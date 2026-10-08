@@ -100,6 +100,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # --- Auth -------------------------------------------------------------------------------------
 AUTH_USER_MODEL = "identity.User"
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    # Built-in membership roles -> permissions until E03 delivers RBAC.
+    "tutortrack.identity.backends.MembershipRoleBackend",
+]
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",

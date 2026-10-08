@@ -38,6 +38,43 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/branches": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Branches (FR-02-2). Extra branches need the ``multi_branch`` feature. */
+    get: operations["branches_list"];
+    put?: never;
+    /** @description Branches (FR-02-2). Extra branches need the ``multi_branch`` feature. */
+    post: operations["branches_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/branches/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Branches (FR-02-2). Extra branches need the ``multi_branch`` feature. */
+    get: operations["branches_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description Archives the branch (the default branch cannot be). */
+    delete: operations["branches_destroy"];
+    options?: never;
+    head?: never;
+    /** @description Branches (FR-02-2). Extra branches need the ``multi_branch`` feature. */
+    patch: operations["branches_partial_update"];
+    trace?: never;
+  };
   "/api/v1/features": {
     parameters: {
       query?: never;
@@ -123,6 +160,54 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/organisation": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The current organisation's profile (FR-02-1). */
+    get: operations["organisation_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description The current organisation's profile (FR-02-1). */
+    patch: operations["organisation_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/settings/{area}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Typed settings for one area, e.g. ``general`` or ``billing`` (FR-02-5).
+     *
+     *     ``schema`` describes each setting so the frontend can render the form. With
+     *     ``?branch=<id>``, ``values`` are the effective values for that branch and
+     *     ``overrides`` lists the keys set at branch level.
+     */
+    get: operations["settings_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Typed settings for one area, e.g. ``general`` or ``billing`` (FR-02-5).
+     *
+     *     ``schema`` describes each setting so the frontend can render the form. With
+     *     ``?branch=<id>``, ``values`` are the effective values for that branch and
+     *     ``overrides`` lists the keys set at branch level.
+     */
+    patch: operations["settings_partial_update"];
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -145,6 +230,58 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
+    Branch: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      code: string;
+      address?: unknown;
+      timezone?: string;
+      currency?: string;
+      locale?: string;
+      tax_settings?: unknown;
+      branding?: unknown;
+      email_sender_name?: string;
+      email_sender_address?: string;
+      invoice_prefix?: string;
+      readonly is_default: boolean;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
+    BranchRequest: {
+      name: string;
+      code: string;
+      address?: unknown;
+      timezone?: string;
+      currency?: string;
+      locale?: string;
+      tax_settings?: unknown;
+      branding?: unknown;
+      email_sender_name?: string;
+      email_sender_address?: string;
+      invoice_prefix?: string;
+    };
+    /**
+     * @description * `sole_trader` - Sole trader
+     *     * `team` - Small team
+     *     * `agency` - Agency
+     *     * `centre` - Tuition centre
+     *     * `online` - Online school
+     * @enum {string}
+     */
+    BusinessTypeEnum: "sole_trader" | "team" | "agency" | "centre" | "online";
+    /**
+     * @description * `locale` - Locale default
+     *     * `dd/MM/yyyy` - 31/12/2026
+     *     * `MM/dd/yyyy` - 12/31/2026
+     *     * `yyyy-MM-dd` - 2026-12-31
+     * @enum {string}
+     */
+    DateFormatEnum: "locale" | "dd/MM/yyyy" | "MM/dd/yyyy" | "yyyy-MM-dd";
     Download: {
       /** Format: uri */
       url: string;
@@ -159,6 +296,55 @@ export interface components {
       file: components["schemas"]["StoredFile"];
       upload: components["schemas"]["PresignedUpload"];
     };
+    /**
+     * @description * `solo` - Solo
+     *     * `multi` - Multi-user
+     * @enum {string}
+     */
+    ModeEnum: "solo" | "multi";
+    /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
+    Organisation: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      legal_name?: string;
+      slug: string;
+      readonly url: string;
+      business_type?: components["schemas"]["BusinessTypeEnum"];
+      mode?: components["schemas"]["ModeEnum"];
+      readonly status: components["schemas"]["OrganisationStatusEnum"];
+      /** @description ISO 3166-1 alpha-2 */
+      country?: string;
+      readonly region: components["schemas"]["RegionEnum"];
+      default_currency?: string;
+      timezone?: string;
+      locale?: string;
+      /** Format: uuid */
+      logo?: string | null;
+      primary_colour?: string;
+      contact_email?: string;
+      contact_phone?: string;
+      address?: unknown;
+      company_number?: string;
+      vat_number?: string;
+      tax_number?: string;
+      fiscal_year_start_month?: number;
+      week_start_day?: components["schemas"]["WeekStartDayEnum"];
+      date_format?: components["schemas"]["DateFormatEnum"];
+      time_format?: components["schemas"]["TimeFormatEnum"];
+      readonly has_demo_data: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `trial` - Trial
+     *     * `active` - Active
+     *     * `past_due` - Past due
+     *     * `suspended` - Suspended
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    OrganisationStatusEnum: "trial" | "active" | "past_due" | "suspended" | "cancelled";
     PaginatedAuditEntryList: {
       /**
        * Format: uri
@@ -172,6 +358,65 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["AuditEntry"][];
     };
+    PaginatedBranchList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Branch"][];
+    };
+    /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
+    PatchedBranchRequest: {
+      name?: string;
+      code?: string;
+      address?: unknown;
+      timezone?: string;
+      currency?: string;
+      locale?: string;
+      tax_settings?: unknown;
+      branding?: unknown;
+      email_sender_name?: string;
+      email_sender_address?: string;
+      invoice_prefix?: string;
+    };
+    /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
+    PatchedOrganisationRequest: {
+      name?: string;
+      legal_name?: string;
+      slug?: string;
+      business_type?: components["schemas"]["BusinessTypeEnum"];
+      mode?: components["schemas"]["ModeEnum"];
+      /** @description ISO 3166-1 alpha-2 */
+      country?: string;
+      default_currency?: string;
+      timezone?: string;
+      locale?: string;
+      /** Format: uuid */
+      logo?: string | null;
+      primary_colour?: string;
+      contact_email?: string;
+      contact_phone?: string;
+      address?: unknown;
+      company_number?: string;
+      vat_number?: string;
+      tax_number?: string;
+      fiscal_year_start_month?: number;
+      week_start_day?: components["schemas"]["WeekStartDayEnum"];
+      date_format?: components["schemas"]["DateFormatEnum"];
+      time_format?: components["schemas"]["TimeFormatEnum"];
+    };
+    PatchedSettingsPatchRequest: {
+      /** @description {key: value}. null resets the key (org) or removes the override (branch). */
+      values?: {
+        [key: string]: unknown;
+      };
+    };
     PresignedUpload: {
       /** Format: uri */
       url: string;
@@ -182,6 +427,14 @@ export interface components {
       expires_in: number;
     };
     /**
+     * @description * `uk` - United Kingdom
+     *     * `eu` - European Union
+     *     * `us` - United States
+     *     * `au` - Australia
+     * @enum {string}
+     */
+    RegionEnum: "uk" | "eu" | "us" | "au";
+    /**
      * @description * `pending` - Pending
      *     * `clean` - Clean
      *     * `infected` - Infected
@@ -191,12 +444,43 @@ export interface components {
      */
     ScanStatusEnum: "pending" | "clean" | "infected" | "error" | "skipped";
     /**
-     * @description * `pending_upload` - Pending Upload
-     *     * `uploaded` - Uploaded
-     *     * `rejected` - Rejected
+     * @description * `organisation` - organisation
+     *     * `branch` - branch
      * @enum {string}
      */
-    StatusEnum: "pending_upload" | "uploaded" | "rejected";
+    ScopeEnum: "organisation" | "branch";
+    /**
+     * @description One registered setting. Fields are declared in get_fields() because names such as
+     *     ``label`` and ``help_text`` clash with attributes of DRF's Field class.
+     */
+    SettingDescription: {
+      key: string;
+      type: components["schemas"]["TypeEnum"];
+      scope: components["schemas"]["ScopeEnum"];
+      default: unknown;
+      label: string;
+      help_text: string;
+      choices?: {
+        [key: string]: unknown;
+      }[];
+      min_value?: number;
+      max_value?: number;
+      max_length?: number;
+      schema?: {
+        [key: string]: unknown;
+      };
+    };
+    SettingsArea: {
+      area: string;
+      /** Format: uuid */
+      branch: string | null;
+      values: {
+        [key: string]: unknown;
+      };
+      /** @description Keys overridden at branch level (empty without ?branch=). */
+      overrides: string[];
+      schema: components["schemas"]["SettingDescription"][];
+    };
     /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
     StoredFile: {
       /** Format: uuid */
@@ -204,13 +488,36 @@ export interface components {
       readonly filename: string;
       readonly content_type: string;
       readonly size_bytes: number;
-      readonly status: components["schemas"]["StatusEnum"];
+      readonly status: components["schemas"]["StoredFileStatusEnum"];
       readonly scan_status: components["schemas"]["ScanStatusEnum"];
       readonly visibility: components["schemas"]["VisibilityEnum"];
       readonly is_downloadable: boolean;
       /** Format: date-time */
       readonly created_at: string;
     };
+    /**
+     * @description * `pending_upload` - Pending Upload
+     *     * `uploaded` - Uploaded
+     *     * `rejected` - Rejected
+     * @enum {string}
+     */
+    StoredFileStatusEnum: "pending_upload" | "uploaded" | "rejected";
+    /**
+     * @description * `locale` - Locale default
+     *     * `24h` - 24-hour
+     *     * `12h` - 12-hour
+     * @enum {string}
+     */
+    TimeFormatEnum: "locale" | "24h" | "12h";
+    /**
+     * @description * `int` - int
+     *     * `str` - str
+     *     * `bool` - bool
+     *     * `choice` - choice
+     *     * `object` - object
+     * @enum {string}
+     */
+    TypeEnum: "int" | "str" | "bool" | "choice" | "object";
     UploadRequestRequest: {
       filename: string;
       content_type: string;
@@ -225,6 +532,17 @@ export interface components {
      * @enum {string}
      */
     VisibilityEnum: "private" | "internal" | "shared";
+    /**
+     * @description * `0` - Monday
+     *     * `1` - Tuesday
+     *     * `2` - Wednesday
+     *     * `3` - Thursday
+     *     * `4` - Friday
+     *     * `5` - Saturday
+     *     * `6` - Sunday
+     * @enum {integer}
+     */
+    WeekStartDayEnum: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   };
   responses: never;
   parameters: never;
@@ -289,6 +607,138 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AuditEntry"];
+        };
+      };
+    };
+  };
+  branches_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Include archived branches. */
+        include_archived?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedBranchList"];
+        };
+      };
+    };
+  };
+  branches_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BranchRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BranchRequest"];
+        "multipart/form-data": components["schemas"]["BranchRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Branch"];
+        };
+      };
+    };
+  };
+  branches_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this branch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Branch"];
+        };
+      };
+    };
+  };
+  branches_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this branch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  branches_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this branch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedBranchRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedBranchRequest"];
+        "multipart/form-data": components["schemas"]["PatchedBranchRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Branch"];
         };
       };
     };
@@ -408,6 +858,104 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["FileUploadCreated"];
+        };
+      };
+    };
+  };
+  organisation_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Organisation"];
+        };
+      };
+    };
+  };
+  organisation_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedOrganisationRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedOrganisationRequest"];
+        "multipart/form-data": components["schemas"]["PatchedOrganisationRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Organisation"];
+        };
+      };
+    };
+  };
+  settings_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Branch id: read or override branch-level values. */
+        branch?: string;
+      };
+      header?: never;
+      path: {
+        area: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SettingsArea"];
+        };
+      };
+    };
+  };
+  settings_partial_update: {
+    parameters: {
+      query?: {
+        /** @description Branch id: read or override branch-level values. */
+        branch?: string;
+      };
+      header?: never;
+      path: {
+        area: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedSettingsPatchRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedSettingsPatchRequest"];
+        "multipart/form-data": components["schemas"]["PatchedSettingsPatchRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SettingsArea"];
         };
       };
     };

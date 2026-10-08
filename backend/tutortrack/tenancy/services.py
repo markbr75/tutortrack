@@ -121,6 +121,9 @@ def create_organisation(
             currency=org.default_currency,
             locale=org.locale,
         )
+        from .settings_service import ensure_settings_rows
+
+        ensure_settings_rows(org)
         if owner is not None:
             from tutortrack.identity.models import Membership
             from tutortrack.identity.services import add_member

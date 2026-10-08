@@ -56,6 +56,10 @@ class TenantManager(models.Manager.from_queryset(TenantQuerySet)):  # type: igno
     def get_queryset(self) -> TenantQuerySet:
         return super().get_queryset().filter(organisation_id=require_organisation_id())
 
+    def none(self) -> TenantQuerySet:
+        """An empty queryset needs no tenant (schema generation, form defaults)."""
+        return super().get_queryset().none()
+
 
 class UnscopedManager(models.Manager.from_queryset(TenantQuerySet)):  # type: ignore[misc]
     """Explicitly unscoped access (platform admin, migrations, cross-tenant jobs) only."""

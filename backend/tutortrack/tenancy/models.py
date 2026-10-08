@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 
 from tutortrack.core.fields import CurrencyField
 from tutortrack.core.ids import new_id
-from tutortrack.core.models import ArchivableModel, TimeStampedModel
+from tutortrack.core.models import ArchivableModel, TenantModel, TimeStampedModel
 
 
 class Organisation(TimeStampedModel):
@@ -222,3 +222,35 @@ class Branch(ArchivableModel):
 
     def __str__(self) -> str:
         return self.name
+
+
+class OrganisationSettings(TenantModel):
+    """Values for registered settings (``tenancy.settings_registry``), one row per org.
+
+    Only explicitly set values are stored; defaults come from the registry, so new
+    settings need no data migration.
+    """
+
+    values = models.JSONField(default=dict, blank=True)
+
+    class Meta(TenantModel.Meta):
+        verbose_name_plural = "organisation settings"
+        constraints = [
+            models.UniqueConstraint(fields=["organisation"], name="org_settings_one_per_org")
+        ]
+
+    def __str__(self) -> str:
+        return f"Settings for {self.organisation_id}"
+
+
+class BranchSettings(TenantModel):
+    """Per-branch overrides for ``scope="branch"`` settings."""
+
+    branch = models.OneToOneField(Branch, on_delete=models.CASCADE, related_name="settings")
+    values = models.JSONField(default=dict, blank=True)
+
+    class Meta(TenantModel.Meta):
+        verbose_name_plural = "branch settings"
+
+    def __str__(self) -> str:
+        return f"Settings for branch {self.branch_id}"

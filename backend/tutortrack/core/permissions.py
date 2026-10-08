@@ -48,3 +48,23 @@ class HasOrganisation(BasePermission):
         if getattr(request.user, "is_superuser", False):
             return True
         return getattr(request, "membership", None) is not None
+
+
+class HasMethodPermission(BasePermission):
+    """Per-HTTP-method codenames:
+    ``HasMethodPermission.for_({"GET": "org.settings.view", "PATCH": "org.settings.manage"})``.
+    Methods not listed fall back to the ``"*"`` entry, or are denied."""
+
+    codenames: dict[str, str] = {}  # set per subclass by for_()
+
+    @classmethod
+    def for_(cls, codenames: dict[str, str]) -> type[HasMethodPermission]:
+        name = "HasMethodPermission_" + "_".join(sorted(codenames)).replace("*", "any")
+        return type(name, (cls,), {"codenames": dict(codenames)})
+
+    def has_permission(self, request: Request, view: APIView) -> bool:
+        method = request.method or "GET"
+        if method in ("HEAD", "OPTIONS"):
+            method = "GET"
+        codename = self.codenames.get(method) or self.codenames.get("*")
+        return codename is not None and has_perm(request.user, codename)

@@ -6,6 +6,7 @@ from tutortrack.core.api.health import healthz, readyz
 
 api_v1: list[URLPattern | URLResolver] = [
     path("", include("tutortrack.core.api.urls")),
+    path("", include("tutortrack.tenancy.api.urls")),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger"),
     path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),

@@ -160,6 +160,271 @@
                 }
             }
         },
+        "/api/v1/branches": {
+            "get": {
+                "operationId": "branches_list",
+                "description": "Branches (FR-02-2). Extra branches need the ``multi_branch`` feature.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "include_archived",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Include archived branches."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedBranchList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "branches_create",
+                "description": "Branches (FR-02-2). Extra branches need the ``multi_branch`` feature.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BranchRequest"
+                            },
+                            "examples": {
+                                "NewBranch": {
+                                    "value": {
+                                        "name": "Leeds",
+                                        "code": "LDS",
+                                        "timezone": "Europe/London"
+                                    },
+                                    "summary": "New branch"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BranchRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BranchRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Branch"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/branches/{id}": {
+            "get": {
+                "operationId": "branches_retrieve",
+                "description": "Branches (FR-02-2). Extra branches need the ``multi_branch`` feature.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this branch.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Branch"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "branches_partial_update",
+                "description": "Branches (FR-02-2). Extra branches need the ``multi_branch`` feature.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this branch.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedBranchRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedBranchRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedBranchRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Branch"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "branches_destroy",
+                "description": "Archives the branch (the default branch cannot be).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this branch.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/v1/features": {
             "get": {
                 "operationId": "features_retrieve",
@@ -371,6 +636,218 @@
                     }
                 }
             }
+        },
+        "/api/v1/organisation": {
+            "get": {
+                "operationId": "organisation_retrieve",
+                "description": "The current organisation's profile (FR-02-1).",
+                "tags": [
+                    "organisation"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Organisation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "organisation_partial_update",
+                "description": "The current organisation's profile (FR-02-1).",
+                "tags": [
+                    "organisation"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedOrganisationRequest"
+                            },
+                            "examples": {
+                                "RenameAndSetBranding": {
+                                    "value": {
+                                        "name": "Bright Minds Tutoring",
+                                        "primary_colour": "#1d4ed8"
+                                    },
+                                    "summary": "Rename and set branding"
+                                },
+                                "ChangeSubdomain(oldOneRedirectsFor90Days)": {
+                                    "value": {
+                                        "slug": "brightminds-london"
+                                    },
+                                    "summary": "Change subdomain (old one redirects for 90 days)"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedOrganisationRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedOrganisationRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Organisation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/settings/{area}": {
+            "get": {
+                "operationId": "settings_retrieve",
+                "description": "Typed settings for one area, e.g. ``general`` or ``billing`` (FR-02-5).\n\n``schema`` describes each setting so the frontend can render the form. With\n``?branch=<id>``, ``values`` are the effective values for that branch and\n``overrides`` lists the keys set at branch level.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "area",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Branch id: read or override branch-level values."
+                    }
+                ],
+                "tags": [
+                    "settings"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SettingsArea"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "settings_partial_update",
+                "description": "Typed settings for one area, e.g. ``general`` or ``billing`` (FR-02-5).\n\n``schema`` describes each setting so the frontend can render the form. With\n``?branch=<id>``, ``values`` are the effective values for that branch and\n``overrides`` lists the keys set at branch level.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "area",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Branch id: read or override branch-level values."
+                    }
+                ],
+                "tags": [
+                    "settings"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSettingsPatchRequest"
+                            },
+                            "examples": {
+                                "RenameTutorToTeacher": {
+                                    "value": {
+                                        "values": {
+                                            "general.terminology": {
+                                                "tutor": {
+                                                    "singular": "Teacher",
+                                                    "plural": "Teachers"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "summary": "Rename Tutor to Teacher"
+                                },
+                                "BranchOverride,ThenRemoveIt": {
+                                    "value": {
+                                        "values": {
+                                            "general.default_lesson_duration": null
+                                        }
+                                    },
+                                    "summary": "Branch override, then remove it"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSettingsPatchRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSettingsPatchRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SettingsArea"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -444,6 +921,162 @@
                     "request_id"
                 ]
             },
+            "Branch": {
+                "type": "object",
+                "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "code": {
+                        "type": "string",
+                        "maxLength": 20
+                    },
+                    "address": {},
+                    "timezone": {
+                        "type": "string"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "maxLength": 3
+                    },
+                    "locale": {
+                        "type": "string",
+                        "maxLength": 10
+                    },
+                    "tax_settings": {},
+                    "branding": {},
+                    "email_sender_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "email_sender_address": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email",
+                                "maxLength": 254
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "invoice_prefix": {
+                        "type": "string",
+                        "maxLength": 10
+                    },
+                    "is_default": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "archived_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "archived_at",
+                    "code",
+                    "created_at",
+                    "id",
+                    "is_default",
+                    "name"
+                ]
+            },
+            "BranchRequest": {
+                "type": "object",
+                "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 20
+                    },
+                    "address": {},
+                    "timezone": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "currency": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 3
+                    },
+                    "locale": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 10
+                    },
+                    "tax_settings": {},
+                    "branding": {},
+                    "email_sender_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "email_sender_address": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email",
+                                "maxLength": 254
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "invoice_prefix": {
+                        "type": "string",
+                        "maxLength": 10
+                    }
+                },
+                "required": [
+                    "code",
+                    "name"
+                ]
+            },
+            "BusinessTypeEnum": {
+                "enum": [
+                    "sole_trader",
+                    "team",
+                    "agency",
+                    "centre",
+                    "online"
+                ],
+                "type": "string",
+                "description": "* `sole_trader` - Sole trader\n* `team` - Small team\n* `agency` - Agency\n* `centre` - Tuition centre\n* `online` - Online school"
+            },
+            "DateFormatEnum": {
+                "enum": [
+                    "locale",
+                    "dd/MM/yyyy",
+                    "MM/dd/yyyy",
+                    "yyyy-MM-dd"
+                ],
+                "type": "string",
+                "description": "* `locale` - Locale default\n* `dd/MM/yyyy` - 31/12/2026\n* `MM/dd/yyyy` - 12/31/2026\n* `yyyy-MM-dd` - 2026-12-31"
+            },
             "Download": {
                 "type": "object",
                 "properties": {
@@ -489,6 +1122,177 @@
                     "upload"
                 ]
             },
+            "ModeEnum": {
+                "enum": [
+                    "solo",
+                    "multi"
+                ],
+                "type": "string",
+                "description": "* `solo` - Solo\n* `multi` - Multi-user"
+            },
+            "Organisation": {
+                "type": "object",
+                "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "legal_name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "slug": {
+                        "type": "string",
+                        "maxLength": 63,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "url": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "business_type": {
+                        "$ref": "#/components/schemas/BusinessTypeEnum"
+                    },
+                    "mode": {
+                        "$ref": "#/components/schemas/ModeEnum"
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/OrganisationStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "country": {
+                        "type": "string",
+                        "description": "ISO 3166-1 alpha-2",
+                        "maxLength": 2
+                    },
+                    "region": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RegionEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "default_currency": {
+                        "type": "string",
+                        "maxLength": 3
+                    },
+                    "timezone": {
+                        "type": "string"
+                    },
+                    "locale": {
+                        "type": "string",
+                        "maxLength": 10
+                    },
+                    "logo": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "primary_colour": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^(#[0-9a-fA-F]{6})?$"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "contact_email": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email",
+                                "maxLength": 254
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "contact_phone": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "address": {},
+                    "company_number": {
+                        "type": "string",
+                        "maxLength": 50
+                    },
+                    "vat_number": {
+                        "type": "string",
+                        "maxLength": 50
+                    },
+                    "tax_number": {
+                        "type": "string",
+                        "maxLength": 50
+                    },
+                    "fiscal_year_start_month": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "week_start_day": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/WeekStartDayEnum"
+                            }
+                        ],
+                        "minimum": 0,
+                        "maximum": 32767
+                    },
+                    "date_format": {
+                        "$ref": "#/components/schemas/DateFormatEnum"
+                    },
+                    "time_format": {
+                        "$ref": "#/components/schemas/TimeFormatEnum"
+                    },
+                    "has_demo_data": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "has_demo_data",
+                    "id",
+                    "name",
+                    "region",
+                    "slug",
+                    "status",
+                    "url"
+                ]
+            },
+            "OrganisationStatusEnum": {
+                "enum": [
+                    "trial",
+                    "active",
+                    "past_due",
+                    "suspended",
+                    "cancelled"
+                ],
+                "type": "string",
+                "description": "* `trial` - Trial\n* `active` - Active\n* `past_due` - Past due\n* `suspended` - Suspended\n* `cancelled` - Cancelled"
+            },
             "PaginatedAuditEntryList": {
                 "type": "object",
                 "required": [
@@ -512,6 +1316,212 @@
                         "items": {
                             "$ref": "#/components/schemas/AuditEntry"
                         }
+                    }
+                }
+            },
+            "PaginatedBranchList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Branch"
+                        }
+                    }
+                }
+            },
+            "PatchedBranchRequest": {
+                "type": "object",
+                "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 20
+                    },
+                    "address": {},
+                    "timezone": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "currency": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 3
+                    },
+                    "locale": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 10
+                    },
+                    "tax_settings": {},
+                    "branding": {},
+                    "email_sender_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "email_sender_address": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email",
+                                "maxLength": 254
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "invoice_prefix": {
+                        "type": "string",
+                        "maxLength": 10
+                    }
+                }
+            },
+            "PatchedOrganisationRequest": {
+                "type": "object",
+                "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "legal_name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "slug": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 63,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "business_type": {
+                        "$ref": "#/components/schemas/BusinessTypeEnum"
+                    },
+                    "mode": {
+                        "$ref": "#/components/schemas/ModeEnum"
+                    },
+                    "country": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "ISO 3166-1 alpha-2",
+                        "maxLength": 2
+                    },
+                    "default_currency": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 3
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "locale": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 10
+                    },
+                    "logo": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "primary_colour": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^(#[0-9a-fA-F]{6})?$"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "contact_email": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email",
+                                "maxLength": 254
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "contact_phone": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "address": {},
+                    "company_number": {
+                        "type": "string",
+                        "maxLength": 50
+                    },
+                    "vat_number": {
+                        "type": "string",
+                        "maxLength": 50
+                    },
+                    "tax_number": {
+                        "type": "string",
+                        "maxLength": 50
+                    },
+                    "fiscal_year_start_month": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "week_start_day": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/WeekStartDayEnum"
+                            }
+                        ],
+                        "minimum": 0,
+                        "maximum": 32767
+                    },
+                    "date_format": {
+                        "$ref": "#/components/schemas/DateFormatEnum"
+                    },
+                    "time_format": {
+                        "$ref": "#/components/schemas/TimeFormatEnum"
+                    }
+                }
+            },
+            "PatchedSettingsPatchRequest": {
+                "type": "object",
+                "properties": {
+                    "values": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "nullable": true
+                        },
+                        "description": "{key: value}. null resets the key (org) or removes the override (branch)."
                     }
                 }
             },
@@ -542,6 +1552,16 @@
                     "url"
                 ]
             },
+            "RegionEnum": {
+                "enum": [
+                    "uk",
+                    "eu",
+                    "us",
+                    "au"
+                ],
+                "type": "string",
+                "description": "* `uk` - United Kingdom\n* `eu` - European Union\n* `us` - United States\n* `au` - Australia"
+            },
             "ScanStatusEnum": {
                 "enum": [
                     "pending",
@@ -553,14 +1573,100 @@
                 "type": "string",
                 "description": "* `pending` - Pending\n* `clean` - Clean\n* `infected` - Infected\n* `error` - Error\n* `skipped` - Skipped"
             },
-            "StatusEnum": {
+            "ScopeEnum": {
                 "enum": [
-                    "pending_upload",
-                    "uploaded",
-                    "rejected"
+                    "organisation",
+                    "branch"
                 ],
                 "type": "string",
-                "description": "* `pending_upload` - Pending Upload\n* `uploaded` - Uploaded\n* `rejected` - Rejected"
+                "description": "* `organisation` - organisation\n* `branch` - branch"
+            },
+            "SettingDescription": {
+                "type": "object",
+                "description": "One registered setting. Fields are declared in get_fields() because names such as\n``label`` and ``help_text`` clash with attributes of DRF's Field class.",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/TypeEnum"
+                    },
+                    "scope": {
+                        "$ref": "#/components/schemas/ScopeEnum"
+                    },
+                    "default": {},
+                    "label": {
+                        "type": "string"
+                    },
+                    "help_text": {
+                        "type": "string"
+                    },
+                    "choices": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "min_value": {
+                        "type": "integer"
+                    },
+                    "max_value": {
+                        "type": "integer"
+                    },
+                    "max_length": {
+                        "type": "integer"
+                    },
+                    "schema": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "default",
+                    "help_text",
+                    "key",
+                    "label",
+                    "scope",
+                    "type"
+                ]
+            },
+            "SettingsArea": {
+                "type": "object",
+                "properties": {
+                    "area": {
+                        "type": "string"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "values": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "overrides": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Keys overridden at branch level (empty without ?branch=)."
+                    },
+                    "schema": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SettingDescription"
+                        }
+                    }
+                },
+                "required": [
+                    "area",
+                    "branch",
+                    "overrides",
+                    "schema",
+                    "values"
+                ]
             },
             "StoredFile": {
                 "type": "object",
@@ -586,7 +1692,7 @@
                     "status": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/StatusEnum"
+                                "$ref": "#/components/schemas/StoredFileStatusEnum"
                             }
                         ],
                         "readOnly": true
@@ -629,6 +1735,35 @@
                     "visibility"
                 ]
             },
+            "StoredFileStatusEnum": {
+                "enum": [
+                    "pending_upload",
+                    "uploaded",
+                    "rejected"
+                ],
+                "type": "string",
+                "description": "* `pending_upload` - Pending Upload\n* `uploaded` - Uploaded\n* `rejected` - Rejected"
+            },
+            "TimeFormatEnum": {
+                "enum": [
+                    "locale",
+                    "24h",
+                    "12h"
+                ],
+                "type": "string",
+                "description": "* `locale` - Locale default\n* `24h` - 24-hour\n* `12h` - 12-hour"
+            },
+            "TypeEnum": {
+                "enum": [
+                    "int",
+                    "str",
+                    "bool",
+                    "choice",
+                    "object"
+                ],
+                "type": "string",
+                "description": "* `int` - int\n* `str` - str\n* `bool` - bool\n* `choice` - choice\n* `object` - object"
+            },
             "UploadRequestRequest": {
                 "type": "object",
                 "properties": {
@@ -669,6 +1804,19 @@
                 ],
                 "type": "string",
                 "description": "* `private` - Private\n* `internal` - Internal\n* `shared` - Shared"
+            },
+            "WeekStartDayEnum": {
+                "enum": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                ],
+                "type": "integer",
+                "description": "* `0` - Monday\n* `1` - Tuesday\n* `2` - Wednesday\n* `3` - Thursday\n* `4` - Friday\n* `5` - Saturday\n* `6` - Sunday"
             }
         },
         "securitySchemes": {
