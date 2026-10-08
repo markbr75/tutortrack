@@ -1,0 +1,40 @@
+{
+  "app": { "name": "TutorTrack" },
+  "nav": {
+    "home": "Home",
+    "calendar": "Calendar",
+    "people": "People",
+    "billing": "Billing",
+    "audit": "Audit log",
+    "settings": "Settings"
+  },
+  "auth": {
+    "signInTitle": "Sign in",
+    "signInBody": "You need to sign in to continue.",
+    "signInAction": "Sign in"
+  },
+  "home": {
+    "title": "Welcome",
+    "subtitle": "Your tutoring business at a glance.",
+    "features": "Enabled features",
+    "noFeatures": "No optional features are enabled yet."
+  },
+  "audit": {
+    "title": "Audit log",
+    "action": "Action",
+    "object": "Record",
+    "changes": "Changes",
+    "when": "When"
+  },
+  "grid": {
+    "loading": "Loading…",
+    "loadMore": "Load more",
+    "empty": "Nothing to show."
+  },
+  "errors": {
+    "generic": "Something went wrong.",
+    "retry": "Try again",
+    "notFound": "Page not found",
+    "reference": "Reference: {{requestId}}"
+  }
+}

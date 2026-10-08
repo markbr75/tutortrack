@@ -1,0 +1,682 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "TutorTrack API",
+        "version": "1.0.0",
+        "description": "Run a tutoring business end to end. All first-party apps use this API."
+    },
+    "paths": {
+        "/api/v1/audit": {
+            "get": {
+                "operationId": "audit_list",
+                "description": "Audit history for the current organisation (append-only).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "action",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "actor",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "created_after",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "created_before",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "object_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "object_type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "audit"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAuditEntryList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/audit/{id}": {
+            "get": {
+                "operationId": "audit_retrieve",
+                "description": "Audit history for the current organisation (append-only).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this audit entry.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "audit"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuditEntry"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/features": {
+            "get": {
+                "operationId": "features_retrieve",
+                "description": "Feature flags as resolved for the current organisation (drives ``useFeature()``).",
+                "tags": [
+                    "features"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Features"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/files/{id}": {
+            "get": {
+                "operationId": "files_retrieve",
+                "description": "Direct-to-storage uploads: create -> PUT to ``upload.url`` -> complete -> download.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this stored file.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "files"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StoredFile"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/files/{id}/complete": {
+            "post": {
+                "operationId": "files_complete_create",
+                "description": "Direct-to-storage uploads: create -> PUT to ``upload.url`` -> complete -> download.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this stored file.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "files"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StoredFile"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/files/{id}/download": {
+            "get": {
+                "operationId": "files_download_retrieve",
+                "description": "Direct-to-storage uploads: create -> PUT to ``upload.url`` -> complete -> download.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this stored file.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "files"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Download"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/files/uploads": {
+            "post": {
+                "operationId": "files_uploads_create",
+                "description": "Direct-to-storage uploads: create -> PUT to ``upload.url`` -> complete -> download.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "files"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UploadRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UploadRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UploadRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FileUploadCreated"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AuditEntry": {
+                "type": "object",
+                "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "action": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "object_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "object_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "object_repr": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "changes": {
+                        "readOnly": true
+                    },
+                    "actor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "impersonator": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "ip": {
+                        "type": "string",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "request_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "action",
+                    "actor",
+                    "changes",
+                    "created_at",
+                    "id",
+                    "impersonator",
+                    "ip",
+                    "object_id",
+                    "object_repr",
+                    "object_type",
+                    "request_id"
+                ]
+            },
+            "Download": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "expires_in": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "expires_in",
+                    "url"
+                ]
+            },
+            "Features": {
+                "type": "object",
+                "properties": {
+                    "features": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "required": [
+                    "features"
+                ]
+            },
+            "FileUploadCreated": {
+                "type": "object",
+                "properties": {
+                    "file": {
+                        "$ref": "#/components/schemas/StoredFile"
+                    },
+                    "upload": {
+                        "$ref": "#/components/schemas/PresignedUpload"
+                    }
+                },
+                "required": [
+                    "file",
+                    "upload"
+                ]
+            },
+            "PaginatedAuditEntryList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AuditEntry"
+                        }
+                    }
+                }
+            },
+            "PresignedUpload": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "method": {
+                        "type": "string"
+                    },
+                    "headers": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "expires_in": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "expires_in",
+                    "headers",
+                    "method",
+                    "url"
+                ]
+            },
+            "ScanStatusEnum": {
+                "enum": [
+                    "pending",
+                    "clean",
+                    "infected",
+                    "error",
+                    "skipped"
+                ],
+                "type": "string",
+                "description": "* `pending` - Pending\n* `clean` - Clean\n* `infected` - Infected\n* `error` - Error\n* `skipped` - Skipped"
+            },
+            "StatusEnum": {
+                "enum": [
+                    "pending_upload",
+                    "uploaded",
+                    "rejected"
+                ],
+                "type": "string",
+                "description": "* `pending_upload` - Pending Upload\n* `uploaded` - Uploaded\n* `rejected` - Rejected"
+            },
+            "StoredFile": {
+                "type": "object",
+                "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "filename": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "content_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "size_bytes": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/StatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "scan_status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ScanStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "visibility": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/VisibilityEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "is_downloadable": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "content_type",
+                    "created_at",
+                    "filename",
+                    "id",
+                    "is_downloadable",
+                    "scan_status",
+                    "size_bytes",
+                    "status",
+                    "visibility"
+                ]
+            },
+            "UploadRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "filename": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                    },
+                    "content_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 127
+                    },
+                    "size_bytes": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "visibility": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/VisibilityEnum"
+                            }
+                        ],
+                        "default": "private"
+                    }
+                },
+                "required": [
+                    "content_type",
+                    "filename",
+                    "size_bytes"
+                ]
+            },
+            "VisibilityEnum": {
+                "enum": [
+                    "private",
+                    "internal",
+                    "shared"
+                ],
+                "type": "string",
+                "description": "* `private` - Private\n* `internal` - Internal\n* `shared` - Shared"
+            }
+        },
+        "securitySchemes": {
+            "cookieAuth": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "sessionid"
+            }
+        }
+    }
+}

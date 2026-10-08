@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+/* Workspace packages are reached through node_modules symlinks, which Tailwind skips when
+   scanning the consuming app. Register this package so its component classes are generated. */
+@source ".";
+
+/*
+ * Design tokens. Tenants re-brand the portals at runtime by overriding --tt-brand-* on
+ * :root (E24). Components only use the semantic tokens below, never raw colours.
+ */
+:root {
+  --tt-brand: 221 83% 53%;
+  --tt-brand-foreground: 0 0% 100%;
+  --tt-background: 0 0% 100%;
+  --tt-foreground: 222 47% 11%;
+  --tt-muted: 210 40% 96%;
+  --tt-muted-foreground: 215 16% 40%;
+  --tt-border: 214 32% 88%;
+  --tt-danger: 0 72% 45%;
+  --tt-success: 142 71% 30%;
+  --tt-radius: 0.5rem;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --tt-background: 222 47% 8%;
+    --tt-foreground: 210 40% 96%;
+    --tt-muted: 217 33% 15%;
+    --tt-muted-foreground: 215 20% 70%;
+    --tt-border: 217 33% 22%;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --tt-background: 222 47% 8%;
+  --tt-foreground: 210 40% 96%;
+  --tt-muted: 217 33% 15%;
+  --tt-muted-foreground: 215 20% 70%;
+  --tt-border: 217 33% 22%;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-brand: hsl(var(--tt-brand));
+  --color-brand-foreground: hsl(var(--tt-brand-foreground));
+  --color-background: hsl(var(--tt-background));
+  --color-foreground: hsl(var(--tt-foreground));
+  --color-muted: hsl(var(--tt-muted));
+  --color-muted-foreground: hsl(var(--tt-muted-foreground));
+  --color-border: hsl(var(--tt-border));
+  --color-danger: hsl(var(--tt-danger));
+  --color-success: hsl(var(--tt-success));
+  --radius-md: var(--tt-radius);
+}
+
+body {
+  background: hsl(var(--tt-background));
+  color: hsl(var(--tt-foreground));
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid hsl(var(--tt-brand));
+  outline-offset: 2px;
+}

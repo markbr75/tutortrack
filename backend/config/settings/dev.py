@@ -8,8 +8,15 @@ ALLOWED_HOSTS = env.list(
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS", default=["http://localhost:5173", "http://localhost:5174"]
 )
+# Apps are served on tenant subdomains locally, e.g. http://brightminds.localhost:5173.
 CSRF_TRUSTED_ORIGINS = env.list(
-    "CSRF_TRUSTED_ORIGINS", default=["http://localhost:5173", "http://localhost:5174"]
+    "CSRF_TRUSTED_ORIGINS",
+    default=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://*.localhost:5173",
+        "http://*.localhost:5174",
+    ],
 )
 
 # Browsable API is handy locally.
