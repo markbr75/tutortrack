@@ -6,6 +6,9 @@
 BE := cd backend &&
 FE := cd frontend &&
 UV := uv run
+# Lower these on small machines/VMs, e.g. `make check PYTEST_WORKERS=2 FE_CONCURRENCY=1`.
+PYTEST_WORKERS ?= auto
+FE_CONCURRENCY ?= 2
 
 .PHONY: help dev infra down logs install test test-be test-fe e2e lint fmt typecheck check \
         migrate makemigrations migrations-check shell seed openapi api-client api-client-check
@@ -36,10 +39,10 @@ install: ## Install backend and frontend dependencies on the host
 test: test-be test-fe ## Run all tests
 
 test-be: ## Backend tests (parallel, with coverage)
-	$(BE) $(UV) pytest -n auto --cov --cov-report=term-missing:skip-covered
+	$(BE) $(UV) pytest -n $(PYTEST_WORKERS) --cov --cov-report=term-missing:skip-covered
 
 test-fe: ## Frontend unit tests
-	$(FE) pnpm -r test
+	$(FE) pnpm -r --workspace-concurrency=$(FE_CONCURRENCY) test
 
 e2e: ## Playwright end-to-end tests (requires `make dev`)
 	$(FE) pnpm e2e

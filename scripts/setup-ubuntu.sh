@@ -6,14 +6,41 @@
 #
 # Installs: git, make, Docker Engine + compose plugin, Node 22, pnpm 9, uv (which installs
 # Python 3.12 itself), GitHub CLI. Then clones the repo, starts the backing services,
-# installs dependencies, migrates, seeds demo data and runs the full check suite.
-# Safe to re-run.
+# installs dependencies, migrates and seeds demo data. Safe to re-run.
+#
+# The full test suite is heavy (parallel workers + 4 containers). It is skipped by default;
+# run it with RUN_CHECKS=1, or later with `make check PYTEST_WORKERS=2 FE_CONCURRENCY=1`.
+# Recommended: 4 GB RAM (8 GB comfortable), 2+ CPUs, 15 GB free disk.
 set -euo pipefail
 
 REPO_URL="${REPO_URL:-https://github.com/markbr75/tutortrack.git}"
 TARGET_DIR="${TARGET_DIR:-$HOME/tutortrack}"
 
+RUN_CHECKS="${RUN_CHECKS:-0}"
+
 log() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
+warn() { printf '\033[1;33m!! %s\033[0m\n' "$*"; }
+
+log "Preflight"
+mem_mb=$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo)
+swap_mb=$(awk '/SwapTotal/ {print int($2/1024)}' /proc/meminfo)
+disk_gb=$(df -BG --output=avail "$HOME" | tail -1 | tr -dc '0-9')
+cpus=$(nproc)
+echo "RAM ${mem_mb} MB, swap ${swap_mb} MB, CPUs ${cpus}, free disk ${disk_gb} GB"
+if [ "$mem_mb" -lt 3000 ]; then
+  warn "Less than 3 GB RAM: the stack will likely freeze this machine."
+  warn "Give the VM more memory (4 GB+) or add swap first:"
+  warn "  sudo fallocate -l 4G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile"
+  exit 1
+fi
+if [ "$mem_mb" -lt 6000 ] && [ "$swap_mb" -lt 2000 ]; then
+  warn "Under 6 GB RAM with little swap; consider adding a 4 GB swapfile (command above)."
+fi
+if [ "${disk_gb:-0}" -lt 10 ]; then
+  warn "Less than 10 GB free disk; Docker images and dependencies need about 6-8 GB."
+fi
+# Keep test parallelism proportionate to the machine.
+workers=$(( cpus > 4 ? 4 : (cpus > 1 ? cpus - 1 : 1) ))
 
 log "Base packages"
 sudo apt-get update -y
@@ -78,12 +105,22 @@ log "Database, storage bucket and demo data"
 (cd backend && uv run python manage.py ensure_storage_bucket)
 (cd backend && uv run python manage.py seed_demo)
 
-log "Full check suite (lint, types, migrations, tests, API client drift)"
-make check
+if [ "$RUN_CHECKS" = "1" ]; then
+  log "Full check suite with ${workers} test workers"
+  make check PYTEST_WORKERS="$workers" FE_CONCURRENCY=1
+else
+  log "Quick smoke check (full suite skipped; set RUN_CHECKS=1 to run it)"
+  (cd backend && uv run python manage.py check)
+  curl -fsS http://localhost:9010 >/dev/null 2>&1 || true
+fi
 
 cat <<'EOF'
 
-Setup complete. Start the app in two terminals:
+Setup complete. Run the full test suite when convenient:
+
+  cd ~/tutortrack && make check PYTEST_WORKERS=2 FE_CONCURRENCY=1
+
+Start the app in two terminals:
 
   cd ~/tutortrack/backend && uv run python manage.py runserver 127.0.0.1:8010
   pnpm --dir ~/tutortrack/frontend dev
