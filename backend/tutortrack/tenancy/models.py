@@ -272,3 +272,25 @@ class OnboardingState(TenantModel):
 
     def __str__(self) -> str:
         return f"Onboarding for {self.organisation_id}"
+
+
+class DemoRecord(TenantModel):
+    """A record created by "explore with demo data" (FR-02-6), so it can be wiped later."""
+
+    content_type = models.ForeignKey(
+        "contenttypes.ContentType", on_delete=models.CASCADE, related_name="+"
+    )
+    object_id = models.CharField(max_length=64)
+    provider = models.CharField(max_length=200)
+    sequence = models.PositiveIntegerField()
+
+    class Meta(TenantModel.Meta):
+        ordering = ["sequence"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "content_type", "object_id"], name="demo_record_unique"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"demo {self.content_type_id}:{self.object_id}"

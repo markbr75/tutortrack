@@ -482,6 +482,66 @@
                 }
             }
         },
+        "/api/v1/demo-data": {
+            "post": {
+                "operationId": "demo_data_create",
+                "description": "Load sample data to explore the product (POST) or wipe it in one click (DELETE).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "demo-data"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DemoData"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "demo_data_destroy",
+                "description": "Load sample data to explore the product (POST) or wipe it in one click (DELETE).",
+                "tags": [
+                    "demo-data"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DemoData"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/features": {
             "get": {
                 "operationId": "features_retrieve",
@@ -686,6 +746,35 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/FileUploadCreated"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me/organisations": {
+            "get": {
+                "operationId": "me_organisations_list",
+                "description": "Organisations the signed-in user belongs to, most recently used first.\n\nSwitching is navigation: open ``url``. Each organisation is a separate security\ncontext, so permissions never carry across.",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/MyOrganisation"
+                                    }
                                 }
                             }
                         },
@@ -1467,6 +1556,21 @@
                 "type": "string",
                 "description": "* `locale` - Locale default\n* `dd/MM/yyyy` - 31/12/2026\n* `MM/dd/yyyy` - 12/31/2026\n* `yyyy-MM-dd` - 2026-12-31"
             },
+            "DemoData": {
+                "type": "object",
+                "properties": {
+                    "has_demo_data": {
+                        "type": "boolean"
+                    },
+                    "records": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "has_demo_data",
+                    "records"
+                ]
+            },
             "Download": {
                 "type": "object",
                 "properties": {
@@ -1519,6 +1623,49 @@
                 ],
                 "type": "string",
                 "description": "* `solo` - Solo\n* `multi` - Multi-user"
+            },
+            "MyOrganisation": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Organisation status (trial, active, suspended...)"
+                    },
+                    "is_current": {
+                        "type": "boolean"
+                    },
+                    "last_active_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "id",
+                    "is_current",
+                    "last_active_at",
+                    "name",
+                    "role",
+                    "slug",
+                    "status",
+                    "url"
+                ]
             },
             "OnboardingState": {
                 "type": "object",

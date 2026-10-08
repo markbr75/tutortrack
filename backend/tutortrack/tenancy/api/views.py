@@ -10,7 +10,7 @@ from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
 )
-from rest_framework import mixins, status, viewsets
+from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -208,3 +208,80 @@ class SettingsView(APIView):
         payload.is_valid(raise_exception=True)
         settings_service.update_settings(area, payload.validated_data["values"], branch=branch)
         return Response(self._payload(area, branch))
+
+
+# --- org switcher (FR-02-7) ---------------------------------------------------------------------
+
+
+class MyOrganisationSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+    slug = serializers.CharField()
+    url = serializers.CharField()
+    role = serializers.CharField()
+    status = serializers.CharField(help_text="Organisation status (trial, active, suspended...)")
+    is_current = serializers.BooleanField()
+    last_active_at = serializers.DateTimeField(allow_null=True)
+
+
+class MyOrganisationsView(APIView):
+    """Organisations the signed-in user belongs to, most recently used first.
+
+    Switching is navigation: open ``url``. Each organisation is a separate security
+    context, so permissions never carry across.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=MyOrganisationSerializer(many=True))
+    def get(self, request: Request) -> Response:
+        from tutortrack.identity.selectors import memberships_for_user
+
+        current = getattr(request, "organisation", None)
+        rows = [
+            {
+                "id": m.organisation.pk,
+                "name": m.organisation.name,
+                "slug": m.organisation.slug,
+                "url": m.organisation.base_url,
+                "role": m.role,
+                "status": m.organisation.status,
+                "is_current": current is not None and current.pk == m.organisation_id,
+                "last_active_at": m.last_active_at,
+            }
+            for m in memberships_for_user(request.user)
+            if m.organisation.status != Organisation.Status.CANCELLED
+        ]
+        return Response(MyOrganisationSerializer(rows, many=True).data)
+
+
+# --- demo data (E02-T08) ------------------------------------------------------------------------
+
+
+class DemoDataSerializer(serializers.Serializer):
+    has_demo_data = serializers.BooleanField()
+    records = serializers.IntegerField()
+
+
+class DemoDataView(APIView):
+    """Load sample data to explore the product (POST) or wipe it in one click (DELETE)."""
+
+    permission_classes = [
+        IsAuthenticated,
+        HasOrganisation,
+        HasMethodPermission.for_({"*": perms.SETTINGS_MANAGE}),
+    ]
+
+    @extend_schema(request=None, responses={201: DemoDataSerializer})
+    def post(self, request: Request) -> Response:
+        from .. import demo
+
+        records = demo.load_demo_data()
+        return Response({"has_demo_data": True, "records": records}, status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=None, responses={200: DemoDataSerializer})
+    def delete(self, request: Request) -> Response:
+        from .. import demo
+
+        records = demo.wipe_demo_data()
+        return Response({"has_demo_data": False, "records": records})

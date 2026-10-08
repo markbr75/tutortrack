@@ -92,6 +92,24 @@ export interface paths {
     patch: operations["branches_partial_update"];
     trace?: never;
   };
+  "/api/v1/demo-data": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Load sample data to explore the product (POST) or wipe it in one click (DELETE). */
+    post: operations["demo_data_create"];
+    /** @description Load sample data to explore the product (POST) or wipe it in one click (DELETE). */
+    delete: operations["demo_data_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/features": {
     parameters: {
       query?: never;
@@ -171,6 +189,28 @@ export interface paths {
     put?: never;
     /** @description Direct-to-storage uploads: create -> PUT to ``upload.url`` -> complete -> download. */
     post: operations["files_uploads_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/organisations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Organisations the signed-in user belongs to, most recently used first.
+     *
+     *     Switching is navigation: open ``url``. Each organisation is a separate security
+     *     context, so permissions never carry across.
+     */
+    get: operations["me_organisations_list"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -426,6 +466,10 @@ export interface components {
      * @enum {string}
      */
     DateFormatEnum: "locale" | "dd/MM/yyyy" | "MM/dd/yyyy" | "yyyy-MM-dd";
+    DemoData: {
+      has_demo_data: boolean;
+      records: number;
+    };
     Download: {
       /** Format: uri */
       url: string;
@@ -446,6 +490,19 @@ export interface components {
      * @enum {string}
      */
     ModeEnum: "solo" | "multi";
+    MyOrganisation: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      slug: string;
+      url: string;
+      role: string;
+      /** @description Organisation status (trial, active, suspended...) */
+      status: string;
+      is_current: boolean;
+      /** Format: date-time */
+      last_active_at: string | null;
+    };
     OnboardingState: {
       current_step: string;
       steps: components["schemas"]["OnboardingStepStatus"][];
@@ -982,6 +1039,47 @@ export interface operations {
       };
     };
   };
+  demo_data_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DemoData"];
+        };
+      };
+    };
+  };
+  demo_data_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DemoData"];
+        };
+      };
+    };
+  };
   features_retrieve: {
     parameters: {
       query?: never;
@@ -1097,6 +1195,25 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["FileUploadCreated"];
+        };
+      };
+    };
+  };
+  me_organisations_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyOrganisation"][];
         };
       };
     };

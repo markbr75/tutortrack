@@ -10,7 +10,13 @@ from .signup import (
     SlugCheckView,
     VerifyEmailView,
 )
-from .views import BranchViewSet, OrganisationView, SettingsView
+from .views import (
+    BranchViewSet,
+    DemoDataView,
+    MyOrganisationsView,
+    OrganisationView,
+    SettingsView,
+)
 
 router = SimpleRouter(trailing_slash=False)
 router.register("branches", BranchViewSet, basename="branches")
@@ -27,6 +33,8 @@ urlpatterns = [
         ResendVerificationView.as_view(),
         name="signup-resend-verification",
     ),
+    path("me/organisations", MyOrganisationsView.as_view(), name="me-organisations"),
+    path("demo-data", DemoDataView.as_view(), name="demo-data"),
     path("auth/handoff", HandoffView.as_view(), name="auth-handoff"),
     path("onboarding/state", OnboardingStateView.as_view(), name="onboarding-state"),
     path("onboarding/<slug:step>", OnboardingStepView.as_view(), name="onboarding-step"),
