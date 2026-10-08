@@ -73,7 +73,9 @@ resource "aws_iam_role_policy" "task_s3" {
 # --- Task definitions -----------------------------------------------------------------------------
 
 locals {
-  secret_keys = ["DJANGO_SECRET_KEY", "DATABASE_URL", "REDIS_URL", "CELERY_BROKER_URL"]
+  # The owner credentials only reach the migrate task; every other process connects as the
+  # RLS-restricted application role (FR-02-4).
+  secret_keys = ["DJANGO_SECRET_KEY", "DATABASE_URL", "DATABASE_PLATFORM_URL", "REDIS_URL", "CELERY_BROKER_URL"]
 
   container_base = {
     image     = var.backend_image
@@ -87,17 +89,13 @@ locals {
       { name = "CLAMAV_ENABLED", value = "true" },
       { name = "LOG_JSON", value = "true" },
     ]
-    secrets = [for key in local.secret_keys : {
-      name      = key
-      valueFrom = "${aws_secretsmanager_secret.app.arn}:${key}::"
-    }]
   }
 
   processes = {
-    web     = { command = null, cpu = 512, memory = 1024, port = true }
-    worker  = { command = ["celery", "-A", "config", "worker", "-l", "INFO", "-Q", "default,outbox,notifications,billing,integrations,imports,reports"], cpu = 512, memory = 1024, port = false }
-    beat    = { command = ["celery", "-A", "config", "beat", "-l", "INFO"], cpu = 256, memory = 512, port = false }
-    migrate = { command = ["python", "manage.py", "migrate", "--noinput"], cpu = 256, memory = 512, port = false }
+    web     = { command = null, cpu = 512, memory = 1024, port = true, extra_secrets = [] }
+    worker  = { command = ["celery", "-A", "config", "worker", "-l", "INFO", "-Q", "default,outbox,notifications,billing,integrations,imports,reports"], cpu = 512, memory = 1024, port = false, extra_secrets = [] }
+    beat    = { command = ["celery", "-A", "config", "beat", "-l", "INFO"], cpu = 256, memory = 512, port = false, extra_secrets = [] }
+    migrate = { command = ["sh", "-c", "python manage.py ensure_db_roles && python manage.py migrate --noinput"], cpu = 256, memory = 512, port = false, extra_secrets = ["DATABASE_OWNER_URL"] }
   }
 }
 
@@ -113,8 +111,12 @@ resource "aws_ecs_task_definition" "process" {
   task_role_arn            = aws_iam_role.task.arn
 
   container_definitions = jsonencode([merge(local.container_base, {
-    name         = each.key
-    command      = each.value.command
+    name    = each.key
+    command = each.value.command
+    secrets = [for key in concat(local.secret_keys, each.value.extra_secrets) : {
+      name      = key
+      valueFrom = "${aws_secretsmanager_secret.app.arn}:${key}::"
+    }]
     portMappings = each.value.port ? [{ containerPort = 8000, protocol = "tcp" }] : []
     logConfiguration = {
       logDriver = "awslogs"

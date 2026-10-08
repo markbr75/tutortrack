@@ -2,14 +2,16 @@ from typing import Any
 
 import factory
 
+from tutortrack.core.context import tenant_context
 from tutortrack.tenancy.tests.factories import OrganisationFactory
 
 from .testapp.models import Gadget, Widget
 
 
 class TenantFactory(factory.django.DjangoModelFactory):
-    """Base for tenant-owned models. Creates through ``all_tenants`` so factories work with
-    or without a tenant context; pass ``organisation=`` to choose the tenant."""
+    """Base for tenant-owned models. Creates through ``all_tenants`` inside the object's own
+    tenant context (so the RLS policies accept the insert), whether or not the test is in a
+    tenant context; pass ``organisation=`` to choose the tenant."""
 
     class Meta:
         abstract = True
@@ -19,6 +21,13 @@ class TenantFactory(factory.django.DjangoModelFactory):
     @classmethod
     def _get_manager(cls, model_class: Any) -> Any:
         return model_class.all_tenants
+
+    @classmethod
+    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> Any:
+        organisation = kwargs.get("organisation")
+        org_id = kwargs.get("organisation_id") or getattr(organisation, "pk", None)
+        with tenant_context(org_id):
+            return super()._create(model_class, *args, **kwargs)
 
 
 class GadgetFactory(TenantFactory):

@@ -11,7 +11,7 @@ PYTEST_WORKERS ?= auto
 FE_CONCURRENCY ?= 2
 
 .PHONY: help dev infra down logs install test test-be test-fe e2e lint fmt typecheck check \
-        migrate makemigrations migrations-check shell seed openapi api-client api-client-check
+        migrate db-roles makemigrations migrations-check shell seed openapi api-client api-client-check
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -66,7 +66,10 @@ migrations-check: ## Fail if model changes are missing migrations
 
 check: lint typecheck migrations-check test api-client-check ## Everything CI runs. Must pass before a ticket is done.
 
-migrate: ## Apply migrations
+db-roles: ## Create/update the app (RLS) and platform database roles
+	$(BE) $(UV) python manage.py ensure_db_roles
+
+migrate: db-roles ## Apply migrations (runs as the owner role)
 	$(BE) $(UV) python manage.py migrate
 
 makemigrations: ## Create migrations

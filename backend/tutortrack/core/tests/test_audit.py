@@ -1,8 +1,9 @@
 import pytest
-from django.db import ProgrammingError, connection, transaction
+from django.db import ProgrammingError, connections, transaction
 
 from tutortrack.core import audit
-from tutortrack.core.context import request_context
+from tutortrack.core.context import request_context, tenant_context
+from tutortrack.core.db import PLATFORM_DB_ALIAS
 from tutortrack.core.models import AuditEntry
 from tutortrack.core.testing import TenantIsolationTestMixin, client_for
 
@@ -54,21 +55,37 @@ def test_impersonator_is_recorded(tenant, user, superuser):
     assert entry.impersonator_id == superuser.pk
 
 
-def test_audit_entries_cannot_be_updated_or_deleted(tenant):
+def test_app_role_cannot_update_or_delete_audit_entries(tenant):
+    """Privileges: the application role may only SELECT and INSERT audit rows."""
     entry = audit.record(WidgetFactory(organisation=tenant), "create")
-    with pytest.raises(ProgrammingError, match="append-only"), transaction.atomic():
+    with pytest.raises(ProgrammingError, match="permission denied"), transaction.atomic():
         AuditEntry.objects.filter(pk=entry.pk).update(action="tampered")
-    with pytest.raises(ProgrammingError, match="append-only"), transaction.atomic():
+    with pytest.raises(ProgrammingError, match="permission denied"), transaction.atomic():
         AuditEntry.objects.filter(pk=entry.pk).delete()
 
 
-def test_retention_purge_can_delete_when_explicitly_enabled(tenant):
-    entry = audit.record(WidgetFactory(organisation=tenant), "create")
-    with transaction.atomic():
-        with connection.cursor() as cursor:
+@pytest.mark.django_db(databases=["default", PLATFORM_DB_ALIAS], transaction=True)
+def test_trigger_blocks_mutation_even_for_privileged_roles(org):
+    with tenant_context(org):
+        entry = audit.record(WidgetFactory(organisation=org), "create")
+    with (
+        pytest.raises(ProgrammingError, match="append-only"),
+        transaction.atomic(using=PLATFORM_DB_ALIAS),
+    ):
+        AuditEntry.objects.using(PLATFORM_DB_ALIAS).filter(pk=entry.pk).update(action="x")
+
+
+@pytest.mark.django_db(databases=["default", PLATFORM_DB_ALIAS], transaction=True)
+def test_retention_purge_can_delete_when_explicitly_enabled(org):
+    """E29 purges run on the platform connection and opt in explicitly."""
+    with tenant_context(org):
+        entry = audit.record(WidgetFactory(organisation=org), "create")
+    with transaction.atomic(using=PLATFORM_DB_ALIAS):
+        with connections[PLATFORM_DB_ALIAS].cursor() as cursor:
             cursor.execute("SET LOCAL tutortrack.audit_purge = 'on'")
-        AuditEntry.objects.filter(pk=entry.pk).delete()
-    assert not AuditEntry.objects.filter(pk=entry.pk).exists()
+        AuditEntry.objects.using(PLATFORM_DB_ALIAS).filter(pk=entry.pk).delete()
+    with tenant_context(org):
+        assert not AuditEntry.objects.filter(pk=entry.pk).exists()
 
 
 # --- API ----------------------------------------------------------------------------------------
@@ -76,8 +93,9 @@ def test_retention_purge_can_delete_when_explicitly_enabled(tenant):
 
 def test_audit_api_filters_by_object(org, admin_api):
     a, b = WidgetFactory(organisation=org), WidgetFactory(organisation=org)
-    audit.record(a, "create")
-    audit.record(b, "create")
+    with tenant_context(org):
+        audit.record(a, "create")
+        audit.record(b, "create")
     response = admin_api.get(
         "/api/v1/audit", {"object_type": "testapp.widget", "object_id": str(a.pk)}
     )
@@ -103,4 +121,5 @@ class TestAuditIsolation(TenantIsolationTestMixin):
     list_url = "/api/v1/audit"
 
     def make_object(self, organisation):
-        return audit.record(WidgetFactory(organisation=organisation), "create")
+        with tenant_context(organisation):
+            return audit.record(WidgetFactory(organisation=organisation), "create")

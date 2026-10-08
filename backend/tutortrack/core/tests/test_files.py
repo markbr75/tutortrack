@@ -189,14 +189,14 @@ class TestFileIsolation(TenantIsolationTestMixin):
     list_url = "/api/v1/files"
 
     def make_object(self, organisation):
-        return StoredFile.all_tenants.create(
-            organisation=organisation,
-            filename="a.pdf",
-            content_type="application/pdf",
-            size_bytes=1,
-            storage_key=f"org/{organisation.pk}/a.pdf",
-            visibility=StoredFile.Visibility.INTERNAL,
-        )
+        with tenant_context(organisation):
+            return StoredFile.objects.create(
+                filename="a.pdf",
+                content_type="application/pdf",
+                size_bytes=1,
+                storage_key=f"org/{organisation.pk}/a.pdf",
+                visibility=StoredFile.Visibility.INTERNAL,
+            )
 
     def test_list_only_returns_own_organisation(self, org, other_org):
         pytest.skip("files have no list endpoint; detail isolation is still enforced")

@@ -30,7 +30,9 @@ jobs:
       run:
         working-directory: backend
     env:
-      DATABASE_URL: postgres://tutortrack:tutortrack@localhost:5442/tutortrack
+      DATABASE_URL: postgres://tutortrack_app:tutortrack_app@localhost:5442/tutortrack
+      DATABASE_OWNER_URL: postgres://tutortrack:tutortrack@localhost:5442/tutortrack
+      DATABASE_PLATFORM_URL: postgres://tutortrack_platform:tutortrack_platform@localhost:5442/tutortrack
       REDIS_URL: redis://localhost:6389/0
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +40,8 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --frozen
+      - name: Database roles (app role is subject to RLS)
+        run: uv run python manage.py ensure_db_roles
       - name: Lint
         run: |
           uv run ruff check .

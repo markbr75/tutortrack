@@ -17,6 +17,11 @@ per-region stacks for data residency (E29), tenant custom domains (E24), alarms 
 dashboards (E30), the OIDC deploy role used by `.github/workflows/deploy.yml`.
 
 Notes:
-- The database master user (`tutortrack_owner`) owns the tables. E02 creates a separate
-  non-owner application role so Postgres row-level security applies to the app.
+- Database roles (FR-02-4): the RDS master user owns the tables and is only given to the
+  `migrate` task (`DATABASE_OWNER_URL`), which runs `manage.py ensure_db_roles` before
+  migrating. `web`, `worker` and `beat` connect as `tutortrack_app` (non-owner,
+  `NOBYPASSRLS`, so row-level security applies); platform-admin code uses
+  `tutortrack_platform` (`BYPASSRLS`). Not yet verified against RDS: creating a `BYPASSRLS`
+  role needs a superuser-equivalent, so check on the first apply that the master user is
+  allowed to; if not, create `tutortrack_platform` once by hand.
 - Task definitions and services ignore image changes: CI registers new revisions on deploy.

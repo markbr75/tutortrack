@@ -12,6 +12,41 @@ from tutortrack.tenancy.models import Organisation
 from tutortrack.tenancy.tests.factories import OrganisationFactory
 
 
+@pytest.fixture(scope="session")
+def django_db_setup(django_db_setup: None, django_db_blocker: Any) -> Iterator[None]:
+    """Run the suite as the RLS-restricted application role.
+
+    pytest-django creates and migrates the test database as the owner role (see
+    ``config/settings/test.py``). Afterwards we make sure the app/platform roles exist and
+    have privileges, then point the ``default`` connection at the app role so every test
+    exercises the row-level-security policies. The owner is restored for teardown.
+    """
+    from django.db import connections
+
+    from tutortrack.core.dbroles import ensure_roles, grant_privileges
+
+    default = connections["default"]
+    owner_user, owner_password = default.settings_dict["USER"], default.settings_dict["PASSWORD"]
+    app_user, app_password = settings.DB_APP_ROLE
+    if app_user == owner_user:
+        pytest.exit(
+            "DATABASE_URL must use the application role, not the owner "
+            f"({owner_user!r}); see .env.example.",
+            returncode=4,
+        )
+    with django_db_blocker.unblock():
+        ensure_roles("default", update_existing=False)
+        grant_privileges("default", truncate=True)
+        default.close()
+    default.settings_dict.update(USER=app_user, PASSWORD=app_password)
+    if "platform" in settings.DATABASES:
+        connections["platform"].settings_dict["NAME"] = default.settings_dict["NAME"]
+    yield
+    with django_db_blocker.unblock():
+        default.close()
+    default.settings_dict.update(USER=owner_user, PASSWORD=owner_password)
+
+
 @pytest.fixture
 def org(db: None) -> Organisation:
     return OrganisationFactory(name="Bright Minds", slug="brightminds")

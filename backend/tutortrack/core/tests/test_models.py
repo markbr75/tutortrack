@@ -33,10 +33,13 @@ def test_queries_are_scoped_to_the_organisation_in_context(org, other_org):
         assert list(Gadget.objects.all()) == [theirs]
 
 
-def test_all_tenants_manager_is_unscoped(org, other_org):
+def test_all_tenants_manager_skips_the_orm_filter_but_rls_still_applies(org, other_org):
     GadgetFactory(organisation=org)
     GadgetFactory(organisation=other_org)
-    assert Gadget.all_tenants.count() == 2
+    # No ORM filter (and no NoTenantContext error)...
+    assert Gadget.all_tenants.count() == 0  # ...but RLS shows nothing without a tenant
+    with tenant_context(org):
+        assert Gadget.all_tenants.count() == 1
 
 
 def test_save_assigns_organisation_from_context(tenant):

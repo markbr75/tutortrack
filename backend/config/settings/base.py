@@ -69,13 +69,30 @@ TEMPLATES = [
 ]
 
 # --- Database ---------------------------------------------------------------------------------
+# Three roles (docs/02-architecture.md §3, FR-02-4; created by `manage.py ensure_db_roles`):
+#   default  - the application role. Not the table owner and NOBYPASSRLS, so RLS applies.
+#   owner    - owns the tables; `manage.py migrate` runs as this role automatically.
+#   platform - BYPASSRLS, for platform-admin code only (E30).
 DATABASES = {
     "default": env.db(
-        "DATABASE_URL", default="postgres://tutortrack:tutortrack@localhost:5442/tutortrack"
+        "DATABASE_URL", default="postgres://tutortrack_app:tutortrack_app@localhost:5442/tutortrack"
+    ),
+    "owner": env.db(
+        "DATABASE_OWNER_URL", default="postgres://tutortrack:tutortrack@localhost:5442/tutortrack"
+    ),
+    "platform": env.db(
+        "DATABASE_PLATFORM_URL",
+        default="postgres://tutortrack_platform:tutortrack_platform@localhost:5442/tutortrack",
     ),
 }
-DATABASES["default"]["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=60)
-DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+for _db in DATABASES.values():
+    _db["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=60)
+    _db["CONN_HEALTH_CHECKS"] = True
+DATABASE_ROUTERS = ["tutortrack.core.db.DatabaseRouter"]
+# Connections that carry the app.current_org / app.current_user session variables.
+RLS_DB_ALIASES = ["default"]
+# What to do if the default role bypasses RLS (superuser/BYPASSRLS): "error" | "warn" | "off".
+DB_RLS_ROLE_CHECK = env("DB_RLS_ROLE_CHECK", default="error")
 # Primary keys are UUIDv7 via core.models.UUIDModel; this only applies to third-party models.
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

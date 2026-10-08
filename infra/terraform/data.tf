@@ -5,6 +5,18 @@ resource "random_password" "db" {
   special = false
 }
 
+# Application (RLS-restricted) and platform (BYPASSRLS) roles, created by the migrate task
+# with `manage.py ensure_db_roles` (FR-02-4). The master user owns the tables.
+resource "random_password" "db_app" {
+  length  = 40
+  special = false
+}
+
+resource "random_password" "db_platform" {
+  length  = 40
+  special = false
+}
+
 resource "aws_db_parameter_group" "postgres" {
   name   = "${local.name}-pg16"
   family = "postgres16"
@@ -125,9 +137,19 @@ resource "aws_secretsmanager_secret_version" "app" {
   secret_string = jsonencode({
     DJANGO_SECRET_KEY = random_password.django_secret.result
     DATABASE_URL = format(
+      "postgres://tutortrack_app:%s@%s/tutortrack?sslmode=require",
+      random_password.db_app.result,
+      aws_db_instance.postgres.endpoint,
+    )
+    DATABASE_OWNER_URL = format(
       "postgres://%s:%s@%s/tutortrack?sslmode=require",
       aws_db_instance.postgres.username,
       random_password.db.result,
+      aws_db_instance.postgres.endpoint,
+    )
+    DATABASE_PLATFORM_URL = format(
+      "postgres://tutortrack_platform:%s@%s/tutortrack?sslmode=require",
+      random_password.db_platform.result,
       aws_db_instance.postgres.endpoint,
     )
     REDIS_URL         = "rediss://${aws_elasticache_replication_group.redis.primary_endpoint_address}:6379/0"

@@ -6,7 +6,9 @@
 
 x-backend-env: &backend-env
   DJANGO_SETTINGS_MODULE: config.settings.dev
-  DATABASE_URL: postgres://tutortrack:tutortrack@postgres:5432/tutortrack
+  DATABASE_URL: postgres://tutortrack_app:tutortrack_app@postgres:5432/tutortrack
+  DATABASE_OWNER_URL: postgres://tutortrack:tutortrack@postgres:5432/tutortrack
+  DATABASE_PLATFORM_URL: postgres://tutortrack_platform:tutortrack_platform@postgres:5432/tutortrack
   REDIS_URL: redis://redis:6379/0
   CELERY_BROKER_URL: redis://redis:6379/1
   AWS_S3_ENDPOINT_URL: http://s3:8333
@@ -92,7 +94,8 @@ services:
   backend:
     <<: *backend
     command: >-
-      sh -c "uv run python manage.py migrate &&
+      sh -c "uv run python manage.py ensure_db_roles &&
+      uv run python manage.py migrate &&
       uv run python manage.py ensure_storage_bucket &&
       uv run python manage.py runserver 0.0.0.0:8000"
     ports: ["8010:8000"]

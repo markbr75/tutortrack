@@ -101,7 +101,7 @@ log "Dependencies"
 (cd frontend && pnpm install)
 
 log "Database, storage bucket and demo data"
-(cd backend && uv run python manage.py migrate)
+(cd backend && uv run python manage.py ensure_db_roles && uv run python manage.py migrate)
 (cd backend && uv run python manage.py ensure_storage_bucket)
 (cd backend && uv run python manage.py seed_demo)
 
