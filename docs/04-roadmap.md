@@ -1,0 +1,101 @@
+# 04 — Roadmap & Build Order
+
+## Phases
+
+### Phase 1 — MVP: "A sole trader or small team can run their whole business"
+Exit criteria: a solo tutor can sign up, configure services, add families and students, schedule recurring lessons, mark attendance, write reports, auto-invoice, take card payments with auto-pay, send reminders, and give parents a portal. A small team can add tutors with limited permissions.
+
+| Order | Epic | Scope in Phase 1 |
+|---|---|---|
+| 1 | E01 Platform Foundations | Full |
+| 2 | E02 Multi-Tenancy | Full (branches can be hidden behind a feature flag) |
+| 3 | E03 Identity & Access | Email/password, magic link, Google SSO, TOTP 2FA, built-in roles. Custom roles → Phase 2 |
+| 4 | E29 Security/Privacy (part 1) | Audit log, encryption helpers, consent capture, cookie banner |
+| 5 | E05 People & CRM | Full minus advanced deduplication |
+| 6 | E06 Catalogue & Pricing | Services, subjects, default rates, tax rates. Pay tiers and premiums → Phase 2 |
+| 7 | E07 Jobs | Full (a simplified "quick job" UI for solo mode) |
+| 8 | E08 Scheduling | Full except rooms/resources and self-booking → Phase 2 |
+| 9 | E09 Lesson Delivery | Full |
+| 10 | E10 Client Billing | Ledger, invoices, calendar-based auto-invoicing, credit, payment requests, credit notes. Packages and late fees → Phase 2 |
+| 11 | E11 Payments | Stripe (cards, auto-pay), manual payments. GoCardless and PayPal → Phase 2 |
+| 12 | E13 Communications | Email and SMS templates, reminders, notification preferences |
+| 13 | E15 Client & Student Portal | Schedule, invoices, pay, lesson reports, profile |
+| 14 | E16 Tutor Portal | Responsive tutor web portal (PWA install, push → Phase 2) |
+| 15 | E04 SaaS Subscriptions | Trials, Stripe Billing, plan entitlements |
+| 16 | E30 Platform Admin (part 1) | Tenant list, impersonation, feature flags, health |
+
+### Phase 2 — Agency: "A tutoring agency can migrate off TutorCruncher"
+| Order | Epic |
+|---|---|
+| 17 | E12 Tutor Payroll, Expenses & Payouts |
+| 18 | E17 Leads, Enquiries & Pipeline |
+| 19 | E18 Tutor Recruitment & Compliance |
+| 20 | E19 Tutor Matching & Job Marketplace |
+| 21 | E14 Automation Engine |
+| 22 | E22 Calendar Sync & Video |
+| 23 | E23 Accounting Integrations |
+| 24 | E24 Website, Widgets & White-label |
+| 25 | E26 Reporting & Dashboards |
+| 26 | E27 Public API & Webhooks |
+| 27 | E28 Import & Migration |
+| 28 | E03/E06/E08/E10/E11 Phase-2 remainders (custom roles, pay tiers, rooms, self-booking, packages, late fees, GoCardless, PayPal) |
+| 29 | E16 PWA push and offline |
+
+### Phase 3 — Scale & Differentiate
+| Order | Epic |
+|---|---|
+| 30 | E20 Group Classes, Courses & Terms |
+| 31 | E21 Learning Tools |
+| 32 | E25 Reviews, Referrals & Affiliates |
+| 33 | E31 AI Assistant |
+| 34 | E29 Part 2 (data residency, SOC 2 readiness, advanced safeguarding) |
+| 35 | E30 Part 2 (usage analytics, tenant health scoring, support tooling) |
+
+## Dependency graph (simplified)
+
+```
+E01 ─► E02 ─► E03 ─► E05 ─► E06 ─► E07 ─► E08 ─► E09 ─► E10 ─► E11
+                │                    │       │       │      └─► E12 (needs E09 pay)
+                │                    │       │       └─► E21
+                ├─► E04              │       └─► E20 (needs E08, E10)
+                └─► E13 ─► E14 (needs outbox E01 + E13 actions)
+E05 ─► E17 ─► E19 ◄─ E18
+E08 ─► E22 ; E10/E11/E12 ─► E23 ; E05/E06 ─► E24 ; E10 ─► E25
+All ─► E26, E27, E28, E31
+```
+
+## Progress tracker
+
+| Epic | Status | Notes |
+|---|---|---|
+| E01 | ☐ Not started | |
+| E02 | ☐ | |
+| E03 | ☐ | |
+| E04 | ☐ | |
+| E05 | ☐ | |
+| E06 | ☐ | |
+| E07 | ☐ | |
+| E08 | ☐ | |
+| E09 | ☐ | |
+| E10 | ☐ | |
+| E11 | ☐ | |
+| E12 | ☐ | |
+| E13 | ☐ | |
+| E14 | ☐ | |
+| E15 | ☐ | |
+| E16 | ☐ | |
+| E17 | ☐ | |
+| E18 | ☐ | |
+| E19 | ☐ | |
+| E20 | ☐ | |
+| E21 | ☐ | |
+| E22 | ☐ | |
+| E23 | ☐ | |
+| E24 | ☐ | |
+| E25 | ☐ | |
+| E26 | ☐ | |
+| E27 | ☐ | |
+| E28 | ☐ | |
+| E29 | ☐ | |
+| E30 | ☐ | |
+| E31 | ☐ | |
