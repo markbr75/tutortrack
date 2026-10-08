@@ -1,0 +1,32 @@
+from .base import *
+
+DEBUG = False
+SECRET_KEY = env("DJANGO_SECRET_KEY")  # required in production
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 63072000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SECURE = True
+X_FRAME_OPTIONS = "DENY"
+# Tenant custom domains are added to CSRF_TRUSTED_ORIGINS dynamically in E24.
+
+
+# Django must not re-apply LOGGING over the structlog configuration.
+LOGGING_CONFIG = None
+
+from config.observability import configure_observability  # noqa: E402
+
+configure_observability(
+    log_level=LOG_LEVEL,
+    log_json=LOG_JSON,
+    sentry_dsn=SENTRY_DSN,
+    sentry_env=SENTRY_ENVIRONMENT,
+    otlp_endpoint=OTEL_EXPORTER_OTLP_ENDPOINT,
+)
