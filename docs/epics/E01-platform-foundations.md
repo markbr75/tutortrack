@@ -3,6 +3,7 @@
 | | |
 |---|---|
 | **Phase** | MVP (first) |
+| **Status** | ✅ Done (2026-10-08) |
 | **Depends on** | — |
 | **Unlocks** | Everything |
 
@@ -119,17 +120,56 @@ Set up the monorepo, local dev environment, CI/CD, the Django and React skeleton
 - Test suite parallelised (`pytest-xdist`); CI under 10 minutes.
 
 ## 6. Delivery plan
-- [ ] **E01-T01** Monorepo scaffold, uv/pnpm, Makefile, pre-commit, docker-compose with all services, `.env.example`.
-- [ ] **E01-T02** Django project, settings split, structlog, Sentry, health endpoints, RFC 7807 handler.
-- [ ] **E01-T03** Core base models (UUIDv7, TimeStamped, Archivable) and the tenant context primitives (contextvar + manager raising without context). Full tenancy arrives in E02.
-- [ ] **E01-T04** Money value object, fields and serializer, with Hypothesis tests.
-- [ ] **E01-T05** Time and recurrence utilities with DST tests.
-- [ ] **E01-T06** Outbox: models, publish, dispatcher, subscriber registry, idempotency, dead-letter.
-- [ ] **E01-T07** Audit log with append-only trigger, diff helper and API.
-- [ ] **E01-T08** DRF config: pagination, filters, sparse fields, expand, idempotency middleware, ETag mixin, OpenAPI docs.
-- [ ] **E01-T09** Celery with TenantTask, queues, beat module, fan-out helper.
-- [ ] **E01-T10** File storage with presigned uploads, AV scan and permission-checked downloads.
-- [ ] **E01-T11** Sequence numbers and feature flags.
-- [ ] **E01-T12** Frontend workspace: admin/portal/widgets apps, ui package, generated api-client, auth bootstrap, data-grid component, Storybook.
-- [ ] **E01-T13** CI pipelines (backend, frontend, contract, e2e) and Terraform baseline.
-- [ ] **E01-T14** Seed/demo data command.
+- [x] **E01-T01** Monorepo scaffold, uv/pnpm, Makefile, pre-commit, docker-compose with all services, `.env.example`.
+- [x] **E01-T02** Django project, settings split, structlog, Sentry, health endpoints, RFC 7807 handler.
+- [x] **E01-T03** Core base models (UUIDv7, TimeStamped, Archivable) and the tenant context primitives (contextvar + manager raising without context). Full tenancy arrives in E02.
+- [x] **E01-T04** Money value object, fields and serializer, with Hypothesis tests.
+- [x] **E01-T05** Time and recurrence utilities with DST tests.
+- [x] **E01-T06** Outbox: models, publish, dispatcher, subscriber registry, idempotency, dead-letter.
+- [x] **E01-T07** Audit log with append-only trigger, diff helper and API.
+- [x] **E01-T08** DRF config: pagination, filters, sparse fields, expand, idempotency middleware, ETag mixin, OpenAPI docs.
+- [x] **E01-T09** Celery with TenantTask, queues, beat module, fan-out helper.
+- [x] **E01-T10** File storage with presigned uploads, AV scan and permission-checked downloads.
+- [x] **E01-T11** Sequence numbers and feature flags.
+- [x] **E01-T12** Frontend workspace: admin/portal/widgets apps, ui package, generated api-client, auth bootstrap, data-grid component, Storybook.
+- [x] **E01-T13** CI pipelines (backend, frontend, contract, e2e) and Terraform baseline.
+- [x] **E01-T14** Seed/demo data command.
+
+## 7. Implementation notes (as built, 2026-10-08)
+
+Where the build differs from, or adds to, the requirements above. Later epics should treat
+these as the source of truth.
+
+| Area | As built | Why |
+|---|---|---|
+| Local S3 | **SeaweedFS** (`chrislusf/seaweedfs`) instead of MinIO; bucket created by `manage.py ensure_storage_bucket` | MinIO no longer publishes container images |
+| Host ports | Postgres **5442**, Redis **6389**, API **8010**, S3 **9010** | Avoid clashes with other local services |
+| Money fields (FR-01-5) | `MoneyField(currency_field="currency")` stores `<name>_amount` and reads the currency from an **explicit** `CurrencyField` on the model (shared by all amounts on a record). `instance.total` returns `Money`; `instance.total_amount` returns `Decimal`. Saving more decimals than the column allows raises instead of silently rounding | Auto-generated currency columns break Django migrations; one currency per document is the common case |
+| Org and User models | Minimal `tenancy.Organisation` and `identity.User` (email login, UUIDv7) created in E01 | `TenantModel` needs the Organisation FK and Django needs `AUTH_USER_MODEL` from the first migration. **E02/E03 extend these models; do not recreate them** |
+| Branch scoping (FR-01-4) | `BranchScopedModel` deferred to **E02-T04** | Needs the Branch model |
+| Tenant resolution | Subdomain resolver only (`<slug>.<TENANT_BASE_DOMAIN>`), pluggable via `settings.TENANT_RESOLVER` | Header resolution needs the E03 membership check; custom domains are E24 |
+| Postgres RLS | Not yet enabled; the tenant-scoped manager plus `TenantIsolationTestMixin` provide isolation for now | Lands in **E02-T03** with the non-owner app DB role |
+| Permissions | `core.permissions.has_perm()` / `HasPermission.for_("x.y")` hook: superuser or Django perms until E03 | E03 swaps in RBAC without touching call sites |
+| Audit (FR-01-7) | Postgres trigger blocks UPDATE/DELETE unless `SET LOCAL tutortrack.audit_purge='on'`. TRUNCATE is not trigger-blocked (Django test flush needs it); E02 table ownership prevents it | |
+| Idempotency (FR-01-10) | Keyed by organisation + principal (user id, or SHA-256 of the `Authorization` header for token clients) + key; 5xx and >1 MB responses are not stored | Middleware runs before DRF token auth |
+| Files (FR-01-12) | Presigned **PUT** (not POST); `complete` verifies size and type with HEAD; scan status `skipped` when `CLAMAV_ENABLED=false` (local only); infected files are deleted and the record rejected | Simpler; works with S3 and SeaweedFS |
+| Sequences (FR-01-13) | `core.sequences.next_number(key, prefix=, padding=)` must run inside the document's transaction (raises otherwise) | Guarantees gap-free numbering |
+| Seed data (FR-01-17) | Registry: each app adds `seeds.py` with `@seed_step(order=N)`. E01 seeds the platform admin, **Bright Minds Tutoring** (`brightminds`) and baseline flags; clients, tutors and lessons arrive with their epics | Avoids a monolithic seed script |
+| Frontend dev | Apps served at `http://<slug>.localhost:5173`; Vite proxies `/api` and `/django-admin` keeping the Host header, so tenancy, cookies and CSRF behave as in production. Session bootstrap uses `GET /api/v1/features` until E03 adds `/api/v1/me`; sign-in temporarily uses the Django admin login | |
+| Frontend styling | Tailwind CSS v4; the `ui` package declares `@source "."` so its classes are generated in consuming apps | Workspace symlinks are skipped by Tailwind scanning |
+| API client | `createApiClient()` resolves `fetch` per call and uses absolute URLs | Needed for test stubs and instrumentation |
+| Infra (FR-01-16) | Terraform baseline passes `terraform validate` but is **not applied**; the deploy workflow needs the AWS OIDC role, ECR and state bucket first | No AWS account configured yet |
+| Windows dev | `make` is not installed by default: `winget install ezwinports.make`, or run the Makefile commands directly | |
+
+### Verified
+- Backend: 123 tests (incl. thread-concurrency tests for the outbox and sequences, Hypothesis money properties, DST recurrence), 93% coverage, ruff and mypy clean, `check --deploy` clean, OpenAPI schema validates with zero warnings.
+- Frontend: lint, typecheck, unit tests and production builds pass for all 6 packages.
+- End to end on the local stack: upload, S3 PUT, complete, Celery scan, presigned download (bytes match); the admin app signs in on `brightminds.localhost` and loads features and the audit log grid.
+- Production Docker image builds.
+
+### Carried forward
+- **E02:** RLS policies + `enable_rls` migration helper + non-owner DB role; `BranchScopedModel`; full tenant resolver; set `app.current_org` in `TenantTask`.
+- **E03:** replace `has_perm`, the Django-admin sign-in and the `/features` session probe (add `/api/v1/me`).
+- **E29:** `core.crypto.EncryptedField`; ClamAV service in the AWS stack.
+- **E30:** alarms, dashboards and the dead-letter console on top of `core.events.dispatcher.replay_dead_letter`.
+- Not yet in CI: Storybook build. The Playwright e2e job is defined and runs on pushes to `main` only.

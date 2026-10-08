@@ -68,8 +68,8 @@ All ─► E26, E27, E28, E31
 
 | Epic | Status | Notes |
 |---|---|---|
-| E01 | ☐ Not started | |
-| E02 | ☐ | |
+| E01 | ✅ Done (2026-10-08) | See Implementation notes in the epic; follow-ups carried into E02, E03, E29, E30 |
+| E02 | ⏭ Next | Extend the existing `tenancy.Organisation` model |
 | E03 | ☐ | |
 | E04 | ☐ | |
 | E05 | ☐ | |
