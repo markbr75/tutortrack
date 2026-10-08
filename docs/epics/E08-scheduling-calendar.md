@@ -115,3 +115,15 @@ Indexes: `(organisation_id, start)`, GIN on tstzrange; exclusion constraint for 
 - [ ] **E08-T13** (Phase 2) Reschedule requests and policies.
 - [ ] **E08-T14** (Phase 2) Self-booking engine, holds, booking settings, payment-at-booking hook (E11).
 - [ ] **E08-T15** (Phase 2) Time-off approval workflow and cover flagging.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E08-TW1** Booking, reschedule and time-off workflows (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `BookingHoldWorkflow` `booking-hold:{org}:{hold_id}` | Self-booking slot selected (FR-08-9) | Hold slot → wait for signal `paid` / `confirmed` up to **10 min** → confirm lesson, or release slot on timeout | Redis hold + expiry job |
+| `RescheduleRequestWorkflow` | `reschedule.requested` | Notify approver → wait for `approve`/`decline` until the policy deadline → apply move or auto-decline; reminders at 50% of window | Status polling |
+| `TimeOffApprovalWorkflow` | `time_off.requested` | Wait for admin decision → on approval flag conflicting lessons and start `CoverRequestWorkflow` (E19) | Manual follow-up |

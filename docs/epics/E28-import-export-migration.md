@@ -53,3 +53,15 @@ Remove switching costs: guided CSV/XLSX imports for every core entity with field
 - [ ] **E28-T08** Teachworks API connector.
 - [ ] **E28-T09** Google Sheets import.
 - [ ] **E28-T10** Full tenant export.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E28-TW1** Import, migration and export workflows (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `ImportWorkflow` `import:{org}:{batch}` | User confirms an import after the dry-run | Validate → import rows in checkpointed batches (activities) → report → **7-day rollback window timer**. Signal `rollback` reverts the batch; the timer expiry finalises it | ImportBatch status polling + rollback cutoff job |
+| `MigrationProjectWorkflow` | Cutover assistant started | Orchestrates connector pulls (TutorCruncher/TutorBird/Teachworks) step by step with human confirmation signals between steps → reconciliation report | Manual steps |
+| `TenantExportWorkflow` | Owner requests a full export / account closure | Export per entity in batches → zip → link email → link expiry timer (7 days) → delete file | Export job + cleanup job |

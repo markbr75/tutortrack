@@ -55,3 +55,14 @@ Find the right tutor for a job quickly: a scored search across subject competenc
 - [ ] **E19-T07** Frontend: match search UI with map & heatmap, offer management, tutor job inbox.
 - [ ] **E19-T08** (Phase 2b) Client shortlist sharing.
 - [ ] **E19-T09** Matching analytics widgets.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E19-TW1** Job offer and cover workflows (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `JobOfferCascadeWorkflow` `job-offer:{org}:{job}` | Coordinator sends offers (simultaneous or sequential) | Send offer(s) → wait `accepted`/`declined` per tutor with expiry timers → sequential cascade to the next tutor → first acceptance wins (or admin confirm signal) → withdraw the rest → assign tutor + create series + intro notifications | Offer expiry tasks |
+| `CoverRequestWorkflow` | Cover request created | Notify eligible tutors → wait for first `accept` until lesson start minus N hours → reassign lessons, or escalate as unfilled | Manual chasing |

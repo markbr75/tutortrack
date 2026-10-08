@@ -88,3 +88,14 @@ What happens when a lesson takes place (or doesn't): marking completion and atte
 - [ ] **E09-T07** Unconfirmed lessons queue and auto-complete task.
 - [ ] **E09-T08** Frontend: complete-lesson modal, register UI, cancel flow with policy preview, report editor, report review queue.
 - [ ] **E09-T09** (Phase 2) Client feedback micro-surveys.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E09-TW1** Lesson report SLA and unconfirmed-lesson workflows (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `LessonReportSlaWorkflow` `report-sla:{org}:{lesson}` | `lesson.completed` (report required) | Timer to **due** → reminder → overdue event + hold pay (E12) → escalate to coordinator after M hours. Signal `submitted` ends it; `approved`/`shared` update state | Due/overdue beat sweeper (FR-09-7) |
+| `UnconfirmedLessonWorkflow` | Lesson end time passes while still `planned` | Nudge tutor after N hours → auto-complete or flag per setting. Signal `completed`/`cancelled` ends it | Unconfirmed sweeper (FR-09-8) |

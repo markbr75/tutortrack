@@ -66,3 +66,15 @@ Capture enquiries from websites, widgets, phone, email and marketplaces; work th
 - [ ] **E17-T08** Registration forms with fee payment.
 - [ ] **E17-T09** (Phase 2b) Proposals with online acceptance.
 - [ ] **E17-T10** Funnel reports (E26 widgets).
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E17-TW1** Lead follow-up, waitlist and proposal workflows (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `EnquiryFollowUpWorkflow` `enquiry:{org}:{id}` | `enquiry.received` | Auto-ack → SLA timers per stage (breach event + escalation) → trial follow-up sequence. Signals `stage_changed`, `won`, `lost` adjust or end it | SLA flag sweeper |
+| `WaitlistOfferWorkflow` | Capacity appears for a waitlisted student | Offer to the first in queue → wait `accepted`/`declined` until expiry → cascade to the next student | Offer expiry job |
+| `ProposalWorkflow` | Proposal sent | Reminders → wait `accepted` → conversion + optional upfront payment (`PaymentCollectionWorkflow`) | Manual chasing |

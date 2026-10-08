@@ -171,5 +171,6 @@ these as the source of truth.
 - **E02:** RLS policies + `enable_rls` migration helper + non-owner DB role; `BranchScopedModel`; full tenant resolver; set `app.current_org` in `TenantTask`.
 - **E03:** replace `has_perm`, the Django-admin sign-in and the `/features` session probe (add `/api/v1/me`).
 - **E29:** `core.crypto.EncryptedField`; ClamAV service in the AWS stack.
+- **E32:** Temporal takes over long-running processes; Celery stays for short tasks (outbox dispatch, sends, scans, webhooks, global crons).
 - **E30:** alarms, dashboards and the dead-letter console on top of `core.events.dispatcher.replay_dead_letter`.
 - Not yet in CI: Storybook build. The Playwright e2e job is defined and runs on pushes to `main` only.

@@ -10,6 +10,7 @@ Exit criteria: a solo tutor can sign up, configure services, add families and st
 | 1 | E01 Platform Foundations | Full |
 | 2 | E02 Multi-Tenancy | Full (branches can be hidden behind a feature flag) |
 | 3 | E03 Identity & Access | Email/password, magic link, Google SSO, TOTP 2FA, built-in roles. Custom roles → Phase 2 |
+| 3b | E32 Workflow Orchestration (Temporal) | Runtime, worker, tenancy plumbing, bridge, codec, test harness. Build before E04/E09/E10, which start workflows |
 | 4 | E29 Security/Privacy (part 1) | Audit log, encryption helpers, consent capture, cookie banner |
 | 5 | E05 People & CRM | Full minus advanced deduplication |
 | 6 | E06 Catalogue & Pricing | Services, subjects, default rates, tax rates. Pay tiers and premiums → Phase 2 |
@@ -54,6 +55,7 @@ Exit criteria: a solo tutor can sign up, configure services, add families and st
 ## Dependency graph (simplified)
 
 ```
+E01 ─► E02 ─► E03 ─► E32 (Temporal) ─► E04, E08–E14, E17–E20, E22, E23, E25, E28, E29 (their workflows)
 E01 ─► E02 ─► E03 ─► E05 ─► E06 ─► E07 ─► E08 ─► E09 ─► E10 ─► E11
                 │                    │       │       │      └─► E12 (needs E09 pay)
                 │                    │       │       └─► E21
@@ -99,3 +101,4 @@ All ─► E26, E27, E28, E31
 | E29 | ☐ | |
 | E30 | ☐ | |
 | E31 | ☐ | |
+| E32 | ☐ | Build after E03 (Phase 1, order 3b) |

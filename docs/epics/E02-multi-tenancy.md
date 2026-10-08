@@ -98,3 +98,13 @@ Typed settings stored in an `OrganisationSettings` model (one row per org) plus 
 - [ ] **E02-T07** Onboarding wizard backend state machine + frontend wizard.
 - [ ] **E02-T08** Org switcher, demo-data mode and wipe.
 - [ ] **E02-T09** Org close/suspend flows.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E02-TW1** Organisation closure on Temporal (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `OrganisationClosureWorkflow` `org-closure:{org}` | Owner confirms close (FR-02-8) | Export data (activity) → email link → **30-day timer** → pause schedules → anonymise/delete per retention (E29). Signal `reactivate` cancels within the grace period | Scheduled deletion job |

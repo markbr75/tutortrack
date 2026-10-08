@@ -122,3 +122,16 @@ Turns delivered (or scheduled) lessons into money owed. An **append-only client 
 - [ ] **E10-T13** (Phase 2) Recurring fixed-fee billing plans with proration.
 - [ ] **E10-T14** (Phase 2) Late fees and collections blocks.
 - [ ] **E10-T15** (Phase 2) Split billing.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E10-TW1** Billing workflows (invoice runs, dunning, payment requests, packages) (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `InvoiceRunWorkflow` `invoice-run:{org}:{branch}:{period}` (**Temporal Schedule** per branch cycle) | Schedule, or manual "Generate invoices" | Collect charges → build drafts → **review window timer** (or wait for `approve` signal) → issue in batches → send → start `PaymentCollectionWorkflow` for auto-pay clients. Query shows progress. Workflow ID makes re-runs idempotent | Invoice-run beat task + review-window polling |
+| `InvoiceDunningWorkflow` `invoice-dunning:{org}:{invoice}` | `invoice.issued` | Reminder timers per schedule (−3, 0, +3, +7, +14, +30) → late fee activity → collections task/booking block. Signals `paid`, `credited`, `voided`, `paused` stop or pause it | Reminder log + daily dunning job (FR-10-10) |
+| `PaymentRequestWorkflow` | Payment request sent | Reminders until paid or cancelled; auto top-up retry for threshold requests | Reminder job |
+| `PackageExpiryWorkflow` `package:{org}:{purchase}` | `package.activated` | Timer to N days before expiry → reminder → expiry → expire units + revenue entry. Signals `depleted`, `extended(until)` | Expiry sweeper |

@@ -72,3 +72,15 @@ Attract and vet tutors: public application forms, a recruitment pipeline (screen
 - [ ] **E18-T09** Subject competency approvals.
 - [ ] **E18-T10** Frontend: recruitment board, application detail, tutor onboarding (tutor portal), compliance UI.
 - [ ] **E18-T11** (Phase 3) Background check provider integrations.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E18-TW1** Recruitment, onboarding and compliance workflows (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `TutorApplicationWorkflow` | `application.submitted` | Screening tasks → interview scheduling (wait for booking signal) → references (child `ReferenceRequestWorkflow` per referee with reminders and timeout) → decision signal → on approval start onboarding | Stage reminders |
+| `TutorOnboardingWorkflow` `onboarding:{org}:{tutor}` | Application approved / tutor invited | Track checklist items via signals → reminders → activate tutor when mandatory items are done | Checklist polling |
+| `ComplianceRecordWorkflow` `compliance:{org}:{record}` | `compliance.record_verified` with an expiry date | Timers at 60/30/7 days before expiry (reminders) → on expiry restrict tutor and hold pay. Signal `renewed` restarts with the new expiry (`continue_as_new`) | Nightly expiry job (FR-18-6) |

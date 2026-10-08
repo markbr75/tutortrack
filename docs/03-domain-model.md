@@ -41,7 +41,8 @@ This is the shared vocabulary for all epics. Epics may add fields, but **must no
 | **Class / Course / Term** | Group-teaching constructs: Course (curriculum product) → Class (scheduled cohort with capacity) → Term (date range for enrolment and billing). |
 | **Enrolment** | A Student's place in a Class for a Term. |
 | **Affiliate** | A referrer earning commission on referred clients' revenue. |
-| **Automation** | A tenant-defined rule: Trigger (event or schedule) → Conditions → Actions. |
+| **Automation** | A tenant-defined rule: Trigger (event or schedule) → Conditions → Actions. Each run executes as a Temporal workflow (E14/E32). |
+| **Workflow (process)** | A durable, long-running business process run on Temporal (E32), e.g. an invoice's dunning or a pay run's approval. Linked to its subject record and shown as a process timeline. Workflows act with actor type `workflow` in audit and events. |
 
 ## 2. Core entity relationships
 

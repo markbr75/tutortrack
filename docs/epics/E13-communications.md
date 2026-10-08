@@ -87,3 +87,13 @@ A registry of notification types, each with: key, trigger event, recipients reso
 - [ ] **E13-T10** (Phase 2) Broadcasts with segments and tracking.
 - [ ] **E13-T11** (Phase 2) Conversations inbox (email/SMS inbound, in-app chat, assignment).
 - [ ] **E13-T12** (Phase 2) WhatsApp channel; custom sender domains; Mailchimp/Brevo sync.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E13-TW1** Broadcast workflow (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `BroadcastWorkflow` `broadcast:{org}:{id}` | Broadcast scheduled or sent | Wait for scheduled time → resolve segment → send in throttled batches (activities enqueue Celery sends) → collect stats. Signals `pause`, `resume`, `cancel` | Scheduled-broadcast beat job |

@@ -62,3 +62,14 @@ Support centre-style operations: Courses (products like "Year 6 11+ Prep"), Clas
 - [ ] **E20-T08** Term rollover flow with parent confirmation.
 - [ ] **E20-T09** Public catalogue and online enrolment with payment.
 - [ ] **E20-T10** Frontend admin: courses/classes/roster/register UIs.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E20-TW1** Term rollover and enrolment payment workflows (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `TermRolloverWorkflow` `rollover:{org}:{term}` | Admin starts rollover | Send confirm/opt-out requests to families → reminders → deadline timer → enrol confirmed students, release unconfirmed places to waitlists, bill term fees | Batch job + manual reminders |
+| `EnrolmentPaymentWorkflow` | Online enrolment with payment | Hold the place → wait for `paid` signal until timeout → confirm enrolment, or release the place | Pending-payment sweeper |

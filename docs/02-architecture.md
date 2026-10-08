@@ -10,7 +10,8 @@ This document defines the technical foundation that **every epic must follow**. 
 | Web framework | **Django 5.x** | Mature ORM, migrations, admin, auth and i18n; ideal for a CRUD-heavy, multi-module SaaS |
 | API | **Django REST Framework** + **drf-spectacular** (OpenAPI 3.1) | Powerful permissions, filtering, throttling and pagination; generated docs; one API for internal and public use |
 | Database | **PostgreSQL 16+** | Requirement. Uses JSONB, row-level security, exclusion constraints (no double-booking), `tstzrange`, full-text search, partial indexes |
-| Async jobs | **Celery 5** + **Redis** (broker) and **Celery Beat** (schedules) | Invoices, reminders, syncs, webhooks, imports |
+| Async jobs | **Celery 5** + **Redis** (broker) and **Celery Beat** (global crons) | Short, stateless tasks: outbox dispatch, message sends, scans, webhook deliveries |
+| Durable workflows | **Temporal** (Python SDK `temporalio`; Temporal Cloud in production, CLI dev server locally) | Long-running, multi-step processes with timers, retries and human approvals: invoice runs, dunning, pay runs, offers, compliance expiry, automations, imports, DSARs (E32, ADR 0002) |
 | Cache / locks | Redis | Caching, rate limiting, distributed locks (`django-redis`, `redis-lock`) |
 | Frontend (admin, tutor, client apps) | **React 18 + TypeScript + Vite**, TanStack Query, TanStack Router, Tailwind CSS, shadcn/ui, FullCalendar (premium for resource views), React Hook Form + Zod | Rich interactive calendar and data grids; installable PWA |
 | API client | TypeScript client **generated from OpenAPI** (`openapi-typescript` + `openapi-fetch`) | Keeps the frontend in lockstep with the backend |
@@ -151,7 +152,16 @@ Alternatives considered: FastAPI (rejected: we would rebuild admin, auth, migrat
 - Rate limits per token and per IP (Redis).
 - Every endpoint documented in OpenAPI with examples, and the TS client is regenerated in CI (fails on drift).
 
-## 9. Background scheduling (Celery Beat)
+## 9. Background work: Celery vs Temporal
+
+**Rule (E32 §2):** use **Temporal** when a process has multiple steps that must all happen, waits on timers longer than a few minutes, waits for a human or an external callback, must be visible as a timeline, or must be cancellable mid-flight. Use **Celery** for single, short, stateless tasks. If you would add a `next_*_at` column and a sweeper, use a workflow instead.
+
+- Temporal workflows are deterministic; side effects happen in activities that call services inside `tenant_context`. Workflow IDs are tenant-prefixed (`invoice-dunning:{org}:{invoice}`) for idempotent starts.
+- Domain events reach workflows through the outbox → Temporal bridge (start/signal). Human decisions arrive as signals from API endpoints.
+- Per-tenant recurring processes (invoice runs, pay-run cut-offs, retention purges) use **Temporal Schedules**; global housekeeping crons stay on Celery Beat.
+- Workflow payloads are encrypted with a KMS-backed codec; payloads carry IDs, not documents.
+
+### Celery Beat (global crons)
 
 Centralised in `config/celery_schedule.py`. Jobs must be **idempotent and tenant-sharded**: a master task fans out one task per active organisation. Examples: reminder dispatch (every 5 min), auto-invoice generation (hourly, per org's configured schedule), dunning (daily), calendar sync (every 5 min, plus push channels), compliance expiry checks (daily), payout runs (per schedule), outbox dispatch (continuous), webhook retries (exponential backoff).
 

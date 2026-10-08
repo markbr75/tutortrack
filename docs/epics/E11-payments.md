@@ -98,3 +98,15 @@ Collect money from clients through a **provider-agnostic payment layer**: card a
 - [ ] **E11-T12** (Phase 2) PayPal provider.
 - [ ] **E11-T13** (Phase 2) Bank statement import and Open Banking feeds with matching queue.
 - [ ] **E11-T14** (Phase 2) Split payments across clients.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E11-TW1** Payment collection, dispute and provider-migration workflows (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `PaymentCollectionWorkflow` `collect:{org}:{invoice}` | Invoice issued with auto-pay, or manual "collect" | Charge default method (activity, idempotency key) → for direct debit wait for `confirmed`/`failed` webhook signal (days) → retry schedule (card +3d, +5d; DD once) → notify client with pay link → final failure notify staff. The workflow *is* the per-invoice collection lock (FR-11-2) | PaymentAttempt `next_retry_at` + retry beat job |
+| `DisputeWorkflow` | Provider `dispute.created` webhook | Alert staff → evidence deadline timer with reminders → outcome signal → ledger reversal and invoice reopen if lost | Manual tracking |
+| `ProviderMigrationWorkflow` | Admin moves a client between providers | Send new mandate/card setup link → wait for `method_added` → switch default → cancel old mandate after in-flight collections settle | Manual steps |

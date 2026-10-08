@@ -92,3 +92,14 @@ Calculates what each tutor has earned (lesson pay, premiums, travel, bonuses, ex
 - [ ] **E12-T10** External payroll exports.
 - [ ] **E12-T11** Frontend: pay runs UI, expenses approval, tutor earnings pages.
 - [ ] **E12-T12** (Phase 3) Wise payouts, 1099 data, commission-based pay.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E12-TW1** Pay run and expense workflows (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `PayRunWorkflow` `pay-run:{org}:{pay_run}` (**Temporal Schedule** at cut-off) | Schedule or manual create | Assemble items → wait for `approve` signal(s) (dual approval above threshold; reminders) → generate statements → payouts (Stripe Connect transfers / bank file) → wait for payout webhook signals → mark paid; failed payouts return items to the next run. Query exposes status for the pay-run screen | Pay run state machine + polling |
+| `ExpenseApprovalWorkflow` | `expense.submitted` | Notify approver → reminders → `approve`/`reject` signal → pay item and optional rebill charge | Approval queue reminders |

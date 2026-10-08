@@ -45,3 +45,14 @@ Growth tools: collect reviews and ratings of tutors and the business, publish te
 - [ ] **E25-T04** Affiliate records, links, attribution, portal.
 - [ ] **E25-T05** Commission engine with clawbacks, statements, payouts.
 - [ ] **E25-T06** Tutor referral bonuses.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E25-TW1** Referral and review workflows (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `ReferralRewardWorkflow` `referral:{org}:{id}` | `referral.created` | Wait for the referee's first paid invoice / N completed lessons (signals) up to the programme deadline → fraud checks → issue credit to the referrer and discount to the referee | Milestone polling |
+| `ReviewRequestWorkflow` | Trigger rule (e.g. N lessons completed) | Send request → reminder → stop on `submitted` | Reminder job |

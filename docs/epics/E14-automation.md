@@ -73,3 +73,14 @@ Pre-built, one-click-install automations, e.g.:
 - [ ] **E14-T07** Finance and pipeline actions.
 - [ ] **E14-T08** Recipe library and install.
 - [ ] **E14-T09** Frontend flow builder with dry-run.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E14-TW1** Run the automation engine on Temporal (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `AutomationRunWorkflow` `automation:{org}:{automation}:{subject}:{event}` | Matching event (via the outbox bridge), schedule trigger, date-field trigger or manual run | Interprets the automation version's steps: conditions → actions (activities) → **wait** steps become durable timers, **branch** steps are plain workflow logic. Guardrails (rate per record, causation depth) are checked before start. Run log = workflow history + `AutomationRunStep` rows written by activities | `AutomationRunStep.resume_at` + resume sweeper (FR-14-5) |
+| Schedule and date-field triggers | **Temporal Schedules** per automation | Schedule fires → query matching records → start one `AutomationRunWorkflow` per record (workflow IDs dedupe) | Cron-like trigger evaluation |

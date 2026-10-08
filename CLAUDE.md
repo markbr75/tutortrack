@@ -3,7 +3,7 @@
 TutorTrack is a multi-tenant SaaS for running tutoring businesses. Specs live in `docs/`. **Read `docs/02-architecture.md` and `docs/03-domain-model.md` before any work.** Build tickets come from `docs/epics/EXX-*.md` → "Delivery Plan".
 
 ## Stack
-Python 3.12 · Django 5 · DRF + drf-spectacular · PostgreSQL 16 · Celery + Redis · React 18 + TypeScript + Vite + TanStack Query + Tailwind/shadcn · pytest · Playwright.
+Python 3.12 · Django 5 · DRF + drf-spectacular · PostgreSQL 16 · Celery + Redis · Temporal (from E32) · React 18 + TypeScript + Vite + TanStack Query + Tailwind/shadcn · pytest · Playwright.
 
 ## Local environment
 - `cp .env.example .env`, then `make infra` starts Postgres (5442), Redis (6389), SeaweedFS S3 (9010) and Mailpit (8025).
@@ -23,6 +23,7 @@ Python 3.12 · Django 5 · DRF + drf-spectacular · PostgreSQL 16 · Celery + Re
 2. **Business logic lives in `services.py`** (writes) and `selectors.py` (reads). Views and serializers stay thin. Apps talk to each other via services and domain events, never by writing to another app's models.
 3. **Domain events:** emit via `core.events.publish()` inside the transaction (outbox). Handlers must be idempotent.
 4. **Audit:** mutations go through services, which record `AuditEntry`.
+4a. **Long-running processes use Temporal (E32):** multi-step, timer-based or approval-based processes are Temporal workflows (deterministic code; side effects in `@tenant_activity` activities calling services; tenant-prefixed workflow IDs). Celery is only for short stateless tasks. Never add `next_*_at` columns plus a sweeper.
 5. **Money:** use `core.money.Money` / `Decimal` only, never float. Round half-up to the currency minor unit at line level. Financial records are never deleted or edited after issue: use credit notes and adjustments.
 6. **Time:** store UTC (`timestamptz`); carry IANA timezone on lessons, users, branches and orgs. Recurrence expands in the lesson's local tz.
 7. **Permissions:** declare codenames in `<app>/permissions.py`; enforce in API permission classes *and* queryset scoping. Sensitive fields are hidden by serializer field-permission mixins.

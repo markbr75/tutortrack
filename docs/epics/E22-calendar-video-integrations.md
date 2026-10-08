@@ -56,3 +56,14 @@ Connect tutors' and staff's personal calendars (two-way, near-real-time) and aut
 - [ ] **E22-T08** Lessonspace provider; Daily.co/Whereby built-in rooms.
 - [ ] **E22-T09** Join links in portals/reminders with timed enablement.
 - [ ] **E22-T10** (Phase 3) Video attendance ingestion, recordings, embedded classroom.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E22-TW1** Calendar connection and meeting provisioning workflows (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `CalendarConnectionWorkflow` `calendar:{org}:{connection}` (long-running, `continue_as_new`) | Integration connected | Renew push channels before expiry → incremental sync on `changed` signals (from provider webhooks) with polling fallback timer → token refresh and error backoff. Signal `disconnect` ends it | Watch-renewal and polling beat jobs |
+| `OnlineMeetingProvisioningWorkflow` | Online lesson scheduled, moved or cancelled | Create/update/delete the meeting at the provider with retries → store links → notify if provisioning ultimately fails | Ad hoc retries |

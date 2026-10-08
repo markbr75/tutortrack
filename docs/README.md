@@ -63,3 +63,4 @@ TutorTrack is a multi-tenant SaaS platform that lets a tutoring business run end
 | E29 | [Security, Privacy, Safeguarding & Compliance](epics/E29-security-privacy-compliance.md) | MVP→Scale |
 | E30 | [Platform Administration, Support & Operations](epics/E30-platform-admin-ops.md) | MVP→Scale |
 | E31 | [AI Assistant Features](epics/E31-ai-assistant.md) | Scale |
+| E32 | [Workflow Orchestration (Temporal)](epics/E32-workflow-orchestration-temporal.md) | MVP (build after E03) |

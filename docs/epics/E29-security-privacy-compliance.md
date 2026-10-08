@@ -75,3 +75,15 @@ Platform-wide controls that make TutorTrack trustworthy for businesses handling 
 - [ ] **E29-T10** COPPA/AADC age-aware defaults.
 - [ ] **E29-T11** Regional stacks and region-aware signup routing; DPA acceptance and sub-processor page.
 - [ ] **E29-T12** Compliance programme artefacts (policies, runbooks, security.txt).
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E29-TW1** Privacy workflows (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `DataSubjectRequestWorkflow` `dsar:{org}:{id}` | DSAR logged | Statutory deadline timer (30 days) with escalating reminders → wait for `identity_verified` → compile export (activities) → wait for `redaction_approved` → deliver secure link → link expiry | Deadline tracker polling |
+| `ErasureWorkflow` | Approved erasure request | Legal-hold check → anonymise records across apps (activities, idempotent) → delete files → revoke logins → audit summary | Ad hoc scripts |
+| `RetentionPurgeWorkflow` (**Temporal Schedule** per organisation) | Nightly schedule | Dry-run report → purge/anonymise per policy in batches → notify admins | Nightly purge beat job |

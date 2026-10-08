@@ -75,3 +75,14 @@ How **we** bill our tenants: plans, trials, per-seat/usage pricing, Stripe Billi
 - [ ] **E04-T07** Dunning states, banners, read-only suspension mode.
 - [ ] **E04-T08** SMS/AI credit ledger with top-ups.
 - [ ] **E04-T09** Frontend Billing & Plan page and upgrade prompts.
+
+## Temporal workflows (E32)
+
+Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
+
+- [ ] **E04-TW1** Trial and subscription dunning workflows (requires E32).
+
+| Workflow | Started by | Steps, timers and signals | Replaces |
+|---|---|---|---|
+| `TrialLifecycleWorkflow` `trial:{org}` | `organisation.created` | Timers for day 1/7/23/28 emails → expiry: downgrade or read-only. Signals `converted` (paid), `extended(days)` (platform admin) | Trial email beat job |
+| `SubscriptionDunningWorkflow` `sub-dunning:{org}:{invoice}` | Stripe `invoice.payment_failed` | Banner + emails on day 0/3/7/14 → day 21 suspend (read-only, pause portals and automations). Signal `paid` restores immediately | Dunning sweeper |
