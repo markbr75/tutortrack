@@ -15,6 +15,8 @@ SECRET_KEY = env("DJANGO_SECRET_KEY", default="dev-insecure-change-me")
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 TENANT_BASE_DOMAIN = env("TENANT_BASE_DOMAIN", default="localhost")
+# The root app (signup, email verification, org picker), e.g. https://app.tutortrack.app.
+APP_URL = env("APP_URL", default="https://app.tutortrack.app")
 # Public URL of an organisation's app (emails, redirects, the org switcher).
 TENANT_URL_TEMPLATE = env("TENANT_URL_TEMPLATE", default="https://{slug}.{domain}")
 
@@ -226,6 +228,11 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
     "DATETIME_FORMAT": "iso-8601",
+    "DEFAULT_THROTTLE_RATES": {
+        "signup": env("THROTTLE_SIGNUP", default="10/hour"),
+        "verify_email": "30/hour",
+        "handoff": "60/hour",
+    },
     "COERCE_DECIMAL_TO_STRING": True,
 }
 
@@ -248,6 +255,11 @@ OUTBOX = {
 }
 
 IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60
+
+# --- Signup (E02-T06) -------------------------------------------------------------------------
+TURNSTILE_SITE_KEY = env("TURNSTILE_SITE_KEY", default="")
+TURNSTILE_SECRET_KEY = env("TURNSTILE_SECRET_KEY", default="")
+EMAIL_VERIFICATION_MAX_AGE_SECONDS = 3 * 24 * 60 * 60
 
 # --- Observability ----------------------------------------------------------------------------
 LOG_LEVEL = env("LOG_LEVEL", default="INFO")

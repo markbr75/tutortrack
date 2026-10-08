@@ -1,0 +1,7 @@
+{% load i18n %}{% blocktranslate with name=user.get_short_name %}Hi {{ name }},{% endblocktranslate %}
+
+{% translate "Please confirm your email address to finish setting up TutorTrack:" %}
+
+{{ url }}
+
+{% translate "The link expires in 3 days. If you didn't sign up, you can ignore this email." %}

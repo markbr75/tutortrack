@@ -106,3 +106,22 @@ def requires_feature(key: str) -> Callable[[F], F]:
         return wrapper  # type: ignore[return-value]
 
     return decorator
+
+
+def set_override(
+    key: str, organisation_id: uuid.UUID, *, enabled: bool, reason: str = ""
+) -> FeatureFlagOverride | None:
+    """Turn a flag on/off for one organisation (onboarding defaults, platform console).
+
+    Unknown flags are ignored (returns None) so callers don't depend on seed data.
+    """
+    flag = FeatureFlag.objects.filter(key=key).first()
+    if flag is None:
+        return None
+    override, _ = FeatureFlagOverride.objects.update_or_create(
+        flag=flag,
+        organisation_id=organisation_id,
+        defaults={"enabled": enabled, "reason": reason[:255], "expires_at": None},
+    )
+    invalidate_cache()
+    return override

@@ -254,3 +254,21 @@ class BranchSettings(TenantModel):
 
     def __str__(self) -> str:
         return f"Settings for branch {self.branch_id}"
+
+
+class OnboardingState(TenantModel):
+    """Progress through the signup wizard (FR-02-6), one row per organisation."""
+
+    current_step = models.CharField(max_length=30, blank=True, default="")
+    completed_steps = models.JSONField(default=list, blank=True)
+    skipped_steps = models.JSONField(default=list, blank=True)
+    data = models.JSONField(default=dict, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta(TenantModel.Meta):
+        constraints = [
+            models.UniqueConstraint(fields=["organisation"], name="onboarding_one_per_org")
+        ]
+
+    def __str__(self) -> str:
+        return f"Onboarding for {self.organisation_id}"

@@ -67,3 +67,36 @@ def touch_last_active(membership: Membership, *, min_interval_seconds: int = 300
         return
     Membership.objects.filter(pk=membership.pk).update(last_active_at=current)
     membership.last_active_at = current
+
+
+# --- users and email verification (E02-T06; E03 adds login, reset, MFA) ---------------------------
+
+
+def create_user(
+    *, email: str, password: str, first_name: str = "", last_name: str = "", **extra: Any
+) -> User:
+    """Create a login. Raises ``django.core.exceptions.ValidationError`` for weak passwords."""
+    from django.contrib.auth.password_validation import validate_password
+
+    candidate = User(email=email.strip().lower(), first_name=first_name, last_name=last_name)
+    validate_password(password, user=candidate)
+    return User.objects.create_user(
+        candidate.email, password, first_name=first_name, last_name=last_name, **extra
+    )
+
+
+def send_verification_email(user: User) -> None:
+    """Queue the verification email after the current transaction commits."""
+    from .tasks import send_verification_email as task
+
+    transaction.on_commit(lambda: task.delay(user_id=str(user.pk)))
+
+
+def verify_email(token: str) -> User:
+    from .tokens import user_from_email_token
+
+    user = user_from_email_token(token)
+    if user.email_verified_at is None:
+        user.email_verified_at = now()
+        user.save(update_fields=["email_verified_at"])
+    return user

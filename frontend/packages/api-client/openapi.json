@@ -160,6 +160,63 @@
                 }
             }
         },
+        "/api/v1/auth/handoff": {
+            "post": {
+                "operationId": "auth_handoff_create",
+                "description": "Exchange a signup handoff token for a session on this organisation's host.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TokenRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TokenRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TokenRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SignupUser"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/branches": {
             "get": {
                 "operationId": "branches_list",
@@ -637,6 +694,112 @@
                 }
             }
         },
+        "/api/v1/onboarding/{step}": {
+            "post": {
+                "operationId": "onboarding_create",
+                "description": "Submit (or ``{\"skip\": true}``) one wizard step; ``complete`` finishes the wizard.\n\nSteps: business, locale, branding, service, tutors (teams/agencies), students,\npayments, invoicing.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "step",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "onboarding"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            },
+                            "examples": {
+                                "Business": {
+                                    "value": {
+                                        "business_type": "agency",
+                                        "team_size": "6-20"
+                                    },
+                                    "summary": "business"
+                                },
+                                "Service": {
+                                    "value": {
+                                        "subject": "Maths",
+                                        "level": "GCSE",
+                                        "duration_minutes": 60,
+                                        "price": {
+                                            "amount": "40.00",
+                                            "currency": "GBP"
+                                        }
+                                    },
+                                    "summary": "service"
+                                },
+                                "SkipAStep": {
+                                    "value": {
+                                        "skip": true
+                                    },
+                                    "summary": "skip a step"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OnboardingState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/onboarding/state": {
+            "get": {
+                "operationId": "onboarding_state_retrieve",
+                "tags": [
+                    "onboarding"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OnboardingState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/organisation": {
             "get": {
                 "operationId": "organisation_retrieve",
@@ -841,6 +1004,233 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/SettingsArea"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/signup": {
+            "post": {
+                "operationId": "signup_create",
+                "description": "Create an organisation, and a login for new people (FR-02-6).\n\nSigned-in users may call it to add another organisation (no credentials needed).\nPublic, rate-limited per IP and protected by Cloudflare Turnstile.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "signup"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignupRequestRequest"
+                            },
+                            "examples": {
+                                "NewTutor": {
+                                    "value": {
+                                        "first_name": "Sam",
+                                        "last_name": "Patel",
+                                        "email": "sam@example.com",
+                                        "password": "a-long-passphrase",
+                                        "business_name": "Sam Patel Tutoring",
+                                        "country": "GB",
+                                        "business_type": "sole_trader",
+                                        "timezone": "Europe/London",
+                                        "turnstile_token": "<token from the widget>"
+                                    },
+                                    "summary": "New tutor"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignupRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignupRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SignupResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/signup/config": {
+            "get": {
+                "operationId": "signup_config_retrieve",
+                "description": "Public configuration for the signup form.",
+                "tags": [
+                    "signup"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SignupConfig"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/signup/resend-verification": {
+            "post": {
+                "operationId": "signup_resend_verification_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "signup"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/signup/slug-check": {
+            "get": {
+                "operationId": "signup_slug_check_retrieve",
+                "description": "Is a subdomain available? Optionally suggests one from a business name.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "name",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Business name to suggest a slug from."
+                    },
+                    {
+                        "in": "query",
+                        "name": "slug",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Subdomain to check."
+                    }
+                ],
+                "tags": [
+                    "signup"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SlugCheck"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/signup/verify-email": {
+            "post": {
+                "operationId": "signup_verify_email_create",
+                "description": "Confirm an email address from the link in the verification email.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "signup"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TokenRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TokenRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TokenRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SignupUser"
                                 }
                             }
                         },
@@ -1129,6 +1519,60 @@
                 ],
                 "type": "string",
                 "description": "* `solo` - Solo\n* `multi` - Multi-user"
+            },
+            "OnboardingState": {
+                "type": "object",
+                "properties": {
+                    "current_step": {
+                        "type": "string"
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OnboardingStepStatus"
+                        }
+                    },
+                    "answers": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "description": "Saved answers per completed step."
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "answers",
+                    "completed_at",
+                    "current_step",
+                    "steps"
+                ]
+            },
+            "OnboardingStepStatus": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/OnboardingStepStatusStatusEnum"
+                    }
+                },
+                "required": [
+                    "key",
+                    "status"
+                ]
+            },
+            "OnboardingStepStatusStatusEnum": {
+                "enum": [
+                    "pending",
+                    "completed",
+                    "skipped"
+                ],
+                "type": "string",
+                "description": "* `pending` - pending\n* `completed` - completed\n* `skipped` - skipped"
             },
             "Organisation": {
                 "type": "object",
@@ -1668,6 +2112,170 @@
                     "values"
                 ]
             },
+            "SignupConfig": {
+                "type": "object",
+                "properties": {
+                    "turnstile_site_key": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "turnstile_site_key"
+                ]
+            },
+            "SignupOrganisation": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "slug",
+                    "url"
+                ]
+            },
+            "SignupRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "business_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "country": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "ISO 3166-1 alpha-2",
+                        "pattern": "^[A-Za-z]{2}$"
+                    },
+                    "business_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/BusinessTypeEnum"
+                            }
+                        ],
+                        "default": "sole_trader"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "maxLength": 63
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "maxLength": 64
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "email": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "turnstile_token": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "business_name",
+                    "country"
+                ]
+            },
+            "SignupResponse": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "$ref": "#/components/schemas/SignupUser"
+                    },
+                    "organisation": {
+                        "$ref": "#/components/schemas/SignupOrganisation"
+                    },
+                    "continue_url": {
+                        "type": "string",
+                        "description": "Open this to continue onboarding on the new organisation's address."
+                    }
+                },
+                "required": [
+                    "continue_url",
+                    "organisation",
+                    "user"
+                ]
+            },
+            "SignupUser": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "email_verified": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "email",
+                    "email_verified",
+                    "id"
+                ]
+            },
+            "SlugCheck": {
+                "type": "object",
+                "properties": {
+                    "slug": {
+                        "type": "string"
+                    },
+                    "available": {
+                        "type": "boolean"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "suggestion": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "available",
+                    "reason",
+                    "slug",
+                    "suggestion"
+                ]
+            },
             "StoredFile": {
                 "type": "object",
                 "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
@@ -1752,6 +2360,18 @@
                 ],
                 "type": "string",
                 "description": "* `locale` - Locale default\n* `24h` - 24-hour\n* `12h` - 12-hour"
+            },
+            "TokenRequest": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "token"
+                ]
             },
             "TypeEnum": {
                 "enum": [

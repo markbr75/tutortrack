@@ -154,6 +154,8 @@ resource "aws_secretsmanager_secret_version" "app" {
     )
     REDIS_URL         = "rediss://${aws_elasticache_replication_group.redis.primary_endpoint_address}:6379/0"
     CELERY_BROKER_URL = "rediss://${aws_elasticache_replication_group.redis.primary_endpoint_address}:6379/1"
+    # Set the real Cloudflare Turnstile secret in Secrets Manager; prod refuses to start empty.
+    TURNSTILE_SECRET_KEY = ""
   })
 
   lifecycle {

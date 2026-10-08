@@ -2,6 +2,13 @@ from .base import *
 
 DEBUG = False
 SECRET_KEY = env("DJANGO_SECRET_KEY")  # required in production
+TURNSTILE_SECRET_KEY = env("TURNSTILE_SECRET_KEY")  # signup captcha is mandatory
+if not TURNSTILE_SECRET_KEY:
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured("TURNSTILE_SECRET_KEY must be set in production")
+# Share the session across tenant subdomains so the org switcher needs no re-login.
+SESSION_COOKIE_DOMAIN = env("SESSION_COOKIE_DOMAIN", default=None)
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = True

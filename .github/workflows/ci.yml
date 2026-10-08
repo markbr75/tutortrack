@@ -56,6 +56,7 @@ jobs:
         run: uv run python manage.py check --deploy --fail-level WARNING --settings=config.settings.prod
         env:
           DJANGO_SECRET_KEY: ci-only-${{ github.run_id }}-not-a-real-secret-value-0123456789
+          TURNSTILE_SECRET_KEY: ci-only-not-a-real-key
       - name: Tests
         run: uv run pytest -n auto --cov --cov-report=xml
       - uses: actions/upload-artifact@v4

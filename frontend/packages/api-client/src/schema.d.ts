@@ -38,6 +38,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/auth/handoff": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Exchange a signup handoff token for a session on this organisation's host. */
+    post: operations["auth_handoff_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/branches": {
     parameters: {
       query?: never;
@@ -160,6 +177,44 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/onboarding/{step}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Submit (or ``{"skip": true}``) one wizard step; ``complete`` finishes the wizard.
+     *
+     *     Steps: business, locale, branding, service, tutors (teams/agencies), students,
+     *     payments, invoicing.
+     */
+    post: operations["onboarding_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/onboarding/state": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["onboarding_state_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/organisation": {
     parameters: {
       query?: never;
@@ -206,6 +261,95 @@ export interface paths {
      *     ``overrides`` lists the keys set at branch level.
      */
     patch: operations["settings_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/signup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Create an organisation, and a login for new people (FR-02-6).
+     *
+     *     Signed-in users may call it to add another organisation (no credentials needed).
+     *     Public, rate-limited per IP and protected by Cloudflare Turnstile.
+     */
+    post: operations["signup_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/signup/config": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Public configuration for the signup form. */
+    get: operations["signup_config_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/signup/resend-verification": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["signup_resend_verification_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/signup/slug-check": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Is a subdomain available? Optionally suggests one from a business name. */
+    get: operations["signup_slug_check_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/signup/verify-email": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Confirm an email address from the link in the verification email. */
+    post: operations["signup_verify_email_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
 }
@@ -302,6 +446,27 @@ export interface components {
      * @enum {string}
      */
     ModeEnum: "solo" | "multi";
+    OnboardingState: {
+      current_step: string;
+      steps: components["schemas"]["OnboardingStepStatus"][];
+      /** @description Saved answers per completed step. */
+      answers: {
+        [key: string]: unknown;
+      };
+      /** Format: date-time */
+      completed_at: string | null;
+    };
+    OnboardingStepStatus: {
+      key: string;
+      status: components["schemas"]["OnboardingStepStatusStatusEnum"];
+    };
+    /**
+     * @description * `pending` - pending
+     *     * `completed` - completed
+     *     * `skipped` - skipped
+     * @enum {string}
+     */
+    OnboardingStepStatusStatusEnum: "pending" | "completed" | "skipped";
     /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
     Organisation: {
       /** Format: uuid */
@@ -481,6 +646,49 @@ export interface components {
       overrides: string[];
       schema: components["schemas"]["SettingDescription"][];
     };
+    SignupConfig: {
+      turnstile_site_key: string;
+    };
+    SignupOrganisation: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      slug: string;
+      url: string;
+    };
+    SignupRequestRequest: {
+      business_name: string;
+      /** @description ISO 3166-1 alpha-2 */
+      country: string;
+      /** @default sole_trader */
+      business_type: components["schemas"]["BusinessTypeEnum"];
+      slug?: string;
+      timezone?: string;
+      first_name?: string;
+      last_name?: string;
+      email?: string;
+      password?: string;
+      turnstile_token?: string;
+    };
+    SignupResponse: {
+      user: components["schemas"]["SignupUser"];
+      organisation: components["schemas"]["SignupOrganisation"];
+      /** @description Open this to continue onboarding on the new organisation's address. */
+      continue_url: string;
+    };
+    SignupUser: {
+      /** Format: uuid */
+      id: string;
+      /** Format: email */
+      email: string;
+      email_verified: boolean;
+    };
+    SlugCheck: {
+      slug: string;
+      available: boolean;
+      reason: string | null;
+      suggestion: string | null;
+    };
     /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
     StoredFile: {
       /** Format: uuid */
@@ -509,6 +717,9 @@ export interface components {
      * @enum {string}
      */
     TimeFormatEnum: "locale" | "24h" | "12h";
+    TokenRequest: {
+      token: string;
+    };
     /**
      * @description * `int` - int
      *     * `str` - str
@@ -607,6 +818,34 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AuditEntry"];
+        };
+      };
+    };
+  };
+  auth_handoff_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TokenRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TokenRequest"];
+        "multipart/form-data": components["schemas"]["TokenRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignupUser"];
         };
       };
     };
@@ -862,6 +1101,55 @@ export interface operations {
       };
     };
   };
+  onboarding_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        step: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          [key: string]: unknown;
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OnboardingState"];
+        };
+      };
+    };
+  };
+  onboarding_state_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OnboardingState"];
+        };
+      };
+    };
+  };
   organisation_retrieve: {
     parameters: {
       query?: never;
@@ -956,6 +1244,126 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SettingsArea"];
+        };
+      };
+    };
+  };
+  signup_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SignupRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SignupRequestRequest"];
+        "multipart/form-data": components["schemas"]["SignupRequestRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignupResponse"];
+        };
+      };
+    };
+  };
+  signup_config_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignupConfig"];
+        };
+      };
+    };
+  };
+  signup_resend_verification_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  signup_slug_check_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Business name to suggest a slug from. */
+        name?: string;
+        /** @description Subdomain to check. */
+        slug?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SlugCheck"];
+        };
+      };
+    };
+  };
+  signup_verify_email_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TokenRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TokenRequest"];
+        "multipart/form-data": components["schemas"]["TokenRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignupUser"];
         };
       };
     };
