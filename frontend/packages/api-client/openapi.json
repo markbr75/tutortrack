@@ -973,6 +973,72 @@
                 }
             }
         },
+        "/api/v1/organisation/close": {
+            "post": {
+                "operationId": "organisation_close_create",
+                "description": "Close the account (owner only). Data is kept for a 30-day grace period, then\ndeleted; the subscription is cancelled.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "organisation"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CloseOrganisationRequest"
+                            },
+                            "examples": {
+                                "Close": {
+                                    "value": {
+                                        "password": "my password",
+                                        "confirm_slug": "brightminds",
+                                        "reason": "Retiring",
+                                        "export_data": true
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CloseOrganisationRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CloseOrganisationRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Organisation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/settings/{area}": {
             "get": {
                 "operationId": "settings_retrieve",
@@ -1545,6 +1611,34 @@
                 ],
                 "type": "string",
                 "description": "* `sole_trader` - Sole trader\n* `team` - Small team\n* `agency` - Agency\n* `centre` - Tuition centre\n* `online` - Online school"
+            },
+            "CloseOrganisationRequest": {
+                "type": "object",
+                "properties": {
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1
+                    },
+                    "confirm_slug": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Type the organisation's subdomain."
+                    },
+                    "reason": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "export_data": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Email the owner a full data export (E28) before deletion."
+                    }
+                },
+                "required": [
+                    "confirm_slug",
+                    "password"
+                ]
             },
             "DateFormatEnum": {
                 "enum": [

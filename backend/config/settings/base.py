@@ -48,6 +48,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "tutortrack.core.middleware.UserContextMiddleware",
     "tutortrack.tenancy.middleware.TenantMiddleware",
+    "tutortrack.tenancy.middleware.OrganisationStatusMiddleware",
     "tutortrack.core.idempotency.IdempotencyMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -255,6 +256,12 @@ OUTBOX = {
 }
 
 IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60
+
+# --- Organisation lifecycle (E02-T09) ---------------------------------------------------------
+# Writes still allowed while suspended (billing, so the owner can pay; E04 adds its paths).
+SUSPENDED_ORG_WRITE_ALLOWLIST = ["/api/v1/subscription", "/api/v1/auth/"]
+# Reachable whatever the organisation's status (sign-in, health).
+ORG_STATUS_EXEMPT_PATHS = ["/api/v1/auth/", "/api/v1/me/organisations", "/healthz", "/readyz"]
 
 # --- Signup (E02-T06) -------------------------------------------------------------------------
 TURNSTILE_SITE_KEY = env("TURNSTILE_SITE_KEY", default="")

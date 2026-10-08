@@ -12,6 +12,7 @@ from .signup import (
 )
 from .views import (
     BranchViewSet,
+    CloseOrganisationView,
     DemoDataView,
     MyOrganisationsView,
     OrganisationView,
@@ -23,6 +24,7 @@ router.register("branches", BranchViewSet, basename="branches")
 
 urlpatterns = [
     path("organisation", OrganisationView.as_view(), name="organisation"),
+    path("organisation/close", CloseOrganisationView.as_view(), name="organisation-close"),
     path("settings/<slug:area>", SettingsView.as_view(), name="settings"),
     path("signup", SignupView.as_view(), name="signup"),
     path("signup/config", SignupConfigView.as_view(), name="signup-config"),

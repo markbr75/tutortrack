@@ -273,6 +273,26 @@ export interface paths {
     patch: operations["organisation_partial_update"];
     trace?: never;
   };
+  "/api/v1/organisation/close": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Close the account (owner only). Data is kept for a 30-day grace period, then
+     *     deleted; the subscription is cancelled.
+     */
+    post: operations["organisation_close_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/settings/{area}": {
     parameters: {
       query?: never;
@@ -458,6 +478,17 @@ export interface components {
      * @enum {string}
      */
     BusinessTypeEnum: "sole_trader" | "team" | "agency" | "centre" | "online";
+    CloseOrganisationRequest: {
+      password: string;
+      /** @description Type the organisation's subdomain. */
+      confirm_slug: string;
+      reason?: string;
+      /**
+       * @description Email the owner a full data export (E28) before deletion.
+       * @default true
+       */
+      export_data: boolean;
+    };
     /**
      * @description * `locale` - Locale default
      *     * `dd/MM/yyyy` - 31/12/2026
@@ -1298,6 +1329,34 @@ export interface operations {
         "application/json": components["schemas"]["PatchedOrganisationRequest"];
         "application/x-www-form-urlencoded": components["schemas"]["PatchedOrganisationRequest"];
         "multipart/form-data": components["schemas"]["PatchedOrganisationRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Organisation"];
+        };
+      };
+    };
+  };
+  organisation_close_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CloseOrganisationRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CloseOrganisationRequest"];
+        "multipart/form-data": components["schemas"]["CloseOrganisationRequest"];
       };
     };
     responses: {

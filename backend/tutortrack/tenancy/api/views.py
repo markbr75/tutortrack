@@ -285,3 +285,58 @@ class DemoDataView(APIView):
 
         records = demo.wipe_demo_data()
         return Response({"has_demo_data": False, "records": records})
+
+
+# --- close account (FR-02-8) --------------------------------------------------------------------
+
+
+class CloseOrganisationSerializer(serializers.Serializer):
+    password = serializers.CharField(trim_whitespace=False, write_only=True)
+    confirm_slug = serializers.CharField(help_text="Type the organisation's subdomain.")
+    reason = serializers.CharField(required=False, allow_blank=True, max_length=500)
+    export_data = serializers.BooleanField(
+        default=True, help_text="Email the owner a full data export (E28) before deletion."
+    )
+
+
+class CloseOrganisationView(APIView):
+    """Close the account (owner only). Data is kept for a 30-day grace period, then
+    deleted; the subscription is cancelled."""
+
+    permission_classes = [
+        IsAuthenticated,
+        HasOrganisation,
+        HasMethodPermission.for_({"POST": perms.CLOSE}),
+    ]
+
+    @extend_schema(
+        request=CloseOrganisationSerializer,
+        responses=OrganisationSerializer,
+        examples=[
+            OpenApiExample(
+                "Close",
+                value={
+                    "password": "my password",
+                    "confirm_slug": "brightminds",
+                    "reason": "Retiring",
+                    "export_data": True,
+                },
+                request_only=True,
+            )
+        ],
+    )
+    def post(self, request: Request) -> Response:
+        from ..lifecycle import close_organisation
+
+        payload = CloseOrganisationSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+        org = close_organisation(
+            Organisation.objects.get(pk=require_organisation_id()),
+            user=request.user,
+            password=data["password"],
+            confirm_slug=data["confirm_slug"],
+            reason=data.get("reason", ""),
+            export_requested=data["export_data"],
+        )
+        return Response(OrganisationSerializer(org, context={"request": request}).data)
