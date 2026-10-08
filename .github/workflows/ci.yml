@@ -1,0 +1,133 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: tutortrack
+          POSTGRES_PASSWORD: tutortrack
+          POSTGRES_DB: tutortrack
+        ports: ["5442:5432"]
+        options: >-
+          --health-cmd "pg_isready -U tutortrack" --health-interval 5s --health-timeout 3s
+          --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ["6389:6379"]
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: postgres://tutortrack:tutortrack@localhost:5442/tutortrack
+      REDIS_URL: redis://localhost:6389/0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Lint
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Type check
+        run: uv run mypy
+      - name: Migrations are up to date
+        run: |
+          uv run python manage.py makemigrations --check --dry-run
+          uv run python manage.py makemigrations --check --dry-run --settings=config.settings.test
+      - name: Deploy checks
+        run: uv run python manage.py check --deploy --fail-level WARNING --settings=config.settings.prod
+        env:
+          DJANGO_SECRET_KEY: ci-only-${{ github.run_id }}-not-a-real-secret-value-0123456789
+      - name: Tests
+        run: uv run pytest -n auto --cov --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage.xml
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r lint
+      - run: pnpm -r typecheck
+      - run: pnpm -r test
+      - run: pnpm -r build
+
+  contract:
+    name: OpenAPI / client drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: uv sync --frozen
+        working-directory: backend
+      - run: pnpm install --frozen-lockfile
+        working-directory: frontend
+      - name: Regenerate schema and TypeScript client
+        run: |
+          cd backend
+          uv run python manage.py spectacular --validate --fail-on-warn --format openapi-json \
+            --file ../frontend/packages/api-client/openapi.json
+          cd ../frontend
+          pnpm --filter @tutortrack/api-client generate
+      - name: Fail if the committed client is stale
+        run: git diff --exit-code -- frontend/packages/api-client/
+
+  e2e:
+    if: github.event_name == 'push'
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start stack
+        run: |
+          cp .env.example .env
+          docker compose up -d --build --wait backend frontend
+          docker compose exec -T backend uv run python manage.py seed_demo
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: pnpm install --frozen-lockfile && pnpm exec playwright install --with-deps chromium
+        working-directory: frontend
+      - run: pnpm e2e --project=chromium
+        working-directory: frontend
+      - if: failure()
+        run: docker compose logs --tail=200

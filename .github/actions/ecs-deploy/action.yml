@@ -1,0 +1,54 @@
+name: ECS deploy
+description: Run migrations as a one-off task, then roll the web, worker and beat services.
+
+inputs:
+  image: { required: true, description: Backend image URI }
+  environment: { required: true, description: staging or production }
+  role-arn: { required: true, description: IAM role to assume via OIDC }
+  region: { required: true, description: AWS region }
+
+runs:
+  using: composite
+  steps:
+    - uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ inputs.role-arn }}
+        aws-region: ${{ inputs.region }}
+    - name: Register task definitions with the new image
+      shell: bash
+      run: |
+        set -euo pipefail
+        for svc in web worker beat migrate; do
+          family="tutortrack-${{ inputs.environment }}-${svc}"
+          aws ecs describe-task-definition --task-definition "$family" \
+            --query taskDefinition > td.json
+          jq --arg img "${{ inputs.image }}" \
+            '.containerDefinitions[0].image = $img
+             | del(.taskDefinitionArn, .revision, .status, .requiresAttributes,
+                   .compatibilities, .registeredAt, .registeredBy)' td.json > td-new.json
+          aws ecs register-task-definition --cli-input-json file://td-new.json > /dev/null
+        done
+    - name: Run migrations (expand/contract: must be backward compatible)
+      shell: bash
+      run: |
+        set -euo pipefail
+        cluster="tutortrack-${{ inputs.environment }}"
+        network=$(aws ssm get-parameter --name "/tutortrack/${{ inputs.environment }}/ecs/network" \
+          --query Parameter.Value --output text)
+        task=$(aws ecs run-task --cluster "$cluster" --launch-type FARGATE \
+          --task-definition "tutortrack-${{ inputs.environment }}-migrate" \
+          --network-configuration "$network" --query 'tasks[0].taskArn' --output text)
+        aws ecs wait tasks-stopped --cluster "$cluster" --tasks "$task"
+        code=$(aws ecs describe-tasks --cluster "$cluster" --tasks "$task" \
+          --query 'tasks[0].containers[0].exitCode' --output text)
+        test "$code" = "0"
+    - name: Roll services
+      shell: bash
+      run: |
+        set -euo pipefail
+        cluster="tutortrack-${{ inputs.environment }}"
+        for svc in web worker beat; do
+          aws ecs update-service --cluster "$cluster" --service "tutortrack-${svc}" \
+            --task-definition "tutortrack-${{ inputs.environment }}-${svc}" > /dev/null
+        done
+        aws ecs wait services-stable --cluster "$cluster" --services tutortrack-web tutortrack-worker

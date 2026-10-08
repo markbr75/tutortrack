@@ -1,0 +1,66 @@
+name: Deploy
+
+# main -> staging automatically; version tags (v*) -> production after manual approval
+# (configure required reviewers on the "production" GitHub environment).
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  id-token: write # OIDC to AWS, no long-lived keys
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - id: meta
+        run: echo "image=${{ steps.ecr.outputs.registry }}/tutortrack-backend:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: backend
+          target: prod
+          push: true
+          tags: ${{ steps.meta.outputs.image }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-staging:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ecs-deploy
+        with:
+          image: ${{ needs.build.outputs.image }}
+          environment: staging
+          role-arn: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          region: ${{ vars.AWS_REGION }}
+
+  deploy-production:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ecs-deploy
+        with:
+          image: ${{ needs.build.outputs.image }}
+          environment: production
+          role-arn: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          region: ${{ vars.AWS_REGION }}
