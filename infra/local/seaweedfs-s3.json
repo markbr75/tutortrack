@@ -1,0 +1,9 @@
+{
+  "identities": [
+    {
+      "name": "tutortrack",
+      "credentials": [{ "accessKey": "tutortrack", "secretKey": "tutortrack-secret" }],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    }
+  ]
+}

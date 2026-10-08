@@ -1,0 +1,136 @@
+# Local development stack. `make dev` starts everything; `make infra` starts only the
+# backing services so you can run Django/Vite natively on the host.
+#
+# Host ports are deliberately offset (5442, 6389, 8010, 9010) to avoid clashing with
+# other local services.
+
+x-backend-env: &backend-env
+  DJANGO_SETTINGS_MODULE: config.settings.dev
+  DATABASE_URL: postgres://tutortrack:tutortrack@postgres:5432/tutortrack
+  REDIS_URL: redis://redis:6379/0
+  CELERY_BROKER_URL: redis://redis:6379/1
+  AWS_S3_ENDPOINT_URL: http://s3:8333
+  AWS_S3_PUBLIC_ENDPOINT_URL: http://localhost:9010
+  CLAMAV_HOST: clamav
+  EMAIL_URL: smtp://mailpit:1025
+
+x-backend: &backend
+  build:
+    context: ./backend
+    target: dev
+  env_file:
+    - path: .env
+      required: false
+  environment: *backend-env
+  volumes:
+    - ./backend:/app
+    - backend-venv:/app/.venv
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+    s3:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: tutortrack
+      POSTGRES_PASSWORD: tutortrack
+      POSTGRES_DB: tutortrack
+    ports: ["5442:5432"]
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tutortrack -d tutortrack"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6389:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  s3:
+    # SeaweedFS provides an S3-compatible API locally (MinIO no longer publishes images).
+    # Production uses AWS S3; the app only talks to it through boto3.
+    image: chrislusf/seaweedfs:3.97
+    command: >-
+      server -dir=/data -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json
+      -s3.allowedOrigins=http://localhost:5173,http://localhost:5174
+    ports: ["9010:8333"]
+    volumes:
+      - s3-data:/data
+      - ./infra/local/seaweedfs-s3.json:/etc/seaweedfs/s3.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://localhost:9333/cluster/status >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  mailpit:
+    image: axllent/mailpit:v1.24
+    ports: ["8025:8025", "1025:1025"]
+
+  clamav:
+    image: clamav/clamav:1.4
+    profiles: ["clamav"]
+    ports: ["3310:3310"]
+    healthcheck:
+      test: ["CMD", "clamdcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+
+  backend:
+    <<: *backend
+    command: >-
+      sh -c "uv run python manage.py migrate &&
+      uv run python manage.py ensure_storage_bucket &&
+      uv run python manage.py runserver 0.0.0.0:8000"
+    ports: ["8010:8000"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:8000/healthz')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  worker:
+    <<: *backend
+    command: uv run celery -A config worker -l INFO -Q default,outbox,notifications,billing,integrations,imports,reports
+
+  beat:
+    <<: *backend
+    command: uv run celery -A config beat -l INFO
+
+  frontend:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "corepack enable && pnpm install && pnpm --filter @tutortrack/admin dev --host 0.0.0.0"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8010
+    ports: ["5173:5173"]
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+
+  stripe-cli:
+    image: stripe/stripe-cli:v1.27.0
+    profiles: ["stripe"]
+    command: listen --forward-to backend:8000/webhooks/stripe/platform
+    env_file:
+      - path: .env
+        required: false
+
+volumes:
+  pg-data:
+  s3-data:
+  backend-venv:
+  frontend-node-modules:
