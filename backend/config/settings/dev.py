@@ -1,6 +1,7 @@
 from .base import *
 
 DEBUG = env.bool("DJANGO_DEBUG", default=True)
+TENANT_URL_TEMPLATE = env("TENANT_URL_TEMPLATE", default="http://{slug}.{domain}:5173")
 LOG_JSON = env.bool("LOG_JSON", default=False)
 ALLOWED_HOSTS = env.list(
     "DJANGO_ALLOWED_HOSTS", default=["localhost", "127.0.0.1", ".localhost", "backend"]

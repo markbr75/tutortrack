@@ -3,7 +3,6 @@ from typing import Any
 import factory
 
 from tutortrack.core.context import tenant_context
-from tutortrack.tenancy.tests.factories import OrganisationFactory
 
 from .testapp.models import Gadget, Widget
 
@@ -16,7 +15,7 @@ class TenantFactory(factory.django.DjangoModelFactory):
     class Meta:
         abstract = True
 
-    organisation = factory.SubFactory(OrganisationFactory)
+    organisation = factory.SubFactory("tutortrack.tenancy.tests.factories.OrganisationFactory")
 
     @classmethod
     def _get_manager(cls, model_class: Any) -> Any:

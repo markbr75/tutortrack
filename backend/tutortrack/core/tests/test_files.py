@@ -10,7 +10,7 @@ from tutortrack.core.storage import services
 from tutortrack.core.storage.clamav import ScanError, parse_response
 from tutortrack.core.storage.tasks import scan_file
 from tutortrack.core.testing import TenantIsolationTestMixin, client_for
-from tutortrack.identity.tests.factories import UserFactory
+from tutortrack.identity.tests.factories import MembershipFactory, UserFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -143,7 +143,7 @@ def test_download_requires_clean_file_and_access(tenant, s3, user):
     assert services.download_url(stranger, stored)
 
 
-def test_full_upload_flow_via_api(org, user, s3, django_capture_on_commit_callbacks):
+def test_full_upload_flow_via_api(org, user, member, s3, django_capture_on_commit_callbacks):
     api = client_for(org, user)
     created = api.post(
         "/api/v1/files/uploads",
@@ -181,7 +181,8 @@ def test_private_files_of_other_users_are_hidden(org, user, s3):
     ):
         ctx.return_value.user_id = user.pk
         stored, _ = _create()
-    response = client_for(org, UserFactory()).get(f"/api/v1/files/{stored.pk}")
+    colleague = MembershipFactory(organisation=org).user
+    response = client_for(org, colleague).get(f"/api/v1/files/{stored.pk}")
     assert response.status_code == 404
 
 

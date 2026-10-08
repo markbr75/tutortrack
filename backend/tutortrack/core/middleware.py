@@ -1,24 +1,21 @@
-"""Request middleware: request ids and logging context, user context and timezone, and the
-tenant resolution hook."""
+"""Request middleware: request ids and logging context, user context and timezone.
+
+Tenant resolution lives in ``tutortrack.tenancy.middleware`` (E02)."""
 
 from __future__ import annotations
 
 import re
 import uuid
 from collections.abc import Callable
-from typing import Any
 
 import structlog
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
-from django.utils.module_loading import import_string
 
 from .context import (
     RequestContext,
-    reset_organisation,
     reset_request_context,
-    set_organisation,
     set_request_context,
     update_request_context,
 )
@@ -86,43 +83,3 @@ class UserContextMiddleware:
             return self.get_response(request)
         finally:
             timezone.deactivate()
-
-
-def resolve_from_subdomain(request: HttpRequest) -> Any:
-    """Default resolver: ``<slug>.<TENANT_BASE_DOMAIN>`` -> Organisation.
-
-    E02 replaces this with the full chain (custom domain -> subdomain -> X-Organisation
-    header with a membership check -> last active organisation).
-    """
-    from tutortrack.tenancy.models import Organisation
-
-    host = request.get_host().split(":")[0].lower()
-    base = settings.TENANT_BASE_DOMAIN.lower()
-    if not host.endswith(f".{base}"):
-        return None
-    slug = host[: -(len(base) + 1)]
-    if not slug or "." in slug:
-        return None
-    return Organisation.objects.filter(slug=slug).first()
-
-
-class TenantMiddleware:
-    """Resolves the organisation for the request and sets the tenant context."""
-
-    def __init__(self, get_response: GetResponse):
-        self.get_response = get_response
-        resolver_path = getattr(
-            settings, "TENANT_RESOLVER", "tutortrack.core.middleware.resolve_from_subdomain"
-        )
-        self.resolve: Callable[[HttpRequest], Any] = import_string(resolver_path)
-
-    def __call__(self, request: HttpRequest) -> HttpResponse:
-        organisation = self.resolve(request)
-        request.organisation = organisation  # type: ignore[attr-defined]
-        token = set_organisation(organisation)
-        if organisation is not None:
-            structlog.contextvars.bind_contextvars(organisation_id=str(organisation.pk))
-        try:
-            return self.get_response(request)
-        finally:
-            reset_organisation(token)

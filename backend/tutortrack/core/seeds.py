@@ -38,18 +38,19 @@ def platform_admin(ctx: SeedContext) -> None:
 @seed_step(order=10)
 def demo_organisation(ctx: SeedContext) -> None:
     from tutortrack.tenancy.models import Organisation
+    from tutortrack.tenancy.services import create_organisation
 
-    org, created = Organisation.objects.get_or_create(
-        slug=DEMO_ORG_SLUG,
-        defaults={
-            "name": "Bright Minds Tutoring",
-            "status": Organisation.Status.ACTIVE,
-            "default_currency": "GBP",
-            "timezone": "Europe/London",
-        },
-    )
-    if created:
-        ctx.log(f"    created organisation {org.name} -> http://{org.slug}.localhost:8010")
+    org = Organisation.objects.filter(slug=DEMO_ORG_SLUG).first()
+    if org is None:
+        org = create_organisation(
+            name="Bright Minds Tutoring",
+            slug=DEMO_ORG_SLUG,
+            owner=ctx.admin,
+            country="GB",
+            business_type=Organisation.BusinessType.AGENCY,
+            status=Organisation.Status.ACTIVE,
+        )
+        ctx.log(f"    created organisation {org.name} -> {org.base_url}")
     ctx.organisation = org
 
 

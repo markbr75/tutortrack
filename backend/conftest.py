@@ -75,8 +75,16 @@ def superuser(db: None) -> Any:
 
 
 @pytest.fixture
-def api(org: Organisation, user: Any) -> Any:
-    """Logged-in API client for ``org``."""
+def member(org: Organisation, user: Any) -> Any:
+    """``user``'s admin membership in ``org``."""
+    from tutortrack.identity.tests.factories import MembershipFactory
+
+    return MembershipFactory(organisation=org, user=user)
+
+
+@pytest.fixture
+def api(org: Organisation, user: Any, member: Any) -> Any:
+    """Logged-in API client for ``org`` as an admin member."""
     return client_for(org, user)
 
 

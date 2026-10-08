@@ -20,6 +20,12 @@ _current_organisation_id: ContextVar[uuid.UUID | None] = ContextVar(
 )
 
 
+# Branches the current user may see; None = all branches (FR-02-2 branch scoping).
+_current_branch_ids: ContextVar[frozenset[uuid.UUID] | None] = ContextVar(
+    "current_branch_ids", default=None
+)
+
+
 @dataclass(frozen=True)
 class RequestContext:
     request_id: str | None = None
@@ -78,6 +84,33 @@ def set_organisation(organisation: Any | None) -> Any:
 
 def reset_organisation(token: Any) -> None:
     _current_organisation_id.reset(token)
+
+
+# --- branch scope -------------------------------------------------------------------------------
+
+
+def current_branch_ids() -> frozenset[uuid.UUID] | None:
+    """Branch ids the current user is restricted to, or None for unrestricted."""
+    return _current_branch_ids.get()
+
+
+def set_branch_ids(branch_ids: Any) -> Any:
+    value = None if branch_ids is None else frozenset(_as_uuid(b) for b in branch_ids)
+    return _current_branch_ids.set(value)
+
+
+def reset_branch_ids(token: Any) -> None:
+    _current_branch_ids.reset(token)
+
+
+@contextmanager
+def branch_scope(branch_ids: Any) -> Iterator[frozenset[uuid.UUID] | None]:
+    """Restrict branch-scoped queries to ``branch_ids`` (None lifts the restriction)."""
+    token = set_branch_ids(branch_ids)
+    try:
+        yield _current_branch_ids.get()
+    finally:
+        _current_branch_ids.reset(token)
 
 
 # --- request ------------------------------------------------------------------------------------

@@ -31,7 +31,7 @@ class TenantTask(Task):
     """Base class for tasks that touch tenant data.
 
     Requires an ``organisation_id`` keyword argument and runs the task body inside
-    ``tenant_context``. (E02 also sets the Postgres RLS variable here.)
+    ``tenant_context``, which also scopes Postgres row-level security (``core.db``).
     """
 
     abstract = True

@@ -1,6 +1,7 @@
 import factory
 
-from tutortrack.identity.models import User
+from tutortrack.core.tests.factories import TenantFactory
+from tutortrack.identity.models import Membership, User
 
 TEST_PASSWORD = "correct-horse-battery"
 
@@ -13,3 +14,12 @@ class UserFactory(factory.django.DjangoModelFactory):
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
     password = factory.django.Password(TEST_PASSWORD)
+
+
+class MembershipFactory(TenantFactory):
+    class Meta:
+        model = Membership
+
+    user = factory.SubFactory(UserFactory)
+    role = Membership.Role.ADMIN
+    status = Membership.Status.ACTIVE

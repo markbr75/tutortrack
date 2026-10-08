@@ -15,6 +15,8 @@ SECRET_KEY = env("DJANGO_SECRET_KEY", default="dev-insecure-change-me")
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 TENANT_BASE_DOMAIN = env("TENANT_BASE_DOMAIN", default="localhost")
+# Public URL of an organisation's app (emails, redirects, the org switcher).
+TENANT_URL_TEMPLATE = env("TENANT_URL_TEMPLATE", default="https://{slug}.{domain}")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -43,7 +45,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "tutortrack.core.middleware.UserContextMiddleware",
-    "tutortrack.core.middleware.TenantMiddleware",
+    "tutortrack.tenancy.middleware.TenantMiddleware",
     "tutortrack.core.idempotency.IdempotencyMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",

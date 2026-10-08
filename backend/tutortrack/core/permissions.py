@@ -33,10 +33,18 @@ class HasPermission(BasePermission):
 
 
 class HasOrganisation(BasePermission):
-    """Rejects requests that have no organisation in context."""
+    """Requires an organisation in context and an active membership in it (FR-02-7).
 
-    message = "No organisation selected."
+    Superusers (platform staff) pass without a membership; E30 adds reason capture and
+    impersonation on top.
+    """
+
+    message = "No organisation selected, or you are not a member of it."
 
     def has_permission(self, request: Request, view: APIView) -> bool:
         # DRF's Request proxies unknown attributes to the underlying HttpRequest.
-        return getattr(request, "organisation", None) is not None
+        if getattr(request, "organisation", None) is None:
+            return False
+        if getattr(request.user, "is_superuser", False):
+            return True
+        return getattr(request, "membership", None) is not None

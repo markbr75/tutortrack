@@ -1,5 +1,10 @@
-"""Global user identity. E01 ships the custom user model (it must exist from the first
-migration); E03 adds memberships, roles, MFA, SSO and invitations."""
+"""Global user identity and organisation memberships.
+
+E01 shipped the custom user model; E02 adds ``email_verified_at`` and a minimal
+``Membership`` (one built-in role key and a branch scope) because tenancy needs it for the
+owner at signup, the ``X-Organisation`` header check, branch scoping and the org switcher.
+E03 extends Membership with RBAC roles, invitations, MFA and SSO.
+"""
 
 from __future__ import annotations
 
@@ -11,6 +16,7 @@ from django.db import models
 from django.utils import timezone as dj_timezone
 
 from tutortrack.core.ids import new_id
+from tutortrack.core.models import TenantModel
 
 
 class UserManager(BaseUserManager["User"]):
@@ -53,6 +59,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=False, help_text="TutorTrack operator with access to the platform console."
     )
     date_joined = models.DateTimeField(default=dj_timezone.now)
+    email_verified_at = models.DateTimeField(null=True, blank=True)
 
     objects: ClassVar[UserManager] = UserManager()
 
@@ -72,3 +79,77 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self) -> str:
         return self.first_name or self.email
+
+
+class Membership(TenantModel):
+    """A user's place in an organisation (glossary: Membership).
+
+    Visible to the app role for the organisation in context **and** to the member themself
+    across organisations (RLS ``user_column``), which is what the org switcher needs.
+    """
+
+    class Status(models.TextChoices):
+        INVITED = "invited"
+        ACTIVE = "active"
+        SUSPENDED = "suspended"
+        REMOVED = "removed"
+
+    class Role(models.TextChoices):
+        """Built-in roles (E03 FR-03-5). E03 replaces this with Role/RolePermission rows."""
+
+        OWNER = "owner"
+        ADMIN = "admin"
+        BRANCH_MANAGER = "branch_manager"
+        COORDINATOR = "coordinator"
+        FINANCE = "finance"
+        TUTOR = "tutor"
+        CLIENT = "client"
+        STUDENT = "student"
+        AFFILIATE = "affiliate"
+
+    class BranchScope(models.TextChoices):
+        ALL = "all"
+        SELECTED = "selected"
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="memberships")
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
+    role = models.CharField(max_length=20, choices=Role.choices)
+    branch_scope = models.CharField(
+        max_length=10, choices=BranchScope.choices, default=BranchScope.ALL
+    )
+    branches = models.ManyToManyField(
+        "tenancy.Branch", through="MembershipBranch", related_name="+", blank=True
+    )
+    title = models.CharField(max_length=100, blank=True, default="")
+    joined_at = models.DateTimeField(null=True, blank=True)
+    last_active_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta(TenantModel.Meta):
+        constraints = [
+            models.UniqueConstraint(fields=["organisation", "user"], name="membership_unique"),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user_id} @ {self.organisation_id} ({self.role})"
+
+    @property
+    def is_active(self) -> bool:
+        return self.status == self.Status.ACTIVE
+
+    @property
+    def is_owner_or_admin(self) -> bool:
+        return self.role in {self.Role.OWNER, self.Role.ADMIN}
+
+
+class MembershipBranch(TenantModel):
+    """Branches a ``selected``-scope membership may see (FR-02-2 branch scoping)."""
+
+    membership = models.ForeignKey(Membership, on_delete=models.CASCADE)
+    branch = models.ForeignKey("tenancy.Branch", on_delete=models.CASCADE, related_name="+")
+
+    class Meta(TenantModel.Meta):
+        constraints = [
+            models.UniqueConstraint(
+                fields=["membership", "branch"], name="membership_branch_unique"
+            ),
+        ]
