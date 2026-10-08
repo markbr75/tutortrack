@@ -4,7 +4,7 @@ import factory
 
 from tutortrack.core.context import tenant_context
 
-from .testapp.models import Gadget, Widget
+from .testapp.models import Gadget, Gizmo, Widget
 
 
 class TenantFactory(factory.django.DjangoModelFactory):
@@ -41,3 +41,12 @@ class WidgetFactory(TenantFactory):
         model = Widget
 
     name = factory.Sequence(lambda n: f"Widget {n}")
+
+
+class GizmoFactory(TenantFactory):
+    """Branch defaults to the organisation's default branch when not given."""
+
+    class Meta:
+        model = Gizmo
+
+    name = factory.Sequence(lambda n: f"Gizmo {n}")

@@ -56,6 +56,12 @@ class CrossTenantWrite(DomainError):
     title = "Object belongs to a different organisation"
 
 
+class CrossBranchWrite(DomainError):
+    status_code = 403
+    problem_type = "cross-branch-write"
+    title = "You do not have access to this branch"
+
+
 class FeatureDisabled(DomainError):
     status_code = 403
     problem_type = "feature-disabled"

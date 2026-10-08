@@ -14,7 +14,7 @@ from tutortrack.core.api.serializers import BaseModelSerializer
 from tutortrack.core.api.viewsets import TenantScopedViewMixin
 from tutortrack.core.exceptions import BusinessRuleViolation
 
-from .models import Gadget, Widget
+from .models import Gadget, Gizmo, Widget
 
 
 class GadgetSerializer(BaseModelSerializer):
@@ -36,6 +36,20 @@ class WidgetViewSet(TenantScopedViewMixin, ConditionalUpdateMixin, viewsets.Mode
 
     def get_tenant_queryset(self) -> QuerySet[Widget]:
         return Widget.objects.all()
+
+
+class GizmoSerializer(BaseModelSerializer):
+    class Meta:
+        model = Gizmo
+        fields = ["id", "name", "branch"]
+
+
+class GizmoViewSet(TenantScopedViewMixin, viewsets.ModelViewSet):
+    model = Gizmo
+    serializer_class = GizmoSerializer
+
+    def get_tenant_queryset(self) -> QuerySet[Gizmo]:
+        return Gizmo.objects.all()
 
 
 @api_view(["GET"])
@@ -65,6 +79,7 @@ def echo(request: Request) -> Response:
 
 router = SimpleRouter(trailing_slash=False)
 router.register("widgets", WidgetViewSet, basename="widgets")
+router.register("gizmos", GizmoViewSet, basename="gizmos")
 
 urlpatterns: list[Any] = [
     path("api/v1/test/", include(router.urls)),

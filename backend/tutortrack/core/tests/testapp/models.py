@@ -5,7 +5,7 @@ from typing import ClassVar
 from django.db import models
 
 from tutortrack.core.fields import CurrencyField, MoneyField, RateField
-from tutortrack.core.models import ArchivableModel, TenantModel
+from tutortrack.core.models import ArchivableModel, BranchScopedModel, TenantModel
 
 
 class Gadget(TenantModel):
@@ -24,6 +24,15 @@ class Widget(ArchivableModel):
     gadget = models.ForeignKey(Gadget, null=True, blank=True, on_delete=models.SET_NULL)
 
     audit_sensitive_fields: ClassVar[frozenset[str]] = frozenset({"secret_note"})
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Gizmo(BranchScopedModel):
+    """A branch-scoped record (stands in for clients, lessons, invoices...)."""
+
+    name = models.CharField(max_length=100)
 
     def __str__(self) -> str:
         return self.name

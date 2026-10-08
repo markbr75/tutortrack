@@ -6,7 +6,8 @@
   organisation in context and **raises** ``NoTenantContext`` when there is none.
 * ``ArchivableModel``: soft archive (``archived_at``) for people-like records.
 
-Branch scoping (``BranchScopedModel``) is added in E02 once Branch exists.
+* ``BranchScopedModel``: a tenant model that also belongs to a Branch; the default manager
+  additionally filters to the branches the current user may see (FR-02-2).
 """
 
 from __future__ import annotations
@@ -17,8 +18,13 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
-from ..context import current_organisation_id, get_request_context, require_organisation_id
-from ..exceptions import CrossTenantWrite
+from ..context import (
+    current_branch_ids,
+    current_organisation_id,
+    get_request_context,
+    require_organisation_id,
+)
+from ..exceptions import CrossBranchWrite, CrossTenantWrite
 from ..ids import new_id
 
 
@@ -101,6 +107,48 @@ class TenantModel(UUIDModel, TimeStampedModel):
             update_fields = kwargs.get("update_fields")
             if update_fields is not None:
                 kwargs["update_fields"] = {*update_fields, "updated_by", "updated_at"}
+        super().save(*args, **kwargs)
+
+
+# --- branch scoping -----------------------------------------------------------------------------
+
+
+class BranchScopedManager(TenantManager):
+    """Tenant-scoped, and limited to ``current_branch_ids()`` when the user is restricted."""
+
+    def get_queryset(self) -> TenantQuerySet:
+        qs = super().get_queryset()
+        branch_ids = current_branch_ids()
+        if branch_ids is not None:
+            qs = qs.filter(branch_id__in=branch_ids)
+        return qs
+
+
+class BranchScopedModel(TenantModel):
+    """Owned by a Branch of the organisation (clients, students, jobs, lessons, invoices...).
+
+    ``branch`` defaults to the organisation's default branch, which is all sole traders
+    ever see. Saving into a branch outside the user's scope raises ``CrossBranchWrite``.
+    """
+
+    branch = models.ForeignKey(
+        "tenancy.Branch", on_delete=models.PROTECT, related_name="+", db_index=True
+    )
+
+    objects: ClassVar[BranchScopedManager] = BranchScopedManager()
+    all_tenants: ClassVar[UnscopedManager] = UnscopedManager()
+
+    class Meta(TenantModel.Meta):
+        abstract = True
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        if self.branch_id is None:
+            from tutortrack.tenancy.selectors import default_branch_id
+
+            self.branch_id = default_branch_id(self.organisation_id or require_organisation_id())
+        branch_ids = current_branch_ids()
+        if branch_ids is not None and self.branch_id not in branch_ids:
+            raise CrossBranchWrite()
         super().save(*args, **kwargs)
 
 

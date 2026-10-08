@@ -2,6 +2,8 @@ from .audit import AuditEntry
 from .base import (
     ArchivableModel,
     ArchivableQuerySet,
+    BranchScopedManager,
+    BranchScopedModel,
     TenantManager,
     TenantModel,
     TenantQuerySet,
@@ -19,6 +21,8 @@ __all__ = [
     "ArchivableModel",
     "ArchivableQuerySet",
     "AuditEntry",
+    "BranchScopedManager",
+    "BranchScopedModel",
     "FeatureFlag",
     "FeatureFlagOverride",
     "IdempotencyRecord",
