@@ -131,6 +131,8 @@ def permissions_for(user: Any) -> dict[str, str]:
     """``{codename: scope}`` for every registered codename the user holds here."""
     from tutortrack.core.permission_registry import all_permissions
 
+    if getattr(user, "is_superuser", False) and user.is_active:
+        return dict.fromkeys(all_permissions(), "all")  # platform staff (has_perm agrees)
     out = {}
     for codename in all_permissions():
         scope = scope_for(user, codename)

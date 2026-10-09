@@ -35,3 +35,13 @@ export function mockApi(routes: Record<string, Route>): RecordedCall[] {
   );
   return calls;
 }
+
+/** A signed-in admin, as returned by `GET /api/v1/me`. */
+export const ME = {
+  user: { id: "u1", email: "sam@example.com", first_name: "Sam", has_mfa: false },
+  organisation: { id: "o1", name: "Bright Minds", slug: "brightminds", status: "active" },
+  membership: { id: "m1", role: "admin", branch_scope: "all" },
+  permissions: { "team.view": "all", "org.settings.view": "all" },
+  features: {},
+  impersonator: null,
+};

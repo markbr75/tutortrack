@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 
 import { App } from "./App";
-import { mockApi } from "./test-utils";
+import { ME, mockApi } from "./test-utils";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -17,20 +17,23 @@ const ORG = {
 };
 
 describe("App", () => {
-  it("asks unauthenticated users to sign in", async () => {
+  it("sends unauthenticated users to the login page", async () => {
+    const assign = vi.fn();
+    vi.stubGlobal("location", { ...window.location, assign, pathname: "/", search: "" });
     mockApi({
-      "GET /api/v1/features": {
+      "GET /api/v1/me": {
         status: 403,
         body: { type: "not-authenticated", title: "Not signed in", status: 403 },
       },
     });
     render(<App />);
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
+    expect(assign).toHaveBeenCalledWith("/login?next=%2F");
   });
 
   it("renders the shell and enabled features for signed-in users", async () => {
     mockApi({
-      "GET /api/v1/features": { body: { features: { courses: true, payroll: false } } },
+      "GET /api/v1/me": { body: { ...ME, features: { courses: true, payroll: false } } },
       "GET /api/v1/organisation": { body: ORG },
       "GET /api/v1/me/organisations": { body: [] },
     });
@@ -39,11 +42,27 @@ describe("App", () => {
     expect(screen.getByRole("navigation", { name: "Main" })).toBeInTheDocument();
     expect(screen.getByText("courses")).toBeInTheDocument();
     expect(screen.queryByText("payroll")).not.toBeInTheDocument();
+    // Navigation follows permissions: no audit.view, so no audit link.
+    expect(screen.getByRole("link", { name: "Team" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Audit log" })).not.toBeInTheDocument();
+  });
+
+  it("shows the impersonation banner", async () => {
+    mockApi({
+      "GET /api/v1/me": {
+        body: { ...ME, impersonator: { id: "a1", email: "a@x", name: "Admin", write: false } },
+      },
+      "GET /api/v1/organisation": { body: ORG },
+      "GET /api/v1/me/organisations": { body: [] },
+    });
+    render(<App />);
+    expect(await screen.findByText(/You're viewing as Sam/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Stop viewing as" })).toBeInTheDocument();
   });
 
   it("shows the organisation switcher and suspended banner", async () => {
     mockApi({
-      "GET /api/v1/features": { body: { features: {} } },
+      "GET /api/v1/me": { body: ME },
       "GET /api/v1/organisation": { body: { ...ORG, status: "suspended" } },
       "GET /api/v1/me/organisations": {
         body: [

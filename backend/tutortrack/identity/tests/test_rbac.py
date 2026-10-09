@@ -213,3 +213,9 @@ def test_toggles_only_affect_tutors(org):
     with tenant_context(org):
         settings_service.update_settings("tutor_access", {"tutor_access.edit_rates": True})
         assert has_perm(coordinator, "billing.rates.edit") is False
+
+
+def test_me_lists_every_permission_for_platform_staff(org, superuser):
+    permissions = client_for(org, superuser).get("/api/v1/me").json()["permissions"]
+    assert permissions["org.close"] == "all"
+    assert set(permissions) == set(all_permissions())

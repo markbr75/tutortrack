@@ -8,12 +8,41 @@
     "people": "People",
     "billing": "Billing",
     "audit": "Audit log",
-    "settings": "Settings"
+    "settings": "Settings",
+    "team": "Team",
+    "account": "Account",
+    "signOut": "Sign out"
   },
   "auth": {
     "signInTitle": "Sign in",
     "signInBody": "You need to sign in to continue.",
-    "signInAction": "Sign in"
+    "signInAction": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "remember": "Keep me signed in on this device",
+    "submit": "Sign in",
+    "forgot": "Forgot your password?",
+    "magicLink": "Email me a sign-in link",
+    "magicLinkSent": "If an account exists for that address, we've sent a sign-in link. It expires in 15 minutes.",
+    "or": "or",
+    "continueWith": "Continue with {{provider}}",
+    "noAccount": "New to TutorTrack? Create an account.",
+    "mfaTitle": "Two-factor authentication",
+    "mfaBody": "Enter the 6-digit code from your authenticator app, or a recovery code.",
+    "mfaCode": "Code",
+    "mfaSubmit": "Verify",
+    "ssoError": "We couldn't sign you in with that account. Try another way, or ask your organisation for an invitation.",
+    "checkingLink": "Signing you in…",
+    "linkInvalid": "This sign-in link is invalid or has expired.",
+    "forgotTitle": "Reset your password",
+    "forgotBody": "We'll email you a link to choose a new password.",
+    "forgotSubmit": "Send reset link",
+    "forgotSent": "If an account exists for that address, we've sent a reset link. It expires in 1 hour.",
+    "resetTitle": "Choose a new password",
+    "newPassword": "New password",
+    "resetSubmit": "Save password",
+    "resetDone": "Your password has been changed. Sign in with your new password.",
+    "backToLogin": "Back to sign in"
   },
   "home": {
     "title": "Welcome",
@@ -47,7 +76,8 @@
     "skip": "Skip for now",
     "cancel": "Cancel",
     "loading": "Loading…",
-    "optional": "Optional"
+    "optional": "Optional",
+    "actions": "Actions"
   },
   "signup": {
     "title": "Create your TutorTrack account",
@@ -182,5 +212,87 @@
   "suspended": {
     "title": "Your account is suspended",
     "body": "It is read-only until billing is up to date."
+  },
+  "providers": {
+    "google": "Google",
+    "microsoft": "Microsoft"
+  },
+  "invite": {
+    "title": "Join {{organisation}}",
+    "body": "You've been invited as {{role}} ({{email}}).",
+    "create": "Create your account to accept",
+    "accept": "Accept invitation",
+    "signInFirst": "You already have an account. Sign in as {{email}} to accept.",
+    "invalid": "This invitation is invalid or has expired. Ask for a new one."
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "branch_manager": "Branch manager",
+    "coordinator": "Coordinator",
+    "finance": "Finance",
+    "tutor": "Tutor",
+    "client": "Client",
+    "student": "Student",
+    "affiliate": "Affiliate"
+  },
+  "account": {
+    "title": "Your account",
+    "profile": "Profile",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "preferredName": "Preferred name",
+    "pronouns": "Pronouns",
+    "phone": "Phone",
+    "timezone": "Timezone",
+    "password": "Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "changePassword": "Change password",
+    "passwordChanged": "Password changed. Other devices have been signed out.",
+    "mfa": "Two-factor authentication",
+    "mfaOn": "Two-factor authentication is on.",
+    "mfaOff": "Add a second step to signing in with an authenticator app.",
+    "mfaSetup": "Set up authenticator app",
+    "mfaScan": "Scan this QR code with your authenticator app, or enter the key manually:",
+    "mfaConfirm": "Enter the 6-digit code to confirm",
+    "mfaEnable": "Turn on",
+    "recoveryCodes": "Recovery codes",
+    "recoveryBody": "Save these somewhere safe. Each can be used once if you lose your phone.",
+    "newRecoveryCodes": "New recovery codes",
+    "mfaDisable": "Turn off",
+    "confirmPassword": "Confirm with your password",
+    "sessions": "Where you're signed in",
+    "thisDevice": "This device",
+    "lastSeen": "Last active {{when}}",
+    "signOutSession": "Sign out",
+    "signOutOthers": "Sign out of all other devices"
+  },
+  "team": {
+    "title": "Team",
+    "members": "Members",
+    "invite": "Invite someone",
+    "inviteSubmit": "Send invitation",
+    "email": "Email",
+    "role": "Role",
+    "pending": "Pending invitations",
+    "resend": "Resend",
+    "revoke": "Revoke",
+    "remove": "Remove",
+    "viewAs": "View as",
+    "invited": "Invitation sent to {{email}}.",
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "invited": "Invited",
+      "removed": "Removed"
+    },
+    "expires": "Expires {{when}}",
+    "name": "Name"
+  },
+  "impersonation": {
+    "banner": "You're viewing as {{name}}.",
+    "readOnly": "Read-only.",
+    "stop": "Stop viewing as"
   }
 }

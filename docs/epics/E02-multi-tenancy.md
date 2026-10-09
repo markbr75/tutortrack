@@ -143,7 +143,7 @@ these as the source of truth. Design rationale for RLS is in [ADR 0003](../adr/0
 - Live smoke on the local stack: signup → handoff on the new subdomain → onboarding step → settings → switcher; unknown subdomain 404; replayed handoff rejected.
 
 ### Carried forward
-- **E03:** extend `Membership` (roles, invitations), replace `MembershipRoleBackend`, real login screen (the shell still uses the Django-admin sign-in), zxcvbn/HIBP, handle `onboarding.step_completed` (tutors) to send invites.
+- ~~**E03:** extend `Membership` (roles, invitations), replace `MembershipRoleBackend`, real login screen, zxcvbn/HIBP, handle `onboarding.step_completed` (tutors) to send invites.~~ Done in E03.
 - **E04:** start trial on `organisation.created`; plan-gate `multi_branch`; add billing paths to `SUSPENDED_ORG_WRITE_ALLOWLIST`; call `lifecycle.suspend_organisation`/`reactivate_organisation` on dunning.
 - **E05/E06/E11:** consume onboarding answers (first student, first service, Stripe); add demo providers.
 - **E24:** custom-domain verification/TLS on `OrganisationDomain`; dynamic CSRF origins.

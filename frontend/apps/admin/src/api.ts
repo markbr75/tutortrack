@@ -18,21 +18,37 @@ export function createQueryClient(): QueryClient {
   });
 }
 
-/**
- * Session bootstrap. E03 replaces this with `GET /api/v1/me`; until then the features
- * endpoint doubles as an authenticated "who am I in this organisation" probe.
- */
-export function useFeatures() {
+export type Me = components["schemas"]["Me"];
+
+/** Session bootstrap: who am I here (user, organisation, role, permissions, features). */
+export function useMe() {
   return useQuery({
-    queryKey: ["features"],
-    queryFn: async () => unwrap(await api.GET("/api/v1/features")).features,
+    queryKey: ["me"],
+    queryFn: async () => unwrap(await api.GET("/api/v1/me")),
   });
+}
+
+/** Feature flags for the current organisation (from `/me`). */
+export function useFeatures() {
+  const me = useMe();
+  return { ...me, data: me.data?.features };
 }
 
 /** `useFeature("courses")` gates UI behind a feature flag / plan entitlement. */
 export function useFeature(key: string): boolean {
-  const { data } = useFeatures();
-  return Boolean(data?.[key]);
+  const { data } = useMe();
+  return Boolean(data?.features[key]);
+}
+
+/** `usePermission("team.invite")`: whether the current user holds a permission here. */
+export function usePermission(codename: string): boolean {
+  const { data } = useMe();
+  return Boolean(data?.permissions[codename]);
+}
+
+/** Only allow same-site relative paths as post-login destinations. */
+export function safeNext(value: string | null | undefined): string {
+  return value && value.startsWith("/") && !value.startsWith("//") ? value : "/";
 }
 
 export function isAuthError(error: unknown): boolean {

@@ -27,11 +27,11 @@ Python 3.12 · Django 5 · DRF + drf-spectacular · PostgreSQL 16 · Celery + Re
 4a. **Long-running processes use Temporal (E32):** multi-step, timer-based or approval-based processes are Temporal workflows (deterministic code; side effects in `@tenant_activity` activities calling services; tenant-prefixed workflow IDs). Celery is only for short stateless tasks. Never add `next_*_at` columns plus a sweeper.
 5. **Money:** use `core.money.Money` / `Decimal` only, never float. Round half-up to the currency minor unit at line level. Financial records are never deleted or edited after issue: use credit notes and adjustments.
 6. **Time:** store UTC (`timestamptz`); carry IANA timezone on lessons, users, branches and orgs. Recurrence expands in the lesson's local tz.
-7. **Permissions:** declare codenames in `<app>/permissions.py`; enforce in API permission classes *and* queryset scoping. Sensitive fields are hidden by serializer field-permission mixins.
+7. **Permissions:** declare codenames in `<app>/permissions.py` (`PERMISSIONS = {codename: description}`); enforce with `core.permissions.HasPermission`/`HasMethodPermission` *and* `scope_queryset(user, qs, codename)` in selectors (models with an `own` scope implement `own_scope_q(user)`). Sensitive fields use `Meta.field_permissions` on `BaseModelSerializer`. Built-in roles are grant patterns in `identity/roles.py`.
 8. **API:** `/api/v1/`, cursor pagination, RFC 7807 errors, `Idempotency-Key` on financial POSTs, OpenAPI documented with examples.
 9. **Migrations:** backward compatible (expand/contract). Add RLS policies for new tenant tables via `core.migrations_utils.enable_rls` (available from E02).
 10. **Tests first:** every FR in the ticket gets a test. Use `factory_boy` factories in `<app>/tests/factories.py` (tenant models subclass `core.tests.factories.TenantFactory`). Shared fixtures (`org`, `other_org`, `tenant`, `api`, `admin_api`, `s3`, `fake_redis`) live in `backend/conftest.py`. Dev seed data goes in `<app>/seeds.py` via `@seed_step(order=N)`; in-product sample data in `<app>/demo.py` via `@demo_provider`. Org settings are registered in `<app>/org_settings.py`. Use Hypothesis for money, recurrence and proration logic.
-11. **Secrets/PII:** OAuth tokens, bank details and safeguarding notes use `core.crypto.EncryptedField` (available from E29; until then, do not store such data). Never log PII or tokens.
+11. **Secrets/PII:** secrets (MFA, OAuth tokens), bank details and safeguarding notes use `core.crypto.EncryptedField` (Fernet keys in `FIELD_ENCRYPTION_KEYS`; KMS in E29). Never log PII or tokens.
 12. **i18n:** wrap user-facing strings (`gettext` / `t()`). No hard-coded currency symbols or date formats.
 13. **Accessibility:** WCAG 2.2 AA for all UI.
 
