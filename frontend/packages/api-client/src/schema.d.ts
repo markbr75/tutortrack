@@ -55,6 +55,173 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/auth/login": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Email + password. When the user has 2FA, ``mfa_required`` is true and the session
+     *     waits for ``POST /auth/mfa/verify``.
+     */
+    post: operations["auth_login_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/logout": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["auth_logout_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/magic-link": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Email a single-use sign-in link (15 minutes). Always 202. */
+    post: operations["auth_magic_link_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/magic-link/verify": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["auth_magic_link_verify_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/mfa/verify": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["auth_mfa_verify_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/password/reset": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Email a reset link (1 hour, single use). Always 202. */
+    post: operations["auth_password_reset_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/password/reset/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["auth_password_reset_confirm_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/sso/{provider}/callback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["auth_sso_callback_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/sso/{provider}/start": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Browser navigation: redirects to Google/Microsoft (open on the root app host). */
+    get: operations["auth_sso_start_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/sso/providers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["auth_sso_providers_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/branches": {
     parameters: {
       query?: never;
@@ -195,6 +362,225 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/impersonate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description View the app as a tutor, client or student (read-only unless ``write``). */
+    post: operations["impersonate_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/impersonate/stop": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["impersonate_stop_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invitations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Invitations. ``DELETE`` revokes; ``resend`` sends a fresh 7-day link. */
+    get: operations["invitations_list"];
+    put?: never;
+    /** @description Invitations. ``DELETE`` revokes; ``resend`` sends a fresh 7-day link. */
+    post: operations["invitations_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invitations/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Invitations. ``DELETE`` revokes; ``resend`` sends a fresh 7-day link. */
+    get: operations["invitations_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description Invitations. ``DELETE`` revokes; ``resend`` sends a fresh 7-day link. */
+    delete: operations["invitations_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invitations/{id}/resend": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Invitations. ``DELETE`` revokes; ``resend`` sends a fresh 7-day link. */
+    post: operations["invitations_resend_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invitations/accept": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Accept an invitation: signed in as the invited email, or create the account. */
+    post: operations["invitations_accept_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invitations/bulk": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Invitations. ``DELETE`` revokes; ``resend`` sends a fresh 7-day link. */
+    post: operations["invitations_bulk_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invitations/lookup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Public: what an invitation link is for (shown on the accept page). */
+    get: operations["invitations_lookup_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Who am I here: profile, organisation, role, effective permissions, features. */
+    get: operations["me_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Who am I here: profile, organisation, role, effective permissions, features. */
+    patch: operations["me_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/me/mfa/disable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["me_mfa_disable_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/mfa/recovery-codes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["me_mfa_recovery_codes_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/mfa/totp": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["me_mfa_totp_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/mfa/totp/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["me_mfa_totp_confirm_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/me/organisations": {
     parameters: {
       query?: never;
@@ -215,6 +601,109 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/password": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["me_password_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/sessions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Your signed-in sessions; delete one to sign it out (FR-03-3). */
+    get: operations["me_sessions_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/sessions/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** @description Your signed-in sessions; delete one to sign it out (FR-03-3). */
+    delete: operations["me_sessions_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/sessions/revoke-all": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Sign out every other device. */
+    post: operations["me_sessions_revoke_all_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/memberships": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Team members. ``DELETE`` removes the member's access to this organisation. */
+    get: operations["memberships_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/memberships/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Team members. ``DELETE`` removes the member's access to this organisation. */
+    get: operations["memberships_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description Team members. ``DELETE`` removes the member's access to this organisation. */
+    delete: operations["memberships_destroy"];
+    options?: never;
+    head?: never;
+    /** @description Team members. ``DELETE`` removes the member's access to this organisation. */
+    patch: operations["memberships_partial_update"];
     trace?: never;
   };
   "/api/v1/onboarding/{step}": {
@@ -287,6 +776,39 @@ export interface paths {
      *     deleted; the subscription is cancelled.
      */
     post: operations["organisation_close_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/permissions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The permission registry (for the roles matrix). */
+    get: operations["permissions_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/roles": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["roles_list"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -416,7 +938,22 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
+    AcceptInvitationRequest: {
+      token: string;
+      first_name?: string;
+      last_name?: string;
+      password?: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
     AuditEntry: {
       /** Format: uuid */
       readonly id: string;
@@ -434,7 +971,16 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
     Branch: {
       /** Format: uuid */
       readonly id: string;
@@ -455,7 +1001,16 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
     BranchRequest: {
       name: string;
       code: string;
@@ -468,6 +1023,22 @@ export interface components {
       email_sender_name?: string;
       email_sender_address?: string;
       invoice_prefix?: string;
+    };
+    /**
+     * @description * `all` - All
+     *     * `selected` - Selected
+     * @enum {string}
+     */
+    BranchScopeEnum: "all" | "selected";
+    BulkInviteRequest: {
+      emails: string[];
+      role: components["schemas"]["RoleEnum"];
+    };
+    BulkInviteResult: {
+      invited: string[];
+      skipped: {
+        [key: string]: string;
+      };
     };
     /**
      * @description * `sole_trader` - Sole trader
@@ -489,6 +1060,9 @@ export interface components {
        */
       export_data: boolean;
     };
+    CodeRequest: {
+      code: string;
+    };
     /**
      * @description * `locale` - Locale default
      *     * `dd/MM/yyyy` - 31/12/2026
@@ -506,6 +1080,12 @@ export interface components {
       url: string;
       expires_in: number;
     };
+    EmailRequest: {
+      /** Format: email */
+      email: string;
+      /** @default / */
+      next: string;
+    };
     Features: {
       features: {
         [key: string]: boolean;
@@ -515,6 +1095,173 @@ export interface components {
       file: components["schemas"]["StoredFile"];
       upload: components["schemas"]["PresignedUpload"];
     };
+    ImpersonateRequest: {
+      /** Format: uuid */
+      membership_id: string;
+      /** @default false */
+      write: boolean;
+    };
+    Impersonator: {
+      /** Format: uuid */
+      id: string;
+      /** Format: email */
+      email: string;
+      name: string;
+      write: boolean;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Invitation: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: email */
+      email: string;
+      role: components["schemas"]["RoleEnum"];
+      branch_scope?: components["schemas"]["BranchScopeEnum"];
+      branch_ids?: unknown;
+      title?: string;
+      readonly status: components["schemas"]["InvitationStatusEnum"];
+      /** Format: date-time */
+      readonly expires_at: string;
+      /** Format: date-time */
+      readonly accepted_at: string | null;
+      readonly sent_count: number;
+      /** Format: date-time */
+      readonly last_sent_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    InvitationLookup: {
+      /** Format: email */
+      email: string;
+      role: string;
+      organisation_name: string;
+      account_exists: boolean;
+      /** Format: date-time */
+      expires_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    InvitationRequest: {
+      /** Format: email */
+      email: string;
+      role: components["schemas"]["RoleEnum"];
+      branch_scope?: components["schemas"]["BranchScopeEnum"];
+      branch_ids?: unknown;
+      title?: string;
+    };
+    /**
+     * @description * `pending` - Pending
+     *     * `accepted` - Accepted
+     *     * `revoked` - Revoked
+     * @enum {string}
+     */
+    InvitationStatusEnum: "pending" | "accepted" | "revoked";
+    LoginRequest: {
+      /** Format: email */
+      email: string;
+      password: string;
+      /** @default false */
+      remember: boolean;
+    };
+    LoginResult: {
+      mfa_required: boolean;
+      user: components["schemas"]["User"] | null;
+    };
+    LoginTokenRequest: {
+      token: string;
+      /** @default false */
+      remember: boolean;
+    };
+    Me: {
+      user: components["schemas"]["User"];
+      organisation: components["schemas"]["MeOrganisation"] | null;
+      membership: components["schemas"]["MeMembership"] | null;
+      /** @description {codename: scope (all|branch|own)} */
+      permissions: {
+        [key: string]: string;
+      };
+      features: {
+        [key: string]: boolean;
+      };
+      impersonator: components["schemas"]["Impersonator"] | null;
+    };
+    MeMembership: {
+      /** Format: uuid */
+      id: string;
+      role: string;
+      branch_scope: string;
+    };
+    MeOrganisation: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      slug: string;
+      status: string;
+      mode: string;
+    };
+    MemberUser: {
+      /** Format: uuid */
+      id: string;
+      /** Format: email */
+      email: string;
+      name: string;
+      has_mfa: boolean;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Membership: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly user: components["schemas"]["MemberUser"];
+      role: components["schemas"]["RoleEnum"];
+      status?: components["schemas"]["MembershipStatusEnum"];
+      branch_scope?: components["schemas"]["BranchScopeEnum"];
+      readonly branches: string[];
+      title?: string;
+      /** Format: date-time */
+      readonly joined_at: string | null;
+      /** Format: date-time */
+      readonly last_active_at: string | null;
+    };
+    /**
+     * @description * `invited` - Invited
+     *     * `active` - Active
+     *     * `suspended` - Suspended
+     *     * `removed` - Removed
+     * @enum {string}
+     */
+    MembershipStatusEnum: "invited" | "active" | "suspended" | "removed";
+    /**
+     * @description * `active` - active
+     *     * `suspended` - suspended
+     * @enum {string}
+     */
+    MembershipUpdateStatusEnum: "active" | "suspended";
     /**
      * @description * `solo` - Solo
      *     * `multi` - Multi-user
@@ -555,7 +1302,16 @@ export interface components {
      * @enum {string}
      */
     OnboardingStepStatusStatusEnum: "pending" | "completed" | "skipped";
-    /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
     Organisation: {
       /** Format: uuid */
       readonly id: string;
@@ -624,7 +1380,54 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Branch"][];
     };
-    /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
+    PaginatedInvitationList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Invitation"][];
+    };
+    PaginatedMembershipList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Membership"][];
+    };
+    PasswordChangeRequest: {
+      current_password: string;
+      new_password: string;
+    };
+    PasswordConfirmRequest: {
+      password: string;
+    };
+    PasswordResetConfirmRequest: {
+      uid: string;
+      token: string;
+      new_password: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
     PatchedBranchRequest: {
       name?: string;
       code?: string;
@@ -638,7 +1441,23 @@ export interface components {
       email_sender_address?: string;
       invoice_prefix?: string;
     };
-    /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
+    PatchedMembershipUpdateRequest: {
+      role?: components["schemas"]["RoleEnum"];
+      status?: components["schemas"]["MembershipUpdateStatusEnum"];
+      title?: string;
+      branch_scope?: components["schemas"]["BranchScopeEnum"];
+      branches?: string[];
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
     PatchedOrganisationRequest: {
       name?: string;
       legal_name?: string;
@@ -670,6 +1489,31 @@ export interface components {
         [key: string]: unknown;
       };
     };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    PatchedUserRequest: {
+      first_name?: string;
+      last_name?: string;
+      preferred_name?: string;
+      pronouns?: string;
+      /** @description E.164 */
+      phone?: string;
+      timezone?: string;
+      locale?: string;
+    };
+    Permission: {
+      codename: string;
+      category: string;
+      description: string;
+    };
     PresignedUpload: {
       /** Format: uri */
       url: string;
@@ -679,6 +1523,10 @@ export interface components {
       };
       expires_in: number;
     };
+    RecoveryCodes: {
+      /** @description Shown once. Each works one time. */
+      recovery_codes: string[];
+    };
     /**
      * @description * `uk` - United Kingdom
      *     * `eu` - European Union
@@ -687,6 +1535,41 @@ export interface components {
      * @enum {string}
      */
     RegionEnum: "uk" | "eu" | "us" | "au";
+    Role: {
+      key: string;
+      name: string;
+      description: string;
+      is_builtin: boolean;
+      is_staff: boolean;
+      grants: string[];
+      denies: string[];
+    };
+    /**
+     * @description * `owner` - Owner
+     *     * `admin` - Admin
+     *     * `branch_manager` - Branch Manager
+     *     * `coordinator` - Coordinator
+     *     * `finance` - Finance
+     *     * `tutor` - Tutor
+     *     * `client` - Client
+     *     * `student` - Student
+     *     * `affiliate` - Affiliate
+     * @enum {string}
+     */
+    RoleEnum:
+      | "owner"
+      | "admin"
+      | "branch_manager"
+      | "coordinator"
+      | "finance"
+      | "tutor"
+      | "client"
+      | "student"
+      | "affiliate";
+    SSOProvider: {
+      key: string;
+      start_url: string;
+    };
     /**
      * @description * `pending` - Pending
      *     * `clean` - Clean
@@ -702,6 +1585,21 @@ export interface components {
      * @enum {string}
      */
     ScopeEnum: "organisation" | "branch";
+    Session: {
+      /** Format: uuid */
+      readonly id: string;
+      ip?: string | null;
+      user_agent?: string;
+      method?: string;
+      /** Format: date-time */
+      created_at?: string;
+      /** Format: date-time */
+      last_seen_at?: string;
+      readonly is_current: boolean;
+    };
+    SessionsRevoked: {
+      revoked: number;
+    };
     /**
      * @description One registered setting. Fields are declared in get_fields() because names such as
      *     ``label`` and ``help_text`` clash with attributes of DRF's Field class.
@@ -777,7 +1675,16 @@ export interface components {
       reason: string | null;
       suggestion: string | null;
     };
-    /** @description ``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept). */
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
     StoredFile: {
       /** Format: uuid */
       readonly id: string;
@@ -798,6 +1705,19 @@ export interface components {
      * @enum {string}
      */
     StoredFileStatusEnum: "pending_upload" | "uploaded" | "rejected";
+    TOTPConfirmRequest: {
+      /** Format: uuid */
+      device_id: string;
+      code: string;
+    };
+    TOTPSetup: {
+      /** Format: uuid */
+      device_id: string;
+      secret: string;
+      otpauth_uri: string;
+      /** @description SVG markup of the QR code for the URI. */
+      qr_svg: string;
+    };
     /**
      * @description * `locale` - Locale default
      *     * `24h` - 24-hour
@@ -823,6 +1743,34 @@ export interface components {
       size_bytes: number;
       /** @default private */
       visibility: components["schemas"]["VisibilityEnum"];
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    User: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: email */
+      readonly email: string;
+      first_name?: string;
+      last_name?: string;
+      preferred_name?: string;
+      pronouns?: string;
+      /** @description E.164 */
+      phone?: string;
+      timezone?: string;
+      locale?: string;
+      readonly email_verified: boolean;
+      readonly has_mfa: boolean;
+      /** Format: date-time */
+      readonly date_joined: string;
     };
     /**
      * @description * `private` - Private
@@ -934,6 +1882,260 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SignupUser"];
+        };
+      };
+    };
+  };
+  auth_login_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LoginRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LoginRequest"];
+        "multipart/form-data": components["schemas"]["LoginRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LoginResult"];
+        };
+      };
+    };
+  };
+  auth_logout_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  auth_magic_link_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EmailRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["EmailRequest"];
+        "multipart/form-data": components["schemas"]["EmailRequest"];
+      };
+    };
+    responses: {
+      /** @description No response body */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  auth_magic_link_verify_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LoginTokenRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LoginTokenRequest"];
+        "multipart/form-data": components["schemas"]["LoginTokenRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LoginResult"];
+        };
+      };
+    };
+  };
+  auth_mfa_verify_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CodeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CodeRequest"];
+        "multipart/form-data": components["schemas"]["CodeRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["User"];
+        };
+      };
+    };
+  };
+  auth_password_reset_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EmailRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["EmailRequest"];
+        "multipart/form-data": components["schemas"]["EmailRequest"];
+      };
+    };
+    responses: {
+      /** @description No response body */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  auth_password_reset_confirm_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PasswordResetConfirmRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PasswordResetConfirmRequest"];
+        "multipart/form-data": components["schemas"]["PasswordResetConfirmRequest"];
+      };
+    };
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  auth_sso_callback_retrieve: {
+    parameters: {
+      query?: {
+        code?: string;
+        state?: string;
+      };
+      header?: never;
+      path: {
+        provider: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  auth_sso_start_retrieve: {
+    parameters: {
+      query?: {
+        intent?: "login" | "signup";
+        /** @description Path to open after signing in. */
+        next?: string;
+        /** @description Organisation id to continue to. */
+        org?: string;
+      };
+      header?: never;
+      path: {
+        provider: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  auth_sso_providers_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SSOProvider"][];
         };
       };
     };
@@ -1230,6 +2432,434 @@ export interface operations {
       };
     };
   };
+  impersonate_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ImpersonateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ImpersonateRequest"];
+        "multipart/form-data": components["schemas"]["ImpersonateRequest"];
+      };
+    };
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  impersonate_stop_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  invitations_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `owner` - Owner
+         *     * `admin` - Admin
+         *     * `branch_manager` - Branch Manager
+         *     * `coordinator` - Coordinator
+         *     * `finance` - Finance
+         *     * `tutor` - Tutor
+         *     * `client` - Client
+         *     * `student` - Student
+         *     * `affiliate` - Affiliate
+         */
+        role?:
+          | "admin"
+          | "affiliate"
+          | "branch_manager"
+          | "client"
+          | "coordinator"
+          | "finance"
+          | "owner"
+          | "student"
+          | "tutor";
+        /**
+         * @description * `pending` - Pending
+         *     * `accepted` - Accepted
+         *     * `revoked` - Revoked
+         */
+        status?: "accepted" | "pending" | "revoked";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedInvitationList"];
+        };
+      };
+    };
+  };
+  invitations_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["InvitationRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["InvitationRequest"];
+        "multipart/form-data": components["schemas"]["InvitationRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Invitation"];
+        };
+      };
+    };
+  };
+  invitations_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this invitation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Invitation"];
+        };
+      };
+    };
+  };
+  invitations_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this invitation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  invitations_resend_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this invitation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Invitation"];
+        };
+      };
+    };
+  };
+  invitations_accept_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AcceptInvitationRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AcceptInvitationRequest"];
+        "multipart/form-data": components["schemas"]["AcceptInvitationRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Membership"];
+        };
+      };
+    };
+  };
+  invitations_bulk_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BulkInviteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BulkInviteRequest"];
+        "multipart/form-data": components["schemas"]["BulkInviteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BulkInviteResult"];
+        };
+      };
+    };
+  };
+  invitations_lookup_retrieve: {
+    parameters: {
+      query?: {
+        token?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvitationLookup"];
+        };
+      };
+    };
+  };
+  me_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Me"];
+        };
+      };
+    };
+  };
+  me_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedUserRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedUserRequest"];
+        "multipart/form-data": components["schemas"]["PatchedUserRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Me"];
+        };
+      };
+    };
+  };
+  me_mfa_disable_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PasswordConfirmRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PasswordConfirmRequest"];
+        "multipart/form-data": components["schemas"]["PasswordConfirmRequest"];
+      };
+    };
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  me_mfa_recovery_codes_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PasswordConfirmRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PasswordConfirmRequest"];
+        "multipart/form-data": components["schemas"]["PasswordConfirmRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RecoveryCodes"];
+        };
+      };
+    };
+  };
+  me_mfa_totp_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TOTPSetup"];
+        };
+      };
+    };
+  };
+  me_mfa_totp_confirm_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TOTPConfirmRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TOTPConfirmRequest"];
+        "multipart/form-data": components["schemas"]["TOTPConfirmRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RecoveryCodes"];
+        };
+      };
+    };
+  };
   me_organisations_list: {
     parameters: {
       query?: never;
@@ -1245,6 +2875,228 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["MyOrganisation"][];
+        };
+      };
+    };
+  };
+  me_password_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PasswordChangeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PasswordChangeRequest"];
+        "multipart/form-data": components["schemas"]["PasswordChangeRequest"];
+      };
+    };
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  me_sessions_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Session"][];
+        };
+      };
+    };
+  };
+  me_sessions_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this user session. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  me_sessions_revoke_all_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionsRevoked"];
+        };
+      };
+    };
+  };
+  memberships_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `owner` - Owner
+         *     * `admin` - Admin
+         *     * `branch_manager` - Branch Manager
+         *     * `coordinator` - Coordinator
+         *     * `finance` - Finance
+         *     * `tutor` - Tutor
+         *     * `client` - Client
+         *     * `student` - Student
+         *     * `affiliate` - Affiliate
+         */
+        role?:
+          | "admin"
+          | "affiliate"
+          | "branch_manager"
+          | "client"
+          | "coordinator"
+          | "finance"
+          | "owner"
+          | "student"
+          | "tutor";
+        /**
+         * @description * `invited` - Invited
+         *     * `active` - Active
+         *     * `suspended` - Suspended
+         *     * `removed` - Removed
+         */
+        status?: "active" | "invited" | "removed" | "suspended";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedMembershipList"];
+        };
+      };
+    };
+  };
+  memberships_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this membership. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Membership"];
+        };
+      };
+    };
+  };
+  memberships_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this membership. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  memberships_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this membership. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedMembershipUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedMembershipUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedMembershipUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Membership"];
         };
       };
     };
@@ -1366,6 +3218,44 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Organisation"];
+        };
+      };
+    };
+  };
+  permissions_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Permission"][];
+        };
+      };
+    };
+  };
+  roles_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Role"][];
         };
       };
     };

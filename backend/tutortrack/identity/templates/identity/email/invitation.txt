@@ -1,0 +1,6 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}{{ inviter }} has invited you to join {{ organisation_name }} on TutorTrack.{% endblocktranslate %}
+
+{% translate "Accept the invitation (the link expires in 7 days):" %}
+
+{{ url }}
+{% endautoescape %}

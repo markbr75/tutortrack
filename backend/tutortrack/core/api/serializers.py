@@ -1,7 +1,8 @@
 """Serializer building blocks shared by every app.
 
 * ``MoneySerializerField``: ``{"amount": "12.50", "currency": "GBP"}``.
-* ``BaseModelSerializer``: maps ``MoneyField``/``RateField`` automatically, supports sparse
+* ``BaseModelSerializer``: hides fields per ``Meta.field_permissions``, maps
+  ``MoneyField``/``RateField`` automatically, supports sparse
   fieldsets (``?fields=id,name``) and expansion (``?expand=client``) via
   ``Meta.expandable_fields = {"client": ("dotted.path.ClientSerializer", {...kwargs})}``.
 """
@@ -102,7 +103,33 @@ class ExpandableFieldsMixin:
             )
 
 
-class BaseModelSerializer(DynamicFieldsMixin, ExpandableFieldsMixin, serializers.ModelSerializer):
+class FieldPermissionMixin:
+    """Drops fields the viewer may not see (FR-03-5 field-level permissions).
+
+        class Meta:
+            field_permissions = {"pay_rate": "billing.rates.view_pay",
+                                 "charge_rate": "billing.rates.view_charge"}
+
+    Fields are removed from output *and* input, so they can't be written either.
+    Serializers without a request in context (internal use) keep every field.
+    """
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        rules: dict[str, str] = getattr(getattr(self, "Meta", None), "field_permissions", {})
+        request = self.context.get("request")  # type: ignore[attr-defined]
+        if not rules or request is None:
+            return
+        from ..permissions import has_perm
+
+        for field, codename in rules.items():
+            if field in self.fields and not has_perm(request.user, codename):  # type: ignore[attr-defined]
+                self.fields.pop(field)  # type: ignore[attr-defined]
+
+
+class BaseModelSerializer(
+    FieldPermissionMixin, DynamicFieldsMixin, ExpandableFieldsMixin, serializers.ModelSerializer
+):
     serializer_field_mapping = {
         **serializers.ModelSerializer.serializer_field_mapping,
         MoneyField: MoneySerializerField,

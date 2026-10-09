@@ -1,14 +1,28 @@
-"""Permission checks. E01 provides the hook; E03 replaces ``has_perm`` with the RBAC engine
-(roles, data scopes, field permissions). Code should always call ``has_perm`` here rather
-than ``user.has_perm`` so the switch is transparent."""
+"""Permission checks used everywhere (CLAUDE.md rule 7).
+
+* ``has_perm(user, codename, obj=None)``: role grants with data scopes (E03 RBAC, via the
+  ``identity.backends.RBACBackend`` auth backend). Always call this, not ``user.has_perm``.
+* ``scope_queryset(user, qs, codename)``: restrict a queryset to the user's data scope
+  (all / branch / own). Selectors call it so lists and details agree.
+* DRF classes: ``HasPermission.for_("x.y")``, ``HasMethodPermission.for_({...})``,
+  ``HasOrganisation``.
+"""
 
 from __future__ import annotations
 
 from typing import Any
 
+from django.conf import settings
+from django.db.models import QuerySet
+from django.utils.module_loading import import_string
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.views import APIView
+
+# Codenames owned by core (see core.permission_registry).
+PERMISSIONS = {
+    "audit.view": "View the audit log",
+}
 
 
 def has_perm(user: Any, codename: str, obj: Any = None) -> bool:
@@ -17,6 +31,17 @@ def has_perm(user: Any, codename: str, obj: Any = None) -> bool:
     if user.is_superuser:
         return True
     return bool(user.has_perm(codename, obj))
+
+
+def scope_queryset(user: Any, queryset: QuerySet[Any], codename: str) -> QuerySet[Any]:
+    """Records of ``queryset`` the user may access under ``codename`` (none if no grant)."""
+    if not getattr(user, "is_authenticated", False) or not user.is_active:
+        return queryset.none()
+    scoper: Any = import_string(
+        getattr(settings, "PERMISSION_SCOPER", "tutortrack.identity.rbac.scope_queryset")
+    )
+    result: QuerySet[Any] = scoper(user, queryset, codename)
+    return result
 
 
 class HasPermission(BasePermission):

@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with name=user.get_short_name %}Hi {{ name }},{% endblocktranslate %}
+
+{% translate "Your TutorTrack account was just used to sign in from a new device:" %}
+
+{{ user_agent }}
+{% blocktranslate %}IP address: {{ ip }}{% endblocktranslate %}
+
+{% translate "If this was you, there's nothing to do. If not, change your password now and sign out of all devices from your account settings." %}
+{% endautoescape %}

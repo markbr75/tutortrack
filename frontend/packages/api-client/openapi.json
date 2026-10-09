@@ -217,6 +217,492 @@
                 }
             }
         },
+        "/api/v1/auth/login": {
+            "post": {
+                "operationId": "auth_login_create",
+                "description": "Email + password. When the user has 2FA, ``mfa_required`` is true and the session\nwaits for ``POST /auth/mfa/verify``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            },
+                            "examples": {
+                                "SignIn": {
+                                    "value": {
+                                        "email": "sam@example.com",
+                                        "password": "secret",
+                                        "remember": false
+                                    },
+                                    "summary": "Sign in"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "operationId": "auth_logout_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/magic-link": {
+            "post": {
+                "operationId": "auth_magic_link_create",
+                "description": "Email a single-use sign-in link (15 minutes). Always 202.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "202": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/magic-link/verify": {
+            "post": {
+                "operationId": "auth_magic_link_verify_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginTokenRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginTokenRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginTokenRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/mfa/verify": {
+            "post": {
+                "operationId": "auth_mfa_verify_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CodeRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CodeRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CodeRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/password/reset": {
+            "post": {
+                "operationId": "auth_password_reset_create",
+                "description": "Email a reset link (1 hour, single use). Always 202.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "202": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/password/reset/confirm": {
+            "post": {
+                "operationId": "auth_password_reset_confirm_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetConfirmRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetConfirmRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetConfirmRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/sso/{provider}/callback": {
+            "get": {
+                "operationId": "auth_sso_callback_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "code",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "provider",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "state",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "302": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/sso/{provider}/start": {
+            "get": {
+                "operationId": "auth_sso_start_retrieve",
+                "description": "Browser navigation: redirects to Google/Microsoft (open on the root app host).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "intent",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "login",
+                                "signup"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "next",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Path to open after signing in."
+                    },
+                    {
+                        "in": "query",
+                        "name": "org",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Organisation id to continue to."
+                    },
+                    {
+                        "in": "path",
+                        "name": "provider",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "302": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/sso/providers": {
+            "get": {
+                "operationId": "auth_sso_providers_list",
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SSOProvider"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/branches": {
             "get": {
                 "operationId": "branches_list",
@@ -754,6 +1240,764 @@
                 }
             }
         },
+        "/api/v1/impersonate": {
+            "post": {
+                "operationId": "impersonate_create",
+                "description": "View the app as a tutor, client or student (read-only unless ``write``).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "impersonate"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ImpersonateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ImpersonateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ImpersonateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/impersonate/stop": {
+            "post": {
+                "operationId": "impersonate_stop_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "impersonate"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/invitations": {
+            "get": {
+                "operationId": "invitations_list",
+                "description": "Invitations. ``DELETE`` revokes; ``resend`` sends a fresh 7-day link.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "role",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "admin",
+                                "affiliate",
+                                "branch_manager",
+                                "client",
+                                "coordinator",
+                                "finance",
+                                "owner",
+                                "student",
+                                "tutor"
+                            ]
+                        },
+                        "description": "* `owner` - Owner\n* `admin` - Admin\n* `branch_manager` - Branch Manager\n* `coordinator` - Coordinator\n* `finance` - Finance\n* `tutor` - Tutor\n* `client` - Client\n* `student` - Student\n* `affiliate` - Affiliate"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "accepted",
+                                "pending",
+                                "revoked"
+                            ]
+                        },
+                        "description": "* `pending` - Pending\n* `accepted` - Accepted\n* `revoked` - Revoked"
+                    }
+                ],
+                "tags": [
+                    "invitations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedInvitationList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "invitations_create",
+                "description": "Invitations. ``DELETE`` revokes; ``resend`` sends a fresh 7-day link.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "invitations"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InvitationRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InvitationRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InvitationRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Invitation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/invitations/{id}": {
+            "get": {
+                "operationId": "invitations_retrieve",
+                "description": "Invitations. ``DELETE`` revokes; ``resend`` sends a fresh 7-day link.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this invitation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "invitations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Invitation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "invitations_destroy",
+                "description": "Invitations. ``DELETE`` revokes; ``resend`` sends a fresh 7-day link.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this invitation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "invitations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/invitations/{id}/resend": {
+            "post": {
+                "operationId": "invitations_resend_create",
+                "description": "Invitations. ``DELETE`` revokes; ``resend`` sends a fresh 7-day link.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this invitation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "invitations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Invitation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/invitations/accept": {
+            "post": {
+                "operationId": "invitations_accept_create",
+                "description": "Accept an invitation: signed in as the invited email, or create the account.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "invitations"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AcceptInvitationRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AcceptInvitationRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AcceptInvitationRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Membership"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/invitations/bulk": {
+            "post": {
+                "operationId": "invitations_bulk_create",
+                "description": "Invitations. ``DELETE`` revokes; ``resend`` sends a fresh 7-day link.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "invitations"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BulkInviteRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BulkInviteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BulkInviteRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BulkInviteResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/invitations/lookup": {
+            "get": {
+                "operationId": "invitations_lookup_retrieve",
+                "description": "Public: what an invitation link is for (shown on the accept page).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "invitations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InvitationLookup"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me": {
+            "get": {
+                "operationId": "me_retrieve",
+                "description": "Who am I here: profile, organisation, role, effective permissions, features.",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Me"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "me_partial_update",
+                "description": "Who am I here: profile, organisation, role, effective permissions, features.",
+                "tags": [
+                    "me"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedUserRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedUserRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedUserRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Me"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me/mfa/disable": {
+            "post": {
+                "operationId": "me_mfa_disable_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordConfirmRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordConfirmRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordConfirmRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/me/mfa/recovery-codes": {
+            "post": {
+                "operationId": "me_mfa_recovery_codes_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordConfirmRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordConfirmRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordConfirmRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RecoveryCodes"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me/mfa/totp": {
+            "post": {
+                "operationId": "me_mfa_totp_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TOTPSetup"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me/mfa/totp/confirm": {
+            "post": {
+                "operationId": "me_mfa_totp_confirm_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TOTPConfirmRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TOTPConfirmRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TOTPConfirmRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RecoveryCodes"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/me/organisations": {
             "get": {
                 "operationId": "me_organisations_list",
@@ -779,6 +2023,387 @@
                             }
                         },
                         "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me/password": {
+            "post": {
+                "operationId": "me_password_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChangeRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChangeRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChangeRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/me/sessions": {
+            "get": {
+                "operationId": "me_sessions_list",
+                "description": "Your signed-in sessions; delete one to sign it out (FR-03-3).",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Session"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me/sessions/{id}": {
+            "delete": {
+                "operationId": "me_sessions_destroy",
+                "description": "Your signed-in sessions; delete one to sign it out (FR-03-3).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this user session.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/me/sessions/revoke-all": {
+            "post": {
+                "operationId": "me_sessions_revoke_all_create",
+                "description": "Sign out every other device.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SessionsRevoked"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/memberships": {
+            "get": {
+                "operationId": "memberships_list",
+                "description": "Team members. ``DELETE`` removes the member's access to this organisation.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "role",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "admin",
+                                "affiliate",
+                                "branch_manager",
+                                "client",
+                                "coordinator",
+                                "finance",
+                                "owner",
+                                "student",
+                                "tutor"
+                            ]
+                        },
+                        "description": "* `owner` - Owner\n* `admin` - Admin\n* `branch_manager` - Branch Manager\n* `coordinator` - Coordinator\n* `finance` - Finance\n* `tutor` - Tutor\n* `client` - Client\n* `student` - Student\n* `affiliate` - Affiliate"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "invited",
+                                "removed",
+                                "suspended"
+                            ]
+                        },
+                        "description": "* `invited` - Invited\n* `active` - Active\n* `suspended` - Suspended\n* `removed` - Removed"
+                    }
+                ],
+                "tags": [
+                    "memberships"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedMembershipList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/memberships/{id}": {
+            "get": {
+                "operationId": "memberships_retrieve",
+                "description": "Team members. ``DELETE`` removes the member's access to this organisation.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this membership.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "memberships"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Membership"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "memberships_partial_update",
+                "description": "Team members. ``DELETE`` removes the member's access to this organisation.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this membership.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "memberships"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedMembershipUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedMembershipUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedMembershipUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Membership"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "memberships_destroy",
+                "description": "Team members. ``DELETE`` removes the member's access to this organisation.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this membership.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "memberships"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
                     }
                 }
             }
@@ -1031,6 +2656,63 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Organisation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/permissions": {
+            "get": {
+                "operationId": "permissions_list",
+                "description": "The permission registry (for the roles matrix).",
+                "tags": [
+                    "permissions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Permission"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/roles": {
+            "get": {
+                "operationId": "roles_list",
+                "tags": [
+                    "roles"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Role"
+                                    }
                                 }
                             }
                         },
@@ -1397,9 +3079,32 @@
     },
     "components": {
         "schemas": {
+            "AcceptInvitationRequest": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
             "AuditEntry": {
                 "type": "object",
-                "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -1468,7 +3173,7 @@
             },
             "Branch": {
                 "type": "object",
-                "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -1545,7 +3250,7 @@
             },
             "BranchRequest": {
                 "type": "object",
-                "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -1601,6 +3306,58 @@
                     "name"
                 ]
             },
+            "BranchScopeEnum": {
+                "enum": [
+                    "all",
+                    "selected"
+                ],
+                "type": "string",
+                "description": "* `all` - All\n* `selected` - Selected"
+            },
+            "BulkInviteRequest": {
+                "type": "object",
+                "properties": {
+                    "emails": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "email",
+                            "minLength": 1
+                        },
+                        "maxItems": 200,
+                        "minItems": 1
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/RoleEnum"
+                    }
+                },
+                "required": [
+                    "emails",
+                    "role"
+                ]
+            },
+            "BulkInviteResult": {
+                "type": "object",
+                "properties": {
+                    "invited": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "email"
+                        }
+                    },
+                    "skipped": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "invited",
+                    "skipped"
+                ]
+            },
             "BusinessTypeEnum": {
                 "enum": [
                     "sole_trader",
@@ -1638,6 +3395,19 @@
                 "required": [
                     "confirm_slug",
                     "password"
+                ]
+            },
+            "CodeRequest": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 20
+                    }
+                },
+                "required": [
+                    "code"
                 ]
             },
             "DateFormatEnum": {
@@ -1681,6 +3451,24 @@
                     "url"
                 ]
             },
+            "EmailRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 1
+                    },
+                    "next": {
+                        "type": "string",
+                        "minLength": 1,
+                        "default": "/"
+                    }
+                },
+                "required": [
+                    "email"
+                ]
+            },
             "Features": {
                 "type": "object",
                 "properties": {
@@ -1709,6 +3497,446 @@
                     "file",
                     "upload"
                 ]
+            },
+            "ImpersonateRequest": {
+                "type": "object",
+                "properties": {
+                    "membership_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "write": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "membership_id"
+                ]
+            },
+            "Impersonator": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "write": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "email",
+                    "id",
+                    "name",
+                    "write"
+                ]
+            },
+            "Invitation": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 254
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/RoleEnum"
+                    },
+                    "branch_scope": {
+                        "$ref": "#/components/schemas/BranchScopeEnum"
+                    },
+                    "branch_ids": {},
+                    "title": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/InvitationStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "accepted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "sent_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "last_sent_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "accepted_at",
+                    "created_at",
+                    "email",
+                    "expires_at",
+                    "id",
+                    "last_sent_at",
+                    "role",
+                    "sent_count",
+                    "status"
+                ]
+            },
+            "InvitationLookup": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "role": {
+                        "type": "string"
+                    },
+                    "organisation_name": {
+                        "type": "string"
+                    },
+                    "account_exists": {
+                        "type": "boolean"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "account_exists",
+                    "email",
+                    "expires_at",
+                    "organisation_name",
+                    "role"
+                ]
+            },
+            "InvitationRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 1,
+                        "maxLength": 254
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/RoleEnum"
+                    },
+                    "branch_scope": {
+                        "$ref": "#/components/schemas/BranchScopeEnum"
+                    },
+                    "branch_ids": {},
+                    "title": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "email",
+                    "role"
+                ]
+            },
+            "InvitationStatusEnum": {
+                "enum": [
+                    "pending",
+                    "accepted",
+                    "revoked"
+                ],
+                "type": "string",
+                "description": "* `pending` - Pending\n* `accepted` - Accepted\n* `revoked` - Revoked"
+            },
+            "LoginRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 1
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1
+                    },
+                    "remember": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "email",
+                    "password"
+                ]
+            },
+            "LoginResult": {
+                "type": "object",
+                "properties": {
+                    "mfa_required": {
+                        "type": "boolean"
+                    },
+                    "user": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "mfa_required",
+                    "user"
+                ]
+            },
+            "LoginTokenRequest": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "remember": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "Me": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "$ref": "#/components/schemas/User"
+                    },
+                    "organisation": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MeOrganisation"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "membership": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MeMembership"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "permissions": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "description": "{codename: scope (all|branch|own)}"
+                    },
+                    "features": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "boolean"
+                        }
+                    },
+                    "impersonator": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Impersonator"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "features",
+                    "impersonator",
+                    "membership",
+                    "organisation",
+                    "permissions",
+                    "user"
+                ]
+            },
+            "MeMembership": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "role": {
+                        "type": "string"
+                    },
+                    "branch_scope": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "branch_scope",
+                    "id",
+                    "role"
+                ]
+            },
+            "MeOrganisation": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "mode": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "mode",
+                    "name",
+                    "slug",
+                    "status"
+                ]
+            },
+            "MemberUser": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "has_mfa": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "email",
+                    "has_mfa",
+                    "id",
+                    "name"
+                ]
+            },
+            "Membership": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "user": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MemberUser"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/RoleEnum"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/MembershipStatusEnum"
+                    },
+                    "branch_scope": {
+                        "$ref": "#/components/schemas/BranchScopeEnum"
+                    },
+                    "branches": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "joined_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_active_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "branches",
+                    "id",
+                    "joined_at",
+                    "last_active_at",
+                    "role",
+                    "user"
+                ]
+            },
+            "MembershipStatusEnum": {
+                "enum": [
+                    "invited",
+                    "active",
+                    "suspended",
+                    "removed"
+                ],
+                "type": "string",
+                "description": "* `invited` - Invited\n* `active` - Active\n* `suspended` - Suspended\n* `removed` - Removed"
+            },
+            "MembershipUpdateStatusEnum": {
+                "enum": [
+                    "active",
+                    "suspended"
+                ],
+                "type": "string",
+                "description": "* `active` - active\n* `suspended` - suspended"
             },
             "ModeEnum": {
                 "enum": [
@@ -1817,7 +4045,7 @@
             },
             "Organisation": {
                 "type": "object",
-                "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -2030,9 +4258,116 @@
                     }
                 }
             },
+            "PaginatedInvitationList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Invitation"
+                        }
+                    }
+                }
+            },
+            "PaginatedMembershipList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Membership"
+                        }
+                    }
+                }
+            },
+            "PasswordChangeRequest": {
+                "type": "object",
+                "properties": {
+                    "current_password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1
+                    },
+                    "new_password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "current_password",
+                    "new_password"
+                ]
+            },
+            "PasswordConfirmRequest": {
+                "type": "object",
+                "properties": {
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "password"
+                ]
+            },
+            "PasswordResetConfirmRequest": {
+                "type": "object",
+                "properties": {
+                    "uid": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "token": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "new_password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "new_password",
+                    "token",
+                    "uid"
+                ]
+            },
             "PatchedBranchRequest": {
                 "type": "object",
-                "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -2084,9 +4419,34 @@
                     }
                 }
             },
+            "PatchedMembershipUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "role": {
+                        "$ref": "#/components/schemas/RoleEnum"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/MembershipUpdateStatusEnum"
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "branch_scope": {
+                        "$ref": "#/components/schemas/BranchScopeEnum"
+                    },
+                    "branches": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                }
+            },
             "PatchedOrganisationRequest": {
                 "type": "object",
-                "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -2210,6 +4570,62 @@
                     }
                 }
             },
+            "PatchedUserRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "first_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "preferred_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "pronouns": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "E.164",
+                        "maxLength": 20
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                    },
+                    "locale": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 10
+                    }
+                }
+            },
+            "Permission": {
+                "type": "object",
+                "properties": {
+                    "codename": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "category",
+                    "codename",
+                    "description"
+                ]
+            },
             "PresignedUpload": {
                 "type": "object",
                 "properties": {
@@ -2237,6 +4653,21 @@
                     "url"
                 ]
             },
+            "RecoveryCodes": {
+                "type": "object",
+                "properties": {
+                    "recovery_codes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Shown once. Each works one time."
+                    }
+                },
+                "required": [
+                    "recovery_codes"
+                ]
+            },
             "RegionEnum": {
                 "enum": [
                     "uk",
@@ -2246,6 +4677,77 @@
                 ],
                 "type": "string",
                 "description": "* `uk` - United Kingdom\n* `eu` - European Union\n* `us` - United States\n* `au` - Australia"
+            },
+            "Role": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "is_builtin": {
+                        "type": "boolean"
+                    },
+                    "is_staff": {
+                        "type": "boolean"
+                    },
+                    "grants": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "denies": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "denies",
+                    "description",
+                    "grants",
+                    "is_builtin",
+                    "is_staff",
+                    "key",
+                    "name"
+                ]
+            },
+            "RoleEnum": {
+                "enum": [
+                    "owner",
+                    "admin",
+                    "branch_manager",
+                    "coordinator",
+                    "finance",
+                    "tutor",
+                    "client",
+                    "student",
+                    "affiliate"
+                ],
+                "type": "string",
+                "description": "* `owner` - Owner\n* `admin` - Admin\n* `branch_manager` - Branch Manager\n* `coordinator` - Coordinator\n* `finance` - Finance\n* `tutor` - Tutor\n* `client` - Client\n* `student` - Student\n* `affiliate` - Affiliate"
+            },
+            "SSOProvider": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "start_url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "key",
+                    "start_url"
+                ]
             },
             "ScanStatusEnum": {
                 "enum": [
@@ -2265,6 +4767,55 @@
                 ],
                 "type": "string",
                 "description": "* `organisation` - organisation\n* `branch` - branch"
+            },
+            "Session": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "ip": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "user_agent": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "method": {
+                        "type": "string",
+                        "maxLength": 20
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "last_seen_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "is_current": {
+                        "type": "boolean",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "id",
+                    "is_current"
+                ]
+            },
+            "SessionsRevoked": {
+                "type": "object",
+                "properties": {
+                    "revoked": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "revoked"
+                ]
             },
             "SettingDescription": {
                 "type": "object",
@@ -2519,7 +5070,7 @@
             },
             "StoredFile": {
                 "type": "object",
-                "description": "``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept).",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -2593,6 +5144,49 @@
                 "type": "string",
                 "description": "* `pending_upload` - Pending Upload\n* `uploaded` - Uploaded\n* `rejected` - Rejected"
             },
+            "TOTPConfirmRequest": {
+                "type": "object",
+                "properties": {
+                    "device_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 10
+                    }
+                },
+                "required": [
+                    "code",
+                    "device_id"
+                ]
+            },
+            "TOTPSetup": {
+                "type": "object",
+                "properties": {
+                    "device_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "secret": {
+                        "type": "string"
+                    },
+                    "otpauth_uri": {
+                        "type": "string"
+                    },
+                    "qr_svg": {
+                        "type": "string",
+                        "description": "SVG markup of the QR code for the URI."
+                    }
+                },
+                "required": [
+                    "device_id",
+                    "otpauth_uri",
+                    "qr_svg",
+                    "secret"
+                ]
+            },
             "TimeFormatEnum": {
                 "enum": [
                     "locale",
@@ -2655,6 +5249,71 @@
                     "content_type",
                     "filename",
                     "size_bytes"
+                ]
+            },
+            "User": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "readOnly": true
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "preferred_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "pronouns": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "E.164",
+                        "maxLength": 20
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "maxLength": 64
+                    },
+                    "locale": {
+                        "type": "string",
+                        "maxLength": 10
+                    },
+                    "email_verified": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "has_mfa": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "date_joined": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "date_joined",
+                    "email",
+                    "email_verified",
+                    "has_mfa",
+                    "id"
                 ]
             },
             "VisibilityEnum": {

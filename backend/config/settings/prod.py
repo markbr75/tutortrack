@@ -7,6 +7,7 @@ if not TURNSTILE_SECRET_KEY:
     from django.core.exceptions import ImproperlyConfigured
 
     raise ImproperlyConfigured("TURNSTILE_SECRET_KEY must be set in production")
+FIELD_ENCRYPTION_KEYS = env.list("FIELD_ENCRYPTION_KEYS")  # no development default in prod
 # Share the session across tenant subdomains so the org switcher needs no re-login.
 SESSION_COOKIE_DOMAIN = env("SESSION_COOKIE_DOMAIN", default=None)
 

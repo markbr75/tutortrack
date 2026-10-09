@@ -13,6 +13,7 @@ from tutortrack.core.api.mixins import ConditionalUpdateMixin
 from tutortrack.core.api.serializers import BaseModelSerializer
 from tutortrack.core.api.viewsets import TenantScopedViewMixin
 from tutortrack.core.exceptions import BusinessRuleViolation
+from tutortrack.core.permissions import scope_queryset
 
 from .models import Gadget, Gizmo, Widget
 
@@ -28,6 +29,11 @@ class WidgetSerializer(BaseModelSerializer):
         model = Widget
         fields = ["id", "name", "currency", "price", "hourly_rate", "gadget", "created_at"]
         expandable_fields = {"gadget": (GadgetSerializer, {})}
+        # price stands in for a charge rate, hourly_rate for a pay rate (FR-03-5).
+        field_permissions = {
+            "price": "billing.rates.view_charge",
+            "hourly_rate": "billing.rates.view_pay",
+        }
 
 
 class WidgetViewSet(TenantScopedViewMixin, ConditionalUpdateMixin, viewsets.ModelViewSet):
@@ -41,15 +47,17 @@ class WidgetViewSet(TenantScopedViewMixin, ConditionalUpdateMixin, viewsets.Mode
 class GizmoSerializer(BaseModelSerializer):
     class Meta:
         model = Gizmo
-        fields = ["id", "name", "branch"]
+        fields = ["id", "name", "branch", "assignee"]
 
 
 class GizmoViewSet(TenantScopedViewMixin, viewsets.ModelViewSet):
+    """Scoped like lessons: tutors see only their own (``own`` scope)."""
+
     model = Gizmo
     serializer_class = GizmoSerializer
 
     def get_tenant_queryset(self) -> QuerySet[Gizmo]:
-        return Gizmo.objects.all()
+        return scope_queryset(self.request.user, Gizmo.objects.all(), "scheduling.lesson.view")
 
 
 @api_view(["GET"])

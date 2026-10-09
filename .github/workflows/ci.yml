@@ -57,6 +57,7 @@ jobs:
         env:
           DJANGO_SECRET_KEY: ci-only-${{ github.run_id }}-not-a-real-secret-value-0123456789
           TURNSTILE_SECRET_KEY: ci-only-not-a-real-key
+          FIELD_ENCRYPTION_KEYS: DbyhxHUuYW0d6P-VFWYHcV9sWb7MmEwUC9RsDpmJpS8=
       - name: Tests
         run: uv run pytest -n auto --cov --cov-report=xml
       - uses: actions/upload-artifact@v4

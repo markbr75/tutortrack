@@ -82,7 +82,7 @@ seed: ## Load demo data
 	$(BE) $(UV) python manage.py seed_demo
 
 openapi: ## Write the OpenAPI schema to frontend/packages/api-client/openapi.json
-	$(BE) $(UV) python manage.py spectacular --file ../frontend/packages/api-client/openapi.json --format openapi-json --validate
+	$(BE) $(UV) python manage.py spectacular --file ../frontend/packages/api-client/openapi.json --format openapi-json --validate --fail-on-warn
 
 api-client: openapi ## Regenerate the TypeScript API client from OpenAPI
 	$(FE) pnpm --filter @tutortrack/api-client generate

@@ -33,6 +33,14 @@ class Gizmo(BranchScopedModel):
     """A branch-scoped record (stands in for clients, lessons, invoices...)."""
 
     name = models.CharField(max_length=100)
+    assignee = models.ForeignKey(
+        "identity.User", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    @classmethod
+    def own_scope_q(cls, user: object) -> models.Q:
+        """``own`` data scope: gizmos assigned to the user (like a tutor's lessons)."""
+        return models.Q(assignee_id=getattr(user, "pk", None))
 
     def __str__(self) -> str:
         return self.name

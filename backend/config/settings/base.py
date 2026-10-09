@@ -46,9 +46,12 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "tutortrack.identity.middleware.SessionSecurityMiddleware",
+    "tutortrack.identity.impersonation.ImpersonationMiddleware",
     "tutortrack.core.middleware.UserContextMiddleware",
     "tutortrack.tenancy.middleware.TenantMiddleware",
     "tutortrack.tenancy.middleware.OrganisationStatusMiddleware",
+    "tutortrack.identity.middleware.MFAEnforcementMiddleware",
     "tutortrack.core.idempotency.IdempotencyMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -105,8 +108,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "identity.User"
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
-    # Built-in membership roles -> permissions until E03 delivers RBAC.
-    "tutortrack.identity.backends.MembershipRoleBackend",
+    # Roles, data scopes and tutor access toggles (E03, identity.rbac).
+    "tutortrack.identity.backends.RBACBackend",
 ]
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
@@ -117,7 +120,20 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {"NAME": "tutortrack.identity.password_validation.ZxcvbnValidator"},
+    {"NAME": "tutortrack.identity.password_validation.PwnedPasswordValidator"},
 ]
+PWNED_PASSWORDS_CHECK = env.bool("PWNED_PASSWORDS_CHECK", default=True)
+PASSWORD_RESET_TIMEOUT = 60 * 60  # 1 hour (E03 §6)
+# Sessions (FR-03-3): staff sign out after idle hours (orgs may shorten via
+# security.staff_idle_timeout_hours); "remember me" lasts PORTAL_REMEMBER_DAYS.
+SESSION_IDLE_TIMEOUT_HOURS = 8
+PORTAL_REMEMBER_DAYS = 30
+SESSION_COOKIE_AGE = PORTAL_REMEMBER_DAYS * 24 * 60 * 60
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+MFA_ENROLMENT_EXEMPT_PATHS = ["/api/v1/me", "/api/v1/auth/"]
 
 # --- i18n / time ------------------------------------------------------------------------------
 LANGUAGE_CODE = "en-gb"
@@ -233,6 +249,10 @@ REST_FRAMEWORK = {
         "signup": env("THROTTLE_SIGNUP", default="10/hour"),
         "verify_email": "30/hour",
         "handoff": "60/hour",
+        "login": env("THROTTLE_LOGIN", default="30/minute"),
+        "magic_link": "10/hour",
+        "password_reset": "10/hour",
+        "mfa": "20/minute",
     },
     "COERCE_DECIMAL_TO_STRING": True,
 }
@@ -263,10 +283,23 @@ SUSPENDED_ORG_WRITE_ALLOWLIST = ["/api/v1/subscription", "/api/v1/auth/"]
 # Reachable whatever the organisation's status (sign-in, health).
 ORG_STATUS_EXEMPT_PATHS = ["/api/v1/auth/", "/api/v1/me/organisations", "/healthz", "/readyz"]
 
+# --- Field encryption (core.crypto; KMS-managed in E29) ---------------------------------------
+# Comma-separated Fernet keys, newest first. Generate: python -c "from cryptography.fernet import
+# Fernet; print(Fernet.generate_key().decode())"
+FIELD_ENCRYPTION_KEYS = env.list(
+    "FIELD_ENCRYPTION_KEYS", default=["DbyhxHUuYW0d6P-VFWYHcV9sWb7MmEwUC9RsDpmJpS8="]
+)
+
 # --- Signup (E02-T06) -------------------------------------------------------------------------
 TURNSTILE_SITE_KEY = env("TURNSTILE_SITE_KEY", default="")
 TURNSTILE_SECRET_KEY = env("TURNSTILE_SECRET_KEY", default="")
 EMAIL_VERIFICATION_MAX_AGE_SECONDS = 3 * 24 * 60 * 60
+
+# --- SSO (E03-T07): a provider is enabled when both values are set ----------------------------
+GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID", default="")
+GOOGLE_CLIENT_SECRET = env("GOOGLE_CLIENT_SECRET", default="")
+MICROSOFT_CLIENT_ID = env("MICROSOFT_CLIENT_ID", default="")
+MICROSOFT_CLIENT_SECRET = env("MICROSOFT_CLIENT_SECRET", default="")
 
 # --- Observability ----------------------------------------------------------------------------
 LOG_LEVEL = env("LOG_LEVEL", default="INFO")

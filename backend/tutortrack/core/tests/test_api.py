@@ -2,6 +2,7 @@ from datetime import timedelta
 from unittest import mock
 
 import pytest
+from django.test import override_settings
 
 from tutortrack.core.models import IdempotencyRecord
 from tutortrack.core.testing import TenantIsolationTestMixin, client_for
@@ -232,3 +233,16 @@ class TestWidgetIsolation(TenantIsolationTestMixin):
 
     def make_object(self, organisation):
         return WidgetFactory(organisation=organisation)
+
+
+@override_settings(ROOT_URLCONF="config.urls")  # the real API, without test-only routes
+def test_schema_generates_without_tenant_context_or_warnings():
+    """`manage.py spectacular` runs with no request/tenant (CI drift check, deploy check)."""
+    from io import StringIO
+
+    from django.core.management import call_command
+
+    out = StringIO()
+    call_command("spectacular", "--validate", "--fail-on-warn", "--format", "openapi-json",
+                 stdout=out)  # fmt: skip
+    assert '"/api/v1/memberships"' in out.getvalue()

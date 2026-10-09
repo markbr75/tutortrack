@@ -74,7 +74,10 @@ class UserContextMiddleware:
     def __call__(self, request: HttpRequest) -> HttpResponse:
         user = getattr(request, "user", None)
         if user is not None and user.is_authenticated:
-            update_request_context(user_id=user.pk)
+            impersonator = getattr(request, "impersonator", None)
+            update_request_context(
+                user_id=user.pk, impersonator_id=impersonator.pk if impersonator else None
+            )
             structlog.contextvars.bind_contextvars(user_id=str(user.pk))
             tz_name = getattr(user, "timezone", "")
             if tz_name and is_valid_timezone(tz_name):

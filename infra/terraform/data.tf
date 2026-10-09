@@ -156,6 +156,10 @@ resource "aws_secretsmanager_secret_version" "app" {
     CELERY_BROKER_URL = "rediss://${aws_elasticache_replication_group.redis.primary_endpoint_address}:6379/1"
     # Set the real Cloudflare Turnstile secret in Secrets Manager; prod refuses to start empty.
     TURNSTILE_SECRET_KEY = ""
+    # Fernet keys for core.crypto, newest first (E29 moves these to KMS).
+    FIELD_ENCRYPTION_KEYS   = ""
+    GOOGLE_CLIENT_SECRET    = ""
+    MICROSOFT_CLIENT_SECRET = ""
   })
 
   lifecycle {

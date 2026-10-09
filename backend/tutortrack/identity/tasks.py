@@ -26,3 +26,58 @@ def send_verification_email(*, user_id: str) -> None:
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[user.email],
         )
+
+
+def _send(user: User, subject: str, template: str, context: dict[str, object]) -> None:
+    with translation.override(user.locale):
+        send_mail(
+            subject=subject,
+            message=render_to_string(template, {"user": user, **context}),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+        )
+
+
+@shared_task(name="tutortrack.identity.tasks.send_magic_link", ignore_result=True)
+def send_magic_link(*, user_id: str, url: str) -> None:
+    user = User.objects.filter(pk=user_id, is_active=True).first()
+    if user is not None:
+        with translation.override(user.locale):
+            _send(user, _("Your sign-in link"), "identity/email/magic_link.txt", {"url": url})
+
+
+@shared_task(name="tutortrack.identity.tasks.send_password_reset", ignore_result=True)
+def send_password_reset(*, user_id: str, url: str) -> None:
+    user = User.objects.filter(pk=user_id, is_active=True).first()
+    if user is not None:
+        with translation.override(user.locale):
+            _send(user, _("Reset your password"), "identity/email/password_reset.txt", {"url": url})
+
+
+@shared_task(name="tutortrack.identity.tasks.send_new_device_alert", ignore_result=True)
+def send_new_device_alert(*, user_id: str, ip: str, user_agent: str) -> None:
+    user = User.objects.filter(pk=user_id, is_active=True).first()
+    if user is not None:
+        with translation.override(user.locale):
+            _send(
+                user,
+                _("New sign-in to your TutorTrack account"),
+                "identity/email/new_device.txt",
+                {"ip": ip, "user_agent": user_agent},
+            )
+
+
+@shared_task(name="tutortrack.identity.tasks.send_invitation", ignore_result=True)
+def send_invitation(
+    *, email: str, organisation_name: str, inviter: str, url: str, locale: str
+) -> None:
+    with translation.override(locale):
+        send_mail(
+            subject=_("You're invited to join %(org)s on TutorTrack") % {"org": organisation_name},
+            message=render_to_string(
+                "identity/email/invitation.txt",
+                {"organisation_name": organisation_name, "inviter": inviter, "url": url},
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+        )

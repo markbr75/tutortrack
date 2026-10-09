@@ -53,7 +53,10 @@ def _flatten_errors(detail: Any) -> dict[str, Any]:
 
 def problem_exception_handler(exc: Exception, context: dict[str, Any]) -> Response | None:
     if isinstance(exc, DomainError):
-        return _problem(exc.status_code, exc.problem_type, exc.title, exc.detail, exc.extra)
+        domain = _problem(exc.status_code, exc.problem_type, exc.title, exc.detail, exc.extra)
+        if "retry_after" in exc.extra:
+            domain["Retry-After"] = str(exc.extra["retry_after"])
+        return domain
 
     if isinstance(exc, Http404):
         exc = drf.NotFound()

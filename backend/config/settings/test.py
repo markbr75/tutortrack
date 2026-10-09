@@ -37,3 +37,5 @@ OUTBOX = {**OUTBOX, "MAX_ATTEMPTS": 3, "BACKOFF_BASE_SECONDS": 0}
 # Concrete models and routes that exercise the abstract core primitives.
 INSTALLED_APPS = [*INSTALLED_APPS, "tutortrack.core.tests.testapp"]
 ROOT_URLCONF = "tutortrack.core.tests.testapp.api"
+
+PWNED_PASSWORDS_CHECK = False  # no network in tests

@@ -1,0 +1,8 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with name=user.get_short_name %}Hi {{ name }},{% endblocktranslate %}
+
+{% translate "Use this link to sign in to TutorTrack. It works once and expires in 15 minutes:" %}
+
+{{ url }}
+
+{% translate "If you didn't ask for it, you can ignore this email." %}
+{% endautoescape %}
