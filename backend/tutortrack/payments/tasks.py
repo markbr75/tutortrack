@@ -3,10 +3,6 @@
 from __future__ import annotations
 
 from celery import shared_task
-from django.conf import settings
-from django.core.mail import EmailMessage
-from django.utils import translation
-from django.utils.translation import gettext as _
 
 from tutortrack.core.tasks import TenantTask
 
@@ -38,29 +34,17 @@ def process_webhook(*, organisation_id: str, event_id: str) -> None:
 
 @shared_task(base=TenantTask, name="tutortrack.payments.tasks.send_receipt")
 def send_receipt(*, organisation_id: str, payment_id: str) -> bool:
+    """Email a PDF receipt through communications (E13). True if sent."""
+    from tutortrack.comms import services as comms
     from tutortrack.core.time import now
-    from tutortrack.tenancy.models import Organisation
 
-    from . import pdf
     from .models import Payment
 
     payment = Payment.objects.select_related("client").filter(pk=payment_id).first()
     if payment is None or payment.receipt_sent_at:
         return False
-    client = payment.client
-    contact = client.billing_contact or client.primary_contact
-    if contact is None or not contact.email:
-        return False
-    org = Organisation.objects.get(pk=organisation_id)
-    with translation.override(org.locale):
-        message = EmailMessage(
-            subject=_("Payment received \N{EN DASH} thank you"),
-            body=_("Hello,\n\nWe received your payment of %(amount)s. Your receipt is attached.\n")
-            % {"amount": payment.amount.format(org.locale.replace("-", "_"))},
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[contact.email],
-        )
-    message.attach(f"receipt-{payment.pk}.pdf", pdf.receipt_pdf(payment), "application/pdf")
-    message.send()
-    Payment.objects.filter(pk=payment.pk).update(receipt_sent_at=now())
-    return True
+    messages = comms.notify("payment_received", payment, key=str(payment.pk), immediate=True)
+    sent = any(m.status == "sent" for m in messages)
+    if sent:
+        Payment.objects.filter(pk=payment.pk).update(receipt_sent_at=now())
+    return sent

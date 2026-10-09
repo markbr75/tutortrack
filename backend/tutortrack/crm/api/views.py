@@ -455,7 +455,7 @@ class SavedViewViewSet(
 
 
 class TimelineItemSerializer(serializers.Serializer):
-    kind = serializers.ChoiceField(choices=["note", "task", "document", "change"])
+    kind = serializers.ChoiceField(choices=["note", "task", "document", "change", "message"])
     id = serializers.CharField()
     at = serializers.DateTimeField()
     title = serializers.CharField()

@@ -82,9 +82,9 @@ All ─► E26, E27, E28, E31
 | E10 | ✅ Done (2026-10-09) | Phase 1 scope (packages, fixed fees, late fees and split billing are Phase 2). See Implementation notes and ADR 0007 |
 | E11 | ✅ Done (2026-10-09) | Stripe + manual (GoCardless, PayPal, bank feeds and split payments are Phase 2). See Implementation notes and ADR 0008 |
 | E12 | ☐ | |
-| E13 | ⏭ Next | |
+| E13 | ✅ Done (2026-10-09) | MVP scope (broadcasts, inbox, WhatsApp, custom domains are Phase 2). See Implementation notes |
 | E14 | ☐ | |
-| E15 | ☐ | |
+| E15 | ⏭ Next | |
 | E16 | ☐ | |
 | E17 | ☐ | |
 | E18 | ☐ | |

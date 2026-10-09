@@ -75,15 +75,15 @@ A registry of notification types, each with: key, trigger event, recipients reso
 `comms.settings.manage`, `comms.template.manage`, `comms.broadcast.send`, `comms.inbox.{view,reply,assign}`, `comms.message.view_log`; tutors: threads involving them only.
 
 ## 7. Delivery plan
-- [ ] **E13-T01** Notification type registry, org settings, recipient resolvers.
-- [ ] **E13-T02** Template model, sandboxed renderer, variable whitelist per type, preview/test send.
-- [ ] **E13-T03** Email channel (Postmark) with delivery webhooks, bounces, suppressions.
-- [ ] **E13-T04** SMS channel (Twilio), credits deduction, STOP handling, quiet hours.
-- [ ] **E13-T05** Event → notification subscribers for the MVP catalogue; dedupe keys.
-- [ ] **E13-T06** Lesson reminder scheduler (multiple offsets, per-recipient tz).
-- [ ] **E13-T07** Preferences and unsubscribe.
-- [ ] **E13-T08** In-app notifications with realtime feed.
-- [ ] **E13-T09** Frontend: notification settings, template editor, message log on timelines.
+- [x] **E13-T01** Notification type registry, org settings, recipient resolvers.
+- [x] **E13-T02** Template model, sandboxed renderer, variable whitelist per type, preview/test send.
+- [x] **E13-T03** Email channel (Postmark) with delivery webhooks, bounces, suppressions.
+- [x] **E13-T04** SMS channel (Twilio), credits deduction, STOP handling, quiet hours.
+- [x] **E13-T05** Event → notification subscribers for the MVP catalogue; dedupe keys.
+- [x] **E13-T06** Lesson reminder scheduler (multiple offsets, per-recipient tz).
+- [x] **E13-T07** Preferences and unsubscribe.
+- [x] **E13-T08** In-app notifications with realtime feed.
+- [x] **E13-T09** Frontend: notification settings, template editor, message log on timelines.
 - [ ] **E13-T10** (Phase 2) Broadcasts with segments and tracking.
 - [ ] **E13-T11** (Phase 2) Conversations inbox (email/SMS inbound, in-app chat, assignment).
 - [ ] **E13-T12** (Phase 2) WhatsApp channel; custom sender domains; Mailchimp/Brevo sync.
@@ -97,3 +97,14 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
 | Workflow | Started by | Steps, timers and signals | Replaces |
 |---|---|---|---|
 | `BroadcastWorkflow` `broadcast:{org}:{id}` | Broadcast scheduled or sent | Wait for scheduled time → resolve segment → send in throttled batches (activities enqueue Celery sends) → collect stats. Signals `pause`, `resume`, `cancel` | Scheduled-broadcast beat job |
+
+## Implementation notes (as built 2026-10-09)
+- **App:** `comms` with `OrgNotificationSetting`, `MessageTemplate` (versioned overrides), `Message` (+ `MessageEvent`), `CommunicationPreference`, `Suppression` and `InAppNotification`, all with RLS. There is also a platform `SmsOptOut` table for STOP replies to the shared sender, which applies to every organisation.
+- **Registry (T01):** types are defined in code (`catalogue.py`), each with category, audience, supported and default channels, a recipient resolver, whitelisted variables, sample data, transactional flag, timing (reminders), attachments and an in-app link. The MVP catalogue covers: lesson booked/moved/cancelled/reminder, series summary, tutor assigned; report shared/due/overdue, unconfirmed lesson; invoice issued (PDF attached), payment reminder, receipt (PDF), payment failed, payment request, low credit; staff alerts (report escalated, completion blocked, payment failed after retries, dispute) and task assigned. Recipients are client contacts (using their `receives_reminders`/`receives_invoices`/`receives_reports` flags, falling back to the billing or primary contact), tutors (email, mobile, in-app when they have an active login) and staff holding the relevant permission. Students have no direct channel yet (adult learners are reached through their contact). The daily tutor agenda, weekly client schedule, booking requests and account emails stay with identity (E03), and E16 adds digests.
+- **Templates (T02):** sandboxed Jinja2 (`SandboxedEnvironment`; contexts are plain dicts, never models) with `|datetime`, `|time`, `|date` and `|money` filters, localised with Babel and shown in the lesson's or organisation's timezone. Platform defaults live in `defaults.py`. Organisations override per type and channel; each save is a new version and revert returns to the default. Preview renders the sample data or a draft; test-send goes to your own email or bell. Branch and locale overrides are left for later (the model has `locale`).
+- **Pipeline (T03..T05):** `notify(type, subject, key=...)` → setting (enabled, channels) → recipients → channels the recipient has, filtered by their preferences (transactional types fall back to email rather than going silent) → suppression check → render → `Message` with a unique dedupe key (type, occurrence, recipient, channel), so redelivered events never double-send. Messages are sent by a Celery task; texts in quiet hours (`comms.quiet_hours_start/end`, organisation timezone) are held until they end. Email uses Django mail (Postmark over SMTP in production) with an HTML alternative, the sender name and reply-to from settings, metadata headers for webhooks, and RFC 8058 `List-Unsubscribe` on non-transactional mail. Postmark webhooks (`/webhooks/postmark?token=`) record delivered, opened, clicked, bounced and complained events without moving backwards; hard bounces and complaints add a suppression. SMS uses Twilio's REST API (a fake records texts without credentials), with signed status callbacks and STOP/START handling at `/webhooks/twilio/inbound`. SMS credits use a meter hook that E04 fills (unlimited until then). Invoice emails (E10) and receipts (E11) now go through comms.
+- **Reminders (T06):** a 5-minute beat task (the reminder dispatch listed in the architecture's Celery section) sends each configured offset (default 24h and 2h) for lessons whose reminder fell due in the last hour. Dedupe keys make repeats harmless; a lesson booked after a reminder's moment skips that reminder. Times follow the lesson's timezone.
+- **Preferences (T07):** channels per person and category (`/communication-preferences`); one-click unsubscribe links (signed, one year) remove email for that category.
+- **In-app (T08):** a bell with an unread count, a list and "mark all read". It polls every 30 seconds, instead of the spec's realtime SSE/WebSockets (that needs ASGI). Realtime is a follow-up.
+- **Frontend (T09):** Settings → Notifications (per type: on/off, channels, reminder hours; template editor with variables, preview, SMS part count, test send, revert), the bell in the app shell, and messages on record timelines (`message` kind through a new CRM timeline provider hook).
+- **Deferred (Phase 2):** broadcasts and BroadcastWorkflow (T10, TW1), conversations inbox (T11), WhatsApp, custom sending domains, and Mailchimp/Brevo sync (T12).

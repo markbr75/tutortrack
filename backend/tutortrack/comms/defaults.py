@@ -1,0 +1,193 @@
+"""Platform default templates (en). Organisations override them per channel (FR-13-3).
+
+``{{ ... }}`` is Jinja2 (sandboxed). Filters: ``|datetime("short")``, ``|time``, ``|date``,
+``|money``. Times show in the lesson's (or the organisation's) timezone.
+"""
+
+from __future__ import annotations
+
+WHEN = '{{ lesson.start|datetime("full") }}'
+WHERE = (
+    "{% if lesson.online %}Online{% if lesson.meeting_url %}: {{ lesson.meeting_url }}"
+    "{% endif %}{% elif lesson.location %}{{ lesson.location }}{% endif %}"
+)
+SIGN = "\n\n{{ organisation.name }}"
+
+DEFAULTS: dict[tuple[str, str], tuple[str, str]] = {
+    ("lesson_booked", "email"): (
+        "Lesson booked: {{ lesson.title }}",
+        "Hello {{ recipient.first_name }},\n\n{{ lesson.title }} is booked for "
+        + WHEN
+        + " with {{ lesson.tutor_names }}.\n"
+        + WHERE
+        + SIGN,
+    ),
+    ("lesson_booked", "sms"): (
+        "",
+        "{{ organisation.name }}: {{ lesson.title }} booked for "
+        '{{ lesson.start|datetime("short") }}.',
+    ),
+    ("lesson_booked", "in_app"): ("Lesson booked", "{{ lesson.title }}, " + WHEN),
+    ("lesson_changed", "email"): (
+        "Lesson moved: {{ lesson.title }}",
+        "Hello {{ recipient.first_name }},\n\n{{ lesson.title }} has moved to "
+        + WHEN
+        + ".\n"
+        + WHERE
+        + SIGN,
+    ),
+    ("lesson_changed", "sms"): (
+        "",
+        "{{ organisation.name }}: {{ lesson.title }} moved to "
+        '{{ lesson.start|datetime("short") }}.',
+    ),
+    ("lesson_changed", "in_app"): ("Lesson moved", "{{ lesson.title }}, now " + WHEN),
+    ("lesson_cancelled", "email"): (
+        "Lesson cancelled: {{ lesson.title }}",
+        "Hello {{ recipient.first_name }},\n\n{{ lesson.title }} on "
+        + WHEN
+        + " has been cancelled.{% if lesson.status_reason %}\nReason: "
+        "{{ lesson.status_reason }}{% endif %}" + SIGN,
+    ),
+    ("lesson_cancelled", "sms"): (
+        "",
+        "{{ organisation.name }}: {{ lesson.title }} on "
+        '{{ lesson.start|datetime("short") }} is cancelled.',
+    ),
+    ("lesson_cancelled", "in_app"): ("Lesson cancelled", "{{ lesson.title }}, " + WHEN),
+    ("lesson_reminder", "email"): (
+        'Reminder: {{ lesson.title }} {{ lesson.start|datetime("short") }}',
+        "Hello {{ recipient.first_name }},\n\nA reminder that {{ lesson.title }} is on "
+        + WHEN
+        + ".\n"
+        + WHERE
+        + SIGN,
+    ),
+    ("lesson_reminder", "sms"): (
+        "",
+        "Reminder from {{ organisation.name }}: {{ lesson.title }} "
+        '{{ lesson.start|datetime("short") }}.',
+    ),
+    ("lesson_reminder", "in_app"): ("Lesson soon", "{{ lesson.title }}, " + WHEN),
+    ("series_created", "email"): (
+        "Your regular lessons: {{ lesson.service }}",
+        "Hello {{ recipient.first_name }},\n\nRegular lessons are arranged with "
+        "{{ lesson.tutor_names }}. The next ones are:\n"
+        '{% for item in upcoming %}- {{ item.start|datetime("full") }}\n{% endfor %}' + SIGN,
+    ),
+    ("tutor_assigned", "email"): (
+        "New job: {{ job.name }}",
+        "Hello {{ recipient.first_name }},\n\nYou've been assigned to {{ job.name }} "
+        "({{ job.reference }}, {{ job.service }})." + SIGN,
+    ),
+    ("tutor_assigned", "in_app"): ("New job", "{{ job.name }} ({{ job.reference }})"),
+    ("report_shared", "email"): (
+        "Lesson report: {{ report.lesson_title }}",
+        "Hello {{ recipient.first_name }},\n\n{{ report.tutor_name }} wrote a report on "
+        '{{ report.lesson_title }} ({{ report.lesson_start|datetime("medium") }}).\n\n'
+        "{% for row in report.answers %}{{ row.label }}:\n{{ row.value }}\n\n{% endfor %}"
+        + SIGN.strip("\n"),
+    ),
+    ("report_due", "email"): (
+        "Report due: {{ report.lesson_title }}",
+        "Hello {{ recipient.first_name }},\n\nYour report for {{ report.lesson_title }} is "
+        'due by {{ report.due_at|datetime("short") }}.\nWrite it here: {{ report.link }}' + SIGN,
+    ),
+    ("report_due", "sms"): (
+        "",
+        'Report due by {{ report.due_at|datetime("short") }}: {{ report.lesson_title }}. '
+        "{{ report.link }}",
+    ),
+    ("report_due", "in_app"): ("Report due", "{{ report.lesson_title }}"),
+    ("report_overdue", "email"): (
+        "Report overdue: {{ report.lesson_title }}",
+        "Hello {{ recipient.first_name }},\n\nYour report for {{ report.lesson_title }} is "
+        "overdue. Please write it now: {{ report.link }}" + SIGN,
+    ),
+    ("report_overdue", "sms"): ("", "Report overdue: {{ report.lesson_title }}. {{ report.link }}"),
+    ("report_overdue", "in_app"): ("Report overdue", "{{ report.lesson_title }}"),
+    ("lesson_unconfirmed", "email"): (
+        "Please confirm: {{ lesson.title }}",
+        "Hello {{ recipient.first_name }},\n\n{{ lesson.title }} on "
+        + WHEN
+        + " hasn't been marked as completed or cancelled yet. Please update it."
+        + SIGN,
+    ),
+    ("lesson_unconfirmed", "sms"): (
+        "",
+        'Please mark {{ lesson.title }} ({{ lesson.start|datetime("short") }}) as '
+        "completed or cancelled.",
+    ),
+    ("lesson_unconfirmed", "in_app"): ("Lesson not confirmed", "{{ lesson.title }}, " + WHEN),
+    ("invoice_issued", "email"): (
+        "Invoice {{ invoice.number }} from {{ organisation.name }}",
+        "Hello {{ recipient.first_name }},\n\nPlease find invoice {{ invoice.number }} "
+        "attached.\nAmount due: {{ invoice.balance_due|money }} by "
+        "{{ invoice.due_date|date }}.\n{% if invoice.pay_url %}Pay online: {{ invoice.pay_url }}"
+        "{% endif %}" + SIGN,
+    ),
+    ("invoice_reminder", "email"): (
+        "{% if days_overdue %}Overdue{% else %}Reminder{% endif %}: invoice {{ invoice.number }}",
+        "Hello {{ recipient.first_name }},\n\nInvoice {{ invoice.number }} for "
+        "{{ invoice.balance_due|money }} {% if days_overdue %}was due on{% else %}is due on"
+        "{% endif %} {{ invoice.due_date|date }}.\n{% if invoice.pay_url %}Pay online: "
+        "{{ invoice.pay_url }}{% endif %}" + SIGN,
+    ),
+    ("invoice_reminder", "sms"): (
+        "",
+        "{{ organisation.name }}: invoice {{ invoice.number }} for "
+        "{{ invoice.balance_due|money }} is due {{ invoice.due_date|date }}. {{ invoice.pay_url }}",
+    ),
+    ("payment_received", "email"): (
+        "Payment received \N{EN DASH} thank you",
+        "Hello {{ recipient.first_name }},\n\nWe received your payment of "
+        "{{ payment.amount|money }}. Your receipt is attached." + SIGN,
+    ),
+    ("payment_failed", "email"): (
+        "Payment for invoice {{ invoice.number }} didn't go through",
+        "Hello {{ recipient.first_name }},\n\nWe couldn't take the automatic payment for "
+        "invoice {{ invoice.number }} ({{ invoice.balance_due|money }}). Please pay online: "
+        "{{ invoice.pay_url }}" + SIGN,
+    ),
+    ("payment_failed", "sms"): (
+        "",
+        "{{ organisation.name }}: the payment for {{ invoice.number }} failed. Please pay: "
+        "{{ invoice.pay_url }}",
+    ),
+    ("payment_request", "email"): (
+        "Payment request {{ request.number }}",
+        "Hello {{ recipient.first_name }},\n\n{{ request.description }}: "
+        "{{ request.amount|money }}.\nPay online: {{ request.pay_url }}" + SIGN,
+    ),
+    ("payment_request", "sms"): (
+        "",
+        "{{ organisation.name }}: please top up {{ request.amount|money }}. {{ request.pay_url }}",
+    ),
+    ("balance_low", "email"): (
+        "Your credit is running low",
+        "Hello {{ recipient.first_name }},\n\nYou have {{ available|money }} of credit left. "
+        "Please top up to keep lessons going." + SIGN,
+    ),
+    ("balance_low", "sms"): (
+        "",
+        "{{ organisation.name }}: your credit is low ({{ available|money }}).",
+    ),
+    ("task_assigned", "in_app"): ("Task assigned to you", "{{ task.title }}"),
+    ("task_assigned", "email"): (
+        "Task: {{ task.title }}",
+        "Hello {{ recipient.first_name }},\n\nYou have a new task: {{ task.title }}." + SIGN,
+    ),
+}
+
+for _key in (
+    "staff_report_escalated",
+    "staff_completion_blocked",
+    "staff_payment_failed",
+    "staff_dispute",
+):
+    DEFAULTS[(_key, "in_app")] = ("{{ alert.title }}", "{{ alert.body }}")
+    DEFAULTS[(_key, "email")] = ("{{ alert.title }}", "{{ alert.body }}" + SIGN)
+
+
+def default_template(type_key: str, channel: str) -> tuple[str, str] | None:
+    return DEFAULTS.get((type_key, channel))

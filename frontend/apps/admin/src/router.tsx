@@ -14,6 +14,7 @@ import { PaymentsSettingsPage } from "./payments/PaymentsPages";
 import { AvailabilityPage } from "./calendar/AvailabilityPage";
 import { CalendarPage } from "./calendar/CalendarPage";
 import { CataloguePage } from "./catalogue/CataloguePage";
+import { NotificationSettingsPage } from "./comms/NotificationSettingsPage";
 import { TasksPage } from "./crm/TasksPage";
 import { DeliverySettingsPage } from "./delivery/DeliverySettingsPage";
 import { ReportPage } from "./delivery/ReportPage";
@@ -161,6 +162,7 @@ const unconfirmedRoute = appPage("/unconfirmed", UnconfirmedPage);
 const deliverySettingsRoute = appPage("/lesson-policies", DeliverySettingsPage);
 const billingRoute = appPage("/billing", BillingPage);
 const paymentsSettingsRoute = appPage("/settings/payments", PaymentsSettingsPage);
+const notificationSettingsRoute = appPage("/settings/notifications", NotificationSettingsPage);
 const invoiceRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/invoices/$invoiceId",
@@ -210,6 +212,7 @@ const routeTree = rootRoute.addChildren([
     billingRoute,
     invoiceRoute,
     paymentsSettingsRoute,
+    notificationSettingsRoute,
     teamRoute,
     auditRoute,
     settingsRoute,

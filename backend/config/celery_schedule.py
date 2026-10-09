@@ -19,6 +19,11 @@ BEAT_SCHEDULE = {
         "task": "tutortrack.delivery.tasks.start_all_unconfirmed_checks",
         "schedule": timedelta(minutes=15),
     },
+    # Lesson reminders at each configured offset (E13-T06); dedupe keys make it idempotent.
+    "lesson-reminders": {
+        "task": "tutortrack.comms.tasks.send_all_lesson_reminders",
+        "schedule": timedelta(minutes=5),
+    },
     # Fallback sweep; most events are dispatched immediately via on_commit.
     "outbox-dispatch": {
         "task": "tutortrack.core.events.tasks.dispatch_outbox",

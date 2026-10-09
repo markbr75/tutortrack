@@ -218,7 +218,7 @@ class InvoiceViewSet(
         if invoice.status in {Invoice.Status.DRAFT, Invoice.Status.VOID}:
             raise ValidationError({"status": ["Issue the invoice before sending it."]})
         sent = tasks.send_invoice_email(
-            organisation_id=str(invoice.organisation_id), invoice_id=str(invoice.pk)
+            organisation_id=str(invoice.organisation_id), invoice_id=str(invoice.pk), resend=True
         )
         if not sent:
             raise ValidationError({"email": ["The client has no billing email address."]})

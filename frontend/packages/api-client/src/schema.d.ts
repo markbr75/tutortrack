@@ -1188,6 +1188,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/communication-preferences": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description A contact's or tutor's channel choices per category (FR-13-5). */
+    get: operations["communication_preferences_retrieve"];
+    /** @description A contact's or tutor's channel choices per category (FR-13-5). */
+    put: operations["communication_preferences_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/conflicts/check": {
     parameters: {
       query?: never;
@@ -3188,6 +3206,102 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/message-templates/{key}/{channel}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description A type's template for one channel: the organisation's override or the default.
+     *     ``PUT`` saves a new version; ``DELETE`` reverts to the default.
+     */
+    get: operations["message_templates_retrieve"];
+    /**
+     * @description A type's template for one channel: the organisation's override or the default.
+     *     ``PUT`` saves a new version; ``DELETE`` reverts to the default.
+     */
+    put: operations["message_templates_update"];
+    post?: never;
+    /**
+     * @description A type's template for one channel: the organisation's override or the default.
+     *     ``PUT`` saves a new version; ``DELETE`` reverts to the default.
+     */
+    delete: operations["message_templates_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/message-templates/{key}/{channel}/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Render a template (the saved one, or the draft sent) with sample data. */
+    post: operations["message_templates_preview_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/message-templates/{key}/{channel}/test": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Send the sample message to yourself (email or your notifications). */
+    post: operations["message_templates_test_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/messages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The message log (FR-13-4): what was sent to whom, with delivery events. */
+    get: operations["messages_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/messages/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The message log (FR-13-4): what was sent to whom, with delivery events. */
+    get: operations["messages_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/notes": {
     parameters: {
       query?: never;
@@ -3238,6 +3352,90 @@ export interface paths {
      *     ``<span data-mention="<user id>">``. Visibility hides staff-only notes from tutors.
      */
     patch: operations["notes_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/notification-settings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Every notification type with the organisation's choice (FR-13-2). */
+    get: operations["notification_settings_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/notification-settings/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations["notification_settings_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Your in-app notifications (the bell). Poll ``unread-count``. */
+    get: operations["notifications_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/notifications/read": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Your in-app notifications (the bell). Poll ``unread-count``. */
+    post: operations["notifications_read_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/notifications/unread-count": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Your in-app notifications (the bell). Poll ``unread-count``. */
+    get: operations["notifications_unread_count_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/onboarding/{step}": {
@@ -4474,6 +4672,24 @@ export interface paths {
      *     ``POST /lessons/bulk``; ``POST`` here nudges their tutors.
      */
     post: operations["unconfirmed_lessons_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/unsubscribe/{token}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description One-click unsubscribe from the link in an email (RFC 8058). */
+    get: operations["unsubscribe_retrieve"];
+    put?: never;
+    /** @description One-click unsubscribe from the link in an email (RFC 8058). */
+    post: operations["unsubscribe_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -5965,6 +6181,18 @@ export interface components {
       name: string;
       write: boolean;
     };
+    InApp: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly type_key: string;
+      readonly title: string;
+      readonly body: string;
+      readonly link: string;
+      /** Format: date-time */
+      readonly read_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
     Invitation: {
       /** Format: uuid */
       readonly id: string;
@@ -6626,14 +6854,6 @@ export interface components {
      * @enum {string}
      */
     JobTutorStatusEnum: "offered" | "active" | "ended" | "declined";
-    /**
-     * @description * `note` - note
-     *     * `task` - task
-     *     * `document` - document
-     *     * `change` - change
-     * @enum {string}
-     */
-    KindEnum: "note" | "task" | "document" | "change";
     LedgerAdjustRequest: {
       /** @description Positive adds to what the client owes */
       amount: {
@@ -7084,6 +7304,9 @@ export interface components {
       on_tutor_cancellation: boolean;
       valid_days: number;
     };
+    MarkReadRequest: {
+      ids?: string[] | null;
+    };
     Me: {
       user: components["schemas"]["User"];
       organisation: components["schemas"]["MeOrganisation"] | null;
@@ -7147,6 +7370,67 @@ export interface components {
      * @enum {string}
      */
     MembershipUpdateStatusEnum: "active" | "suspended";
+    Message: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly type_key: string;
+      readonly channel: components["schemas"]["MessageChannelEnum"];
+      readonly recipient_type: string;
+      readonly recipient_id: string;
+      readonly recipient_name: string;
+      readonly to: string;
+      readonly subject: string;
+      readonly body: string;
+      readonly status: components["schemas"]["MessageStatusEnum"];
+      readonly error: string;
+      readonly related_type: string;
+      readonly related_id: string;
+      readonly target_type: string;
+      readonly target_id: string;
+      /** Format: date-time */
+      readonly scheduled_for: string | null;
+      /** Format: date-time */
+      readonly sent_at: string | null;
+      readonly segments: number;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly events: components["schemas"]["MessageEvent"][];
+    };
+    /**
+     * @description * `email` - Email
+     *     * `sms` - Text message
+     *     * `in_app` - In the app
+     * @enum {string}
+     */
+    MessageChannelEnum: "email" | "sms" | "in_app";
+    MessageEvent: {
+      readonly type: string;
+      /** Format: date-time */
+      readonly occurred_at: string;
+      readonly detail: unknown;
+    };
+    /**
+     * @description * `queued` - Queued
+     *     * `sent` - Sent
+     *     * `delivered` - Delivered
+     *     * `opened` - Opened
+     *     * `clicked` - Clicked
+     *     * `bounced` - Bounced
+     *     * `complained` - Marked as spam
+     *     * `failed` - Failed
+     *     * `suppressed` - Not sent (suppressed)
+     * @enum {string}
+     */
+    MessageStatusEnum:
+      | "queued"
+      | "sent"
+      | "delivered"
+      | "opened"
+      | "clicked"
+      | "bounced"
+      | "complained"
+      | "failed"
+      | "suppressed";
     /** @description Read-only money in computed responses (quotes, summaries). */
     MoneyOut: {
       amount: string;
@@ -7201,6 +7485,24 @@ export interface components {
      * @enum {string}
      */
     NoteVisibilityEnum: "staff_only" | "staff_and_tutors" | "shared_with_client";
+    NotificationSetting: {
+      key: string;
+      label: string;
+      category: string;
+      audience: string;
+      channels: components["schemas"]["MessageChannelEnum"][];
+      available_channels: components["schemas"]["MessageChannelEnum"][];
+      enabled: boolean;
+      timing: number[];
+      has_timing: boolean;
+      transactional: boolean;
+      customised: boolean;
+    };
+    NotificationSettingUpdateRequest: {
+      enabled: boolean;
+      channels: components["schemas"]["MessageChannelEnum"][];
+      timing?: number[] | null;
+    };
     NudgeRequest: {
       ids: string[];
     };
@@ -7534,6 +7836,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Exception"][];
     };
+    PaginatedInAppList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["InApp"][];
+    };
     PaginatedInvitationList: {
       /**
        * Format: uri
@@ -7663,6 +7978,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Membership"][];
+    };
+    PaginatedMessageList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Message"][];
     };
     PaginatedNoteList: {
       /**
@@ -8604,6 +8932,13 @@ export interface components {
       id: string;
       name: string;
     };
+    /**
+     * @description * `contact` - contact
+     *     * `tutor` - tutor
+     *     * `user` - user
+     * @enum {string}
+     */
+    PersonTypeEnum: "contact" | "tutor" | "user";
     PolicyOverrideRequest: {
       /** Format: decimal */
       charge_percent: string;
@@ -8636,6 +8971,33 @@ export interface components {
       max_free_per_month?: number | null;
       makeup_credit?: components["schemas"]["MakeupRulesRequest"];
     };
+    PreferenceRow: {
+      category: components["schemas"]["PreferenceRowCategoryEnum"];
+      channels: components["schemas"]["MessageChannelEnum"][];
+    };
+    /**
+     * @description * `scheduling` - scheduling
+     *     * `reports` - reports
+     *     * `billing` - billing
+     *     * `account` - account
+     *     * `staff` - staff
+     * @enum {string}
+     */
+    PreferenceRowCategoryEnum: "scheduling" | "reports" | "billing" | "account" | "staff";
+    PreferenceRowRequest: {
+      category: components["schemas"]["PreferenceRowCategoryEnum"];
+      channels: components["schemas"]["MessageChannelEnum"][];
+    };
+    Preferences: {
+      person_type: components["schemas"]["PersonTypeEnum"];
+      person_id: string;
+      preferences: components["schemas"]["PreferenceRow"][];
+    };
+    PreferencesRequest: {
+      person_type: components["schemas"]["PersonTypeEnum"];
+      person_id: string;
+      preferences: components["schemas"]["PreferenceRowRequest"][];
+    };
     /**
      * @description * `email` - Email
      *     * `sms` - SMS
@@ -8651,6 +9013,15 @@ export interface components {
         [key: string]: string;
       };
       expires_in: number;
+    };
+    Preview: {
+      subject: string;
+      body: string;
+      segments: number;
+    };
+    PreviewRequestRequest: {
+      subject?: string | null;
+      body?: string | null;
     };
     /**
      * @description * `per_hour` - Per hour
@@ -9915,6 +10286,15 @@ export interface components {
       exempt_reason?: string;
       active?: boolean;
     };
+    Template: {
+      type_key: string;
+      channel: components["schemas"]["MessageChannelEnum"];
+      subject: string;
+      body: string;
+      customised: boolean;
+      version: number;
+      variables: string[];
+    };
     TemplateField: {
       key: string;
       label: string;
@@ -9968,6 +10348,11 @@ export interface components {
      * @enum {string}
      */
     TemplateFieldVisibilityEnum: "staff" | "client" | "student";
+    TemplateWriteRequest: {
+      /** @default  */
+      subject: string;
+      body: string;
+    };
     /**
      * @description * `locale` - Locale default
      *     * `24h` - 24-hour
@@ -9976,7 +10361,7 @@ export interface components {
      */
     TimeFormatEnum: "locale" | "24h" | "12h";
     TimelineItem: {
-      kind: components["schemas"]["KindEnum"];
+      kind: components["schemas"]["TimelineItemKindEnum"];
       id: string;
       /** Format: date-time */
       at: string;
@@ -9984,6 +10369,15 @@ export interface components {
       body: string;
       actor_id: string | null;
     };
+    /**
+     * @description * `note` - note
+     *     * `task` - task
+     *     * `document` - document
+     *     * `change` - change
+     *     * `message` - message
+     * @enum {string}
+     */
+    TimelineItemKindEnum: "note" | "task" | "document" | "change" | "message";
     TokenRequest: {
       token: string;
     };
@@ -10148,6 +10542,13 @@ export interface components {
       subject: string;
       level?: string;
       proficiency?: components["schemas"]["ProficiencyEnum"];
+    };
+    UnreadCount: {
+      unread: number;
+    };
+    Unsubscribe: {
+      category: string;
+      done: boolean;
     };
     UploadRequestRequest: {
       filename: string;
@@ -12769,6 +13170,53 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ClientDetail"];
+        };
+      };
+    };
+  };
+  communication_preferences_retrieve: {
+    parameters: {
+      query?: {
+        person_id?: string;
+        person_type?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Preferences"];
+        };
+      };
+    };
+  };
+  communication_preferences_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PreferencesRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PreferencesRequest"];
+        "multipart/form-data": components["schemas"]["PreferencesRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Preferences"];
         };
       };
     };
@@ -16658,6 +17106,217 @@ export interface operations {
       };
     };
   };
+  message_templates_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        channel: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Template"];
+        };
+      };
+    };
+  };
+  message_templates_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        channel: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TemplateWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TemplateWriteRequest"];
+        "multipart/form-data": components["schemas"]["TemplateWriteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Template"];
+        };
+      };
+    };
+  };
+  message_templates_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        channel: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  message_templates_preview_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        channel: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PreviewRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PreviewRequestRequest"];
+        "multipart/form-data": components["schemas"]["PreviewRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Preview"];
+        };
+      };
+    };
+  };
+  message_templates_test_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        channel: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Message"];
+        };
+      };
+    };
+  };
+  messages_list: {
+    parameters: {
+      query?: {
+        /**
+         * @description * `email` - Email
+         *     * `sms` - Text message
+         */
+        channel?: "email" | "sms";
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        related_id?: string;
+        related_type?: string;
+        /**
+         * @description * `queued` - Queued
+         *     * `sent` - Sent
+         *     * `delivered` - Delivered
+         *     * `opened` - Opened
+         *     * `clicked` - Clicked
+         *     * `bounced` - Bounced
+         *     * `complained` - Marked as spam
+         *     * `failed` - Failed
+         *     * `suppressed` - Not sent (suppressed)
+         */
+        status?: (
+          | "bounced"
+          | "clicked"
+          | "complained"
+          | "delivered"
+          | "failed"
+          | "opened"
+          | "queued"
+          | "sent"
+          | "suppressed"
+        )[];
+        target_id?: string;
+        target_type?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedMessageList"];
+        };
+      };
+    };
+  };
+  messages_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this message. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Message"];
+        };
+      };
+    };
+  };
   notes_list: {
     parameters: {
       query?: {
@@ -16786,6 +17445,127 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Note"];
+        };
+      };
+    };
+  };
+  notification_settings_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["NotificationSetting"][];
+        };
+      };
+    };
+  };
+  notification_settings_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NotificationSettingUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["NotificationSettingUpdateRequest"];
+        "multipart/form-data": components["schemas"]["NotificationSettingUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["NotificationSetting"];
+        };
+      };
+    };
+  };
+  notifications_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedInAppList"];
+        };
+      };
+    };
+  };
+  notifications_read_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["MarkReadRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["MarkReadRequest"];
+        "multipart/form-data": components["schemas"]["MarkReadRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["UnreadCount"];
+        };
+      };
+    };
+  };
+  notifications_unread_count_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["UnreadCount"];
         };
       };
     };
@@ -19239,6 +20019,51 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["NudgeResult"];
+        };
+      };
+    };
+  };
+  unsubscribe_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Unsubscribe"];
+        };
+      };
+    };
+  };
+  unsubscribe_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Unsubscribe"];
         };
       };
     };

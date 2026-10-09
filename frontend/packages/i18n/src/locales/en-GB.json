@@ -22,7 +22,8 @@
     "reports": "Lesson reports",
     "unconfirmed": "Unconfirmed lessons",
     "deliverySettings": "Lesson policies",
-    "payments": "Payments setup"
+    "payments": "Payments setup",
+    "notifications": "Notifications"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -485,7 +486,8 @@
       "task": "Task",
       "document": "Document",
       "change": "Change",
-      "none": "Nothing has happened yet."
+      "none": "Nothing has happened yet.",
+      "message": "Message"
     }
   },
   "search": {
@@ -1237,5 +1239,47 @@
     "saveDetails": "Save details",
     "setupDone": "Saved: card or account ending {{last4}}.",
     "autopayOn": "Invoices will be paid automatically."
+  },
+  "comms": {
+    "bell_one": "Notifications ({{count}} new)",
+    "bell_other": "Notifications ({{count}} new)",
+    "bell_zero": "Notifications",
+    "notifications": "Notifications",
+    "markAllRead": "Mark all read",
+    "noNotifications": "Nothing new.",
+    "title": "Notifications",
+    "help": "Choose which messages go out, by which channels, and edit their wording.",
+    "channels": "Channels",
+    "channel": {
+      "email": "Email",
+      "sms": "Text",
+      "in_app": "In the app"
+    },
+    "hoursBefore": "Hours before",
+    "hoursHint": "Up to three, e.g. 24, 2",
+    "save": "Save",
+    "saved": "Saved.",
+    "editTemplates": "Edit wording",
+    "templateFor": "Wording: {{label}}",
+    "close": "Close",
+    "channelLabel": "Channel",
+    "subject": "Subject",
+    "body": "Message",
+    "variables": "You can use:",
+    "saveTemplate": "Save wording",
+    "preview": "Preview",
+    "sendTest": "Send me a test",
+    "revert": "Use the standard wording",
+    "version": "Your version {{n}}",
+    "testSent": "Test sent.",
+    "segments_one": "{{count}} text message",
+    "segments_other": "{{count}} text messages",
+    "category": {
+      "scheduling": "Lessons",
+      "reports": "Lesson reports",
+      "billing": "Billing",
+      "account": "Account",
+      "staff": "Staff alerts"
+    }
   }
 }

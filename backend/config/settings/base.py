@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "tutortrack.delivery",
     "tutortrack.billing",
     "tutortrack.payments",
+    "tutortrack.comms",
 ]
 
 MIDDLEWARE = [
@@ -293,6 +294,7 @@ SPECTACULAR_SETTINGS = {
         "AttendanceOutcomeEnum": "tutortrack.scheduling.models.LessonAttendee.Outcome",
         "CancellationPolicyScopeEnum": "tutortrack.delivery.models.CancellationPolicy.Scope",
         "InvoiceStatusEnum": "tutortrack.billing.models.Invoice.Status",
+        "MessageChannelEnum": "tutortrack.comms.models.Channel",
         "ChargeStatusEnum": "tutortrack.billing.models.Charge.Status",
         "ChargeKindEnum": "tutortrack.billing.models.Charge.Kind",
         "InvoiceRunStatusEnum": "tutortrack.billing.models.InvoiceRun.Status",
@@ -317,6 +319,16 @@ STRIPE = {
     "WEBHOOK_SECRET": env("STRIPE_WEBHOOK_SECRET", default=""),
     "APPLICATION_FEE_PERCENT": env("STRIPE_APPLICATION_FEE_PERCENT", default="0"),
 }
+
+# Communications (E13): Twilio for SMS (empty = a fake that records texts); Postmark
+# delivery webhooks authenticate with a shared token in the URL.
+TWILIO = {
+    "ACCOUNT_SID": env("TWILIO_ACCOUNT_SID", default=""),
+    "AUTH_TOKEN": env("TWILIO_AUTH_TOKEN", default=""),
+    "FROM": env("TWILIO_FROM", default=""),
+}
+POSTMARK_WEBHOOK_TOKEN = env("POSTMARK_WEBHOOK_TOKEN", default="")
+PLATFORM_BASE_URL = env("PLATFORM_BASE_URL", default="http://localhost:8010")
 
 TEMPORAL = {
     "ADDRESS": env("TEMPORAL_ADDRESS", default="localhost:7233"),

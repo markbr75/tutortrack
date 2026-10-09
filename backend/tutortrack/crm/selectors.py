@@ -26,6 +26,15 @@ class TimelineItem:
     actor_id: str | None
 
 
+TimelineProvider = Any  # (user, target_type, target_id, limit) -> list[TimelineItem]
+_providers: dict[str, TimelineProvider] = {}
+
+
+def register_timeline_provider(kind: str, provider: TimelineProvider) -> None:
+    """Other apps add their items to record timelines (E13 messages, ...)."""
+    _providers[kind] = provider
+
+
 def visible_notes(user: Any) -> Any:
     qs = Note.objects.all()
     if not has_perm(user, "crm.note.view_staff_only"):
@@ -39,7 +48,7 @@ def timeline(
     """Notes, tasks, documents and record changes for one record, newest first. Messages,
     lessons, invoices and payments join as their epics land (E13, E08, E10, E11)."""
     items: list[TimelineItem] = []
-    want = kinds or {"note", "task", "document", "change"}
+    want = kinds or {"note", "task", "document", "change", *_providers}
     if "note" in want and has_perm(user, "crm.note.view"):
         for n in visible_notes(user).filter(target_type=target_type, target_id=target_id)[:limit]:
             items.append(
@@ -90,6 +99,9 @@ def timeline(
                     str(a.actor_id) if a.actor_id else None,
                 )
             )
+    for kind, provider in _providers.items():
+        if kind in want:
+            items.extend(provider(user, target_type, target_id, limit))
     items.sort(key=lambda i: i.at, reverse=True)
     return items[:limit]
 

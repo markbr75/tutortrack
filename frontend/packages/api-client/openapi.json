@@ -5317,6 +5317,92 @@
                 }
             }
         },
+        "/api/v1/communication-preferences": {
+            "get": {
+                "operationId": "communication_preferences_retrieve",
+                "description": "A contact's or tutor's channel choices per category (FR-13-5).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "person_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "person_type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "communication-preferences"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Preferences"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "communication_preferences_update",
+                "description": "A contact's or tutor's channel choices per category (FR-13-5).",
+                "tags": [
+                    "communication-preferences"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PreferencesRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PreferencesRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PreferencesRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Preferences"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/conflicts/check": {
             "post": {
                 "operationId": "conflicts_check_create",
@@ -13202,6 +13288,443 @@
                 }
             }
         },
+        "/api/v1/message-templates/{key}/{channel}": {
+            "get": {
+                "operationId": "message_templates_retrieve",
+                "description": "A type's template for one channel: the organisation's override or the default.\n``PUT`` saves a new version; ``DELETE`` reverts to the default.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "channel",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "message-templates"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Template"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "message_templates_update",
+                "description": "A type's template for one channel: the organisation's override or the default.\n``PUT`` saves a new version; ``DELETE`` reverts to the default.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "channel",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "message-templates"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TemplateWriteRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TemplateWriteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TemplateWriteRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Template"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "message_templates_destroy",
+                "description": "A type's template for one channel: the organisation's override or the default.\n``PUT`` saves a new version; ``DELETE`` reverts to the default.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "channel",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "message-templates"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/message-templates/{key}/{channel}/preview": {
+            "post": {
+                "operationId": "message_templates_preview_create",
+                "description": "Render a template (the saved one, or the draft sent) with sample data.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "channel",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "message-templates"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PreviewRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PreviewRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PreviewRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Preview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/message-templates/{key}/{channel}/test": {
+            "post": {
+                "operationId": "message_templates_test_create",
+                "description": "Send the sample message to yourself (email or your notifications).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "channel",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "message-templates"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/messages": {
+            "get": {
+                "operationId": "messages_list",
+                "description": "The message log (FR-13-4): what was sent to whom, with delivery events.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "channel",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "email",
+                                "sms"
+                            ]
+                        },
+                        "description": "* `email` - Email\n* `sms` - Text message"
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "related_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "related_type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "bounced",
+                                    "clicked",
+                                    "complained",
+                                    "delivered",
+                                    "failed",
+                                    "opened",
+                                    "queued",
+                                    "sent",
+                                    "suppressed"
+                                ]
+                            }
+                        },
+                        "description": "* `queued` - Queued\n* `sent` - Sent\n* `delivered` - Delivered\n* `opened` - Opened\n* `clicked` - Clicked\n* `bounced` - Bounced\n* `complained` - Marked as spam\n* `failed` - Failed\n* `suppressed` - Not sent (suppressed)",
+                        "explode": true,
+                        "style": "form"
+                    },
+                    {
+                        "in": "query",
+                        "name": "target_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "target_type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedMessageList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/messages/{id}": {
+            "get": {
+                "operationId": "messages_retrieve",
+                "description": "The message log (FR-13-4): what was sent to whom, with delivery events.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this message.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/notes": {
             "get": {
                 "operationId": "notes_list",
@@ -13459,6 +13982,234 @@
                 "responses": {
                     "204": {
                         "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/notification-settings": {
+            "get": {
+                "operationId": "notification_settings_list",
+                "description": "Every notification type with the organisation's choice (FR-13-2).",
+                "tags": [
+                    "notification-settings"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/NotificationSetting"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/notification-settings/{key}": {
+            "put": {
+                "operationId": "notification_settings_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "notification-settings"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NotificationSettingUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NotificationSettingUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NotificationSettingUpdateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotificationSetting"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/notifications": {
+            "get": {
+                "operationId": "notifications_list",
+                "description": "Your in-app notifications (the bell). Poll ``unread-count``.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedInAppList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/notifications/read": {
+            "post": {
+                "operationId": "notifications_read_create",
+                "description": "Your in-app notifications (the bell). Poll ``unread-count``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MarkReadRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MarkReadRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MarkReadRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnreadCount"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/notifications/unread-count": {
+            "get": {
+                "operationId": "notifications_unread_count_retrieve",
+                "description": "Your in-app notifications (the bell). Poll ``unread-count``.",
+                "tags": [
+                    "notifications"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnreadCount"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -18481,6 +19232,80 @@
                     }
                 }
             }
+        },
+        "/api/v1/unsubscribe/{token}": {
+            "get": {
+                "operationId": "unsubscribe_retrieve",
+                "description": "One-click unsubscribe from the link in an email (RFC 8058).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "unsubscribe"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Unsubscribe"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "unsubscribe_create",
+                "description": "One-click unsubscribe from the link in an email (RFC 8058).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "unsubscribe"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Unsubscribe"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -22820,6 +23645,52 @@
                     "write"
                 ]
             },
+            "InApp": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "type_key": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "body": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "link": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "read_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "body",
+                    "created_at",
+                    "id",
+                    "link",
+                    "read_at",
+                    "title",
+                    "type_key"
+                ]
+            },
             "Invitation": {
                 "type": "object",
                 "properties": {
@@ -24724,16 +25595,6 @@
                 "type": "string",
                 "description": "* `offered` - Offered\n* `active` - Active\n* `ended` - Ended\n* `declined` - Declined"
             },
-            "KindEnum": {
-                "enum": [
-                    "note",
-                    "task",
-                    "document",
-                    "change"
-                ],
-                "type": "string",
-                "description": "* `note` - note\n* `task` - task\n* `document` - document\n* `change` - change"
-            },
             "LedgerAdjustRequest": {
                 "type": "object",
                 "properties": {
@@ -26134,6 +26995,19 @@
                     "valid_days"
                 ]
             },
+            "MarkReadRequest": {
+                "type": "object",
+                "properties": {
+                    "ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "nullable": true
+                    }
+                }
+            },
             "Me": {
                 "type": "object",
                 "properties": {
@@ -26336,6 +27210,176 @@
                 "type": "string",
                 "description": "* `active` - active\n* `suspended` - suspended"
             },
+            "Message": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "type_key": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "channel": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MessageChannelEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "recipient_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "recipient_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "recipient_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "to": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "subject": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "body": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MessageStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "related_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "related_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "target_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "target_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "scheduled_for": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "sent_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "segments": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "events": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MessageEvent"
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "body",
+                    "channel",
+                    "created_at",
+                    "error",
+                    "events",
+                    "id",
+                    "recipient_id",
+                    "recipient_name",
+                    "recipient_type",
+                    "related_id",
+                    "related_type",
+                    "scheduled_for",
+                    "segments",
+                    "sent_at",
+                    "status",
+                    "subject",
+                    "target_id",
+                    "target_type",
+                    "to",
+                    "type_key"
+                ]
+            },
+            "MessageChannelEnum": {
+                "enum": [
+                    "email",
+                    "sms",
+                    "in_app"
+                ],
+                "type": "string",
+                "description": "* `email` - Email\n* `sms` - Text message\n* `in_app` - In the app"
+            },
+            "MessageEvent": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "occurred_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "detail": {
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "detail",
+                    "occurred_at",
+                    "type"
+                ]
+            },
+            "MessageStatusEnum": {
+                "enum": [
+                    "queued",
+                    "sent",
+                    "delivered",
+                    "opened",
+                    "clicked",
+                    "bounced",
+                    "complained",
+                    "failed",
+                    "suppressed"
+                ],
+                "type": "string",
+                "description": "* `queued` - Queued\n* `sent` - Sent\n* `delivered` - Delivered\n* `opened` - Opened\n* `clicked` - Clicked\n* `bounced` - Bounced\n* `complained` - Marked as spam\n* `failed` - Failed\n* `suppressed` - Not sent (suppressed)"
+            },
             "MoneyOut": {
                 "type": "object",
                 "description": "Read-only money in computed responses (quotes, summaries).",
@@ -26520,6 +27564,91 @@
                 ],
                 "type": "string",
                 "description": "* `staff_only` - Staff only\n* `staff_and_tutors` - Staff and tutors\n* `shared_with_client` - Shared with the client"
+            },
+            "NotificationSetting": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "string"
+                    },
+                    "audience": {
+                        "type": "string"
+                    },
+                    "channels": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MessageChannelEnum"
+                        }
+                    },
+                    "available_channels": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MessageChannelEnum"
+                        }
+                    },
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "timing": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "has_timing": {
+                        "type": "boolean"
+                    },
+                    "transactional": {
+                        "type": "boolean"
+                    },
+                    "customised": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "audience",
+                    "available_channels",
+                    "category",
+                    "channels",
+                    "customised",
+                    "enabled",
+                    "has_timing",
+                    "key",
+                    "label",
+                    "timing",
+                    "transactional"
+                ]
+            },
+            "NotificationSettingUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "channels": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MessageChannelEnum"
+                        }
+                    },
+                    "timing": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "channels",
+                    "enabled"
+                ]
             },
             "NudgeRequest": {
                 "type": "object",
@@ -27363,6 +28492,32 @@
                     }
                 }
             },
+            "PaginatedInAppList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/InApp"
+                        }
+                    }
+                }
+            },
             "PaginatedInvitationList": {
                 "type": "object",
                 "required": [
@@ -27619,6 +28774,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Membership"
+                        }
+                    }
+                }
+            },
+            "PaginatedMessageList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Message"
                         }
                     }
                 }
@@ -30488,6 +31669,15 @@
                     "name"
                 ]
             },
+            "PersonTypeEnum": {
+                "enum": [
+                    "contact",
+                    "tutor",
+                    "user"
+                ],
+                "type": "string",
+                "description": "* `contact` - contact\n* `tutor` - tutor\n* `user` - user"
+            },
             "PolicyOverrideRequest": {
                 "type": "object",
                 "properties": {
@@ -30586,6 +31776,100 @@
                     }
                 }
             },
+            "PreferenceRow": {
+                "type": "object",
+                "properties": {
+                    "category": {
+                        "$ref": "#/components/schemas/PreferenceRowCategoryEnum"
+                    },
+                    "channels": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MessageChannelEnum"
+                        }
+                    }
+                },
+                "required": [
+                    "category",
+                    "channels"
+                ]
+            },
+            "PreferenceRowCategoryEnum": {
+                "enum": [
+                    "scheduling",
+                    "reports",
+                    "billing",
+                    "account",
+                    "staff"
+                ],
+                "type": "string",
+                "description": "* `scheduling` - scheduling\n* `reports` - reports\n* `billing` - billing\n* `account` - account\n* `staff` - staff"
+            },
+            "PreferenceRowRequest": {
+                "type": "object",
+                "properties": {
+                    "category": {
+                        "$ref": "#/components/schemas/PreferenceRowCategoryEnum"
+                    },
+                    "channels": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MessageChannelEnum"
+                        }
+                    }
+                },
+                "required": [
+                    "category",
+                    "channels"
+                ]
+            },
+            "Preferences": {
+                "type": "object",
+                "properties": {
+                    "person_type": {
+                        "$ref": "#/components/schemas/PersonTypeEnum"
+                    },
+                    "person_id": {
+                        "type": "string",
+                        "maxLength": 64
+                    },
+                    "preferences": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PreferenceRow"
+                        }
+                    }
+                },
+                "required": [
+                    "person_id",
+                    "person_type",
+                    "preferences"
+                ]
+            },
+            "PreferencesRequest": {
+                "type": "object",
+                "properties": {
+                    "person_type": {
+                        "$ref": "#/components/schemas/PersonTypeEnum"
+                    },
+                    "person_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                    },
+                    "preferences": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PreferenceRowRequest"
+                        }
+                    }
+                },
+                "required": [
+                    "person_id",
+                    "person_type",
+                    "preferences"
+                ]
+            },
             "PreferredContactMethodEnum": {
                 "enum": [
                     "email",
@@ -30621,6 +31905,39 @@
                     "method",
                     "url"
                 ]
+            },
+            "Preview": {
+                "type": "object",
+                "properties": {
+                    "subject": {
+                        "type": "string"
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "segments": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "body",
+                    "segments",
+                    "subject"
+                ]
+            },
+            "PreviewRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "subject": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "body": {
+                        "type": "string",
+                        "nullable": true,
+                        "minLength": 1
+                    }
+                }
             },
             "PricingUnitEnum": {
                 "enum": [
@@ -34345,6 +35662,44 @@
                     "percent"
                 ]
             },
+            "Template": {
+                "type": "object",
+                "properties": {
+                    "type_key": {
+                        "type": "string"
+                    },
+                    "channel": {
+                        "$ref": "#/components/schemas/MessageChannelEnum"
+                    },
+                    "subject": {
+                        "type": "string"
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "customised": {
+                        "type": "boolean"
+                    },
+                    "version": {
+                        "type": "integer"
+                    },
+                    "variables": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "body",
+                    "channel",
+                    "customised",
+                    "subject",
+                    "type_key",
+                    "variables",
+                    "version"
+                ]
+            },
             "TemplateField": {
                 "type": "object",
                 "properties": {
@@ -34463,6 +35818,24 @@
                 "type": "string",
                 "description": "* `staff` - staff\n* `client` - client\n* `student` - student"
             },
+            "TemplateWriteRequest": {
+                "type": "object",
+                "properties": {
+                    "subject": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 300
+                    },
+                    "body": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 20000
+                    }
+                },
+                "required": [
+                    "body"
+                ]
+            },
             "TimeFormatEnum": {
                 "enum": [
                     "locale",
@@ -34476,7 +35849,7 @@
                 "type": "object",
                 "properties": {
                     "kind": {
-                        "$ref": "#/components/schemas/KindEnum"
+                        "$ref": "#/components/schemas/TimelineItemKindEnum"
                     },
                     "id": {
                         "type": "string"
@@ -34504,6 +35877,17 @@
                     "kind",
                     "title"
                 ]
+            },
+            "TimelineItemKindEnum": {
+                "enum": [
+                    "note",
+                    "task",
+                    "document",
+                    "change",
+                    "message"
+                ],
+                "type": "string",
+                "description": "* `note` - note\n* `task` - task\n* `document` - document\n* `change` - change\n* `message` - message"
             },
             "TokenRequest": {
                 "type": "object",
@@ -35048,6 +36432,32 @@
                 },
                 "required": [
                     "subject"
+                ]
+            },
+            "UnreadCount": {
+                "type": "object",
+                "properties": {
+                    "unread": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "unread"
+                ]
+            },
+            "Unsubscribe": {
+                "type": "object",
+                "properties": {
+                    "category": {
+                        "type": "string"
+                    },
+                    "done": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "category",
+                    "done"
                 ]
             },
             "UploadRequestRequest": {

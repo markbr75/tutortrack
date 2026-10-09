@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import URLPattern, URLResolver, include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
+from tutortrack.comms.api.views import postmark_webhook, twilio_inbound, twilio_status
 from tutortrack.core.api.health import healthz, readyz
 from tutortrack.payments.api.views import stripe_webhook
 from tutortrack.scheduling.api.views import ical_feed
@@ -21,6 +22,7 @@ api_v1: list[URLPattern | URLResolver] = [
     path("", include("tutortrack.delivery.api.urls")),
     path("", include("tutortrack.billing.api.urls")),
     path("", include("tutortrack.payments.api.urls")),
+    path("", include("tutortrack.comms.api.urls")),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger"),
     path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
@@ -33,6 +35,9 @@ urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("ical/<str:token>.ics", ical_feed, name="ical-feed"),
     path("webhooks/stripe", stripe_webhook, name="stripe-webhook"),
+    path("webhooks/postmark", postmark_webhook, name="postmark-webhook"),
+    path("webhooks/twilio/status", twilio_status, name="twilio-status"),
+    path("webhooks/twilio/inbound", twilio_inbound, name="twilio-inbound"),
     # Temporal Web UI codec server (staff-only, E32 FR-32-9).
     path("temporal-codec/<slug:operation>", codec, name="temporal-codec"),
 ]

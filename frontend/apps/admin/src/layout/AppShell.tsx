@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Link, Outlet } from "@tanstack/react-router";
 import { useEffect } from "react";
 
+import { NotificationBell } from "../comms/NotificationBell";
 import { CommandPalette } from "../crm/CommandPalette";
 import { api, isAuthError, useMe, useMyOrganisations, useOrganisation } from "../api";
 
@@ -25,6 +26,11 @@ const NAV = [
   { to: "/team", key: "nav.team", permission: "team.view" },
   { to: "/audit", key: "nav.audit", permission: "audit.view" },
   { to: "/settings/payments", key: "nav.payments", permission: "payments.provider.manage" },
+  {
+    to: "/settings/notifications",
+    key: "nav.notifications",
+    permission: "comms.settings.manage",
+  },
   { to: "/settings", key: "nav.settings", permission: "org.settings.view" },
   { to: "/account", key: "nav.account", permission: null },
 ] as const;
@@ -145,6 +151,7 @@ export function AppShell() {
       >
         <span className="mr-4 px-2 py-1 font-semibold md:mb-4 md:mr-0">{t("app.name")}</span>
         {permissions["crm.search"] ? <CommandPalette /> : null}
+        <NotificationBell />
         {NAV.filter((item) => !item.permission || permissions[item.permission]).map((item) => (
           <Link
             key={item.to}
