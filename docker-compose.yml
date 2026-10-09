@@ -146,12 +146,15 @@ services:
     environment:
       # The Vite dev proxy runs inside the container: reach the API over the compose network.
       VITE_API_BASE_URL: http://backend:8000
+      # Keep pnpm's content store on a volume, never inside the bind-mounted repo.
+      npm_config_store_dir: /pnpm-store
     ports: ["5173:5173"]
     volumes:
       - ./frontend:/app
       # The container installs its own (Alpine) dependencies; keep every workspace
       # package's node_modules off the bind mount so host installs are unaffected.
       - frontend-node-modules:/app/node_modules
+      - frontend-pnpm-store:/pnpm-store
       - /app/apps/admin/node_modules
       - /app/apps/portal/node_modules
       - /app/apps/widgets/node_modules
@@ -172,3 +175,4 @@ volumes:
   s3-data:
   backend-venv:
   frontend-node-modules:
+  frontend-pnpm-store:

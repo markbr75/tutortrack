@@ -44,3 +44,9 @@ Thumbs.db
 # Playwright
 /frontend/test-results/
 /frontend/playwright-report/
+
+# pnpm content store (created by the frontend container if its store isn't on a volume)
+.pnpm-store/
+# Playwright output
+frontend/test-results/
+frontend/playwright-report/

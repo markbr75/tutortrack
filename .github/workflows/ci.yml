@@ -137,4 +137,10 @@ jobs:
       - run: pnpm e2e --project=chromium
         working-directory: frontend
       - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: frontend/test-results/
+          retention-days: 7
+      - if: failure()
         run: docker compose logs --tail=200
