@@ -50,7 +50,8 @@ def _redirect_url(request: HttpRequest, organisation: Organisation) -> str:
     port = request.get_host().partition(":")[2]
     host = f"{organisation.slug}.{settings.TENANT_BASE_DOMAIN}" + (f":{port}" if port else "")
     scheme = "https" if request.is_secure() else "http"
-    return f"{scheme}://{host}{request.get_full_path()}"
+    # A URL for HttpResponseRedirect, not an HTML response body.
+    return f"{scheme}://{host}{request.get_full_path()}"  # nosemgrep
 
 
 def _from_header(request: HttpRequest, user: Any) -> Resolution | None:

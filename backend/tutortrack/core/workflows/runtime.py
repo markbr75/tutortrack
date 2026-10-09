@@ -11,7 +11,9 @@ from __future__ import annotations
 import asyncio
 import threading
 from collections.abc import Coroutine
-from typing import Any
+from typing import Any, TypeVar
+
+T = TypeVar("T")
 
 _loop: asyncio.AbstractEventLoop | None = None
 _lock = threading.Lock()
@@ -30,7 +32,7 @@ def loop() -> asyncio.AbstractEventLoop:
         return _loop
 
 
-def run[T](coro: Coroutine[Any, Any, T], *, timeout: float | None = 30) -> T:
+def run(coro: Coroutine[Any, Any, T], *, timeout: float | None = 30) -> T:
     """Run ``coro`` on the Temporal loop and wait for the result."""
     future = asyncio.run_coroutine_threadsafe(coro, loop())
     return future.result(timeout=timeout)

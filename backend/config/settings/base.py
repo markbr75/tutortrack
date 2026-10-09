@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "tutortrack.core.middleware.RequestContextMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "tutortrack.core.security.SecurityHeadersMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -301,6 +302,14 @@ OUTBOX = {
 }
 
 IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60
+
+# --- Security headers and outbound requests (E29-T01) ---------------------------------------
+FRAMEABLE_PATH_PREFIXES = ["/widgets/"]  # E24 embeddable endpoints may be framed
+CSP_EXTRA_SCRIPT_SRC: list[str] = []
+CSP_EXTRA_CONNECT_SRC: list[str] = []
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+X_FRAME_OPTIONS = "DENY"
+ALLOW_HTTP_OUTBOUND = False  # SSRF guard (core.net): https only
 
 # --- Organisation lifecycle (E02-T09) ---------------------------------------------------------
 # Writes still allowed while suspended (billing, so the owner can pay; E04 adds its paths).

@@ -32,6 +32,48 @@ data "aws_cloudfront_origin_request_policy" "all_viewer" {
   name = "Managed-AllViewer" # forwards Host so the backend can resolve the tenant
 }
 
+# Security headers for the single-page apps (E29-T01). The SPA bundle has no inline scripts,
+# so script-src stays 'self' (+ Stripe and Turnstile, which the apps embed).
+resource "aws_cloudfront_response_headers_policy" "spa" {
+  name = "${local.name}-spa-security"
+
+  security_headers_config {
+    content_security_policy {
+      override = true
+      content_security_policy = join("; ", [
+        "default-src 'self'",
+        "script-src 'self' https://js.stripe.com https://challenges.cloudflare.com",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: blob: https:",
+        "font-src 'self' data:",
+        "connect-src 'self' https://*.ingest.sentry.io",
+        "frame-src https://js.stripe.com https://challenges.cloudflare.com",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+      ])
+    }
+    strict_transport_security {
+      override                   = true
+      access_control_max_age_sec = 63072000
+      include_subdomains         = true
+      preload                    = true
+    }
+    frame_options {
+      override     = true
+      frame_option = "DENY"
+    }
+    content_type_options {
+      override = true
+    }
+    referrer_policy {
+      override        = true
+      referrer_policy = "strict-origin-when-cross-origin"
+    }
+  }
+}
+
 resource "aws_cloudfront_distribution" "app" {
   enabled             = true
   aliases             = ["*.${var.app_domain}"]
@@ -60,8 +102,9 @@ resource "aws_cloudfront_distribution" "app" {
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
-    cache_policy_id        = data.aws_cloudfront_cache_policy.optimized.id
-    compress               = true
+    cache_policy_id            = data.aws_cloudfront_cache_policy.optimized.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.spa.id
+    compress                   = true
   }
 
   dynamic "ordered_cache_behavior" {

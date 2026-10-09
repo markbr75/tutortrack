@@ -68,6 +68,7 @@ select = ["E", "W", "F", "I", "B", "UP", "DJ", "S", "SIM", "RUF", "PT", "C4", "D
 ignore = [
     "RUF012", # mutable class attributes are idiomatic in Django Meta/DRF
     "DJ001",  # null=True on CharField is used deliberately in a few places
+    "UP046", "UP047",  # PEP 695 generics: Semgrep (SAST, E29) cannot parse them yet
 ]
 
 [tool.ruff.lint.per-file-ignores]

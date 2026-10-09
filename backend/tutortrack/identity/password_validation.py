@@ -47,7 +47,9 @@ class PwnedPasswordValidator:
     def validate(self, password: str, user: Any = None) -> None:
         if not getattr(settings, "PWNED_PASSWORDS_CHECK", True):
             return
-        digest = hashlib.sha1(password.encode(), usedforsecurity=False).hexdigest().upper()
+        # SHA-1 is what the HIBP range API is keyed by; it is not used for security here.
+        hasher = hashlib.sha1(password.encode(), usedforsecurity=False)  # nosemgrep
+        digest = hasher.hexdigest().upper()
         prefix, suffix = digest[:5], digest[5:]
         request = urllib.request.Request(  # noqa: S310 - fixed https URL
             self.URL + prefix, headers={"Add-Padding": "true", "User-Agent": "TutorTrack"}

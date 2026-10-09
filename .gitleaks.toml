@@ -1,0 +1,18 @@
+# Secret scanning (E29-T01). Extends gitleaks' default rules.
+title = "TutorTrack gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Test fixtures and the documented, public development-only keys"
+paths = [
+  '''(^|/)tests?/''',
+  '''(^|/)conftest\.py$''',
+]
+regexes = [
+  # Development defaults for FIELD_ENCRYPTION_KEYS / TEMPORAL_PAYLOAD_KEYS (never used in prod;
+  # production settings refuse to start without real keys).
+  '''DbyhxHUuYW0d6P-VFWYHcV9sWb7MmEwUC9RsDpmJpS8=''',
+  '''3q2\+7wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhs=''',
+]

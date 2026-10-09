@@ -10,6 +10,19 @@ const proxied = { target: apiTarget, changeOrigin: false, xfwd: true };
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // Crawl the app *and* the linked workspace packages at startup so every dependency is
+  // pre-bundled before the first request. Otherwise a cold dev server discovers deps from
+  // packages/* lazily, re-optimises mid-load and serves 504 "Outdated Optimize Dep" chunks
+  // (blank page on first load; this broke the e2e job).
+  optimizeDeps: {
+    entries: [
+      "index.html",
+      "src/**/*.{ts,tsx}",
+      "../../packages/*/src/**/*.{ts,tsx}",
+      "!**/*.{test,stories}.{ts,tsx}",
+      "!**/test-*.ts",
+    ],
+  },
   server: {
     port: 5173,
     strictPort: true,

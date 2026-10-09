@@ -6,11 +6,12 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, TypeVar
 
 from django.utils.module_loading import autodiscover_modules
 
 ALL_QUEUES = "*"
+T = TypeVar("T")
 
 
 @dataclass
@@ -35,7 +36,7 @@ class ProcessInfo:
 registry = Registry()
 
 
-def register_workflow[T](
+def register_workflow(
     *, process: str, task_queue: str = "default", cancel_permission: str | None = None
 ) -> Callable[[type[T]], type[T]]:
     """Class decorator, applied *outside* ``@workflow.defn``."""

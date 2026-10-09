@@ -17,13 +17,15 @@ from __future__ import annotations
 import functools
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeVar
 
 from django.db import close_old_connections
 from temporalio import activity
 
 from ..context import request_context, tenant_context
 from .registry import ALL_QUEUES, register_activity
+
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -39,7 +41,7 @@ def idempotency_key() -> str:
     return f"{info.workflow_id}/{info.activity_id}"
 
 
-def tenant_activity[F: Callable[..., Any]](
+def tenant_activity(
     fn: F | None = None, *, name: str | None = None, task_queue: str = ALL_QUEUES
 ) -> Any:
     """Activities run on the task queue of the workflow that calls them, so by default
@@ -73,7 +75,7 @@ def tenant_activity[F: Callable[..., Any]](
     return decorator(fn) if fn is not None else decorator
 
 
-def platform_activity[F: Callable[..., Any]](
+def platform_activity(
     fn: F | None = None, *, name: str | None = None, task_queue: str = ALL_QUEUES
 ) -> Any:
     """An activity without a tenant (rare: platform housekeeping)."""
