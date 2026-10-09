@@ -150,10 +150,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Start stack
+      - name: Start backend stack
         run: |
           cp .env.example .env
-          docker compose up -d --build --wait backend frontend
+          docker compose up -d --build --wait backend
           docker compose exec -T backend uv run python manage.py seed_demo
       - uses: pnpm/action-setup@v4
         with:
@@ -163,6 +163,16 @@ jobs:
           node-version: 22
       - run: pnpm install --frozen-lockfile && pnpm exec playwright install --with-deps chromium
         working-directory: frontend
+      # Test the production bundle (vite preview reuses the dev proxy to the API), not the
+      # dev server: a cold dev server re-optimises dependencies mid-test.
+      - name: Build and serve the admin app
+        working-directory: frontend
+        env:
+          VITE_API_BASE_URL: http://localhost:8010
+        run: |
+          pnpm --filter @tutortrack/admin build
+          nohup pnpm --filter @tutortrack/admin preview --host 0.0.0.0 --port 5173 --strictPort > /tmp/preview.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf -o /dev/null http://localhost:5173/ && break; sleep 1; done
       - run: pnpm e2e --project=chromium
         working-directory: frontend
       - if: failure()
@@ -172,4 +182,4 @@ jobs:
           path: frontend/test-results/
           retention-days: 7
       - if: failure()
-        run: docker compose logs --tail=200
+        run: docker compose logs --tail=200; cat /tmp/preview.log || true

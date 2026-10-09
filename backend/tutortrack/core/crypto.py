@@ -65,14 +65,21 @@ def decrypt(token: str) -> str:
 
 
 class EncryptedField(models.TextField):
-    """A text value encrypted at rest. Not searchable or orderable by design."""
+    """A text value encrypted at rest. Not searchable or orderable by design.
+
+    Empty strings are stored as empty (they reveal nothing and keep ``blank=True`` defaults
+    and pre-existing empty values readable)."""
 
     def from_db_value(self, value: Any, expression: Any, connection: Any) -> str | None:
-        return None if value is None else decrypt(value)
+        if value is None or value == "":
+            return value
+        return decrypt(value)
 
     def get_prep_value(self, value: Any) -> Any:
         value = super().get_prep_value(value)
-        return None if value is None else encrypt(str(value))
+        if value is None or value == "":
+            return value
+        return encrypt(str(value))
 
     def get_lookup(self, lookup_name: str) -> Any:
         if lookup_name not in {"isnull"}:
@@ -92,7 +99,7 @@ def rotate_field(model: type[models.Model], field: str, *, using: str = "default
     with connections[using].cursor() as cursor:
         cursor.execute(f'SELECT id, "{column}" FROM "{model._meta.db_table}"')  # noqa: S608
         for pk, token in cursor.fetchall():
-            if token is None:
+            if not token:
                 continue
             rotated = fernet().rotate(token.encode()).decode()
             cursor.execute(
