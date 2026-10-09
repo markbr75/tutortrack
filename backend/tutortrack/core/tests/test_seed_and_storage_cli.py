@@ -35,6 +35,10 @@ def test_seed_demo_is_idempotent(settings):
         from tutortrack.jobs.models import Job
 
         assert sorted(Job.objects.values_list("status", flat=True)) == ["active", "seeking_tutor"]
+        from tutortrack.scheduling.models import Lesson, LessonSeries
+
+        assert LessonSeries.objects.count() == 1
+        assert Lesson.objects.filter(status="planned").exists()
 
 
 @pytest.mark.django_db

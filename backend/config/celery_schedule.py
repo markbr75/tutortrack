@@ -6,7 +6,14 @@ organisation (see ``tutortrack.core.tasks.fan_out_per_org``).
 
 from datetime import timedelta
 
+from celery.schedules import crontab
+
 BEAT_SCHEDULE = {
+    # Recurring lessons are materialised up to a rolling horizon (E08 FR-08-2).
+    "extend-series-horizons": {
+        "task": "tutortrack.scheduling.tasks.extend_all_series_horizons",
+        "schedule": crontab(hour=2, minute=30),
+    },
     # Fallback sweep; most events are dispatched immediately via on_commit.
     "outbox-dispatch": {
         "task": "tutortrack.core.events.tasks.dispatch_outbox",

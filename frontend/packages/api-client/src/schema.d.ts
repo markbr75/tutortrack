@@ -242,6 +242,41 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/availability/{tutor_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description A tutor's weekly availability (GET current template and windows, PUT a new one). */
+    get: operations["availability_retrieve"];
+    /** @description A tutor's weekly availability (GET current template and windows, PUT a new one). */
+    put: operations["availability_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/availability/{tutor_id}/slots": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Free start times for a tutor (FR-08-5 AC). */
+    get: operations["availability_slots_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/branches": {
     parameters: {
       query?: never;
@@ -339,6 +374,23 @@ export interface paths {
      *     ``/bulk-jobs/{id}`` for progress and the per-record report (FR-05-12).
      */
     post: operations["bulk_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/calendar": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Lessons and events overlapping ``[start, end)`` in a light shape (FR-08-7). */
+    get: operations["calendar_list"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -904,6 +956,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/conflicts/check": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Dry-run the conflict engine for a proposed lesson (FR-08-6). */
+    post: operations["conflicts_check_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/consent-types": {
     parameters: {
       query?: never;
@@ -1132,6 +1201,43 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/events": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Calendar events and organisation-wide closures (FR-08-4). */
+    get: operations["events_list"];
+    put?: never;
+    /** @description Calendar events and organisation-wide closures (FR-08-4). */
+    post: operations["events_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/events/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Calendar events and organisation-wide closures (FR-08-4). */
+    get: operations["events_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description Calendar events and organisation-wide closures (FR-08-4). */
+    delete: operations["events_destroy"];
+    options?: never;
+    head?: never;
+    /** @description Calendar events and organisation-wide closures (FR-08-4). */
+    patch: operations["events_partial_update"];
+    trace?: never;
+  };
   "/api/v1/features": {
     parameters: {
       query?: never;
@@ -1211,6 +1317,41 @@ export interface paths {
     put?: never;
     /** @description Direct-to-storage uploads: create -> PUT to ``upload.url`` -> complete -> download. */
     post: operations["files_uploads_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ical-feeds": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Your secret calendar feed URLs (FR-08-11). The URL is shown once, when created. */
+    get: operations["ical_feeds_list"];
+    put?: never;
+    /** @description Your secret calendar feed URLs (FR-08-11). The URL is shown once, when created. */
+    post: operations["ical_feeds_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ical-feeds/{id}/revoke": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Your secret calendar feed URLs (FR-08-11). The URL is shown once, when created. */
+    post: operations["ical_feeds_revoke_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -1628,6 +1769,250 @@ export interface paths {
     put?: never;
     /** @description "Set up lessons" for a student: service, rate, tutor and weekly times in one step. */
     post: operations["jobs_quick_setup_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lesson-series": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Recurring lessons (FR-08-2). Create reports occurrences skipped for clashes. */
+    post: operations["lesson_series_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lesson-series/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Recurring lessons (FR-08-2). Create reports occurrences skipped for clashes. */
+    get: operations["lesson_series_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Recurring lessons (FR-08-2). Create reports occurrences skipped for clashes. */
+    patch: operations["lesson_series_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/lesson-series/{id}/end": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Recurring lessons (FR-08-2). Create reports occurrences skipped for clashes. */
+    post: operations["lesson_series_end_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lessons": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.
+     *     A hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the
+     *     permission) to schedule anyway.
+     */
+    get: operations["lessons_list"];
+    put?: never;
+    /**
+     * @description Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.
+     *     A hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the
+     *     permission) to schedule anyway.
+     */
+    post: operations["lessons_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lessons/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.
+     *     A hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the
+     *     permission) to schedule anyway.
+     */
+    get: operations["lessons_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.
+     *     A hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the
+     *     permission) to schedule anyway.
+     */
+    delete: operations["lessons_destroy"];
+    options?: never;
+    head?: never;
+    /** @description ``scope`` = ``this`` (just this lesson), ``following`` or ``all`` (its series). */
+    patch: operations["lessons_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/lessons/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.
+     *     A hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the
+     *     permission) to schedule anyway.
+     */
+    post: operations["lessons_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lessons/{id}/complete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.
+     *     A hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the
+     *     permission) to schedule anyway.
+     */
+    post: operations["lessons_complete_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lessons/{id}/duplicate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.
+     *     A hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the
+     *     permission) to schedule anyway.
+     */
+    post: operations["lessons_duplicate_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lessons/{id}/missed": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.
+     *     A hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the
+     *     permission) to schedule anyway.
+     */
+    post: operations["lessons_missed_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lessons/{id}/pricing": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The pricing trace stored on the lesson (FR-06-4 popover). */
+    get: operations["lessons_pricing_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lessons/{id}/reschedule": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.
+     *     A hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the
+     *     permission) to schedule anyway.
+     */
+    post: operations["lessons_reschedule_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lessons/bulk": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Bulk actions on up to 200 lessons; each lesson succeeds or fails on its own. */
+    post: operations["lessons_bulk_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -2513,6 +2898,50 @@ export interface paths {
     patch: operations["tasks_partial_update"];
     trace?: never;
   };
+  "/api/v1/time-off": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Time off and extra availability (FR-08-5). Creating time off returns the planned
+     *     lessons that now need cover in ``clashes``.
+     */
+    get: operations["time_off_list"];
+    put?: never;
+    /**
+     * @description Time off and extra availability (FR-08-5). Creating time off returns the planned
+     *     lessons that now need cover in ``clashes``.
+     */
+    post: operations["time_off_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/time-off/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * @description Time off and extra availability (FR-08-5). Creating time off returns the planned
+     *     lessons that now need cover in ``clashes``.
+     */
+    delete: operations["time_off_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/timeline": {
     parameters: {
       query?: never;
@@ -2630,6 +3059,15 @@ export interface components {
       password?: string;
     };
     /**
+     * @description * `complete` - complete
+     *     * `cancel` - cancel
+     *     * `reassign_tutor` - reassign_tutor
+     *     * `change_location` - change_location
+     *     * `delete` - delete
+     * @enum {string}
+     */
+    ActionEnum: "complete" | "cancel" | "reassign_tutor" | "change_location" | "delete";
+    /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
      *
      *         class Meta:
@@ -2731,6 +3169,24 @@ export interface components {
       readonly request_id: string;
       /** Format: date-time */
       readonly created_at: string;
+    };
+    Availability: {
+      /** Format: date */
+      effective_from: string;
+      timezone: string;
+      windows: components["schemas"]["Window"][];
+    };
+    /**
+     * @description * `extra` - Extra availability
+     *     * `off` - Time off
+     * @enum {string}
+     */
+    AvailabilityExceptionTypeEnum: "extra" | "off";
+    AvailabilityRequest: {
+      /** Format: date */
+      effective_from: string;
+      timezone: string;
+      windows: components["schemas"]["WindowRequest"][];
     };
     /**
      * @description * `pay_as_you_go` - Pay as you go
@@ -2846,6 +3302,23 @@ export interface components {
      * @enum {string}
      */
     BulkJobStatusEnum: "queued" | "running" | "completed" | "failed";
+    BulkLessonRequest: {
+      action: components["schemas"]["ActionEnum"];
+      ids: string[];
+      /** Format: uuid */
+      tutor?: string;
+      /** Format: uuid */
+      location?: string | null;
+      /** @default  */
+      reason: string;
+    };
+    BulkResult: {
+      succeeded: string[];
+      /** @description Lesson id: reason */
+      failed: {
+        [key: string]: string;
+      };
+    };
     /**
      * @description * `sole_trader` - Sole trader
      *     * `team` - Small team
@@ -2855,6 +3328,112 @@ export interface components {
      * @enum {string}
      */
     BusinessTypeEnum: "sole_trader" | "team" | "agency" | "centre" | "online";
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    CalendarEvent: {
+      /** Format: uuid */
+      readonly id: string;
+      type?: components["schemas"]["CalendarEventTypeEnum"];
+      title: string;
+      description?: string;
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      timezone: string;
+      all_day?: boolean;
+      org_wide?: boolean;
+      /** Format: uuid */
+      branch?: string | null;
+      readonly participants: string[];
+      paid?: boolean;
+      cancel_lessons?: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    CalendarEventRequest: {
+      type?: components["schemas"]["CalendarEventTypeEnum"];
+      title: string;
+      description?: string;
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      timezone: string;
+      all_day?: boolean;
+      org_wide?: boolean;
+      /** Format: uuid */
+      branch?: string | null;
+      tutors?: string[];
+      paid?: boolean;
+      cancel_lessons?: boolean;
+    };
+    /**
+     * @description * `meeting` - Meeting
+     *     * `training` - Training
+     *     * `admin` - Admin
+     *     * `blocked` - Blocked / unavailable
+     *     * `holiday` - Holiday / closure
+     *     * `custom` - Other
+     * @enum {string}
+     */
+    CalendarEventTypeEnum: "meeting" | "training" | "admin" | "blocked" | "holiday" | "custom";
+    CalendarItem: {
+      kind: components["schemas"]["CalendarItemKindEnum"];
+      id: string;
+      title: string;
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      timezone: string;
+      status: string;
+      colour: string;
+      service: string | null;
+      job: string | null;
+      series: string | null;
+      location: string;
+      online: boolean;
+      tutors: components["schemas"]["PersonRef"][];
+      students: components["schemas"]["PersonRef"][];
+      locked: boolean;
+      org_wide?: boolean;
+      all_day?: boolean;
+    };
+    /**
+     * @description * `lesson` - lesson
+     *     * `event` - event
+     * @enum {string}
+     */
+    CalendarItemKindEnum: "lesson" | "event";
+    CancelRequest: {
+      /** @default  */
+      reason: string;
+      /** @default false */
+      chargeable: boolean;
+      /** @default true */
+      notify: boolean;
+    };
     /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
      *
@@ -3058,6 +3637,41 @@ export interface components {
     CodeRequest: {
       code: string;
     };
+    Conflict: {
+      kind: string;
+      severity: components["schemas"]["SeverityEnum"];
+      message: string;
+      lesson_id: string | null;
+      tutor_id: string | null;
+      student_id: string | null;
+    };
+    ConflictCheckRequest: {
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      timezone?: string;
+      tutors?: string[];
+      students?: string[];
+      /**
+       * Format: uuid
+       * @description Ignore this lesson (editing it).
+       */
+      lesson?: string | null;
+      /** Format: uuid */
+      location?: string | null;
+      /** @default false */
+      online: boolean;
+      /** Format: uuid */
+      job?: string | null;
+    };
+    /**
+     * @description * `skip` - skip
+     *     * `create` - create
+     *     * `fail` - fail
+     * @enum {string}
+     */
+    ConflictModeEnum: "skip" | "create" | "fail";
     /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
      *
@@ -3245,6 +3859,16 @@ export interface components {
       language?: string;
       custom_fields?: unknown;
     };
+    /**
+     * @description * `admin` - Admin
+     *     * `tutor` - Tutor
+     *     * `client_booking` - Client booking
+     *     * `api` - API
+     *     * `import` - Import
+     *     * `series` - Series
+     * @enum {string}
+     */
+    CreatedViaEnum: "admin" | "tutor" | "client_booking" | "api" | "import" | "series";
     /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
      *
@@ -3436,6 +4060,12 @@ export interface components {
       client_id: string | null;
       reason: string;
     };
+    DuplicateRequest: {
+      /** Format: date-time */
+      start: string;
+      /** @default false */
+      override_conflicts: boolean;
+    };
     /**
      * @description * `contact` - contact
      *     * `student` - student
@@ -3475,10 +4105,142 @@ export interface components {
       /** @default  */
       reason: string;
     };
+    EndSeriesRequest: {
+      /** Format: date */
+      after?: string;
+      /** @default  */
+      reason: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Exception: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      tutor: string;
+      type: components["schemas"]["AvailabilityExceptionTypeEnum"];
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      reason?: string;
+      readonly status: components["schemas"]["ExceptionStatusEnum"];
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    ExceptionRequest: {
+      /** Format: uuid */
+      tutor: string;
+      type: components["schemas"]["AvailabilityExceptionTypeEnum"];
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      reason?: string;
+    };
+    /**
+     * @description * `requested` - Requested
+     *     * `approved` - Approved
+     *     * `declined` - Declined
+     * @enum {string}
+     */
+    ExceptionStatusEnum: "requested" | "approved" | "declined";
     Features: {
       features: {
         [key: string]: boolean;
       };
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Feed: {
+      /** Format: uuid */
+      readonly id: string;
+      kind: components["schemas"]["FeedKindEnum"];
+      /** Format: uuid */
+      subject_id: string;
+      /** Format: date-time */
+      readonly revoked_at: string | null;
+      /** Format: date-time */
+      readonly last_used_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    FeedCreated: {
+      /** Format: uuid */
+      readonly id: string;
+      kind: components["schemas"]["FeedKindEnum"];
+      /** Format: uuid */
+      subject_id: string;
+      /** Format: date-time */
+      readonly revoked_at: string | null;
+      /** Format: date-time */
+      readonly last_used_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly url: string;
+    };
+    /**
+     * @description * `tutor` - Tutor schedule
+     *     * `client` - Household schedule
+     *     * `student` - Student schedule
+     * @enum {string}
+     */
+    FeedKindEnum: "tutor" | "client" | "student";
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    FeedRequest: {
+      kind: components["schemas"]["FeedKindEnum"];
+      /** Format: uuid */
+      subject_id: string;
     };
     FileUploadCreated: {
       file: components["schemas"]["StoredFile"];
@@ -4025,6 +4787,220 @@ export interface components {
      *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
+    Lesson: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly job: string | null;
+      /** Format: uuid */
+      readonly series: string | null;
+      /** Format: date */
+      readonly occurrence_date: string | null;
+      readonly is_exception: boolean;
+      /** Format: uuid */
+      readonly service: string;
+      /** Format: uuid */
+      readonly branch: string;
+      readonly title: string;
+      /** Format: date-time */
+      readonly start: string;
+      /** Format: date-time */
+      readonly end: string;
+      readonly duration_minutes: number;
+      readonly timezone: string;
+      readonly status: components["schemas"]["LessonStatusEnum"];
+      /** Format: uuid */
+      readonly location: string | null;
+      readonly online: boolean;
+      /** Format: uri */
+      readonly meeting_url: string;
+      readonly meeting_provider: string;
+      readonly notes_internal: string;
+      readonly notes_for_tutor: string;
+      readonly notes_for_client: string;
+      readonly colour: string;
+      readonly created_via: components["schemas"]["CreatedViaEnum"];
+      readonly lock_state: components["schemas"]["LockStateEnum"];
+      /** Format: date-time */
+      readonly rescheduled_from: string | null;
+      readonly reschedule_reason: string;
+      readonly status_reason: string;
+      /** Format: date-time */
+      readonly status_changed_at: string | null;
+      readonly chargeable_cancellation: boolean;
+      readonly tutors: components["schemas"]["LessonTutor"][];
+      readonly attendees: components["schemas"]["LessonAttendee"][];
+      readonly custom_fields: unknown;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    LessonAttendee: {
+      /** Format: uuid */
+      student: string;
+      readonly name: string;
+      /** Format: uuid */
+      client: string;
+      charge_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      charge_amount?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      tax_amount?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      charge_snapshot?: unknown;
+      chargeable?: boolean;
+    };
+    LessonAttendeeInputRequest: {
+      /** Format: uuid */
+      student: string;
+      charge_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
+    LessonReasonRequest: {
+      /** @default  */
+      reason: string;
+    };
+    LessonResult: {
+      lesson: components["schemas"]["Lesson"];
+      warnings: components["schemas"]["Conflict"][];
+    };
+    /**
+     * @description * `planned` - Planned
+     *     * `completed` - Completed
+     *     * `cancelled` - Cancelled
+     *     * `missed` - Missed
+     * @enum {string}
+     */
+    LessonStatusEnum: "planned" | "completed" | "cancelled" | "missed";
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    LessonTutor: {
+      /** Format: uuid */
+      tutor: string;
+      readonly name: string;
+      pay_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      pay_amount?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      pay_snapshot?: unknown;
+      payable?: boolean;
+    };
+    LessonTutorInputRequest: {
+      /** Format: uuid */
+      tutor: string;
+      pay_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
+    /**
+     * @description * `this` - this
+     *     * `following` - following
+     *     * `all` - all
+     * @enum {string}
+     */
+    LessonUpdateScopeEnum: "this" | "following" | "all";
+    LessonWriteRequest: {
+      /** Format: uuid */
+      job?: string | null;
+      /** Format: uuid */
+      service?: string | null;
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      timezone?: string;
+      attendees?: components["schemas"]["LessonAttendeeInputRequest"][];
+      tutors?: components["schemas"]["LessonTutorInputRequest"][];
+      title?: string;
+      /** Format: uuid */
+      location?: string | null;
+      online?: boolean;
+      meeting_url?: string;
+      notes_internal?: string;
+      notes_for_tutor?: string;
+      notes_for_client?: string;
+      colour?: string;
+      /** @default false */
+      override_conflicts: boolean;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
     Level: {
       /** Format: uuid */
       readonly id: string;
@@ -4120,6 +5096,13 @@ export interface components {
      * @enum {string}
      */
     LocationTypeEnum: "centre" | "client_home" | "tutor_home" | "school" | "online" | "other";
+    /**
+     * @description * `unlocked` - Unlocked
+     *     * `invoiced` - Invoiced
+     *     * `paid` - Paid
+     * @enum {string}
+     */
+    LockStateEnum: "unlocked" | "invoiced" | "paid";
     LoginEvent: {
       /** Format: uuid */
       id: string;
@@ -4221,12 +5204,6 @@ export interface components {
      * @enum {string}
      */
     MembershipUpdateStatusEnum: "active" | "suspended";
-    /**
-     * @description * `solo` - Solo
-     *     * `multi` - Multi-user
-     * @enum {string}
-     */
-    ModeEnum: "solo" | "multi";
     /** @description Read-only money in computed responses (quotes, summaries). */
     MoneyOut: {
       amount: string;
@@ -4343,7 +5320,7 @@ export interface components {
       slug: string;
       readonly url: string;
       business_type?: components["schemas"]["BusinessTypeEnum"];
-      mode?: components["schemas"]["ModeEnum"];
+      mode?: components["schemas"]["OrganisationModeEnum"];
       readonly status: components["schemas"]["OrganisationStatusEnum"];
       /** @description ISO 3166-1 alpha-2 */
       country?: string;
@@ -4367,6 +5344,12 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    /**
+     * @description * `solo` - Solo
+     *     * `multi` - Multi-user
+     * @enum {string}
+     */
+    OrganisationModeEnum: "solo" | "multi";
     /**
      * @description * `trial` - Trial
      *     * `active` - Active
@@ -4496,6 +5479,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["BulkJob"][];
     };
+    PaginatedCalendarEventList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["CalendarEvent"][];
+    };
     PaginatedClientList: {
       /**
        * Format: uri
@@ -4508,6 +5504,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Client"][];
+    };
+    PaginatedConflictList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Conflict"][];
     };
     PaginatedConsentRecordList: {
       /**
@@ -4574,6 +5583,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Document"][];
     };
+    PaginatedExceptionList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Exception"][];
+    };
     PaginatedInvitationList: {
       /**
        * Format: uri
@@ -4599,6 +5621,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Job"][];
+    };
+    PaginatedLessonList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Lesson"][];
     };
     PaginatedLocationList: {
       /**
@@ -4803,6 +5838,34 @@ export interface components {
      *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
+    PatchedCalendarEventRequest: {
+      type?: components["schemas"]["CalendarEventTypeEnum"];
+      title?: string;
+      description?: string;
+      /** Format: date-time */
+      start?: string;
+      /** Format: date-time */
+      end?: string;
+      timezone?: string;
+      all_day?: boolean;
+      org_wide?: boolean;
+      /** Format: uuid */
+      branch?: string | null;
+      tutors?: string[];
+      paid?: boolean;
+      cancel_lessons?: boolean;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
     PatchedCategoryRequest: {
       name?: string;
       order?: number;
@@ -4982,6 +6045,36 @@ export interface components {
       policy_overrides?: unknown;
       custom_fields?: unknown;
     };
+    PatchedLessonUpdateRequest: {
+      /** Format: uuid */
+      service?: string | null;
+      /** Format: date-time */
+      start?: string;
+      /** Format: date-time */
+      end?: string;
+      timezone?: string;
+      attendees?: components["schemas"]["LessonAttendeeInputRequest"][];
+      tutors?: components["schemas"]["LessonTutorInputRequest"][];
+      title?: string;
+      /** Format: uuid */
+      location?: string | null;
+      online?: boolean;
+      meeting_url?: string;
+      notes_internal?: string;
+      notes_for_tutor?: string;
+      notes_for_client?: string;
+      colour?: string;
+      /** @default false */
+      override_conflicts: boolean;
+      /** @default this */
+      scope: components["schemas"]["LessonUpdateScopeEnum"];
+      /** @default false */
+      overwrite_exceptions: boolean;
+      /** @default true */
+      notify: boolean;
+      /** @default  */
+      reason: string;
+    };
     /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
      *
@@ -5063,7 +6156,7 @@ export interface components {
       legal_name?: string;
       slug?: string;
       business_type?: components["schemas"]["BusinessTypeEnum"];
-      mode?: components["schemas"]["ModeEnum"];
+      mode?: components["schemas"]["OrganisationModeEnum"];
       /** @description ISO 3166-1 alpha-2 */
       country?: string;
       default_currency?: string;
@@ -5169,6 +6262,27 @@ export interface components {
       filters?: unknown;
       columns?: unknown;
       ordering?: string;
+    };
+    PatchedSeriesUpdateRequest: {
+      scope?: components["schemas"]["SeriesUpdateScopeEnum"];
+      /** Format: uuid */
+      from_lesson?: string;
+      /** @default false */
+      overwrite_exceptions: boolean;
+      /** Format: time */
+      start_time?: string;
+      duration_minutes?: number;
+      rrule?: string;
+      /** Format: date */
+      until?: string | null;
+      count?: number | null;
+      skip_holidays?: boolean;
+      attendees?: components["schemas"]["LessonAttendeeInputRequest"][];
+      tutors?: components["schemas"]["LessonTutorInputRequest"][];
+      /** Format: uuid */
+      location?: string | null;
+      online?: boolean;
+      notes_for_tutor?: string;
     };
     /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
@@ -5449,6 +6563,10 @@ export interface components {
       codename: string;
       category: string;
       description: string;
+    };
+    PersonRef: {
+      id: string;
+      name: string;
     };
     /**
      * @description * `email` - Email
@@ -5844,6 +6962,18 @@ export interface components {
       conflicts: number;
       new_assignment: components["schemas"]["JobTutor"] | null;
     };
+    RescheduleRequest: {
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      /** @default  */
+      reason: string;
+      /** @default true */
+      notify: boolean;
+      /** @default false */
+      override_conflicts: boolean;
+    };
     RespondRequest: {
       accept: boolean;
     };
@@ -5947,12 +7077,6 @@ export interface components {
       time: string;
       duration_minutes?: number;
     };
-    /**
-     * @description * `organisation` - organisation
-     *     * `branch` - branch
-     * @enum {string}
-     */
-    ScopeEnum: "organisation" | "branch";
     SearchHit: {
       type: string;
       id: string;
@@ -5962,6 +7086,92 @@ export interface components {
       score: number;
       client_id: string | null;
     };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Series: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly job: string | null;
+      /** Format: uuid */
+      readonly service: string;
+      readonly rrule: string;
+      /** Format: date */
+      readonly start_date: string;
+      /** Format: time */
+      readonly start_time: string;
+      readonly timezone: string;
+      readonly duration_minutes: number;
+      /** Format: date */
+      readonly until: string | null;
+      readonly count: number | null;
+      /** Format: date */
+      readonly horizon_generated_until: string | null;
+      readonly skip_holidays: boolean;
+      readonly template: unknown;
+      readonly status: components["schemas"]["SeriesStatusEnum"];
+      /** Format: uuid */
+      readonly split_from: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    SeriesCreateRequest: {
+      /** Format: uuid */
+      job?: string | null;
+      /** Format: uuid */
+      service?: string | null;
+      /** @description e.g. FREQ=WEEKLY;BYDAY=MO,WE */
+      rrule: string;
+      /** Format: date */
+      start_date: string;
+      /** Format: time */
+      start_time: string;
+      duration_minutes: number;
+      timezone?: string;
+      /** Format: date */
+      until?: string | null;
+      count?: number | null;
+      /** @default true */
+      skip_holidays: boolean;
+      attendees?: components["schemas"]["LessonAttendeeInputRequest"][];
+      tutors?: components["schemas"]["LessonTutorInputRequest"][];
+      /** Format: uuid */
+      location?: string | null;
+      /** @default false */
+      online: boolean;
+      /** @default  */
+      notes_for_tutor: string;
+      /** @default skip */
+      conflict_mode: components["schemas"]["ConflictModeEnum"];
+    };
+    SeriesResult: {
+      series: components["schemas"]["Series"];
+      lessons_created: number;
+      lessons_changed: number;
+      skipped: components["schemas"]["Skipped"][];
+      conflicting: string[];
+    };
+    /**
+     * @description * `active` - Active
+     *     * `ended` - Ended
+     * @enum {string}
+     */
+    SeriesStatusEnum: "active" | "ended";
+    /**
+     * @description * `following` - following
+     *     * `all` - all
+     * @enum {string}
+     */
+    SeriesUpdateScopeEnum: "following" | "all";
     /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
      *
@@ -6171,7 +7381,7 @@ export interface components {
     SettingDescription: {
       key: string;
       type: components["schemas"]["SettingDescriptionTypeEnum"];
-      scope: components["schemas"]["ScopeEnum"];
+      scope: components["schemas"]["SettingDescriptionScopeEnum"];
       default: unknown;
       label: string;
       help_text: string;
@@ -6185,6 +7395,12 @@ export interface components {
         [key: string]: unknown;
       };
     };
+    /**
+     * @description * `organisation` - organisation
+     *     * `branch` - branch
+     * @enum {string}
+     */
+    SettingDescriptionScopeEnum: "organisation" | "branch";
     /**
      * @description * `int` - int
      *     * `str` - str
@@ -6205,6 +7421,12 @@ export interface components {
       overrides: string[];
       schema: components["schemas"]["SettingDescription"][];
     };
+    /**
+     * @description * `hard` - hard
+     *     * `soft` - soft
+     * @enum {string}
+     */
+    SeverityEnum: "hard" | "soft";
     SignupConfig: {
       turnstile_site_key: string;
     };
@@ -6241,6 +7463,17 @@ export interface components {
       /** Format: email */
       email: string;
       email_verified: boolean;
+    };
+    Skipped: {
+      /** Format: date */
+      date: string;
+      conflicts: components["schemas"]["Conflict"][];
+    };
+    Slot: {
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
     };
     SlugCheck: {
       slug: string;
@@ -6939,6 +8172,51 @@ export interface components {
      * @enum {integer}
      */
     WeekStartDayEnum: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Window: {
+      weekday: number;
+      /** Format: time */
+      start_time: string;
+      /** Format: time */
+      end_time: string;
+      mode?: components["schemas"]["WindowModeEnum"];
+    };
+    /**
+     * @description * `any` - In person or online
+     *     * `in_person` - In person only
+     *     * `online` - Online only
+     * @enum {string}
+     */
+    WindowModeEnum: "any" | "in_person" | "online";
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    WindowRequest: {
+      weekday: number;
+      /** Format: time */
+      start_time: string;
+      /** Format: time */
+      end_time: string;
+      mode?: components["schemas"]["WindowModeEnum"];
+    };
   };
   responses: never;
   parameters: never;
@@ -7314,6 +8592,80 @@ export interface operations {
       };
     };
   };
+  availability_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        tutor_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Availability"];
+        };
+      };
+    };
+  };
+  availability_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        tutor_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AvailabilityRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AvailabilityRequest"];
+        "multipart/form-data": components["schemas"]["AvailabilityRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Availability"];
+        };
+      };
+    };
+  };
+  availability_slots_list: {
+    parameters: {
+      query: {
+        duration: number;
+        from: string;
+        step?: number;
+        to: string;
+      };
+      header?: never;
+      path: {
+        tutor_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Slot"][];
+        };
+      };
+    };
+  };
   branches_list: {
     parameters: {
       query?: {
@@ -7526,6 +8878,37 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["BulkJob"];
+        };
+      };
+    };
+  };
+  calendar_list: {
+    parameters: {
+      query: {
+        branch?: string[];
+        client?: string[];
+        end?: string;
+        include_events?: boolean;
+        job?: string[];
+        location?: string[];
+        service?: string[];
+        start: string;
+        status?: string[];
+        student?: string[];
+        tutor?: string[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalendarItem"][];
         };
       };
     };
@@ -8945,6 +10328,34 @@ export interface operations {
       };
     };
   };
+  conflicts_check_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ConflictCheckRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ConflictCheckRequest"];
+        "multipart/form-data": components["schemas"]["ConflictCheckRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Conflict"][];
+        };
+      };
+    };
+  };
   consent_types_list: {
     parameters: {
       query?: {
@@ -9504,6 +10915,136 @@ export interface operations {
       };
     };
   };
+  events_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedCalendarEventList"];
+        };
+      };
+    };
+  };
+  events_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CalendarEventRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CalendarEventRequest"];
+        "multipart/form-data": components["schemas"]["CalendarEventRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalendarEvent"];
+        };
+      };
+    };
+  };
+  events_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this calendar event. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalendarEvent"];
+        };
+      };
+    };
+  };
+  events_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this calendar event. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  events_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this calendar event. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedCalendarEventRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedCalendarEventRequest"];
+        "multipart/form-data": components["schemas"]["PatchedCalendarEventRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalendarEvent"];
+        };
+      };
+    };
+  };
   features_retrieve: {
     parameters: {
       query?: never;
@@ -9620,6 +11161,82 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["FileUploadCreated"];
         };
+      };
+    };
+  };
+  ical_feeds_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Feed"][];
+        };
+      };
+    };
+  };
+  ical_feeds_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FeedRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["FeedRequest"];
+        "multipart/form-data": components["schemas"]["FeedRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FeedCreated"];
+        };
+      };
+    };
+  };
+  ical_feeds_revoke_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this i cal feed token. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -10447,6 +12064,488 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Job"];
+        };
+      };
+    };
+  };
+  lesson_series_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SeriesCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SeriesCreateRequest"];
+        "multipart/form-data": components["schemas"]["SeriesCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SeriesResult"];
+        };
+      };
+    };
+  };
+  lesson_series_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson series. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Series"];
+        };
+      };
+    };
+  };
+  lesson_series_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson series. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedSeriesUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedSeriesUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedSeriesUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SeriesResult"];
+        };
+      };
+    };
+  };
+  lesson_series_end_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this lesson series. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["EndSeriesRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["EndSeriesRequest"];
+        "multipart/form-data": components["schemas"]["EndSeriesRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Series"];
+        };
+      };
+    };
+  };
+  lessons_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Lessons starting before */
+        end?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        job?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        series?: string;
+        service?: string;
+        /** @description Lessons ending after */
+        start?: string;
+        /**
+         * @description * `planned` - Planned
+         *     * `completed` - Completed
+         *     * `cancelled` - Cancelled
+         *     * `missed` - Missed
+         */
+        status?: ("cancelled" | "completed" | "missed" | "planned")[];
+        student?: string;
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedLessonList"];
+        };
+      };
+    };
+  };
+  lessons_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LessonWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LessonWriteRequest"];
+        "multipart/form-data": components["schemas"]["LessonWriteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonResult"];
+        };
+      };
+    };
+  };
+  lessons_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Lesson"];
+        };
+      };
+    };
+  };
+  lessons_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  lessons_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedLessonUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedLessonUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedLessonUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonResult"];
+        };
+      };
+    };
+  };
+  lessons_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this lesson. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["CancelRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CancelRequest"];
+        "multipart/form-data": components["schemas"]["CancelRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Lesson"];
+        };
+      };
+    };
+  };
+  lessons_complete_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this lesson. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Lesson"];
+        };
+      };
+    };
+  };
+  lessons_duplicate_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this lesson. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DuplicateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["DuplicateRequest"];
+        "multipart/form-data": components["schemas"]["DuplicateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonResult"];
+        };
+      };
+    };
+  };
+  lessons_missed_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this lesson. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["LessonReasonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LessonReasonRequest"];
+        "multipart/form-data": components["schemas"]["LessonReasonRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Lesson"];
+        };
+      };
+    };
+  };
+  lessons_pricing_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Lessons starting before */
+        end?: string;
+        job?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        series?: string;
+        service?: string;
+        /** @description Lessons ending after */
+        start?: string;
+        /**
+         * @description * `planned` - Planned
+         *     * `completed` - Completed
+         *     * `cancelled` - Cancelled
+         *     * `missed` - Missed
+         */
+        status?: ("cancelled" | "completed" | "missed" | "planned")[];
+        student?: string;
+        tutor?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedConflictList"];
+        };
+      };
+    };
+  };
+  lessons_reschedule_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this lesson. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RescheduleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RescheduleRequest"];
+        "multipart/form-data": components["schemas"]["RescheduleRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonResult"];
+        };
+      };
+    };
+  };
+  lessons_bulk_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BulkLessonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BulkLessonRequest"];
+        "multipart/form-data": components["schemas"]["BulkLessonRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BulkResult"];
         };
       };
     };
@@ -12261,6 +14360,83 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Task"];
         };
+      };
+    };
+  };
+  time_off_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedExceptionList"];
+        };
+      };
+    };
+  };
+  time_off_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExceptionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ExceptionRequest"];
+        "multipart/form-data": components["schemas"]["ExceptionRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Exception"];
+        };
+      };
+    };
+  };
+  time_off_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this availability exception. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

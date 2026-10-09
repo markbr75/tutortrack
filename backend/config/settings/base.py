@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "tutortrack.crm",
     "tutortrack.catalogue",
     "tutortrack.jobs",
+    "tutortrack.scheduling",
 ]
 
 MIDDLEWARE = [
@@ -285,6 +286,12 @@ SPECTACULAR_SETTINGS = {
         "JobTutorStatusEnum": "tutortrack.jobs.models.JobTutor.Status",
         "JobTutorRoleEnum": "tutortrack.jobs.models.JobTutor.Role",
         "RoleEnum": "tutortrack.identity.models.Membership.Role",
+        "LessonStatusEnum": "tutortrack.scheduling.models.Lesson.Status",
+        "CalendarEventTypeEnum": "tutortrack.scheduling.models.CalendarEvent.Type",
+        "AvailabilityExceptionTypeEnum": "tutortrack.scheduling.models.AvailabilityException.Type",
+        "FeedKindEnum": "tutortrack.scheduling.models.ICalFeedToken.Kind",
+        "CalendarItemKindEnum": ["lesson", "event"],
+        "KindEnum": ["note", "task", "document", "change"],
     },
     "POSTPROCESSING_HOOKS": ["drf_spectacular.hooks.postprocess_schema_enums"],
 }

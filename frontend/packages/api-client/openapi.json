@@ -760,6 +760,169 @@
                 }
             }
         },
+        "/api/v1/availability/{tutor_id}": {
+            "get": {
+                "operationId": "availability_retrieve",
+                "description": "A tutor's weekly availability (GET current template and windows, PUT a new one).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "tutor_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "availability"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Availability"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "availability_update",
+                "description": "A tutor's weekly availability (GET current template and windows, PUT a new one).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "tutor_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "availability"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AvailabilityRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AvailabilityRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AvailabilityRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Availability"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/availability/{tutor_id}/slots": {
+            "get": {
+                "operationId": "availability_slots_list",
+                "description": "Free start times for a tutor (FR-08-5 AC).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "duration",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "step",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "to",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "tutor_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "availability"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Slot"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/branches": {
             "get": {
                 "operationId": "branches_list",
@@ -1198,6 +1361,139 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/BulkJob"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/calendar": {
+            "get": {
+                "operationId": "calendar_list",
+                "description": "Lessons and events overlapping ``[start, end)`` in a light shape (FR-08-7).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "client",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "end",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "include_events",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "job",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "location",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "service",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "start",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "student",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "tags": [
+                    "calendar"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CalendarItem"
+                                    }
                                 }
                             }
                         },
@@ -4100,6 +4396,65 @@
                 }
             }
         },
+        "/api/v1/conflicts/check": {
+            "post": {
+                "operationId": "conflicts_check_create",
+                "description": "Dry-run the conflict engine for a proposed lesson (FR-08-6).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "conflicts"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConflictCheckRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConflictCheckRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConflictCheckRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Conflict"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/consent-types": {
             "get": {
                 "operationId": "consent_types_list",
@@ -5258,6 +5613,253 @@
                 }
             }
         },
+        "/api/v1/events": {
+            "get": {
+                "operationId": "events_list",
+                "description": "Calendar events and organisation-wide closures (FR-08-4).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "events"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedCalendarEventList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "events_create",
+                "description": "Calendar events and organisation-wide closures (FR-08-4).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "events"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CalendarEventRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CalendarEventRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CalendarEventRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CalendarEvent"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/events/{id}": {
+            "get": {
+                "operationId": "events_retrieve",
+                "description": "Calendar events and organisation-wide closures (FR-08-4).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this calendar event.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "events"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CalendarEvent"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "events_partial_update",
+                "description": "Calendar events and organisation-wide closures (FR-08-4).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this calendar event.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "events"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCalendarEventRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCalendarEventRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCalendarEventRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CalendarEvent"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "events_destroy",
+                "description": "Calendar events and organisation-wide closures (FR-08-4).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this calendar event.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "events"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/v1/features": {
             "get": {
                 "operationId": "features_retrieve",
@@ -5466,6 +6068,147 @@
                             }
                         },
                         "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/ical-feeds": {
+            "get": {
+                "operationId": "ical_feeds_list",
+                "description": "Your secret calendar feed URLs (FR-08-11). The URL is shown once, when created.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "ical-feeds"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Feed"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "ical_feeds_create",
+                "description": "Your secret calendar feed URLs (FR-08-11). The URL is shown once, when created.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "ical-feeds"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FeedRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FeedRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FeedRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FeedCreated"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/ical-feeds/{id}/revoke": {
+            "post": {
+                "operationId": "ical_feeds_revoke_create",
+                "description": "Your secret calendar feed URLs (FR-08-11). The URL is shown once, when created.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this i cal feed token.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ical-feeds"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
                     }
                 }
             }
@@ -7194,6 +7937,1074 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Job"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lesson-series": {
+            "post": {
+                "operationId": "lesson_series_create",
+                "description": "Recurring lessons (FR-08-2). Create reports occurrences skipped for clashes.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "lesson-series"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SeriesCreateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SeriesCreateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SeriesCreateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SeriesResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lesson-series/{id}": {
+            "get": {
+                "operationId": "lesson_series_retrieve",
+                "description": "Recurring lessons (FR-08-2). Create reports occurrences skipped for clashes.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson series.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lesson-series"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Series"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "lesson_series_partial_update",
+                "description": "Recurring lessons (FR-08-2). Create reports occurrences skipped for clashes.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson series.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lesson-series"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSeriesUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSeriesUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSeriesUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SeriesResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lesson-series/{id}/end": {
+            "post": {
+                "operationId": "lesson_series_end_create",
+                "description": "Recurring lessons (FR-08-2). Create reports occurrences skipped for clashes.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson series.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lesson-series"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EndSeriesRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EndSeriesRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EndSeriesRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Series"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lessons": {
+            "get": {
+                "operationId": "lessons_list",
+                "description": "Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.\nA hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the\npermission) to schedule anyway.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "client",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "end",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "description": "Lessons starting before"
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "job",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "series",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "service",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "start",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "description": "Lessons ending after"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "cancelled",
+                                    "completed",
+                                    "missed",
+                                    "planned"
+                                ]
+                            }
+                        },
+                        "description": "* `planned` - Planned\n* `completed` - Completed\n* `cancelled` - Cancelled\n* `missed` - Missed",
+                        "explode": true,
+                        "style": "form"
+                    },
+                    {
+                        "in": "query",
+                        "name": "student",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedLessonList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "lessons_create",
+                "description": "Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.\nA hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the\npermission) to schedule anyway.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LessonWriteRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LessonWriteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LessonWriteRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lessons/{id}": {
+            "get": {
+                "operationId": "lessons_retrieve",
+                "description": "Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.\nA hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the\npermission) to schedule anyway.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lesson"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "lessons_partial_update",
+                "description": "``scope`` = ``this`` (just this lesson), ``following`` or ``all`` (its series).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedLessonUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedLessonUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedLessonUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "lessons_destroy",
+                "description": "Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.\nA hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the\npermission) to schedule anyway.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/lessons/{id}/cancel": {
+            "post": {
+                "operationId": "lessons_cancel_create",
+                "description": "Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.\nA hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the\npermission) to schedule anyway.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CancelRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CancelRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CancelRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lesson"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lessons/{id}/complete": {
+            "post": {
+                "operationId": "lessons_complete_create",
+                "description": "Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.\nA hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the\npermission) to schedule anyway.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lesson"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lessons/{id}/duplicate": {
+            "post": {
+                "operationId": "lessons_duplicate_create",
+                "description": "Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.\nA hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the\npermission) to schedule anyway.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DuplicateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DuplicateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DuplicateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lessons/{id}/missed": {
+            "post": {
+                "operationId": "lessons_missed_create",
+                "description": "Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.\nA hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the\npermission) to schedule anyway.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LessonReasonRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LessonReasonRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LessonReasonRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lesson"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lessons/{id}/pricing": {
+            "get": {
+                "operationId": "lessons_pricing_list",
+                "description": "The pricing trace stored on the lesson (FR-06-4 popover).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "client",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "end",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "description": "Lessons starting before"
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson.",
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "job",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "series",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "service",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "start",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "description": "Lessons ending after"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "cancelled",
+                                    "completed",
+                                    "missed",
+                                    "planned"
+                                ]
+                            }
+                        },
+                        "description": "* `planned` - Planned\n* `completed` - Completed\n* `cancelled` - Cancelled\n* `missed` - Missed",
+                        "explode": true,
+                        "style": "form"
+                    },
+                    {
+                        "in": "query",
+                        "name": "student",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedConflictList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lessons/{id}/reschedule": {
+            "post": {
+                "operationId": "lessons_reschedule_create",
+                "description": "Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.\nA hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the\npermission) to schedule anyway.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RescheduleRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RescheduleRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RescheduleRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lessons/bulk": {
+            "post": {
+                "operationId": "lessons_bulk_create",
+                "description": "Bulk actions on up to 200 lessons; each lesson succeeds or fails on its own.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BulkLessonRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BulkLessonRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BulkLessonRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BulkResult"
                                 }
                             }
                         },
@@ -10775,6 +12586,154 @@
                 }
             }
         },
+        "/api/v1/time-off": {
+            "get": {
+                "operationId": "time_off_list",
+                "description": "Time off and extra availability (FR-08-5). Creating time off returns the planned\nlessons that now need cover in ``clashes``.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "time-off"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedExceptionList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "time_off_create",
+                "description": "Time off and extra availability (FR-08-5). Creating time off returns the planned\nlessons that now need cover in ``clashes``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "time-off"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExceptionRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExceptionRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExceptionRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Exception"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/time-off/{id}": {
+            "delete": {
+                "operationId": "time_off_destroy",
+                "description": "Time off and extra availability (FR-08-5). Creating time off returns the planned\nlessons that now need cover in ``clashes``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this availability exception.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "time-off"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/v1/timeline": {
             "get": {
                 "operationId": "timeline_list",
@@ -11487,6 +13446,17 @@
                     "token"
                 ]
             },
+            "ActionEnum": {
+                "enum": [
+                    "complete",
+                    "cancel",
+                    "reassign_tutor",
+                    "change_location",
+                    "delete"
+                ],
+                "type": "string",
+                "description": "* `complete` - complete\n* `cancel` - cancel\n* `reassign_tutor` - reassign_tutor\n* `change_location` - change_location\n* `delete` - delete"
+            },
             "Address": {
                 "type": "object",
                 "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
@@ -11753,6 +13723,61 @@
                     "object_repr",
                     "object_type",
                     "request_id"
+                ]
+            },
+            "Availability": {
+                "type": "object",
+                "properties": {
+                    "effective_from": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "timezone": {
+                        "type": "string"
+                    },
+                    "windows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Window"
+                        }
+                    }
+                },
+                "required": [
+                    "effective_from",
+                    "timezone",
+                    "windows"
+                ]
+            },
+            "AvailabilityExceptionTypeEnum": {
+                "enum": [
+                    "extra",
+                    "off"
+                ],
+                "type": "string",
+                "description": "* `extra` - Extra availability\n* `off` - Time off"
+            },
+            "AvailabilityRequest": {
+                "type": "object",
+                "properties": {
+                    "effective_from": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "windows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WindowRequest"
+                        }
+                    }
+                },
+                "required": [
+                    "effective_from",
+                    "timezone",
+                    "windows"
                 ]
             },
             "BillingMethodEnum": {
@@ -12031,6 +14056,63 @@
                 "type": "string",
                 "description": "* `queued` - Queued\n* `running` - Running\n* `completed` - Completed\n* `failed` - Failed"
             },
+            "BulkLessonRequest": {
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "$ref": "#/components/schemas/ActionEnum"
+                    },
+                    "ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "maxItems": 200,
+                        "minItems": 1
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "location": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 300
+                    }
+                },
+                "required": [
+                    "action",
+                    "ids"
+                ]
+            },
+            "BulkResult": {
+                "type": "object",
+                "properties": {
+                    "succeeded": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "failed": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "description": "Lesson id: reason"
+                    }
+                },
+                "required": [
+                    "failed",
+                    "succeeded"
+                ]
+            },
             "BusinessTypeEnum": {
                 "enum": [
                     "sole_trader",
@@ -12041,6 +14123,262 @@
                 ],
                 "type": "string",
                 "description": "* `sole_trader` - Sole trader\n* `team` - Small team\n* `agency` - Agency\n* `centre` - Tuition centre\n* `online` - Online school"
+            },
+            "CalendarEvent": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/CalendarEventTypeEnum"
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "timezone": {
+                        "type": "string"
+                    },
+                    "all_day": {
+                        "type": "boolean"
+                    },
+                    "org_wide": {
+                        "type": "boolean"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "participants": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "readOnly": true
+                    },
+                    "paid": {
+                        "type": "boolean"
+                    },
+                    "cancel_lessons": {
+                        "type": "boolean"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "end",
+                    "id",
+                    "participants",
+                    "start",
+                    "timezone",
+                    "title"
+                ]
+            },
+            "CalendarEventRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "type": {
+                        "$ref": "#/components/schemas/CalendarEventTypeEnum"
+                    },
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "all_day": {
+                        "type": "boolean"
+                    },
+                    "org_wide": {
+                        "type": "boolean"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "writeOnly": true
+                    },
+                    "paid": {
+                        "type": "boolean"
+                    },
+                    "cancel_lessons": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "end",
+                    "start",
+                    "timezone",
+                    "title"
+                ]
+            },
+            "CalendarEventTypeEnum": {
+                "enum": [
+                    "meeting",
+                    "training",
+                    "admin",
+                    "blocked",
+                    "holiday",
+                    "custom"
+                ],
+                "type": "string",
+                "description": "* `meeting` - Meeting\n* `training` - Training\n* `admin` - Admin\n* `blocked` - Blocked / unavailable\n* `holiday` - Holiday / closure\n* `custom` - Other"
+            },
+            "CalendarItem": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "$ref": "#/components/schemas/CalendarItemKindEnum"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "timezone": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "colour": {
+                        "type": "string"
+                    },
+                    "service": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "job": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "series": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "location": {
+                        "type": "string"
+                    },
+                    "online": {
+                        "type": "boolean"
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PersonRef"
+                        }
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PersonRef"
+                        }
+                    },
+                    "locked": {
+                        "type": "boolean"
+                    },
+                    "org_wide": {
+                        "type": "boolean"
+                    },
+                    "all_day": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "colour",
+                    "end",
+                    "id",
+                    "job",
+                    "kind",
+                    "location",
+                    "locked",
+                    "online",
+                    "series",
+                    "service",
+                    "start",
+                    "status",
+                    "students",
+                    "timezone",
+                    "title",
+                    "tutors"
+                ]
+            },
+            "CalendarItemKindEnum": {
+                "enum": [
+                    "lesson",
+                    "event"
+                ],
+                "type": "string",
+                "description": "* `lesson` - lesson\n* `event` - event"
+            },
+            "CancelRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 300
+                    },
+                    "chargeable": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "notify": {
+                        "type": "boolean",
+                        "default": true
+                    }
+                }
             },
             "Category": {
                 "type": "object",
@@ -12556,6 +14894,104 @@
                     "code"
                 ]
             },
+            "Conflict": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "type": "string"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/SeverityEnum"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "lesson_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "tutor_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "student_id": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "kind",
+                    "lesson_id",
+                    "message",
+                    "severity",
+                    "student_id",
+                    "tutor_id"
+                ]
+            },
+            "ConflictCheckRequest": {
+                "type": "object",
+                "properties": {
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "lesson": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Ignore this lesson (editing it)."
+                    },
+                    "location": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "online": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "job": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "end",
+                    "start"
+                ]
+            },
+            "ConflictModeEnum": {
+                "enum": [
+                    "skip",
+                    "create",
+                    "fail"
+                ],
+                "type": "string",
+                "description": "* `skip` - skip\n* `create` - create\n* `fail` - fail"
+            },
             "ConsentRecord": {
                 "type": "object",
                 "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
@@ -13010,6 +15446,18 @@
                     "first_name"
                 ]
             },
+            "CreatedViaEnum": {
+                "enum": [
+                    "admin",
+                    "tutor",
+                    "client_booking",
+                    "api",
+                    "import",
+                    "series"
+                ],
+                "type": "string",
+                "description": "* `admin` - Admin\n* `tutor` - Tutor\n* `client_booking` - Client booking\n* `api` - API\n* `import` - Import\n* `series` - Series"
+            },
             "CustomField": {
                 "type": "object",
                 "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
@@ -13361,6 +15809,22 @@
                     "type"
                 ]
             },
+            "DuplicateRequest": {
+                "type": "object",
+                "properties": {
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "override_conflicts": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "start"
+                ]
+            },
             "DuplicateTypeEnum": {
                 "enum": [
                     "contact",
@@ -13441,6 +15905,112 @@
                     }
                 }
             },
+            "EndSeriesRequest": {
+                "type": "object",
+                "properties": {
+                    "after": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 300
+                    }
+                }
+            },
+            "Exception": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/AvailabilityExceptionTypeEnum"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ExceptionStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "end",
+                    "id",
+                    "start",
+                    "status",
+                    "tutor",
+                    "type"
+                ]
+            },
+            "ExceptionRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/AvailabilityExceptionTypeEnum"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "maxLength": 300
+                    }
+                },
+                "required": [
+                    "end",
+                    "start",
+                    "tutor",
+                    "type"
+                ]
+            },
+            "ExceptionStatusEnum": {
+                "enum": [
+                    "requested",
+                    "approved",
+                    "declined"
+                ],
+                "type": "string",
+                "description": "* `requested` - Requested\n* `approved` - Approved\n* `declined` - Declined"
+            },
             "Features": {
                 "type": "object",
                 "properties": {
@@ -13453,6 +16023,123 @@
                 },
                 "required": [
                     "features"
+                ]
+            },
+            "Feed": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/FeedKindEnum"
+                    },
+                    "subject_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "revoked_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_used_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "kind",
+                    "last_used_at",
+                    "revoked_at",
+                    "subject_id"
+                ]
+            },
+            "FeedCreated": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/FeedKindEnum"
+                    },
+                    "subject_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "revoked_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_used_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "url": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "kind",
+                    "last_used_at",
+                    "revoked_at",
+                    "subject_id",
+                    "url"
+                ]
+            },
+            "FeedKindEnum": {
+                "enum": [
+                    "tutor",
+                    "client",
+                    "student"
+                ],
+                "type": "string",
+                "description": "* `tutor` - Tutor schedule\n* `client` - Household schedule\n* `student` - Student schedule"
+            },
+            "FeedRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "kind": {
+                        "$ref": "#/components/schemas/FeedKindEnum"
+                    },
+                    "subject_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "kind",
+                    "subject_id"
                 ]
             },
             "FileUploadCreated": {
@@ -14649,6 +17336,576 @@
                 "type": "string",
                 "description": "* `note` - note\n* `task` - task\n* `document` - document\n* `change` - change"
             },
+            "Lesson": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "job": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "series": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "occurrence_date": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "is_exception": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "service": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "duration_minutes": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/LessonStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "location": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "online": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "meeting_url": {
+                        "type": "string",
+                        "format": "uri",
+                        "readOnly": true
+                    },
+                    "meeting_provider": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "notes_internal": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "notes_for_tutor": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "notes_for_client": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "colour": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_via": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CreatedViaEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "lock_state": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/LockStateEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "rescheduled_from": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "reschedule_reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status_reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status_changed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "chargeable_cancellation": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LessonTutor"
+                        },
+                        "readOnly": true
+                    },
+                    "attendees": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LessonAttendee"
+                        },
+                        "readOnly": true
+                    },
+                    "custom_fields": {
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "attendees",
+                    "branch",
+                    "chargeable_cancellation",
+                    "colour",
+                    "created_at",
+                    "created_via",
+                    "custom_fields",
+                    "duration_minutes",
+                    "end",
+                    "id",
+                    "is_exception",
+                    "job",
+                    "location",
+                    "lock_state",
+                    "meeting_provider",
+                    "meeting_url",
+                    "notes_for_client",
+                    "notes_for_tutor",
+                    "notes_internal",
+                    "occurrence_date",
+                    "online",
+                    "reschedule_reason",
+                    "rescheduled_from",
+                    "series",
+                    "service",
+                    "start",
+                    "status",
+                    "status_changed_at",
+                    "status_reason",
+                    "timezone",
+                    "title",
+                    "tutors"
+                ]
+            },
+            "LessonAttendee": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "student": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "client": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "charge_rate_override": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "nullable": true
+                    },
+                    "charge_amount": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "nullable": true
+                    },
+                    "tax_amount": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "nullable": true
+                    },
+                    "charge_snapshot": {},
+                    "chargeable": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "client",
+                    "name",
+                    "student"
+                ]
+            },
+            "LessonAttendeeInputRequest": {
+                "type": "object",
+                "properties": {
+                    "student": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "charge_rate_override": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "student"
+                ]
+            },
+            "LessonReasonRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 300
+                    }
+                }
+            },
+            "LessonResult": {
+                "type": "object",
+                "properties": {
+                    "lesson": {
+                        "$ref": "#/components/schemas/Lesson"
+                    },
+                    "warnings": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Conflict"
+                        }
+                    }
+                },
+                "required": [
+                    "lesson",
+                    "warnings"
+                ]
+            },
+            "LessonStatusEnum": {
+                "enum": [
+                    "planned",
+                    "completed",
+                    "cancelled",
+                    "missed"
+                ],
+                "type": "string",
+                "description": "* `planned` - Planned\n* `completed` - Completed\n* `cancelled` - Cancelled\n* `missed` - Missed"
+            },
+            "LessonTutor": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "pay_rate_override": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "nullable": true
+                    },
+                    "pay_amount": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "nullable": true
+                    },
+                    "pay_snapshot": {},
+                    "payable": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "name",
+                    "tutor"
+                ]
+            },
+            "LessonTutorInputRequest": {
+                "type": "object",
+                "properties": {
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "pay_rate_override": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "tutor"
+                ]
+            },
+            "LessonUpdateScopeEnum": {
+                "enum": [
+                    "this",
+                    "following",
+                    "all"
+                ],
+                "type": "string",
+                "description": "* `this` - this\n* `following` - following\n* `all` - all"
+            },
+            "LessonWriteRequest": {
+                "type": "object",
+                "properties": {
+                    "job": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "service": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "attendees": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LessonAttendeeInputRequest"
+                        }
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LessonTutorInputRequest"
+                        }
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "location": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "online": {
+                        "type": "boolean"
+                    },
+                    "meeting_url": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "uri"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "notes_internal": {
+                        "type": "string"
+                    },
+                    "notes_for_tutor": {
+                        "type": "string"
+                    },
+                    "notes_for_client": {
+                        "type": "string"
+                    },
+                    "colour": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^(#[0-9a-fA-F]{6})?$"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "override_conflicts": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "end",
+                    "start"
+                ]
+            },
             "Level": {
                 "type": "object",
                 "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
@@ -14857,6 +18114,15 @@
                 ],
                 "type": "string",
                 "description": "* `centre` - Centre\n* `client_home` - Client's home\n* `tutor_home` - Tutor's home\n* `school` - School\n* `online` - Online\n* `other` - Other"
+            },
+            "LockStateEnum": {
+                "enum": [
+                    "unlocked",
+                    "invoiced",
+                    "paid"
+                ],
+                "type": "string",
+                "description": "* `unlocked` - Unlocked\n* `invoiced` - Invoiced\n* `paid` - Paid"
             },
             "LoginEvent": {
                 "type": "object",
@@ -15158,14 +18424,6 @@
                 "type": "string",
                 "description": "* `active` - active\n* `suspended` - suspended"
             },
-            "ModeEnum": {
-                "enum": [
-                    "solo",
-                    "multi"
-                ],
-                "type": "string",
-                "description": "* `solo` - Solo\n* `multi` - Multi-user"
-            },
             "MoneyOut": {
                 "type": "object",
                 "description": "Read-only money in computed responses (quotes, summaries).",
@@ -15437,7 +18695,7 @@
                         "$ref": "#/components/schemas/BusinessTypeEnum"
                     },
                     "mode": {
-                        "$ref": "#/components/schemas/ModeEnum"
+                        "$ref": "#/components/schemas/OrganisationModeEnum"
                     },
                     "status": {
                         "allOf": [
@@ -15554,6 +18812,14 @@
                     "status",
                     "url"
                 ]
+            },
+            "OrganisationModeEnum": {
+                "enum": [
+                    "solo",
+                    "multi"
+                ],
+                "type": "string",
+                "description": "* `solo` - Solo\n* `multi` - Multi-user"
             },
             "OrganisationStatusEnum": {
                 "enum": [
@@ -15834,6 +19100,32 @@
                     }
                 }
             },
+            "PaginatedCalendarEventList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CalendarEvent"
+                        }
+                    }
+                }
+            },
             "PaginatedClientList": {
                 "type": "object",
                 "required": [
@@ -15856,6 +19148,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Client"
+                        }
+                    }
+                }
+            },
+            "PaginatedConflictList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Conflict"
                         }
                     }
                 }
@@ -15990,6 +19308,32 @@
                     }
                 }
             },
+            "PaginatedExceptionList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Exception"
+                        }
+                    }
+                }
+            },
             "PaginatedInvitationList": {
                 "type": "object",
                 "required": [
@@ -16038,6 +19382,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Job"
+                        }
+                    }
+                }
+            },
+            "PaginatedLessonList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Lesson"
                         }
                     }
                 }
@@ -16463,6 +19833,60 @@
                     }
                 }
             },
+            "PatchedCalendarEventRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "type": {
+                        "$ref": "#/components/schemas/CalendarEventTypeEnum"
+                    },
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "all_day": {
+                        "type": "boolean"
+                    },
+                    "org_wide": {
+                        "type": "boolean"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "writeOnly": true
+                    },
+                    "paid": {
+                        "type": "boolean"
+                    },
+                    "cancel_lessons": {
+                        "type": "boolean"
+                    }
+                }
+            },
             "PatchedCategoryRequest": {
                 "type": "object",
                 "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
@@ -16874,6 +20298,110 @@
                     "custom_fields": {}
                 }
             },
+            "PatchedLessonUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "service": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "attendees": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LessonAttendeeInputRequest"
+                        }
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LessonTutorInputRequest"
+                        }
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "location": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "online": {
+                        "type": "boolean"
+                    },
+                    "meeting_url": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "uri"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "notes_internal": {
+                        "type": "string"
+                    },
+                    "notes_for_tutor": {
+                        "type": "string"
+                    },
+                    "notes_for_client": {
+                        "type": "string"
+                    },
+                    "colour": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^(#[0-9a-fA-F]{6})?$"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "override_conflicts": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "scope": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/LessonUpdateScopeEnum"
+                            }
+                        ],
+                        "default": "this"
+                    },
+                    "overwrite_exceptions": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "notify": {
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 300
+                    }
+                }
+            },
             "PatchedLevelRequest": {
                 "type": "object",
                 "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
@@ -17026,7 +20554,7 @@
                         "$ref": "#/components/schemas/BusinessTypeEnum"
                     },
                     "mode": {
-                        "$ref": "#/components/schemas/ModeEnum"
+                        "$ref": "#/components/schemas/OrganisationModeEnum"
                     },
                     "country": {
                         "type": "string",
@@ -17271,6 +20799,72 @@
                     "ordering": {
                         "type": "string",
                         "maxLength": 60
+                    }
+                }
+            },
+            "PatchedSeriesUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "scope": {
+                        "$ref": "#/components/schemas/SeriesUpdateScopeEnum"
+                    },
+                    "from_lesson": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "overwrite_exceptions": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "time"
+                    },
+                    "duration_minutes": {
+                        "type": "integer",
+                        "maximum": 720,
+                        "minimum": 5
+                    },
+                    "rrule": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 300
+                    },
+                    "until": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "count": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "nullable": true
+                    },
+                    "skip_holidays": {
+                        "type": "boolean"
+                    },
+                    "attendees": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LessonAttendeeInputRequest"
+                        }
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LessonTutorInputRequest"
+                        }
+                    },
+                    "location": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "online": {
+                        "type": "boolean"
+                    },
+                    "notes_for_tutor": {
+                        "type": "string"
                     }
                 }
             },
@@ -17878,6 +21472,21 @@
                     "category",
                     "codename",
                     "description"
+                ]
+            },
+            "PersonRef": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
                 ]
             },
             "PreferredContactMethodEnum": {
@@ -18833,6 +22442,36 @@
                     "new_assignment"
                 ]
             },
+            "RescheduleRequest": {
+                "type": "object",
+                "properties": {
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 300
+                    },
+                    "notify": {
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "override_conflicts": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "end",
+                    "start"
+                ]
+            },
             "RespondRequest": {
                 "type": "object",
                 "properties": {
@@ -19049,14 +22688,6 @@
                     "weekday"
                 ]
             },
-            "ScopeEnum": {
-                "enum": [
-                    "organisation",
-                    "branch"
-                ],
-                "type": "string",
-                "description": "* `organisation` - organisation\n* `branch` - branch"
-            },
             "SearchHit": {
                 "type": "object",
                 "properties": {
@@ -19089,6 +22720,252 @@
                     "title",
                     "type"
                 ]
+            },
+            "Series": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "job": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "service": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "rrule": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "time",
+                        "readOnly": true
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "duration_minutes": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "until": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "count": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "horizon_generated_until": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "skip_holidays": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "template": {
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SeriesStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "split_from": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "count",
+                    "created_at",
+                    "duration_minutes",
+                    "horizon_generated_until",
+                    "id",
+                    "job",
+                    "rrule",
+                    "service",
+                    "skip_holidays",
+                    "split_from",
+                    "start_date",
+                    "start_time",
+                    "status",
+                    "template",
+                    "timezone",
+                    "until"
+                ]
+            },
+            "SeriesCreateRequest": {
+                "type": "object",
+                "properties": {
+                    "job": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "service": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "rrule": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "e.g. FREQ=WEEKLY;BYDAY=MO,WE",
+                        "maxLength": 300
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "time"
+                    },
+                    "duration_minutes": {
+                        "type": "integer",
+                        "maximum": 720,
+                        "minimum": 5
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "until": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "count": {
+                        "type": "integer",
+                        "maximum": 520,
+                        "minimum": 1,
+                        "nullable": true
+                    },
+                    "skip_holidays": {
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "attendees": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LessonAttendeeInputRequest"
+                        }
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LessonTutorInputRequest"
+                        }
+                    },
+                    "location": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "online": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "notes_for_tutor": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "conflict_mode": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ConflictModeEnum"
+                            }
+                        ],
+                        "default": "skip"
+                    }
+                },
+                "required": [
+                    "duration_minutes",
+                    "rrule",
+                    "start_date",
+                    "start_time"
+                ]
+            },
+            "SeriesResult": {
+                "type": "object",
+                "properties": {
+                    "series": {
+                        "$ref": "#/components/schemas/Series"
+                    },
+                    "lessons_created": {
+                        "type": "integer"
+                    },
+                    "lessons_changed": {
+                        "type": "integer"
+                    },
+                    "skipped": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Skipped"
+                        }
+                    },
+                    "conflicting": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "conflicting",
+                    "lessons_changed",
+                    "lessons_created",
+                    "series",
+                    "skipped"
+                ]
+            },
+            "SeriesStatusEnum": {
+                "enum": [
+                    "active",
+                    "ended"
+                ],
+                "type": "string",
+                "description": "* `active` - Active\n* `ended` - Ended"
+            },
+            "SeriesUpdateScopeEnum": {
+                "enum": [
+                    "following",
+                    "all"
+                ],
+                "type": "string",
+                "description": "* `following` - following\n* `all` - all"
             },
             "Service": {
                 "type": "object",
@@ -19570,7 +23447,7 @@
                         "$ref": "#/components/schemas/SettingDescriptionTypeEnum"
                     },
                     "scope": {
-                        "$ref": "#/components/schemas/ScopeEnum"
+                        "$ref": "#/components/schemas/SettingDescriptionScopeEnum"
                     },
                     "default": {},
                     "label": {
@@ -19608,6 +23485,14 @@
                     "scope",
                     "type"
                 ]
+            },
+            "SettingDescriptionScopeEnum": {
+                "enum": [
+                    "organisation",
+                    "branch"
+                ],
+                "type": "string",
+                "description": "* `organisation` - organisation\n* `branch` - branch"
             },
             "SettingDescriptionTypeEnum": {
                 "enum": [
@@ -19656,6 +23541,14 @@
                     "schema",
                     "values"
                 ]
+            },
+            "SeverityEnum": {
+                "enum": [
+                    "hard",
+                    "soft"
+                ],
+                "type": "string",
+                "description": "* `hard` - hard\n* `soft` - soft"
             },
             "SignupConfig": {
                 "type": "object",
@@ -19794,6 +23687,42 @@
                     "email",
                     "email_verified",
                     "id"
+                ]
+            },
+            "Skipped": {
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "conflicts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Conflict"
+                        }
+                    }
+                },
+                "required": [
+                    "conflicts",
+                    "date"
+                ]
+            },
+            "Slot": {
+                "type": "object",
+                "properties": {
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "end",
+                    "start"
                 ]
             },
             "SlugCheck": {
@@ -21383,6 +25312,69 @@
                 ],
                 "type": "integer",
                 "description": "* `0` - Monday\n* `1` - Tuesday\n* `2` - Wednesday\n* `3` - Thursday\n* `4` - Friday\n* `5` - Saturday\n* `6` - Sunday"
+            },
+            "Window": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "weekday": {
+                        "type": "integer",
+                        "maximum": 6,
+                        "minimum": 0
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "time"
+                    },
+                    "end_time": {
+                        "type": "string",
+                        "format": "time"
+                    },
+                    "mode": {
+                        "$ref": "#/components/schemas/WindowModeEnum"
+                    }
+                },
+                "required": [
+                    "end_time",
+                    "start_time",
+                    "weekday"
+                ]
+            },
+            "WindowModeEnum": {
+                "enum": [
+                    "any",
+                    "in_person",
+                    "online"
+                ],
+                "type": "string",
+                "description": "* `any` - In person or online\n* `in_person` - In person only\n* `online` - Online only"
+            },
+            "WindowRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "weekday": {
+                        "type": "integer",
+                        "maximum": 6,
+                        "minimum": 0
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "format": "time"
+                    },
+                    "end_time": {
+                        "type": "string",
+                        "format": "time"
+                    },
+                    "mode": {
+                        "$ref": "#/components/schemas/WindowModeEnum"
+                    }
+                },
+                "required": [
+                    "end_time",
+                    "start_time",
+                    "weekday"
+                ]
             }
         },
         "securitySchemes": {
