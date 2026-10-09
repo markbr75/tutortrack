@@ -176,26 +176,87 @@ class LessonViewSet(
         services.delete_lesson(self.get_object())
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @extend_schema(request=s.CancelSerializer, responses=s.LessonSerializer)
+    @extend_schema(
+        request=s.CancelSerializer,
+        responses=s.CancelResultSerializer,
+        parameters=[
+            OpenApiParameter(
+                "preview", bool, description="Only show the policy outcome (nothing changes)."
+            )
+        ],
+    )
     @action(
         detail=True,
         methods=["post"],
         permission_classes=perms({"POST": "scheduling.lesson.cancel"}),
     )
     def cancel(self, request: Request, pk: Any = None) -> Response:
+        """Cancel under the cancellation policy (E09 FR-09-3). ``?preview=true`` returns the
+        outcome ("late cancellation: client charged 100%...") without cancelling. An
+        ``override`` of the percentages needs ``delivery.cancel.override_policy``."""
+        from tutortrack.delivery import services as delivery
+
         payload = s.CancelSerializer(data=request.data)
         payload.is_valid(raise_exception=True)
-        lesson = services.cancel_lesson(self.get_object(), **payload.validated_data)
-        return Response(self.get_serializer(lesson).data)
+        data = dict(payload.validated_data)
+        if data["override"] and not has_perm(request.user, "delivery.cancel.override_policy"):
+            raise PermissionDenied()
+        preview = request.query_params.get("preview") in {"1", "true", "yes"}
+        result = delivery.cancel_lesson(
+            self.get_object(), user=request.user, preview=preview, **data
+        )
+        return Response(_cancel_out(result, request))
 
-    @extend_schema(request=None, responses=s.LessonSerializer)
+    @extend_schema(request=s.CompleteSerializer, responses=s.LessonSerializer)
     @action(
         detail=True,
         methods=["post"],
         permission_classes=perms({"POST": "scheduling.lesson.complete"}),
     )
     def complete(self, request: Request, pk: Any = None) -> Response:
-        return Response(self.get_serializer(services.complete_lesson(self.get_object())).data)
+        """Complete with attendance (E09 FR-09-1/2). Students left out were present. A
+        prepaid client without enough credit blocks completion (422,
+        ``code=insufficient_balance``); ``override_balance`` needs
+        ``delivery.balance.override``."""
+        from tutortrack.delivery import services as delivery
+
+        payload = s.CompleteSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+        if data["override_balance"] and not has_perm(request.user, "delivery.balance.override"):
+            raise PermissionDenied()
+        lesson = delivery.complete_lesson(
+            self.get_object(),
+            user=request.user,
+            attendance=_attendance(data["attendance"]),
+            actual_start=data["actual_start"],
+            actual_end=data["actual_end"],
+            override_balance=data["override_balance"],
+        )
+        lesson.refresh_from_db()
+        return Response(self.get_serializer(lesson).data)
+
+    @extend_schema(request=s.AttendanceSerializer, responses=s.LessonSerializer)
+    @action(
+        detail=True,
+        methods=["patch"],
+        permission_classes=perms({"PATCH": "delivery.attendance.edit"}),
+    )
+    def attendance(self, request: Request, pk: Any = None) -> Response:
+        """Correct attendance after completion (unlocked lessons)."""
+        from tutortrack.delivery import services as delivery
+
+        lesson = self.get_object()
+        if not scope_queryset(
+            request.user, Lesson.objects.filter(pk=lesson.pk), "delivery.attendance.edit"
+        ).exists():
+            raise PermissionDenied()
+        payload = s.AttendanceSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        lesson = delivery.record_attendance(
+            lesson, _attendance(payload.validated_data["attendance"]), user=request.user
+        )
+        return Response(self.get_serializer(lesson).data)
 
     @extend_schema(request=s.LessonReasonSerializer, responses=s.LessonSerializer)
     @action(
@@ -291,12 +352,48 @@ class LessonViewSet(
         return Response(out)
 
 
+def _attendance(rows: list[dict[str, Any]]) -> list[Any]:
+    from tutortrack.delivery.services import AttendanceRow
+
+    return [AttendanceRow(r["attendee"], r["outcome"], r.get("late_minutes")) for r in rows]
+
+
+def _cancel_out(result: Any, request: Request) -> dict[str, Any]:
+    decision = result.decision
+    outcome = s.CancelOutcomeSerializer(
+        {
+            "kind": decision.kind,
+            "charge_percent": result.charge_percent,
+            "pay_percent": result.pay_percent,
+            "policy_charge_percent": decision.charge_percent,
+            "policy_pay_percent": decision.pay_percent,
+            "notice_minutes": decision.notice_minutes,
+            "makeup_credit": decision.makeup_credit,
+            "policy_name": decision.policy.snapshot()["name"],
+            "message": decision.message,
+        }
+    ).data
+    return {
+        "outcome": outcome,
+        "lesson": (
+            s.LessonSerializer(result.lesson, context={"request": request}).data
+            if result.lesson
+            else None
+        ),
+        "following_cancelled": result.following_cancelled,
+    }
+
+
 def _bulk_one(lesson: Lesson, data: dict[str, Any], request: Request) -> None:
+    from tutortrack.delivery import services as delivery
+
     action = data["action"]
     if action == "complete":
-        services.complete_lesson(lesson)
+        delivery.complete_lesson(lesson, user=request.user)
     elif action == "cancel":
-        services.cancel_lesson(lesson, reason=data["reason"])
+        delivery.cancel_lesson(
+            lesson, user=request.user, cancelled_by=data["cancelled_by"], reason=data["reason"]
+        )
     elif action == "delete":
         services.delete_lesson(lesson)
     elif action == "reassign_tutor":

@@ -43,18 +43,43 @@ class LessonRescheduled(DomainEvent):
 
 @dataclass(frozen=True, kw_only=True)
 class LessonCancelled(DomainEvent):
+    """``attendees``/``tutors`` carry the policy outcome (E09): per attendee
+    ``{"id", "student_id", "client_id", "outcome", "charge_percent", "chargeable"}`` and per
+    tutor ``{"id", "tutor_id", "pay_percent", "payable"}``. ``policy_kind`` is ``free``,
+    ``late``, ``tutor`` or ``admin``; E10 raises a "Late cancellation fee" for chargeable
+    attendees."""
+
     event_type: ClassVar[str] = "lesson.cancelled"
     subject_type: ClassVar[str] = "lesson"
     reason: str = ""
     chargeable: bool = False
     notify: bool = True
+    cancelled_by: str = "admin"
+    policy_kind: str = ""
+    attendees: list[dict[str, object]] = field(default_factory=list)
+    tutors: list[dict[str, object]] = field(default_factory=list)
 
 
 @dataclass(frozen=True, kw_only=True)
 class LessonCompleted(DomainEvent):
+    """E10 charges chargeable attendees and E12 pays payable tutors (idempotently, keyed by
+    attendee/tutor link). Shapes as in ``LessonCancelled``."""
+
     event_type: ClassVar[str] = "lesson.completed"
     subject_type: ClassVar[str] = "lesson"
     job_id: str | None = None
+    auto: bool = False
+    attendees: list[dict[str, object]] = field(default_factory=list)
+    tutors: list[dict[str, object]] = field(default_factory=list)
+
+
+@dataclass(frozen=True, kw_only=True)
+class AttendanceRecorded(DomainEvent):
+    """Attendance changed after completion; E10 updates uninvoiced charges."""
+
+    event_type: ClassVar[str] = "attendance.recorded"
+    subject_type: ClassVar[str] = "lesson"
+    attendees: list[dict[str, object]] = field(default_factory=list)
 
 
 @dataclass(frozen=True, kw_only=True)

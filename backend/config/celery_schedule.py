@@ -14,6 +14,11 @@ BEAT_SCHEDULE = {
         "task": "tutortrack.scheduling.tasks.extend_all_series_horizons",
         "schedule": crontab(hour=2, minute=30),
     },
+    # Lessons that just ended while still planned get an UnconfirmedLessonWorkflow (E09).
+    "start-unconfirmed-checks": {
+        "task": "tutortrack.delivery.tasks.start_all_unconfirmed_checks",
+        "schedule": timedelta(minutes=15),
+    },
     # Fallback sweep; most events are dispatched immediately via on_commit.
     "outbox-dispatch": {
         "task": "tutortrack.core.events.tasks.dispatch_outbox",

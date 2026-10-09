@@ -397,6 +397,58 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/cancellation-policies": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Cancellation policies (FR-09-3). Updating a policy creates a new version; deleting
+     *     deactivates it (cancellations keep a snapshot of the rules they used).
+     */
+    get: operations["cancellation_policies_list"];
+    put?: never;
+    /**
+     * @description Cancellation policies (FR-09-3). Updating a policy creates a new version; deleting
+     *     deactivates it (cancellations keep a snapshot of the rules they used).
+     */
+    post: operations["cancellation_policies_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/cancellation-policies/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Cancellation policies (FR-09-3). Updating a policy creates a new version; deleting
+     *     deactivates it (cancellations keep a snapshot of the rules they used).
+     */
+    get: operations["cancellation_policies_retrieve"];
+    /**
+     * @description Cancellation policies (FR-09-3). Updating a policy creates a new version; deleting
+     *     deactivates it (cancellations keep a snapshot of the rules they used).
+     */
+    put: operations["cancellation_policies_update"];
+    post?: never;
+    /**
+     * @description Cancellation policies (FR-09-3). Updating a policy creates a new version; deleting
+     *     deactivates it (cancellations keep a snapshot of the rules they used).
+     */
+    delete: operations["cancellation_policies_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/catalogue/categories": {
     parameters: {
       query?: never;
@@ -1775,6 +1827,154 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/lesson-reports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
+     *     their own. ``PUT`` saves a draft (autosave).
+     */
+    get: operations["lesson_reports_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lesson-reports/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
+     *     their own. ``PUT`` saves a draft (autosave).
+     */
+    get: operations["lesson_reports_retrieve"];
+    /**
+     * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
+     *     their own. ``PUT`` saves a draft (autosave).
+     */
+    put: operations["lesson_reports_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lesson-reports/{id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
+     *     their own. ``PUT`` saves a draft (autosave).
+     */
+    post: operations["lesson_reports_approve_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lesson-reports/{id}/comments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
+     *     their own. ``PUT`` saves a draft (autosave).
+     */
+    get: operations["lesson_reports_comments_list"];
+    put?: never;
+    /**
+     * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
+     *     their own. ``PUT`` saves a draft (autosave).
+     */
+    post: operations["lesson_reports_comments_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lesson-reports/{id}/return": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
+     *     their own. ``PUT`` saves a draft (autosave).
+     */
+    post: operations["lesson_reports_return_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lesson-reports/{id}/share": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
+     *     their own. ``PUT`` saves a draft (autosave).
+     */
+    post: operations["lesson_reports_share_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lesson-reports/{id}/submit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
+     *     their own. ``PUT`` saves a draft (autosave).
+     */
+    post: operations["lesson_reports_submit_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/lesson-series": {
     parameters: {
       query?: never;
@@ -1853,6 +2053,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/lessons/{lesson_id}/reports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description A lesson's reports (one per tutor). ``POST`` opens the report for a tutor (you, if
+     *     you are the lesson's tutor) so it can be written, even before completion.
+     */
+    get: operations["lessons_reports_list"];
+    put?: never;
+    /**
+     * @description A lesson's reports (one per tutor). ``POST`` opens the report for a tutor (you, if
+     *     you are the lesson's tutor) so it can be written, even before completion.
+     */
+    post: operations["lessons_reports_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/lessons/{id}": {
     parameters: {
       query?: never;
@@ -1880,6 +2104,23 @@ export interface paths {
     patch: operations["lessons_partial_update"];
     trace?: never;
   };
+  "/api/v1/lessons/{id}/attendance": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Correct attendance after completion (unlocked lessons). */
+    patch: operations["lessons_attendance_partial_update"];
+    trace?: never;
+  };
   "/api/v1/lessons/{id}/cancel": {
     parameters: {
       query?: never;
@@ -1890,9 +2131,9 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * @description Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.
-     *     A hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the
-     *     permission) to schedule anyway.
+     * @description Cancel under the cancellation policy (E09 FR-09-3). ``?preview=true`` returns the
+     *     outcome ("late cancellation: client charged 100%...") without cancelling. An
+     *     ``override`` of the percentages needs ``delivery.cancel.override_policy``.
      */
     post: operations["lessons_cancel_create"];
     delete?: never;
@@ -1911,9 +2152,10 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * @description Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.
-     *     A hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the
-     *     permission) to schedule anyway.
+     * @description Complete with attendance (E09 FR-09-1/2). Students left out were present. A
+     *     prepaid client without enough credit blocks completion (422,
+     *     ``code=insufficient_balance``); ``override_balance`` needs
+     *     ``delivery.balance.override``.
      */
     post: operations["lessons_complete_create"];
     delete?: never;
@@ -2013,6 +2255,121 @@ export interface paths {
     put?: never;
     /** @description Bulk actions on up to 200 lessons; each lesson succeeds or fails on its own. */
     post: operations["lessons_bulk_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/makeup-credits": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["makeup_credits_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/makeup-credits/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["makeup_credits_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/makeup-credits/{id}/consume": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["makeup_credits_consume_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/makeup-credits/{id}/extend": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["makeup_credits_extend_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/makeup-credits/{id}/void": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["makeup_credits_void_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -2548,6 +2905,58 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/report-templates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Report templates (FR-09-4). Changing the fields creates a new version; deleting
+     *     archives the template.
+     */
+    get: operations["report_templates_list"];
+    put?: never;
+    /**
+     * @description Report templates (FR-09-4). Changing the fields creates a new version; deleting
+     *     archives the template.
+     */
+    post: operations["report_templates_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/report-templates/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Report templates (FR-09-4). Changing the fields creates a new version; deleting
+     *     archives the template.
+     */
+    get: operations["report_templates_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Report templates (FR-09-4). Changing the fields creates a new version; deleting
+     *     archives the template.
+     */
+    delete: operations["report_templates_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Report templates (FR-09-4). Changing the fields creates a new version; deleting
+     *     archives the template.
+     */
+    patch: operations["report_templates_partial_update"];
+    trace?: never;
+  };
   "/api/v1/roles": {
     parameters: {
       query?: never;
@@ -2785,6 +3194,22 @@ export interface paths {
     put?: never;
     /** @description Students. ``DELETE`` archives; ``status`` changes the lifecycle status. */
     post: operations["students_status_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/students/{student_id}/attendance": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["students_attendance_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -3048,6 +3473,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/unconfirmed-lessons": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description FR-09-8: past lessons still planned. Bulk complete or cancel them with
+     *     ``POST /lessons/bulk``; ``POST`` here nudges their tutors.
+     */
+    get: operations["unconfirmed_lessons_list"];
+    put?: never;
+    /**
+     * @description FR-09-8: past lessons still planned. Bulk complete or cancel them with
+     *     ``POST /lessons/bulk``; ``POST`` here nudges their tutors.
+     */
+    post: operations["unconfirmed_lessons_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3118,6 +3567,40 @@ export interface components {
     ApplyTagResult: {
       changed: number;
     };
+    /**
+     * @description * `present` - Present
+     *     * `late` - Late
+     *     * `absent_notified` - Absent (notified)
+     *     * `no_show` - No-show
+     *     * `cancelled_client` - Cancelled by client
+     *     * `cancelled_tutor` - Cancelled by tutor
+     *     * `cancelled_admin` - Cancelled by us
+     * @enum {string}
+     */
+    AttendanceOutcomeEnum:
+      | "present"
+      | "late"
+      | "absent_notified"
+      | "no_show"
+      | "cancelled_client"
+      | "cancelled_tutor"
+      | "cancelled_admin";
+    AttendanceRowRequest: {
+      /** Format: uuid */
+      attendee: string;
+      outcome: components["schemas"]["AttendanceOutcomeEnum"];
+      late_minutes?: number | null;
+    };
+    AttendanceStats: {
+      lessons: number;
+      attended: number;
+      /** Format: decimal */
+      rate_percent: string;
+      streak: number;
+      by_outcome: {
+        [key: string]: number;
+      };
+    };
     AuditEntry: {
       /** Format: uuid */
       readonly id: string;
@@ -3163,6 +3646,8 @@ export interface components {
      * @enum {string}
      */
     BillingMethodEnum: "pay_as_you_go" | "prepaid_credit" | "package" | "recurring_fixed";
+    /** @enum {unknown} */
+    BlankEnum: "";
     Branch: {
       /** Format: uuid */
       readonly id: string;
@@ -3245,6 +3730,8 @@ export interface components {
       location?: string | null;
       /** @default  */
       reason: string;
+      /** @default admin */
+      cancelled_by: components["schemas"]["CancelledByEnum"];
     };
     BulkResult: {
       succeeded: string[];
@@ -3338,14 +3825,88 @@ export interface components {
      * @enum {string}
      */
     CalendarItemKindEnum: "lesson" | "event";
+    CancelOutcome: {
+      kind: components["schemas"]["CancelOutcomeKindEnum"];
+      /** Format: decimal */
+      charge_percent: string;
+      /** Format: decimal */
+      pay_percent: string;
+      /** Format: decimal */
+      policy_charge_percent: string;
+      /** Format: decimal */
+      policy_pay_percent: string;
+      notice_minutes: number;
+      makeup_credit: boolean;
+      policy_name: string;
+      message: string;
+    };
+    /**
+     * @description * `free` - free
+     *     * `late` - late
+     *     * `tutor` - tutor
+     *     * `admin` - admin
+     * @enum {string}
+     */
+    CancelOutcomeKindEnum: "free" | "late" | "tutor" | "admin";
     CancelRequest: {
+      /** @default admin */
+      cancelled_by: components["schemas"]["CancelledByEnum"];
       /** @default  */
       reason: string;
-      /** @default false */
-      chargeable: boolean;
       /** @default true */
       notify: boolean;
+      /** @default this */
+      scope: components["schemas"]["CancelScopeEnum"];
+      override?: components["schemas"]["PolicyOverrideRequest"] | null;
     };
+    CancelResult: {
+      outcome: components["schemas"]["CancelOutcome"];
+      /** @description Null for a preview. */
+      lesson: components["schemas"]["Lesson"] | null;
+      following_cancelled: number;
+    };
+    /**
+     * @description * `this` - this
+     *     * `following` - following
+     * @enum {string}
+     */
+    CancelScopeEnum: "this" | "following";
+    CancellationPolicy: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      scope_type: components["schemas"]["CancellationPolicyScopeEnum"];
+      /** Format: uuid */
+      scope_id?: string | null;
+      rules: components["schemas"]["PolicyRules"];
+      readonly version: number;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    CancellationPolicyRequest: {
+      name: string;
+      scope_type: components["schemas"]["CancellationPolicyScopeEnum"];
+      /** Format: uuid */
+      scope_id?: string | null;
+      rules: components["schemas"]["PolicyRulesRequest"];
+    };
+    /**
+     * @description * `organisation` - Organisation default
+     *     * `branch` - Branch
+     *     * `service` - Service
+     *     * `job` - Job
+     *     * `client` - Client
+     * @enum {string}
+     */
+    CancellationPolicyScopeEnum: "organisation" | "branch" | "service" | "job" | "client";
+    /**
+     * @description * `client` - Client
+     *     * `student` - Student
+     *     * `tutor` - Tutor
+     *     * `admin` - Us
+     * @enum {string}
+     */
+    CancelledByEnum: "client" | "student" | "tutor" | "admin";
     Category: {
       /** Format: uuid */
       readonly id: string;
@@ -3494,6 +4055,15 @@ export interface components {
     CodeRequest: {
       code: string;
     };
+    CompleteRequest: {
+      attendance?: components["schemas"]["AttendanceRowRequest"][];
+      /** Format: date-time */
+      actual_start?: string | null;
+      /** Format: date-time */
+      actual_end?: string | null;
+      /** @default false */
+      override_balance: boolean;
+    };
     Conflict: {
       kind: string;
       severity: components["schemas"]["SeverityEnum"];
@@ -3611,6 +4181,10 @@ export interface components {
       required?: boolean;
       applies_to?: unknown;
       is_active?: boolean;
+    };
+    ConsumeRequest: {
+      /** Format: uuid */
+      lesson: string;
     };
     Contact: {
       /** Format: uuid */
@@ -3901,6 +4475,10 @@ export interface components {
      * @enum {string}
      */
     ExceptionStatusEnum: "requested" | "approved" | "declined";
+    ExtendRequest: {
+      /** Format: date-time */
+      until: string;
+    };
     Features: {
       features: {
         [key: string]: boolean;
@@ -4421,6 +4999,14 @@ export interface components {
       /** Format: date-time */
       readonly status_changed_at: string | null;
       readonly chargeable_cancellation: boolean;
+      readonly cancelled_by: string;
+      /** Format: date-time */
+      readonly actual_start: string | null;
+      /** Format: date-time */
+      readonly actual_end: string | null;
+      readonly auto_completed: boolean;
+      /** Format: date-time */
+      readonly unconfirmed_at: string | null;
       readonly tutors: components["schemas"]["LessonTutor"][];
       readonly attendees: components["schemas"]["LessonAttendee"][];
       readonly custom_fields: unknown;
@@ -4428,6 +5014,8 @@ export interface components {
       readonly created_at: string;
     };
     LessonAttendee: {
+      /** Format: uuid */
+      readonly id: string;
       /** Format: uuid */
       student: string;
       readonly name: string;
@@ -4462,6 +5050,12 @@ export interface components {
       } | null;
       charge_snapshot?: unknown;
       chargeable?: boolean;
+      outcome?: components["schemas"]["AttendanceOutcomeEnum"] | components["schemas"]["BlankEnum"];
+      late_minutes?: number | null;
+      /** Format: decimal */
+      charge_percent?: string;
+      /** Format: date-time */
+      recorded_at?: string | null;
     };
     LessonAttendeeInputRequest: {
       /** Format: uuid */
@@ -4480,6 +5074,55 @@ export interface components {
       /** @default  */
       reason: string;
     };
+    LessonReport: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly lesson: string;
+      readonly lesson_title: string;
+      /** Format: date-time */
+      readonly lesson_start: string;
+      /** Format: date-time */
+      readonly lesson_end: string;
+      readonly lesson_status: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      readonly students: components["schemas"]["StudentRef"][];
+      readonly status: components["schemas"]["LessonReportStatusEnum"];
+      readonly sla_state: components["schemas"]["SlaStateEnum"];
+      /** Format: date-time */
+      readonly due_at: string;
+      /** Format: date-time */
+      readonly submitted_at: string | null;
+      /** Format: date-time */
+      readonly approved_at: string | null;
+      /** Format: date-time */
+      readonly shared_at: string | null;
+      /** Format: date-time */
+      readonly overdue_at: string | null;
+      /** Format: date-time */
+      readonly escalated_at: string | null;
+      readonly pay_held: boolean;
+      readonly returned_note: string;
+      readonly template_name: string;
+      readonly template_version_number: number;
+      readonly template_fields: components["schemas"]["TemplateField"][];
+      readonly answers: {
+        [key: string]: unknown;
+      };
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    /**
+     * @description * `pending` - Not started
+     *     * `draft` - Draft
+     *     * `submitted` - Submitted
+     *     * `returned` - Returned to tutor
+     *     * `approved` - Approved
+     * @enum {string}
+     */
+    LessonReportStatusEnum: "pending" | "draft" | "submitted" | "returned" | "approved";
     LessonResult: {
       lesson: components["schemas"]["Lesson"];
       warnings: components["schemas"]["Conflict"][];
@@ -4493,6 +5136,8 @@ export interface components {
      */
     LessonStatusEnum: "planned" | "completed" | "cancelled" | "missed";
     LessonTutor: {
+      /** Format: uuid */
+      readonly id: string;
       /** Format: uuid */
       tutor: string;
       readonly name: string;
@@ -4516,6 +5161,8 @@ export interface components {
       } | null;
       pay_snapshot?: unknown;
       payable?: boolean;
+      /** Format: decimal */
+      pay_percent?: string;
     };
     LessonTutorInputRequest: {
       /** Format: uuid */
@@ -4657,6 +5304,46 @@ export interface components {
       /** @default false */
       remember: boolean;
     };
+    MakeupCredit: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly student: string;
+      readonly student_name: string;
+      /** Format: uuid */
+      readonly client: string;
+      /** Format: uuid */
+      readonly source_lesson: string;
+      readonly source_lesson_title: string;
+      /** Format: date-time */
+      readonly source_lesson_start: string;
+      /** Format: date-time */
+      readonly expires_at: string;
+      /** Format: uuid */
+      readonly consumed_by_lesson: string | null;
+      /** Format: date-time */
+      readonly consumed_at: string | null;
+      readonly status: components["schemas"]["MakeupCreditStatusEnum"];
+      readonly note: string;
+    };
+    /**
+     * @description * `available` - Available
+     *     * `used` - Used
+     *     * `expired` - Expired
+     *     * `void` - Void
+     * @enum {string}
+     */
+    MakeupCreditStatusEnum: "available" | "used" | "expired" | "void";
+    MakeupRules: {
+      on_free_cancellation: boolean;
+      on_tutor_cancellation: boolean;
+      valid_days: number;
+    };
+    MakeupRulesRequest: {
+      on_free_cancellation: boolean;
+      on_tutor_cancellation: boolean;
+      valid_days: number;
+    };
     Me: {
       user: components["schemas"]["User"];
       organisation: components["schemas"]["MeOrganisation"] | null;
@@ -4774,6 +5461,12 @@ export interface components {
      * @enum {string}
      */
     NoteVisibilityEnum: "staff_only" | "staff_and_tutors" | "shared_with_client";
+    NudgeRequest: {
+      ids: string[];
+    };
+    NudgeResult: {
+      nudged: number;
+    };
     OnboardingState: {
       current_step: string;
       steps: components["schemas"]["OnboardingStepStatus"][];
@@ -5096,6 +5789,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Lesson"][];
     };
+    PaginatedLessonReportList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["LessonReport"][];
+    };
     PaginatedLocationList: {
       /**
        * Format: uri
@@ -5121,6 +5827,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["LoginEvent"][];
+    };
+    PaginatedMakeupCreditList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["MakeupCredit"][];
     };
     PaginatedMembershipList: {
       /**
@@ -5263,6 +5982,9 @@ export interface components {
       uid: string;
       token: string;
       new_password: string;
+    };
+    PatchedAttendanceRequest: {
+      attendance?: components["schemas"]["AttendanceRowRequest"][];
     };
     PatchedBranchRequest: {
       name?: string;
@@ -5551,6 +6273,15 @@ export interface components {
       tutor_share_percent?: string;
       active?: boolean;
     };
+    PatchedReportTemplateRequest: {
+      name?: string;
+      description?: string;
+      is_default?: boolean;
+      fields?: components["schemas"]["TemplateFieldRequest"][];
+      services?: string[];
+      subjects?: string[];
+      jobs?: string[];
+    };
     PatchedSavedViewRequest: {
       entity_type?: string;
       name?: string;
@@ -5767,6 +6498,18 @@ export interface components {
      * @enum {string}
      */
     PayUnitEnum: "per_hour" | "per_lesson";
+    PercentPair: {
+      /** Format: decimal */
+      charge_percent: string;
+      /** Format: decimal */
+      pay_percent: string;
+    };
+    PercentPairRequest: {
+      /** Format: decimal */
+      charge_percent: string;
+      /** Format: decimal */
+      pay_percent: string;
+    };
     Permission: {
       codename: string;
       category: string;
@@ -5775,6 +6518,38 @@ export interface components {
     PersonRef: {
       id: string;
       name: string;
+    };
+    PolicyOverrideRequest: {
+      /** Format: decimal */
+      charge_percent: string;
+      /** Format: decimal */
+      pay_percent: string;
+      /** @default  */
+      reason: string;
+    };
+    /** @description All keys optional on input (defaults fill the gaps); complete on output. */
+    PolicyRules: {
+      free_window_hours?: number;
+      late_cancellation?: components["schemas"]["PercentPair"];
+      no_show?: components["schemas"]["PercentPair"];
+      absent_notified?: components["schemas"]["PercentPair"];
+      late?: components["schemas"]["PercentPair"];
+      tutor_cancellation?: components["schemas"]["PercentPair"];
+      admin_cancellation?: components["schemas"]["PercentPair"];
+      max_free_per_month?: number | null;
+      makeup_credit?: components["schemas"]["MakeupRules"];
+    };
+    /** @description All keys optional on input (defaults fill the gaps); complete on output. */
+    PolicyRulesRequest: {
+      free_window_hours?: number;
+      late_cancellation?: components["schemas"]["PercentPairRequest"];
+      no_show?: components["schemas"]["PercentPairRequest"];
+      absent_notified?: components["schemas"]["PercentPairRequest"];
+      late?: components["schemas"]["PercentPairRequest"];
+      tutor_cancellation?: components["schemas"]["PercentPairRequest"];
+      admin_cancellation?: components["schemas"]["PercentPairRequest"];
+      max_free_per_month?: number | null;
+      makeup_credit?: components["schemas"]["MakeupRulesRequest"];
     };
     /**
      * @description * `email` - Email
@@ -6125,6 +6900,69 @@ export interface components {
       lessons: components["schemas"]["AffectedLesson"][];
       conflicts: number;
       new_assignment: components["schemas"]["JobTutor"] | null;
+    };
+    ReportAnswersRequest: {
+      answers: {
+        [key: string]: unknown;
+      };
+    };
+    ReportComment: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly author_name: string;
+      body: string;
+      visibility?: components["schemas"]["ReportCommentVisibilityEnum"];
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ReportCommentRequest: {
+      body: string;
+      visibility?: components["schemas"]["ReportCommentVisibilityEnum"];
+    };
+    /**
+     * @description * `staff` - Staff and tutor only
+     *     * `client` - Visible to the client
+     * @enum {string}
+     */
+    ReportCommentVisibilityEnum: "staff" | "client";
+    ReportOpenRequest: {
+      /**
+       * Format: uuid
+       * @description Defaults to you (tutors).
+       */
+      tutor?: string;
+    };
+    ReportReturnRequest: {
+      /** @default  */
+      note: string;
+    };
+    ReportSubmitRequest: {
+      answers?: {
+        [key: string]: unknown;
+      };
+    };
+    ReportTemplate: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      description?: string;
+      is_default?: boolean;
+      fields: components["schemas"]["TemplateField"][];
+      readonly version: number;
+      services?: string[];
+      subjects?: string[];
+      jobs?: string[];
+      /** Format: date-time */
+      readonly archived_at: string | null;
+    };
+    ReportTemplateRequest: {
+      name: string;
+      description?: string;
+      is_default?: boolean;
+      fields: components["schemas"]["TemplateFieldRequest"][];
+      services?: string[];
+      subjects?: string[];
+      jobs?: string[];
     };
     RescheduleRequest: {
       /** Format: date-time */
@@ -6556,6 +7394,15 @@ export interface components {
       date: string;
       conflicts: components["schemas"]["Conflict"][];
     };
+    /**
+     * @description * `due` - due
+     *     * `overdue` - overdue
+     *     * `submitted` - submitted
+     *     * `approved` - approved
+     *     * `shared` - shared
+     * @enum {string}
+     */
+    SlaStateEnum: "due" | "overdue" | "submitted" | "approved" | "shared";
     Slot: {
       /** Format: date-time */
       start: string;
@@ -6673,6 +7520,11 @@ export interface components {
         /** @example GBP */
         currency: string;
       } | null;
+    };
+    StudentRef: {
+      /** Format: uuid */
+      id: string;
+      name: string;
     };
     StudentRequest: {
       /** Format: uuid */
@@ -6833,6 +7685,59 @@ export interface components {
       exempt_reason?: string;
       active?: boolean;
     };
+    TemplateField: {
+      key: string;
+      label: string;
+      type: components["schemas"]["TemplateFieldTypeEnum"];
+      /** @default false */
+      required: boolean;
+      /** @default client */
+      visibility: components["schemas"]["TemplateFieldVisibilityEnum"];
+      options?: string[];
+      help_text?: string;
+    };
+    TemplateFieldRequest: {
+      key: string;
+      label: string;
+      type: components["schemas"]["TemplateFieldTypeEnum"];
+      /** @default false */
+      required: boolean;
+      /** @default client */
+      visibility: components["schemas"]["TemplateFieldVisibilityEnum"];
+      options?: string[];
+      help_text?: string;
+    };
+    /**
+     * @description * `rich_text` - rich_text
+     *     * `text` - text
+     *     * `rating` - rating
+     *     * `select` - select
+     *     * `multi_select` - multi_select
+     *     * `checklist` - checklist
+     *     * `topics` - topics
+     *     * `homework` - homework
+     *     * `next_steps` - next_steps
+     *     * `attachment` - attachment
+     * @enum {string}
+     */
+    TemplateFieldTypeEnum:
+      | "rich_text"
+      | "text"
+      | "rating"
+      | "select"
+      | "multi_select"
+      | "checklist"
+      | "topics"
+      | "homework"
+      | "next_steps"
+      | "attachment";
+    /**
+     * @description * `staff` - staff
+     *     * `client` - client
+     *     * `student` - student
+     * @enum {string}
+     */
+    TemplateFieldVisibilityEnum: "staff" | "client" | "student";
     /**
      * @description * `locale` - Locale default
      *     * `24h` - 24-hour
@@ -7038,6 +7943,10 @@ export interface components {
       readonly has_mfa: boolean;
       /** Format: date-time */
       readonly date_joined: string;
+    };
+    VoidRequest: {
+      /** @default  */
+      note: string;
     };
     /**
      * @description * `0` - Monday
@@ -7766,6 +8675,132 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["CalendarItem"][];
         };
+      };
+    };
+  };
+  cancellation_policies_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CancellationPolicy"][];
+        };
+      };
+    };
+  };
+  cancellation_policies_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CancellationPolicyRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CancellationPolicyRequest"];
+        "multipart/form-data": components["schemas"]["CancellationPolicyRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CancellationPolicy"];
+        };
+      };
+    };
+  };
+  cancellation_policies_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this cancellation policy. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CancellationPolicy"];
+        };
+      };
+    };
+  };
+  cancellation_policies_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this cancellation policy. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CancellationPolicyRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CancellationPolicyRequest"];
+        "multipart/form-data": components["schemas"]["CancellationPolicyRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CancellationPolicy"];
+        };
+      };
+    };
+  };
+  cancellation_policies_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this cancellation policy. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -10924,6 +11959,299 @@ export interface operations {
       };
     };
   };
+  lesson_reports_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        lesson?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description SLA state
+         *
+         *     * `due` - Due
+         *     * `overdue` - Overdue
+         *     * `submitted` - Submitted, not shared
+         *     * `awaiting_approval` - Awaiting approval
+         *     * `approved` - Approved, not shared
+         *     * `shared` - Shared
+         */
+        sla?: "approved" | "awaiting_approval" | "due" | "overdue" | "shared" | "submitted";
+        /**
+         * @description * `pending` - Not started
+         *     * `draft` - Draft
+         *     * `submitted` - Submitted
+         *     * `returned` - Returned to tutor
+         *     * `approved` - Approved
+         */
+        status?: ("approved" | "draft" | "pending" | "returned" | "submitted")[];
+        student?: string;
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedLessonReportList"];
+        };
+      };
+    };
+  };
+  lesson_reports_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonReport"];
+        };
+      };
+    };
+  };
+  lesson_reports_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportAnswersRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReportAnswersRequest"];
+        "multipart/form-data": components["schemas"]["ReportAnswersRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonReport"];
+        };
+      };
+    };
+  };
+  lesson_reports_approve_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this lesson report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonReport"];
+        };
+      };
+    };
+  };
+  lesson_reports_comments_list: {
+    parameters: {
+      query?: {
+        lesson?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /**
+         * @description SLA state
+         *
+         *     * `due` - Due
+         *     * `overdue` - Overdue
+         *     * `submitted` - Submitted, not shared
+         *     * `awaiting_approval` - Awaiting approval
+         *     * `approved` - Approved, not shared
+         *     * `shared` - Shared
+         */
+        sla?: "approved" | "awaiting_approval" | "due" | "overdue" | "shared" | "submitted";
+        /**
+         * @description * `pending` - Not started
+         *     * `draft` - Draft
+         *     * `submitted` - Submitted
+         *     * `returned` - Returned to tutor
+         *     * `approved` - Approved
+         */
+        status?: ("approved" | "draft" | "pending" | "returned" | "submitted")[];
+        student?: string;
+        tutor?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportComment"][];
+        };
+      };
+    };
+  };
+  lesson_reports_comments_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this lesson report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportCommentRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReportCommentRequest"];
+        "multipart/form-data": components["schemas"]["ReportCommentRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportComment"];
+        };
+      };
+    };
+  };
+  lesson_reports_return_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this lesson report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ReportReturnRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReportReturnRequest"];
+        "multipart/form-data": components["schemas"]["ReportReturnRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonReport"];
+        };
+      };
+    };
+  };
+  lesson_reports_share_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this lesson report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonReport"];
+        };
+      };
+    };
+  };
+  lesson_reports_submit_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this lesson report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ReportSubmitRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReportSubmitRequest"];
+        "multipart/form-data": components["schemas"]["ReportSubmitRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonReport"];
+        };
+      };
+    };
+  };
   lesson_series_create: {
     parameters: {
       query?: never;
@@ -11109,6 +12437,57 @@ export interface operations {
       };
     };
   };
+  lessons_reports_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonReport"][];
+        };
+      };
+    };
+  };
+  lessons_reports_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ReportOpenRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReportOpenRequest"];
+        "multipart/form-data": components["schemas"]["ReportOpenRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonReport"];
+        };
+      };
+    };
+  };
   lessons_retrieve: {
     parameters: {
       query?: {
@@ -11183,9 +12562,40 @@ export interface operations {
       };
     };
   };
-  lessons_cancel_create: {
+  lessons_attendance_partial_update: {
     parameters: {
       query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedAttendanceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedAttendanceRequest"];
+        "multipart/form-data": components["schemas"]["PatchedAttendanceRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Lesson"];
+        };
+      };
+    };
+  };
+  lessons_cancel_create: {
+    parameters: {
+      query?: {
+        /** @description Only show the policy outcome (nothing changes). */
+        preview?: boolean;
+      };
       header?: {
         /** @description Makes the request safe to retry for 24 hours. */
         "Idempotency-Key"?: string;
@@ -11209,7 +12619,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Lesson"];
+          "application/json": components["schemas"]["CancelResult"];
         };
       };
     };
@@ -11227,7 +12637,13 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["CompleteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CompleteRequest"];
+        "multipart/form-data": components["schemas"]["CompleteRequest"];
+      };
+    };
     responses: {
       200: {
         headers: {
@@ -11402,6 +12818,154 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["BulkResult"];
+        };
+      };
+    };
+  };
+  makeup_credits_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedMakeupCreditList"];
+        };
+      };
+    };
+  };
+  makeup_credits_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this makeup credit. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MakeupCredit"];
+        };
+      };
+    };
+  };
+  makeup_credits_consume_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this makeup credit. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ConsumeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ConsumeRequest"];
+        "multipart/form-data": components["schemas"]["ConsumeRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MakeupCredit"];
+        };
+      };
+    };
+  };
+  makeup_credits_extend_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this makeup credit. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExtendRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ExtendRequest"];
+        "multipart/form-data": components["schemas"]["ExtendRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MakeupCredit"];
+        };
+      };
+    };
+  };
+  makeup_credits_void_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this makeup credit. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["VoidRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["VoidRequest"];
+        "multipart/form-data": components["schemas"]["VoidRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MakeupCredit"];
         };
       };
     };
@@ -12389,6 +13953,132 @@ export interface operations {
       };
     };
   };
+  report_templates_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportTemplate"][];
+        };
+      };
+    };
+  };
+  report_templates_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportTemplateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReportTemplateRequest"];
+        "multipart/form-data": components["schemas"]["ReportTemplateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportTemplate"];
+        };
+      };
+    };
+  };
+  report_templates_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this report template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportTemplate"];
+        };
+      };
+    };
+  };
+  report_templates_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this report template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  report_templates_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this report template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedReportTemplateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedReportTemplateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedReportTemplateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportTemplate"];
+        };
+      };
+    };
+  };
   roles_list: {
     parameters: {
       query?: never;
@@ -12909,6 +14599,27 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Student"];
+        };
+      };
+    };
+  };
+  students_attendance_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        student_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AttendanceStats"];
         };
       };
     };
@@ -13597,6 +15308,53 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TutorSubject"];
+        };
+      };
+    };
+  };
+  unconfirmed_lessons_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Lesson"][];
+        };
+      };
+    };
+  };
+  unconfirmed_lessons_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NudgeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["NudgeRequest"];
+        "multipart/form-data": components["schemas"]["NudgeRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["NudgeResult"];
         };
       };
     };

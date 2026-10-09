@@ -7,6 +7,7 @@ import secrets
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import date, datetime, time, timedelta
+from decimal import Decimal
 from typing import Any
 
 from django.db import transaction
@@ -408,35 +409,150 @@ def update_lesson(
     return LessonResult(lesson, found)
 
 
+ONE_HUNDRED = Decimal(100)
+CANCEL_OUTCOMES = {
+    "client": LessonAttendee.Outcome.CANCELLED_CLIENT,
+    "student": LessonAttendee.Outcome.CANCELLED_CLIENT,
+    "tutor": LessonAttendee.Outcome.CANCELLED_TUTOR,
+    "admin": LessonAttendee.Outcome.CANCELLED_ADMIN,
+}
+
+
+@dataclass(frozen=True)
+class AttendanceInput:
+    """One attendee's outcome; ``charge_percent`` comes from the cancellation policy (E09)."""
+
+    attendee_id: Any
+    outcome: str
+    charge_percent: Decimal = ONE_HUNDRED
+    late_minutes: int | None = None
+
+
+def attendee_rows(lesson: Lesson) -> list[dict[str, object]]:
+    return [
+        {
+            "id": str(a.pk),
+            "student_id": str(a.student_id),
+            "client_id": str(a.client_id),
+            "outcome": a.outcome,
+            "charge_percent": str(a.charge_percent),
+            "chargeable": a.chargeable,
+        }
+        for a in lesson.attendees.order_by("created_at", "id")
+    ]
+
+
+def tutor_rows(lesson: Lesson) -> list[dict[str, object]]:
+    return [
+        {
+            "id": str(t.pk),
+            "tutor_id": str(t.tutor_id),
+            "pay_percent": str(t.pay_percent),
+            "payable": t.payable,
+        }
+        for t in lesson.tutors.order_by("created_at", "id")
+    ]
+
+
+def _check_percent(value: Decimal) -> Decimal:
+    if not ONE_HUNDRED >= value >= 0:
+        raise _invalid("charge_percent", _("Percentages run from 0 to 100."))
+    return value
+
+
+def _apply_attendance(
+    lesson: Lesson, attendance: Iterable[AttendanceInput], recorded_by: Any
+) -> None:
+    by_id = {str(a.pk): a for a in lesson.attendees.all()}
+    stamp = now()
+    for row in attendance:
+        attendee = by_id.get(str(row.attendee_id))
+        if attendee is None:
+            raise _invalid("attendance", _("That student isn't in this lesson."))
+        if row.outcome not in LessonAttendee.Outcome.values:
+            raise _invalid("attendance", _("Unknown attendance outcome."))
+        attendee.outcome = row.outcome
+        attendee.late_minutes = (
+            row.late_minutes if row.outcome == LessonAttendee.Outcome.LATE else None
+        )
+        attendee.charge_percent = _check_percent(row.charge_percent)
+        attendee.chargeable = row.charge_percent > 0
+        attendee.recorded_by = recorded_by
+        attendee.recorded_at = stamp
+        attendee.save(
+            update_fields=[
+                "outcome",
+                "late_minutes",
+                "charge_percent",
+                "chargeable",
+                "recorded_by",
+                "recorded_at",
+                "updated_at",
+            ]
+        )
+
+
+def _apply_pay(lesson: Lesson, pay_percent: Decimal) -> None:
+    pay_percent = _check_percent(pay_percent)
+    lesson.tutors.update(pay_percent=pay_percent, payable=pay_percent > 0)
+
+
 @transaction.atomic
 def cancel_lesson(
-    lesson: Lesson, *, reason: str = "", chargeable: bool = False, notify: bool = True
+    lesson: Lesson,
+    *,
+    reason: str = "",
+    chargeable: bool = False,
+    notify: bool = True,
+    cancelled_by: str = "admin",
+    charge_percent: Decimal | None = None,
+    pay_percent: Decimal | None = None,
+    policy_kind: str = "",
+    recorded_by: Any = None,
 ) -> Lesson:
-    """Cancel (E09 decides chargeability from policy; here the caller says)."""
+    """Cancel a lesson. E09's policy engine supplies ``charge_percent``/``pay_percent``
+    (otherwise ``chargeable`` means 100%/100% and not chargeable 0%/0%)."""
     if lesson.status != Lesson.Status.PLANNED:
         raise BusinessRuleViolation(_("Only planned lessons can be cancelled."))
     if lesson.is_locked:
         raise BusinessRuleViolation(_("This lesson is already invoiced or paid."))
+    if cancelled_by not in CANCEL_OUTCOMES:
+        raise _invalid("cancelled_by", _("Say who cancelled."))
+    charge = charge_percent if charge_percent is not None else ONE_HUNDRED * chargeable
+    pay = pay_percent if pay_percent is not None else ONE_HUNDRED * chargeable
     with audit.track(lesson, action="cancel"):
         lesson.status = Lesson.Status.CANCELLED
         lesson.status_reason = reason[:300]
         lesson.status_changed_at = now()
-        lesson.chargeable_cancellation = chargeable
+        lesson.chargeable_cancellation = charge > 0
+        lesson.cancelled_by = cancelled_by
         lesson.save(
             update_fields=[
                 "status",
                 "status_reason",
                 "status_changed_at",
                 "chargeable_cancellation",
+                "cancelled_by",
                 "updated_at",
             ]
         )
-    if not chargeable:
-        lesson.attendees.update(chargeable=False)
-        lesson.tutors.update(payable=False)
+    outcome = CANCEL_OUTCOMES[cancelled_by]
+    _apply_attendance(
+        lesson,
+        [AttendanceInput(a.pk, outcome, charge) for a in lesson.attendees.all()],
+        recorded_by,
+    )
+    _apply_pay(lesson, pay)
     publish(
         events.LessonCancelled(
-            subject_id=lesson.pk, reason=reason, chargeable=chargeable, notify=notify
+            subject_id=lesson.pk,
+            reason=reason,
+            chargeable=charge > 0,
+            notify=notify,
+            cancelled_by=cancelled_by,
+            policy_kind=policy_kind,
+            attendees=attendee_rows(lesson),
+            tutors=tutor_rows(lesson),
         ),
         branch_id=lesson.branch_id,
     )
@@ -444,23 +560,99 @@ def cancel_lesson(
 
 
 @transaction.atomic
-def complete_lesson(lesson: Lesson) -> Lesson:
-    """Mark delivered (E09 adds attendance and the report)."""
+def complete_lesson(
+    lesson: Lesson,
+    *,
+    attendance: Iterable[AttendanceInput] | None = None,
+    pay_percent: Decimal = ONE_HUNDRED,
+    actual_start: datetime | None = None,
+    actual_end: datetime | None = None,
+    reprice_actual: bool = False,
+    recorded_by: Any = None,
+    auto: bool = False,
+    earliest: datetime | None = None,
+) -> Lesson:
+    """Mark delivered with attendance (E09 supplies outcomes and policy percentages; by
+    default everyone was present). ``earliest`` is when completion opens (default: start)."""
     if lesson.status not in {Lesson.Status.PLANNED, Lesson.Status.MISSED}:
         raise BusinessRuleViolation(_("Only planned lessons can be completed."))
-    if lesson.start > now():
+    if (earliest or lesson.start) > now():
         raise BusinessRuleViolation(_("This lesson hasn't started yet."))
+    if lesson.is_locked:
+        raise BusinessRuleViolation(_("This lesson is already invoiced or paid."))
+    if actual_start and actual_end:
+        _check_times(actual_start, actual_end)
     with audit.track(lesson, action="complete"):
         lesson.status = Lesson.Status.COMPLETED
         lesson.status_changed_at = now()
-        lesson.save(update_fields=["status", "status_changed_at", "updated_at"])
+        lesson.actual_start = actual_start
+        lesson.actual_end = actual_end
+        lesson.auto_completed = auto
+        lesson.unconfirmed_at = None
+        lesson.save(
+            update_fields=[
+                "status",
+                "status_changed_at",
+                "actual_start",
+                "actual_end",
+                "auto_completed",
+                "unconfirmed_at",
+                "updated_at",
+            ]
+        )
+    rows = list(attendance) if attendance is not None else []
+    given = {str(row.attendee_id) for row in rows}
+    rows += [
+        AttendanceInput(a.pk, LessonAttendee.Outcome.PRESENT)
+        for a in lesson.attendees.all()
+        if str(a.pk) not in given
+    ]
+    _apply_attendance(lesson, rows, recorded_by)
+    _apply_pay(lesson, pay_percent)
+    if reprice_actual and actual_start and actual_end:
+        minutes = int((actual_end - actual_start).total_seconds() // 60)
+        if minutes != lesson.duration_minutes:
+            pricing.price_lesson(lesson, minutes=minutes)
     publish(
         events.LessonCompleted(
-            subject_id=lesson.pk, job_id=str(lesson.job_id) if lesson.job_id else None
+            subject_id=lesson.pk,
+            job_id=str(lesson.job_id) if lesson.job_id else None,
+            auto=auto,
+            attendees=attendee_rows(lesson),
+            tutors=tutor_rows(lesson),
         ),
         branch_id=lesson.branch_id,
     )
     return lesson
+
+
+@transaction.atomic
+def record_attendance(
+    lesson: Lesson, attendance: Iterable[AttendanceInput], *, recorded_by: Any = None
+) -> Lesson:
+    """Correct attendance after completion (unlocked lessons; E10 updates charges)."""
+    if lesson.status != Lesson.Status.COMPLETED:
+        raise BusinessRuleViolation(_("Attendance is recorded when the lesson is completed."))
+    if lesson.is_locked:
+        raise BusinessRuleViolation(
+            _("This lesson is already invoiced or paid; raise a credit note instead.")
+        )
+    with audit.track(lesson, action="attendance"):
+        _apply_attendance(lesson, attendance, recorded_by)
+    publish(
+        events.AttendanceRecorded(subject_id=lesson.pk, attendees=attendee_rows(lesson)),
+        branch_id=lesson.branch_id,
+    )
+    return lesson
+
+
+@transaction.atomic
+def flag_unconfirmed(lesson: Lesson) -> bool:
+    """FR-09-8: a past lesson still planned is flagged (shown in the unconfirmed queue)."""
+    updated = Lesson.objects.filter(
+        pk=lesson.pk, status=Lesson.Status.PLANNED, unconfirmed_at__isnull=True
+    ).update(unconfirmed_at=now())
+    return bool(updated)
 
 
 @transaction.atomic

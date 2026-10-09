@@ -36,7 +36,16 @@ class LessonTutorSerializer(BaseModelSerializer):
 
     class Meta:
         model = LessonTutor
-        fields = ["tutor", "name", "pay_rate_override", "pay_amount", "pay_snapshot", "payable"]
+        fields = [
+            "id",
+            "tutor",
+            "name",
+            "pay_rate_override",
+            "pay_amount",
+            "pay_snapshot",
+            "payable",
+            "pay_percent",
+        ]
         field_permissions = {
             "pay_rate_override": "billing.rates.view_pay",
             "pay_amount": "billing.rates.view_pay",
@@ -50,6 +59,7 @@ class LessonAttendeeSerializer(BaseModelSerializer):
     class Meta:
         model = LessonAttendee
         fields = [
+            "id",
             "student",
             "name",
             "client",
@@ -58,6 +68,10 @@ class LessonAttendeeSerializer(BaseModelSerializer):
             "tax_amount",
             "charge_snapshot",
             "chargeable",
+            "outcome",
+            "late_minutes",
+            "charge_percent",
+            "recorded_at",
         ]
         field_permissions = {
             "charge_rate_override": "billing.rates.view_charge",
@@ -103,6 +117,11 @@ class LessonSerializer(BaseModelSerializer):
             "status_reason",
             "status_changed_at",
             "chargeable_cancellation",
+            "cancelled_by",
+            "actual_start",
+            "actual_end",
+            "auto_completed",
+            "unconfirmed_at",
             "tutors",
             "attendees",
             "custom_fields",
@@ -165,10 +184,62 @@ class LessonResultSerializer(serializers.Serializer):
     warnings = ConflictSerializer(many=True)
 
 
-class CancelSerializer(serializers.Serializer):
+CANCELLED_BY = [("client", "Client"), ("student", "Student"), ("tutor", "Tutor"), ("admin", "Us")]
+
+
+class PolicyOverrideSerializer(serializers.Serializer):
+    charge_percent = serializers.DecimalField(
+        max_digits=5, decimal_places=2, min_value=0, max_value=100
+    )
+    pay_percent = serializers.DecimalField(
+        max_digits=5, decimal_places=2, min_value=0, max_value=100
+    )
     reason = serializers.CharField(max_length=300, required=False, allow_blank=True, default="")
-    chargeable = serializers.BooleanField(default=False)
+
+
+class CancelSerializer(serializers.Serializer):
+    cancelled_by = serializers.ChoiceField(choices=CANCELLED_BY, default="admin")
+    reason = serializers.CharField(max_length=300, required=False, allow_blank=True, default="")
     notify = serializers.BooleanField(default=True)
+    scope = serializers.ChoiceField(choices=["this", "following"], default="this")
+    override = PolicyOverrideSerializer(required=False, allow_null=True, default=None)
+
+
+class CancelOutcomeSerializer(serializers.Serializer):
+    kind = serializers.ChoiceField(choices=["free", "late", "tutor", "admin"])
+    charge_percent = serializers.DecimalField(max_digits=5, decimal_places=2)
+    pay_percent = serializers.DecimalField(max_digits=5, decimal_places=2)
+    policy_charge_percent = serializers.DecimalField(max_digits=5, decimal_places=2)
+    policy_pay_percent = serializers.DecimalField(max_digits=5, decimal_places=2)
+    notice_minutes = serializers.IntegerField()
+    makeup_credit = serializers.BooleanField()
+    policy_name = serializers.CharField()
+    message = serializers.CharField()
+
+
+class CancelResultSerializer(serializers.Serializer):
+    outcome = CancelOutcomeSerializer()
+    lesson = LessonSerializer(allow_null=True, help_text="Null for a preview.")
+    following_cancelled = serializers.IntegerField()
+
+
+class AttendanceRowSerializer(serializers.Serializer):
+    attendee = serializers.UUIDField()
+    outcome = serializers.ChoiceField(choices=LessonAttendee.Outcome.choices)
+    late_minutes = serializers.IntegerField(
+        min_value=0, max_value=600, required=False, allow_null=True
+    )
+
+
+class CompleteSerializer(serializers.Serializer):
+    attendance = AttendanceRowSerializer(many=True, required=False, default=list)
+    actual_start = serializers.DateTimeField(required=False, allow_null=True, default=None)
+    actual_end = serializers.DateTimeField(required=False, allow_null=True, default=None)
+    override_balance = serializers.BooleanField(default=False)
+
+
+class AttendanceSerializer(serializers.Serializer):
+    attendance = serializers.ListField(child=AttendanceRowSerializer(), min_length=1)
 
 
 class LessonReasonSerializer(serializers.Serializer):
@@ -196,6 +267,7 @@ class BulkLessonSerializer(serializers.Serializer):
     tutor = TenantRelatedField(TutorProfile, required=False)
     location = TenantRelatedField(Location, required=False, allow_null=True)
     reason = serializers.CharField(max_length=300, required=False, allow_blank=True, default="")
+    cancelled_by = serializers.ChoiceField(choices=CANCELLED_BY, default="admin")
 
 
 class BulkResultSerializer(serializers.Serializer):

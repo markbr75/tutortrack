@@ -70,11 +70,28 @@ function base(extra: Record<string, unknown> = {}) {
 }
 
 describe("calendar", () => {
-  it("shows the week and cancels a lesson from the quick view", async () => {
+  it("shows the week and cancels a lesson with the policy preview", async () => {
     window.history.pushState(null, "", "/calendar");
+    const outcome = {
+      kind: "late",
+      charge_percent: "100.00",
+      pay_percent: "50.00",
+      policy_charge_percent: "100.00",
+      policy_pay_percent: "50.00",
+      notice_minutes: 600,
+      makeup_credit: false,
+      policy_name: "Default policy",
+      message: "This is a late cancellation: client charged 100%, tutor paid 50%.",
+    };
     const calls = mockApi({
       ...base(),
-      "POST /api/v1/lessons/l1/cancel": { body: { ...LESSON, status: "cancelled" } },
+      "POST /api/v1/lessons/l1/cancel": (_body, url) => ({
+        body: {
+          outcome,
+          lesson: url.searchParams.get("preview") ? null : { ...LESSON, status: "cancelled" },
+          following_cancelled: 0,
+        },
+      }),
     });
     render(<App />);
     const item = await screen.findByRole("button", { name: /GCSE Maths – Arjun Patel/ });
@@ -83,17 +100,23 @@ describe("calendar", () => {
     expect(within(dialog).getByText("Nia Adeyemi")).toBeInTheDocument();
     expect(within(dialog).getByText("Online")).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Cancel lesson", hidden: true }));
+    expect(await within(dialog).findByText(outcome.message)).toBeInTheDocument();
     fireEvent.change(within(dialog).getByLabelText("Reason"), { target: { value: "Ill" } });
     fireEvent.click(
       within(dialog).getAllByRole("button", { name: "Cancel lesson", hidden: true })[0]!,
     );
     await waitFor(() =>
-      expect(calls.find((c) => c.path === "/api/v1/lessons/l1/cancel")?.body).toEqual({
+      expect(
+        calls.find((c) => c.path === "/api/v1/lessons/l1/cancel" && !c.search)?.body,
+      ).toEqual({
+        cancelled_by: "client",
         reason: "Ill",
-        chargeable: false,
         notify: true,
+        scope: "this",
+        override: null,
       }),
     );
+    expect(calls.find((c) => c.search === "?preview=true")).toBeDefined();
     const range = calls.find((c) => c.path === "/api/v1/calendar");
     expect(range).toBeDefined();
   });

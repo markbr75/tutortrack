@@ -400,8 +400,8 @@ def test_lesson_actions(org, admin_api, people):
     assert admin_api.post(f"/api/v1/lessons/{future.pk}/complete").status_code == 422
     assert admin_api.post(f"/api/v1/lessons/{past.pk}/complete").json()["status"] == "completed"
     cancelled = admin_api.post(
-        f"/api/v1/lessons/{future.pk}/cancel", {"reason": "Ill", "chargeable": False}, format="json"
-    ).json()
+        f"/api/v1/lessons/{future.pk}/cancel", {"reason": "Ill"}, format="json"
+    ).json()["lesson"]
     assert (cancelled["status"], cancelled["attendees"][0]["chargeable"]) == ("cancelled", False)
     copy = admin_api.post(
         f"/api/v1/lessons/{past.pk}/duplicate",

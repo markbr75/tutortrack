@@ -11,6 +11,10 @@ import { AvailabilityPage } from "./calendar/AvailabilityPage";
 import { CalendarPage } from "./calendar/CalendarPage";
 import { CataloguePage } from "./catalogue/CataloguePage";
 import { TasksPage } from "./crm/TasksPage";
+import { DeliverySettingsPage } from "./delivery/DeliverySettingsPage";
+import { ReportPage } from "./delivery/ReportPage";
+import { ReportsPage } from "./delivery/ReportsPage";
+import { UnconfirmedPage } from "./delivery/UnconfirmedPage";
 import { JobPage } from "./jobs/JobPage";
 import { JobsPage } from "./jobs/JobsPage";
 import { AppShell } from "./layout/AppShell";
@@ -127,6 +131,16 @@ const catalogueRoute = appPage("/catalogue", CataloguePage);
 const jobsRoute = appPage("/jobs", JobsPage);
 const calendarRoute = appPage("/calendar", CalendarPage);
 const availabilityRoute = appPage("/availability", AvailabilityPage);
+const reportsRoute = appPage("/reports", ReportsPage);
+const reportRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/reports/$reportId",
+  component: function ReportRoute() {
+    return <ReportPage reportId={reportRoute.useParams().reportId} />;
+  },
+});
+const unconfirmedRoute = appPage("/unconfirmed", UnconfirmedPage);
+const deliverySettingsRoute = appPage("/lesson-policies", DeliverySettingsPage);
 const jobRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/jobs/$jobId",
@@ -160,6 +174,10 @@ const routeTree = rootRoute.addChildren([
     jobRoute,
     calendarRoute,
     availabilityRoute,
+    reportsRoute,
+    reportRoute,
+    unconfirmedRoute,
+    deliverySettingsRoute,
     teamRoute,
     auditRoute,
     settingsRoute,

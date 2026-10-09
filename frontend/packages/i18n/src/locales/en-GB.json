@@ -18,7 +18,10 @@
     "tasks": "My tasks",
     "catalogue": "Catalogue",
     "jobs": "Jobs",
-    "availability": "Availability"
+    "availability": "Availability",
+    "reports": "Lesson reports",
+    "unconfirmed": "Unconfirmed lessons",
+    "deliverySettings": "Lesson policies"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -824,7 +827,8 @@
       "save": "Schedule lesson",
       "saveSeries": "Schedule series",
       "createdSkipped": "Created {{count}} lessons; {{skipped}} dates were skipped because the tutor is busy."
-    }
+    },
+    "writeReport": "Write report"
   },
   "availability": {
     "title": "Availability",
@@ -861,5 +865,161 @@
     "feedUrl": "Feed URL",
     "createFeed": "Create feed link",
     "noTutor": "There's no tutor profile to show."
+  },
+  "delivery": {
+    "outcome": {
+      "present": "Present",
+      "late": "Late",
+      "absent_notified": "Absent (told us)",
+      "no_show": "No-show",
+      "cancelled_client": "Cancelled by client",
+      "cancelled_tutor": "Cancelled by tutor",
+      "cancelled_admin": "Cancelled by us"
+    },
+    "complete": {
+      "title": "Register",
+      "student": "Student",
+      "outcome": "Attendance",
+      "lateMinutes": "Minutes late",
+      "lateMinutesFor": "Minutes late for {{name}}",
+      "outcomeFor": "Attendance for {{name}}",
+      "allPresent": "Mark all present",
+      "actualTimes": "Actual times (if different)",
+      "actualStart": "Started",
+      "actualEnd": "Finished",
+      "save": "Complete lesson",
+      "overrideBalance": "Complete anyway (the client will owe this)",
+      "done": "Lesson completed."
+    },
+    "cancel": {
+      "who": "Who cancelled",
+      "by": {
+        "client": "Client",
+        "student": "Student",
+        "tutor": "Tutor",
+        "admin": "Us"
+      },
+      "following": "Also cancel the rest of the series",
+      "notify": "Tell the people involved",
+      "override": "Change the charge or pay",
+      "chargePercent": "Client charged (%)",
+      "payPercent": "Tutor paid (%)",
+      "overrideReason": "Why",
+      "checking": "Checking the cancellation policy…",
+      "followingDone_one": "{{count}} later lesson was cancelled too.",
+      "followingDone_other": "{{count}} later lessons were cancelled too."
+    },
+    "reports": {
+      "title": "Lesson reports",
+      "tabs": {
+        "due": "Due",
+        "overdue": "Overdue",
+        "awaiting_approval": "To approve",
+        "shared": "Shared"
+      },
+      "lesson": "Lesson",
+      "tutor": "Tutor",
+      "due": "Due",
+      "state": "State",
+      "open": "Open",
+      "sla": {
+        "due": "Due",
+        "overdue": "Overdue",
+        "submitted": "Submitted",
+        "approved": "Approved",
+        "shared": "Shared"
+      },
+      "empty": "No reports here.",
+      "heading": "Report: {{title}}",
+      "dueAt": "Due {{when}}",
+      "returned": "Returned to you: {{note}}",
+      "saving": "Saving…",
+      "saved": "Draft saved",
+      "submit": "Submit report",
+      "approve": "Approve",
+      "return": "Return to tutor",
+      "returnNote": "What needs changing",
+      "share": "Share with client",
+      "sharedAt": "Shared with the client {{when}}",
+      "visibility": {
+        "staff": "Staff only",
+        "client": "Client can see",
+        "student": "Student and client can see"
+      },
+      "rating": "{{n}} out of 5",
+      "addItem": "Add",
+      "removeItem": "Remove {{item}}",
+      "newItem": "New item for {{label}}",
+      "comments": "Comments",
+      "comment": "Add a comment",
+      "post": "Post comment",
+      "commentVisibility": "Who can see it",
+      "commentStaff": "Staff and tutor only",
+      "commentClient": "Client too",
+      "payHeld": "Pay is held until this report is submitted.",
+      "readOnly": "This report can no longer be edited."
+    },
+    "unconfirmed": {
+      "title": "Unconfirmed lessons",
+      "help": "Past lessons nobody has marked as completed or cancelled.",
+      "select": "Select {{title}}",
+      "selectAll": "Select all",
+      "complete": "Mark completed",
+      "cancel": "Cancel",
+      "nudge": "Remind tutors",
+      "empty": "Every past lesson has been confirmed.",
+      "nudged_one": "Reminded the tutor of {{count}} lesson.",
+      "nudged_other": "Reminded the tutors of {{count}} lessons.",
+      "result": "{{ok}} updated, {{failed}} couldn't be changed."
+    },
+    "settings": {
+      "title": "Lesson policies",
+      "policies": "Cancellation policy",
+      "templates": "Report templates",
+      "freeWindow": "Free cancellation with at least this much notice (hours)",
+      "lateCancel": "Late cancellation",
+      "noShow": "No-show",
+      "absentNotified": "Absent (told us)",
+      "late": "Arrived late",
+      "tutorCancel": "Tutor cancels",
+      "adminCancel": "We cancel",
+      "charge": "Client charged (%)",
+      "pay": "Tutor paid (%)",
+      "maxFree": "Free cancellations allowed per month (blank: no limit)",
+      "makeupFree": "Free cancellations get a makeup lesson credit",
+      "makeupTutor": "Tutor cancellations get a makeup lesson credit",
+      "makeupDays": "Makeup credits last (days)",
+      "savePolicy": "Save policy",
+      "saved": "Saved.",
+      "overrides": "Overrides",
+      "overridesHelp": "Different rules for a branch, service, job or client are set from that record.",
+      "newTemplate": "New template",
+      "templateName": "Template name",
+      "default": "Default template",
+      "fields": "Fields",
+      "fieldLabel": "Question",
+      "fieldKey": "Key",
+      "fieldType": "Type",
+      "fieldVisibility": "Who sees it",
+      "fieldRequired": "Required",
+      "fieldOptions": "Options (one per line)",
+      "addField": "Add a question",
+      "removeField": "Remove {{label}}",
+      "saveTemplate": "Save template",
+      "version": "Version {{n}}",
+      "archive": "Archive",
+      "types": {
+        "rich_text": "Long text",
+        "text": "Short text",
+        "rating": "Rating 1–5",
+        "select": "Choose one",
+        "multi_select": "Choose several",
+        "checklist": "Checklist",
+        "topics": "Topics covered",
+        "homework": "Homework",
+        "next_steps": "Next steps",
+        "attachment": "Attachments"
+      }
+    }
   }
 }

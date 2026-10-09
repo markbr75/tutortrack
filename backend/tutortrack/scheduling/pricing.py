@@ -14,7 +14,10 @@ from .models import Lesson, LessonAttendee, LessonTutor
 
 
 def build_context(
-    lesson: Lesson, attendees: list[LessonAttendee], tutors: list[LessonTutor]
+    lesson: Lesson,
+    attendees: list[LessonAttendee],
+    tutors: list[LessonTutor],
+    minutes: int | None = None,
 ) -> rates.RateContext:
     job = lesson.job
     job_students: dict[Any, Any] = {}
@@ -24,7 +27,7 @@ def build_context(
         job_tutors = {link.tutor_id: link for link in job.tutors.filter(status="active")}
     return rates.RateContext(
         service=lesson.service,
-        duration_minutes=lesson.duration_minutes,
+        duration_minutes=minutes or lesson.duration_minutes,
         currency=job.currency if job else lesson.service.currency,
         job_charge_rate=job.charge_rate if job else None,
         attendees=[
@@ -57,11 +60,12 @@ def lesson_currency(lesson: Lesson) -> str:
     return lesson.job.currency if lesson.job_id and lesson.job else lesson.service.currency
 
 
-def price_lesson(lesson: Lesson) -> rates.RateQuote:
-    """Resolve and store charge and pay amounts on the lesson's attendees and tutors."""
+def price_lesson(lesson: Lesson, *, minutes: int | None = None) -> rates.RateQuote:
+    """Resolve and store charge and pay amounts on the lesson's attendees and tutors.
+    ``minutes`` prices the actual duration instead of the scheduled one (E09)."""
     attendees = list(lesson.attendees.all())
     tutors = list(lesson.tutors.all())
-    quote = rates.resolve_rates(build_context(lesson, attendees, tutors))
+    quote = rates.resolve_rates(build_context(lesson, attendees, tutors, minutes))
     snapshot = quote.as_dict()
     by_student = {line["student_id"]: line for line in snapshot["charges"]}
     by_tutor = {line["tutor_id"]: line for line in snapshot["pay"]}

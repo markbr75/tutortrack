@@ -79,23 +79,36 @@ What happens when a lesson takes place (or doesn't): marking completion and atte
 `delivery.lesson.complete` (own/all), `delivery.attendance.edit`, `delivery.cancel.override_policy`, `delivery.report.{write,approve,edit_any,share}`, `delivery.policy.manage`.
 
 ## 7. Delivery plan
-- [ ] **E09-T01** Complete-lesson service: actual times, attendance, idempotent event emission; negative-balance guard (interface to E10 balance selector).
-- [ ] **E09-T02** Cancellation policy model, evaluation engine and preview; cancel service for single and series.
-- [ ] **E09-T03** Makeup credits.
-- [ ] **E09-T04** Report templates (builder backend), versioning.
-- [ ] **E09-T05** Lesson reports: draft/submit/approve/share, visibility rules, comments.
-- [ ] **E09-T06** SLA engine: due/overdue computation task, reminders, escalation, pay/invoice hold flags.
-- [ ] **E09-T07** Unconfirmed lessons queue and auto-complete task.
-- [ ] **E09-T08** Frontend: complete-lesson modal, register UI, cancel flow with policy preview, report editor, report review queue.
+- [x] **E09-T01** Complete-lesson service: actual times, attendance, idempotent event emission; negative-balance guard (interface to E10 balance selector).
+- [x] **E09-T02** Cancellation policy model, evaluation engine and preview; cancel service for single and series.
+- [x] **E09-T03** Makeup credits.
+- [x] **E09-T04** Report templates (builder backend), versioning.
+- [x] **E09-T05** Lesson reports: draft/submit/approve/share, visibility rules, comments.
+- [x] **E09-T06** SLA engine: due/overdue computation task, reminders, escalation, pay/invoice hold flags.
+- [x] **E09-T07** Unconfirmed lessons queue and auto-complete task.
+- [x] **E09-T08** Frontend: complete-lesson modal, register UI, cancel flow with policy preview, report editor, report review queue.
 - [ ] **E09-T09** (Phase 2) Client feedback micro-surveys.
 
 ## Temporal workflows (E32)
 
 Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
 
-- [ ] **E09-TW1** Lesson report SLA and unconfirmed-lesson workflows (requires E32).
+- [x] **E09-TW1** Lesson report SLA and unconfirmed-lesson workflows (requires E32).
 
 | Workflow | Started by | Steps, timers and signals | Replaces |
 |---|---|---|---|
 | `LessonReportSlaWorkflow` `report-sla:{org}:{lesson}` | `lesson.completed` (report required) | Timer to **due** → reminder → overdue event + hold pay (E12) → escalate to coordinator after M hours. Signal `submitted` ends it; `approved`/`shared` update state | Due/overdue beat sweeper (FR-09-7) |
 | `UnconfirmedLessonWorkflow` | Lesson end time passes while still `planned` | Nudge tutor after N hours → auto-complete or flag per setting. Signal `completed`/`cancelled` ends it | Unconfirmed sweeper (FR-09-8) |
+
+## Implementation notes (as built 2026-10-09)
+- **App:** `delivery` holds `CancellationPolicy` (versioned: an update creates a new version and deactivates the old one), `CancellationRecord`, `MakeupCredit`, `ReportTemplate` + `ReportTemplateVersion` (fields as JSON on immutable versions, replacing the separate `ReportTemplateField` table), `LessonReport` and `LessonReportComment`. All have RLS. Attendance lives on scheduling's `LessonAttendee` (outcome, late minutes, charge %, recorded by/at). `LessonTutor.pay_percent`, `Lesson.actual_start/actual_end/cancelled_by/auto_completed/unconfirmed_at` were added in scheduling 0002. See ADR 0006 for the split.
+- **Completion (T01):** `POST /lessons/{id}/complete` takes `attendance` (students left out were present), optional actual times and `override_balance`. Policies map each outcome to a charge %. Tutors are paid in full if anyone attended; otherwise they get the best outcome's pay %. Completion opens at the start, or N minutes before the end (`delivery.completion_opens`). `delivery.bill_actual_duration` re-prices from actual times. The prepaid-balance guard is a hook (`delivery.balance.set_guard`) that E10 fills. A blocked completion returns 422 `code=insufficient_balance` and publishes `lesson.completion_blocked`. Overriding needs `delivery.balance.override`. Completing publishes `lesson.completed` with per-attendee and per-tutor rows. Corrections go through `PATCH /lessons/{id}/attendance` (unlocked lessons only; `attendance.recorded`). The permission to complete stays `scheduling.lesson.complete` (the spec's `delivery.lesson.complete` was not added).
+- **Cancellation (T02):** `POST /lessons/{id}/cancel` takes `cancelled_by` (client/student/tutor/admin), reason, notify, `scope` (`following` also ends the series; later lessons are cancelled free) and an optional `override` of the percentages (`delivery.cancel.override_policy`; audited as `override_policy`). `?preview=true` returns the outcome and message ("This is a late cancellation: client charged 100%, tutor paid 50%.") without changing anything. Notice is computed from the cancellation time. "Max free cancellations per month" counts the client's free cancellations in the lesson's local calendar month. A client policy applies when every attendee belongs to that client. Cancellations carry over "charge %" for the E10 late-fee line. The "term" limit waits for terms (E20).
+- **Makeup credits (T03):** issued on free or tutor cancellations when the policy says so, and valid for N days. Consuming one marks the makeup lesson for that student (E10 doesn't charge it, via `selectors.makeup_students`). Credits can be extended or voided. Expiry is derived from `expires_at`, so there is no sweeper and no `makeup_credit.expired` event yet; E13 reminders can add a workflow if needed.
+- **Templates (T04):** a builder backend with types rich text, text, rating, select, multi-select, checklist, topics, homework, next steps and attachment. Visibility is staff, client or student per field. Topics and homework are free lists until E21 curricula. Attachments are stored as references (names/URLs) until uploads are wired. Resolution order is job → service → subject → default "Simple" (seeded on `organisation.created` and created lazily).
+- **Reports (T05):** one report per lesson and tutor. `POST /lessons/{id}/reports` opens it (writable before completion). Then `/lesson-reports/{id}` GET/PUT (draft autosave), `submit`, `approve`, `return`, `share` and `comments`. Reports are addressed by their own id rather than `/lessons/{id}/report`. Submitting completes a started planned lesson (`delivery.report_submit_completes`). Reports auto-share unless approval is required. Tutors can edit for `delivery.report_edit_window_hours` after submitting; staff with `delivery.report.edit_any` always can (audited). Answers are filtered per audience (`templates.visible_answers`) for the portals (E15).
+- **SLA (T06, TW1):** `LessonReportSlaWorkflow` sends a reminder N hours before due (`lesson_report.due`). At the due time it marks the report overdue (`lesson_report.overdue`, `pay_held` when `delivery.hold_pay_overdue_reports`). M hours later it escalates (`lesson_report.escalated` plus a CRM task on the report). Submission signals it to stop, and each step re-checks the report. `?sla=overdue` lists overdue reports for tutors (own) and staff. `selectors.lessons_with_open_reports` serves E10's `delivery.hold_invoice_without_report`.
+- **Unconfirmed (T07, TW1):** `/unconfirmed-lessons` lists them, and `POST` nudges tutors (`lesson.unconfirmed`, flags the lesson). Bulk complete/cancel uses `/lessons/bulk`, which now applies delivery policies. A 15-minute beat task starts `UnconfirmedLessonWorkflow` for lessons that just ended (ADR 0006). After `delivery.unconfirmed_after_hours` it auto-completes (setting) or flags and nudges. A prepaid client with too little credit is flagged rather than auto-completed.
+- **Stats:** `/students/{id}/attendance` returns the rate, streak and counts by outcome. Cancellations by the tutor or by us don't count.
+- **Frontend (T08):** the calendar quick view gains a register (outcome per student, minutes late, "mark all present", actual times, balance override) and a cancel flow with a live policy preview, override and series option. It also has "Write report". New pages: report editor with field types, autosave, submit/approve/return/share and comments; reports list (due/overdue/to approve/shared); unconfirmed lessons with bulk actions; lesson policies (organisation cancellation policy and report template builder). Overrides for a branch, service, job or client are API-only for now.
+- **Deferred:** T09 feedback micro-surveys (Phase 2); AI drafting (E31); offline writing (E16); report emails and reminders are events for E13.

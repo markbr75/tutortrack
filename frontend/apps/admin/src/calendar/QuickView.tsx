@@ -2,30 +2,15 @@ import { unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
 import { Alert, Button, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
-import { api, fieldErrors, usePermission } from "../api";
+import { api, usePermission } from "../api";
+import { CancelForm } from "../delivery/CancelForm";
+import { CompleteForm } from "../delivery/CompleteForm";
 import { fromInputs, toDateInput, toTimeInput, viewerTimeZone } from "./dates";
-import { conflictsOf, type CalendarItem } from "./types";
-
-export function ErrorList({ error }: { error: unknown }) {
-  const { t } = useTranslation();
-  if (!error) return null;
-  const conflicts = conflictsOf(error);
-  const messages = conflicts.length
-    ? conflicts.map((c) => c.message)
-    : Object.values(fieldErrors(error));
-  return (
-    <Alert
-      tone="danger"
-      title={conflicts.length ? t("calendar.conflict") : undefined}
-      className="mt-2"
-    >
-      {messages.length ? messages.join(" ") : t("errors.generic")}
-    </Alert>
-  );
-}
+import { ErrorList } from "./ErrorList";
+import { type CalendarItem, conflictsOf } from "./types";
 
 function Pricing({ id }: { id: string }) {
   const { t } = useTranslation();
@@ -59,12 +44,13 @@ export function QuickView({ item, onClose }: { item: CalendarItem | null; onClos
   const canCancel = usePermission("scheduling.lesson.cancel");
   const canComplete = usePermission("scheduling.lesson.complete");
   const canOverride = usePermission("scheduling.override_conflicts");
+  const canReport = usePermission("delivery.report.write");
+  const navigate = useNavigate();
   const canSeeCharge = usePermission("billing.rates.view_charge");
   const canSeePay = usePermission("billing.rates.view_pay");
   const canPrice = canSeeCharge || canSeePay;
-  const [mode, setMode] = useState<"view" | "cancel" | "reschedule">("view");
+  const [mode, setMode] = useState<"view" | "cancel" | "reschedule" | "complete">("view");
   const [reason, setReason] = useState("");
-  const [chargeable, setChargeable] = useState(false);
   const [when, setWhen] = useState({ date: "", start: "", end: "" });
 
   useEffect(() => {
@@ -89,19 +75,11 @@ export function QuickView({ item, onClose }: { item: CalendarItem | null; onClos
     onClose();
   };
   const run = useMutation({
-    mutationFn: async (kind: "complete" | "missed" | "cancel" | "reschedule" | "override") => {
+    mutationFn: async (kind: "missed" | "reschedule" | "override") => {
       const id = item!.id;
       const path = { params: { path: { id } } };
-      if (kind === "complete") return unwrap(await api.POST("/api/v1/lessons/{id}/complete", path));
       if (kind === "missed")
         return unwrap(await api.POST("/api/v1/lessons/{id}/missed", { ...path, body: { reason } }));
-      if (kind === "cancel")
-        return unwrap(
-          await api.POST("/api/v1/lessons/{id}/cancel", {
-            ...path,
-            body: { reason, chargeable, notify: true },
-          }),
-        );
       return unwrap(
         await api.POST("/api/v1/lessons/{id}/reschedule", {
           ...path,
@@ -116,6 +94,19 @@ export function QuickView({ item, onClose }: { item: CalendarItem | null; onClos
       );
     },
     onSuccess: done,
+  });
+  const openReport = useMutation({
+    mutationFn: async () =>
+      unwrap(
+        await api.POST("/api/v1/lessons/{lesson_id}/reports", {
+          params: { path: { lesson_id: item!.id } },
+          body: {},
+        }),
+      ),
+    onSuccess: (report) => {
+      onClose();
+      void navigate({ to: "/reports/$reportId", params: { reportId: report.id } });
+    },
   });
 
   const lesson = item?.kind === "lesson";
@@ -181,32 +172,9 @@ export function QuickView({ item, onClose }: { item: CalendarItem | null; onClos
           {item.locked ? <Alert className="mt-3">{t("calendar.locked")}</Alert> : null}
 
           {mode === "cancel" ? (
-            <form
-              className="mt-4 space-y-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                run.mutate("cancel");
-              }}
-            >
-              <TextField
-                label={t("calendar.reason")}
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-              />
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  className="size-4"
-                  checked={chargeable}
-                  onChange={(e) => setChargeable(e.target.checked)}
-                />
-                {t("calendar.chargeable")}
-              </label>
-              <Button type="submit" variant="danger" disabled={run.isPending}>
-                {t("calendar.confirmCancel")}
-              </Button>
-            </form>
+            <CancelForm lessonId={item.id} inSeries={Boolean(item.series)} onDone={done} />
           ) : null}
+          {mode === "complete" ? <CompleteForm lessonId={item.id} onDone={done} /> : null}
           {mode === "reschedule" ? (
             <form
               className="mt-4 grid grid-cols-3 gap-2"
@@ -254,12 +222,12 @@ export function QuickView({ item, onClose }: { item: CalendarItem | null; onClos
               </div>
             </form>
           ) : null}
-          <ErrorList error={run.error} />
+          <ErrorList error={run.error ?? openReport.error} />
 
           <div className="mt-5 flex flex-wrap gap-2">
-            {lesson && planned && !item.locked && canComplete && started ? (
+            {lesson && planned && !item.locked && canComplete && started && mode !== "complete" ? (
               <>
-                <Button size="sm" onClick={() => run.mutate("complete")} disabled={run.isPending}>
+                <Button size="sm" onClick={() => setMode("complete")}>
                   {t("calendar.complete")}
                 </Button>
                 <Button
@@ -280,6 +248,16 @@ export function QuickView({ item, onClose }: { item: CalendarItem | null; onClos
             {lesson && planned && !item.locked && canCancel && mode !== "cancel" ? (
               <Button size="sm" variant="secondary" onClick={() => setMode("cancel")}>
                 {t("calendar.cancel")}
+              </Button>
+            ) : null}
+            {lesson && canReport && item.status !== "cancelled" && item.tutors.length ? (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => openReport.mutate()}
+                disabled={openReport.isPending}
+              >
+                {t("calendar.writeReport")}
               </Button>
             ) : null}
             <Button size="sm" variant="ghost" onClick={onClose}>

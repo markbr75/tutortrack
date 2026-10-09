@@ -1502,6 +1502,239 @@
                 }
             }
         },
+        "/api/v1/cancellation-policies": {
+            "get": {
+                "operationId": "cancellation_policies_list",
+                "description": "Cancellation policies (FR-09-3). Updating a policy creates a new version; deleting\ndeactivates it (cancellations keep a snapshot of the rules they used).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "cancellation-policies"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CancellationPolicy"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "cancellation_policies_create",
+                "description": "Cancellation policies (FR-09-3). Updating a policy creates a new version; deleting\ndeactivates it (cancellations keep a snapshot of the rules they used).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "cancellation-policies"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CancellationPolicyRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CancellationPolicyRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CancellationPolicyRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CancellationPolicy"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/cancellation-policies/{id}": {
+            "get": {
+                "operationId": "cancellation_policies_retrieve",
+                "description": "Cancellation policies (FR-09-3). Updating a policy creates a new version; deleting\ndeactivates it (cancellations keep a snapshot of the rules they used).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this cancellation policy.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "cancellation-policies"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CancellationPolicy"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "cancellation_policies_update",
+                "description": "Cancellation policies (FR-09-3). Updating a policy creates a new version; deleting\ndeactivates it (cancellations keep a snapshot of the rules they used).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this cancellation policy.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "cancellation-policies"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CancellationPolicyRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CancellationPolicyRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CancellationPolicyRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CancellationPolicy"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "cancellation_policies_destroy",
+                "description": "Cancellation policies (FR-09-3). Updating a policy creates a new version; deleting\ndeactivates it (cancellations keep a snapshot of the rules they used).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this cancellation policy.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "cancellation-policies"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/v1/catalogue/categories": {
             "get": {
                 "operationId": "catalogue_categories_list",
@@ -7945,6 +8178,625 @@
                 }
             }
         },
+        "/api/v1/lesson-reports": {
+            "get": {
+                "operationId": "lesson_reports_list",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "lesson",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "sla",
+                        "schema": {
+                            "enum": [
+                                "approved",
+                                "awaiting_approval",
+                                "due",
+                                "overdue",
+                                "shared",
+                                "submitted"
+                            ]
+                        },
+                        "description": "SLA state\n\n* `due` - Due\n* `overdue` - Overdue\n* `submitted` - Submitted, not shared\n* `awaiting_approval` - Awaiting approval\n* `approved` - Approved, not shared\n* `shared` - Shared"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "approved",
+                                    "draft",
+                                    "pending",
+                                    "returned",
+                                    "submitted"
+                                ]
+                            }
+                        },
+                        "description": "* `pending` - Not started\n* `draft` - Draft\n* `submitted` - Submitted\n* `returned` - Returned to tutor\n* `approved` - Approved",
+                        "explode": true,
+                        "style": "form"
+                    },
+                    {
+                        "in": "query",
+                        "name": "student",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "tags": [
+                    "lesson-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedLessonReportList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lesson-reports/{id}": {
+            "get": {
+                "operationId": "lesson_reports_retrieve",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lesson-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "lesson_reports_update",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lesson-reports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportAnswersRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportAnswersRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportAnswersRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lesson-reports/{id}/approve": {
+            "post": {
+                "operationId": "lesson_reports_approve_create",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lesson-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lesson-reports/{id}/comments": {
+            "get": {
+                "operationId": "lesson_reports_comments_list",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson report.",
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "lesson",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "sla",
+                        "schema": {
+                            "enum": [
+                                "approved",
+                                "awaiting_approval",
+                                "due",
+                                "overdue",
+                                "shared",
+                                "submitted"
+                            ]
+                        },
+                        "description": "SLA state\n\n* `due` - Due\n* `overdue` - Overdue\n* `submitted` - Submitted, not shared\n* `awaiting_approval` - Awaiting approval\n* `approved` - Approved, not shared\n* `shared` - Shared"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "approved",
+                                    "draft",
+                                    "pending",
+                                    "returned",
+                                    "submitted"
+                                ]
+                            }
+                        },
+                        "description": "* `pending` - Not started\n* `draft` - Draft\n* `submitted` - Submitted\n* `returned` - Returned to tutor\n* `approved` - Approved",
+                        "explode": true,
+                        "style": "form"
+                    },
+                    {
+                        "in": "query",
+                        "name": "student",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "tags": [
+                    "lesson-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ReportComment"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "lesson_reports_comments_create",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lesson-reports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportCommentRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportCommentRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportCommentRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReportComment"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lesson-reports/{id}/return": {
+            "post": {
+                "operationId": "lesson_reports_return_create",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lesson-reports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportReturnRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportReturnRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportReturnRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lesson-reports/{id}/share": {
+            "post": {
+                "operationId": "lesson_reports_share_create",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lesson-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/lesson-reports/{id}/submit": {
+            "post": {
+                "operationId": "lesson_reports_submit_create",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lesson-reports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportSubmitRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportSubmitRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportSubmitRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/lesson-series": {
             "post": {
                 "operationId": "lesson_series_create",
@@ -8369,6 +9221,108 @@
                 }
             }
         },
+        "/api/v1/lessons/{lesson_id}/reports": {
+            "get": {
+                "operationId": "lessons_reports_list",
+                "description": "A lesson's reports (one per tutor). ``POST`` opens the report for a tutor (you, if\nyou are the lesson's tutor) so it can be written, even before completion.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "lesson_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/LessonReport"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "lessons_reports_create",
+                "description": "A lesson's reports (one per tutor). ``POST`` opens the report for a tutor (you, if\nyou are the lesson's tutor) so it can be written, even before completion.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "lesson_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportOpenRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportOpenRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportOpenRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/lessons/{id}": {
             "get": {
                 "operationId": "lessons_retrieve",
@@ -8499,10 +9453,67 @@
                 }
             }
         },
+        "/api/v1/lessons/{id}/attendance": {
+            "patch": {
+                "operationId": "lessons_attendance_partial_update",
+                "description": "Correct attendance after completion (unlocked lessons).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAttendanceRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAttendanceRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAttendanceRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lesson"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/lessons/{id}/cancel": {
             "post": {
                 "operationId": "lessons_cancel_create",
-                "description": "Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.\nA hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the\npermission) to schedule anyway.",
+                "description": "Cancel under the cancellation policy (E09 FR-09-3). ``?preview=true`` returns the\noutcome (\"late cancellation: client charged 100%...\") without cancelling. An\n``override`` of the percentages needs ``delivery.cancel.override_policy``.",
                 "parameters": [
                     {
                         "in": "header",
@@ -8521,6 +9532,14 @@
                         },
                         "description": "A UUID string identifying this lesson.",
                         "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "preview",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Only show the policy outcome (nothing changes)."
                     }
                 ],
                 "tags": [
@@ -8555,7 +9574,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Lesson"
+                                    "$ref": "#/components/schemas/CancelResult"
                                 }
                             }
                         },
@@ -8567,7 +9586,7 @@
         "/api/v1/lessons/{id}/complete": {
             "post": {
                 "operationId": "lessons_complete_create",
-                "description": "Lessons (E08). List with ``?start&end`` and filters; edits re-price unlocked lessons.\nA hard conflict returns 422 with ``conflicts``; send ``override_conflicts`` (with the\npermission) to schedule anyway.",
+                "description": "Complete with attendance (E09 FR-09-1/2). Students left out were present. A\nprepaid client without enough credit blocks completion (422,\n``code=insufficient_balance``); ``override_balance`` needs\n``delivery.balance.override``.",
                 "parameters": [
                     {
                         "in": "header",
@@ -8591,6 +9610,25 @@
                 "tags": [
                     "lessons"
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteRequest"
+                            }
+                        }
+                    }
+                },
                 "security": [
                     {
                         "cookieAuth": []
@@ -9005,6 +10043,328 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/BulkResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/makeup-credits": {
+            "get": {
+                "operationId": "makeup_credits_list",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "client",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "student",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "tags": [
+                    "makeup-credits"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedMakeupCreditList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/makeup-credits/{id}": {
+            "get": {
+                "operationId": "makeup_credits_retrieve",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this makeup credit.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "makeup-credits"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MakeupCredit"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/makeup-credits/{id}/consume": {
+            "post": {
+                "operationId": "makeup_credits_consume_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this makeup credit.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "makeup-credits"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConsumeRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConsumeRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConsumeRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MakeupCredit"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/makeup-credits/{id}/extend": {
+            "post": {
+                "operationId": "makeup_credits_extend_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this makeup credit.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "makeup-credits"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExtendRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExtendRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExtendRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MakeupCredit"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/makeup-credits/{id}/void": {
+            "post": {
+                "operationId": "makeup_credits_void_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this makeup credit.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "makeup-credits"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VoidRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VoidRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VoidRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MakeupCredit"
                                 }
                             }
                         },
@@ -10897,6 +12257,238 @@
                 }
             }
         },
+        "/api/v1/report-templates": {
+            "get": {
+                "operationId": "report_templates_list",
+                "description": "Report templates (FR-09-4). Changing the fields creates a new version; deleting\narchives the template.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "report-templates"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ReportTemplate"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "report_templates_create",
+                "description": "Report templates (FR-09-4). Changing the fields creates a new version; deleting\narchives the template.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "report-templates"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportTemplateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportTemplateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportTemplateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReportTemplate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/report-templates/{id}": {
+            "get": {
+                "operationId": "report_templates_retrieve",
+                "description": "Report templates (FR-09-4). Changing the fields creates a new version; deleting\narchives the template.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this report template.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "report-templates"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReportTemplate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "report_templates_partial_update",
+                "description": "Report templates (FR-09-4). Changing the fields creates a new version; deleting\narchives the template.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this report template.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "report-templates"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedReportTemplateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedReportTemplateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedReportTemplateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReportTemplate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "report_templates_destroy",
+                "description": "Report templates (FR-09-4). Changing the fields creates a new version; deleting\narchives the template.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this report template.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "report-templates"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/v1/roles": {
             "get": {
                 "operationId": "roles_list",
@@ -11950,6 +13542,41 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Student"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/students/{student_id}/attendance": {
+            "get": {
+                "operationId": "students_attendance_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "student_id",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "students"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AttendanceStats"
                                 }
                             }
                         },
@@ -13426,6 +15053,89 @@
                     }
                 }
             }
+        },
+        "/api/v1/unconfirmed-lessons": {
+            "get": {
+                "operationId": "unconfirmed_lessons_list",
+                "description": "FR-09-8: past lessons still planned. Bulk complete or cancel them with\n``POST /lessons/bulk``; ``POST`` here nudges their tutors.",
+                "tags": [
+                    "unconfirmed-lessons"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Lesson"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "unconfirmed_lessons_create",
+                "description": "FR-09-8: past lessons still planned. Bulk complete or cancel them with\n``POST /lessons/bulk``; ``POST`` here nudges their tutors.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "unconfirmed-lessons"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NudgeRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NudgeRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NudgeRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NudgeResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -13655,6 +15365,73 @@
                     "changed"
                 ]
             },
+            "AttendanceOutcomeEnum": {
+                "enum": [
+                    "present",
+                    "late",
+                    "absent_notified",
+                    "no_show",
+                    "cancelled_client",
+                    "cancelled_tutor",
+                    "cancelled_admin"
+                ],
+                "type": "string",
+                "description": "* `present` - Present\n* `late` - Late\n* `absent_notified` - Absent (notified)\n* `no_show` - No-show\n* `cancelled_client` - Cancelled by client\n* `cancelled_tutor` - Cancelled by tutor\n* `cancelled_admin` - Cancelled by us"
+            },
+            "AttendanceRowRequest": {
+                "type": "object",
+                "properties": {
+                    "attendee": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "outcome": {
+                        "$ref": "#/components/schemas/AttendanceOutcomeEnum"
+                    },
+                    "late_minutes": {
+                        "type": "integer",
+                        "maximum": 600,
+                        "minimum": 0,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "attendee",
+                    "outcome"
+                ]
+            },
+            "AttendanceStats": {
+                "type": "object",
+                "properties": {
+                    "lessons": {
+                        "type": "integer"
+                    },
+                    "attended": {
+                        "type": "integer"
+                    },
+                    "rate_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,4}(?:\\.\\d{0,1})?$"
+                    },
+                    "streak": {
+                        "type": "integer"
+                    },
+                    "by_outcome": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "required": [
+                    "attended",
+                    "by_outcome",
+                    "lessons",
+                    "rate_percent",
+                    "streak"
+                ]
+            },
             "AuditEntry": {
                 "type": "object",
                 "properties": {
@@ -13793,6 +15570,11 @@
                 ],
                 "type": "string",
                 "description": "* `pay_as_you_go` - Pay as you go\n* `prepaid_credit` - Prepaid credit\n* `package` - Package\n* `recurring_fixed` - Recurring fixed fee"
+            },
+            "BlankEnum": {
+                "enum": [
+                    ""
+                ]
             },
             "Branch": {
                 "type": "object",
@@ -14085,6 +15867,14 @@
                         "type": "string",
                         "default": "",
                         "maxLength": 300
+                    },
+                    "cancelled_by": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CancelledByEnum"
+                            }
+                        ],
+                        "default": "admin"
                     }
                 },
                 "required": [
@@ -14361,23 +16151,226 @@
                 "type": "string",
                 "description": "* `lesson` - lesson\n* `event` - event"
             },
+            "CancelOutcome": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "$ref": "#/components/schemas/CancelOutcomeKindEnum"
+                    },
+                    "charge_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    },
+                    "pay_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    },
+                    "policy_charge_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    },
+                    "policy_pay_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    },
+                    "notice_minutes": {
+                        "type": "integer"
+                    },
+                    "makeup_credit": {
+                        "type": "boolean"
+                    },
+                    "policy_name": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "charge_percent",
+                    "kind",
+                    "makeup_credit",
+                    "message",
+                    "notice_minutes",
+                    "pay_percent",
+                    "policy_charge_percent",
+                    "policy_name",
+                    "policy_pay_percent"
+                ]
+            },
+            "CancelOutcomeKindEnum": {
+                "enum": [
+                    "free",
+                    "late",
+                    "tutor",
+                    "admin"
+                ],
+                "type": "string",
+                "description": "* `free` - free\n* `late` - late\n* `tutor` - tutor\n* `admin` - admin"
+            },
             "CancelRequest": {
                 "type": "object",
                 "properties": {
+                    "cancelled_by": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CancelledByEnum"
+                            }
+                        ],
+                        "default": "admin"
+                    },
                     "reason": {
                         "type": "string",
                         "default": "",
                         "maxLength": 300
                     },
-                    "chargeable": {
-                        "type": "boolean",
-                        "default": false
-                    },
                     "notify": {
                         "type": "boolean",
                         "default": true
+                    },
+                    "scope": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CancelScopeEnum"
+                            }
+                        ],
+                        "default": "this"
+                    },
+                    "override": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PolicyOverrideRequest"
+                            }
+                        ],
+                        "nullable": true
                     }
                 }
+            },
+            "CancelResult": {
+                "type": "object",
+                "properties": {
+                    "outcome": {
+                        "$ref": "#/components/schemas/CancelOutcome"
+                    },
+                    "lesson": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Lesson"
+                            }
+                        ],
+                        "nullable": true,
+                        "description": "Null for a preview."
+                    },
+                    "following_cancelled": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "following_cancelled",
+                    "lesson",
+                    "outcome"
+                ]
+            },
+            "CancelScopeEnum": {
+                "enum": [
+                    "this",
+                    "following"
+                ],
+                "type": "string",
+                "description": "* `this` - this\n* `following` - following"
+            },
+            "CancellationPolicy": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 120
+                    },
+                    "scope_type": {
+                        "$ref": "#/components/schemas/CancellationPolicyScopeEnum"
+                    },
+                    "scope_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "rules": {
+                        "$ref": "#/components/schemas/PolicyRules"
+                    },
+                    "version": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "name",
+                    "rules",
+                    "scope_type",
+                    "version"
+                ]
+            },
+            "CancellationPolicyRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                    },
+                    "scope_type": {
+                        "$ref": "#/components/schemas/CancellationPolicyScopeEnum"
+                    },
+                    "scope_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "rules": {
+                        "$ref": "#/components/schemas/PolicyRulesRequest"
+                    }
+                },
+                "required": [
+                    "name",
+                    "rules",
+                    "scope_type"
+                ]
+            },
+            "CancellationPolicyScopeEnum": {
+                "enum": [
+                    "organisation",
+                    "branch",
+                    "service",
+                    "job",
+                    "client"
+                ],
+                "type": "string",
+                "description": "* `organisation` - Organisation default\n* `branch` - Branch\n* `service` - Service\n* `job` - Job\n* `client` - Client"
+            },
+            "CancelledByEnum": {
+                "enum": [
+                    "client",
+                    "student",
+                    "tutor",
+                    "admin"
+                ],
+                "type": "string",
+                "description": "* `client` - Client\n* `student` - Student\n* `tutor` - Tutor\n* `admin` - Us"
             },
             "Category": {
                 "type": "object",
@@ -14888,6 +16881,31 @@
                     "code"
                 ]
             },
+            "CompleteRequest": {
+                "type": "object",
+                "properties": {
+                    "attendance": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AttendanceRowRequest"
+                        }
+                    },
+                    "actual_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "actual_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "override_balance": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                }
+            },
             "Conflict": {
                 "type": "object",
                 "properties": {
@@ -15241,6 +17259,18 @@
                     "category",
                     "key",
                     "name"
+                ]
+            },
+            "ConsumeRequest": {
+                "type": "object",
+                "properties": {
+                    "lesson": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "lesson"
                 ]
             },
             "Contact": {
@@ -15993,6 +18023,18 @@
                 ],
                 "type": "string",
                 "description": "* `requested` - Requested\n* `approved` - Approved\n* `declined` - Declined"
+            },
+            "ExtendRequest": {
+                "type": "object",
+                "properties": {
+                    "until": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "until"
+                ]
             },
             "Features": {
                 "type": "object",
@@ -17452,6 +19494,32 @@
                         "type": "boolean",
                         "readOnly": true
                     },
+                    "cancelled_by": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "actual_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "actual_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "auto_completed": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "unconfirmed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
                     "tutors": {
                         "type": "array",
                         "items": {
@@ -17476,8 +19544,12 @@
                     }
                 },
                 "required": [
+                    "actual_end",
+                    "actual_start",
                     "attendees",
+                    "auto_completed",
                     "branch",
+                    "cancelled_by",
                     "chargeable_cancellation",
                     "colour",
                     "created_at",
@@ -17507,12 +19579,18 @@
                     "status_reason",
                     "timezone",
                     "title",
-                    "tutors"
+                    "tutors",
+                    "unconfirmed_at"
                 ]
             },
             "LessonAttendee": {
                 "type": "object",
                 "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
                     "student": {
                         "type": "string",
                         "format": "uuid"
@@ -17594,10 +19672,37 @@
                     "charge_snapshot": {},
                     "chargeable": {
                         "type": "boolean"
+                    },
+                    "outcome": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/AttendanceOutcomeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    },
+                    "late_minutes": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "charge_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    },
+                    "recorded_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
                     }
                 },
                 "required": [
                     "client",
+                    "id",
                     "name",
                     "student"
                 ]
@@ -17646,6 +19751,176 @@
                     }
                 }
             },
+            "LessonReport": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "lesson": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "lesson_title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "lesson_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "lesson_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "lesson_status": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "tutor_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StudentRef"
+                        },
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/LessonReportStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "sla_state": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SlaStateEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "due_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "submitted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "approved_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "shared_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "overdue_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "escalated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "pay_held": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "returned_note": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "template_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "template_version_number": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "template_fields": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TemplateField"
+                        },
+                        "readOnly": true
+                    },
+                    "answers": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "answers",
+                    "approved_at",
+                    "due_at",
+                    "escalated_at",
+                    "id",
+                    "lesson",
+                    "lesson_end",
+                    "lesson_start",
+                    "lesson_status",
+                    "lesson_title",
+                    "overdue_at",
+                    "pay_held",
+                    "returned_note",
+                    "shared_at",
+                    "sla_state",
+                    "status",
+                    "students",
+                    "submitted_at",
+                    "template_fields",
+                    "template_name",
+                    "template_version_number",
+                    "tutor",
+                    "tutor_name",
+                    "updated_at"
+                ]
+            },
+            "LessonReportStatusEnum": {
+                "enum": [
+                    "pending",
+                    "draft",
+                    "submitted",
+                    "returned",
+                    "approved"
+                ],
+                "type": "string",
+                "description": "* `pending` - Not started\n* `draft` - Draft\n* `submitted` - Submitted\n* `returned` - Returned to tutor\n* `approved` - Approved"
+            },
             "LessonResult": {
                 "type": "object",
                 "properties": {
@@ -17677,6 +19952,11 @@
             "LessonTutor": {
                 "type": "object",
                 "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
                     "tutor": {
                         "type": "string",
                         "format": "uuid"
@@ -17732,9 +20012,15 @@
                     "pay_snapshot": {},
                     "payable": {
                         "type": "boolean"
+                    },
+                    "pay_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
                     }
                 },
                 "required": [
+                    "id",
                     "name",
                     "tutor"
                 ]
@@ -18185,6 +20471,139 @@
                     "token"
                 ]
             },
+            "MakeupCredit": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "student": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "student_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "client": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "source_lesson": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "source_lesson_title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "source_lesson_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "consumed_by_lesson": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "consumed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MakeupCreditStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "note": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "client",
+                    "consumed_at",
+                    "consumed_by_lesson",
+                    "expires_at",
+                    "id",
+                    "note",
+                    "source_lesson",
+                    "source_lesson_start",
+                    "source_lesson_title",
+                    "status",
+                    "student",
+                    "student_name"
+                ]
+            },
+            "MakeupCreditStatusEnum": {
+                "enum": [
+                    "available",
+                    "used",
+                    "expired",
+                    "void"
+                ],
+                "type": "string",
+                "description": "* `available` - Available\n* `used` - Used\n* `expired` - Expired\n* `void` - Void"
+            },
+            "MakeupRules": {
+                "type": "object",
+                "properties": {
+                    "on_free_cancellation": {
+                        "type": "boolean"
+                    },
+                    "on_tutor_cancellation": {
+                        "type": "boolean"
+                    },
+                    "valid_days": {
+                        "type": "integer",
+                        "maximum": 730,
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "on_free_cancellation",
+                    "on_tutor_cancellation",
+                    "valid_days"
+                ]
+            },
+            "MakeupRulesRequest": {
+                "type": "object",
+                "properties": {
+                    "on_free_cancellation": {
+                        "type": "boolean"
+                    },
+                    "on_tutor_cancellation": {
+                        "type": "boolean"
+                    },
+                    "valid_days": {
+                        "type": "integer",
+                        "maximum": 730,
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "on_free_cancellation",
+                    "on_tutor_cancellation",
+                    "valid_days"
+                ]
+            },
             "Me": {
                 "type": "object",
                 "properties": {
@@ -18571,6 +20990,34 @@
                 ],
                 "type": "string",
                 "description": "* `staff_only` - Staff only\n* `staff_and_tutors` - Staff and tutors\n* `shared_with_client` - Shared with the client"
+            },
+            "NudgeRequest": {
+                "type": "object",
+                "properties": {
+                    "ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "maxItems": 200,
+                        "minItems": 1
+                    }
+                },
+                "required": [
+                    "ids"
+                ]
+            },
+            "NudgeResult": {
+                "type": "object",
+                "properties": {
+                    "nudged": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "nudged"
+                ]
             },
             "OnboardingState": {
                 "type": "object",
@@ -19370,6 +21817,32 @@
                     }
                 }
             },
+            "PaginatedLessonReportList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LessonReport"
+                        }
+                    }
+                }
+            },
             "PaginatedLocationList": {
                 "type": "object",
                 "required": [
@@ -19418,6 +21891,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/LoginEvent"
+                        }
+                    }
+                }
+            },
+            "PaginatedMakeupCreditList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MakeupCredit"
                         }
                     }
                 }
@@ -19736,6 +22235,18 @@
                     "token",
                     "uid"
                 ]
+            },
+            "PatchedAttendanceRequest": {
+                "type": "object",
+                "properties": {
+                    "attendance": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AttendanceRowRequest"
+                        },
+                        "minItems": 1
+                    }
+                }
             },
             "PatchedBranchRequest": {
                 "type": "object",
@@ -20721,6 +23232,50 @@
                     }
                 }
             },
+            "PatchedReportTemplateRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "is_default": {
+                        "type": "boolean"
+                    },
+                    "fields": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TemplateFieldRequest"
+                        }
+                    },
+                    "services": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "jobs": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                }
+            },
             "PatchedSavedViewRequest": {
                 "type": "object",
                 "properties": {
@@ -21390,6 +23945,44 @@
                 "type": "string",
                 "description": "* `per_hour` - Per hour\n* `per_lesson` - Per lesson"
             },
+            "PercentPair": {
+                "type": "object",
+                "properties": {
+                    "charge_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    },
+                    "pay_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    }
+                },
+                "required": [
+                    "charge_percent",
+                    "pay_percent"
+                ]
+            },
+            "PercentPairRequest": {
+                "type": "object",
+                "properties": {
+                    "charge_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    },
+                    "pay_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    }
+                },
+                "required": [
+                    "charge_percent",
+                    "pay_percent"
+                ]
+            },
             "Permission": {
                 "type": "object",
                 "properties": {
@@ -21423,6 +24016,104 @@
                     "id",
                     "name"
                 ]
+            },
+            "PolicyOverrideRequest": {
+                "type": "object",
+                "properties": {
+                    "charge_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    },
+                    "pay_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 300
+                    }
+                },
+                "required": [
+                    "charge_percent",
+                    "pay_percent"
+                ]
+            },
+            "PolicyRules": {
+                "type": "object",
+                "description": "All keys optional on input (defaults fill the gaps); complete on output.",
+                "properties": {
+                    "free_window_hours": {
+                        "type": "integer",
+                        "maximum": 720,
+                        "minimum": 0
+                    },
+                    "late_cancellation": {
+                        "$ref": "#/components/schemas/PercentPair"
+                    },
+                    "no_show": {
+                        "$ref": "#/components/schemas/PercentPair"
+                    },
+                    "absent_notified": {
+                        "$ref": "#/components/schemas/PercentPair"
+                    },
+                    "late": {
+                        "$ref": "#/components/schemas/PercentPair"
+                    },
+                    "tutor_cancellation": {
+                        "$ref": "#/components/schemas/PercentPair"
+                    },
+                    "admin_cancellation": {
+                        "$ref": "#/components/schemas/PercentPair"
+                    },
+                    "max_free_per_month": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "makeup_credit": {
+                        "$ref": "#/components/schemas/MakeupRules"
+                    }
+                }
+            },
+            "PolicyRulesRequest": {
+                "type": "object",
+                "description": "All keys optional on input (defaults fill the gaps); complete on output.",
+                "properties": {
+                    "free_window_hours": {
+                        "type": "integer",
+                        "maximum": 720,
+                        "minimum": 0
+                    },
+                    "late_cancellation": {
+                        "$ref": "#/components/schemas/PercentPairRequest"
+                    },
+                    "no_show": {
+                        "$ref": "#/components/schemas/PercentPairRequest"
+                    },
+                    "absent_notified": {
+                        "$ref": "#/components/schemas/PercentPairRequest"
+                    },
+                    "late": {
+                        "$ref": "#/components/schemas/PercentPairRequest"
+                    },
+                    "tutor_cancellation": {
+                        "$ref": "#/components/schemas/PercentPairRequest"
+                    },
+                    "admin_cancellation": {
+                        "$ref": "#/components/schemas/PercentPairRequest"
+                    },
+                    "max_free_per_month": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "makeup_credit": {
+                        "$ref": "#/components/schemas/MakeupRulesRequest"
+                    }
+                }
             },
             "PreferredContactMethodEnum": {
                 "enum": [
@@ -22371,6 +25062,214 @@
                     "conflicts",
                     "lessons",
                     "new_assignment"
+                ]
+            },
+            "ReportAnswersRequest": {
+                "type": "object",
+                "properties": {
+                    "answers": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "answers"
+                ]
+            },
+            "ReportComment": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "author_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/ReportCommentVisibilityEnum"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "author_name",
+                    "body",
+                    "created_at",
+                    "id"
+                ]
+            },
+            "ReportCommentRequest": {
+                "type": "object",
+                "properties": {
+                    "body": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/ReportCommentVisibilityEnum"
+                    }
+                },
+                "required": [
+                    "body"
+                ]
+            },
+            "ReportCommentVisibilityEnum": {
+                "enum": [
+                    "staff",
+                    "client"
+                ],
+                "type": "string",
+                "description": "* `staff` - Staff and tutor only\n* `client` - Visible to the client"
+            },
+            "ReportOpenRequest": {
+                "type": "object",
+                "properties": {
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Defaults to you (tutors)."
+                    }
+                }
+            },
+            "ReportReturnRequest": {
+                "type": "object",
+                "properties": {
+                    "note": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 500
+                    }
+                }
+            },
+            "ReportSubmitRequest": {
+                "type": "object",
+                "properties": {
+                    "answers": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                }
+            },
+            "ReportTemplate": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 120
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "is_default": {
+                        "type": "boolean"
+                    },
+                    "fields": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TemplateField"
+                        }
+                    },
+                    "version": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "services": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "jobs": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "archived_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "archived_at",
+                    "fields",
+                    "id",
+                    "name",
+                    "version"
+                ]
+            },
+            "ReportTemplateRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "is_default": {
+                        "type": "boolean"
+                    },
+                    "fields": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TemplateFieldRequest"
+                        }
+                    },
+                    "services": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "jobs": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                },
+                "required": [
+                    "fields",
+                    "name"
                 ]
             },
             "RescheduleRequest": {
@@ -23632,6 +26531,17 @@
                     "date"
                 ]
             },
+            "SlaStateEnum": {
+                "enum": [
+                    "due",
+                    "overdue",
+                    "submitted",
+                    "approved",
+                    "shared"
+                ],
+                "type": "string",
+                "description": "* `due` - due\n* `overdue` - overdue\n* `submitted` - submitted\n* `approved` - approved\n* `shared` - shared"
+            },
             "Slot": {
                 "type": "object",
                 "properties": {
@@ -24021,6 +26931,22 @@
                 },
                 "required": [
                     "student"
+                ]
+            },
+            "StudentRef": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
                 ]
             },
             "StudentRequest": {
@@ -24521,6 +27447,124 @@
                     "name",
                     "percent"
                 ]
+            },
+            "TemplateField": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "pattern": "^[a-z][a-z0-9_]{0,39}$"
+                    },
+                    "label": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/TemplateFieldTypeEnum"
+                    },
+                    "required": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "visibility": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TemplateFieldVisibilityEnum"
+                            }
+                        ],
+                        "default": "client"
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 100
+                        },
+                        "maxItems": 50
+                    },
+                    "help_text": {
+                        "type": "string",
+                        "maxLength": 300
+                    }
+                },
+                "required": [
+                    "key",
+                    "label",
+                    "type"
+                ]
+            },
+            "TemplateFieldRequest": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "minLength": 1,
+                        "pattern": "^[a-z][a-z0-9_]{0,39}$"
+                    },
+                    "label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/TemplateFieldTypeEnum"
+                    },
+                    "required": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "visibility": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TemplateFieldVisibilityEnum"
+                            }
+                        ],
+                        "default": "client"
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                        },
+                        "maxItems": 50
+                    },
+                    "help_text": {
+                        "type": "string",
+                        "maxLength": 300
+                    }
+                },
+                "required": [
+                    "key",
+                    "label",
+                    "type"
+                ]
+            },
+            "TemplateFieldTypeEnum": {
+                "enum": [
+                    "rich_text",
+                    "text",
+                    "rating",
+                    "select",
+                    "multi_select",
+                    "checklist",
+                    "topics",
+                    "homework",
+                    "next_steps",
+                    "attachment"
+                ],
+                "type": "string",
+                "description": "* `rich_text` - rich_text\n* `text` - text\n* `rating` - rating\n* `select` - select\n* `multi_select` - multi_select\n* `checklist` - checklist\n* `topics` - topics\n* `homework` - homework\n* `next_steps` - next_steps\n* `attachment` - attachment"
+            },
+            "TemplateFieldVisibilityEnum": {
+                "enum": [
+                    "staff",
+                    "client",
+                    "student"
+                ],
+                "type": "string",
+                "description": "* `staff` - staff\n* `client` - client\n* `student` - student"
             },
             "TimeFormatEnum": {
                 "enum": [
@@ -25204,6 +28248,16 @@
                     "has_mfa",
                     "id"
                 ]
+            },
+            "VoidRequest": {
+                "type": "object",
+                "properties": {
+                    "note": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 300
+                    }
+                }
             },
             "WeekStartDayEnum": {
                 "enum": [

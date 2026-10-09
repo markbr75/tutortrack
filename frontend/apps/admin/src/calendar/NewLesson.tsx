@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { api, usePermission } from "../api";
 import { fromInputs, toDateInput, toTimeInput } from "./dates";
-import { ErrorList } from "./QuickView";
+import { ErrorList } from "./ErrorList";
 import { conflictsOf } from "./types";
 
 const WEEKDAY_CODES = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"] as const;

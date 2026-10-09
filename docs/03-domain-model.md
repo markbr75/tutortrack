@@ -121,7 +121,7 @@ Naming: `<aggregate>.<past_tense_verb>`. Each epic lists its events; this table 
 | `service.created`, `service.updated` (with `rate_changed`) | E06 |
 | `job.created/updated/status_changed`, `job.tutor_assigned/removed/replaced`, `job.hours_cap_reached` | E07 |
 | `lesson.scheduled`, `lesson.rescheduled`, `lesson.updated`, `lesson.cancelled`, `lesson.completed`, `lesson.missed`, `lesson.locked_edited`, `lesson_series.created/updated/ended`, `availability.updated`, `booking.requested/approved/declined` (Phase 2) | E08 |
-| `attendance.recorded`, `lesson_report.submitted`, `lesson_report.overdue`, `lesson_report.shared` | E09 |
+| `attendance.recorded` (published by scheduling), `lesson.completion_blocked`, `lesson.unconfirmed`, `lesson_report.requested/due/overdue/escalated/submitted/returned/approved/shared/commented`, `makeup_credit.issued/consumed/voided` | E09 |
 | `charge.created`, `invoice.drafted/issued/sent/paid/overdue/voided`, `credit_note.issued`, `payment_request.sent/paid`, `client.balance_low`, `package.purchased/depleted/expiring` | E10 |
 | `payment.succeeded/failed/refunded/disputed`, `payment_method.added/expiring/removed`, `mandate.created/cancelled` | E11 |
 | `pay_item.created`, `pay_run.approved/paid`, `payout.paid/failed`, `expense.submitted/approved/rejected` | E12 |

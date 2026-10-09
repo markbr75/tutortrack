@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 import { api, useMe, usePermission } from "../api";
 import { fromInputs, toDateInput, viewerTimeZone } from "./dates";
-import { ErrorList } from "./QuickView";
+import { ErrorList } from "./ErrorList";
 
 type Window = components["schemas"]["Window"];
 type Mode = components["schemas"]["WindowModeEnum"];

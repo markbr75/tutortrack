@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Any
 
 from django.conf import settings
@@ -103,6 +104,12 @@ class Lesson(BranchScopedModel, CustomisableModel):
     status_reason = models.CharField(max_length=300, blank=True, default="")
     status_changed_at = models.DateTimeField(null=True, blank=True)
     chargeable_cancellation = models.BooleanField(default=False)  # E09 policies decide
+    # Delivery (E09): what actually happened.
+    actual_start = models.DateTimeField(null=True, blank=True)
+    actual_end = models.DateTimeField(null=True, blank=True)
+    cancelled_by = models.CharField(max_length=7, blank=True, default="")  # client/tutor/...
+    auto_completed = models.BooleanField(default=False)
+    unconfirmed_at = models.DateTimeField(null=True, blank=True)  # flagged as not confirmed
 
     class Meta(BranchScopedModel.Meta):
         ordering = ["start"]
@@ -149,6 +156,7 @@ class LessonTutor(TenantModel):
     pay_amount = MoneyField(null=True, blank=True)
     pay_snapshot = models.JSONField(default=dict, blank=True)  # rate, units, trace
     payable = models.BooleanField(default=True)
+    pay_percent = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(100))
 
     class Meta(TenantModel.Meta):
         constraints = [
@@ -157,6 +165,15 @@ class LessonTutor(TenantModel):
 
 
 class LessonAttendee(TenantModel):
+    class Outcome(models.TextChoices):
+        PRESENT = "present", _("Present")
+        LATE = "late", _("Late")
+        ABSENT_NOTIFIED = "absent_notified", _("Absent (notified)")
+        NO_SHOW = "no_show", _("No-show")
+        CANCELLED_CLIENT = "cancelled_client", _("Cancelled by client")
+        CANCELLED_TUTOR = "cancelled_tutor", _("Cancelled by tutor")
+        CANCELLED_ADMIN = "cancelled_admin", _("Cancelled by us")
+
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="attendees")
     student = models.ForeignKey("people.Student", on_delete=models.PROTECT, related_name="lessons")
     client = models.ForeignKey("people.Client", on_delete=models.PROTECT, related_name="+")
@@ -166,6 +183,14 @@ class LessonAttendee(TenantModel):
     tax_amount = MoneyField(null=True, blank=True)
     charge_snapshot = models.JSONField(default=dict, blank=True)
     chargeable = models.BooleanField(default=True)
+    # Attendance (E09 FR-09-2); the policy maps the outcome to a charge percentage.
+    outcome = models.CharField(max_length=16, choices=Outcome.choices, blank=True, default="")
+    late_minutes = models.PositiveSmallIntegerField(null=True, blank=True)
+    charge_percent = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(100))
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    recorded_at = models.DateTimeField(null=True, blank=True)
 
     class Meta(TenantModel.Meta):
         constraints = [

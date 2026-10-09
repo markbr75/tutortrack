@@ -2,11 +2,13 @@ interface Reply {
   status?: number;
   body: unknown;
 }
-type Route = Reply | ((body: unknown) => Reply);
+type Route = Reply | ((body: unknown, url: URL) => Reply);
 
 export interface RecordedCall {
   method: string;
   path: string;
+  /** The query string, e.g. "?preview=true" ("" when there is none). */
+  search: string;
   body: unknown;
 }
 
@@ -17,12 +19,13 @@ export function mockApi(routes: Record<string, Route>): RecordedCall[] {
   vi.stubGlobal(
     "fetch",
     vi.fn(async (request: Request) => {
-      const path = new URL(request.url).pathname;
+      const url = new URL(request.url);
+      const path = url.pathname;
       const text = request.method === "GET" ? "" : await request.clone().text();
       const body: unknown = text ? JSON.parse(text) : undefined;
-      calls.push({ method: request.method, path, body });
+      calls.push({ method: request.method, path, search: url.search, body });
       const route = routes[`${request.method} ${path}`];
-      const reply = typeof route === "function" ? route(body) : route;
+      const reply = typeof route === "function" ? route(body, url) : route;
       const status = reply ? (reply.status ?? 200) : 404;
       const payload = reply ? reply.body : { type: "about:blank", title: "Not found", status };
       return new Response(JSON.stringify(payload), {

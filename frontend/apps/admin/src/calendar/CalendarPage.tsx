@@ -8,7 +8,8 @@ import { api, usePermission } from "../api";
 import { colourFor, rangeFor, sameDay, shift, STATUS_COLOURS, type View } from "./dates";
 import { NewLesson } from "./NewLesson";
 import { AgendaView, MonthView } from "./OtherViews";
-import { ErrorList, QuickView } from "./QuickView";
+import { ErrorList } from "./ErrorList";
+import { QuickView } from "./QuickView";
 import { TimeGrid, type GridColumn } from "./TimeGrid";
 import type { CalendarItem } from "./types";
 
