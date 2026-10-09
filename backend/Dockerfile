@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 # Multi-stage image: `dev` (docker-compose, source mounted) and `prod` (ECS).
 
-FROM python:3.12-slim-bookworm AS base
+FROM python:3.14-slim-bookworm AS base
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
