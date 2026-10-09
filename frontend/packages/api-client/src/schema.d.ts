@@ -345,6 +345,459 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/catalogue/categories": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Optional grouping of subjects and services (FR-06-1). */
+    get: operations["catalogue_categories_list"];
+    put?: never;
+    /** @description Optional grouping of subjects and services (FR-06-1). */
+    post: operations["catalogue_categories_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/categories/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Optional grouping of subjects and services (FR-06-1). */
+    get: operations["catalogue_categories_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Optional grouping of subjects and services (FR-06-1). */
+    patch: operations["catalogue_categories_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/catalogue/categories/{id}/archive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Optional grouping of subjects and services (FR-06-1). */
+    post: operations["catalogue_categories_archive_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/categories/{id}/restore": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Optional grouping of subjects and services (FR-06-1). */
+    post: operations["catalogue_categories_restore_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/levels": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Create and edit through ``save``; nothing is deleted (archive or deactivate). */
+    get: operations["catalogue_levels_list"];
+    put?: never;
+    /** @description Create and edit through ``save``; nothing is deleted (archive or deactivate). */
+    post: operations["catalogue_levels_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/levels/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Create and edit through ``save``; nothing is deleted (archive or deactivate). */
+    get: operations["catalogue_levels_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Create and edit through ``save``; nothing is deleted (archive or deactivate). */
+    patch: operations["catalogue_levels_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/catalogue/levels/{id}/archive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Create and edit through ``save``; nothing is deleted (archive or deactivate). */
+    post: operations["catalogue_levels_archive_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/levels/{id}/restore": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Create and edit through ``save``; nothing is deleted (archive or deactivate). */
+    post: operations["catalogue_levels_restore_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/locations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Where lessons happen (FR-06-10). */
+    get: operations["catalogue_locations_list"];
+    put?: never;
+    /** @description Where lessons happen (FR-06-10). */
+    post: operations["catalogue_locations_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/locations/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Where lessons happen (FR-06-10). */
+    get: operations["catalogue_locations_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Where lessons happen (FR-06-10). */
+    patch: operations["catalogue_locations_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/catalogue/locations/{id}/archive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Where lessons happen (FR-06-10). */
+    post: operations["catalogue_locations_archive_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/locations/{id}/restore": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Where lessons happen (FR-06-10). */
+    post: operations["catalogue_locations_restore_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/packages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Prepaid package templates (FR-06-8); selling them is E10. */
+    get: operations["catalogue_packages_list"];
+    put?: never;
+    /** @description Prepaid package templates (FR-06-8); selling them is E10. */
+    post: operations["catalogue_packages_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/packages/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Prepaid package templates (FR-06-8); selling them is E10. */
+    get: operations["catalogue_packages_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Prepaid package templates (FR-06-8); selling them is E10. */
+    patch: operations["catalogue_packages_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/catalogue/products": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Fees and products for ad hoc charges (FR-06-9). */
+    get: operations["catalogue_products_list"];
+    put?: never;
+    /** @description Fees and products for ad hoc charges (FR-06-9). */
+    post: operations["catalogue_products_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/products/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Fees and products for ad hoc charges (FR-06-9). */
+    get: operations["catalogue_products_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Fees and products for ad hoc charges (FR-06-9). */
+    patch: operations["catalogue_products_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/catalogue/services": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description What you sell (FR-06-2). Changing default rates needs ``rates.manage``; existing
+     *     lessons keep their snapshotted prices.
+     */
+    get: operations["catalogue_services_list"];
+    put?: never;
+    /**
+     * @description What you sell (FR-06-2). Changing default rates needs ``rates.manage``; existing
+     *     lessons keep their snapshotted prices.
+     */
+    post: operations["catalogue_services_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/services/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description What you sell (FR-06-2). Changing default rates needs ``rates.manage``; existing
+     *     lessons keep their snapshotted prices.
+     */
+    get: operations["catalogue_services_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description What you sell (FR-06-2). Changing default rates needs ``rates.manage``; existing
+     *     lessons keep their snapshotted prices.
+     */
+    patch: operations["catalogue_services_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/catalogue/services/{id}/prices": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Set the price in another currency (FR-06-12). */
+    post: operations["catalogue_services_prices_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/subjects": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Subjects with their (active) levels (FR-06-1). */
+    get: operations["catalogue_subjects_list"];
+    put?: never;
+    /** @description Subjects with their (active) levels (FR-06-1). */
+    post: operations["catalogue_subjects_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/subjects/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Subjects with their (active) levels (FR-06-1). */
+    get: operations["catalogue_subjects_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Subjects with their (active) levels (FR-06-1). */
+    patch: operations["catalogue_subjects_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/catalogue/subjects/{id}/archive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Subjects with their (active) levels (FR-06-1). */
+    post: operations["catalogue_subjects_archive_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/subjects/{id}/restore": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Subjects with their (active) levels (FR-06-1). */
+    post: operations["catalogue_subjects_restore_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/tax-rates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Tax rates (FR-06-3). One is the default for new services and products. */
+    get: operations["catalogue_tax_rates_list"];
+    put?: never;
+    /** @description Tax rates (FR-06-3). One is the default for new services and products. */
+    post: operations["catalogue_tax_rates_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/tax-rates/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Tax rates (FR-06-3). One is the default for new services and products. */
+    get: operations["catalogue_tax_rates_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Tax rates (FR-06-3). One is the default for new services and products. */
+    patch: operations["catalogue_tax_rates_partial_update"];
+    trace?: never;
+  };
   "/api/v1/clients": {
     parameters: {
       query?: never;
@@ -1410,6 +1863,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/rates/quote": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Dry-run the rate engine for a lesson (FR-06-4): charge lines per student and pay
+     *     lines per tutor, each with a trace. You only see the sides your role may see.
+     */
+    post: operations["rates_quote_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/roles": {
     parameters: {
       query?: never;
@@ -2092,6 +2565,50 @@ export interface components {
      *     Fields are removed from output *and* input, so they can't be written either.
      *     Serializers without a request in context (internal use) keep every field.
      */
+    Category: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      order?: number;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    CategoryRequest: {
+      name: string;
+      order?: number;
+    };
+    ChargeLine: {
+      student_id: string;
+      client_id: string | null;
+      unit: string;
+      rate: components["schemas"]["MoneyOut"];
+      quantity: string;
+      amount: components["schemas"]["MoneyOut"];
+      tax_rate_id: string | null;
+      tax_percent: string;
+      tax_amount: components["schemas"]["MoneyOut"];
+      trace: string[];
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
     Client: {
       /** Format: uuid */
       readonly id: string;
@@ -2522,6 +3039,13 @@ export interface components {
      * @enum {string}
      */
     DateFormatEnum: "locale" | "dd/MM/yyyy" | "MM/dd/yyyy" | "yyyy-MM-dd";
+    /**
+     * @description * `in_person` - In person
+     *     * `online` - Online
+     *     * `hybrid` - Hybrid
+     * @enum {string}
+     */
+    DeliveryModeEnum: "in_person" | "online" | "hybrid";
     DemoData: {
       has_demo_data: boolean;
       records: number;
@@ -2641,6 +3165,19 @@ export interface components {
      * @enum {string}
      */
     FileVisibilityEnum: "private" | "internal" | "shared";
+    /**
+     * @description * `one_to_one` - One to one
+     *     * `small_group` - Small group
+     *     * `class` - Class
+     * @enum {string}
+     */
+    FormatEnum: "one_to_one" | "small_group" | "class";
+    /**
+     * @description * `per_student` - Each student pays the rate
+     *     * `split` - The rate is split between students
+     * @enum {string}
+     */
+    GroupChargeEnum: "per_student" | "split";
     ImpersonateRequest: {
       /** Format: uuid */
       membership_id: string;
@@ -2741,6 +3278,100 @@ export interface components {
      * @enum {string}
      */
     KindEnum: "note" | "task" | "document" | "change";
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Level: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      subject: string;
+      name: string;
+      order?: number;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    LevelRequest: {
+      /** Format: uuid */
+      subject: string;
+      name: string;
+      order?: number;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Location: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      type?: components["schemas"]["LocationTypeEnum"];
+      readonly address: components["schemas"]["Address"];
+      timezone?: string;
+      /** Format: uuid */
+      branch?: string | null;
+      capacity?: number | null;
+      opening_hours?: unknown;
+      online_url?: string;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    LocationRequest: {
+      name: string;
+      type?: components["schemas"]["LocationTypeEnum"];
+      address_input?: components["schemas"]["AddressInputRequest"];
+      timezone?: string;
+      /** Format: uuid */
+      branch?: string | null;
+      capacity?: number | null;
+      opening_hours?: unknown;
+      online_url?: string;
+    };
+    /**
+     * @description * `centre` - Centre
+     *     * `client_home` - Client's home
+     *     * `tutor_home` - Tutor's home
+     *     * `school` - School
+     *     * `online` - Online
+     *     * `other` - Other
+     * @enum {string}
+     */
+    LocationTypeEnum: "centre" | "client_home" | "tutor_home" | "school" | "online" | "other";
     LoginEvent: {
       /** Format: uuid */
       id: string;
@@ -2847,6 +3478,10 @@ export interface components {
      * @enum {string}
      */
     ModeEnum: "solo" | "multi";
+    MoneyOut: {
+      amount: string;
+      currency: string;
+    };
     MyConsentRequest: {
       consent_type: string;
       granted: boolean;
@@ -2989,6 +3624,85 @@ export interface components {
      * @enum {string}
      */
     OrganisationStatusEnum: "trial" | "active" | "past_due" | "suspended" | "cancelled";
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    PackageTemplate: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      description?: string;
+      services?: string[];
+      quantity_type: components["schemas"]["QuantityTypeEnum"];
+      /** Format: decimal */
+      quantity: string;
+      readonly currency: string;
+      price: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      validity_days?: number | null;
+      /** Format: date */
+      valid_until?: string | null;
+      /** Format: uuid */
+      tax_rate?: string | null;
+      transferable_between_siblings?: boolean;
+      refund_policy?: components["schemas"]["RefundPolicyEnum"];
+      bookable_online?: boolean;
+      auto_renew?: boolean;
+      active?: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    PackageTemplateRequest: {
+      name: string;
+      description?: string;
+      services?: string[];
+      quantity_type: components["schemas"]["QuantityTypeEnum"];
+      /** Format: decimal */
+      quantity: string;
+      price: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      validity_days?: number | null;
+      /** Format: date */
+      valid_until?: string | null;
+      /** Format: uuid */
+      tax_rate?: string | null;
+      transferable_between_siblings?: boolean;
+      refund_policy?: components["schemas"]["RefundPolicyEnum"];
+      bookable_online?: boolean;
+      auto_renew?: boolean;
+      active?: boolean;
+    };
     PaginatedAuditEntryList: {
       /**
        * Format: uri
@@ -3119,6 +3833,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Invitation"][];
     };
+    PaginatedLocationList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Location"][];
+    };
     PaginatedLoginEventList: {
       /**
        * Format: uri
@@ -3158,6 +3885,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Note"][];
     };
+    PaginatedPackageTemplateList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PackageTemplate"][];
+    };
     PaginatedProcessList: {
       /**
        * Format: uri
@@ -3170,6 +3910,32 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Process"][];
+    };
+    PaginatedProductList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Product"][];
+    };
+    PaginatedServiceList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Service"][];
     };
     PaginatedStudentList: {
       /**
@@ -3257,6 +4023,20 @@ export interface components {
       email_sender_name?: string;
       email_sender_address?: string;
       invoice_prefix?: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    PatchedCategoryRequest: {
+      name?: string;
+      order?: number;
     };
     /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
@@ -3366,6 +4146,43 @@ export interface components {
       validation_regex?: string;
       active?: boolean;
     };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    PatchedLevelRequest: {
+      /** Format: uuid */
+      subject?: string;
+      name?: string;
+      order?: number;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    PatchedLocationRequest: {
+      name?: string;
+      type?: components["schemas"]["LocationTypeEnum"];
+      address_input?: components["schemas"]["AddressInputRequest"];
+      timezone?: string;
+      /** Format: uuid */
+      branch?: string | null;
+      capacity?: number | null;
+      opening_hours?: unknown;
+      online_url?: string;
+    };
     PatchedMembershipUpdateRequest: {
       role?: components["schemas"]["RoleEnum"];
       status?: components["schemas"]["MembershipUpdateStatusEnum"];
@@ -3436,6 +4253,73 @@ export interface components {
      *     Fields are removed from output *and* input, so they can't be written either.
      *     Serializers without a request in context (internal use) keep every field.
      */
+    PatchedPackageTemplateRequest: {
+      name?: string;
+      description?: string;
+      services?: string[];
+      quantity_type?: components["schemas"]["QuantityTypeEnum"];
+      /** Format: decimal */
+      quantity?: string;
+      price?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      validity_days?: number | null;
+      /** Format: date */
+      valid_until?: string | null;
+      /** Format: uuid */
+      tax_rate?: string | null;
+      transferable_between_siblings?: boolean;
+      refund_policy?: components["schemas"]["RefundPolicyEnum"];
+      bookable_online?: boolean;
+      auto_renew?: boolean;
+      active?: boolean;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    PatchedProductRequest: {
+      name?: string;
+      description?: string;
+      category?: components["schemas"]["ProductCategoryEnum"];
+      price?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /** Format: uuid */
+      tax_rate?: string | null;
+      account_code?: string;
+      /** Format: decimal */
+      tutor_share_percent?: string;
+      active?: boolean;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
     PatchedSavedViewRequest: {
       entity_type?: string;
       name?: string;
@@ -3443,6 +4327,62 @@ export interface components {
       filters?: unknown;
       columns?: unknown;
       ordering?: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    PatchedServiceRequest: {
+      name?: string;
+      description?: string;
+      public_description?: string;
+      /** Format: uuid */
+      category?: string | null;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      format?: components["schemas"]["FormatEnum"];
+      max_students?: number;
+      delivery_mode?: components["schemas"]["DeliveryModeEnum"];
+      default_duration_minutes?: number;
+      allowed_durations?: unknown;
+      pricing_unit?: components["schemas"]["PricingUnitEnum"];
+      group_charge?: components["schemas"]["GroupChargeEnum"];
+      charge_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      pay_unit?: components["schemas"]["PayUnitEnum"];
+      pay_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: decimal */
+      pay_percent?: string | null;
+      /** Format: uuid */
+      tax_rate?: string | null;
+      revenue_account_code?: string;
+      branches?: string[];
+      bookable_online?: boolean;
+      colour?: string;
+      active?: boolean;
     };
     PatchedSettingsPatchRequest: {
       /** @description {key: value}. null resets the key (org) or removes the override (branch). */
@@ -3492,6 +4432,23 @@ export interface components {
      *     Fields are removed from output *and* input, so they can't be written either.
      *     Serializers without a request in context (internal use) keep every field.
      */
+    PatchedSubjectRequest: {
+      name?: string;
+      /** Format: uuid */
+      category?: string | null;
+      exam_boards?: string[];
+      order?: number;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
     PatchedTagRequest: {
       name?: string;
       colour?: string;
@@ -3520,6 +4477,26 @@ export interface components {
       target_id?: string;
       /** Format: date-time */
       remind_at?: string | null;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    PatchedTaxRateRequest: {
+      name?: string;
+      /** Format: decimal */
+      percent?: string;
+      country?: string;
+      region?: string;
+      is_default?: boolean;
+      exempt_reason?: string;
+      active?: boolean;
     };
     /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
@@ -3582,6 +4559,20 @@ export interface components {
       timezone?: string;
       locale?: string;
     };
+    PayLine: {
+      tutor_id: string;
+      unit: string;
+      rate: components["schemas"]["MoneyOut"] | null;
+      quantity: string;
+      amount: components["schemas"]["MoneyOut"];
+      trace: string[];
+    };
+    /**
+     * @description * `per_hour` - Per hour
+     *     * `per_lesson` - Per lesson
+     * @enum {string}
+     */
+    PayUnitEnum: "per_hour" | "per_lesson";
     Permission: {
       codename: string;
       category: string;
@@ -3603,6 +4594,16 @@ export interface components {
       };
       expires_in: number;
     };
+    /**
+     * @description * `per_hour` - Per hour
+     *     * `per_lesson` - Per lesson
+     *     * `per_student_per_lesson` - Per student per lesson
+     *     * `per_month` - Per month
+     *     * `per_term` - Per term
+     * @enum {string}
+     */
+    PricingUnitEnum:
+      "per_hour" | "per_lesson" | "per_student_per_lesson" | "per_month" | "per_term";
     /**
      * @description * `low` - Low
      *     * `normal` - Normal
@@ -3678,12 +4679,96 @@ export interface components {
     ProcessStatusEnum:
       "running" | "completed" | "failed" | "cancelled" | "terminated" | "timed_out";
     /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Product: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      description?: string;
+      category?: components["schemas"]["ProductCategoryEnum"];
+      readonly currency: string;
+      price: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /** Format: uuid */
+      tax_rate?: string | null;
+      account_code?: string;
+      /** Format: decimal */
+      tutor_share_percent?: string;
+      active?: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `registration` - Registration fee
+     *     * `materials` - Materials
+     *     * `books` - Books
+     *     * `exam_entry` - Exam entry
+     *     * `late_cancel` - Late cancellation fee
+     *     * `travel` - Travel fee
+     *     * `other` - Other
+     * @enum {string}
+     */
+    ProductCategoryEnum:
+      "registration" | "materials" | "books" | "exam_entry" | "late_cancel" | "travel" | "other";
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    ProductRequest: {
+      name: string;
+      description?: string;
+      category?: components["schemas"]["ProductCategoryEnum"];
+      price: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /** Format: uuid */
+      tax_rate?: string | null;
+      account_code?: string;
+      /** Format: decimal */
+      tutor_share_percent?: string;
+      active?: boolean;
+    };
+    /**
      * @description * `good` - Good
      *     * `strong` - Strong
      *     * `expert` - Expert
      * @enum {string}
      */
     ProficiencyEnum: "good" | "strong" | "expert";
+    /**
+     * @description * `hours` - Hours
+     *     * `lessons` - Lessons
+     *     * `credit` - Credit
+     * @enum {string}
+     */
+    QuantityTypeEnum: "hours" | "lessons" | "credit";
     QuickAddContactRequest: {
       first_name: string;
       last_name?: string;
@@ -3707,6 +4792,79 @@ export interface components {
       /** Format: date */
       date_of_birth?: string | null;
       subjects?: components["schemas"]["SubjectInputRequest"][];
+    };
+    QuoteRequestRequest: {
+      /** Format: uuid */
+      service: string;
+      duration_minutes?: number;
+      /** Format: date-time */
+      starts_at?: string;
+      /** Format: date-time */
+      ends_at?: string;
+      currency?: string;
+      job_charge_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      students: components["schemas"]["QuoteStudentInputRequest"][];
+      tutors?: components["schemas"]["QuoteTutorInputRequest"][];
+    };
+    QuoteStudentInputRequest: {
+      /** Format: uuid */
+      student: string;
+      rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      job_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
+    QuoteTutorInputRequest: {
+      /** Format: uuid */
+      tutor: string;
+      rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      job_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
+    RateQuote: {
+      currency: string;
+      duration_minutes: number;
+      total_charge?: components["schemas"]["MoneyOut"];
+      total_pay?: components["schemas"]["MoneyOut"];
+      charges?: components["schemas"]["ChargeLine"][];
+      pay?: components["schemas"]["PayLine"][];
     };
     ReasonRequest: {
       reason: string;
@@ -3733,6 +4891,13 @@ export interface components {
       /** @description Shown once. Each works one time. */
       recovery_codes: string[];
     };
+    /**
+     * @description * `none` - Not refundable
+     *     * `unused_pro_rata` - Unused part refundable
+     *     * `full` - Fully refundable before first use
+     * @enum {string}
+     */
+    RefundPolicyEnum: "none" | "unused_pro_rata" | "full";
     /**
      * @description * `uk` - United Kingdom
      *     * `eu` - European Union
@@ -3851,6 +5016,189 @@ export interface components {
       /** Format: double */
       score: number;
       client_id: string | null;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Service: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      description?: string;
+      public_description?: string;
+      /** Format: uuid */
+      category?: string | null;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      format?: components["schemas"]["FormatEnum"];
+      max_students?: number;
+      delivery_mode?: components["schemas"]["DeliveryModeEnum"];
+      default_duration_minutes?: number;
+      allowed_durations?: unknown;
+      pricing_unit?: components["schemas"]["PricingUnitEnum"];
+      group_charge?: components["schemas"]["GroupChargeEnum"];
+      readonly currency: string;
+      charge_rate: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      pay_unit?: components["schemas"]["PayUnitEnum"];
+      pay_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: decimal */
+      pay_percent?: string | null;
+      readonly prices: components["schemas"]["ServicePrice"][];
+      /** Format: uuid */
+      tax_rate?: string | null;
+      revenue_account_code?: string;
+      branches?: string[];
+      bookable_online?: boolean;
+      colour?: string;
+      active?: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    ServicePrice: {
+      readonly currency: string;
+      charge_rate: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      pay_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: decimal */
+      pay_percent?: string | null;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    ServicePriceRequest: {
+      charge_rate: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      pay_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: decimal */
+      pay_percent?: string | null;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    ServiceRequest: {
+      name: string;
+      description?: string;
+      public_description?: string;
+      /** Format: uuid */
+      category?: string | null;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      format?: components["schemas"]["FormatEnum"];
+      max_students?: number;
+      delivery_mode?: components["schemas"]["DeliveryModeEnum"];
+      default_duration_minutes?: number;
+      allowed_durations?: unknown;
+      pricing_unit?: components["schemas"]["PricingUnitEnum"];
+      group_charge?: components["schemas"]["GroupChargeEnum"];
+      charge_rate: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      pay_unit?: components["schemas"]["PayUnitEnum"];
+      pay_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: decimal */
+      pay_percent?: string | null;
+      /** Format: uuid */
+      tax_rate?: string | null;
+      revenue_account_code?: string;
+      branches?: string[];
+      bookable_online?: boolean;
+      colour?: string;
+      active?: boolean;
     };
     Session: {
       /** Format: uuid */
@@ -4078,13 +5426,60 @@ export interface components {
      * @enum {string}
      */
     StudentStatusEnum: "lead" | "trial" | "active" | "waiting" | "paused" | "finished" | "archived";
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Subject: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      /** Format: uuid */
+      category?: string | null;
+      exam_boards?: string[];
+      order?: number;
+      readonly levels: {
+        [key: string]: unknown;
+      }[];
+      /** Format: date-time */
+      readonly archived_at: string | null;
+    };
+    /** @description A subject by name, or chosen from the catalogue by ``subject_id``/``level_id``. */
     SubjectInput: {
-      subject: string;
+      subject?: string;
       level?: string;
     };
+    /** @description A subject by name, or chosen from the catalogue by ``subject_id``/``level_id``. */
     SubjectInputRequest: {
-      subject: string;
+      subject?: string;
       level?: string;
+      /** Format: uuid */
+      subject_id?: string;
+      /** Format: uuid */
+      level_id?: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    SubjectRequest: {
+      name: string;
+      /** Format: uuid */
+      category?: string | null;
+      exam_boards?: string[];
+      order?: number;
     };
     TOTPConfirmRequest: {
       /** Format: uuid */
@@ -4195,6 +5590,48 @@ export interface components {
      * @enum {string}
      */
     TaskStatusEnum: "open" | "done" | "cancelled";
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    TaxRate: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      /** Format: decimal */
+      percent: string;
+      country?: string;
+      region?: string;
+      is_default?: boolean;
+      exempt_reason?: string;
+      active?: boolean;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    TaxRateRequest: {
+      name: string;
+      /** Format: decimal */
+      percent: string;
+      country?: string;
+      region?: string;
+      is_default?: boolean;
+      exempt_reason?: string;
+      active?: boolean;
+    };
     /**
      * @description * `locale` - Locale default
      *     * `24h` - 24-hour
@@ -4368,6 +5805,10 @@ export interface components {
       readonly id: string;
       subject: string;
       level?: string;
+      /** Format: uuid */
+      readonly catalogue_subject: string | null;
+      /** Format: uuid */
+      readonly catalogue_level: string | null;
       proficiency?: components["schemas"]["ProficiencyEnum"];
       readonly approved: boolean;
       /** Format: uuid */
@@ -5021,6 +6462,1129 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["BulkJob"];
+        };
+      };
+    };
+  };
+  catalogue_categories_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        include_archived?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Category"][];
+        };
+      };
+    };
+  };
+  catalogue_categories_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CategoryRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CategoryRequest"];
+        "multipart/form-data": components["schemas"]["CategoryRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Category"];
+        };
+      };
+    };
+  };
+  catalogue_categories_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this category. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Category"];
+        };
+      };
+    };
+  };
+  catalogue_categories_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this category. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedCategoryRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedCategoryRequest"];
+        "multipart/form-data": components["schemas"]["PatchedCategoryRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Category"];
+        };
+      };
+    };
+  };
+  catalogue_categories_archive_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this category. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Category"];
+        };
+      };
+    };
+  };
+  catalogue_categories_restore_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this category. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Category"];
+        };
+      };
+    };
+  };
+  catalogue_levels_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        include_archived?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        subject?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Level"][];
+        };
+      };
+    };
+  };
+  catalogue_levels_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LevelRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LevelRequest"];
+        "multipart/form-data": components["schemas"]["LevelRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Level"];
+        };
+      };
+    };
+  };
+  catalogue_levels_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this level. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Level"];
+        };
+      };
+    };
+  };
+  catalogue_levels_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this level. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedLevelRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedLevelRequest"];
+        "multipart/form-data": components["schemas"]["PatchedLevelRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Level"];
+        };
+      };
+    };
+  };
+  catalogue_levels_archive_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this level. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Level"];
+        };
+      };
+    };
+  };
+  catalogue_levels_restore_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this level. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Level"];
+        };
+      };
+    };
+  };
+  catalogue_locations_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        include_archived?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedLocationList"];
+        };
+      };
+    };
+  };
+  catalogue_locations_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LocationRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LocationRequest"];
+        "multipart/form-data": components["schemas"]["LocationRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Location"];
+        };
+      };
+    };
+  };
+  catalogue_locations_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this location. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Location"];
+        };
+      };
+    };
+  };
+  catalogue_locations_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this location. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedLocationRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedLocationRequest"];
+        "multipart/form-data": components["schemas"]["PatchedLocationRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Location"];
+        };
+      };
+    };
+  };
+  catalogue_locations_archive_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this location. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Location"];
+        };
+      };
+    };
+  };
+  catalogue_locations_restore_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this location. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Location"];
+        };
+      };
+    };
+  };
+  catalogue_packages_list: {
+    parameters: {
+      query?: {
+        active?: boolean;
+        bookable_online?: boolean;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPackageTemplateList"];
+        };
+      };
+    };
+  };
+  catalogue_packages_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PackageTemplateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PackageTemplateRequest"];
+        "multipart/form-data": components["schemas"]["PackageTemplateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PackageTemplate"];
+        };
+      };
+    };
+  };
+  catalogue_packages_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this package template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PackageTemplate"];
+        };
+      };
+    };
+  };
+  catalogue_packages_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this package template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedPackageTemplateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedPackageTemplateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedPackageTemplateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PackageTemplate"];
+        };
+      };
+    };
+  };
+  catalogue_products_list: {
+    parameters: {
+      query?: {
+        active?: boolean;
+        /**
+         * @description * `registration` - Registration fee
+         *     * `materials` - Materials
+         *     * `books` - Books
+         *     * `exam_entry` - Exam entry
+         *     * `late_cancel` - Late cancellation fee
+         *     * `travel` - Travel fee
+         *     * `other` - Other
+         */
+        category?:
+          | "books"
+          | "exam_entry"
+          | "late_cancel"
+          | "materials"
+          | "other"
+          | "registration"
+          | "travel";
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedProductList"];
+        };
+      };
+    };
+  };
+  catalogue_products_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProductRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ProductRequest"];
+        "multipart/form-data": components["schemas"]["ProductRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Product"];
+        };
+      };
+    };
+  };
+  catalogue_products_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this product. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Product"];
+        };
+      };
+    };
+  };
+  catalogue_products_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this product. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedProductRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedProductRequest"];
+        "multipart/form-data": components["schemas"]["PatchedProductRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Product"];
+        };
+      };
+    };
+  };
+  catalogue_services_list: {
+    parameters: {
+      query?: {
+        active?: boolean;
+        bookable_online?: boolean;
+        category?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /**
+         * @description * `one_to_one` - One to one
+         *     * `small_group` - Small group
+         *     * `class` - Class
+         */
+        format?: "class" | "one_to_one" | "small_group";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        subject?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedServiceList"];
+        };
+      };
+    };
+  };
+  catalogue_services_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ServiceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ServiceRequest"];
+        "multipart/form-data": components["schemas"]["ServiceRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Service"];
+        };
+      };
+    };
+  };
+  catalogue_services_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this service. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Service"];
+        };
+      };
+    };
+  };
+  catalogue_services_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this service. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedServiceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedServiceRequest"];
+        "multipart/form-data": components["schemas"]["PatchedServiceRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Service"];
+        };
+      };
+    };
+  };
+  catalogue_services_prices_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this service. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ServicePriceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ServicePriceRequest"];
+        "multipart/form-data": components["schemas"]["ServicePriceRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ServicePrice"];
+        };
+      };
+    };
+  };
+  catalogue_subjects_list: {
+    parameters: {
+      query?: {
+        category?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        include_archived?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Subject"][];
+        };
+      };
+    };
+  };
+  catalogue_subjects_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SubjectRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SubjectRequest"];
+        "multipart/form-data": components["schemas"]["SubjectRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Subject"];
+        };
+      };
+    };
+  };
+  catalogue_subjects_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this subject. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Subject"];
+        };
+      };
+    };
+  };
+  catalogue_subjects_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this subject. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedSubjectRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedSubjectRequest"];
+        "multipart/form-data": components["schemas"]["PatchedSubjectRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Subject"];
+        };
+      };
+    };
+  };
+  catalogue_subjects_archive_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this subject. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Subject"];
+        };
+      };
+    };
+  };
+  catalogue_subjects_restore_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this subject. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Subject"];
+        };
+      };
+    };
+  };
+  catalogue_tax_rates_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TaxRate"][];
+        };
+      };
+    };
+  };
+  catalogue_tax_rates_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TaxRateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TaxRateRequest"];
+        "multipart/form-data": components["schemas"]["TaxRateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TaxRate"];
+        };
+      };
+    };
+  };
+  catalogue_tax_rates_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this tax rate. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TaxRate"];
+        };
+      };
+    };
+  };
+  catalogue_tax_rates_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this tax rate. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedTaxRateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedTaxRateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedTaxRateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TaxRate"];
         };
       };
     };
@@ -7225,6 +9789,34 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Process"];
+        };
+      };
+    };
+  };
+  rates_quote_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuoteRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["QuoteRequestRequest"];
+        "multipart/form-data": components["schemas"]["QuoteRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RateQuote"];
         };
       };
     };

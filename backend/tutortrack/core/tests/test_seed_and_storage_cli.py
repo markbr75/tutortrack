@@ -28,6 +28,10 @@ def test_seed_demo_is_idempotent(settings):
         assert Client.objects.count() == 3
         assert TutorProfile.objects.count() == 2
         assert Task.objects.count() == 1
+        from tutortrack.catalogue.models import Service, Subject
+
+        assert Service.objects.count() == 3
+        assert Subject.objects.filter(name="Maths").count() == 1
 
 
 @pytest.mark.django_db

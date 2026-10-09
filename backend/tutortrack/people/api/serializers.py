@@ -34,8 +34,17 @@ class AddressInput(serializers.Serializer):
 
 
 class SubjectInput(serializers.Serializer):
-    subject = serializers.CharField(max_length=100)
+    """A subject by name, or chosen from the catalogue by ``subject_id``/``level_id``."""
+
+    subject = serializers.CharField(max_length=100, required=False)
     level = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    subject_id = serializers.UUIDField(required=False, write_only=True)
+    level_id = serializers.UUIDField(required=False, write_only=True)
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        if not attrs.get("subject") and not attrs.get("subject_id") and not attrs.get("level_id"):
+            raise serializers.ValidationError({"subject": ["Give a subject."]})
+        return attrs
 
 
 class ContactSerializer(BaseModelSerializer):
@@ -154,8 +163,11 @@ class QuickAddSerializer(serializers.Serializer):
 class TutorSubjectSerializer(BaseModelSerializer):
     class Meta:
         model = TutorSubject
-        fields = ["id", "subject", "level", "proficiency", "approved", "approved_by"]
-        read_only_fields = ["id", "approved", "approved_by"]
+        fields = [
+            "id", "subject", "level", "catalogue_subject", "catalogue_level", "proficiency",
+            "approved", "approved_by",
+        ]  # fmt: skip
+        read_only_fields = ["id", "catalogue_subject", "catalogue_level", "approved", "approved_by"]
 
 
 class TutorQualificationSerializer(BaseModelSerializer):

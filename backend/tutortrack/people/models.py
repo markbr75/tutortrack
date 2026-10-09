@@ -340,7 +340,8 @@ class TutorProfile(TenantModel, CustomisableModel):
 
 
 class TutorSubject(TenantModel):
-    """What a tutor teaches (subject/level are free text until E06 links the catalogue)."""
+    """What a tutor teaches. ``subject``/``level`` keep the names; the catalogue links are
+    set when they match an E06 subject and level (matching in E07 uses the links)."""
 
     class Proficiency(models.TextChoices):
         GOOD = "good", _("Good")
@@ -350,6 +351,12 @@ class TutorSubject(TenantModel):
     tutor = models.ForeignKey(TutorProfile, on_delete=models.CASCADE, related_name="subjects")
     subject = models.CharField(max_length=100)
     level = models.CharField(max_length=100, blank=True, default="")
+    catalogue_subject = models.ForeignKey(
+        "catalogue.Subject", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    catalogue_level = models.ForeignKey(
+        "catalogue.Level", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
     proficiency = models.CharField(
         max_length=10, choices=Proficiency.choices, default=Proficiency.STRONG
     )

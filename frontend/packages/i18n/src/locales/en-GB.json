@@ -15,7 +15,8 @@
     "clients": "Clients",
     "students": "Students",
     "tutors": "Tutors",
-    "tasks": "My tasks"
+    "tasks": "My tasks",
+    "catalogue": "Catalogue"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -492,6 +493,149 @@
       "contact": "Contact",
       "student": "Student",
       "tutor": "Tutor"
+    }
+  },
+  "catalogue": {
+    "title": "Catalogue and pricing",
+    "name": "Name",
+    "add": "Add",
+    "edit": "Edit",
+    "editNamed": "Edit {{name}}",
+    "save": "Save changes",
+    "cancel": "Cancel",
+    "archive": "Archive",
+    "archiveNamed": "Archive {{name}}",
+    "active": "Active",
+    "inactive": "Inactive",
+    "actions": "Actions",
+    "tabs": {
+      "services": "Services",
+      "subjects": "Subjects",
+      "tax": "Tax rates",
+      "locations": "Locations",
+      "products": "Fees and products",
+      "packages": "Packages",
+      "price": "Price check"
+    },
+    "subjects": {
+      "new": "New subject",
+      "newLevel": "New level for {{subject}}",
+      "addLevel": "Add level",
+      "noLevels": "No levels"
+    },
+    "services": {
+      "new": "New service",
+      "edit": "Edit service",
+      "create": "Create service",
+      "pricing": "Pricing",
+      "charge": "Charge rate",
+      "pay": "Pay rate",
+      "payPercent": "Pay (% of charge)",
+      "payMode": "Tutor pay",
+      "payUnit": "Pay per",
+      "status": "Status",
+      "formatLabel": "Format",
+      "maxStudents": "Maximum students",
+      "groupCharge": "Group pricing",
+      "duration": "Lesson length (minutes)",
+      "taxRate": "Tax rate",
+      "defaultTax": "Default tax rate",
+      "rates": "Default rates ({{currency}})",
+      "percentOfCharge": "{{percent}}% of charge",
+      "unit": {
+        "per_hour": "Per hour",
+        "per_lesson": "Per lesson",
+        "per_student_per_lesson": "Per student per lesson",
+        "per_month": "Per month",
+        "per_term": "Per term"
+      },
+      "format": {
+        "one_to_one": "One to one",
+        "small_group": "Small group",
+        "class": "Class"
+      },
+      "group": {
+        "per_student": "Each student pays the rate",
+        "split": "Split the rate between students"
+      },
+      "payModes": {
+        "rate": "Fixed rate",
+        "percent": "Percentage of charge",
+        "none": "Not set"
+      }
+    },
+    "tax": {
+      "new": "New tax rate",
+      "percent": "Rate (%)",
+      "exemptReason": "Exemption reason",
+      "default": "Default",
+      "isDefault": "Default",
+      "makeDefault": "Make default",
+      "makeDefaultNamed": "Make {{name}} the default"
+    },
+    "locations": {
+      "new": "New location",
+      "type": "Type",
+      "address": "Address",
+      "types": {
+        "centre": "Centre",
+        "client_home": "Client's home",
+        "tutor_home": "Tutor's home",
+        "school": "School",
+        "online": "Online",
+        "other": "Other"
+      }
+    },
+    "products": {
+      "new": "New fee or product",
+      "category": "Category",
+      "price": "Price",
+      "priceIn": "Price ({{currency}})",
+      "tutorShare": "Tutor share (%)",
+      "categories": {
+        "registration": "Registration fee",
+        "materials": "Materials",
+        "books": "Books",
+        "exam_entry": "Exam entry",
+        "late_cancel": "Late cancellation fee",
+        "travel": "Travel fee",
+        "other": "Other"
+      }
+    },
+    "packages": {
+      "new": "New package",
+      "quantity": "Quantity",
+      "unit": "Made of",
+      "validity": "Valid for",
+      "validityDays": "Valid for (days)",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "units": {
+        "hours": "Hours",
+        "lessons": "Lessons",
+        "credit": "Credit"
+      },
+      "amount": {
+        "hours_one": "{{count}} hour",
+        "hours_other": "{{count}} hours",
+        "lessons_one": "{{count}} lesson",
+        "lessons_other": "{{count}} lessons",
+        "credit_one": "{{count}} credit",
+        "credit_other": "{{count}} credit"
+      }
+    },
+    "price": {
+      "service": "Service",
+      "choose": "Choose a service",
+      "tutor": "Tutor",
+      "noTutor": "No tutor",
+      "jobRate": "Job rate ({{currency}})",
+      "jobRateHint": "Optional: a rate agreed for this job",
+      "students": "Students",
+      "check": "Check price",
+      "charges": "Charged to clients",
+      "pay": "Paid to tutors",
+      "noAccess": "You can't see charge or pay rates."
     }
   }
 }

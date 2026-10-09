@@ -1,6 +1,6 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import { Alert, Button, SelectField, Spinner, Tabs, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 
@@ -251,38 +251,18 @@ type Tab = (typeof TABS)[number];
 export function RecordActivity({ target }: { target: TargetRef }) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("notes");
-  const baseId = useId();
   return (
     <section aria-label={t("crm.activity")} className="mt-8">
-      <div role="tablist" aria-label={t("crm.activity")} className="mb-4 flex gap-1 border-b">
-        {TABS.map((key) => (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            id={`${baseId}-${key}`}
-            aria-selected={tab === key}
-            aria-controls={`${baseId}-${key}-panel`}
-            tabIndex={tab === key ? 0 : -1}
-            className="-mb-px border-b-2 border-transparent px-3 py-2 text-sm aria-selected:border-primary aria-selected:font-medium"
-            onClick={() => setTab(key)}
-            onKeyDown={(e) => {
-              const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
-              if (!step) return;
-              const next = TABS[(TABS.indexOf(key) + step + TABS.length) % TABS.length] ?? key;
-              setTab(next);
-              document.getElementById(`${baseId}-${next}`)?.focus();
-            }}
-          >
-            {t(`crm.tabs.${key}`)}
-          </button>
-        ))}
-      </div>
-      <div role="tabpanel" id={`${baseId}-${tab}-panel`} aria-labelledby={`${baseId}-${tab}`}>
+      <Tabs
+        label={t("crm.activity")}
+        tabs={TABS.map((key) => ({ key, label: t(`crm.tabs.${key}`) }))}
+        value={tab}
+        onChange={setTab}
+      >
         {tab === "notes" ? <Notes target={target} /> : null}
         {tab === "tasks" ? <Tasks target={target} /> : null}
         {tab === "timeline" ? <Timeline target={target} /> : null}
-      </div>
+      </Tabs>
     </section>
   );
 }

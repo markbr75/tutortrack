@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "tutortrack.privacy",
     "tutortrack.people",
     "tutortrack.crm",
+    "tutortrack.catalogue",
 ]
 
 MIDDLEWARE = [

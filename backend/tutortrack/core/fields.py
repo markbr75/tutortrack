@@ -83,6 +83,10 @@ class MoneyDescriptor:
 class MoneyField(models.DecimalField):
     """Decimal amount column whose Python value is exposed as ``Money``."""
 
+    # django-stubs: the attribute is Money (the column is ``<name>_amount``).
+    _pyi_private_set_type: Money  # type: ignore[assignment]
+    _pyi_private_get_type: Money  # type: ignore[assignment]
+
     def __init__(
         self,
         *args: Any,

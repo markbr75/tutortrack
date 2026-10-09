@@ -19,3 +19,4 @@ export {
   type TextFieldProps,
 } from "./Form";
 export type { ColumnDef } from "@tanstack/react-table";
+export { Tabs, type TabItem, type TabsProps } from "./Tabs";

@@ -93,14 +93,29 @@ CRUD for each; `POST /api/v1/rates/quote` (dry-run resolution for UI previews: g
 - Hypothesis tests: totals are non-negative and correctly rounded; group splits sum to the total.
 
 ## 7. Delivery plan
-- [ ] **E06-T01** Subjects/levels/categories with country seed data.
-- [ ] **E06-T02** Services, service prices and tax rates.
-- [ ] **E06-T03** Locations (rooms model stubbed for Phase 2).
-- [ ] **E06-T04** Rate resolution engine v1 (overrides + service defaults + duration/pricing units + group modes) with trace and quote API.
-- [ ] **E06-T05** Products/fees catalogue.
-- [ ] **E06-T06** Package templates.
+- [x] **E06-T01** Subjects/levels/categories with country seed data.
+- [x] **E06-T02** Services, service prices and tax rates.
+- [x] **E06-T03** Locations (rooms model stubbed for Phase 2).
+- [x] **E06-T04** Rate resolution engine v1 (overrides + service defaults + duration/pricing units + group modes) with trace and quote API.
+- [x] **E06-T05** Products/fees catalogue.
+- [x] **E06-T06** Package templates.
 - [ ] **E06-T07** (Phase 2) Pay tiers, tutor service rates, bulk edit/CSV.
 - [ ] **E06-T08** (Phase 2) Premium rules and holiday calendars.
 - [ ] **E06-T09** (Phase 2) Discounts and promo codes; price lists.
 - [ ] **E06-T10** (Phase 2) Rooms and resources.
-- [ ] **E06-T11** Frontend settings pages for catalogue, rates grid and quote preview.
+- [x] **E06-T11** Frontend settings pages for catalogue, rates grid and quote preview.
+
+## Implementation notes (as built 2026-10-09)
+- **App:** `catalogue` holds `Category`, `Subject`, `Level`, `TaxRate`, `Service`, `ServicePrice`, `Location`, `Room` (Phase 2 stub), `Product` and `PackageTemplate`. All are `TenantModel` with RLS. Nothing is deleted: taxonomy and locations are archived (archiving a subject archives its levels), and services, products and packages are deactivated.
+- **Exam boards** are a list attribute on `Subject` (`exam_boards`), not a separate `ExamBoard` model.
+- **Starter data:** an `organisation.created` handler seeds categories, subjects, levels and tax rates for the organisation's country (GB, US, AU, CA, IE, NZ; other countries get the US list). Seeding is idempotent. In GB the default tax rate is "Exempt (education)". Organisations created before E06 are seeded by `make seed` (demo) or by calling `catalogue.services.seed_catalogue()` (there are no production tenants yet).
+- **Tax settings:** `billing.prices_include_tax` and `billing.tax_registered` are organisation settings. The tax number stays the encrypted organisation field from E29.
+- **Rates:** `RateField` (4 decimal places) for charge and pay rates. A service has one currency, set by its charge rate. `ServicePrice` adds prices in other currencies, and the quote API's `currency` picks one. A service has *either* a pay rate *or* a pay percentage (DB check constraint), plus a `pay_unit` (per hour or per lesson) that the spec didn't name. Group services choose `group_charge`: each student pays the rate, or the rate is split between students.
+- **Rate engine v1** (`catalogue/rates.py`): `resolve_rates(RateContext) -> RateQuote`. Charge precedence: lesson attendee override → job student override → job charge rate → service price. Pay precedence: lesson tutor override → job tutor override → service pay rate or % of the lesson charge (shared between tutors). Per-hour pricing scales with duration. Per-lesson and per-student-per-lesson pricing does not. Per-month and per-term services are not charged per lesson (E10 subscriptions). Lines are rounded half-up per line. Split group charges use largest-remainder allocation, so the lines add up to the lesson total exactly. Tax is shown per line (inclusive or exclusive per the setting). Traces are human-readable strings in English (e.g. `"job rate £42.00/h", "90 minutes"`). `RateQuote.as_dict()` is the JSON snapshot E08 stores on lessons. Overrides arrive as inputs now. E07/E08 feed them from jobs and lessons.
+- **Deferred to Phase 2 (T07–T10):** pay tiers, tutor personal rates, client price lists, premiums and holiday calendars, discounts and promo codes, and rooms. They slot into the precedence chain where the spec puts them. Percentage pay is currently based on the gross charge (there are no discounts yet).
+- **Permissions:** `catalogue.view`/`catalogue.manage`, and `rates.manage` for tax rates and default service rates. Changing a service's charge or pay rate through the API needs `rates.manage`. `billing.rates.view_charge`/`view_pay` hide rate fields and the matching half of a quote. Coordinators and tutors get `catalogue.view`. Finance also gets `rates.manage`.
+- **Events:** `service.created`, and `service.updated` with `rate_changed`. E08 uses `rate_changed` to offer "apply to future lessons? (N affected)". Locked lessons are never re-priced.
+- **E05 follow-up:** `TutorSubject` gained nullable `catalogue_subject`/`catalogue_level` links. They are set by case-insensitive name match, or from `subject_id`/`level_id` in the subjects input. Free-text subjects remain valid. Student subjects stay as names.
+- **OpenAPI fix:** money `amount` is now documented as a decimal string, which is what the API sends and accepts.
+- **Frontend:** a Catalogue page with tabs for services (rates editable with `rates.manage`), subjects/levels, tax rates, locations, fees and products, packages, and a price check. The price check runs the quote API and shows charge and pay lines with their trace. There is a new shared accessible `Tabs` component in the ui package.
+

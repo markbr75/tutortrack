@@ -4,8 +4,6 @@ from typing import Any
 
 from drf_spectacular.extensions import OpenApiSerializerFieldExtension
 from drf_spectacular.openapi import AutoSchema as SpectacularAutoSchema
-from drf_spectacular.plumbing import build_basic_type
-from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter
 
 from .serializers import BaseModelSerializer
@@ -63,7 +61,13 @@ class MoneyFieldExtension(OpenApiSerializerFieldExtension):
         return {
             "type": "object",
             "properties": {
-                "amount": {**(build_basic_type(OpenApiTypes.DECIMAL) or {}), "example": "40.00"},
+                # Decimal strings: floats are rejected because they lose precision.
+                "amount": {
+                    "type": "string",
+                    "format": "decimal",
+                    "pattern": r"^-?\d+(\.\d+)?$",
+                    "example": "40.00",
+                },
                 "currency": {"type": "string", "example": "GBP", "minLength": 3, "maxLength": 3},
             },
             "required": ["amount", "currency"],

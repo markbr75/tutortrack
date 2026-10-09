@@ -7,6 +7,7 @@ import {
   type RouterHistory,
 } from "@tanstack/react-router";
 
+import { CataloguePage } from "./catalogue/CataloguePage";
 import { TasksPage } from "./crm/TasksPage";
 import { AppShell } from "./layout/AppShell";
 import { ClientsPage, StudentsPage, TutorsPage } from "./people/PeopleLists";
@@ -118,6 +119,7 @@ const tutorRoute = createRoute({
   },
 });
 const tasksRoute = appPage("/tasks", TasksPage);
+const catalogueRoute = appPage("/catalogue", CataloguePage);
 
 const routeTree = rootRoute.addChildren([
   signupRoute,
@@ -139,6 +141,7 @@ const routeTree = rootRoute.addChildren([
     tutorsRoute,
     tutorRoute,
     tasksRoute,
+    catalogueRoute,
     teamRoute,
     auditRoute,
     settingsRoute,

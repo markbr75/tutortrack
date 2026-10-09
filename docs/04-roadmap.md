@@ -75,8 +75,8 @@ All ─► E26, E27, E28, E31
 | E03 | ✅ Done (2026-10-09) | Phase 1 scope (T08/T11/T12 are Phase 2). See Implementation notes |
 | E04 | ☐ | |
 | E05 | ✅ Done (2026-10-09) | Phase 1 scope (merge tool and map view are Phase 2). See Implementation notes |
-| E06 | ⏭ Next | |
-| E07 | ☐ | |
+| E06 | ✅ Done (2026-10-09) | MVP scope (T07–T10 pay tiers, premiums, discounts, rooms are Phase 2). See Implementation notes |
+| E07 | ⏭ Next | |
 | E08 | ☐ | |
 | E09 | ☐ | |
 | E10 | ☐ | |

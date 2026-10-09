@@ -238,7 +238,16 @@ def _validate_subjects(value: Any) -> list[dict[str, str]]:
         raise BusinessRuleViolation(_("Subjects must be a list."))
     out = []
     for item in value:
-        if not isinstance(item, dict) or not str(item.get("subject", "")).strip():
+        if not isinstance(item, dict):
+            raise BusinessRuleViolation(_("Each subject needs a name."))
+        if item.get("subject_id") or item.get("level_id"):
+            from tutortrack.catalogue.selectors import resolve_subject_ids
+
+            subject, level = resolve_subject_ids(item.get("subject_id"), item.get("level_id"))
+            if subject is None:
+                raise BusinessRuleViolation(_("Choose a subject from the catalogue."))
+            item = {"subject": subject.name, "level": level.name if level else ""}
+        if not str(item.get("subject", "")).strip():
             raise BusinessRuleViolation(_("Each subject needs a name."))
         out.append({"subject": str(item["subject"]).strip()[:100],
                     "level": str(item.get("level", "")).strip()[:100]})  # fmt: skip
@@ -432,11 +441,15 @@ def set_tutor_subjects(tutor: TutorProfile, subjects: list[dict[str, Any]]) -> l
     }
     TutorSubject.objects.filter(tutor=tutor).delete()
     created = []
+    from tutortrack.catalogue.selectors import match_subject
+
     for item in _validate_subjects(subjects):
         was_approved, by = approved.get((item["subject"], item["level"]), (False, None))
+        cat_subject, cat_level = match_subject(item["subject"], item["level"])
         created.append(
             TutorSubject.objects.create(
                 tutor=tutor, subject=item["subject"], level=item["level"],
+                catalogue_subject=cat_subject, catalogue_level=cat_level,
                 approved=was_approved, approved_by_id=by,
             )
         )  # fmt: skip
