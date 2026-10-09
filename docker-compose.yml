@@ -148,7 +148,15 @@ services:
     ports: ["5173:5173"]
     volumes:
       - ./frontend:/app
+      # The container installs its own (Alpine) dependencies; keep every workspace
+      # package's node_modules off the bind mount so host installs are unaffected.
       - frontend-node-modules:/app/node_modules
+      - /app/apps/admin/node_modules
+      - /app/apps/portal/node_modules
+      - /app/apps/widgets/node_modules
+      - /app/packages/api-client/node_modules
+      - /app/packages/i18n/node_modules
+      - /app/packages/ui/node_modules
 
   stripe-cli:
     image: stripe/stripe-cli:v1.27.0
