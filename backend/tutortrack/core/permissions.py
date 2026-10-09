@@ -22,6 +22,7 @@ from rest_framework.views import APIView
 # Codenames owned by core (see core.permission_registry).
 PERMISSIONS = {
     "audit.view": "View the audit log",
+    "audit.export": "Export the audit log (each export is audited)",
 }
 
 

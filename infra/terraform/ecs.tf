@@ -58,6 +58,32 @@ resource "aws_iam_role" "task" {
   assume_role_policy = data.aws_iam_policy_document.ecs_assume.json
 }
 
+# Envelope encryption for application secrets/PII (E29-T02): FIELD_ENCRYPTION_KEYS and
+# TEMPORAL_PAYLOAD_KEYS hold data keys wrapped by this key (`manage.py
+# generate_encryption_key`); tasks unwrap them once at startup.
+resource "aws_kms_key" "app_data" {
+  description             = "${local.name} application data keys"
+  enable_key_rotation     = true
+  deletion_window_in_days = 30
+}
+
+resource "aws_kms_alias" "app_data" {
+  name          = "alias/${local.name}-app-data"
+  target_key_id = aws_kms_key.app_data.key_id
+}
+
+resource "aws_iam_role_policy" "task_kms" {
+  role = aws_iam_role.task.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["kms:Decrypt", "kms:GenerateDataKey"]
+      Resource = [aws_kms_key.app_data.arn]
+    }]
+  })
+}
+
 resource "aws_iam_role_policy" "task_s3" {
   role = aws_iam_role.task.id
   policy = jsonencode({
@@ -89,6 +115,7 @@ locals {
       { name = "CLAMAV_ENABLED", value = "true" },
       { name = "LOG_JSON", value = "true" },
       { name = "TEMPORAL_ADDRESS", value = var.temporal_address },
+      { name = "FIELD_ENCRYPTION_KMS_KEY_ID", value = aws_kms_key.app_data.arn },
       { name = "TEMPORAL_NAMESPACE", value = var.temporal_namespace },
     ]
   }

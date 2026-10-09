@@ -30,10 +30,15 @@ from tutortrack.core import flags
 from tutortrack.core.api.viewsets import TenantScopedViewMixin
 from tutortrack.core.exceptions import BusinessRuleViolation, PermissionDenied
 from tutortrack.core.permission_registry import all_permissions
-from tutortrack.core.permissions import HasMethodPermission, HasOrganisation, scope_queryset
+from tutortrack.core.permissions import (
+    HasMethodPermission,
+    HasOrganisation,
+    HasPermission,
+    scope_queryset,
+)
 
 from .. import auth, impersonation, rbac, services, sso
-from ..models import Invitation, Membership, User, UserSession
+from ..models import Invitation, LoginEvent, Membership, User, UserSession
 from ..roles import ROLES
 from ..tokens import InvalidToken, handoff_token
 from .serializers import (
@@ -45,6 +50,7 @@ from .serializers import (
     ImpersonateSerializer,
     InvitationLookupSerializer,
     InvitationSerializer,
+    LoginEventSerializer,
     LoginResultSerializer,
     LoginSerializer,
     LoginTokenSerializer,
@@ -358,6 +364,23 @@ class MeView(APIView):
         return Response(me_payload(request))
 
 
+LOGIN_HISTORY_LIMIT = 100
+
+
+def _login_history(user: Any) -> list[Any]:
+    return list(LoginEvent.objects.filter(user=user).order_by("-created_at")[:LOGIN_HISTORY_LIMIT])
+
+
+class MyLoginsView(APIView):
+    """Your recent sign-in attempts (FR-29-2 login history)."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=LoginEventSerializer(many=True))
+    def get(self, request: Request) -> Response:
+        return Response(LoginEventSerializer(_login_history(_user(request)), many=True).data)
+
+
 class PasswordChangeView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -508,6 +531,20 @@ class MembershipViewSet(
 
     def perform_destroy(self, instance: Membership) -> None:
         services.remove_member(instance)
+
+    @extend_schema(request=None, responses=LoginEventSerializer(many=True))
+    @action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[IsAuthenticated, HasOrganisation, HasPermission.for_("team.manage")],
+    )
+    def logins(self, request: Request, pk: Any = None) -> Response:
+        """A member's recent sign-in attempts (admins reviewing suspicious activity)."""
+        membership = self.get_object()
+        from tutortrack.core import audit
+
+        audit.record_read(membership, "login history")
+        return Response(LoginEventSerializer(_login_history(membership.user), many=True).data)
 
 
 class InvitationViewSet(

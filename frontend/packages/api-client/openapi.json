@@ -28,6 +28,13 @@
                     },
                     {
                         "in": "query",
+                        "name": "actor_email",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
                         "name": "created_after",
                         "schema": {
                             "type": "string",
@@ -90,6 +97,14 @@
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search the record description"
                     }
                 ],
                 "tags": [
@@ -152,6 +167,48 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/AuditEntry"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/audit/export": {
+            "get": {
+                "operationId": "audit_export_retrieve",
+                "description": "CSV of the filtered audit log (max 50,000 rows). The export itself is audited and\nrepeated exports alert the owners (FR-29-2).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "actor_email",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "audit"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "text/csv": {
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         },
@@ -1805,6 +1862,35 @@
                 }
             }
         },
+        "/api/v1/me/logins": {
+            "get": {
+                "operationId": "me_logins_list",
+                "description": "Your recent sign-in attempts (FR-29-2 login history).",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/LoginEvent"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/me/mfa/disable": {
             "post": {
                 "operationId": "me_mfa_disable_create",
@@ -2404,6 +2490,104 @@
                 "responses": {
                     "204": {
                         "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/memberships/{id}/logins": {
+            "get": {
+                "operationId": "memberships_logins_list",
+                "description": "A member's recent sign-in attempts (admins reviewing suspicious activity).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this membership.",
+                        "required": true
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "role",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "admin",
+                                "affiliate",
+                                "branch_manager",
+                                "client",
+                                "coordinator",
+                                "finance",
+                                "owner",
+                                "student",
+                                "tutor"
+                            ]
+                        },
+                        "description": "* `owner` - Owner\n* `admin` - Admin\n* `branch_manager` - Branch Manager\n* `coordinator` - Coordinator\n* `finance` - Finance\n* `tutor` - Tutor\n* `client` - Client\n* `student` - Student\n* `affiliate` - Affiliate"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "invited",
+                                "removed",
+                                "suspended"
+                            ]
+                        },
+                        "description": "* `invited` - Invited\n* `active` - Active\n* `suspended` - Suspended\n* `removed` - Removed"
+                    }
+                ],
+                "tags": [
+                    "memberships"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedLoginEventList"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -3448,6 +3632,11 @@
                         "readOnly": true,
                         "nullable": true
                     },
+                    "actor_email": {
+                        "type": "string",
+                        "format": "email",
+                        "readOnly": true
+                    },
                     "impersonator": {
                         "type": "string",
                         "format": "uuid",
@@ -3472,6 +3661,7 @@
                 "required": [
                     "action",
                     "actor",
+                    "actor_email",
                     "changes",
                     "created_at",
                     "id",
@@ -3988,6 +4178,44 @@
                 "type": "string",
                 "description": "* `pending` - Pending\n* `accepted` - Accepted\n* `revoked` - Revoked"
             },
+            "LoginEvent": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "method": {
+                        "type": "string"
+                    },
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "reason": {
+                        "type": "string"
+                    },
+                    "ip": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "user_agent": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "ip",
+                    "method",
+                    "reason",
+                    "success",
+                    "user_agent"
+                ]
+            },
             "LoginRequest": {
                 "type": "object",
                 "properties": {
@@ -4463,8 +4691,7 @@
                         "maxLength": 50
                     },
                     "tax_number": {
-                        "type": "string",
-                        "maxLength": 50
+                        "type": "string"
                     },
                     "fiscal_year_start_month": {
                         "type": "integer",
@@ -4592,6 +4819,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Invitation"
+                        }
+                    }
+                }
+            },
+            "PaginatedLoginEventList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LoginEvent"
                         }
                     }
                 }
@@ -4871,8 +5124,7 @@
                         "maxLength": 50
                     },
                     "tax_number": {
-                        "type": "string",
-                        "maxLength": 50
+                        "type": "string"
                     },
                     "fiscal_year_start_month": {
                         "type": "integer",

@@ -38,6 +38,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/audit/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description CSV of the filtered audit log (max 50,000 rows). The export itself is audited and
+     *     repeated exports alert the owners (FR-29-2).
+     */
+    get: operations["audit_export_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/auth/handoff": {
     parameters: {
       query?: never;
@@ -517,6 +537,23 @@ export interface paths {
     patch: operations["me_partial_update"];
     trace?: never;
   };
+  "/api/v1/me/logins": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Your recent sign-in attempts (FR-29-2 login history). */
+    get: operations["me_logins_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/me/mfa/disable": {
     parameters: {
       query?: never;
@@ -704,6 +741,23 @@ export interface paths {
     head?: never;
     /** @description Team members. ``DELETE`` removes the member's access to this organisation. */
     patch: operations["memberships_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/memberships/{id}/logins": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description A member's recent sign-in attempts (admins reviewing suspicious activity). */
+    get: operations["memberships_logins_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/onboarding/{step}": {
@@ -1049,6 +1103,8 @@ export interface components {
       readonly changes: unknown;
       /** Format: uuid */
       readonly actor: string | null;
+      /** Format: email */
+      readonly actor_email: string;
       /** Format: uuid */
       readonly impersonator: string | null;
       readonly ip: string | null;
@@ -1258,6 +1314,17 @@ export interface components {
      * @enum {string}
      */
     InvitationStatusEnum: "pending" | "accepted" | "revoked";
+    LoginEvent: {
+      /** Format: uuid */
+      id: string;
+      /** Format: date-time */
+      created_at: string;
+      method: string;
+      success: boolean;
+      reason: string;
+      ip: string | null;
+      user_agent: string;
+    };
     LoginRequest: {
       /** Format: email */
       email: string;
@@ -1477,6 +1544,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Invitation"][];
+    };
+    PaginatedLoginEventList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["LoginEvent"][];
     };
     PaginatedMembershipList: {
       /**
@@ -1972,6 +2052,7 @@ export interface operations {
       query?: {
         action?: string;
         actor?: string;
+        actor_email?: string;
         created_after?: string;
         created_before?: string;
         /** @description The pagination cursor value. */
@@ -1984,6 +2065,8 @@ export interface operations {
         ordering?: string;
         /** @description Number of results to return per page. */
         page_size?: number;
+        /** @description Search the record description */
+        q?: string;
       };
       header?: never;
       path?: never;
@@ -2022,6 +2105,28 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AuditEntry"];
+        };
+      };
+    };
+  };
+  audit_export_retrieve: {
+    parameters: {
+      query?: {
+        actor_email?: string;
+        q?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv": string;
         };
       };
     };
@@ -2923,6 +3028,25 @@ export interface operations {
       };
     };
   };
+  me_logins_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LoginEvent"][];
+        };
+      };
+    };
+  };
   me_mfa_disable_create: {
     parameters: {
       query?: never;
@@ -3265,6 +3389,63 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Membership"];
+        };
+      };
+    };
+  };
+  memberships_logins_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `owner` - Owner
+         *     * `admin` - Admin
+         *     * `branch_manager` - Branch Manager
+         *     * `coordinator` - Coordinator
+         *     * `finance` - Finance
+         *     * `tutor` - Tutor
+         *     * `client` - Client
+         *     * `student` - Student
+         *     * `affiliate` - Affiliate
+         */
+        role?:
+          | "admin"
+          | "affiliate"
+          | "branch_manager"
+          | "client"
+          | "coordinator"
+          | "finance"
+          | "owner"
+          | "student"
+          | "tutor";
+        /**
+         * @description * `invited` - Invited
+         *     * `active` - Active
+         *     * `suspended` - Suspended
+         *     * `removed` - Removed
+         */
+        status?: "active" | "invited" | "removed" | "suspended";
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this membership. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedLoginEventList"];
         };
       };
     };

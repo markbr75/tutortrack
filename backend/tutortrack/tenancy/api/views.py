@@ -45,7 +45,13 @@ class OrganisationView(APIView):
 
     @extend_schema(responses=OrganisationSerializer)
     def get(self, request: Request) -> Response:
-        return Response(OrganisationSerializer(self._org(), context={"request": request}).data)
+        org = self._org()
+        data = OrganisationSerializer(org, context={"request": request}).data
+        if data.get("tax_number"):
+            from tutortrack.core import audit
+
+            audit.record_read(org, "tax id")  # sensitive-data access log (FR-29-2)
+        return Response(data)
 
     @extend_schema(
         request=OrganisationSerializer,

@@ -31,6 +31,7 @@ urlpatterns = [
     ),
     path("me", views.MeView.as_view(), name="me"),
     path("me/password", views.PasswordChangeView.as_view(), name="me-password"),
+    path("me/logins", views.MyLoginsView.as_view(), name="me-logins"),
     path("me/mfa/totp", views.TOTPSetupView.as_view(), name="me-mfa-totp"),
     path("me/mfa/totp/confirm", views.TOTPConfirmView.as_view(), name="me-mfa-totp-confirm"),
     path("me/mfa/disable", views.MFADisableView.as_view(), name="me-mfa-disable"),

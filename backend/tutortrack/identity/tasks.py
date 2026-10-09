@@ -81,3 +81,15 @@ def send_invitation(
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[email],
         )
+
+
+@shared_task(name="tutortrack.identity.tasks.send_security_alert", ignore_result=True)
+def send_security_alert(*, email: str, kind: str, detail: str, who: str) -> None:
+    send_mail(
+        subject=_("Security alert on your TutorTrack account"),
+        message=render_to_string(
+            "identity/email/security_alert.txt", {"kind": kind, "detail": detail, "who": who}
+        ),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[email],
+    )

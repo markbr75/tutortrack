@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from typing import Any
 
+from django.db import transaction
 from django.db.models import QuerySet
+from django.http import HttpResponse
 from django_filters import rest_framework as filters
-from drf_spectacular.utils import extend_schema, inline_serializer
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -25,6 +28,8 @@ from .viewsets import TenantScopedViewMixin
 
 
 class AuditEntrySerializer(BaseModelSerializer):
+    actor_email = serializers.EmailField(source="actor.email", read_only=True, default=None)
+
     class Meta:
         model = AuditEntry
         fields = [
@@ -35,6 +40,7 @@ class AuditEntrySerializer(BaseModelSerializer):
             "object_repr",
             "changes",
             "actor",
+            "actor_email",
             "impersonator",
             "ip",
             "request_id",
@@ -44,12 +50,26 @@ class AuditEntrySerializer(BaseModelSerializer):
 
 
 class AuditEntryFilter(filters.FilterSet):
+    """Global audit search (FR-29-2): by user, record, action, date and free text."""
+
     created_after = filters.IsoDateTimeFilter(field_name="created_at", lookup_expr="gte")
     created_before = filters.IsoDateTimeFilter(field_name="created_at", lookup_expr="lt")
+    actor_email = filters.CharFilter(field_name="actor__email", lookup_expr="iexact")
+    q = filters.CharFilter(method="search", label="Search the record description")
 
     class Meta:
         model = AuditEntry
         fields = ["object_type", "object_id", "actor", "action"]
+
+    def search(self, queryset: QuerySet[AuditEntry], name: str, value: str) -> QuerySet[AuditEntry]:
+        return queryset.filter(object_repr__icontains=value.strip()[:100])
+
+
+EXPORT_LIMIT = 50_000
+EXPORT_COLUMNS = [
+    "created_at", "action", "object_type", "object_id", "object_repr", "actor_email",
+    "impersonator", "ip", "request_id", "changes",
+]  # fmt: skip
 
 
 class AuditEntryViewSet(TenantScopedViewMixin, viewsets.ReadOnlyModelViewSet):
@@ -61,7 +81,67 @@ class AuditEntryViewSet(TenantScopedViewMixin, viewsets.ReadOnlyModelViewSet):
     filterset_class = AuditEntryFilter
 
     def get_tenant_queryset(self) -> QuerySet[AuditEntry]:
-        return AuditEntry.objects.filter(organisation_id=require_organisation_id())
+        return AuditEntry.objects.filter(organisation_id=require_organisation_id()).select_related(
+            "actor"
+        )
+
+    @extend_schema(
+        parameters=[OpenApiParameter("q", str), OpenApiParameter("actor_email", str)],
+        responses={(200, "text/csv"): OpenApiTypes.STR},
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        permission_classes=[IsAuthenticated, HasOrganisation, HasPermission.for_("audit.export")],
+    )
+    def export(self, request: Request) -> HttpResponse:
+        """CSV of the filtered audit log (max 50,000 rows). The export itself is audited and
+        repeated exports alert the owners (FR-29-2)."""
+        import csv
+        import io
+        import json
+
+        from .. import audit as audit_log
+        from ..security_alerts import check_mass_export
+
+        rows = self.filter_queryset(self.get_queryset()).order_by("-created_at")[:EXPORT_LIMIT]
+        buffer = io.StringIO()
+        writer = csv.writer(buffer)
+        writer.writerow(EXPORT_COLUMNS)
+        count = 0
+        for entry in rows:
+            count += 1
+            writer.writerow(
+                [
+                    entry.created_at.isoformat(),
+                    entry.action,
+                    entry.object_type,
+                    entry.object_id,
+                    _csv_safe(entry.object_repr),
+                    entry.actor.email if entry.actor else "",
+                    entry.impersonator_id or "",
+                    entry.ip or "",
+                    entry.request_id,
+                    json.dumps(entry.changes),
+                ]
+            )
+        with transaction.atomic():
+            organisation = request.organisation  # type: ignore[attr-defined]
+            audit_log.record(
+                organisation,
+                "export",
+                {"rows": [None, count], "filters": [None, dict(request.query_params)]},
+                object_repr="audit log",
+            )
+            check_mass_export(request.user, organisation.pk)
+        response = HttpResponse(buffer.getvalue(), content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = 'attachment; filename="audit-log.csv"'
+        return response
+
+
+def _csv_safe(value: str) -> str:
+    """Neutralise spreadsheet formula injection (cells starting with = + - @)."""
+    return "'" + value if value[:1] in {"=", "+", "-", "@", "\t"} else value
 
 
 # --- files --------------------------------------------------------------------------------------

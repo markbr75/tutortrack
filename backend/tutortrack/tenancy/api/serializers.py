@@ -54,6 +54,8 @@ class OrganisationSerializer(BaseModelSerializer):
             "date_format", "time_format", "has_demo_data", "created_at",
         ]  # fmt: skip
         read_only_fields = ["id", "status", "region", "has_demo_data", "created_at"]
+        # Tax ids are encrypted at rest and only shown to people who manage the profile.
+        field_permissions = {"tax_number": "org.settings.manage"}
 
     def validate_address(self, value: Any) -> dict[str, str]:
         return validate_address(value)

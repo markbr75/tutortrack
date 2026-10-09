@@ -237,3 +237,13 @@ class PermissionSerializer(serializers.Serializer):
 class ImpersonateSerializer(serializers.Serializer):
     membership_id = serializers.UUIDField()
     write = serializers.BooleanField(default=False)
+
+
+class LoginEventSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    created_at = serializers.DateTimeField()
+    method = serializers.CharField()
+    success = serializers.BooleanField()
+    reason = serializers.CharField()
+    ip = serializers.IPAddressField(allow_null=True)
+    user_agent = serializers.CharField()

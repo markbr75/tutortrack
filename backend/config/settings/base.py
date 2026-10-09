@@ -310,6 +310,9 @@ CSP_EXTRA_CONNECT_SRC: list[str] = []
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 X_FRAME_OPTIONS = "DENY"
 ALLOW_HTTP_OUTBOUND = False  # SSRF guard (core.net): https only
+# Alert the owners when one person runs this many exports within the window (FR-29-2).
+MASS_EXPORT_ALERT_THRESHOLD = 5
+MASS_EXPORT_WINDOW_MINUTES = 60
 
 # --- Organisation lifecycle (E02-T09) ---------------------------------------------------------
 # Writes still allowed while suspended (billing, so the owner can pay; E04 adds its paths).

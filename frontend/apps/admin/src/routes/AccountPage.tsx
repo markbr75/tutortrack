@@ -282,6 +282,32 @@ function SessionsSection() {
   );
 }
 
+function LoginHistorySection() {
+  const { t, i18n } = useTranslation();
+  const logins = useQuery({
+    queryKey: ["me-logins"],
+    queryFn: async () => unwrap(await api.GET("/api/v1/me/logins")),
+  });
+  return (
+    <Section title={t("account.logins")}>
+      <ul className="divide-y divide-border text-sm">
+        {logins.data?.slice(0, 10).map((e) => (
+          <li key={e.id} className="py-2">
+            <span className={e.success ? "" : "text-danger"}>
+              {e.success ? t("account.loginOk") : t("account.loginFailed")}
+            </span>
+            {" · "}
+            {formatDateTime(e.created_at, i18n.language)}
+            <span className="block text-muted-foreground">
+              {e.ip} · {e.user_agent}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </Section>
+  );
+}
+
 export function AccountPage() {
   const { t } = useTranslation();
   return (
@@ -291,6 +317,7 @@ export function AccountPage() {
       <PasswordSection />
       <MFASection />
       <SessionsSection />
+      <LoginHistorySection />
     </div>
   );
 }

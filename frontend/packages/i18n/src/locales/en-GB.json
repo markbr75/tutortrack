@@ -55,7 +55,13 @@
     "action": "Action",
     "object": "Record",
     "changes": "Changes",
-    "when": "When"
+    "when": "When",
+    "actor": "Who",
+    "search": "Search",
+    "from": "From",
+    "to": "To",
+    "apply": "Apply",
+    "export": "Export CSV"
   },
   "grid": {
     "loading": "Loading…",
@@ -266,7 +272,10 @@
     "thisDevice": "This device",
     "lastSeen": "Last active {{when}}",
     "signOutSession": "Sign out",
-    "signOutOthers": "Sign out of all other devices"
+    "signOutOthers": "Sign out of all other devices",
+    "logins": "Recent sign-ins",
+    "loginOk": "Signed in",
+    "loginFailed": "Failed attempt"
   },
   "team": {
     "title": "Team",
