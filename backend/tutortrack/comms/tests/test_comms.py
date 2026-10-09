@@ -81,6 +81,21 @@ def lesson_at(org, family, start):
         ).lesson  # fmt: skip
 
 
+def quiet_window(*, now_is_quiet: bool) -> dict[str, str]:
+    """Quiet hours that do (or don't) include the current London time."""
+    from zoneinfo import ZoneInfo
+
+    local = now().astimezone(ZoneInfo("Europe/London"))
+    if now_is_quiet:
+        start, end = local - timedelta(hours=1), local + timedelta(hours=2)
+    else:
+        start, end = local + timedelta(hours=2), local + timedelta(hours=3)
+    return {
+        "comms.quiet_hours_start": start.strftime("%H:%M"),
+        "comms.quiet_hours_end": end.strftime("%H:%M"),
+    }
+
+
 def run(org, event_type, handler):
     """Deliver the latest outbox event of a type to one subscriber (as the dispatcher does)."""
     from django.test import TestCase
@@ -218,9 +233,7 @@ def test_preferences_suppressions_and_transactional_fallback(org, family):
 
 def test_sms_quiet_hours_stop_and_credits(org, family, fake_sms):
     with tenant_context(org):
-        settings_service.update_settings(
-            "comms", {"comms.quiet_hours_start": "00:00", "comms.quiet_hours_end": "23:59"}
-        )
+        settings_service.update_settings("comms", quiet_window(now_is_quiet=True))
         services.update_setting("lesson_cancelled", enabled=True, channels=["sms"])
     lesson = lesson_at(org, family, now() + timedelta(days=3))
     with tenant_context(org):
@@ -232,9 +245,7 @@ def test_sms_quiet_hours_stop_and_credits(org, family, fake_sms):
     assert fake_sms.outbox == []
 
     with tenant_context(org):
-        settings_service.update_settings(
-            "comms", {"comms.quiet_hours_start": "03:00", "comms.quiet_hours_end": "03:01"}
-        )
+        settings_service.update_settings("comms", quiet_window(now_is_quiet=False))
         Message.objects.filter(pk=deferred.pk).update(scheduled_for=None)
         services.send_now(deferred)
     assert fake_sms.outbox[0]["to"] == "+447700900123"
@@ -297,9 +308,7 @@ def test_delivery_webhooks_update_status_and_suppress_bounces(org, family, setti
 def test_twilio_status_callback(org, family):
     with tenant_context(org):
         services.update_setting("lesson_cancelled", enabled=True, channels=["sms"])
-        settings_service.update_settings(
-            "comms", {"comms.quiet_hours_start": "03:00", "comms.quiet_hours_end": "03:01"}
-        )
+        settings_service.update_settings("comms", quiet_window(now_is_quiet=False))
     lesson = lesson_at(org, family, now() + timedelta(days=3))
     with tenant_context(org):
         delivery.cancel_lesson(lesson, cancelled_by="admin")
