@@ -53,6 +53,31 @@ class MoneySerializerField(serializers.Field):
         return Money(amount, currency)
 
 
+class MoneyOut(serializers.Serializer):
+    """Read-only money in computed responses (quotes, summaries)."""
+
+    amount = serializers.CharField()
+    currency = serializers.CharField()
+
+
+class TenantRelatedField(serializers.PrimaryKeyRelatedField):
+    """A primary key of a tenant model, looked up in the organisation in context when the
+    request is validated (not when the serializer class is defined).
+
+        student = TenantRelatedField(Student)
+        service = TenantRelatedField(Service, filter={"active": True})
+    """
+
+    def __init__(self, model: Any, *, filter: dict[str, Any] | None = None, **kwargs: Any):
+        self.model = model
+        self.filter = filter or {}
+        kwargs.setdefault("queryset", model.all_tenants.none())  # only for introspection
+        super().__init__(**kwargs)
+
+    def get_queryset(self) -> Any:
+        return self.model.objects.filter(**self.filter)
+
+
 class DynamicFieldsMixin:
     """``?fields=a,b`` limits output fields on the top-level serializer (``id`` always kept)."""
 
@@ -110,23 +135,25 @@ class FieldPermissionMixin:
             field_permissions = {"pay_rate": "billing.rates.view_pay",
                                  "charge_rate": "billing.rates.view_charge"}
 
-    Fields are removed from output *and* input, so they can't be written either.
+    Fields are removed from output *and* input, so they can't be written either. The check
+    runs when the fields are built, so nested serializers see the request of their root.
     Serializers without a request in context (internal use) keep every field.
     """
 
-    def __init__(self, *args: Any, **kwargs: Any):
-        super().__init__(*args, **kwargs)
+    def get_fields(self) -> dict[str, Any]:
+        fields: dict[str, Any] = super().get_fields()  # type: ignore[misc]
         rules: dict[str, str] = getattr(getattr(self, "Meta", None), "field_permissions", {})
         request = self.context.get("request")  # type: ignore[attr-defined]
         if not rules or request is None:
-            return
+            return fields
         if getattr(self.context.get("view"), "swagger_fake_view", False):  # type: ignore[attr-defined]
-            return  # the OpenAPI schema documents every field; access is per viewer
+            return fields  # the OpenAPI schema documents every field; access is per viewer
         from ..permissions import has_perm
 
         for field, codename in rules.items():
-            if field in self.fields and not has_perm(request.user, codename):  # type: ignore[attr-defined]
-                self.fields.pop(field)  # type: ignore[attr-defined]
+            if field in fields and not has_perm(request.user, codename):
+                fields.pop(field)
+        return fields
 
 
 class BaseModelSerializer(

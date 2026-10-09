@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "tutortrack.people",
     "tutortrack.crm",
     "tutortrack.catalogue",
+    "tutortrack.jobs",
 ]
 
 MIDDLEWARE = [
@@ -280,6 +281,10 @@ SPECTACULAR_SETTINGS = {
         "FileVisibilityEnum": "tutortrack.core.models.files.StoredFile.Visibility",
         "CustomFieldVisibilityEnum": "tutortrack.crm.models.CustomFieldDefinition.Visibility",
         "NoteVisibilityEnum": "tutortrack.crm.models.Note.Visibility",
+        "JobStatusEnum": "tutortrack.jobs.models.Job.Status",
+        "JobTutorStatusEnum": "tutortrack.jobs.models.JobTutor.Status",
+        "JobTutorRoleEnum": "tutortrack.jobs.models.JobTutor.Role",
+        "RoleEnum": "tutortrack.identity.models.Membership.Role",
     },
     "POSTPROCESSING_HOOKS": ["drf_spectacular.hooks.postprocess_schema_enums"],
 }

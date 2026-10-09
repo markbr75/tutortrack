@@ -16,7 +16,8 @@
     "students": "Students",
     "tutors": "Tutors",
     "tasks": "My tasks",
-    "catalogue": "Catalogue"
+    "catalogue": "Catalogue",
+    "jobs": "Jobs"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -636,6 +637,109 @@
       "charges": "Charged to clients",
       "pay": "Paid to tutors",
       "noAccess": "You can't see charge or pay rates."
+    }
+  },
+  "jobs": {
+    "title": "Jobs",
+    "job": "Job",
+    "client": "Client",
+    "service": "Service",
+    "tutor": "Tutor",
+    "tutors": "Tutors",
+    "students": "Students",
+    "statusLabel": "Status",
+    "search": "Search reference or name",
+    "needsAttention": "Needs attention",
+    "view": "View",
+    "views": {
+      "list": "List",
+      "board": "Board"
+    },
+    "noTutor": "No tutor yet",
+    "none": "No jobs yet.",
+    "moveTo": "Move to…",
+    "moveNamed": "Move {{name}}",
+    "moveFailed": "That move isn't allowed. Check the job (for example, it needs a tutor).",
+    "status": {
+      "draft": "Draft",
+      "seeking_tutor": "Seeking tutor",
+      "active": "Active",
+      "paused": "Paused",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "tutorStatus": {
+      "offered": "Offered",
+      "active": "Active",
+      "ended": "Ended",
+      "declined": "Declined"
+    },
+    "role": {
+      "lead": "Lead",
+      "assistant": "Assistant"
+    },
+    "changeStatus": "Change status",
+    "chooseStatus": "Choose…",
+    "reason": "Reason",
+    "cancelFuture": "Cancel future lessons",
+    "apply": "Apply",
+    "addTutor": "Add a tutor",
+    "chooseTutor": "Choose a tutor",
+    "offerFirst": "Offer first (tutor accepts)",
+    "assign": "Assign",
+    "replace": "Replace",
+    "replaceNamed": "Replace {{name}}",
+    "replaceWith": "Replace {{name}} with",
+    "from": "From",
+    "previewChange": "Preview",
+    "lessonsMove_one": "{{count}} future lesson will move to the new tutor.",
+    "lessonsMove_other": "{{count}} future lessons will move to the new tutor.",
+    "conflicts_one": "{{count}} lesson clashes with the new tutor's schedule.",
+    "conflicts_other": "{{count}} lessons clash with the new tutor's schedule.",
+    "confirmReplace": "Replace tutor",
+    "remove": "Remove",
+    "removeNamed": "Remove {{name}}",
+    "previously": "Previously",
+    "economics": "Economics",
+    "chargePerLesson": "Charge per lesson",
+    "payPerLesson": "Pay per lesson",
+    "margin": "Margin",
+    "delivered": "{{completed}} of {{planned}} lessons delivered",
+    "details": "Details",
+    "chargeRate": "Job rate",
+    "billing": "Billing",
+    "starts": "Starts",
+    "schedule": "Weekly",
+    "hoursCap": "Hours cap",
+    "leftOn": "left {{when}}",
+    "billingMethod": {
+      "pay_as_you_go": "Pay as you go",
+      "prepaid_credit": "Prepaid credit",
+      "package": "Package",
+      "recurring_fixed": "Recurring fixed fee"
+    },
+    "cap": {
+      "week": "{{hours}} hours a week",
+      "month": "{{hours}} hours a month",
+      "total": "{{hours}} hours in total"
+    },
+    "weekday": {
+      "0": "Monday",
+      "1": "Tuesday",
+      "2": "Wednesday",
+      "3": "Thursday",
+      "4": "Friday",
+      "5": "Saturday",
+      "6": "Sunday"
+    },
+    "quick": {
+      "open": "Set up lessons",
+      "findLater": "Find a tutor later",
+      "rate": "Rate ({{currency}})",
+      "rateHint": "Leave empty to use the service rate",
+      "day": "Day",
+      "time": "Time",
+      "save": "Create job"
     }
   }
 }

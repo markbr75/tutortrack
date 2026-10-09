@@ -9,6 +9,8 @@ import {
 
 import { CataloguePage } from "./catalogue/CataloguePage";
 import { TasksPage } from "./crm/TasksPage";
+import { JobPage } from "./jobs/JobPage";
+import { JobsPage } from "./jobs/JobsPage";
 import { AppShell } from "./layout/AppShell";
 import { ClientsPage, StudentsPage, TutorsPage } from "./people/PeopleLists";
 import { QuickAddFamilyPage } from "./people/QuickAddFamilyPage";
@@ -120,6 +122,14 @@ const tutorRoute = createRoute({
 });
 const tasksRoute = appPage("/tasks", TasksPage);
 const catalogueRoute = appPage("/catalogue", CataloguePage);
+const jobsRoute = appPage("/jobs", JobsPage);
+const jobRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/jobs/$jobId",
+  component: function JobRoute() {
+    return <JobPage jobId={jobRoute.useParams().jobId} />;
+  },
+});
 
 const routeTree = rootRoute.addChildren([
   signupRoute,
@@ -142,6 +152,8 @@ const routeTree = rootRoute.addChildren([
     tutorRoute,
     tasksRoute,
     catalogueRoute,
+    jobsRoute,
+    jobRoute,
     teamRoute,
     auditRoute,
     settingsRoute,

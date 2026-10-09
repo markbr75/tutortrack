@@ -1354,6 +1354,286 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/jobs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Jobs (E07). Tutors see the jobs they're on, without charge rates or margins. */
+    get: operations["jobs_list"];
+    put?: never;
+    /** @description Jobs (E07). Tutors see the jobs they're on, without charge rates or margins. */
+    post: operations["jobs_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/jobs/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Jobs (E07). Tutors see the jobs they're on, without charge rates or margins. */
+    get: operations["jobs_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Jobs (E07). Tutors see the jobs they're on, without charge rates or margins. */
+    patch: operations["jobs_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/jobs/{id}/duplicate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Jobs (E07). Tutors see the jobs they're on, without charge rates or margins. */
+    post: operations["jobs_duplicate_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/jobs/{id}/hours-check": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Whether more hours fit within the job's cap (warn at 80%, block at 100%). */
+    get: operations["jobs_hours_check_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/jobs/{id}/status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Jobs (E07). Tutors see the jobs they're on, without charge rates or margins. */
+    post: operations["jobs_status_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/jobs/{id}/status-history": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Jobs (E07). Tutors see the jobs they're on, without charge rates or margins. */
+    get: operations["jobs_status_history_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/jobs/{id}/students": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Jobs (E07). Tutors see the jobs they're on, without charge rates or margins. */
+    post: operations["jobs_students_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/jobs/{id}/students/{link_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Jobs (E07). Tutors see the jobs they're on, without charge rates or margins. */
+    patch: operations["jobs_students_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/jobs/{id}/students/{link_id}/end": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Jobs (E07). Tutors see the jobs they're on, without charge rates or margins. */
+    post: operations["jobs_students_end_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/jobs/{id}/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Expected per-lesson economics and delivered totals. Charges need
+     *     ``billing.rates.view_charge``; pay and margin also need ``billing.rates.view_pay``.
+     */
+    get: operations["jobs_summary_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/jobs/{id}/tutors": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Jobs (E07). Tutors see the jobs they're on, without charge rates or margins. */
+    post: operations["jobs_tutors_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/jobs/{id}/tutors/{link_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Jobs (E07). Tutors see the jobs they're on, without charge rates or margins. */
+    patch: operations["jobs_tutors_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/jobs/{id}/tutors/{link_id}/remove": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Jobs (E07). Tutors see the jobs they're on, without charge rates or margins. */
+    post: operations["jobs_tutors_remove_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/jobs/{id}/tutors/{link_id}/replace": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Replace a tutor from a date. ``dry_run: true`` previews the future lessons that
+     *     would move and any clashes for the new tutor.
+     */
+    post: operations["jobs_tutors_replace_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/jobs/{id}/tutors/{link_id}/respond": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description The offered tutor (or a coordinator) accepts or declines the job. */
+    post: operations["jobs_tutors_respond_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/jobs/quick-setup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description "Set up lessons" for a student: service, rate, tutor and weekly times in one step. */
+    post: operations["jobs_quick_setup_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/me": {
     parameters: {
       query?: never;
@@ -2356,7 +2636,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Address: {
@@ -2394,7 +2675,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     AddressRequest: {
@@ -2404,6 +2686,12 @@ export interface components {
       region?: string;
       postcode?: string;
       country?: string;
+    };
+    AffectedLesson: {
+      id: string;
+      /** Format: date-time */
+      starts_at: string;
+      conflict: string;
     };
     ApplyTagRequest: {
       target_type: string;
@@ -2421,7 +2709,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     AuditEntry: {
@@ -2444,13 +2733,22 @@ export interface components {
       readonly created_at: string;
     };
     /**
+     * @description * `pay_as_you_go` - Pay as you go
+     *     * `prepaid_credit` - Prepaid credit
+     *     * `package` - Package
+     *     * `recurring_fixed` - Recurring fixed fee
+     * @enum {string}
+     */
+    BillingMethodEnum: "pay_as_you_go" | "prepaid_credit" | "package" | "recurring_fixed";
+    /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
      *
      *         class Meta:
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Branch: {
@@ -2480,7 +2778,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     BranchRequest: {
@@ -2519,7 +2818,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     BulkJob: {
@@ -2562,7 +2862,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Category: {
@@ -2580,7 +2881,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     CategoryRequest: {
@@ -2606,7 +2908,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Client: {
@@ -2651,7 +2954,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     ClientDetail: {
@@ -2698,7 +3002,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     ClientRequest: {
@@ -2760,7 +3065,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     ConsentRecord: {
@@ -2808,7 +3114,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     ConsentType: {
@@ -2853,7 +3160,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     ConsentTypeRequest: {
@@ -2873,7 +3181,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Contact: {
@@ -2912,7 +3221,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     ContactRequest: {
@@ -2942,7 +3252,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     CustomField: {
@@ -2969,7 +3280,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     CustomFieldRequest: {
@@ -3057,7 +3369,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Document: {
@@ -3094,7 +3407,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     DocumentRequest: {
@@ -3129,6 +3443,12 @@ export interface components {
      * @enum {string}
      */
     DuplicateTypeEnum: "contact" | "student" | "tutor";
+    Economics: {
+      charge: components["schemas"]["MoneyOut"];
+      pay?: components["schemas"]["MoneyOut"];
+      margin?: components["schemas"]["MoneyOut"];
+      margin_percent?: string | null;
+    };
     /**
      * @description * `staff` - Staff
      *     * `tutor` - Staff and tutors
@@ -3149,6 +3469,12 @@ export interface components {
      * @enum {string}
      */
     EmploymentTypeEnum: "self_employed" | "employee" | "other";
+    EndRequest: {
+      /** Format: date */
+      end_date?: string;
+      /** @default  */
+      reason: string;
+    };
     Features: {
       features: {
         [key: string]: boolean;
@@ -3173,11 +3499,33 @@ export interface components {
      */
     FormatEnum: "one_to_one" | "small_group" | "class";
     /**
+     * @description * `keep` - keep
+     *     * `cancel` - cancel
+     * @enum {string}
+     */
+    FutureLessonsEnum: "keep" | "cancel";
+    /**
      * @description * `per_student` - Each student pays the rate
      *     * `split` - The rate is split between students
      * @enum {string}
      */
     GroupChargeEnum: "per_student" | "split";
+    /**
+     * @description * `week` - Per week
+     *     * `month` - Per month
+     *     * `total` - In total
+     * @enum {string}
+     */
+    HoursCapPeriodEnum: "week" | "month" | "total";
+    HoursCheck: {
+      level: components["schemas"]["LevelEnum"];
+      used: string;
+      cap: string | null;
+      /** Format: date */
+      period_start: string | null;
+      /** Format: date */
+      period_end: string | null;
+    };
     ImpersonateRequest: {
       /** Format: uuid */
       membership_id: string;
@@ -3199,7 +3547,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Invitation: {
@@ -3238,7 +3587,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     InvitationRequest: {
@@ -3271,6 +3621,392 @@ export interface components {
      */
     InvoiceGroupingEnum: "client" | "student" | "job";
     /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Job: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly reference: string;
+      name?: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      /**
+       * Format: uuid
+       * @description Another client pays (e.g. a school or local authority).
+       */
+      bill_to?: string | null;
+      /** Format: uuid */
+      readonly service: string;
+      readonly service_name: string;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      /** Format: uuid */
+      branch?: string;
+      readonly status: components["schemas"]["JobStatusEnum"];
+      /** Format: date-time */
+      readonly status_changed_at: string | null;
+      readonly currency: string;
+      charge_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      billing_method?: components["schemas"]["BillingMethodEnum"];
+      /** Format: uuid */
+      package_template?: string | null;
+      po_number?: string;
+      default_duration_minutes?: number | null;
+      /** Format: uuid */
+      location?: string | null;
+      online?: boolean;
+      meeting_provider?: string;
+      default_schedule?: components["schemas"]["ScheduleSlot"][];
+      /** Format: date */
+      start_date?: string | null;
+      /** Format: date */
+      expected_end_date?: string | null;
+      /** Format: decimal */
+      lessons_per_week?: string | null;
+      /** Format: decimal */
+      expected_total_hours?: string | null;
+      goals?: string;
+      notes_internal?: string;
+      notes_for_tutor?: string;
+      notes_for_client?: string;
+      /** Format: uuid */
+      account_manager?: string | null;
+      /** Format: decimal */
+      hours_cap?: string | null;
+      hours_cap_period?: components["schemas"]["HoursCapPeriodEnum"];
+      policy_overrides?: unknown;
+      custom_fields?: unknown;
+      readonly students: components["schemas"]["JobStudent"][];
+      readonly tutors: components["schemas"]["JobTutor"][];
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    JobCreate: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly reference: string;
+      name?: string;
+      /** Format: uuid */
+      client: string;
+      readonly client_name: string;
+      /**
+       * Format: uuid
+       * @description Another client pays (e.g. a school or local authority).
+       */
+      bill_to?: string | null;
+      /** Format: uuid */
+      service: string;
+      readonly service_name: string;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      /** Format: uuid */
+      branch?: string;
+      /** @default draft */
+      status: components["schemas"]["JobCreateStatusEnum"];
+      /** Format: date-time */
+      readonly status_changed_at: string | null;
+      readonly currency: string;
+      charge_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      billing_method?: components["schemas"]["BillingMethodEnum"];
+      /** Format: uuid */
+      package_template?: string | null;
+      po_number?: string;
+      default_duration_minutes?: number | null;
+      /** Format: uuid */
+      location?: string | null;
+      online?: boolean;
+      meeting_provider?: string;
+      default_schedule?: components["schemas"]["ScheduleSlot"][];
+      /** Format: date */
+      start_date?: string | null;
+      /** Format: date */
+      expected_end_date?: string | null;
+      /** Format: decimal */
+      lessons_per_week?: string | null;
+      /** Format: decimal */
+      expected_total_hours?: string | null;
+      goals?: string;
+      notes_internal?: string;
+      notes_for_tutor?: string;
+      notes_for_client?: string;
+      /** Format: uuid */
+      account_manager?: string | null;
+      /** Format: decimal */
+      hours_cap?: string | null;
+      hours_cap_period?: components["schemas"]["HoursCapPeriodEnum"];
+      policy_overrides?: unknown;
+      custom_fields?: unknown;
+      readonly students: components["schemas"]["JobStudent"][];
+      readonly tutors: components["schemas"]["JobTutor"][];
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    JobCreateRequest: {
+      name?: string;
+      /** Format: uuid */
+      client: string;
+      /**
+       * Format: uuid
+       * @description Another client pays (e.g. a school or local authority).
+       */
+      bill_to?: string | null;
+      /** Format: uuid */
+      service: string;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      /** Format: uuid */
+      branch?: string;
+      /** @default draft */
+      status: components["schemas"]["JobCreateStatusEnum"];
+      charge_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      billing_method?: components["schemas"]["BillingMethodEnum"];
+      /** Format: uuid */
+      package_template?: string | null;
+      po_number?: string;
+      default_duration_minutes?: number | null;
+      /** Format: uuid */
+      location?: string | null;
+      online?: boolean;
+      meeting_provider?: string;
+      default_schedule?: components["schemas"]["ScheduleSlotRequest"][];
+      /** Format: date */
+      start_date?: string | null;
+      /** Format: date */
+      expected_end_date?: string | null;
+      /** Format: decimal */
+      lessons_per_week?: string | null;
+      /** Format: decimal */
+      expected_total_hours?: string | null;
+      goals?: string;
+      notes_internal?: string;
+      notes_for_tutor?: string;
+      notes_for_client?: string;
+      /** Format: uuid */
+      account_manager?: string | null;
+      /** Format: decimal */
+      hours_cap?: string | null;
+      hours_cap_period?: components["schemas"]["HoursCapPeriodEnum"];
+      policy_overrides?: unknown;
+      custom_fields?: unknown;
+      student_inputs: components["schemas"]["StudentInputRequest"][];
+      tutor_inputs?: components["schemas"]["TutorInputRequest"][];
+    };
+    /**
+     * @description * `draft` - draft
+     *     * `seeking_tutor` - seeking_tutor
+     *     * `active` - active
+     * @enum {string}
+     */
+    JobCreateStatusEnum: "draft" | "seeking_tutor" | "active";
+    /**
+     * @description * `draft` - Draft
+     *     * `seeking_tutor` - Seeking tutor
+     *     * `active` - Active
+     *     * `paused` - Paused
+     *     * `completed` - Completed
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    JobStatusEnum: "draft" | "seeking_tutor" | "active" | "paused" | "completed" | "cancelled";
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    JobStudent: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly student: string;
+      readonly student_name: string;
+      charge_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: date */
+      readonly active_from: string | null;
+      /** Format: date */
+      readonly active_to: string | null;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    JobStudentRequest: {
+      charge_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
+    JobSummary: {
+      per_lesson: components["schemas"]["Economics"] | null;
+      trace: string[];
+      lessons_planned: number;
+      lessons_completed: number;
+      hours_delivered: string;
+      delivered: components["schemas"]["Economics"] | null;
+      /** Format: date-time */
+      next_lesson_at: string | null;
+      /** Format: date-time */
+      last_lesson_at: string | null;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    JobTutor: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      role?: components["schemas"]["JobTutorRoleEnum"];
+      readonly status: components["schemas"]["JobTutorStatusEnum"];
+      pay_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: date */
+      readonly start_date: string | null;
+      /** Format: date */
+      readonly end_date: string | null;
+      /** Format: date-time */
+      readonly responded_at: string | null;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    JobTutorRequest: {
+      role?: components["schemas"]["JobTutorRoleEnum"];
+      pay_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
+    /**
+     * @description * `lead` - Lead
+     *     * `assistant` - Assistant
+     * @enum {string}
+     */
+    JobTutorRoleEnum: "lead" | "assistant";
+    /**
+     * @description * `offered` - Offered
+     *     * `active` - Active
+     *     * `ended` - Ended
+     *     * `declined` - Declined
+     * @enum {string}
+     */
+    JobTutorStatusEnum: "offered" | "active" | "ended" | "declined";
+    /**
      * @description * `note` - note
      *     * `task` - task
      *     * `document` - document
@@ -3285,7 +4021,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Level: {
@@ -3299,13 +4036,22 @@ export interface components {
       readonly archived_at: string | null;
     };
     /**
+     * @description * `none` - none
+     *     * `ok` - ok
+     *     * `warning` - warning
+     *     * `blocked` - blocked
+     * @enum {string}
+     */
+    LevelEnum: "none" | "ok" | "warning" | "blocked";
+    /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
      *
      *         class Meta:
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     LevelRequest: {
@@ -3321,7 +4067,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Location: {
@@ -3348,7 +4095,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     LocationRequest: {
@@ -3441,7 +4189,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Membership: {
@@ -3478,6 +4227,7 @@ export interface components {
      * @enum {string}
      */
     ModeEnum: "solo" | "multi";
+    /** @description Read-only money in computed responses (quotes, summaries). */
     MoneyOut: {
       amount: string;
       currency: string;
@@ -3506,7 +4256,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Note: {
@@ -3533,7 +4284,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     NoteRequest: {
@@ -3579,7 +4331,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Organisation: {
@@ -3606,7 +4359,6 @@ export interface components {
       address?: unknown;
       company_number?: string;
       vat_number?: string;
-      tax_number?: string;
       fiscal_year_start_month?: number;
       week_start_day?: components["schemas"]["WeekStartDayEnum"];
       date_format?: components["schemas"]["DateFormatEnum"];
@@ -3631,7 +4383,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PackageTemplate: {
@@ -3673,7 +4426,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PackageTemplateRequest: {
@@ -3832,6 +4586,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Invitation"][];
+    };
+    PaginatedJobList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Job"][];
     };
     PaginatedLocationList: {
       /**
@@ -4008,7 +4775,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedBranchRequest: {
@@ -4031,7 +4799,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedCategoryRequest: {
@@ -4045,7 +4814,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedClientRequest: {
@@ -4078,7 +4848,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedConsentTypeRequest: {
@@ -4098,7 +4869,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedContactRequest: {
@@ -4128,7 +4900,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedCustomFieldRequest: {
@@ -4153,7 +4926,71 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    PatchedJobRequest: {
+      name?: string;
+      /**
+       * Format: uuid
+       * @description Another client pays (e.g. a school or local authority).
+       */
+      bill_to?: string | null;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      /** Format: uuid */
+      branch?: string;
+      charge_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      billing_method?: components["schemas"]["BillingMethodEnum"];
+      /** Format: uuid */
+      package_template?: string | null;
+      po_number?: string;
+      default_duration_minutes?: number | null;
+      /** Format: uuid */
+      location?: string | null;
+      online?: boolean;
+      meeting_provider?: string;
+      default_schedule?: components["schemas"]["ScheduleSlotRequest"][];
+      /** Format: date */
+      start_date?: string | null;
+      /** Format: date */
+      expected_end_date?: string | null;
+      /** Format: decimal */
+      lessons_per_week?: string | null;
+      /** Format: decimal */
+      expected_total_hours?: string | null;
+      goals?: string;
+      notes_internal?: string;
+      notes_for_tutor?: string;
+      notes_for_client?: string;
+      /** Format: uuid */
+      account_manager?: string | null;
+      /** Format: decimal */
+      hours_cap?: string | null;
+      hours_cap_period?: components["schemas"]["HoursCapPeriodEnum"];
+      policy_overrides?: unknown;
+      custom_fields?: unknown;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedLevelRequest: {
@@ -4169,7 +5006,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedLocationRequest: {
@@ -4197,7 +5035,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedNoteRequest: {
@@ -4215,7 +5054,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedOrganisationRequest: {
@@ -4237,7 +5077,6 @@ export interface components {
       address?: unknown;
       company_number?: string;
       vat_number?: string;
-      tax_number?: string;
       fiscal_year_start_month?: number;
       week_start_day?: components["schemas"]["WeekStartDayEnum"];
       date_format?: components["schemas"]["DateFormatEnum"];
@@ -4250,7 +5089,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedPackageTemplateRequest: {
@@ -4287,7 +5127,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedProductRequest: {
@@ -4317,7 +5158,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedSavedViewRequest: {
@@ -4335,7 +5177,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedServiceRequest: {
@@ -4390,6 +5233,17 @@ export interface components {
         [key: string]: unknown;
       };
     };
+    PatchedStudentRateRequest: {
+      charge_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
     /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
      *
@@ -4397,7 +5251,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedStudentRequest: {
@@ -4429,7 +5284,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedSubjectRequest: {
@@ -4446,7 +5302,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedTagRequest: {
@@ -4461,7 +5318,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedTaskRequest: {
@@ -4485,7 +5343,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedTaxRateRequest: {
@@ -4498,6 +5357,17 @@ export interface components {
       exempt_reason?: string;
       active?: boolean;
     };
+    PatchedTutorRateRequest: {
+      pay_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
     /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
      *
@@ -4505,7 +5375,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedTutorRequest: {
@@ -4546,7 +5417,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     PatchedUserRequest: {
@@ -4618,7 +5490,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Process: {
@@ -4644,7 +5517,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     ProcessDetail: {
@@ -4685,7 +5559,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Product: {
@@ -4732,7 +5607,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     ProductRequest: {
@@ -4792,6 +5668,36 @@ export interface components {
       /** Format: date */
       date_of_birth?: string | null;
       subjects?: components["schemas"]["SubjectInputRequest"][];
+    };
+    QuickSetupRequest: {
+      /** Format: uuid */
+      student: string;
+      /** Format: uuid */
+      service: string;
+      /** Format: uuid */
+      tutor?: string | null;
+      charge_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      pay_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      schedule?: components["schemas"]["ScheduleSlotRequest"][];
+      /** Format: date */
+      start_date?: string;
+      default_duration_minutes?: number;
     };
     QuoteRequestRequest: {
       /** Format: uuid */
@@ -4916,6 +5822,31 @@ export interface components {
      * @enum {string}
      */
     RelationshipEnum: "parent" | "guardian" | "carer" | "self" | "finance" | "other";
+    ReplaceRequest: {
+      /** Format: uuid */
+      tutor: string;
+      /** Format: date */
+      effective_date: string;
+      pay_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** @default false */
+      dry_run: boolean;
+    };
+    Replacement: {
+      lessons: components["schemas"]["AffectedLesson"][];
+      conflicts: number;
+      new_assignment: components["schemas"]["JobTutor"] | null;
+    };
+    RespondRequest: {
+      accept: boolean;
+    };
     Role: {
       key: string;
       name: string;
@@ -4958,7 +5889,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     SavedView: {
@@ -4982,7 +5914,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     SavedViewRequest: {
@@ -5002,6 +5935,18 @@ export interface components {
      * @enum {string}
      */
     ScanStatusEnum: "pending" | "clean" | "infected" | "error" | "skipped";
+    ScheduleSlot: {
+      /** @description Monday is 0. */
+      weekday: number;
+      time: string;
+      duration_minutes?: number;
+    };
+    ScheduleSlotRequest: {
+      /** @description Monday is 0. */
+      weekday: number;
+      time: string;
+      duration_minutes?: number;
+    };
     /**
      * @description * `organisation` - organisation
      *     * `branch` - branch
@@ -5024,7 +5969,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Service: {
@@ -5086,7 +6032,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     ServicePrice: {
@@ -5119,7 +6066,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     ServicePriceRequest: {
@@ -5151,7 +6099,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     ServiceRequest: {
@@ -5305,6 +6254,33 @@ export interface components {
         [key: string]: unknown;
       };
     };
+    StatusChangeRequest: {
+      status: components["schemas"]["JobStatusEnum"];
+      /** @default  */
+      reason: string;
+      /** @default keep */
+      future_lessons: components["schemas"]["FutureLessonsEnum"];
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    StatusHistory: {
+      from_status?: string;
+      to_status: string;
+      reason?: string;
+      /** Format: uuid */
+      readonly created_by: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
     StatusRequest: {
       status: string;
     };
@@ -5315,7 +6291,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     StoredFile: {
@@ -5345,7 +6322,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Student: {
@@ -5383,6 +6361,32 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    StudentInput: {
+      /** Format: uuid */
+      student: string;
+      charge_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
+    StudentInputRequest: {
+      /** Format: uuid */
+      student: string;
+      charge_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
     /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
      *
@@ -5390,7 +6394,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     StudentRequest: {
@@ -5433,7 +6438,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Subject: {
@@ -5471,7 +6477,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     SubjectRequest: {
@@ -5501,7 +6508,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Tag: {
@@ -5518,7 +6526,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     TagRequest: {
@@ -5533,7 +6542,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Task: {
@@ -5566,7 +6576,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     TaskRequest: {
@@ -5597,7 +6608,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     TaxRate: {
@@ -5619,7 +6631,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     TaxRateRequest: {
@@ -5658,7 +6671,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     Tutor: {
@@ -5703,6 +6717,50 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    TutorInput: {
+      /** Format: uuid */
+      tutor: string;
+      /** @default lead */
+      role: components["schemas"]["JobTutorRoleEnum"];
+      pay_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: date */
+      start_date?: string | null;
+      /**
+       * @description Offer the job; the tutor accepts.
+       * @default false
+       */
+      offer: boolean;
+    };
+    TutorInputRequest: {
+      /** Format: uuid */
+      tutor: string;
+      /** @default lead */
+      role: components["schemas"]["JobTutorRoleEnum"];
+      pay_rate_override?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: date */
+      start_date?: string | null;
+      /**
+       * @description Offer the job; the tutor accepts.
+       * @default false
+       */
+      offer: boolean;
+    };
     /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
      *
@@ -5710,7 +6768,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     TutorQualification: {
@@ -5729,7 +6788,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     TutorQualificationRequest: {
@@ -5746,7 +6806,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     TutorRequest: {
@@ -5797,7 +6858,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     TutorSubject: {
@@ -5821,7 +6883,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     TutorSubjectRequest: {
@@ -5843,7 +6906,8 @@ export interface components {
      *             field_permissions = {"pay_rate": "billing.rates.view_pay",
      *                                  "charge_rate": "billing.rates.view_charge"}
      *
-     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Fields are removed from output *and* input, so they can't be written either. The check
+     *     runs when the fields are built, so nested serializers see the request of their root.
      *     Serializers without a request in context (internal use) keep every field.
      */
     User: {
@@ -8834,6 +9898,555 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["InvitationLookup"];
+        };
+      };
+    };
+  };
+  jobs_list: {
+    parameters: {
+      query?: {
+        /** @description Jobs needing attention */
+        attention?: boolean;
+        branch?: string;
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /** @description Search reference and name */
+        q?: string;
+        service?: string;
+        /**
+         * @description * `draft` - Draft
+         *     * `seeking_tutor` - Seeking tutor
+         *     * `active` - Active
+         *     * `paused` - Paused
+         *     * `completed` - Completed
+         *     * `cancelled` - Cancelled
+         */
+        status?: ("active" | "cancelled" | "completed" | "draft" | "paused" | "seeking_tutor")[];
+        student?: string;
+        tutor?: unknown;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedJobList"];
+        };
+      };
+    };
+  };
+  jobs_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["JobCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["JobCreateRequest"];
+        "multipart/form-data": components["schemas"]["JobCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobCreate"];
+        };
+      };
+    };
+  };
+  jobs_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Job"];
+        };
+      };
+    };
+  };
+  jobs_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedJobRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedJobRequest"];
+        "multipart/form-data": components["schemas"]["PatchedJobRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Job"];
+        };
+      };
+    };
+  };
+  jobs_duplicate_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Job"];
+        };
+      };
+    };
+  };
+  jobs_hours_check_retrieve: {
+    parameters: {
+      query?: {
+        extra_hours?: string;
+        on?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HoursCheck"];
+        };
+      };
+    };
+  };
+  jobs_status_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StatusChangeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["StatusChangeRequest"];
+        "multipart/form-data": components["schemas"]["StatusChangeRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Job"];
+        };
+      };
+    };
+  };
+  jobs_status_history_list: {
+    parameters: {
+      query?: {
+        /** @description Jobs needing attention */
+        attention?: boolean;
+        branch?: string;
+        client?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Search reference and name */
+        q?: string;
+        service?: string;
+        /**
+         * @description * `draft` - Draft
+         *     * `seeking_tutor` - Seeking tutor
+         *     * `active` - Active
+         *     * `paused` - Paused
+         *     * `completed` - Completed
+         *     * `cancelled` - Cancelled
+         */
+        status?: ("active" | "cancelled" | "completed" | "draft" | "paused" | "seeking_tutor")[];
+        student?: string;
+        tutor?: unknown;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StatusHistory"][];
+        };
+      };
+    };
+  };
+  jobs_students_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StudentInputRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["StudentInputRequest"];
+        "multipart/form-data": components["schemas"]["StudentInputRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobStudent"];
+        };
+      };
+    };
+  };
+  jobs_students_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+        link_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedStudentRateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedStudentRateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedStudentRateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobStudent"];
+        };
+      };
+    };
+  };
+  jobs_students_end_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+        link_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["EndRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["EndRequest"];
+        "multipart/form-data": components["schemas"]["EndRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobStudent"];
+        };
+      };
+    };
+  };
+  jobs_summary_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobSummary"];
+        };
+      };
+    };
+  };
+  jobs_tutors_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TutorInputRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TutorInputRequest"];
+        "multipart/form-data": components["schemas"]["TutorInputRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobTutor"];
+        };
+      };
+    };
+  };
+  jobs_tutors_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+        link_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedTutorRateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedTutorRateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedTutorRateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobTutor"];
+        };
+      };
+    };
+  };
+  jobs_tutors_remove_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+        link_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["EndRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["EndRequest"];
+        "multipart/form-data": components["schemas"]["EndRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobTutor"];
+        };
+      };
+    };
+  };
+  jobs_tutors_replace_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+        link_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReplaceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReplaceRequest"];
+        "multipart/form-data": components["schemas"]["ReplaceRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Replacement"];
+        };
+      };
+    };
+  };
+  jobs_tutors_respond_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this job. */
+        id: string;
+        link_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RespondRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RespondRequest"];
+        "multipart/form-data": components["schemas"]["RespondRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobTutor"];
+        };
+      };
+    };
+  };
+  jobs_quick_setup_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuickSetupRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["QuickSetupRequest"];
+        "multipart/form-data": components["schemas"]["QuickSetupRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Job"];
         };
       };
     };

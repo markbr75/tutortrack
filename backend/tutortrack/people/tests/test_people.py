@@ -423,3 +423,14 @@ class TestTutorIsolation(TenantIsolationTestMixin):
 
 def test_quick_add_service_names_households():
     assert services.household_name("Patel") == "The Patel Family"
+
+
+def test_nested_contacts_respect_field_permissions(org):
+    """Finance can open a client but not see contacts' phone numbers (nested serializer)."""
+    client = ClientFactory(organisation=org)
+    ContactFactory(organisation=org, client=client, phone="0113 496 0000", email="a@example.com")
+    finance = client_for(org, MembershipFactory(organisation=org, role="finance").user)
+    [contact] = finance.get(f"/api/v1/clients/{client.pk}").json()["contacts"]
+    assert "phone" not in contact
+    assert "email" not in contact
+    assert contact["full_name"]

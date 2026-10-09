@@ -81,7 +81,7 @@ ROLES: dict[str, RoleDef] = {
             _g("scheduling.lesson.view:own", "scheduling.availability.*:own",
                "people.tutor.view:own", "people.tutor.edit:own", "crm.note.view",
                "crm.note.create", "crm.task.view:own", "crm.task.edit:own", "crm.search",
-               "catalogue.view",
+               "catalogue.view", "jobs.job.view:own",
                "people.student.view:own", "delivery.*:own", "payroll.payitem.view:own",
                "payroll.expense.*:own", "learning.*:own"),
         ),

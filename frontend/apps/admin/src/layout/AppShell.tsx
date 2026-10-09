@@ -13,6 +13,7 @@ const NAV = [
   { to: "/clients", key: "nav.clients", permission: "people.client.view" },
   { to: "/students", key: "nav.students", permission: "people.student.view" },
   { to: "/tutors", key: "nav.tutors", permission: "people.tutor.view" },
+  { to: "/jobs", key: "nav.jobs", permission: "jobs.job.view" },
   { to: "/tasks", key: "nav.tasks", permission: "crm.task.view" },
   { to: "/catalogue", key: "nav.catalogue", permission: "catalogue.view" },
   { to: "/team", key: "nav.team", permission: "team.view" },

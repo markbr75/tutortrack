@@ -119,7 +119,7 @@ Naming: `<aggregate>.<past_tense_verb>`. Each epic lists its events; this table 
 | `subscription.started`, `subscription.changed`, `subscription.past_due`, `subscription.cancelled` | E04 |
 | `client.created/updated/archived`, `contact.created/updated`, `student.created/updated/status_changed`, `tutor.created/updated/status_changed`, `note.created`, `task.created/assigned/completed`, `document.uploaded` | E05 |
 | `service.created`, `service.updated` (with `rate_changed`) | E06 |
-| `job.created/updated/status_changed`, `job.tutor_assigned`, `job.tutor_removed` | E07 |
+| `job.created/updated/status_changed`, `job.tutor_assigned/removed/replaced`, `job.hours_cap_reached` | E07 |
 | `lesson.scheduled`, `lesson.rescheduled`, `lesson.updated`, `lesson.cancelled`, `lesson.completed`, `lesson.missed`, `lesson_series.created/updated/ended`, `availability.updated`, `booking.requested/approved/declined` | E08 |
 | `attendance.recorded`, `lesson_report.submitted`, `lesson_report.overdue`, `lesson_report.shared` | E09 |
 | `charge.created`, `invoice.drafted/issued/sent/paid/overdue/voided`, `credit_note.issued`, `payment_request.sent/paid`, `client.balance_low`, `package.purchased/depleted/expiring` | E10 |

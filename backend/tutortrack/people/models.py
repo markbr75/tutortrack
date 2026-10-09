@@ -45,16 +45,34 @@ class CustomisableModel(models.Model):
         abstract = True
 
 
+def _tutor_jobs(user: Any, path: str) -> Q:
+    """Rows reached through ``path`` to a job on which ``user`` is an offered/active tutor."""
+    return Q(
+        **{
+            f"{path}__tutors__tutor__membership__user": user,
+            f"{path}__tutors__status__in": ["offered", "active"],
+        }
+    )
+
+
 class NoOwnScopeMixin:
-    """Tutors' ``own`` scope reaches people through their jobs (E07); until then, none."""
+    """Tutors' ``own`` scope reaches people through their jobs (E07). Subclasses set
+    ``own_scope_path`` to the job relation; the result is distinct rows."""
+
+    own_scope_path: str = ""
 
     @classmethod
     def own_scope_q(cls, user: Any) -> Q:
-        return Q(pk__in=[])
+        if not cls.own_scope_path:
+            return Q(pk__in=[])
+        ids = cls._default_manager.filter(_tutor_jobs(user, cls.own_scope_path)).values("pk")  # type: ignore[attr-defined]
+        return Q(pk__in=ids)
 
 
 class Client(NoOwnScopeMixin, BranchScopedModel, CustomisableModel):
     """The billing account: a household, an adult learner, or an organisation."""
+
+    own_scope_path = "jobs"
 
     class Type(models.TextChoices):
         HOUSEHOLD = "household", _("Household")
@@ -128,6 +146,8 @@ class Client(NoOwnScopeMixin, BranchScopedModel, CustomisableModel):
 class Contact(NoOwnScopeMixin, TenantModel, CustomisableModel):
     """A person attached to a client (parent, guardian, payer...)."""
 
+    own_scope_path = "client__jobs"
+
     class Relationship(models.TextChoices):
         PARENT = "parent", _("Parent")
         GUARDIAN = "guardian", _("Guardian")
@@ -194,6 +214,8 @@ class Contact(NoOwnScopeMixin, TenantModel, CustomisableModel):
 
 
 class Student(NoOwnScopeMixin, BranchScopedModel, CustomisableModel):
+    own_scope_path = "job_links__job"
+
     class Status(models.TextChoices):
         LEAD = "lead", _("Lead")
         TRIAL = "trial", _("Trial")

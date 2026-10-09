@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 
 import { api, usePermission } from "../api";
 import { RecordActivity } from "../crm/Activity";
+import { StudentJobs } from "../jobs/StudentJobs";
 import { STUDENT_STATUSES, TUTOR_STATUSES } from "./statuses";
 
 const linkClass = "font-medium underline-offset-2 hover:underline";
@@ -254,6 +255,9 @@ export function StudentPage({ studentId }: { studentId: string }) {
             />
           </Card>
         ) : null}
+      </div>
+      <div className="mt-4">
+        <StudentJobs studentId={s.id} />
       </div>
       <RecordActivity target={{ target_type: "people.student", target_id: s.id }} />
     </article>

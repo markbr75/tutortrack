@@ -32,6 +32,9 @@ def test_seed_demo_is_idempotent(settings):
 
         assert Service.objects.count() == 3
         assert Subject.objects.filter(name="Maths").count() == 1
+        from tutortrack.jobs.models import Job
+
+        assert sorted(Job.objects.values_list("status", flat=True)) == ["active", "seeking_tutor"]
 
 
 @pytest.mark.django_db

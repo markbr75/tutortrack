@@ -4,7 +4,7 @@ from typing import Any
 
 from rest_framework import serializers
 
-from tutortrack.core.api.serializers import BaseModelSerializer, MoneySerializerField
+from tutortrack.core.api.serializers import BaseModelSerializer, MoneyOut, MoneySerializerField
 from tutortrack.people.api.serializers import AddressInput, AddressSerializer
 
 from ..models import (
@@ -179,11 +179,6 @@ class QuoteRequestSerializer(serializers.Serializer):
                 )
             attrs["duration_minutes"] = int((end - start).total_seconds() // 60)
         return attrs
-
-
-class MoneyOut(serializers.Serializer):
-    amount = serializers.CharField()
-    currency = serializers.CharField()
 
 
 class ChargeLineSerializer(serializers.Serializer):
