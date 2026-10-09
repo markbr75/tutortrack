@@ -74,6 +74,23 @@ resource "aws_cloudfront_response_headers_policy" "spa" {
   }
 }
 
+# The portal SPA (E15/E16) is uploaded under /portal/: its deep links (no file extension)
+# must serve /portal/index.html, not the admin app's index.
+resource "aws_cloudfront_function" "portal_spa" {
+  name    = "${local.name}-portal-spa"
+  runtime = "cloudfront-js-2.0"
+  publish = true
+  code    = <<-EOT
+    function handler(event) {
+      var request = event.request;
+      if (request.uri === "/portal" || (request.uri.indexOf("/portal/") === 0 && request.uri.indexOf(".") === -1)) {
+        request.uri = "/portal/index.html";
+      }
+      return request;
+    }
+  EOT
+}
+
 resource "aws_cloudfront_distribution" "app" {
   enabled             = true
   aliases             = ["*.${var.app_domain}"]
@@ -107,8 +124,23 @@ resource "aws_cloudfront_distribution" "app" {
     compress                   = true
   }
 
+  ordered_cache_behavior {
+    path_pattern               = "/portal*"
+    target_origin_id           = "spa"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    cache_policy_id            = data.aws_cloudfront_cache_policy.optimized.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.spa.id
+    compress                   = true
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.portal_spa.arn
+    }
+  }
+
   dynamic "ordered_cache_behavior" {
-    for_each = ["/api/*", "/healthz", "/readyz", "/django-admin/*", "/static/*"]
+    for_each = ["/api/*", "/healthz", "/readyz", "/django-admin/*", "/static/*", "/webhooks/*", "/ical/*"]
     content {
       path_pattern             = ordered_cache_behavior.value
       target_origin_id         = "api"

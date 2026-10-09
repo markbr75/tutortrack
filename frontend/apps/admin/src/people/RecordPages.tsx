@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 
 import { api, usePermission } from "../api";
 import { ClientBilling } from "../billing/ClientBilling";
+import { InviteButton } from "../portal/InviteButton";
 import { RecordActivity } from "../crm/Activity";
 import { StudentJobs } from "../jobs/StudentJobs";
 import { STUDENT_STATUSES, TUTOR_STATUSES } from "./statuses";
@@ -58,6 +59,7 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
 /** The family page: household, contacts, students and activity (E05-T11). */
 export function ClientPage({ clientId }: { clientId: string }) {
   const { t, i18n } = useTranslation();
+  const canInvite = usePermission("people.client.edit");
   const canBilling = usePermission("billing.invoice.view");
   const client = useQuery({
     queryKey: ["clients", clientId],
@@ -99,6 +101,9 @@ export function ClientPage({ clientId }: { clientId: string }) {
                     .filter(Boolean)
                     .join(" · ")}
                 </p>
+                {canInvite && contact.email ? (
+                  <InviteButton contactId={contact.id} name={contact.full_name} />
+                ) : null}
               </li>
             ))}
           </ul>

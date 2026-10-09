@@ -647,6 +647,33 @@ def record_attendance(
 
 
 @transaction.atomic
+def set_expected_absence(
+    lesson: Lesson,
+    attendee: LessonAttendee,
+    *,
+    charge_percent: Decimal,
+    note: str = "",
+    recorded_by: Any = None,
+) -> LessonAttendee:
+    """Before a lesson: one student won't come (the register starts with them absent)."""
+    if lesson.status != Lesson.Status.PLANNED:
+        raise BusinessRuleViolation(_("Only planned lessons can take absence notices."))
+    _apply_attendance(
+        lesson,
+        [AttendanceInput(attendee.pk, LessonAttendee.Outcome.ABSENT_NOTIFIED, charge_percent)],
+        recorded_by,
+    )
+    publish(
+        events.AbsenceNotified(
+            subject_id=lesson.pk, student_id=str(attendee.student_id), note=note[:300]
+        ),
+        branch_id=lesson.branch_id,
+    )
+    attendee.refresh_from_db()
+    return attendee
+
+
+@transaction.atomic
 def flag_unconfirmed(lesson: Lesson) -> bool:
     """FR-09-8: a past lesson still planned is flagged (shown in the unconfirmed queue)."""
     updated = Lesson.objects.filter(

@@ -23,6 +23,7 @@ api_v1: list[URLPattern | URLResolver] = [
     path("", include("tutortrack.billing.api.urls")),
     path("", include("tutortrack.payments.api.urls")),
     path("", include("tutortrack.comms.api.urls")),
+    path("", include("tutortrack.portal.api.urls")),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger"),
     path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),

@@ -18,6 +18,7 @@ const NAV = [
   { to: "/jobs", key: "nav.jobs", permission: "jobs.job.view" },
   { to: "/billing", key: "nav.billing", permission: "billing.invoice.view" },
   { to: "/tasks", key: "nav.tasks", permission: "crm.task.view" },
+  { to: "/announcements", key: "nav.announcements", permission: "comms.announcement.manage" },
   { to: "/reports", key: "nav.reports", permission: "delivery.report.view" },
   { to: "/unconfirmed", key: "nav.unconfirmed", permission: "scheduling.lesson.complete" },
   { to: "/availability", key: "nav.availability", permission: "scheduling.availability.view" },
@@ -141,6 +142,10 @@ export function AppShell() {
   }
   if (session.isError && isAuthError(session.error)) {
     return <SignInRequired />;
+  }
+  if (["client", "student"].includes(session.data?.membership?.role ?? "")) {
+    window.location.replace("/portal/"); // families use the portal (E15)
+    return null;
   }
 
   return (

@@ -126,7 +126,9 @@ def balances(client: Any, currency: str | None = None) -> Balances:
         client=client, currency=currency, status__in=Invoice.OPEN
     )
     invoice_balance = _sum(open_invoices, "balance_due_amount", currency)
-    overdue = _sum(open_invoices.filter(due_date__lt=now().date()), "balance_due_amount", currency)
+    from .services import org_today
+
+    overdue = _sum(open_invoices.filter(due_date__lt=org_today()), "balance_due_amount", currency)
     credit = invoice_balance - ledger
     available = credit if credit.is_positive() else Money.zero(currency)
     uninvoiced = _sum(

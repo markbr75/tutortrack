@@ -84,8 +84,8 @@ All ─► E26, E27, E28, E31
 | E12 | ☐ | |
 | E13 | ✅ Done (2026-10-09) | MVP scope (broadcasts, inbox, WhatsApp, custom domains are Phase 2). See Implementation notes |
 | E14 | ☐ | |
-| E15 | ⏭ Next | |
-| E16 | ☐ | |
+| E15 | ✅ Done (2026-10-10) | MVP scope (booking, reschedule, packages and messaging are Phase 2). See Implementation notes |
+| E16 | ⏭ Next | |
 | E17 | ☐ | |
 | E18 | ☐ | |
 | E19 | ☐ | |

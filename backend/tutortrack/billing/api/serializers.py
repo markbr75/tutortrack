@@ -12,7 +12,6 @@ from tutortrack.core.api.serializers import (
     MoneySerializerField,
     TenantRelatedField,
 )
-from tutortrack.core.time import now
 from tutortrack.jobs.models import Job
 from tutortrack.people.models import Client, Student, TutorProfile
 from tutortrack.tenancy.models import Branch
@@ -145,7 +144,9 @@ class InvoiceSerializer(BaseModelSerializer):
         read_only_fields = fields
 
     def get_is_overdue(self, obj: Invoice) -> bool:
-        return bool(obj.is_open and obj.due_date and obj.due_date < now().date())
+        from ..services import org_today
+
+        return bool(obj.is_open and obj.due_date and obj.due_date < org_today())
 
 
 class CreditNoteLineSerializer(BaseModelSerializer):

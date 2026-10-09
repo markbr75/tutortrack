@@ -23,9 +23,14 @@ from tutortrack.core.context import tenant_context
 from tutortrack.core.events.dispatcher import dispatch_batch
 from tutortrack.core.models import OutboxEvent, ScheduleLink
 from tutortrack.core.money import Money
-from tutortrack.core.time import now
 from tutortrack.people.tests.factories import ClientFactory, ContactFactory, StudentFactory
 from tutortrack.tenancy import settings_service
+
+
+def local_today(org):
+    with tenant_context(org):
+        return services.org_today()
+
 
 pytestmark = pytest.mark.django_db(transaction=True)
 HISTORIES = Path(__file__).resolve().parents[3] / "tests" / "workflow_histories"
@@ -50,7 +55,7 @@ def settings_for(org, values):
 
 
 def start_run(org):
-    today = now().date()
+    today = local_today(org)
     with transaction.atomic(), tenant_context(org):
         run, _ = services.create_run(period_start=today - timedelta(days=7), period_end=today)
     return run

@@ -12,7 +12,6 @@ from django.db.models import QuerySet, Sum
 
 from tutortrack.core.money import Money
 from tutortrack.core.permissions import scope_queryset
-from tutortrack.core.time import now
 
 from .models import ClientLedgerEntry, Invoice
 
@@ -83,7 +82,9 @@ def statement(client: Any, currency: str, start: date, end: date, tz: str) -> St
 
 def ageing_report(user: Any, currency: str) -> list[dict[str, Any]]:
     """Overdue invoices by client in ageing buckets (FR-10-14 global billing area)."""
-    today = now().date()
+    from .services import org_today
+
+    today = org_today()
     rows: dict[str, dict[str, Any]] = {}
     for invoice in invoices(user).filter(status__in=Invoice.OPEN, currency=currency):
         days = (today - invoice.due_date).days if invoice.due_date else 0

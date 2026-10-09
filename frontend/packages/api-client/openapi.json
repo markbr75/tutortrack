@@ -6,6 +6,326 @@
         "description": "Run a tutoring business end to end. All first-party apps use this API."
     },
     "paths": {
+        "/api/v1/{kind}/{record_id}/portal-invite": {
+            "post": {
+                "operationId": "portal_invite_create",
+                "description": "Invite a contact (parent) or student to the portal.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "kind",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "record_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "portal-invite"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InviteRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InviteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InviteRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InviteResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/announcements": {
+            "get": {
+                "operationId": "announcements_list",
+                "description": "News posts for the portals (E15-T07).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "announcements"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAnnouncementList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "announcements_create",
+                "description": "News posts for the portals (E15-T07).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "announcements"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AnnouncementRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AnnouncementRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AnnouncementRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Announcement"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/announcements/{id}": {
+            "get": {
+                "operationId": "announcements_retrieve",
+                "description": "News posts for the portals (E15-T07).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this announcement.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "announcements"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Announcement"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "announcements_update",
+                "description": "News posts for the portals (E15-T07).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this announcement.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "announcements"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AnnouncementRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AnnouncementRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AnnouncementRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Announcement"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "announcements_destroy",
+                "description": "News posts for the portals (E15-T07).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this announcement.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "announcements"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/v1/audit": {
             "get": {
                 "operationId": "audit_list",
@@ -15966,6 +16286,702 @@
                 }
             }
         },
+        "/api/v1/portal/announcements": {
+            "get": {
+                "operationId": "portal_announcements_list",
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Announcement"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/portal/billing": {
+            "get": {
+                "operationId": "portal_billing_retrieve",
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortalBilling"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/portal/dashboard": {
+            "get": {
+                "operationId": "portal_dashboard_retrieve",
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Dashboard"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/portal/lessons/{lesson_id}/absence": {
+            "post": {
+                "operationId": "portal_lessons_absence_create",
+                "description": "\"Sam is ill today\": a lesson only for them is cancelled under the policy; in a\ngroup lesson they are marked absent (FR-15-4).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "lesson_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AbsenceRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AbsenceRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AbsenceRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/portal/lessons/{lesson_id}/cancel": {
+            "post": {
+                "operationId": "portal_lessons_cancel_create",
+                "description": "Cancel a household lesson; ``?preview=true`` shows the fee first (FR-15-4).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "lesson_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "preview",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PortalCancelRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PortalCancelRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PortalCancelRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortalCancelResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/portal/lessons/{lesson_id}/ics": {
+            "get": {
+                "operationId": "portal_lessons_ics_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "lesson_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "text/calendar": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/portal/me": {
+            "get": {
+                "operationId": "portal_me_retrieve",
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortalMe"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/portal/payment-methods": {
+            "get": {
+                "operationId": "portal_payment_methods_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "client",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortalMethods"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "portal_payment_methods_create",
+                "description": "``action``: ``add`` (a link to save a card or mandate), ``default``,\n``remove`` or ``autopay_off``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PortalMethodActionRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PortalMethodActionRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PortalMethodActionRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortalSetup"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/portal/profile": {
+            "get": {
+                "operationId": "portal_profile_retrieve",
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortalProfile"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/portal/profile/contacts/{contact_id}": {
+            "patch": {
+                "operationId": "portal_profile_contacts_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "contact_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPortalContactRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPortalContactRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPortalContactRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortalContact"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/portal/profile/students/{student_id}": {
+            "patch": {
+                "operationId": "portal_profile_students_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "student_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPortalStudentRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPortalStudentRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPortalStudentRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortalStudent"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/portal/reports": {
+            "get": {
+                "operationId": "portal_reports_list",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "student",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PortalReport"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/portal/reports/{report_id}/comments": {
+            "post": {
+                "operationId": "portal_reports_comments_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "report_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportReplyRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportReplyRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportReplyRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortalReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/portal/schedule": {
+            "get": {
+                "operationId": "portal_schedule_list",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "end",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "start",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "student",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PortalLesson"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/portal/statement": {
+            "get": {
+                "operationId": "portal_statement_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "client",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "to",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/processes": {
             "get": {
                 "operationId": "processes_list",
@@ -19310,6 +20326,23 @@
     },
     "components": {
         "schemas": {
+            "AbsenceRequest": {
+                "type": "object",
+                "properties": {
+                    "student": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "note": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 300
+                    }
+                },
+                "required": [
+                    "student"
+                ]
+            },
             "AcceptInvitationRequest": {
                 "type": "object",
                 "properties": {
@@ -19333,16 +20366,28 @@
                     "token"
                 ]
             },
-            "ActionEnum": {
-                "enum": [
-                    "complete",
-                    "cancel",
-                    "reassign_tutor",
-                    "change_location",
-                    "delete"
-                ],
-                "type": "string",
-                "description": "* `complete` - complete\n* `cancel` - cancel\n* `reassign_tutor` - reassign_tutor\n* `change_location` - change_location\n* `delete` - delete"
+            "Account": {
+                "type": "object",
+                "properties": {
+                    "client": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "balances": {
+                        "$ref": "#/components/schemas/BalancesOut"
+                    },
+                    "auto_pay": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "auto_pay",
+                    "balances",
+                    "client",
+                    "name"
+                ]
             },
             "AdHocChargeRequest": {
                 "type": "object",
@@ -19810,6 +20855,97 @@
                     "invoice"
                 ]
             },
+            "Announcement": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "audience": {
+                        "$ref": "#/components/schemas/AudienceEnum"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "body",
+                    "id",
+                    "title"
+                ]
+            },
+            "AnnouncementRequest": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "body": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audience": {
+                        "$ref": "#/components/schemas/AudienceEnum"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "body",
+                    "title"
+                ]
+            },
+            "Answer": {
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "value": {}
+                },
+                "required": [
+                    "label",
+                    "type",
+                    "value"
+                ]
+            },
             "ApplicationEnum": {
                 "enum": [
                     "invoice",
@@ -19947,6 +21083,15 @@
                     "rate_percent",
                     "streak"
                 ]
+            },
+            "AudienceEnum": {
+                "enum": [
+                    "clients",
+                    "tutors",
+                    "everyone"
+                ],
+                "type": "string",
+                "description": "* `clients` - Families\n* `tutors` - Tutors\n* `everyone` - Everyone"
             },
             "AuditEntry": {
                 "type": "object",
@@ -20121,6 +21266,29 @@
                     "overdue",
                     "projected",
                     "uninvoiced"
+                ]
+            },
+            "BalancesOut": {
+                "type": "object",
+                "properties": {
+                    "currency": {
+                        "type": "string"
+                    },
+                    "invoice_balance": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "available_credit": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "overdue": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    }
+                },
+                "required": [
+                    "available_credit",
+                    "currency",
+                    "invoice_balance",
+                    "overdue"
                 ]
             },
             "BillingMethodEnum": {
@@ -20415,11 +21583,22 @@
                 "type": "string",
                 "description": "* `queued` - Queued\n* `running` - Running\n* `completed` - Completed\n* `failed` - Failed"
             },
+            "BulkLessonActionEnum": {
+                "enum": [
+                    "complete",
+                    "cancel",
+                    "reassign_tutor",
+                    "change_location",
+                    "delete"
+                ],
+                "type": "string",
+                "description": "* `complete` - complete\n* `cancel` - cancel\n* `reassign_tutor` - reassign_tutor\n* `change_location` - change_location\n* `delete` - delete"
+            },
             "BulkLessonRequest": {
                 "type": "object",
                 "properties": {
                     "action": {
-                        "$ref": "#/components/schemas/ActionEnum"
+                        "$ref": "#/components/schemas/BulkLessonActionEnum"
                     },
                     "ids": {
                         "type": "array",
@@ -22891,6 +24070,61 @@
                 "type": "string",
                 "description": "* `staff` - Staff\n* `tutor` - Staff and tutors\n* `client_portal` - Also in the client portal\n* `public` - Public forms"
             },
+            "Dashboard": {
+                "type": "object",
+                "properties": {
+                    "next_lesson": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PortalLesson"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "upcoming": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PortalLesson"
+                        }
+                    },
+                    "reports": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PortalReport"
+                        }
+                    },
+                    "announcements": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/News"
+                        }
+                    },
+                    "amount_due": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MoneyOut"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "credit": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MoneyOut"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "amount_due",
+                    "announcements",
+                    "credit",
+                    "next_lesson",
+                    "reports",
+                    "upcoming"
+                ]
+            },
             "DateFormatEnum": {
                 "enum": [
                     "locale",
@@ -23825,6 +25059,41 @@
                 ],
                 "type": "string",
                 "description": "* `pending` - Pending\n* `accepted` - Accepted\n* `revoked` - Revoked"
+            },
+            "InviteRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email",
+                                "default": ""
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    }
+                }
+            },
+            "InviteResult": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "email",
+                    "expires_at"
+                ]
             },
             "Invoice": {
                 "type": "object",
@@ -27456,6 +28725,45 @@
                     "url"
                 ]
             },
+            "NamedRef": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            },
+            "News": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "body",
+                    "id",
+                    "published_at",
+                    "title"
+                ]
+            },
             "Note": {
                 "type": "object",
                 "properties": {
@@ -28101,6 +29409,32 @@
                     "quantity",
                     "quantity_type"
                 ]
+            },
+            "PaginatedAnnouncementList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Announcement"
+                        }
+                    }
+                }
             },
             "PaginatedAuditEntryList": {
                 "type": "object",
@@ -30130,6 +31464,60 @@
                     }
                 }
             },
+            "PatchedPortalContactRequest": {
+                "type": "object",
+                "properties": {
+                    "first_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "mobile": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "receives_reminders": {
+                        "type": "boolean"
+                    },
+                    "receives_invoices": {
+                        "type": "boolean"
+                    },
+                    "receives_reports": {
+                        "type": "boolean"
+                    },
+                    "receives_marketing": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "PatchedPortalStudentRequest": {
+                "type": "object",
+                "properties": {
+                    "preferred_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "school": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "year_group": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "learning_needs": {
+                        "type": "string"
+                    }
+                }
+            },
             "PatchedProductRequest": {
                 "type": "object",
                 "properties": {
@@ -31776,6 +33164,651 @@
                     }
                 }
             },
+            "PortalAttendee": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "outcome": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "outcome"
+                ]
+            },
+            "PortalBilling": {
+                "type": "object",
+                "properties": {
+                    "accounts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Account"
+                        }
+                    },
+                    "invoices": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PortalInvoice"
+                        }
+                    },
+                    "payment_requests": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PortalRequest"
+                        }
+                    },
+                    "credit_notes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PortalCreditNote"
+                        }
+                    }
+                },
+                "required": [
+                    "accounts",
+                    "credit_notes",
+                    "invoices",
+                    "payment_requests"
+                ]
+            },
+            "PortalCancelRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 300
+                    }
+                }
+            },
+            "PortalCancelResult": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "type": "string"
+                    },
+                    "charge_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "makeup_credit": {
+                        "type": "boolean"
+                    },
+                    "cancelled": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "cancelled",
+                    "charge_percent",
+                    "kind",
+                    "makeup_credit",
+                    "message"
+                ]
+            },
+            "PortalComment": {
+                "type": "object",
+                "properties": {
+                    "author": {
+                        "type": "string"
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "author",
+                    "body",
+                    "created_at"
+                ]
+            },
+            "PortalContact": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "readOnly": true
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "mobile": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "receives_reminders": {
+                        "type": "boolean"
+                    },
+                    "receives_invoices": {
+                        "type": "boolean"
+                    },
+                    "receives_reports": {
+                        "type": "boolean"
+                    },
+                    "receives_marketing": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "email",
+                    "first_name",
+                    "id"
+                ]
+            },
+            "PortalCreditNote": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "number": {
+                        "type": "string"
+                    },
+                    "invoice_number": {
+                        "type": "string"
+                    },
+                    "total": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "issued_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "id",
+                    "invoice_number",
+                    "issued_at",
+                    "number",
+                    "total"
+                ]
+            },
+            "PortalFeatures": {
+                "type": "object",
+                "properties": {
+                    "cancellations": {
+                        "type": "boolean"
+                    },
+                    "absence": {
+                        "type": "boolean"
+                    },
+                    "invoices": {
+                        "type": "boolean"
+                    },
+                    "reports": {
+                        "type": "boolean"
+                    },
+                    "profile": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "absence",
+                    "cancellations",
+                    "invoices",
+                    "profile",
+                    "reports"
+                ]
+            },
+            "PortalInvoice": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "number": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "issue_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "due_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "total": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "balance_due": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "pay_token": {
+                        "type": "string"
+                    },
+                    "pdf_token": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "balance_due",
+                    "due_date",
+                    "id",
+                    "issue_date",
+                    "number",
+                    "pay_token",
+                    "pdf_token",
+                    "status",
+                    "total"
+                ]
+            },
+            "PortalLesson": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "timezone": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "online": {
+                        "type": "boolean"
+                    },
+                    "meeting_url": {
+                        "type": "string"
+                    },
+                    "location": {
+                        "type": "string"
+                    },
+                    "notes_for_client": {
+                        "type": "string"
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PortalTutor"
+                        }
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PortalAttendee"
+                        }
+                    }
+                },
+                "required": [
+                    "end",
+                    "id",
+                    "location",
+                    "meeting_url",
+                    "notes_for_client",
+                    "online",
+                    "start",
+                    "status",
+                    "students",
+                    "timezone",
+                    "title",
+                    "tutors"
+                ]
+            },
+            "PortalMe": {
+                "type": "object",
+                "properties": {
+                    "role": {
+                        "$ref": "#/components/schemas/PortalMeRoleEnum"
+                    },
+                    "organisation": {
+                        "$ref": "#/components/schemas/PortalOrg"
+                    },
+                    "clients": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NamedRef"
+                        }
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NamedRef"
+                        }
+                    },
+                    "features": {
+                        "$ref": "#/components/schemas/PortalFeatures"
+                    },
+                    "welcome_text": {
+                        "type": "string"
+                    },
+                    "help_url": {
+                        "type": "string"
+                    },
+                    "terms_url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "clients",
+                    "features",
+                    "help_url",
+                    "organisation",
+                    "role",
+                    "students",
+                    "terms_url",
+                    "welcome_text"
+                ]
+            },
+            "PortalMeRoleEnum": {
+                "enum": [
+                    "client",
+                    "student"
+                ],
+                "type": "string",
+                "description": "* `client` - client\n* `student` - student"
+            },
+            "PortalMethod": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "brand": {
+                        "type": "string"
+                    },
+                    "last4": {
+                        "type": "string"
+                    },
+                    "exp_month": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "exp_year": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "is_default": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "brand",
+                    "exp_month",
+                    "exp_year",
+                    "id",
+                    "is_default",
+                    "last4",
+                    "type"
+                ]
+            },
+            "PortalMethodActionActionEnum": {
+                "enum": [
+                    "add",
+                    "default",
+                    "remove",
+                    "autopay_off"
+                ],
+                "type": "string",
+                "description": "* `add` - add\n* `default` - default\n* `remove` - remove\n* `autopay_off` - autopay_off"
+            },
+            "PortalMethodActionRequest": {
+                "type": "object",
+                "properties": {
+                    "client": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "action": {
+                        "$ref": "#/components/schemas/PortalMethodActionActionEnum"
+                    },
+                    "method": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "action",
+                    "client"
+                ]
+            },
+            "PortalMethods": {
+                "type": "object",
+                "properties": {
+                    "auto_pay": {
+                        "type": "boolean"
+                    },
+                    "consent_given_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "methods": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PortalMethod"
+                        }
+                    }
+                },
+                "required": [
+                    "auto_pay",
+                    "consent_given_at",
+                    "methods"
+                ]
+            },
+            "PortalOrg": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "primary_colour": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "name",
+                    "primary_colour"
+                ]
+            },
+            "PortalProfile": {
+                "type": "object",
+                "properties": {
+                    "contacts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PortalContact"
+                        }
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PortalStudent"
+                        }
+                    }
+                },
+                "required": [
+                    "contacts",
+                    "students"
+                ]
+            },
+            "PortalReport": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "lesson_title": {
+                        "type": "string"
+                    },
+                    "lesson_start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "tutor_name": {
+                        "type": "string"
+                    },
+                    "shared_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "answers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Answer"
+                        }
+                    },
+                    "comments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PortalComment"
+                        }
+                    }
+                },
+                "required": [
+                    "answers",
+                    "comments",
+                    "id",
+                    "lesson_start",
+                    "lesson_title",
+                    "shared_at",
+                    "tutor_name"
+                ]
+            },
+            "PortalRequest": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "number": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "pay_token": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "amount",
+                    "description",
+                    "id",
+                    "number",
+                    "pay_token"
+                ]
+            },
+            "PortalSetup": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "url"
+                ]
+            },
+            "PortalStudent": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "preferred_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "school": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "year_group": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "learning_needs": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "first_name",
+                    "id",
+                    "last_name"
+                ]
+            },
+            "PortalTutor": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "name",
+                    "phone"
+                ]
+            },
             "PreferenceRow": {
                 "type": "object",
                 "properties": {
@@ -33207,6 +35240,19 @@
                         "description": "Defaults to you (tutors)."
                     }
                 }
+            },
+            "ReportReplyRequest": {
+                "type": "object",
+                "properties": {
+                    "body": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 5000
+                    }
+                },
+                "required": [
+                    "body"
+                ]
             },
             "ReportReturnRequest": {
                 "type": "object",

@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "tutortrack.billing",
     "tutortrack.payments",
     "tutortrack.comms",
+    "tutortrack.portal",
 ]
 
 MIDDLEWARE = [

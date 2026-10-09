@@ -119,7 +119,7 @@ class InvoiceFilter(filters.FilterSet):
 
     def filter_overdue(self, queryset: QuerySet[Invoice], name: str, value: bool) -> Any:
         if value:
-            return queryset.filter(status__in=Invoice.OPEN, due_date__lt=now().date())
+            return queryset.filter(status__in=Invoice.OPEN, due_date__lt=services.org_today())
         return queryset
 
 

@@ -1,6 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 
 const proxied = {
   target: process.env.VITE_API_BASE_URL ?? "http://localhost:8010",
@@ -8,9 +8,11 @@ const proxied = {
   xfwd: true,
 };
 
-// Client, student, tutor and affiliate portals (one installable PWA with role shells).
-// PWA manifest/service worker arrive in E16; role shells in E15/E16.
+// Client, student, tutor and affiliate portals (one installable PWA with role shells),
+// served at /portal/ on the organisation's host so sign-in, sessions and the tenant are
+// shared with the admin app. PWA manifest/service worker arrive in E16.
 export default defineConfig({
+  base: "/portal/",
   plugins: [react(), tailwindcss()],
   // Crawl the app *and* the linked workspace packages at startup so every dependency is
   // pre-bundled before the first request. Otherwise a cold dev server discovers deps from
@@ -31,5 +33,10 @@ export default defineConfig({
     host: true,
     allowedHosts: [".localhost"],
     proxy: { "/api": proxied },
+  },
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./src/test-setup.ts"],
   },
 });

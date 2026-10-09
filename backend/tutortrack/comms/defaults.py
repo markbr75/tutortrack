@@ -179,7 +179,26 @@ DEFAULTS: dict[tuple[str, str], tuple[str, str]] = {
     ),
 }
 
+DEFAULTS[("absence_notified", "email")] = (
+    "{{ absence.student }} will miss {{ lesson.title }}",
+    "Hello {{ recipient.first_name }},\n\n{{ absence.student }} won't be at {{ lesson.title }} on "
+    + WHEN
+    + ".{% if absence.note %}\nNote: {{ absence.note }}{% endif %}"
+    + SIGN,
+)
+DEFAULTS[("absence_notified", "in_app")] = (
+    "{{ absence.student }} will be absent",
+    "{{ lesson.title }}, " + WHEN,
+)
+DEFAULTS[("report_comment", "email")] = (
+    "Reply to your report: {{ report.lesson_title }}",
+    "Hello {{ recipient.first_name }},\n\n{{ comment.author }} replied:\n{{ comment.body }}\n\n"
+    "{{ report.link }}" + SIGN,
+)
+DEFAULTS[("report_comment", "in_app")] = ("Reply from {{ comment.author }}", "{{ comment.body }}")
+
 for _key in (
+    "staff_profile_change",
     "staff_report_escalated",
     "staff_completion_blocked",
     "staff_payment_failed",

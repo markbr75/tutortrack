@@ -4,6 +4,60 @@
  */
 
 export interface paths {
+  "/api/v1/{kind}/{record_id}/portal-invite": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Invite a contact (parent) or student to the portal. */
+    post: operations["portal_invite_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/announcements": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description News posts for the portals (E15-T07). */
+    get: operations["announcements_list"];
+    put?: never;
+    /** @description News posts for the portals (E15-T07). */
+    post: operations["announcements_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/announcements/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description News posts for the portals (E15-T07). */
+    get: operations["announcements_retrieve"];
+    /** @description News posts for the portals (E15-T07). */
+    put: operations["announcements_update"];
+    post?: never;
+    /** @description News posts for the portals (E15-T07). */
+    delete: operations["announcements_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/audit": {
     parameters: {
       query?: never;
@@ -3981,6 +4035,255 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/portal/announcements": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_announcements_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/billing": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_billing_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/dashboard": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_dashboard_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/lessons/{lesson_id}/absence": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description "Sam is ill today": a lesson only for them is cancelled under the policy; in a
+     *     group lesson they are marked absent (FR-15-4).
+     */
+    post: operations["portal_lessons_absence_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/lessons/{lesson_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Cancel a household lesson; ``?preview=true`` shows the fee first (FR-15-4). */
+    post: operations["portal_lessons_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/lessons/{lesson_id}/ics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_lessons_ics_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_me_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/payment-methods": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_payment_methods_retrieve"];
+    put?: never;
+    /**
+     * @description ``action``: ``add`` (a link to save a card or mandate), ``default``,
+     *     ``remove`` or ``autopay_off``.
+     */
+    post: operations["portal_payment_methods_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/profile": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_profile_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/profile/contacts/{contact_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations["portal_profile_contacts_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/portal/profile/students/{student_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations["portal_profile_students_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/portal/reports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_reports_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/reports/{report_id}/comments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["portal_reports_comments_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/schedule": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_schedule_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/statement": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_statement_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/processes": {
     parameters: {
       query?: never;
@@ -4700,21 +5003,24 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    AbsenceRequest: {
+      /** Format: uuid */
+      student: string;
+      /** @default  */
+      note: string;
+    };
     AcceptInvitationRequest: {
       token: string;
       first_name?: string;
       last_name?: string;
       password?: string;
     };
-    /**
-     * @description * `complete` - complete
-     *     * `cancel` - cancel
-     *     * `reassign_tutor` - reassign_tutor
-     *     * `change_location` - change_location
-     *     * `delete` - delete
-     * @enum {string}
-     */
-    ActionEnum: "complete" | "cancel" | "reassign_tutor" | "change_location" | "delete";
+    Account: {
+      client: string;
+      name: string;
+      balances: components["schemas"]["BalancesOut"];
+      auto_pay: boolean;
+    };
     AdHocChargeRequest: {
       /** Format: uuid */
       client: string;
@@ -4868,6 +5174,35 @@ export interface components {
       /** Format: decimal */
       amount: string;
     };
+    Announcement: {
+      /** Format: uuid */
+      readonly id: string;
+      title: string;
+      body: string;
+      audience?: components["schemas"]["AudienceEnum"];
+      /** Format: uuid */
+      branch?: string | null;
+      /** Format: date-time */
+      published_at?: string;
+      /** Format: date-time */
+      expires_at?: string | null;
+    };
+    AnnouncementRequest: {
+      title: string;
+      body: string;
+      audience?: components["schemas"]["AudienceEnum"];
+      /** Format: uuid */
+      branch?: string | null;
+      /** Format: date-time */
+      published_at?: string;
+      /** Format: date-time */
+      expires_at?: string | null;
+    };
+    Answer: {
+      label: string;
+      type: string;
+      value: unknown;
+    };
     /**
      * @description * `invoice` - Reduce what is owed on the invoice
      *     * `credit` - Keep as client credit
@@ -4925,6 +5260,13 @@ export interface components {
         [key: string]: number;
       };
     };
+    /**
+     * @description * `clients` - Families
+     *     * `tutors` - Tutors
+     *     * `everyone` - Everyone
+     * @enum {string}
+     */
+    AudienceEnum: "clients" | "tutors" | "everyone";
     AuditEntry: {
       /** Format: uuid */
       readonly id: string;
@@ -4972,6 +5314,12 @@ export interface components {
       available_credit: components["schemas"]["MoneyOut"];
       uninvoiced: components["schemas"]["MoneyOut"];
       projected: components["schemas"]["MoneyOut"];
+      overdue: components["schemas"]["MoneyOut"];
+    };
+    BalancesOut: {
+      currency: string;
+      invoice_balance: components["schemas"]["MoneyOut"];
+      available_credit: components["schemas"]["MoneyOut"];
       overdue: components["schemas"]["MoneyOut"];
     };
     /**
@@ -5062,8 +5410,17 @@ export interface components {
      * @enum {string}
      */
     BulkJobStatusEnum: "queued" | "running" | "completed" | "failed";
+    /**
+     * @description * `complete` - complete
+     *     * `cancel` - cancel
+     *     * `reassign_tutor` - reassign_tutor
+     *     * `change_location` - change_location
+     *     * `delete` - delete
+     * @enum {string}
+     */
+    BulkLessonActionEnum: "complete" | "cancel" | "reassign_tutor" | "change_location" | "delete";
     BulkLessonRequest: {
-      action: components["schemas"]["ActionEnum"];
+      action: components["schemas"]["BulkLessonActionEnum"];
       ids: string[];
       /** Format: uuid */
       tutor?: string;
@@ -5887,6 +6244,14 @@ export interface components {
      * @enum {string}
      */
     CustomFieldVisibilityEnum: "staff" | "tutor" | "client_portal" | "public";
+    Dashboard: {
+      next_lesson: components["schemas"]["PortalLesson"] | null;
+      upcoming: components["schemas"]["PortalLesson"][];
+      reports: components["schemas"]["PortalReport"][];
+      announcements: components["schemas"]["News"][];
+      amount_due: components["schemas"]["MoneyOut"] | null;
+      credit: components["schemas"]["MoneyOut"] | null;
+    };
     /**
      * @description * `locale` - Locale default
      *     * `dd/MM/yyyy` - 31/12/2026
@@ -6237,6 +6602,15 @@ export interface components {
      * @enum {string}
      */
     InvitationStatusEnum: "pending" | "accepted" | "revoked";
+    InviteRequest: {
+      email?: string;
+    };
+    InviteResult: {
+      /** Format: email */
+      email: string;
+      /** Format: date-time */
+      expires_at: string;
+    };
     Invoice: {
       /** Format: uuid */
       readonly id: string;
@@ -7453,6 +7827,17 @@ export interface components {
       /** Format: date-time */
       last_active_at: string | null;
     };
+    NamedRef: {
+      id: string;
+      name: string;
+    };
+    News: {
+      id: string;
+      title: string;
+      body: string;
+      /** Format: date-time */
+      published_at: string;
+    };
     Note: {
       /** Format: uuid */
       readonly id: string;
@@ -7640,6 +8025,19 @@ export interface components {
       bookable_online?: boolean;
       auto_renew?: boolean;
       active?: boolean;
+    };
+    PaginatedAnnouncementList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Announcement"][];
     };
     PaginatedAuditEntryList: {
       /**
@@ -8436,6 +8834,22 @@ export interface components {
       auto_renew?: boolean;
       active?: boolean;
     };
+    PatchedPortalContactRequest: {
+      first_name?: string;
+      last_name?: string;
+      phone?: string;
+      mobile?: string;
+      receives_reminders?: boolean;
+      receives_invoices?: boolean;
+      receives_reports?: boolean;
+      receives_marketing?: boolean;
+    };
+    PatchedPortalStudentRequest: {
+      preferred_name?: string;
+      school?: string;
+      year_group?: string;
+      learning_needs?: string;
+    };
     PatchedProductRequest: {
       name?: string;
       description?: string;
@@ -8971,6 +9385,183 @@ export interface components {
       max_free_per_month?: number | null;
       makeup_credit?: components["schemas"]["MakeupRulesRequest"];
     };
+    PortalAttendee: {
+      id: string;
+      name: string;
+      outcome: string;
+    };
+    PortalBilling: {
+      accounts: components["schemas"]["Account"][];
+      invoices: components["schemas"]["PortalInvoice"][];
+      payment_requests: components["schemas"]["PortalRequest"][];
+      credit_notes: components["schemas"]["PortalCreditNote"][];
+    };
+    PortalCancelRequest: {
+      /** @default  */
+      reason: string;
+    };
+    PortalCancelResult: {
+      kind: string;
+      /** Format: decimal */
+      charge_percent: string;
+      message: string;
+      makeup_credit: boolean;
+      cancelled: boolean;
+    };
+    PortalComment: {
+      author: string;
+      body: string;
+      /** Format: date-time */
+      created_at: string;
+    };
+    PortalContact: {
+      /** Format: uuid */
+      readonly id: string;
+      first_name: string;
+      last_name?: string;
+      /** Format: email */
+      readonly email: string;
+      phone?: string;
+      mobile?: string;
+      receives_reminders?: boolean;
+      receives_invoices?: boolean;
+      receives_reports?: boolean;
+      receives_marketing?: boolean;
+    };
+    PortalCreditNote: {
+      id: string;
+      number: string;
+      invoice_number: string;
+      total: components["schemas"]["MoneyOut"];
+      /** Format: date-time */
+      issued_at: string;
+    };
+    PortalFeatures: {
+      cancellations: boolean;
+      absence: boolean;
+      invoices: boolean;
+      reports: boolean;
+      profile: boolean;
+    };
+    PortalInvoice: {
+      id: string;
+      number: string;
+      status: string;
+      /** Format: date */
+      issue_date: string | null;
+      /** Format: date */
+      due_date: string | null;
+      total: components["schemas"]["MoneyOut"];
+      balance_due: components["schemas"]["MoneyOut"];
+      pay_token: string;
+      pdf_token: string;
+    };
+    PortalLesson: {
+      id: string;
+      title: string;
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      timezone: string;
+      status: string;
+      online: boolean;
+      meeting_url: string;
+      location: string;
+      notes_for_client: string;
+      tutors: components["schemas"]["PortalTutor"][];
+      students: components["schemas"]["PortalAttendee"][];
+    };
+    PortalMe: {
+      role: components["schemas"]["PortalMeRoleEnum"];
+      organisation: components["schemas"]["PortalOrg"];
+      clients: components["schemas"]["NamedRef"][];
+      students: components["schemas"]["NamedRef"][];
+      features: components["schemas"]["PortalFeatures"];
+      welcome_text: string;
+      help_url: string;
+      terms_url: string;
+    };
+    /**
+     * @description * `client` - client
+     *     * `student` - student
+     * @enum {string}
+     */
+    PortalMeRoleEnum: "client" | "student";
+    PortalMethod: {
+      id: string;
+      type: string;
+      brand: string;
+      last4: string;
+      exp_month: number | null;
+      exp_year: number | null;
+      is_default: boolean;
+    };
+    /**
+     * @description * `add` - add
+     *     * `default` - default
+     *     * `remove` - remove
+     *     * `autopay_off` - autopay_off
+     * @enum {string}
+     */
+    PortalMethodActionActionEnum: "add" | "default" | "remove" | "autopay_off";
+    PortalMethodActionRequest: {
+      /** Format: uuid */
+      client: string;
+      action: components["schemas"]["PortalMethodActionActionEnum"];
+      /** Format: uuid */
+      method?: string | null;
+    };
+    PortalMethods: {
+      auto_pay: boolean;
+      /** Format: date-time */
+      consent_given_at: string | null;
+      methods: components["schemas"]["PortalMethod"][];
+    };
+    PortalOrg: {
+      name: string;
+      primary_colour: string;
+    };
+    PortalProfile: {
+      contacts: components["schemas"]["PortalContact"][];
+      students: components["schemas"]["PortalStudent"][];
+    };
+    PortalReport: {
+      id: string;
+      lesson_title: string;
+      /** Format: date-time */
+      lesson_start: string;
+      tutor_name: string;
+      /** Format: date-time */
+      shared_at: string;
+      answers: components["schemas"]["Answer"][];
+      comments: components["schemas"]["PortalComment"][];
+    };
+    PortalRequest: {
+      id: string;
+      number: string;
+      description: string;
+      amount: components["schemas"]["MoneyOut"];
+      pay_token: string;
+    };
+    PortalSetup: {
+      url: string;
+    };
+    PortalStudent: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly first_name: string;
+      readonly last_name: string;
+      preferred_name?: string;
+      school?: string;
+      year_group?: string;
+      learning_needs?: string;
+    };
+    PortalTutor: {
+      name: string;
+      email: string;
+      phone: string;
+    };
     PreferenceRow: {
       category: components["schemas"]["PreferenceRowCategoryEnum"];
       channels: components["schemas"]["MessageChannelEnum"][];
@@ -9490,6 +10081,9 @@ export interface components {
        * @description Defaults to you (tutors).
        */
       tutor?: string;
+    };
+    ReportReplyRequest: {
+      body: string;
     };
     ReportReturnRequest: {
       /** @default  */
@@ -10622,6 +11216,167 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  portal_invite_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        kind: string;
+        record_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["InviteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["InviteRequest"];
+        "multipart/form-data": components["schemas"]["InviteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InviteResult"];
+        };
+      };
+    };
+  };
+  announcements_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAnnouncementList"];
+        };
+      };
+    };
+  };
+  announcements_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AnnouncementRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AnnouncementRequest"];
+        "multipart/form-data": components["schemas"]["AnnouncementRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Announcement"];
+        };
+      };
+    };
+  };
+  announcements_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this announcement. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Announcement"];
+        };
+      };
+    };
+  };
+  announcements_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this announcement. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AnnouncementRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AnnouncementRequest"];
+        "multipart/form-data": components["schemas"]["AnnouncementRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Announcement"];
+        };
+      };
+    };
+  };
+  announcements_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this announcement. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   audit_list: {
     parameters: {
       query?: {
@@ -18440,6 +19195,383 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Permission"][];
+        };
+      };
+    };
+  };
+  portal_announcements_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Announcement"][];
+        };
+      };
+    };
+  };
+  portal_billing_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalBilling"];
+        };
+      };
+    };
+  };
+  portal_dashboard_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Dashboard"];
+        };
+      };
+    };
+  };
+  portal_lessons_absence_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AbsenceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AbsenceRequest"];
+        "multipart/form-data": components["schemas"]["AbsenceRequest"];
+      };
+    };
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  portal_lessons_cancel_create: {
+    parameters: {
+      query?: {
+        preview?: boolean;
+      };
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PortalCancelRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PortalCancelRequest"];
+        "multipart/form-data": components["schemas"]["PortalCancelRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalCancelResult"];
+        };
+      };
+    };
+  };
+  portal_lessons_ics_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/calendar": string;
+        };
+      };
+    };
+  };
+  portal_me_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalMe"];
+        };
+      };
+    };
+  };
+  portal_payment_methods_retrieve: {
+    parameters: {
+      query?: {
+        client?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalMethods"];
+        };
+      };
+    };
+  };
+  portal_payment_methods_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PortalMethodActionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PortalMethodActionRequest"];
+        "multipart/form-data": components["schemas"]["PortalMethodActionRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalSetup"];
+        };
+      };
+    };
+  };
+  portal_profile_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalProfile"];
+        };
+      };
+    };
+  };
+  portal_profile_contacts_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        contact_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedPortalContactRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedPortalContactRequest"];
+        "multipart/form-data": components["schemas"]["PatchedPortalContactRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalContact"];
+        };
+      };
+    };
+  };
+  portal_profile_students_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        student_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedPortalStudentRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedPortalStudentRequest"];
+        "multipart/form-data": components["schemas"]["PatchedPortalStudentRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalStudent"];
+        };
+      };
+    };
+  };
+  portal_reports_list: {
+    parameters: {
+      query?: {
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalReport"][];
+        };
+      };
+    };
+  };
+  portal_reports_comments_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        report_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportReplyRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReportReplyRequest"];
+        "multipart/form-data": components["schemas"]["ReportReplyRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalReport"];
+        };
+      };
+    };
+  };
+  portal_schedule_list: {
+    parameters: {
+      query?: {
+        end?: string;
+        start?: string;
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalLesson"][];
+        };
+      };
+    };
+  };
+  portal_statement_retrieve: {
+    parameters: {
+      query?: {
+        client?: string;
+        from?: string;
+        to?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": string;
         };
       };
     };

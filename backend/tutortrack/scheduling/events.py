@@ -126,3 +126,13 @@ class SeriesEnded(DomainEvent):
 class AvailabilityUpdated(DomainEvent):
     event_type: ClassVar[str] = "availability.updated"
     subject_type: ClassVar[str] = "tutor"
+
+
+@dataclass(frozen=True, kw_only=True)
+class AbsenceNotified(DomainEvent):
+    """A family told us a student will miss a (group) lesson; the tutor is told (E13)."""
+
+    event_type: ClassVar[str] = "attendance.absence_notified"
+    subject_type: ClassVar[str] = "lesson"
+    student_id: str
+    note: str = ""

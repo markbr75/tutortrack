@@ -41,6 +41,12 @@ from tutortrack.scheduling import services as scheduling
 from tutortrack.scheduling.models import Lesson
 from tutortrack.tenancy import settings_service
 
+
+def local_today(org):
+    with tenant_context(org):
+        return services.org_today()
+
+
 pytestmark = pytest.mark.django_db
 
 
@@ -305,7 +311,7 @@ def test_monthly_arrears_run_for_a_family(org, finance, family):
             timezone="Europe/London", override_conflicts=True,
         ).lesson  # fmt: skip
     complete(org, other_lesson)
-    today = now().date()
+    today = local_today(org)
     created = finance.post(
         "/api/v1/invoice-runs",
         {"period_start": str(today - timedelta(days=30)), "period_end": str(today)},
@@ -348,7 +354,7 @@ def test_issue_numbers_locks_posts_and_renders_pdf(org, finance, family):
     finance.patch(f"/api/v1/invoices/{draft['id']}", {"po_number": "PO-7"}, format="json")
     issued = finance.post(f"/api/v1/invoices/{draft['id']}/issue").json()
     assert issued["number"] == "INV-000001"
-    assert issued["due_date"] == str(now().date() + timedelta(days=14))
+    assert issued["due_date"] == str(local_today(org) + timedelta(days=14))
     assert issued["billing_snapshot"]["email"] == "priya@example.com"
     assert issued["po_number"] == "PO-7"
     with tenant_context(org):
@@ -402,7 +408,7 @@ def test_draft_editing_minimum_and_currency_splits(org, finance, family):
 def test_hold_invoices_for_missing_reports(org, family):
     set_settings(org, "delivery", {"delivery.hold_invoice_without_report": True})
     complete(org, lesson(org, family))
-    today = now().date()
+    today = local_today(org)
     with tenant_context(org):
         run, _created = services.create_run(
             period_start=today - timedelta(days=7), period_end=today, start_workflow=False
@@ -582,7 +588,7 @@ def test_bulk_and_automatic_top_up_requests(org, finance, family):
 def test_advance_invoicing_and_reconciliation(org, family):
     job = make_job(org, family, "invoice_in_advance")
     upcoming = [lesson(org, family, job=job, hours_ago=-24 * d) for d in (3, 10)]
-    today = now().date()
+    today = local_today(org)
     with tenant_context(org):
         run, _ = services.create_run(
             period_start=today,
@@ -614,10 +620,10 @@ def test_advance_invoicing_and_reconciliation(org, family):
 def test_statement_and_ageing(org, finance, family):
     invoice = issued_invoice(org, family)
     with tenant_context(org):
-        Invoice.objects.filter(pk=invoice.pk).update(due_date=now().date() - timedelta(days=40))
+        Invoice.objects.filter(pk=invoice.pk).update(due_date=local_today(org) - timedelta(days=40))
     statement = finance.get(
         f"/api/v1/clients/{family['client'].pk}/statement",
-        {"from": str(now().date() - timedelta(days=5)), "to": str(now().date())},
+        {"from": str(local_today(org) - timedelta(days=5)), "to": str(local_today(org))},
     ).json()
     assert statement["opening"]["amount"] == "0.00"
     assert statement["closing"]["amount"] == "40.00"
@@ -705,7 +711,7 @@ class TestRunIsolation(TenantIsolationTestMixin):
 
     def make_object(self, organisation):
         with tenant_context(organisation):
-            today = now().date()
+            today = services.org_today()
             return services.create_run(period_start=today, period_end=today, start_workflow=False)[
                 0
             ]

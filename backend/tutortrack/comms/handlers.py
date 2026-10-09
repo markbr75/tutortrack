@@ -172,3 +172,40 @@ def task_assigned(event: EventEnvelope) -> None:
     task = catalogue.load_task(_id(event))
     if task is not None:
         notify("task_assigned", task, key=_id(event))
+
+
+@subscribe("attendance.absence_notified")
+def absence_notified(event: EventEnvelope) -> None:
+    from tutortrack.people.models import Student
+
+    lesson = catalogue.load_lesson(_id(event))
+    student = Student.objects.filter(pk=event.data.get("student_id")).first()
+    if lesson is not None and student is not None:
+        payload = (lesson, student.full_name, event.data.get("note", ""))
+        notify("absence_notified", payload, key=str(event.id))
+
+
+@subscribe("lesson_report.commented")
+def report_commented(event: EventEnvelope) -> None:
+    from tutortrack.delivery.models import LessonReportComment
+
+    if event.data.get("visibility") != "client":
+        return
+    comment = LessonReportComment.objects.filter(pk=event.data.get("comment_id")).first()
+    report = catalogue.load_report(_id(event))
+    if comment is None or report is None or comment.author_id is None:
+        return
+    if report.tutor.membership and comment.author_id == report.tutor.membership.user_id:
+        return  # the tutor's own comment
+    notify("report_comment", (report, comment.author_name, comment.body), key=str(comment.pk))
+
+
+@subscribe("portal.sensitive_updated")
+def sensitive_updated(event: EventEnvelope) -> None:
+    _alert(
+        "staff_profile_change",
+        _("A family updated %(student)s's support needs") % {"student": event.data.get("name", "")},
+        _("Check the change on the student's record."),
+        f"/students/{_id(event)}",
+        key=str(event.id),
+    )

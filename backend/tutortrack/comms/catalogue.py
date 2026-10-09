@@ -440,6 +440,66 @@ _lesson_type(
     resolve=_unconfirmed,
 )
 
+
+def _absence(payload: Any) -> list[Delivery]:
+    lesson, student_name, note = payload
+    base = {
+        "organisation": organisation(),
+        "lesson": lesson_context(lesson),
+        "absence": {"student": student_name, "note": note},
+    }
+    return [
+        Delivery(r, {**base, "recipient": {"name": r.name, "first_name": r.first_name}})
+        for r in lesson_people(lesson, clients=False)
+    ]
+
+
+_lesson_type(
+    "absence_notified",
+    _("Student will be absent (to the tutor)"),
+    audience="tutor",
+    default_channels=("email", "in_app"),
+    resolve=_absence,
+)
+
+
+def _report_comment(payload: Any) -> list[Delivery]:
+    report, author, body = payload
+    r = tutor_recipient(report.tutor)
+    return [
+        Delivery(
+            r,
+            {
+                "organisation": organisation(),
+                "recipient": {"name": r.name, "first_name": r.first_name},
+                "report": report_context(report),
+                "comment": {"author": author, "body": body},
+            },
+        )
+    ]
+
+
+register(
+    NotificationType(
+        key="report_comment",
+        label=str(_("Family replied to a report (to the tutor)")),
+        category="reports",
+        audience="tutor",
+        channels=("email", "in_app"),
+        default_channels=("email", "in_app"),
+        resolve=_report_comment,
+        load=load_report,
+        related_type="delivery.lessonreport",
+        variables=(*REPORT_VARS, "comment.author", "comment.body"),
+        sample={
+            **SAMPLE_BASE,
+            "report": SAMPLE_REPORT,
+            "comment": {"author": "Priya Patel", "body": "Thank you!"},
+        },
+        link=lambda payload: f"/reports/{payload[0].pk}",
+    )
+)
+
 # --- billing ------------------------------------------------------------------------------------
 
 
@@ -714,6 +774,7 @@ for _key, _label, _code in (
     ("staff_completion_blocked", _("Lesson blocked: client needs credit"), "billing.invoice.view"),
     ("staff_payment_failed", _("Automatic payment failed after retries"), "payments.payment.view"),
     ("staff_dispute", _("Card payment disputed"), "payments.payment.view"),
+    ("staff_profile_change", _("A family changed sensitive details"), "people.student.edit"),
 ):
     register(
         NotificationType(

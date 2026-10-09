@@ -69,7 +69,9 @@ def _attendance_inputs(
     inputs: list[scheduling.AttendanceInput] = []
     for attendee in lesson.attendees.order_by("created_at", "id"):
         row = given.get(str(attendee.pk))
-        outcome = row.outcome if row else LessonAttendee.Outcome.PRESENT
+        # An absence notice given beforehand stays unless the register says otherwise.
+        expected = attendee.outcome if lesson.status == Lesson.Status.PLANNED else ""
+        outcome = row.outcome if row else (expected or LessonAttendee.Outcome.PRESENT)
         if outcome not in LessonAttendee.Outcome.values:
             raise _invalid("attendance", _("Unknown attendance outcome."))
         charge, _pay = policies.attendance_percents(policy, outcome)
@@ -264,6 +266,24 @@ def cancel_lesson(
             )
     result.lesson, result.record = lesson, record
     return result
+
+
+def notify_absence(lesson: Lesson, student: Any, *, note: str = "", user: Any = None) -> Any:
+    """A family reports that a student will miss a lesson (FR-15-4). A lesson only for
+    them is cancelled by the client (the policy decides any fee); in a group lesson the
+    student is marked absent-notified with the policy's charge."""
+    attendee = lesson.attendees.filter(student=student).first()
+    if attendee is None:
+        raise _invalid("student", _("That student isn't in this lesson."))
+    if lesson.status != Lesson.Status.PLANNED or lesson.end <= now():
+        raise BusinessRuleViolation(_("This lesson can no longer be changed."))
+    if lesson.attendees.count() == 1:
+        return cancel_lesson(lesson, user=user, cancelled_by="client", reason=note or _("Absent"))
+    policy = policies.resolve(lesson)
+    charge, _pay = policies.attendance_percents(policy, LessonAttendee.Outcome.ABSENT_NOTIFIED)
+    return scheduling.set_expected_absence(
+        lesson, attendee, charge_percent=charge, note=note, recorded_by=user
+    )
 
 
 # --- policies -----------------------------------------------------------------------------------

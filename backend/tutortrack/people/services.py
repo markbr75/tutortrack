@@ -474,3 +474,42 @@ def link_membership(tutor: TutorProfile, membership: Any) -> TutorProfile:
         if tutor.status in {TutorProfile.Status.APPLICANT, TutorProfile.Status.ONBOARDING}:
             change_tutor_status(tutor, TutorProfile.Status.ACTIVE)
     return tutor
+
+
+@transaction.atomic
+def link_portal_user(target_type: str, target_id: str, user: Any) -> Any:
+    """Give a contact (parent) or student their portal login (E15)."""
+    model = {"people.contact": Contact, "people.student": Student}.get(target_type)
+    if model is None:
+        return None
+    record = model.objects.filter(pk=target_id).first()
+    if record is not None and record.user_id is None:
+        with audit.track(record, action="link_portal_user"):
+            record.user = user
+            record.save(update_fields=["user", "updated_at"])
+    return record
+
+
+@transaction.atomic
+def invite_to_portal(record: Contact | Student, *, email: str = "") -> Any:
+    """Invite a contact (parent role) or a student (student role) to the portal."""
+    from tutortrack.identity.models import Invitation, Membership
+    from tutortrack.identity.services import invite
+
+    is_contact = isinstance(record, Contact)
+    address = (email or (record.email if isinstance(record, Contact) else "")).strip().lower()
+    if not address:
+        raise BusinessRuleViolation(
+            _("Add an email address first."), extra={"errors": {"email": [_("Required.")]}}
+        )
+    if record.user_id is not None:
+        raise BusinessRuleViolation(_("They already have a portal login."))
+    pending = Invitation.objects.filter(email=address, status=Invitation.Status.PENDING).first()
+    if pending is not None:
+        return pending
+    return invite(
+        address,
+        role=Membership.Role.CLIENT if is_contact else Membership.Role.STUDENT,
+        target_type="people.contact" if is_contact else "people.student",
+        target_id=str(record.pk),
+    )
