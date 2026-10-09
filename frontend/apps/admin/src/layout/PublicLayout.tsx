@@ -1,4 +1,5 @@
 import { useTranslation } from "@tutortrack/i18n";
+import { CookieBanner } from "@tutortrack/ui";
 import type { ReactNode } from "react";
 
 /** Centred card for pages outside the signed-in app (signup, verification, onboarding). */
@@ -22,6 +23,19 @@ export function PublicLayout({
         {subtitle ? <p className="mt-1 text-muted-foreground">{subtitle}</p> : null}
         <div className="mt-6">{children}</div>
       </div>
+      <CookieBanner
+        labels={{
+          title: t("cookies.title"),
+          body: t("cookies.body"),
+          acceptAll: t("cookies.acceptAll"),
+          rejectAll: t("cookies.rejectAll"),
+          customise: t("cookies.customise"),
+          save: t("cookies.save"),
+          analytics: t("cookies.analytics"),
+          marketing: t("cookies.marketing"),
+          necessary: t("cookies.necessary"),
+        }}
+      />
     </main>
   );
 }

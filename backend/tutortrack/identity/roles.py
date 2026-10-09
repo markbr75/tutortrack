@@ -64,7 +64,8 @@ ROLES: dict[str, RoleDef] = {
             "People, jobs, scheduling, communications and leads; can view invoices.",
             _g("people.*", "jobs.*", "scheduling.*", "delivery.*", "comms.*", "leads.*",
                "matching.*", "billing.invoice.view", "billing.rates.view_charge",
-               "org.settings.view", "team.view"),
+               "org.settings.view", "team.view", "privacy.consent.view",
+               "privacy.consent.record"),
         ),
         RoleDef(
             "finance", "Finance",

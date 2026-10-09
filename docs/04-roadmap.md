@@ -74,7 +74,7 @@ All ─► E26, E27, E28, E31
 | E02 | ✅ Done (2026-10-09) | Incl. E02-TW1 (closure workflow, built with E32). Follow-ups in E04, E05, E06, E11, E24 |
 | E03 | ✅ Done (2026-10-09) | Phase 1 scope (T08/T11/T12 are Phase 2). See Implementation notes |
 | E04 | ☐ | |
-| E05 | ☐ | |
+| E05 | ⏭ Next | |
 | E06 | ☐ | |
 | E07 | ☐ | |
 | E08 | ☐ | |
@@ -98,7 +98,7 @@ All ─► E26, E27, E28, E31
 | E26 | ☐ | |
 | E27 | ☐ | |
 | E28 | ☐ | |
-| E29 | ⏭ Next | `core.crypto.EncryptedField` already exists (E03); add KMS keys and consume `organisation.deletion_due` |
+| E29 | 🟡 Part 1 done (2026-10-09) | T01–T04 (security baseline, KMS encryption, audit search, consent). Part 2 (T05–T12, TW1) in Phase 3 |
 | E30 | ☐ | |
 | E31 | ☐ | |
 | E32 | ✅ Done (2026-10-09) | Runtime, bridge, codec, timers, schedules, processes API, test harness; reference + closure workflows |

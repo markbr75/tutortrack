@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "tutortrack.tenancy",
     "tutortrack.identity",
     "tutortrack.workflows",
+    "tutortrack.privacy",
 ]
 
 MIDDLEWARE = [

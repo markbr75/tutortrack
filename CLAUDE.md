@@ -31,7 +31,7 @@ Python 3.12 · Django 5 · DRF + drf-spectacular · PostgreSQL 16 · Celery + Re
 8. **API:** `/api/v1/`, cursor pagination, RFC 7807 errors, `Idempotency-Key` on financial POSTs, OpenAPI documented with examples.
 9. **Migrations:** backward compatible (expand/contract). Add RLS policies for new tenant tables via `core.migrations_utils.enable_rls` (available from E02).
 10. **Tests first:** every FR in the ticket gets a test. Use `factory_boy` factories in `<app>/tests/factories.py` (tenant models subclass `core.tests.factories.TenantFactory`). Shared fixtures (`org`, `other_org`, `tenant`, `member`, `api`, `admin_api`, `s3`, `fake_redis`, `temporal_env`, `temporal_local_env`) live in `backend/conftest.py`. The suite runs as the RLS-restricted app role. Dev seed data goes in `<app>/seeds.py` via `@seed_step(order=N)`; in-product sample data in `<app>/demo.py` via `@demo_provider`. Org settings are registered in `<app>/org_settings.py`. Use Hypothesis for money, recurrence and proration logic.
-11. **Secrets/PII:** secrets (MFA, OAuth tokens), bank details and safeguarding notes use `core.crypto.EncryptedField` (Fernet keys in `FIELD_ENCRYPTION_KEYS`; KMS in E29). Never log PII or tokens.
+11. **Secrets/PII:** secrets (MFA, OAuth tokens), bank details and safeguarding notes use `core.crypto.EncryptedField` (Fernet keys in `FIELD_ENCRYPTION_KEYS`; KMS in E29). Never log PII or tokens. Fetch user-influenced URLs only through `core.net.safe_url`/`safe_urlopen` (SSRF). Log reads of sensitive data with `audit.record_read`.
 12. **i18n:** wrap user-facing strings (`gettext` / `t()`). No hard-coded currency symbols or date formats.
 13. **Accessibility:** WCAG 2.2 AA for all UI.
 

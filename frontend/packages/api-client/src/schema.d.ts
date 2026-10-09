@@ -279,6 +279,100 @@ export interface paths {
     patch: operations["branches_partial_update"];
     trace?: never;
   };
+  "/api/v1/consent-types": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Consent types. Edit wording freely; use ``new-version`` for material changes. */
+    get: operations["consent_types_list"];
+    put?: never;
+    /** @description Consent types. Edit wording freely; use ``new-version`` for material changes. */
+    post: operations["consent_types_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/consent-types/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Consent types. Edit wording freely; use ``new-version`` for material changes. */
+    get: operations["consent_types_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Consent types. Edit wording freely; use ``new-version`` for material changes. */
+    patch: operations["consent_types_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/consent-types/{id}/new-version": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Everyone who consented to an older version is asked again. */
+    post: operations["consent_types_new_version_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/consents": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Consent history (append-only). ``POST`` records a grant or withdrawal on someone's
+     *     behalf (paper form, phone call); people use ``/me/consents`` themselves.
+     */
+    get: operations["consents_list"];
+    put?: never;
+    /**
+     * @description Consent history (append-only). ``POST`` records a grant or withdrawal on someone's
+     *     behalf (paper form, phone call); people use ``/me/consents`` themselves.
+     */
+    post: operations["consents_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/consents/status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Current consent per type for one person. */
+    get: operations["consents_status_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/demo-data": {
     parameters: {
       query?: never;
@@ -535,6 +629,24 @@ export interface paths {
     head?: never;
     /** @description Who am I here: profile, organisation, role, effective permissions, features. */
     patch: operations["me_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/me/consents": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Your own consents in this organisation: see, give or withdraw (portal, FR-29-3). */
+    get: operations["me_consents_list"];
+    put?: never;
+    /** @description Your own consents in this organisation: see, give or withdraw (portal, FR-29-3). */
+    post: operations["me_consents_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/me/logins": {
@@ -1190,6 +1302,26 @@ export interface components {
      * @enum {string}
      */
     BusinessTypeEnum: "sole_trader" | "team" | "agency" | "centre" | "online";
+    /**
+     * @description * `data_processing` - Data processing
+     *     * `photo_video` - Photos and video
+     *     * `marketing_email` - Marketing email
+     *     * `marketing_sms` - Marketing SMS
+     *     * `lesson_recording` - Lesson recording
+     *     * `terms_of_service` - Terms of service
+     *     * `privacy_policy` - Privacy policy
+     *     * `other` - Other
+     * @enum {string}
+     */
+    CategoryEnum:
+      | "data_processing"
+      | "photo_video"
+      | "marketing_email"
+      | "marketing_sms"
+      | "lesson_recording"
+      | "terms_of_service"
+      | "privacy_policy"
+      | "other";
     CloseOrganisationRequest: {
       password: string;
       /** @description Type the organisation's subdomain. */
@@ -1203,6 +1335,99 @@ export interface components {
     };
     CodeRequest: {
       code: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    ConsentRecord: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly consent_type: string;
+      readonly version: number;
+      readonly subject_type: string;
+      readonly subject_id: string;
+      readonly granted: boolean;
+      readonly method: components["schemas"]["ConsentRecordMethodEnum"];
+      /** Format: uuid */
+      readonly given_by: string | null;
+      readonly given_by_name: string;
+      readonly on_behalf_of_child: boolean;
+      readonly ip: string | null;
+      /** Format: date-time */
+      readonly recorded_at: string;
+    };
+    /**
+     * @description * `form` - Public form
+     *     * `portal` - Portal
+     *     * `import` - Import
+     *     * `staff` - Recorded by staff
+     *     * `signup` - Signup
+     * @enum {string}
+     */
+    ConsentRecordMethodEnum: "form" | "portal" | "import" | "staff" | "signup";
+    ConsentStatus: {
+      key: string;
+      name: string;
+      category: string;
+      required: boolean;
+      current_version: number;
+      granted: boolean | null;
+      version: number | null;
+      /** Format: date-time */
+      recorded_at: string | null;
+      needs_reconsent: boolean;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    ConsentType: {
+      /** Format: uuid */
+      readonly id: string;
+      key: string;
+      name: string;
+      description?: string;
+      category: components["schemas"]["CategoryEnum"];
+      readonly version: number;
+      document_url?: string;
+      required?: boolean;
+      applies_to?: unknown;
+      is_active?: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    ConsentTypeRequest: {
+      key: string;
+      name: string;
+      description?: string;
+      category: components["schemas"]["CategoryEnum"];
+      document_url?: string;
+      required?: boolean;
+      applies_to?: unknown;
+      is_active?: boolean;
     };
     /**
      * @description * `locale` - Locale default
@@ -1420,6 +1645,10 @@ export interface components {
      * @enum {string}
      */
     ModeEnum: "solo" | "multi";
+    MyConsentRequest: {
+      consent_type: string;
+      granted: boolean;
+    };
     MyOrganisation: {
       /** Format: uuid */
       id: string;
@@ -1532,6 +1761,45 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Branch"][];
     };
+    PaginatedConsentRecordList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ConsentRecord"][];
+    };
+    PaginatedConsentStatusList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ConsentStatus"][];
+    };
+    PaginatedConsentTypeList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ConsentType"][];
+    };
     PaginatedInvitationList: {
       /**
        * Format: uri
@@ -1618,6 +1886,26 @@ export interface components {
       email_sender_name?: string;
       email_sender_address?: string;
       invoice_prefix?: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    PatchedConsentTypeRequest: {
+      key?: string;
+      name?: string;
+      description?: string;
+      category?: components["schemas"]["CategoryEnum"];
+      document_url?: string;
+      required?: boolean;
+      applies_to?: unknown;
+      is_active?: boolean;
     };
     PatchedMembershipUpdateRequest: {
       role?: components["schemas"]["RoleEnum"];
@@ -1770,6 +2058,24 @@ export interface components {
       "running" | "completed" | "failed" | "cancelled" | "terminated" | "timed_out";
     ReasonRequest: {
       reason: string;
+    };
+    /**
+     * @description * `staff` - staff
+     *     * `form` - form
+     *     * `import` - import
+     * @enum {string}
+     */
+    RecordConsentMethodEnum: "staff" | "form" | "import";
+    RecordConsentRequest: {
+      subject_type: string;
+      subject_id: string;
+      consent_type: string;
+      granted: boolean;
+      /** @default staff */
+      method: components["schemas"]["RecordConsentMethodEnum"];
+      given_by_name?: string;
+      /** @default false */
+      on_behalf_of_child: boolean;
     };
     RecoveryCodes: {
       /** @description Shown once. Each works one time. */
@@ -2545,6 +2851,228 @@ export interface operations {
       };
     };
   };
+  consent_types_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedConsentTypeList"];
+        };
+      };
+    };
+  };
+  consent_types_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ConsentTypeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ConsentTypeRequest"];
+        "multipart/form-data": components["schemas"]["ConsentTypeRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ConsentType"];
+        };
+      };
+    };
+  };
+  consent_types_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this consent type. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ConsentType"];
+        };
+      };
+    };
+  };
+  consent_types_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this consent type. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedConsentTypeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedConsentTypeRequest"];
+        "multipart/form-data": components["schemas"]["PatchedConsentTypeRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ConsentType"];
+        };
+      };
+    };
+  };
+  consent_types_new_version_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this consent type. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ConsentType"];
+        };
+      };
+    };
+  };
+  consents_list: {
+    parameters: {
+      query?: {
+        consent_type?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        subject_id?: string;
+        subject_type?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedConsentRecordList"];
+        };
+      };
+    };
+  };
+  consents_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RecordConsentRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RecordConsentRequest"];
+        "multipart/form-data": components["schemas"]["RecordConsentRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ConsentRecord"];
+        };
+      };
+    };
+  };
+  consents_status_list: {
+    parameters: {
+      query?: {
+        consent_type?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        subject_id?: string;
+        subject_type?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedConsentStatusList"];
+        };
+      };
+    };
+  };
   demo_data_create: {
     parameters: {
       query?: never;
@@ -3024,6 +3552,53 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Me"];
+        };
+      };
+    };
+  };
+  me_consents_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ConsentStatus"][];
+        };
+      };
+    };
+  };
+  me_consents_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MyConsentRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["MyConsentRequest"];
+        "multipart/form-data": components["schemas"]["MyConsentRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ConsentStatus"][];
         };
       };
     };
