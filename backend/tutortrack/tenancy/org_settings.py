@@ -140,3 +140,12 @@ register(
         ("packages", _("Prepaid packages")),
     ),
 )
+register(
+    "privacy.closure_grace_days",
+    type="int",
+    default=30,
+    min_value=1,
+    max_value=365,
+    label=_("Days to keep a closed account before deletion"),
+    help_text=_("Used by the account closure process (FR-02-8). E29 owns the privacy area."),
+)

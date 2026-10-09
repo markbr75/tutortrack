@@ -127,3 +127,23 @@ def _clear_cache() -> Iterator[None]:
     cache.clear()
     yield
     cache.clear()
+
+
+@pytest.fixture
+def temporal_env() -> Iterator[Any]:
+    """Time-skipping Temporal server + workers for every registered task queue (E32).
+    Tests that let activities touch the database need ``django_db(transaction=True)``."""
+    from tutortrack.core.workflows.testing import temporal_test_env
+
+    with temporal_test_env() as env:
+        yield env
+
+
+@pytest.fixture
+def temporal_local_env() -> Iterator[Any]:
+    """A real (in-memory) Temporal dev server + workers: for Schedules, which the
+    time-skipping server does not implement."""
+    from tutortrack.core.workflows.testing import temporal_test_env
+
+    with temporal_test_env(kind="local") as env:
+        yield env

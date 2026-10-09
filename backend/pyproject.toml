@@ -32,6 +32,7 @@ dependencies = [
     "zxcvbn>=4.5",
     "pyjwt[crypto]>=2.10",
     "segno>=1.6",
+    "temporalio>=1.11",
 ]
 
 [dependency-groups]

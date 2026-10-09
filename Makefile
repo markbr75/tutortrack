@@ -22,9 +22,10 @@ dev: ## Start the full stack in Docker (backend, worker, beat, frontend, infra)
 	@echo "API:        http://localhost:8010/api/v1/docs/"
 	@echo "Mailpit:    http://localhost:8025"
 	@echo "S3 (local): http://localhost:9010"
+	@echo "Temporal:   http://localhost:8233"
 
-infra: ## Start only backing services (postgres, redis, s3, mailpit)
-	docker compose up -d postgres redis s3 mailpit
+infra: ## Start only backing services (postgres, redis, s3, mailpit, temporal)
+	docker compose up -d postgres redis s3 mailpit temporal
 
 down: ## Stop the stack
 	docker compose down

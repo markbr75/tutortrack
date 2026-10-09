@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "tutortrack.core",
     "tutortrack.tenancy",
     "tutortrack.identity",
+    "tutortrack.workflows",
 ]
 
 MIDDLEWARE = [
@@ -264,9 +265,33 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "COMPONENT_SPLIT_REQUEST": True,
-    "ENUM_NAME_OVERRIDES": {},
+    "ENUM_NAME_OVERRIDES": {
+        "ProcessStatusEnum": "tutortrack.core.models.workflows.WorkflowLink.Status",
+    },
     "POSTPROCESSING_HOOKS": ["drf_spectacular.hooks.postprocess_schema_enums"],
 }
+
+# --- Temporal (E32) ---------------------------------------------------------------------------
+TEMPORAL = {
+    "ADDRESS": env("TEMPORAL_ADDRESS", default="localhost:7233"),
+    "NAMESPACE": env("TEMPORAL_NAMESPACE", default="tutortrack-local"),
+    "TLS_CERT": env("TEMPORAL_TLS_CERT", default=""),  # file path (mTLS, Temporal Cloud)
+    "TLS_KEY": env("TEMPORAL_TLS_KEY", default=""),
+    "API_KEY": env("TEMPORAL_API_KEY", default=""),  # alternative to mTLS on Temporal Cloud
+    # Task queues mirror the Celery queues (E32 FR-32-2).
+    "TASK_QUEUES": ["default", "billing", "payroll", "comms", "integrations", "imports", "privacy"],
+    # Search attributes must be registered on the namespace (docker-compose does it locally).
+    "SEARCH_ATTRIBUTES": env.bool("TEMPORAL_SEARCH_ATTRIBUTES", default=True),
+}
+# Origins allowed to call /temporal-codec (the Temporal Web UI), e.g. https://cloud.temporal.io
+TEMPORAL_CODEC_CORS_ORIGINS = env.list(
+    "TEMPORAL_CODEC_CORS_ORIGINS", default=["http://localhost:8233"]
+)
+# AES-256-GCM keys for workflow payloads, newest first: "<key id>:<base64 32 bytes>".
+TEMPORAL_PAYLOAD_KEYS = env.list(
+    "TEMPORAL_PAYLOAD_KEYS",
+    default=["dev1:3q2+7wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhs="],
+)
 
 # --- Outbox -----------------------------------------------------------------------------------
 OUTBOX = {

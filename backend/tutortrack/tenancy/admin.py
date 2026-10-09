@@ -18,7 +18,7 @@ class OrganisationAdmin(admin.ModelAdmin):
     search_fields = ("name", "slug", "contact_email")
     list_filter = ("status", "business_type", "region")
     readonly_fields = ("status", "suspended_at", "suspension_reason", "closed_at", "created_by")
-    actions = ["suspend", "reactivate"]
+    actions = ["suspend", "reactivate", "reopen"]
 
     @admin.action(description="Suspend (read-only for owners/admins)")
     def suspend(self, request: HttpRequest, queryset: QuerySet[Organisation]) -> None:
@@ -33,6 +33,15 @@ class OrganisationAdmin(admin.ModelAdmin):
     @admin.action(description="Reactivate")
     def reactivate(self, request: HttpRequest, queryset: QuerySet[Organisation]) -> None:
         self._run(request, queryset, lifecycle.reactivate_organisation)
+
+    @admin.action(description="Reopen a closed account (during the grace period)")
+    def reopen(self, request: HttpRequest, queryset: QuerySet[Organisation]) -> None:
+        for org in queryset:
+            try:
+                if not lifecycle.request_reopen(org):
+                    self.message_user(request, f"{org}: closure already finished", messages.ERROR)
+            except DomainError as exc:
+                self.message_user(request, f"{org}: {exc.detail}", messages.ERROR)
 
     def _run(self, request: HttpRequest, queryset: QuerySet[Organisation], action: Any) -> None:
         for org in queryset:

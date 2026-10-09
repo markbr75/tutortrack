@@ -294,5 +294,29 @@
     "banner": "You're viewing as {{name}}.",
     "readOnly": "Read-only.",
     "stop": "Stop viewing as"
+  },
+  "processes": {
+    "title": "Processes",
+    "status": {
+      "running": "In progress",
+      "completed": "Completed",
+      "failed": "Failed",
+      "cancelled": "Cancelled",
+      "terminated": "Stopped",
+      "timed_out": "Timed out"
+    },
+    "names": {
+      "org-closure": "Account closure",
+      "demo-reminder": "Reminder"
+    },
+    "steps": {
+      "exporting": "Exporting data",
+      "grace_period": "Grace period",
+      "reopened": "Reopened",
+      "deletion_due": "Deletion due",
+      "waiting": "Waiting",
+      "done": "Done",
+      "cancel_requested": "Cancelling"
+    }
   }
 }

@@ -10,6 +10,8 @@ from ..models import OutboxEvent
 from ..time import now
 from .base import DomainEvent, EventEnvelope, to_json_safe
 
+_DEDUPE_NAMESPACE = uuid.UUID("6f2b8a52-6d0c-4c55-9b5c-0e9a6f1c2d31")
+
 
 class PublishOutsideTransaction(RuntimeError):
     pass
@@ -17,6 +19,8 @@ class PublishOutsideTransaction(RuntimeError):
 
 def _default_actor() -> dict[str, Any]:
     ctx = get_request_context()
+    if ctx.workflow_id is not None:
+        return {"type": "workflow", "id": ctx.workflow_id}
     if ctx.user_id is None:
         return {"type": "system", "id": None}
     actor: dict[str, Any] = {"type": "user", "id": str(ctx.user_id)}
@@ -32,11 +36,15 @@ def publish(
     branch_id: uuid.UUID | None = None,
     actor: dict[str, Any] | None = None,
     changes: dict[str, Any] | None = None,
+    dedupe_key: str | None = None,
 ) -> OutboxEvent:
     """Record ``event`` in the transactional outbox.
 
     Must be called inside ``transaction.atomic()`` so the event commits (or rolls back)
     together with the state change it describes. Dispatch happens after commit.
+
+    ``dedupe_key`` makes publishing idempotent: the event id is derived from it, so a
+    retried caller (e.g. a Temporal activity) publishes the event once.
     """
     if not connection.in_atomic_block:
         raise PublishOutsideTransaction(
@@ -44,6 +52,11 @@ def publish(
         )
     org_id = organisation_id or current_organisation_id()
     occurred_at = now()
+    if dedupe_key is not None:
+        event_id = uuid.uuid5(_DEDUPE_NAMESPACE, dedupe_key)
+        existing = OutboxEvent.objects.filter(pk=event_id).first()
+        if existing is not None:
+            return existing
     outbox = OutboxEvent(
         organisation_id=org_id,
         event_type=event.event_type,
@@ -52,6 +65,8 @@ def publish(
         available_at=occurred_at,
         payload={},
     )
+    if dedupe_key is not None:
+        outbox.id = event_id
     envelope = EventEnvelope(
         id=outbox.id,
         type=event.event_type,

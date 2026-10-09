@@ -75,7 +75,7 @@ resource "aws_iam_role_policy" "task_s3" {
 locals {
   # The owner credentials only reach the migrate task; every other process connects as the
   # RLS-restricted application role (FR-02-4).
-  secret_keys = ["DJANGO_SECRET_KEY", "DATABASE_URL", "DATABASE_PLATFORM_URL", "REDIS_URL", "CELERY_BROKER_URL", "TURNSTILE_SECRET_KEY", "FIELD_ENCRYPTION_KEYS", "GOOGLE_CLIENT_SECRET", "MICROSOFT_CLIENT_SECRET"]
+  secret_keys = ["DJANGO_SECRET_KEY", "DATABASE_URL", "DATABASE_PLATFORM_URL", "REDIS_URL", "CELERY_BROKER_URL", "TURNSTILE_SECRET_KEY", "FIELD_ENCRYPTION_KEYS", "GOOGLE_CLIENT_SECRET", "MICROSOFT_CLIENT_SECRET", "TEMPORAL_API_KEY", "TEMPORAL_PAYLOAD_KEYS"]
 
   container_base = {
     image     = var.backend_image
@@ -88,6 +88,8 @@ locals {
       { name = "AWS_S3_REGION_NAME", value = var.region },
       { name = "CLAMAV_ENABLED", value = "true" },
       { name = "LOG_JSON", value = "true" },
+      { name = "TEMPORAL_ADDRESS", value = var.temporal_address },
+      { name = "TEMPORAL_NAMESPACE", value = var.temporal_namespace },
     ]
   }
 
@@ -95,6 +97,8 @@ locals {
     web     = { command = null, cpu = 512, memory = 1024, port = true, extra_secrets = [] }
     worker  = { command = ["celery", "-A", "config", "worker", "-l", "INFO", "-Q", "default,outbox,notifications,billing,integrations,imports,reports"], cpu = 512, memory = 1024, port = false, extra_secrets = [] }
     beat    = { command = ["celery", "-A", "config", "beat", "-l", "INFO"], cpu = 256, memory = 512, port = false, extra_secrets = [] }
+    # Temporal workers (E32): every task queue; split per queue when load needs it.
+    temporal-worker = { command = ["python", "manage.py", "temporal_worker", "--task-queue", "all"], cpu = 512, memory = 1024, port = false, extra_secrets = [] }
     migrate = { command = ["sh", "-c", "python manage.py ensure_db_roles && python manage.py migrate --noinput"], cpu = 256, memory = 512, port = false, extra_secrets = ["DATABASE_OWNER_URL"] }
   }
 }
@@ -192,6 +196,9 @@ locals {
     web    = var.web_desired_count
     worker = var.worker_desired_count
     beat   = 1 # exactly one scheduler
+    # Temporal workers (E32). New revisions roll out alongside old ones, which keep
+    # polling until they drain (Worker Versioning handles breaking workflow changes).
+    temporal-worker = var.temporal_worker_desired_count
   }
 }
 

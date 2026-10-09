@@ -161,6 +161,57 @@ Alternatives considered: FastAPI (rejected: we would rebuild admin, auth, migrat
 - Per-tenant recurring processes (invoice runs, pay-run cut-offs, retention purges) use **Temporal Schedules**; global housekeeping crons stay on Celery Beat.
 - Workflow payloads are encrypted with a KMS-backed codec; payloads carry IDs, not documents.
 
+### Writing a workflow (pattern; reference: `tutortrack/workflows/demo.py`)
+
+```python
+# <app>/activities.py (or alongside the workflow) - side effects, idempotent
+@dataclass(frozen=True, kw_only=True)
+class DunningInput(WorkflowInput):          # first field: organisation_id (from WorkflowInput)
+    invoice_id: str
+
+@tenant_activity                            # runs in tenant_context, actor = the workflow
+def send_reminder(input: DunningInput) -> None:
+    with transaction.atomic():
+        services.send_reminder(input.invoice_id)
+        publish(ReminderSent(...), dedupe_key=idempotency_key())   # once per activity
+
+# <app>/workflows.py - deterministic orchestration only (no ORM/network/clock)
+@register_workflow(process="invoice-dunning", task_queue="billing",
+                   cancel_permission="billing.invoice.manage")
+@workflow.defn
+class InvoiceDunningWorkflow:
+    @workflow.signal
+    def paid(self) -> None: self.done = True
+    @workflow.query
+    def state(self) -> dict[str, str]: return {"step": self.step}
+    @workflow.run
+    async def run(self, input: DunningInput) -> str:
+        settings = await workflow.execute_activity(snapshot_settings, ...)  # snapshot once
+        await report_step(input, "waiting")                                # process timeline
+        if await wait_until_local(due, calendar, until=lambda: self.done): ...
+        await workflow.execute_activity(send_reminder, input, start_to_close_timeout=...)
+
+# <app>/handlers.py - start/signal from domain events (idempotent by workflow id)
+bridge.on("invoice.issued", start=InvoiceDunningWorkflow,
+          id=lambda e: workflow_id("invoice-dunning", e.organisation_id, e.subject["id"]),
+          input=lambda e: DunningInput(organisation_id=str(e.organisation_id),
+                                       invoice_id=e.subject["id"]))
+bridge.on("payment.succeeded", signal="paid",
+          id=lambda e: workflow_id("invoice-dunning", e.organisation_id, e.data["invoice_id"]))
+```
+
+- From services use `core.workflows.start()` / `signal()` (after commit); human decisions are
+  API endpoints that call `signal()`.
+- Per-tenant recurring processes: `core.workflows.schedules.ensure_schedule(...)`; they pause
+  with the organisation on suspension and are deleted on closure.
+- Tests: the `temporal_env` fixture (time-skipping; `env.result(id)` skips timers),
+  `temporal_local_env` for Schedules; workflow tests that run activities use
+  `django_db(transaction=True)`. Ship a happy-path, signal, timer, retry and **replay** test
+  (record histories into `backend/tests/workflow_histories/`, see its README). Breaking a
+  replay means `workflow.patched()` or Worker Versioning, never re-recording.
+- Locally `make infra` starts the Temporal dev server (UI on http://localhost:8233); run
+  workers with `manage.py temporal_worker --task-queue all`.
+
 ### Celery Beat (global crons)
 
 Centralised in `config/celery_schedule.py`. Jobs must be **idempotent and tenant-sharded**: a master task fans out one task per active organisation. Examples: reminder dispatch (every 5 min), auto-invoice generation (hourly, per org's configured schedule), dunning (daily), calendar sync (every 5 min, plus push channels), compliance expiry checks (daily), payout runs (per schedule), outbox dispatch (continuous), webhook retries (exponential backoff).

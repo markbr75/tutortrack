@@ -24,4 +24,9 @@ Notes:
   `tutortrack_platform` (`BYPASSRLS`). Not yet verified against RDS: creating a `BYPASSRLS`
   role needs a superuser-equivalent, so check on the first apply that the master user is
   allowed to; if not, create `tutortrack_platform` once by hand.
+- Temporal (E32): Temporal Cloud is used in every hosted environment (one namespace per
+  environment; set `temporal_address`/`temporal_namespace` and the `TEMPORAL_API_KEY` and
+  `TEMPORAL_PAYLOAD_KEYS` secrets). The `temporal-worker` ECS service polls every task
+  queue. Self-hosting Temporal (server on ECS with its own RDS) is possible but not built.
+  Alarms on workflow task failures, retry storms and schedule backlog arrive with E30.
 - Task definitions and services ignore image changes: CI registers new revisions on deploy.

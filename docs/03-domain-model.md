@@ -114,7 +114,7 @@ Naming: `<aggregate>.<past_tense_verb>`. Each epic lists its events; this table 
 
 | Event | Emitted by |
 |---|---|
-| `organisation.created`, `organisation.updated`, `organisation.settings_updated`, `organisation.suspended`, `organisation.reactivated`, `organisation.closed`, `branch.created`, `branch.updated`, `branch.archived`, `onboarding.step_completed`, `onboarding.completed` | E02 |
+| `organisation.created`, `organisation.updated`, `organisation.settings_updated`, `organisation.suspended`, `organisation.reactivated`, `organisation.closed`, `branch.created`, `branch.updated`, `branch.archived`, `onboarding.step_completed`, `onboarding.completed`, `organisation.export_requested`, `organisation.deletion_due` | E02 |
 | `user.invited`, `user.joined`, `user.logged_in`, `user.mfa_enabled`, `membership.role_changed`, `membership.deactivated`, `impersonation.started`, `impersonation.ended` | E03 |
 | `subscription.started`, `subscription.changed`, `subscription.past_due`, `subscription.cancelled` | E04 |
 | `client.created/updated/archived`, `contact.created/updated`, `student.created/updated/status_changed`, `tutor.created/updated/status_changed`, `note.created`, `task.created/completed`, `document.uploaded` | E05 |

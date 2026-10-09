@@ -15,6 +15,7 @@ x-backend-env: &backend-env
   AWS_S3_PUBLIC_ENDPOINT_URL: http://localhost:9010
   CLAMAV_HOST: clamav
   EMAIL_URL: smtp://mailpit:1025
+  TEMPORAL_ADDRESS: temporal:7233
 
 x-backend: &backend
   build:
@@ -77,6 +78,22 @@ services:
       timeout: 3s
       retries: 30
 
+  temporal:
+    # Temporal dev server (E32): gRPC on 7233, Web UI on http://localhost:8233.
+    # Production uses Temporal Cloud. Search attributes match core.workflows.SEARCH_ATTRIBUTES.
+    image: temporalio/temporal:1.9.1
+    command: >-
+      server start-dev --ip 0.0.0.0 --namespace tutortrack-local
+      --search-attribute OrganisationId=Keyword --search-attribute BranchId=Keyword
+      --search-attribute SubjectType=Keyword --search-attribute SubjectId=Keyword
+      --search-attribute TutorTrackProcess=Keyword
+    ports: ["7233:7233", "8233:8233"]
+    healthcheck:
+      test: ["CMD", "temporal", "operator", "cluster", "health", "--address", "localhost:7233"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
   mailpit:
     image: axllent/mailpit:v1.24
     ports: ["8025:8025", "1025:1025"]
@@ -112,6 +129,15 @@ services:
   beat:
     <<: *backend
     command: uv run celery -A config beat -l INFO
+
+  temporal-worker:
+    <<: *backend
+    command: uv run python manage.py temporal_worker --task-queue all
+    depends_on:
+      postgres:
+        condition: service_healthy
+      temporal:
+        condition: service_healthy
 
   frontend:
     image: node:22-alpine

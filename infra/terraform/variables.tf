@@ -62,3 +62,21 @@ variable "worker_desired_count" {
   type    = number
   default = 1
 }
+
+variable "temporal_address" {
+  description = "Temporal Cloud gRPC endpoint, e.g. tutortrack-staging.abcde.tmprl.cloud:7233 (E32)"
+  type        = string
+  default     = ""
+}
+
+variable "temporal_namespace" {
+  description = "Temporal Cloud namespace for this environment (one per environment, not per tenant)"
+  type        = string
+  default     = ""
+}
+
+variable "temporal_worker_desired_count" {
+  description = "Temporal worker tasks"
+  type        = number
+  default     = 1
+}

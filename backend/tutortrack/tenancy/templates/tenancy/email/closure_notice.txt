@@ -1,0 +1,8 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with name=organisation.name %}The TutorTrack account for {{ name }} has been closed.{% endblocktranslate %}
+
+{% blocktranslate %}We will keep your data for {{ days }} days. It will be permanently deleted on or after {{ deletion_date }}.{% endblocktranslate %}
+
+{% translate "If you requested a data export, we'll email you a download link when it is ready." %}
+
+{% translate "Changed your mind? Contact support before the deletion date and we can reopen the account." %}
+{% endautoescape %}

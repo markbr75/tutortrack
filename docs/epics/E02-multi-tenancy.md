@@ -103,7 +103,7 @@ Typed settings stored in an `OrganisationSettings` model (one row per org) plus 
 
 Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
 
-- [ ] **E02-TW1** Organisation closure on Temporal (requires E32).
+- [x] **E02-TW1** Organisation closure on Temporal (requires E32). *(Built with E32: `tenancy/closure.py`.)*
 
 | Workflow | Started by | Steps, timers and signals | Replaces |
 |---|---|---|---|
@@ -147,6 +147,6 @@ these as the source of truth. Design rationale for RLS is in [ADR 0003](../adr/0
 - **E04:** start trial on `organisation.created`; plan-gate `multi_branch`; add billing paths to `SUSPENDED_ORG_WRITE_ALLOWLIST`; call `lifecycle.suspend_organisation`/`reactivate_organisation` on dunning.
 - **E05/E06/E11:** consume onboarding answers (first student, first service, Stripe); add demo providers.
 - **E24:** custom-domain verification/TLS on `OrganisationDomain`; dynamic CSRF origins.
-- **E32:** `OrganisationClosureWorkflow` (E02-TW1).
+- ~~**E32:** `OrganisationClosureWorkflow` (E02-TW1).~~ Done with E32.
 - **Infra:** confirm RDS lets the master user create a BYPASSRLS role (see `infra/terraform/README.md`).
 - Not built: Playwright wizard E2E (§8) — the e2e job needs the signup flow plus E03 login; add with E03-T13.

@@ -799,6 +799,91 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/processes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Durable processes linked to records, e.g. ``?subject_type=invoice&subject_id=…``. */
+    get: operations["processes_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/processes/{workflow_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Durable processes linked to records, e.g. ``?subject_type=invoice&subject_id=…``. */
+    get: operations["processes_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/processes/{workflow_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Durable processes linked to records, e.g. ``?subject_type=invoice&subject_id=…``. */
+    post: operations["processes_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/processes/{workflow_id}/restart": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Platform operations: start a failed/terminated process again with its input. */
+    post: operations["processes_restart_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/processes/{workflow_id}/terminate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Platform operations: stop a stuck process immediately (audited with a reason). */
+    post: operations["processes_terminate_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/roles": {
     parameters: {
       query?: never;
@@ -1406,6 +1491,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Membership"][];
     };
+    PaginatedProcessList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Process"][];
+    };
     PasswordChangeRequest: {
       current_password: string;
       new_password: string;
@@ -1522,6 +1620,76 @@ export interface components {
         [key: string]: string;
       };
       expires_in: number;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Process: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly workflow_id: string;
+      readonly process: string;
+      readonly workflow_type: string;
+      readonly subject_type: string;
+      readonly subject_id: string;
+      readonly status: components["schemas"]["ProcessStatusEnum"];
+      readonly current_step: string;
+      /** Format: date-time */
+      readonly started_at: string;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      readonly last_error: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    ProcessDetail: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly workflow_id: string;
+      readonly process: string;
+      readonly workflow_type: string;
+      readonly subject_type: string;
+      readonly subject_id: string;
+      readonly status: components["schemas"]["ProcessStatusEnum"];
+      readonly current_step: string;
+      /** Format: date-time */
+      readonly started_at: string;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      readonly last_error: string;
+      /** @description The workflow's own `state` query (current step, next deadline...), if any. */
+      live: {
+        [key: string]: unknown;
+      };
+    };
+    /**
+     * @description * `running` - Running
+     *     * `completed` - Completed
+     *     * `failed` - Failed
+     *     * `cancelled` - Cancelled
+     *     * `terminated` - Terminated
+     *     * `timed_out` - Timed Out
+     * @enum {string}
+     */
+    ProcessStatusEnum:
+      "running" | "completed" | "failed" | "cancelled" | "terminated" | "timed_out";
+    ReasonRequest: {
+      reason: string;
     };
     RecoveryCodes: {
       /** @description Shown once. Each works one time. */
@@ -3237,6 +3405,151 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Permission"][];
+        };
+      };
+    };
+  };
+  processes_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        process?: string;
+        /**
+         * @description * `running` - Running
+         *     * `completed` - Completed
+         *     * `failed` - Failed
+         *     * `cancelled` - Cancelled
+         *     * `terminated` - Terminated
+         *     * `timed_out` - Timed Out
+         */
+        status?: "cancelled" | "completed" | "failed" | "running" | "terminated" | "timed_out";
+        subject_id?: string;
+        subject_type?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedProcessList"];
+        };
+      };
+    };
+  };
+  processes_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workflow_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProcessDetail"];
+        };
+      };
+    };
+  };
+  processes_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        workflow_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Process"];
+        };
+      };
+    };
+  };
+  processes_restart_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        workflow_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReasonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReasonRequest"];
+        "multipart/form-data": components["schemas"]["ReasonRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Process"];
+        };
+      };
+    };
+  };
+  processes_terminate_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        workflow_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReasonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReasonRequest"];
+        "multipart/form-data": components["schemas"]["ReasonRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Process"];
         };
       };
     };

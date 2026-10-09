@@ -39,3 +39,6 @@ INSTALLED_APPS = [*INSTALLED_APPS, "tutortrack.core.tests.testapp"]
 ROOT_URLCONF = "tutortrack.core.tests.testapp.api"
 
 PWNED_PASSWORDS_CHECK = False  # no network in tests
+# The time-skipping test server has no search attributes; tests that need Temporal use the
+# temporal_env fixture, anything else fails fast instead of reaching a local dev server.
+TEMPORAL = {**TEMPORAL, "SEARCH_ATTRIBUTES": False, "ADDRESS": "127.0.0.1:1"}

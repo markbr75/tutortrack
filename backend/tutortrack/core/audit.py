@@ -82,7 +82,8 @@ def record(
         changes=to_json_safe(changes or {}),
         ip=ctx.ip,
         user_agent=(ctx.user_agent or "")[:500],
-        request_id=ctx.request_id or "",
+        # Inside workflows the correlation id is the workflow/activity id.
+        request_id=(ctx.request_id or ctx.workflow_id or "")[:64],
     )
 
 

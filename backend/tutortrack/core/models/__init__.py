@@ -16,6 +16,7 @@ from .flags import FeatureFlag, FeatureFlagOverride
 from .idempotency import IdempotencyRecord
 from .outbox import OutboxEvent, ProcessedEvent
 from .sequences import Sequence
+from .workflows import ScheduleLink, WorkflowLink
 
 __all__ = [
     "ArchivableModel",
@@ -28,6 +29,7 @@ __all__ = [
     "IdempotencyRecord",
     "OutboxEvent",
     "ProcessedEvent",
+    "ScheduleLink",
     "Sequence",
     "StoredFile",
     "TenantManager",
@@ -36,4 +38,5 @@ __all__ = [
     "TimeStampedModel",
     "UUIDModel",
     "UnscopedManager",
+    "WorkflowLink",
 ]

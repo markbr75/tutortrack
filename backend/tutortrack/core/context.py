@@ -33,6 +33,8 @@ class RequestContext:
     user_agent: str | None = None
     user_id: uuid.UUID | None = None
     impersonator_id: uuid.UUID | None = None
+    # Set inside Temporal activities: the workflow acting (E32 FR-32-3).
+    workflow_id: str | None = None
 
 
 _request_context: ContextVar[RequestContext] = ContextVar(

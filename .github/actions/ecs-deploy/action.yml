@@ -18,7 +18,7 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        for svc in web worker beat migrate; do
+        for svc in web worker beat temporal-worker migrate; do
           family="tutortrack-${{ inputs.environment }}-${svc}"
           aws ecs describe-task-definition --task-definition "$family" \
             --query taskDefinition > td.json
@@ -47,7 +47,7 @@ runs:
       run: |
         set -euo pipefail
         cluster="tutortrack-${{ inputs.environment }}"
-        for svc in web worker beat; do
+        for svc in web worker beat temporal-worker; do
           aws ecs update-service --cluster "$cluster" --service "tutortrack-${svc}" \
             --task-definition "tutortrack-${{ inputs.environment }}-${svc}" > /dev/null
         done

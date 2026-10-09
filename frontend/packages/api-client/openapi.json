@@ -2693,6 +2693,318 @@
                 }
             }
         },
+        "/api/v1/processes": {
+            "get": {
+                "operationId": "processes_list",
+                "description": "Durable processes linked to records, e.g. ``?subject_type=invoice&subject_id=…``.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "process",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "cancelled",
+                                "completed",
+                                "failed",
+                                "running",
+                                "terminated",
+                                "timed_out"
+                            ]
+                        },
+                        "description": "* `running` - Running\n* `completed` - Completed\n* `failed` - Failed\n* `cancelled` - Cancelled\n* `terminated` - Terminated\n* `timed_out` - Timed Out"
+                    },
+                    {
+                        "in": "query",
+                        "name": "subject_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "subject_type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "processes"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedProcessList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/processes/{workflow_id}": {
+            "get": {
+                "operationId": "processes_retrieve",
+                "description": "Durable processes linked to records, e.g. ``?subject_type=invoice&subject_id=…``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "workflow_id",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[^/]+$"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "processes"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProcessDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/processes/{workflow_id}/cancel": {
+            "post": {
+                "operationId": "processes_cancel_create",
+                "description": "Durable processes linked to records, e.g. ``?subject_type=invoice&subject_id=…``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "workflow_id",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[^/]+$"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "processes"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Process"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/processes/{workflow_id}/restart": {
+            "post": {
+                "operationId": "processes_restart_create",
+                "description": "Platform operations: start a failed/terminated process again with its input.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "workflow_id",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[^/]+$"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "processes"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReasonRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReasonRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReasonRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Process"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/processes/{workflow_id}/terminate": {
+            "post": {
+                "operationId": "processes_terminate_create",
+                "description": "Platform operations: stop a stuck process immediately (audited with a reason).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "workflow_id",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[^/]+$"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "processes"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReasonRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReasonRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReasonRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Process"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/roles": {
             "get": {
                 "operationId": "roles_list",
@@ -4310,6 +4622,32 @@
                     }
                 }
             },
+            "PaginatedProcessList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Process"
+                        }
+                    }
+                }
+            },
             "PasswordChangeRequest": {
                 "type": "object",
                 "properties": {
@@ -4651,6 +4989,179 @@
                     "headers",
                     "method",
                     "url"
+                ]
+            },
+            "Process": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "workflow_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "process": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "workflow_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "subject_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "subject_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ProcessStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "current_step": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "closed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_error": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "closed_at",
+                    "current_step",
+                    "id",
+                    "last_error",
+                    "process",
+                    "started_at",
+                    "status",
+                    "subject_id",
+                    "subject_type",
+                    "workflow_id",
+                    "workflow_type"
+                ]
+            },
+            "ProcessDetail": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "workflow_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "process": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "workflow_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "subject_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "subject_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ProcessStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "current_step": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "closed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "live": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "description": "The workflow's own `state` query (current step, next deadline...), if any."
+                    }
+                },
+                "required": [
+                    "closed_at",
+                    "current_step",
+                    "id",
+                    "last_error",
+                    "live",
+                    "process",
+                    "started_at",
+                    "status",
+                    "subject_id",
+                    "subject_type",
+                    "workflow_id",
+                    "workflow_type"
+                ]
+            },
+            "ProcessStatusEnum": {
+                "enum": [
+                    "running",
+                    "completed",
+                    "failed",
+                    "cancelled",
+                    "terminated",
+                    "timed_out"
+                ],
+                "type": "string",
+                "description": "* `running` - Running\n* `completed` - Completed\n* `failed` - Failed\n* `cancelled` - Cancelled\n* `terminated` - Terminated\n* `timed_out` - Timed Out"
+            },
+            "ReasonRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                    }
+                },
+                "required": [
+                    "reason"
                 ]
             },
             "RecoveryCodes": {

@@ -1,9 +1,10 @@
 """Organisation lifecycle: close (owner) and suspend/reactivate (platform) (FR-02-8).
 
 Closing records the decision and publishes ``organisation.closed``. The rest of the
-process (data export, 30-day grace with reactivation, deletion per retention policy) is
-the ``OrganisationClosureWorkflow`` on Temporal (E02-TW1, built with E32), and E04 cancels
-the subscription from the same event. No deletion timestamp/sweeper lives here by design.
+process (data export, grace period with reopening, deletion per retention policy) is the
+``OrganisationClosureWorkflow`` on Temporal (``tenancy/closure.py``), started from that
+event; E04 cancels the subscription from the same event. ``request_reopen`` signals the
+workflow during the grace period.
 """
 
 from __future__ import annotations
@@ -117,3 +118,15 @@ def reactivate_organisation(
             organisation_id=organisation.pk,
         )
     return organisation
+
+
+def request_reopen(organisation: Organisation) -> bool:
+    """Platform action: reopen a closed account during its grace period. Returns False if
+    the closure process has already finished (the data may be gone)."""
+    from tutortrack.core.workflows import signal_now
+
+    from .closure import closure_workflow_id
+
+    if not organisation.is_closed:
+        raise BusinessRuleViolation(_("The organisation is not closed."))
+    return signal_now(closure_workflow_id(organisation.pk), "reactivate")

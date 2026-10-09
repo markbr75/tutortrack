@@ -93,8 +93,8 @@ cd "$TARGET_DIR"
 [ -f .env ] || cp .env.example .env
 
 # The docker group change only applies to new logins; run compose through `sg` this time.
-log "Backing services (postgres 5442, redis 6389, s3 9010, mailpit 8025)"
-sg docker -c "docker compose up -d --wait postgres redis s3 mailpit"
+log "Backing services (postgres 5442, redis 6389, s3 9010, mailpit 8025, temporal 7233/8233)"
+sg docker -c "docker compose up -d --wait postgres redis s3 mailpit temporal"
 
 log "Dependencies"
 (cd backend && uv sync)

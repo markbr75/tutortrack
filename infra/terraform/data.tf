@@ -160,6 +160,9 @@ resource "aws_secretsmanager_secret_version" "app" {
     FIELD_ENCRYPTION_KEYS   = ""
     GOOGLE_CLIENT_SECRET    = ""
     MICROSOFT_CLIENT_SECRET = ""
+    # Temporal Cloud API key and AES-256 payload keys ("id:base64", newest first; E32).
+    TEMPORAL_API_KEY      = ""
+    TEMPORAL_PAYLOAD_KEYS = ""
   })
 
   lifecycle {

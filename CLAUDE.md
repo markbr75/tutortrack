@@ -6,12 +6,12 @@ TutorTrack is a multi-tenant SaaS for running tutoring businesses. Specs live in
 Python 3.12 · Django 5 · DRF + drf-spectacular · PostgreSQL 16 · Celery + Redis · Temporal (from E32) · React 18 + TypeScript + Vite + TanStack Query + Tailwind/shadcn · pytest · Playwright.
 
 ## Local environment
-- `cp .env.example .env`, then `make infra` starts Postgres (5442), Redis (6389), SeaweedFS S3 (9010) and Mailpit (8025).
+- `cp .env.example .env`, then `make infra` starts Postgres (5442), Redis (6389), SeaweedFS S3 (9010), Mailpit (8025) and the Temporal dev server (7233, UI 8233).
 - Backend on the host: `cd backend && uv run python manage.py ensure_db_roles && uv run python manage.py migrate && uv run python manage.py ensure_storage_bucket && uv run python manage.py runserver 127.0.0.1:8010`.
 - Database roles (E02, ADR 0003): `DATABASE_URL` is the RLS-restricted app role, `DATABASE_OWNER_URL` the table owner (`migrate` uses it automatically), `DATABASE_PLATFORM_URL` the BYPASSRLS role (platform_admin only). Tests run as the app role. In data migrations use `schema_editor.connection.alias`.
 - `make seed` creates the admin `admin@tutortrack.localhost` (password from `SEED_ADMIN_PASSWORD`, default `tutortrack`) and the org `brightminds`.
 - Admin app: `pnpm --dir frontend install && pnpm --dir frontend dev`, then open http://brightminds.localhost:5173 (tenant = subdomain).
-- Background jobs: `cd backend && uv run celery -A config worker -l INFO` (add `-P solo` on Windows).
+- Background jobs: `cd backend && uv run celery -A config worker -l INFO` (add `-P solo` on Windows); Temporal workers: `uv run python manage.py temporal_worker --task-queue all` (Temporal UI: http://localhost:8233).
 
 ## Commands
 - `make dev`: start the full stack (docker-compose)
@@ -24,13 +24,13 @@ Python 3.12 · Django 5 · DRF + drf-spectacular · PostgreSQL 16 · Celery + Re
 2. **Business logic lives in `services.py`** (writes) and `selectors.py` (reads). Views and serializers stay thin. Apps talk to each other via services and domain events, never by writing to another app's models.
 3. **Domain events:** emit via `core.events.publish()` inside the transaction (outbox). Handlers must be idempotent.
 4. **Audit:** mutations go through services, which record `AuditEntry`.
-4a. **Long-running processes use Temporal (E32):** multi-step, timer-based or approval-based processes are Temporal workflows (deterministic code; side effects in `@tenant_activity` activities calling services; tenant-prefixed workflow IDs). Celery is only for short stateless tasks. Never add `next_*_at` columns plus a sweeper.
+4a. **Long-running processes use Temporal (E32):** multi-step, timer-based or approval-based processes are Temporal workflows (deterministic code; side effects in `@tenant_activity` activities calling services; tenant-prefixed workflow IDs via `core.workflows.workflow_id`; start/signal with `core.workflows.start/signal` or `bridge.on` in `handlers.py`). Celery is only for short stateless tasks. Never add `next_*_at` columns plus a sweeper. Pattern and test requirements (incl. replay histories): `docs/02-architecture.md` §9.
 5. **Money:** use `core.money.Money` / `Decimal` only, never float. Round half-up to the currency minor unit at line level. Financial records are never deleted or edited after issue: use credit notes and adjustments.
 6. **Time:** store UTC (`timestamptz`); carry IANA timezone on lessons, users, branches and orgs. Recurrence expands in the lesson's local tz.
 7. **Permissions:** declare codenames in `<app>/permissions.py` (`PERMISSIONS = {codename: description}`); enforce with `core.permissions.HasPermission`/`HasMethodPermission` *and* `scope_queryset(user, qs, codename)` in selectors (models with an `own` scope implement `own_scope_q(user)`). Sensitive fields use `Meta.field_permissions` on `BaseModelSerializer`. Built-in roles are grant patterns in `identity/roles.py`.
 8. **API:** `/api/v1/`, cursor pagination, RFC 7807 errors, `Idempotency-Key` on financial POSTs, OpenAPI documented with examples.
 9. **Migrations:** backward compatible (expand/contract). Add RLS policies for new tenant tables via `core.migrations_utils.enable_rls` (available from E02).
-10. **Tests first:** every FR in the ticket gets a test. Use `factory_boy` factories in `<app>/tests/factories.py` (tenant models subclass `core.tests.factories.TenantFactory`). Shared fixtures (`org`, `other_org`, `tenant`, `api`, `admin_api`, `s3`, `fake_redis`) live in `backend/conftest.py`. Dev seed data goes in `<app>/seeds.py` via `@seed_step(order=N)`; in-product sample data in `<app>/demo.py` via `@demo_provider`. Org settings are registered in `<app>/org_settings.py`. Use Hypothesis for money, recurrence and proration logic.
+10. **Tests first:** every FR in the ticket gets a test. Use `factory_boy` factories in `<app>/tests/factories.py` (tenant models subclass `core.tests.factories.TenantFactory`). Shared fixtures (`org`, `other_org`, `tenant`, `member`, `api`, `admin_api`, `s3`, `fake_redis`, `temporal_env`, `temporal_local_env`) live in `backend/conftest.py`. The suite runs as the RLS-restricted app role. Dev seed data goes in `<app>/seeds.py` via `@seed_step(order=N)`; in-product sample data in `<app>/demo.py` via `@demo_provider`. Org settings are registered in `<app>/org_settings.py`. Use Hypothesis for money, recurrence and proration logic.
 11. **Secrets/PII:** secrets (MFA, OAuth tokens), bank details and safeguarding notes use `core.crypto.EncryptedField` (Fernet keys in `FIELD_ENCRYPTION_KEYS`; KMS in E29). Never log PII or tokens.
 12. **i18n:** wrap user-facing strings (`gettext` / `t()`). No hard-coded currency symbols or date formats.
 13. **Accessibility:** WCAG 2.2 AA for all UI.

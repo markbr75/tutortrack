@@ -128,15 +128,50 @@ No new business tables. Optional `WorkflowLink(organisation, subject_type, subje
 - No workflow history over 10k events: long-lived processes use `continue_as_new`.
 
 ## 8. Delivery plan
-- [ ] **E32-T01** Temporal dev server in docker-compose and `make infra`; settings and env vars; `temporalio` dependency.
-- [ ] **E32-T02** Client factory, worker management command, autodiscovery of `workflows.py`/`activities.py`, Compose `temporal-worker` service.
-- [ ] **E32-T03** Tenancy and actor plumbing: `@tenant_activity`, input dataclass conventions, workflow ID helpers, search attributes, RLS variable.
-- [ ] **E32-T04** Payload encryption codec (KMS-backed; local key in dev) and staff-only codec server endpoint.
-- [ ] **E32-T05** Outbox → workflow bridge (start/signal mapping, finished-workflow handling, on-commit start/signal helpers).
-- [ ] **E32-T06** Tenant-local timer helpers (quiet hours, holidays) and settings snapshotting.
-- [ ] **E32-T07** Temporal Schedules management service (create/update/pause/delete per organisation).
-- [ ] **E32-T08** Testing harness: time-skipping fixture, activity mocks, replay tests in CI.
-- [ ] **E32-T09** `WorkflowLink` + processes API + record "Process timeline" UI component.
-- [ ] **E32-T10** OpenTelemetry/Sentry interceptors; platform-console views (list, retry, terminate with audit).
-- [ ] **E32-T11** Terraform: worker ECS service, Temporal Cloud namespace/certificates via secrets, alarms.
-- [ ] **E32-T12** Reference `DemoReminderWorkflow` with full test set; document the pattern in `docs/02-architecture.md`.
+- [x] **E32-T01** Temporal dev server in docker-compose and `make infra`; settings and env vars; `temporalio` dependency.
+- [x] **E32-T02** Client factory, worker management command, autodiscovery of `workflows.py`/`activities.py`, Compose `temporal-worker` service.
+- [x] **E32-T03** Tenancy and actor plumbing: `@tenant_activity`, input dataclass conventions, workflow ID helpers, search attributes, RLS variable.
+- [x] **E32-T04** Payload encryption codec (KMS-backed; local key in dev) and staff-only codec server endpoint.
+- [x] **E32-T05** Outbox → workflow bridge (start/signal mapping, finished-workflow handling, on-commit start/signal helpers).
+- [x] **E32-T06** Tenant-local timer helpers (quiet hours, holidays) and settings snapshotting.
+- [x] **E32-T07** Temporal Schedules management service (create/update/pause/delete per organisation).
+- [x] **E32-T08** Testing harness: time-skipping fixture, activity mocks, replay tests in CI.
+- [x] **E32-T09** `WorkflowLink` + processes API + record "Process timeline" UI component.
+- [x] **E32-T10** OpenTelemetry/Sentry interceptors; platform-console views (list, retry, terminate with audit).
+- [x] **E32-T11** Terraform: worker ECS service, Temporal Cloud namespace/certificates via secrets, alarms.
+- [x] **E32-T12** Reference `DemoReminderWorkflow` with full test set; document the pattern in `docs/02-architecture.md`.
+
+## 9. Implementation notes (as built, 2026-10-09)
+
+Where the build differs from, or adds to, the requirements above. Later epics should treat
+these as the source of truth; the coding pattern is in `docs/02-architecture.md` §9.
+
+| Area | As built | Why |
+|---|---|---|
+| Layout | Runtime in `tutortrack/core/workflows/` (client, registry, `@tenant_activity`, ids, ops, bridge, codec, timers, schedules, links, worker, testing). App `tutortrack.workflows` holds the processes API, the codec endpoint, the worker command and the reference workflow. `WorkflowLink`/`ScheduleLink` live in core models (RLS) | Core infrastructure next to the outbox; the spec named both `core.workflows` and a workflows app |
+| SDK / server | `temporalio` 1.34; dev server image `temporalio/temporal:1.9.1` (`start-dev`, namespace `tutortrack-local`, search attributes registered on start) in `make infra`; worker service in Compose and ECS | |
+| Sync ↔ async | `core.workflows.runtime` runs one asyncio loop in a daemon thread; sync Django code calls `runtime.run(coro)`. One client per process | Services, outbox handlers, views and tests are synchronous |
+| Activities | `@tenant_activity` registers on **every** task queue by default (activities run on the calling workflow's queue); `idempotency_key()` = `workflow_id/activity_id`; `publish(..., dedupe_key=)` derives the event id so retries publish once. Actor in events is `{"type": "workflow", "id": workflow_id}`; audit `request_id` carries the workflow/activity id | |
+| Sandbox | Workflows run sandboxed with Django, `tutortrack`, `zoneinfo`, `sentry_sdk` passed through (imported once, outside the sandbox) | Re-importing Django per workflow is slow and breaks |
+| Starts / signals | `start`/`signal` defer to `on_commit`; `start_now`/`signal_now` immediate. Reuse policy `ALLOW_DUPLICATE_FAILED_ONLY` (duplicates return `None`); signals to finished/unknown workflows return `False` | |
+| Encryption (FR-32-9) | AES-256-GCM codec, keys `TEMPORAL_PAYLOAD_KEYS` (`id:base64`, newest first, rotation via key id in metadata); dev default key, required in prod. Codec server `POST /temporal-codec/{encode,decode}` for platform staff (session) with CORS for `TEMPORAL_CODEC_CORS_ORIGINS`; decodes are logged. KMS-managed keys come with E29 | |
+| Timers (FR-32-6) | `wait_until_local(local_dt, BusinessCalendar, until=)`; `BusinessCalendar` (timezone, quiet hours, closed weekdays, holiday dates) is built from a `snapshot_settings` activity at start. E13 (quiet hours) and E06 (holidays) supply the settings | |
+| Schedules (FR-32-7) | `schedules.ensure_schedule(process, workflow, input, cron, timezone)` + `ScheduleLink`; suspension pauses and reactivation resumes an org's schedules (outbox handlers); closure deletes them | |
+| Processes API | `GET /processes` (filter by subject/process/status), `GET /processes/{workflow_id}` (refreshes status, adds the workflow's `state` query as `live`), `POST …/cancel` (only processes registered with a `cancel_permission`), `POST …/terminate` and `…/restart` (platform staff, audited with a reason; restart reuses the stored input). Process timeline UI: `apps/admin/src/components/ProcessTimeline.tsx` | |
+| Observability (FR-32-10) | Sentry interceptor (activities and workflows, tagged with tenant/workflow); OpenTelemetry `TracingInterceptor` when `OTEL_EXPORTER_OTLP_ENDPOINT` is set. Platform console pages, alarms and dashboards are **E30** (API endpoints exist) | E30 owns the console |
+| Testing (FR-32-11) | Fixtures `temporal_env` (time-skipping, session server, per-test workers; `env.result(id)` unlocks time skipping) and `temporal_local_env` (real dev server; Schedules are not implemented by the time-skipping server). Replay tests load `backend/tests/workflow_histories/*.json`; record with `RECORD_WORKFLOW_HISTORIES=1`. Test settings point Temporal at an unreachable address so only fixture-backed tests talk to it | |
+| Infra (FR-32-1/T11) | Temporal Cloud in hosted environments (address/namespace variables; `TEMPORAL_API_KEY`, `TEMPORAL_PAYLOAD_KEYS` secrets); `temporal-worker` ECS service in the deploy action. **Not validated with `terraform validate` in this session** (no Terraform binary locally; CI has no Terraform job yet). Alarms → E30 | |
+| First real workflow | **E02-TW1 `OrganisationClosureWorkflow`** (`tenancy/closure.py`): pause schedules + `organisation.export_requested` → owner notice → grace period from `privacy.closure_grace_days` (30) with `reactivate` signal (Django admin "Reopen") → delete schedules + `organisation.deletion_due` (E29 purges data) | |
+| Reference workflow | `DemoReminderWorkflow` kept (the epic says remove once real workflows exist; one does now, but it remains the documented, fully tested template) | |
+
+### Verified
+- Backend: 395 tests (stable across repeated parallel runs), including workflow tests for the demo and closure workflows (happy path, signal, timer, retry with once-only publish, encrypted payloads, replay of recorded histories), Schedules against a real dev server, processes API and codec endpoint.
+- Live on the local stack: `temporal_worker` polling all queues against the docker dev server; demo workflow started from Django, found by `OrganisationId`/`TutorTrackProcess` search attributes, queried, cancelled by signal; `WorkflowLink` updated.
+
+### Carried forward
+- **E29:** KMS-managed `TEMPORAL_PAYLOAD_KEYS`; consume `organisation.deletion_due` (retention purge); `privacy.*` settings area.
+- **E28:** consume `organisation.export_requested`.
+- **E30:** platform console (list failed/stuck processes across tenants via the platform DB alias, terminate/restart UI, deep links to the Temporal UI), alarms.
+- **E13/E06:** quiet hours and holiday calendars feeding `BusinessCalendar`.
+- Worker Versioning (build IDs) is configured per deployment when the first breaking workflow change ships; replay tests guard until then.
+
