@@ -21,10 +21,16 @@ KEY_ID = "encryption-key-id"
 
 
 def _keys() -> list[tuple[str, bytes]]:
+    """``"<id>:<base64 key>"``, or ``"<id>:kms:<base64 KMS-wrapped data key>"`` (E29)."""
     keys = []
     for raw in settings.TEMPORAL_PAYLOAD_KEYS:
         key_id, _, material = str(raw).partition(":")
-        key = base64.b64decode(material)
+        if material.startswith("kms:"):
+            from tutortrack.core import kms
+
+            key = kms.unwrap(material[4:])
+        else:
+            key = base64.b64decode(material)
         if len(key) != 32:
             raise ValueError(f"Temporal payload key {key_id!r} must be 32 bytes")
         keys.append((key_id, key))

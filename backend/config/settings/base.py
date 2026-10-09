@@ -323,6 +323,9 @@ ORG_STATUS_EXEMPT_PATHS = ["/api/v1/auth/", "/api/v1/me/organisations", "/health
 FIELD_ENCRYPTION_KEYS = env.list(
     "FIELD_ENCRYPTION_KEYS", default=["DbyhxHUuYW0d6P-VFWYHcV9sWb7MmEwUC9RsDpmJpS8="]
 )
+# When set, FIELD_ENCRYPTION_KEYS hold KMS-wrapped data keys (envelope encryption, E29-T02).
+FIELD_ENCRYPTION_KMS_KEY_ID = env("FIELD_ENCRYPTION_KMS_KEY_ID", default="")
+AWS_KMS_REGION = env("AWS_KMS_REGION", default="")
 
 # --- Signup (E02-T06) -------------------------------------------------------------------------
 TURNSTILE_SITE_KEY = env("TURNSTILE_SITE_KEY", default="")

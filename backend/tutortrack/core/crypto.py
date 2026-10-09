@@ -1,13 +1,19 @@
-"""Field-level encryption for secrets (CLAUDE.md rule 11).
+"""Field-level encryption for secrets and sensitive PII (CLAUDE.md rule 11, FR-29-1).
 
-``EncryptedField`` stores Fernet ciphertext. Keys come from ``FIELD_ENCRYPTION_KEYS``
-(newest first; older keys still decrypt, so keys can be rotated with
-``rotate_field(model, "field")``). E03 introduced this for MFA secrets; E29 moves the key
-material to KMS and adds bank details and safeguarding notes.
+``EncryptedField`` stores Fernet ciphertext (AES-128-CBC + HMAC-SHA256). Keys come from
+``FIELD_ENCRYPTION_KEYS``, newest first; older keys still decrypt.
+
+* Envelope encryption (production): with ``FIELD_ENCRYPTION_KMS_KEY_ID`` set, each entry is
+  a KMS-wrapped 32-byte data key (``manage.py generate_encryption_key``), unwrapped once per
+  process via KMS.
+* Development/tests: entries are plain Fernet keys.
+* Rotation: put a new key first, deploy, run ``manage.py rotate_encryption_keys`` (re-encrypts
+  every encrypted column), then drop the old key.
 """
 
 from __future__ import annotations
 
+import base64
 from functools import cache
 from typing import Any
 
@@ -18,14 +24,33 @@ from django.db import models
 
 
 @cache
-def _fernet(keys: tuple[str, ...]) -> MultiFernet:
+def _fernet(keys: tuple[str, ...], kms_key_id: str) -> MultiFernet:
     if not keys:
         raise ImproperlyConfigured("FIELD_ENCRYPTION_KEYS must contain at least one key")
+    if kms_key_id:
+        from . import kms
+
+        return MultiFernet([Fernet(base64.urlsafe_b64encode(kms.unwrap(k))) for k in keys])
     return MultiFernet([Fernet(k.encode()) for k in keys])
 
 
 def fernet() -> MultiFernet:
-    return _fernet(tuple(settings.FIELD_ENCRYPTION_KEYS))
+    return _fernet(
+        tuple(settings.FIELD_ENCRYPTION_KEYS),
+        getattr(settings, "FIELD_ENCRYPTION_KMS_KEY_ID", "") or "",
+    )
+
+
+def encrypted_fields() -> list[tuple[type[models.Model], str]]:
+    """Every (model, field name) using EncryptedField, for rotation."""
+    from django.apps import apps
+
+    return [
+        (model, field.name)
+        for model in apps.get_models()
+        for field in model._meta.concrete_fields
+        if isinstance(field, EncryptedField)
+    ]
 
 
 def encrypt(value: str) -> str:
@@ -56,7 +81,10 @@ class EncryptedField(models.TextField):
 
 
 def rotate_field(model: type[models.Model], field: str, *, using: str = "default") -> int:
-    """Re-encrypt ``field`` with the newest key. Returns rows updated."""
+    """Re-encrypt ``field`` with the newest key. Returns rows updated.
+
+    Raw SQL on ``using``: tenant tables need a connection that bypasses RLS (the
+    ``rotate_encryption_keys`` command uses the platform alias)."""
     count = 0
     column = model._meta.get_field(field).column  # type: ignore[union-attr]
     from django.db import connections

@@ -7,11 +7,14 @@ policy. Everything an organisation *owns* (branches, settings, memberships...) i
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
+from tutortrack.core.crypto import EncryptedField
 from tutortrack.core.fields import CurrencyField
 from tutortrack.core.ids import new_id
 from tutortrack.core.models import ArchivableModel, TenantModel, TimeStampedModel
@@ -87,7 +90,7 @@ class Organisation(TimeStampedModel):
     address = models.JSONField(default=dict, blank=True)
     company_number = models.CharField(max_length=50, blank=True, default="")
     vat_number = models.CharField(max_length=50, blank=True, default="")
-    tax_number = models.CharField(max_length=50, blank=True, default="")
+    tax_number = EncryptedField(blank=True, default="")  # tax id: encrypted (FR-29-1)
     fiscal_year_start_month = models.PositiveSmallIntegerField(default=4)
     week_start_day = models.PositiveSmallIntegerField(
         choices=Weekday.choices, default=Weekday.MONDAY
@@ -110,6 +113,9 @@ class Organisation(TimeStampedModel):
     suspended_at = models.DateTimeField(null=True, blank=True)
     suspension_reason = models.CharField(max_length=500, blank=True, default="")
     closed_at = models.DateTimeField(null=True, blank=True)
+
+    # Never written to audit diffs or logs in clear.
+    audit_sensitive_fields: ClassVar[frozenset[str]] = frozenset({"tax_number"})
 
     class Meta:
         ordering = ["name"]

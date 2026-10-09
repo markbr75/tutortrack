@@ -163,7 +163,14 @@ def test_every_tenant_table_has_an_rls_policy():
     assert sorted(set(tables) - protected) == []
 
 
-ALLOWED_PLATFORM_ALIAS_USERS = ("platform_admin/", "core/db.py", "core/dbroles.py", "/tests/")
+ALLOWED_PLATFORM_ALIAS_USERS = (
+    "platform_admin/",
+    "core/db.py",
+    "core/dbroles.py",
+    "/tests/",
+    # Platform operations commands (key rotation spans every tenant).
+    "core/management/commands/rotate_encryption_keys.py",
+)
 
 
 def test_platform_alias_is_only_used_by_platform_admin_code():
