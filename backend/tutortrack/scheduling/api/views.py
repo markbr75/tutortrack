@@ -10,7 +10,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date, parse_datetime
 from django_filters import rest_framework as filters
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -606,6 +606,7 @@ class SlotsView(APIView):
         )
 
 
+@extend_schema_view(list=extend_schema(parameters=[OpenApiParameter("tutor", str)]))
 class TimeOffViewSet(
     TenantScopedViewMixin,
     mixins.ListModelMixin,

@@ -3067,17 +3067,6 @@ export interface components {
      * @enum {string}
      */
     ActionEnum: "complete" | "cancel" | "reassign_tutor" | "change_location" | "delete";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Address: {
       line1?: string;
       line2?: string;
@@ -3106,17 +3095,6 @@ export interface components {
       postcode?: string;
       country?: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     AddressRequest: {
       line1?: string;
       line2?: string;
@@ -3140,17 +3118,6 @@ export interface components {
     ApplyTagResult: {
       changed: number;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     AuditEntry: {
       /** Format: uuid */
       readonly id: string;
@@ -3196,17 +3163,6 @@ export interface components {
      * @enum {string}
      */
     BillingMethodEnum: "pay_as_you_go" | "prepaid_credit" | "package" | "recurring_fixed";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Branch: {
       /** Format: uuid */
       readonly id: string;
@@ -3227,17 +3183,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     BranchRequest: {
       name: string;
       code: string;
@@ -3267,17 +3212,6 @@ export interface components {
         [key: string]: string;
       };
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     BulkJob: {
       /** Format: uuid */
       readonly id: string;
@@ -3328,17 +3262,6 @@ export interface components {
      * @enum {string}
      */
     BusinessTypeEnum: "sole_trader" | "team" | "agency" | "centre" | "online";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     CalendarEvent: {
       /** Format: uuid */
       readonly id: string;
@@ -3360,17 +3283,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     CalendarEventRequest: {
       type?: components["schemas"]["CalendarEventTypeEnum"];
       title: string;
@@ -3434,17 +3346,6 @@ export interface components {
       /** @default true */
       notify: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Category: {
       /** Format: uuid */
       readonly id: string;
@@ -3453,17 +3354,6 @@ export interface components {
       /** Format: date-time */
       readonly archived_at: string | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     CategoryRequest: {
       name: string;
       order?: number;
@@ -3480,17 +3370,6 @@ export interface components {
       tax_amount: components["schemas"]["MoneyOut"];
       trace: string[];
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Client: {
       /** Format: uuid */
       readonly id: string;
@@ -3526,17 +3405,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     ClientDetail: {
       /** Format: uuid */
       readonly id: string;
@@ -3574,17 +3442,6 @@ export interface components {
       readonly contacts: components["schemas"]["Contact"][];
       readonly students: components["schemas"]["Student"][];
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     ClientRequest: {
       type?: components["schemas"]["ClientTypeEnum"];
       display_name: string;
@@ -3672,17 +3529,6 @@ export interface components {
      * @enum {string}
      */
     ConflictModeEnum: "skip" | "create" | "fail";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     ConsentRecord: {
       /** Format: uuid */
       readonly id: string;
@@ -3721,17 +3567,6 @@ export interface components {
       recorded_at: string | null;
       needs_reconsent: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     ConsentType: {
       /** Format: uuid */
       readonly id: string;
@@ -3767,17 +3602,6 @@ export interface components {
       | "terms_of_service"
       | "privacy_policy"
       | "other";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     ConsentTypeRequest: {
       key: string;
       name: string;
@@ -3788,17 +3612,6 @@ export interface components {
       applies_to?: unknown;
       is_active?: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Contact: {
       /** Format: uuid */
       readonly id: string;
@@ -3828,17 +3641,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     ContactRequest: {
       first_name: string;
       last_name?: string;
@@ -3869,17 +3671,6 @@ export interface components {
      * @enum {string}
      */
     CreatedViaEnum: "admin" | "tutor" | "client_booking" | "api" | "import" | "series";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     CustomField: {
       /** Format: uuid */
       readonly id: string;
@@ -3897,17 +3688,6 @@ export interface components {
       validation_regex?: string;
       active?: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     CustomFieldRequest: {
       entity_type: string;
       key: string;
@@ -3986,17 +3766,6 @@ export interface components {
       has_demo_data: boolean;
       records: number;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Document: {
       /** Format: uuid */
       readonly id: string;
@@ -4024,17 +3793,6 @@ export interface components {
      * @enum {string}
      */
     DocumentCategoryEnum: "contract" | "consent_form" | "report" | "id" | "other";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     DocumentRequest: {
       target_type: string;
       target_id: string;
@@ -4111,17 +3869,6 @@ export interface components {
       /** @default  */
       reason: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Exception: {
       /** Format: uuid */
       readonly id: string;
@@ -4137,17 +3884,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     ExceptionRequest: {
       /** Format: uuid */
       tutor: string;
@@ -4170,17 +3906,6 @@ export interface components {
         [key: string]: boolean;
       };
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Feed: {
       /** Format: uuid */
       readonly id: string;
@@ -4194,17 +3919,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     FeedCreated: {
       /** Format: uuid */
       readonly id: string;
@@ -4226,17 +3940,6 @@ export interface components {
      * @enum {string}
      */
     FeedKindEnum: "tutor" | "client" | "student";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     FeedRequest: {
       kind: components["schemas"]["FeedKindEnum"];
       /** Format: uuid */
@@ -4302,17 +4005,6 @@ export interface components {
       name: string;
       write: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Invitation: {
       /** Format: uuid */
       readonly id: string;
@@ -4342,17 +4034,6 @@ export interface components {
       /** Format: date-time */
       expires_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     InvitationRequest: {
       /** Format: email */
       email: string;
@@ -4382,17 +4063,6 @@ export interface components {
      * @enum {string}
      */
     InvoiceGroupingEnum: "client" | "student" | "job";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Job: {
       /** Format: uuid */
       readonly id: string;
@@ -4462,17 +4132,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     JobCreate: {
       /** Format: uuid */
       readonly id: string;
@@ -4543,17 +4202,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     JobCreateRequest: {
       name?: string;
       /** Format: uuid */
@@ -4631,17 +4279,6 @@ export interface components {
      * @enum {string}
      */
     JobStatusEnum: "draft" | "seeking_tutor" | "active" | "paused" | "completed" | "cancelled";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     JobStudent: {
       /** Format: uuid */
       readonly id: string;
@@ -4662,17 +4299,6 @@ export interface components {
       /** Format: date */
       readonly active_to: string | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     JobStudentRequest: {
       charge_rate_override?: {
         /**
@@ -4696,17 +4322,6 @@ export interface components {
       /** Format: date-time */
       last_lesson_at: string | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     JobTutor: {
       /** Format: uuid */
       readonly id: string;
@@ -4731,17 +4346,6 @@ export interface components {
       /** Format: date-time */
       readonly responded_at: string | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     JobTutorRequest: {
       role?: components["schemas"]["JobTutorRoleEnum"];
       pay_rate_override?: {
@@ -4776,17 +4380,6 @@ export interface components {
      * @enum {string}
      */
     KindEnum: "note" | "task" | "document" | "change";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Lesson: {
       /** Format: uuid */
       readonly id: string;
@@ -4834,17 +4427,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     LessonAttendee: {
       /** Format: uuid */
       student: string;
@@ -4910,17 +4492,6 @@ export interface components {
      * @enum {string}
      */
     LessonStatusEnum: "planned" | "completed" | "cancelled" | "missed";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     LessonTutor: {
       /** Format: uuid */
       tutor: string;
@@ -4990,17 +4561,6 @@ export interface components {
       /** @default false */
       override_conflicts: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Level: {
       /** Format: uuid */
       readonly id: string;
@@ -5019,34 +4579,12 @@ export interface components {
      * @enum {string}
      */
     LevelEnum: "none" | "ok" | "warning" | "blocked";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     LevelRequest: {
       /** Format: uuid */
       subject: string;
       name: string;
       order?: number;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Location: {
       /** Format: uuid */
       readonly id: string;
@@ -5064,17 +4602,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     LocationRequest: {
       name: string;
       type?: components["schemas"]["LocationTypeEnum"];
@@ -5165,17 +4692,6 @@ export interface components {
       name: string;
       has_mfa: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Membership: {
       /** Format: uuid */
       readonly id: string;
@@ -5226,17 +4742,6 @@ export interface components {
       /** Format: date-time */
       last_active_at: string | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Note: {
       /** Format: uuid */
       readonly id: string;
@@ -5254,17 +4759,6 @@ export interface components {
       /** Format: date-time */
       readonly updated_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     NoteRequest: {
       target_type: string;
       target_id: string;
@@ -5301,17 +4795,6 @@ export interface components {
      * @enum {string}
      */
     OnboardingStepStatusStatusEnum: "pending" | "completed" | "skipped";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Organisation: {
       /** Format: uuid */
       readonly id: string;
@@ -5359,17 +4842,6 @@ export interface components {
      * @enum {string}
      */
     OrganisationStatusEnum: "trial" | "active" | "past_due" | "suspended" | "cancelled";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PackageTemplate: {
       /** Format: uuid */
       readonly id: string;
@@ -5402,17 +4874,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PackageTemplateRequest: {
       name: string;
       description?: string;
@@ -5803,17 +5264,6 @@ export interface components {
       token: string;
       new_password: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedBranchRequest: {
       name?: string;
       code?: string;
@@ -5827,17 +5277,6 @@ export interface components {
       email_sender_address?: string;
       invoice_prefix?: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedCalendarEventRequest: {
       type?: components["schemas"]["CalendarEventTypeEnum"];
       title?: string;
@@ -5855,32 +5294,10 @@ export interface components {
       paid?: boolean;
       cancel_lessons?: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedCategoryRequest: {
       name?: string;
       order?: number;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedClientRequest: {
       type?: components["schemas"]["ClientTypeEnum"];
       display_name?: string;
@@ -5904,17 +5321,6 @@ export interface components {
       account_manager?: string | null;
       custom_fields?: unknown;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedConsentTypeRequest: {
       key?: string;
       name?: string;
@@ -5925,17 +5331,6 @@ export interface components {
       applies_to?: unknown;
       is_active?: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedContactRequest: {
       first_name?: string;
       last_name?: string;
@@ -5956,17 +5351,6 @@ export interface components {
       language?: string;
       custom_fields?: unknown;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedCustomFieldRequest: {
       entity_type?: string;
       key?: string;
@@ -5982,17 +5366,6 @@ export interface components {
       validation_regex?: string;
       active?: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedJobRequest: {
       name?: string;
       /**
@@ -6075,34 +5448,12 @@ export interface components {
       /** @default  */
       reason: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedLevelRequest: {
       /** Format: uuid */
       subject?: string;
       name?: string;
       order?: number;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedLocationRequest: {
       name?: string;
       type?: components["schemas"]["LocationTypeEnum"];
@@ -6121,17 +5472,6 @@ export interface components {
       branch_scope?: components["schemas"]["BranchScopeEnum"];
       branches?: string[];
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedNoteRequest: {
       target_type?: string;
       target_id?: string;
@@ -6140,17 +5480,6 @@ export interface components {
       visibility?: components["schemas"]["NoteVisibilityEnum"];
       attachments?: string[];
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedOrganisationRequest: {
       name?: string;
       legal_name?: string;
@@ -6175,17 +5504,6 @@ export interface components {
       date_format?: components["schemas"]["DateFormatEnum"];
       time_format?: components["schemas"]["TimeFormatEnum"];
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedPackageTemplateRequest: {
       name?: string;
       description?: string;
@@ -6213,17 +5531,6 @@ export interface components {
       auto_renew?: boolean;
       active?: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedProductRequest: {
       name?: string;
       description?: string;
@@ -6244,17 +5551,6 @@ export interface components {
       tutor_share_percent?: string;
       active?: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedSavedViewRequest: {
       entity_type?: string;
       name?: string;
@@ -6284,17 +5580,6 @@ export interface components {
       online?: boolean;
       notes_for_tutor?: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedServiceRequest: {
       name?: string;
       description?: string;
@@ -6358,17 +5643,6 @@ export interface components {
         currency: string;
       } | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedStudentRequest: {
       /** Format: uuid */
       client?: string;
@@ -6391,17 +5665,6 @@ export interface components {
       lesson_address_input?: components["schemas"]["AddressInputRequest"];
       custom_fields?: unknown;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedSubjectRequest: {
       name?: string;
       /** Format: uuid */
@@ -6409,33 +5672,11 @@ export interface components {
       exam_boards?: string[];
       order?: number;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedTagRequest: {
       name?: string;
       colour?: string;
       entity_types?: unknown;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedTaskRequest: {
       title?: string;
       description?: string;
@@ -6450,17 +5691,6 @@ export interface components {
       /** Format: date-time */
       remind_at?: string | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedTaxRateRequest: {
       name?: string;
       /** Format: decimal */
@@ -6482,17 +5712,6 @@ export interface components {
         currency: string;
       } | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedTutorRequest: {
       /** Format: email */
       email?: string;
@@ -6524,17 +5743,6 @@ export interface components {
       /** @default true */
       invite: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     PatchedUserRequest: {
       first_name?: string;
       last_name?: string;
@@ -6601,17 +5809,6 @@ export interface components {
      * @enum {string}
      */
     PriorityEnum: "low" | "normal" | "high";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Process: {
       /** Format: uuid */
       readonly id: string;
@@ -6628,17 +5825,6 @@ export interface components {
       readonly closed_at: string | null;
       readonly last_error: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     ProcessDetail: {
       /** Format: uuid */
       readonly id: string;
@@ -6670,17 +5856,6 @@ export interface components {
      */
     ProcessStatusEnum:
       "running" | "completed" | "failed" | "cancelled" | "terminated" | "timed_out";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Product: {
       /** Format: uuid */
       readonly id: string;
@@ -6718,17 +5893,6 @@ export interface components {
      */
     ProductCategoryEnum:
       "registration" | "materials" | "books" | "exam_entry" | "late_cancel" | "travel" | "other";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     ProductRequest: {
       name: string;
       description?: string;
@@ -7012,17 +6176,6 @@ export interface components {
       key: string;
       start_url: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     SavedView: {
       /** Format: uuid */
       readonly id: string;
@@ -7037,17 +6190,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     SavedViewRequest: {
       entity_type: string;
       name: string;
@@ -7086,17 +6228,6 @@ export interface components {
       score: number;
       client_id: string | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Series: {
       /** Format: uuid */
       readonly id: string;
@@ -7172,17 +6303,6 @@ export interface components {
      * @enum {string}
      */
     SeriesUpdateScopeEnum: "following" | "all";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Service: {
       /** Format: uuid */
       readonly id: string;
@@ -7235,17 +6355,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     ServicePrice: {
       readonly currency: string;
       charge_rate: {
@@ -7269,17 +6378,6 @@ export interface components {
       /** Format: decimal */
       pay_percent?: string | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     ServicePriceRequest: {
       charge_rate: {
         /**
@@ -7302,17 +6400,6 @@ export interface components {
       /** Format: decimal */
       pay_percent?: string | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     ServiceRequest: {
       name: string;
       description?: string;
@@ -7494,17 +6581,6 @@ export interface components {
       /** @default keep */
       future_lessons: components["schemas"]["FutureLessonsEnum"];
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     StatusHistory: {
       from_status?: string;
       to_status: string;
@@ -7517,17 +6593,6 @@ export interface components {
     StatusRequest: {
       status: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     StoredFile: {
       /** Format: uuid */
       readonly id: string;
@@ -7548,17 +6613,6 @@ export interface components {
      * @enum {string}
      */
     StoredFileStatusEnum: "pending_upload" | "uploaded" | "rejected";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Student: {
       /** Format: uuid */
       readonly id: string;
@@ -7620,17 +6674,6 @@ export interface components {
         currency: string;
       } | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     StudentRequest: {
       /** Format: uuid */
       client: string;
@@ -7664,17 +6707,6 @@ export interface components {
      * @enum {string}
      */
     StudentStatusEnum: "lead" | "trial" | "active" | "waiting" | "paused" | "finished" | "archived";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Subject: {
       /** Format: uuid */
       readonly id: string;
@@ -7703,17 +6735,6 @@ export interface components {
       /** Format: uuid */
       level_id?: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     SubjectRequest: {
       name: string;
       /** Format: uuid */
@@ -7734,17 +6755,6 @@ export interface components {
       /** @description SVG markup of the QR code for the URI. */
       qr_svg: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Tag: {
       /** Format: uuid */
       readonly id: string;
@@ -7752,33 +6762,11 @@ export interface components {
       colour?: string;
       entity_types?: unknown;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     TagRequest: {
       name: string;
       colour?: string;
       entity_types?: unknown;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Task: {
       /** Format: uuid */
       readonly id: string;
@@ -7802,17 +6790,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     TaskRequest: {
       title: string;
       description?: string;
@@ -7834,17 +6811,6 @@ export interface components {
      * @enum {string}
      */
     TaskStatusEnum: "open" | "done" | "cancelled";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     TaxRate: {
       /** Format: uuid */
       readonly id: string;
@@ -7857,17 +6823,6 @@ export interface components {
       exempt_reason?: string;
       active?: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     TaxRateRequest: {
       name: string;
       /** Format: decimal */
@@ -7897,17 +6852,6 @@ export interface components {
     TokenRequest: {
       token: string;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Tutor: {
       /** Format: uuid */
       readonly id: string;
@@ -7994,17 +6938,6 @@ export interface components {
        */
       offer: boolean;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     TutorQualification: {
       /** Format: uuid */
       readonly id: string;
@@ -8014,17 +6947,6 @@ export interface components {
       /** Format: uuid */
       document?: string | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     TutorQualificationRequest: {
       title: string;
       institution?: string;
@@ -8032,17 +6954,6 @@ export interface components {
       /** Format: uuid */
       document?: string | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     TutorRequest: {
       /** Format: email */
       email: string;
@@ -8084,17 +6995,6 @@ export interface components {
      * @enum {string}
      */
     TutorStatusEnum: "applicant" | "onboarding" | "active" | "restricted" | "inactive" | "archived";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     TutorSubject: {
       /** Format: uuid */
       readonly id: string;
@@ -8109,17 +7009,6 @@ export interface components {
       /** Format: uuid */
       readonly approved_by: string | null;
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     TutorSubjectRequest: {
       subject: string;
       level?: string;
@@ -8132,17 +7021,6 @@ export interface components {
       /** @default private */
       visibility: components["schemas"]["FileVisibilityEnum"];
     };
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     User: {
       /** Format: uuid */
       readonly id: string;
@@ -8172,17 +7050,6 @@ export interface components {
      * @enum {integer}
      */
     WeekStartDayEnum: 0 | 1 | 2 | 3 | 4 | 5 | 6;
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     Window: {
       weekday: number;
       /** Format: time */
@@ -8198,17 +7065,6 @@ export interface components {
      * @enum {string}
      */
     WindowModeEnum: "any" | "in_person" | "online";
-    /**
-     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
-     *
-     *         class Meta:
-     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
-     *                                  "charge_rate": "billing.rates.view_charge"}
-     *
-     *     Fields are removed from output *and* input, so they can't be written either. The check
-     *     runs when the fields are built, so nested serializers see the request of their root.
-     *     Serializers without a request in context (internal use) keep every field.
-     */
     WindowRequest: {
       weekday: number;
       /** Format: time */
@@ -14374,6 +13230,7 @@ export interface operations {
         ordering?: string;
         /** @description Number of results to return per page. */
         page_size?: number;
+        tutor?: string;
       };
       header?: never;
       path?: never;

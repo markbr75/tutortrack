@@ -100,17 +100,17 @@ Indexes: `(organisation_id, start)`, GIN on tstzrange; exclusion constraint for 
 - Series generation for 1 year weekly < 300ms (bulk insert).
 
 ## 8. Delivery plan
-- [ ] **E08-T01** Lesson, LessonTutor and LessonAttendee models; create/update services using the E06 rate engine snapshot.
-- [ ] **E08-T02** Lesson series: RRULE expansion in local tz, horizon generation task, holiday skipping.
-- [ ] **E08-T03** Series edit semantics (this / following / all) with exception preservation; tests for DST and splits.
-- [ ] **E08-T04** Calendar events and org-wide closures.
-- [ ] **E08-T05** Availability templates, exceptions, free-slot calculator.
-- [ ] **E08-T06** Conflict engine (hard and soft), dry-run API, series conflict report.
-- [ ] **E08-T07** Calendar range projection API, optimised queries and indexes.
-- [ ] **E08-T08** Frontend calendar: views, filters, colour modes, drag/drop, quick-view, resource view.
-- [ ] **E08-T09** Lesson actions and bulk actions; change notifications hook (E13).
-- [ ] **E08-T10** Tutor replacement integration with E07; locking rules.
-- [ ] **E08-T11** iCal feeds.
+- [x] **E08-T01** Lesson, LessonTutor and LessonAttendee models; create/update services using the E06 rate engine snapshot.
+- [x] **E08-T02** Lesson series: RRULE expansion in local tz, horizon generation task, holiday skipping.
+- [x] **E08-T03** Series edit semantics (this / following / all) with exception preservation; tests for DST and splits.
+- [x] **E08-T04** Calendar events and org-wide closures.
+- [x] **E08-T05** Availability templates, exceptions, free-slot calculator.
+- [x] **E08-T06** Conflict engine (hard and soft), dry-run API, series conflict report.
+- [x] **E08-T07** Calendar range projection API, optimised queries and indexes.
+- [x] **E08-T08** Frontend calendar: views, filters, colour modes, drag/drop, quick-view, resource view.
+- [x] **E08-T09** Lesson actions and bulk actions; change notifications hook (E13).
+- [x] **E08-T10** Tutor replacement integration with E07; locking rules.
+- [x] **E08-T11** iCal feeds.
 - [ ] **E08-T12** (Phase 2) Rooms with exclusion constraint; room resource view.
 - [ ] **E08-T13** (Phase 2) Reschedule requests and policies.
 - [ ] **E08-T14** (Phase 2) Self-booking engine, holds, booking settings, payment-at-booking hook (E11).
@@ -120,10 +120,28 @@ Indexes: `(organisation_id, start)`, GIN on tstzrange; exclusion constraint for 
 
 Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
 
-- [ ] **E08-TW1** Booking, reschedule and time-off workflows (requires E32).
+- [ ] **E08-TW1** Booking, reschedule and time-off workflows (requires E32). *(Deferred with T13–T15: all three workflows belong to Phase 2 features.)*
 
 | Workflow | Started by | Steps, timers and signals | Replaces |
 |---|---|---|---|
 | `BookingHoldWorkflow` `booking-hold:{org}:{hold_id}` | Self-booking slot selected (FR-08-9) | Hold slot → wait for signal `paid` / `confirmed` up to **10 min** → confirm lesson, or release slot on timeout | Redis hold + expiry job |
 | `RescheduleRequestWorkflow` | `reschedule.requested` | Notify approver → wait for `approve`/`decline` until the policy deadline → apply move or auto-decline; reminders at 50% of window | Status polling |
 | `TimeOffApprovalWorkflow` | `time_off.requested` | Wait for admin decision → on approval flag conflicting lessons and start `CoverRequestWorkflow` (E19) | Manual follow-up |
+
+## Implementation notes (as built 2026-10-09)
+- **App:** `scheduling` with `Lesson` (branch-scoped, customisable, CRM target `scheduling.lesson`), `LessonTutor`, `LessonAttendee`, `LessonSeries`, `CalendarEvent` (+ participants), `AvailabilityTemplate`/`AvailabilityWindow`, `AvailabilityException` and `ICalFeedToken`. RLS covers all of them. Indexes are `(organisation, start)`, `(organisation, end)` and `(job, start)`. Btree range queries replace the GIN/tstzrange index (room exclusion constraints come with T12).
+- **Pricing snapshots:** every lesson is priced through the E06 engine with job rates, job student/tutor overrides and lesson overrides. Amounts and the trace are stored on attendees and tutors. They are re-resolved on edit while unlocked. Attendees are charged to the job's bill-to client when set.
+- **Series:** RRULE parts are limited to daily, weekly and monthly (`FREQ`, `INTERVAL`, `BYDAY`, `BYMONTHDAY`, `BYSETPOS`, `WKST`). UNTIL/COUNT are separate fields. Occurrences are expanded as local wall-clock times in the series timezone and converted to UTC (DST-safe; covered by tests). Each lesson stores its `occurrence_date`, unique per series, which is how regeneration recognises existing dates. Generation prices the first occurrence once and bulk-inserts the rest. A year of weekly lessons is one batch (performance test included). A nightly Celery beat task (`extend_all_series_horizons`) extends series to the rolling horizon (`scheduling.series_horizon_months`, default 6).
+- **Holidays:** "skip holidays" uses organisation-wide closure events (`CalendarEvent` type `holiday`, optionally per branch). E06 holiday calendars (Phase 2) can feed the same events.
+- **Edits:** `this` marks the lesson as an exception. `following` splits the series (the old one ends the day before, the new one carries the remaining count). `all` applies from now. Time or rule changes rebuild affected future lessons. Other changes update them in place. Completed, cancelled and locked lessons never change. Exceptions are kept unless `overwrite_exceptions`.
+- **Conflicts:** *hard* means a tutor is double-booked, busy at a calendar event or on approved time off, or the job's hours cap would be exceeded (when blocking). Time off is treated as hard (the spec lists only tutor/room overlap). *Soft* covers student clashes, outside availability, travel buffer, max weekly hours, closures and location opening hours. Hard conflicts return 422 with `conflicts` unless the user has `scheduling.override_conflicts` and sends `override_conflicts`. Series creation skips, creates anyway, or fails per `conflict_mode`. Series checks use one prefetched busy map instead of per-occurrence queries.
+- **Availability:** weekly templates with effective dates (a new template closes the previous one), extra availability and time off. Time off is auto-approved; the approval workflow is T15/Phase 2. Free slots consider windows, lessons plus the travel buffer, events, time off, closures and minimum notice. External calendar busy times come with E22.
+- **Calendar API:** `/calendar?start&end` (max 62 days) returns lessons and events in a light projection, filterable by tutor, student, client, service, job, location, branch and status. Tutors see their own lessons. Charge and pay fields on lessons follow `billing.rates.view_*`.
+- **Locking:** `services.set_lock` is for E10/E12. Editing financial fields of a locked lesson needs `scheduling.edit_locked` (coordinators are denied it) and emits `lesson.locked_edited` with before/after totals for credit notes and pay adjustments.
+- **E07 integration (T10):** scheduling registers the jobs `LessonsProvider` (stats, hours scheduled, replacement preview with clash check). Handlers: `job.created` with a default schedule creates weekly series; `job.tutor_replaced` moves future unlocked lessons and re-prices them; `job.tutor_assigned` fills tutorless future lessons; `job.status_changed` with `future_lessons=cancel` cancels future lessons (not chargeable) and ends series on completion or cancellation.
+- **iCal:** per-user secret feeds for a tutor, a client (household) or a student. Only a SHA-256 hash is stored, and the URL is shown once. Creating a new feed revokes the previous one for the same subject. Served at `/ical/<token>.ics` on the organisation host (the last 60 days and onwards, UTC times, RFC 5545 line folding).
+- **Notifications:** reschedule, cancel and update events carry `notify`. E13 sends the messages and updated ICS.
+- **Frontend:** the calendar has day, week, month, agenda and tutor-resource views, filters (tutor, status), colour by service, tutor, status or location, click-to-create and drag-to-reschedule. Every lesson is a button that opens a quick view with complete/missed/cancel/reschedule (the keyboard alternative to dragging, WCAG 2.5.7), pricing trace and job link. There is a new lesson/weekly series dialog with conflict override. The availability page covers weekly windows, time off/extra availability and the calendar feed link. Saved filter sets, the secondary timezone display, the print/PDF timetable and bulk actions in the UI are follow-ups; the bulk API exists.
+- **Fix:** OpenAPI component descriptions no longer inherit the serializer mixins' docstrings (`GET_LIB_DOC_EXCLUDES`).
+- **Deferred (Phase 2):** rooms and exclusion constraint (T12), reschedule requests (T13), self-booking with holds and payment (T14), time-off approval and cover (T15), and the TW1 workflows for them.
+

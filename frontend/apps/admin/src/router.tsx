@@ -7,6 +7,8 @@ import {
   type RouterHistory,
 } from "@tanstack/react-router";
 
+import { AvailabilityPage } from "./calendar/AvailabilityPage";
+import { CalendarPage } from "./calendar/CalendarPage";
 import { CataloguePage } from "./catalogue/CataloguePage";
 import { TasksPage } from "./crm/TasksPage";
 import { JobPage } from "./jobs/JobPage";
@@ -123,6 +125,8 @@ const tutorRoute = createRoute({
 const tasksRoute = appPage("/tasks", TasksPage);
 const catalogueRoute = appPage("/catalogue", CataloguePage);
 const jobsRoute = appPage("/jobs", JobsPage);
+const calendarRoute = appPage("/calendar", CalendarPage);
+const availabilityRoute = appPage("/availability", AvailabilityPage);
 const jobRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/jobs/$jobId",
@@ -154,6 +158,8 @@ const routeTree = rootRoute.addChildren([
     catalogueRoute,
     jobsRoute,
     jobRoute,
+    calendarRoute,
+    availabilityRoute,
     teamRoute,
     auditRoute,
     settingsRoute,

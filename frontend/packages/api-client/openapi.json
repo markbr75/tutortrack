@@ -12625,6 +12625,13 @@
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "tags": [
@@ -13459,7 +13466,6 @@
             },
             "Address": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "line1": {
                         "type": "string",
@@ -13565,7 +13571,6 @@
             },
             "AddressRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "line1": {
                         "type": "string",
@@ -13652,7 +13657,6 @@
             },
             "AuditEntry": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -13792,7 +13796,6 @@
             },
             "Branch": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -13869,7 +13872,6 @@
             },
             "BranchRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -13979,7 +13981,6 @@
             },
             "BulkJob": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -14126,7 +14127,6 @@
             },
             "CalendarEvent": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -14196,7 +14196,6 @@
             },
             "CalendarEventRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "type": {
                         "$ref": "#/components/schemas/CalendarEventTypeEnum"
@@ -14382,7 +14381,6 @@
             },
             "Category": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -14413,7 +14411,6 @@
             },
             "CategoryRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -14484,7 +14481,6 @@
             },
             "Client": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -14611,7 +14607,6 @@
             },
             "ClientDetail": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -14754,7 +14749,6 @@
             },
             "ClientRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "type": {
                         "$ref": "#/components/schemas/ClientTypeEnum"
@@ -14994,7 +14988,6 @@
             },
             "ConsentRecord": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -15129,7 +15122,6 @@
             },
             "ConsentType": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -15206,7 +15198,6 @@
             },
             "ConsentTypeRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "key": {
                         "type": "string",
@@ -15254,7 +15245,6 @@
             },
             "Contact": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -15366,7 +15356,6 @@
             },
             "ContactRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "first_name": {
                         "type": "string",
@@ -15460,7 +15449,6 @@
             },
             "CustomField": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -15524,7 +15512,6 @@
             },
             "CustomFieldRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "entity_type": {
                         "type": "string",
@@ -15651,7 +15638,6 @@
             },
             "Document": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -15724,7 +15710,6 @@
             },
             "DocumentRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "target_type": {
                         "type": "string",
@@ -15921,7 +15906,6 @@
             },
             "Exception": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -15973,7 +15957,6 @@
             },
             "ExceptionRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "tutor": {
                         "type": "string",
@@ -16027,7 +16010,6 @@
             },
             "Feed": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -16070,7 +16052,6 @@
             },
             "FeedCreated": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -16127,7 +16108,6 @@
             },
             "FeedRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "kind": {
                         "$ref": "#/components/schemas/FeedKindEnum"
@@ -16275,7 +16255,6 @@
             },
             "Invitation": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -16376,7 +16355,6 @@
             },
             "InvitationRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "email": {
                         "type": "string",
@@ -16430,7 +16408,6 @@
             },
             "Job": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -16646,7 +16623,6 @@
             },
             "JobCreate": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -16859,7 +16835,6 @@
             },
             "JobCreateRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -17054,7 +17029,6 @@
             },
             "JobStudent": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -17115,7 +17089,6 @@
             },
             "JobStudentRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "charge_rate_override": {
                         "type": "object",
@@ -17199,7 +17172,6 @@
             },
             "JobTutor": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -17279,7 +17251,6 @@
             },
             "JobTutorRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "role": {
                         "$ref": "#/components/schemas/JobTutorRoleEnum"
@@ -17338,7 +17309,6 @@
             },
             "Lesson": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -17542,7 +17512,6 @@
             },
             "LessonAttendee": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "student": {
                         "type": "string",
@@ -17707,7 +17676,6 @@
             },
             "LessonTutor": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "tutor": {
                         "type": "string",
@@ -17908,7 +17876,6 @@
             },
             "Level": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -17954,7 +17921,6 @@
             },
             "LevelRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "subject": {
                         "type": "string",
@@ -17978,7 +17944,6 @@
             },
             "Location": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -18051,7 +18016,6 @@
             },
             "LocationRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -18349,7 +18313,6 @@
             },
             "Membership": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -18502,7 +18465,6 @@
             },
             "Note": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -18566,7 +18528,6 @@
             },
             "NoteRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "target_type": {
                         "type": "string",
@@ -18667,7 +18628,6 @@
             },
             "Organisation": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -18834,7 +18794,6 @@
             },
             "PackageTemplate": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -18937,7 +18896,6 @@
             },
             "PackageTemplateRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -19781,7 +19739,6 @@
             },
             "PatchedBranchRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -19835,7 +19792,6 @@
             },
             "PatchedCalendarEventRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "type": {
                         "$ref": "#/components/schemas/CalendarEventTypeEnum"
@@ -19889,7 +19845,6 @@
             },
             "PatchedCategoryRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -19905,7 +19860,6 @@
             },
             "PatchedClientRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "type": {
                         "$ref": "#/components/schemas/ClientTypeEnum"
@@ -19984,7 +19938,6 @@
             },
             "PatchedConsentTypeRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "key": {
                         "type": "string",
@@ -20027,7 +19980,6 @@
             },
             "PatchedContactRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "first_name": {
                         "type": "string",
@@ -20106,7 +20058,6 @@
             },
             "PatchedCustomFieldRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "entity_type": {
                         "type": "string",
@@ -20161,7 +20112,6 @@
             },
             "PatchedJobRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -20404,7 +20354,6 @@
             },
             "PatchedLevelRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "subject": {
                         "type": "string",
@@ -20424,7 +20373,6 @@
             },
             "PatchedLocationRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -20500,7 +20448,6 @@
             },
             "PatchedNoteRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "target_type": {
                         "type": "string",
@@ -20533,7 +20480,6 @@
             },
             "PatchedOrganisationRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -20643,7 +20589,6 @@
             },
             "PatchedPackageTemplateRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -20724,7 +20669,6 @@
             },
             "PatchedProductRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -20779,7 +20723,6 @@
             },
             "PatchedSavedViewRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "entity_type": {
                         "type": "string",
@@ -20870,7 +20813,6 @@
             },
             "PatchedServiceRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -21043,7 +20985,6 @@
             },
             "PatchedStudentRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "client": {
                         "type": "string",
@@ -21110,7 +21051,6 @@
             },
             "PatchedSubjectRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -21140,7 +21080,6 @@
             },
             "PatchedTagRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -21157,7 +21096,6 @@
             },
             "PatchedTaskRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "title": {
                         "type": "string",
@@ -21200,7 +21138,6 @@
             },
             "PatchedTaxRateRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -21261,7 +21198,6 @@
             },
             "PatchedTutorRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "email": {
                         "type": "string",
@@ -21373,7 +21309,6 @@
             },
             "PatchedUserRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "first_name": {
                         "type": "string",
@@ -21547,7 +21482,6 @@
             },
             "Process": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -21618,7 +21552,6 @@
             },
             "ProcessDetail": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -21707,7 +21640,6 @@
             },
             "Product": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -21795,7 +21727,6 @@
             },
             "ProductRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -22556,7 +22487,6 @@
             },
             "SavedView": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -22601,7 +22531,6 @@
             },
             "SavedViewRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "entity_type": {
                         "type": "string",
@@ -22723,7 +22652,6 @@
             },
             "Series": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -22969,7 +22897,6 @@
             },
             "Service": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -23130,7 +23057,6 @@
             },
             "ServicePrice": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "currency": {
                         "type": "string",
@@ -23193,7 +23119,6 @@
             },
             "ServicePriceRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "charge_rate": {
                         "type": "object",
@@ -23251,7 +23176,6 @@
             },
             "ServiceRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -23797,7 +23721,6 @@
             },
             "StatusHistory": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "from_status": {
                         "type": "string",
@@ -23844,7 +23767,6 @@
             },
             "StoredFile": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -23920,7 +23842,6 @@
             },
             "Student": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -24104,7 +24025,6 @@
             },
             "StudentRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "client": {
                         "type": "string",
@@ -24188,7 +24108,6 @@
             },
             "Subject": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -24280,7 +24199,6 @@
             },
             "SubjectRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -24356,7 +24274,6 @@
             },
             "Tag": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -24380,7 +24297,6 @@
             },
             "TagRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -24400,7 +24316,6 @@
             },
             "Task": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -24476,7 +24391,6 @@
             },
             "TaskRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "title": {
                         "type": "string",
@@ -24531,7 +24445,6 @@
             },
             "TaxRate": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -24574,7 +24487,6 @@
             },
             "TaxRateRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "name": {
                         "type": "string",
@@ -24666,7 +24578,6 @@
             },
             "Tutor": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -24941,7 +24852,6 @@
             },
             "TutorQualification": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -24975,7 +24885,6 @@
             },
             "TutorQualificationRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "title": {
                         "type": "string",
@@ -25004,7 +24913,6 @@
             },
             "TutorRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "email": {
                         "type": "string",
@@ -25132,7 +25040,6 @@
             },
             "TutorSubject": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -25184,7 +25091,6 @@
             },
             "TutorSubjectRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "subject": {
                         "type": "string",
@@ -25237,7 +25143,6 @@
             },
             "User": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -25315,7 +25220,6 @@
             },
             "Window": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "weekday": {
                         "type": "integer",
@@ -25351,7 +25255,6 @@
             },
             "WindowRequest": {
                 "type": "object",
-                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either. The check\nruns when the fields are built, so nested serializers see the request of their root.\nSerializers without a request in context (internal use) keep every field.",
                 "properties": {
                     "weekday": {
                         "type": "integer",

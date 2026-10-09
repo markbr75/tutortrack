@@ -77,8 +77,8 @@ All ─► E26, E27, E28, E31
 | E05 | ✅ Done (2026-10-09) | Phase 1 scope (merge tool and map view are Phase 2). See Implementation notes |
 | E06 | ✅ Done (2026-10-09) | MVP scope (T07–T10 pay tiers, premiums, discounts, rooms are Phase 2). See Implementation notes |
 | E07 | ✅ Done (2026-10-09) | Lesson-dependent parts (replace preview, hours used, delivered totals) wired by E08-T10. See Implementation notes |
-| E08 | ⏭ Next | |
-| E09 | ☐ | |
+| E08 | ✅ Done (2026-10-09) | MVP scope (rooms, reschedule requests, self-booking, time-off approval + TW1 are Phase 2). See Implementation notes |
+| E09 | ⏭ Next | |
 | E10 | ☐ | |
 | E11 | ☐ | |
 | E12 | ☐ | |

@@ -72,3 +72,23 @@ class MoneyFieldExtension(OpenApiSerializerFieldExtension):
             },
             "required": ["amount", "currency"],
         }
+
+
+def lib_doc_excludes() -> list[type]:
+    """Base classes whose docstrings must not become component descriptions."""
+    from drf_spectacular.plumbing import get_lib_doc_excludes
+
+    from .serializers import (
+        BaseModelSerializer,
+        DynamicFieldsMixin,
+        ExpandableFieldsMixin,
+        FieldPermissionMixin,
+    )
+
+    return [
+        BaseModelSerializer,
+        FieldPermissionMixin,
+        DynamicFieldsMixin,
+        ExpandableFieldsMixin,
+        *get_lib_doc_excludes(),
+    ]

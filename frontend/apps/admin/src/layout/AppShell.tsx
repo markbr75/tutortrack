@@ -10,11 +10,13 @@ import { api, isAuthError, useMe, useMyOrganisations, useOrganisation } from "..
 
 const NAV = [
   { to: "/", key: "nav.home", permission: null },
+  { to: "/calendar", key: "nav.calendar", permission: "scheduling.lesson.view" },
   { to: "/clients", key: "nav.clients", permission: "people.client.view" },
   { to: "/students", key: "nav.students", permission: "people.student.view" },
   { to: "/tutors", key: "nav.tutors", permission: "people.tutor.view" },
   { to: "/jobs", key: "nav.jobs", permission: "jobs.job.view" },
   { to: "/tasks", key: "nav.tasks", permission: "crm.task.view" },
+  { to: "/availability", key: "nav.availability", permission: "scheduling.availability.view" },
   { to: "/catalogue", key: "nav.catalogue", permission: "catalogue.view" },
   { to: "/team", key: "nav.team", permission: "team.view" },
   { to: "/audit", key: "nav.audit", permission: "audit.view" },

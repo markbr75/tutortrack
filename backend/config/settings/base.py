@@ -294,6 +294,7 @@ SPECTACULAR_SETTINGS = {
         "KindEnum": ["note", "task", "document", "change"],
     },
     "POSTPROCESSING_HOOKS": ["drf_spectacular.hooks.postprocess_schema_enums"],
+    "GET_LIB_DOC_EXCLUDES": "tutortrack.core.api.schema.lib_doc_excludes",
 }
 
 # --- Temporal (E32) ---------------------------------------------------------------------------
