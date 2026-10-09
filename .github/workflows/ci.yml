@@ -61,7 +61,7 @@ jobs:
           TEMPORAL_PAYLOAD_KEYS: ci:3q2+7wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhs=
       - name: Tests
         run: uv run pytest -n auto --cov --cov-report=xml
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: backend-coverage
           path: backend/coverage.xml
@@ -166,7 +166,7 @@ jobs:
       - run: pnpm e2e --project=chromium
         working-directory: frontend
       - if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: e2e-results
           path: frontend/test-results/
