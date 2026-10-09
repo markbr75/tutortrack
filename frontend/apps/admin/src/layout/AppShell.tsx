@@ -1,13 +1,53 @@
 import { useTranslation } from "@tutortrack/i18n";
-import { Button, Spinner } from "@tutortrack/ui";
+import { Alert, Button, Spinner } from "@tutortrack/ui";
 import { Link, Outlet } from "@tanstack/react-router";
 
-import { isAuthError, useFeatures } from "../api";
+import { isAuthError, useFeatures, useMyOrganisations, useOrganisation } from "../api";
 
 const NAV = [
   { to: "/", key: "nav.home" },
   { to: "/audit", key: "nav.audit" },
+  { to: "/settings", key: "nav.settings" },
 ] as const;
+
+/** Lists the user's other organisations; switching is navigation (FR-02-7). */
+function OrgSwitcher() {
+  const { t } = useTranslation();
+  const { data: orgs = [] } = useMyOrganisations();
+  if (orgs.length < 2) return null;
+  return (
+    <nav aria-label={t("switcher.label")} className="mt-auto pt-4 text-sm">
+      <p className="px-2 text-xs font-medium text-muted-foreground">{t("switcher.label")}</p>
+      <ul>
+        {orgs.map((org) => (
+          <li key={org.id}>
+            <a
+              href={org.url}
+              aria-current={org.is_current ? "page" : undefined}
+              className="block rounded-md px-2 py-1 hover:bg-muted aria-[current=page]:font-medium"
+            >
+              {org.name}
+              {org.is_current ? (
+                <span className="sr-only"> ({t("switcher.current")})</span>
+              ) : null}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
+function SuspendedBanner() {
+  const { t } = useTranslation();
+  const { data: org } = useOrganisation();
+  if (org?.status !== "suspended") return null;
+  return (
+    <Alert tone="warning" title={t("suspended.title")} className="mb-6">
+      {t("suspended.body")}
+    </Alert>
+  );
+}
 
 function SignInRequired() {
   const { t } = useTranslation();
@@ -60,8 +100,10 @@ export function AppShell() {
             {t(item.key)}
           </Link>
         ))}
+        <OrgSwitcher />
       </nav>
       <main className="flex-1 p-4 md:p-8">
+        <SuspendedBanner />
         <Outlet />
       </main>
     </div>

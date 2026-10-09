@@ -1,5 +1,7 @@
 {
-  "app": { "name": "TutorTrack" },
+  "app": {
+    "name": "TutorTrack"
+  },
   "nav": {
     "home": "Home",
     "calendar": "Calendar",
@@ -36,5 +38,149 @@
     "retry": "Try again",
     "notFound": "Page not found",
     "reference": "Reference: {{requestId}}"
+  },
+  "common": {
+    "save": "Save",
+    "saved": "Saved",
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip for now",
+    "cancel": "Cancel",
+    "loading": "Loading…",
+    "optional": "Optional"
+  },
+  "signup": {
+    "title": "Create your TutorTrack account",
+    "subtitle": "Free trial. No card needed.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 8 characters. Avoid common words.",
+    "businessName": "Business name",
+    "country": "Country",
+    "businessType": "Type of business",
+    "subdomain": "Your web address",
+    "subdomainHint": "{{slug}}.tutortrack.app",
+    "submit": "Create account",
+    "haveAccount": "Already have an account? Sign in.",
+    "captchaRequired": "Please complete the security check."
+  },
+  "businessTypes": {
+    "sole_trader": "Sole trader",
+    "team": "Small team",
+    "agency": "Agency",
+    "centre": "Tuition centre",
+    "online": "Online school"
+  },
+  "countries": {
+    "GB": "United Kingdom",
+    "IE": "Ireland",
+    "US": "United States",
+    "CA": "Canada",
+    "AU": "Australia",
+    "NZ": "New Zealand",
+    "FR": "France",
+    "DE": "Germany",
+    "ES": "Spain",
+    "NL": "Netherlands"
+  },
+  "verifyEmail": {
+    "title": "Confirm your email",
+    "checking": "Confirming your email address…",
+    "done": "Thanks, your email address is confirmed.",
+    "failed": "This link is invalid or has expired. Sign in and request a new one.",
+    "continue": "Continue"
+  },
+  "onboarding": {
+    "title": "Set up your business",
+    "progress": "Step {{current}} of {{total}}",
+    "demo": "Explore with demo data",
+    "demoLoaded": "Demo data loaded. You can wipe it from Settings.",
+    "finish": "Finish setup",
+    "done": "You're all set!",
+    "steps": {
+      "business": "Your business",
+      "locale": "Language, currency and timezone",
+      "branding": "Logo and colour",
+      "service": "Your first service",
+      "tutors": "Invite your tutors",
+      "students": "Your first student",
+      "payments": "Take card payments",
+      "invoicing": "How you invoice"
+    },
+    "teamSize": "Team size",
+    "locale": "Language",
+    "currency": "Currency",
+    "timezone": "Timezone",
+    "colour": "Brand colour",
+    "subject": "Subject",
+    "level": "Level",
+    "duration": "Lesson length (minutes)",
+    "price": "Price per lesson",
+    "tutorEmails": "Tutor email addresses",
+    "tutorEmailsHint": "One per line. They'll get an invitation.",
+    "studentFirstName": "Student's first name",
+    "studentLastName": "Student's last name",
+    "contactName": "Parent or guardian",
+    "contactEmail": "Their email",
+    "paymentsBody": "Connect Stripe to take card payments and set up auto-pay. You can do this later.",
+    "paymentsStripe": "Connect Stripe",
+    "paymentsLater": "Decide later",
+    "invoicing": {
+      "payg": "Pay as you go, invoiced after lessons",
+      "monthly_advance": "Monthly in advance",
+      "packages": "Prepaid packages"
+    },
+    "handoffFailed": "Your sign-in link has expired. Please sign in to continue."
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Organisation profile",
+    "name": "Business name",
+    "legalName": "Legal name",
+    "contactEmail": "Contact email",
+    "contactPhone": "Contact phone",
+    "timezone": "Timezone",
+    "primaryColour": "Brand colour",
+    "subdomain": "Web address",
+    "subdomainHint": "Changing it keeps the old address working for 90 days.",
+    "general": "General",
+    "lessonDuration": "Default lesson length (minutes)",
+    "terminology": "Terminology",
+    "terminologyHint": "Rename key words across the app.",
+    "singular": "{{term}} (singular)",
+    "plural": "{{term}} (plural)",
+    "branches": "Branches",
+    "addBranch": "Add branch",
+    "branchName": "Branch name",
+    "branchCode": "Code",
+    "archive": "Archive",
+    "default": "Default",
+    "demo": "Demo data",
+    "demoBody": "Your account contains sample data.",
+    "wipeDemo": "Wipe demo data",
+    "close": "Close account",
+    "closeBody": "Closing your account cancels your subscription. Your data is kept for 30 days, then deleted. We'll email you a full export.",
+    "closeConfirmSlug": "Type {{slug}} to confirm",
+    "closePassword": "Your password",
+    "closeReason": "Why are you leaving?",
+    "closeAction": "Close account permanently",
+    "closed": "Your account has been closed."
+  },
+  "terms": {
+    "tutor": "Tutor",
+    "student": "Student",
+    "client": "Client",
+    "lesson": "Lesson",
+    "job": "Job"
+  },
+  "switcher": {
+    "label": "Switch organisation",
+    "current": "current"
+  },
+  "suspended": {
+    "title": "Your account is suspended",
+    "body": "It is read-only until billing is up to date."
   }
 }

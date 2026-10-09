@@ -7,7 +7,8 @@ Python 3.12 · Django 5 · DRF + drf-spectacular · PostgreSQL 16 · Celery + Re
 
 ## Local environment
 - `cp .env.example .env`, then `make infra` starts Postgres (5442), Redis (6389), SeaweedFS S3 (9010) and Mailpit (8025).
-- Backend on the host: `cd backend && uv run python manage.py migrate && uv run python manage.py ensure_storage_bucket && uv run python manage.py runserver 127.0.0.1:8010`.
+- Backend on the host: `cd backend && uv run python manage.py ensure_db_roles && uv run python manage.py migrate && uv run python manage.py ensure_storage_bucket && uv run python manage.py runserver 127.0.0.1:8010`.
+- Database roles (E02, ADR 0003): `DATABASE_URL` is the RLS-restricted app role, `DATABASE_OWNER_URL` the table owner (`migrate` uses it automatically), `DATABASE_PLATFORM_URL` the BYPASSRLS role (platform_admin only). Tests run as the app role. In data migrations use `schema_editor.connection.alias`.
 - `make seed` creates the admin `admin@tutortrack.localhost` (password from `SEED_ADMIN_PASSWORD`, default `tutortrack`) and the org `brightminds`.
 - Admin app: `pnpm --dir frontend install && pnpm --dir frontend dev`, then open http://brightminds.localhost:5173 (tenant = subdomain).
 - Background jobs: `cd backend && uv run celery -A config worker -l INFO` (add `-P solo` on Windows).
@@ -19,7 +20,7 @@ Python 3.12 · Django 5 · DRF + drf-spectacular · PostgreSQL 16 · Celery + Re
 - `make api-client`: regenerate the TS client from OpenAPI
 
 ## Non-negotiables
-1. **Tenancy:** every tenant-owned model subclasses `core.models.TenantModel`. Never query with `all_tenants` outside `platform_admin`. Every new list/detail endpoint gets a cross-tenant isolation test (`TenantIsolationTestMixin`).
+1. **Tenancy:** every tenant-owned model subclasses `core.models.TenantModel` (`BranchScopedModel` for branch-scoped data) and its migration calls `enable_rls()`. Never query with `all_tenants` outside `platform_admin`. Every new list/detail endpoint gets a cross-tenant isolation test (`TenantIsolationTestMixin`).
 2. **Business logic lives in `services.py`** (writes) and `selectors.py` (reads). Views and serializers stay thin. Apps talk to each other via services and domain events, never by writing to another app's models.
 3. **Domain events:** emit via `core.events.publish()` inside the transaction (outbox). Handlers must be idempotent.
 4. **Audit:** mutations go through services, which record `AuditEntry`.
@@ -29,7 +30,7 @@ Python 3.12 · Django 5 · DRF + drf-spectacular · PostgreSQL 16 · Celery + Re
 7. **Permissions:** declare codenames in `<app>/permissions.py`; enforce in API permission classes *and* queryset scoping. Sensitive fields are hidden by serializer field-permission mixins.
 8. **API:** `/api/v1/`, cursor pagination, RFC 7807 errors, `Idempotency-Key` on financial POSTs, OpenAPI documented with examples.
 9. **Migrations:** backward compatible (expand/contract). Add RLS policies for new tenant tables via `core.migrations_utils.enable_rls` (available from E02).
-10. **Tests first:** every FR in the ticket gets a test. Use `factory_boy` factories in `<app>/tests/factories.py` (tenant models subclass `core.tests.factories.TenantFactory`). Shared fixtures (`org`, `other_org`, `tenant`, `api`, `admin_api`, `s3`, `fake_redis`) live in `backend/conftest.py`. Demo data goes in `<app>/seeds.py` via `@seed_step(order=N)`. Use Hypothesis for money, recurrence and proration logic.
+10. **Tests first:** every FR in the ticket gets a test. Use `factory_boy` factories in `<app>/tests/factories.py` (tenant models subclass `core.tests.factories.TenantFactory`). Shared fixtures (`org`, `other_org`, `tenant`, `api`, `admin_api`, `s3`, `fake_redis`) live in `backend/conftest.py`. Dev seed data goes in `<app>/seeds.py` via `@seed_step(order=N)`; in-product sample data in `<app>/demo.py` via `@demo_provider`. Org settings are registered in `<app>/org_settings.py`. Use Hypothesis for money, recurrence and proration logic.
 11. **Secrets/PII:** OAuth tokens, bank details and safeguarding notes use `core.crypto.EncryptedField` (available from E29; until then, do not store such data). Never log PII or tokens.
 12. **i18n:** wrap user-facing strings (`gettext` / `t()`). No hard-coded currency symbols or date formats.
 13. **Accessibility:** WCAG 2.2 AA for all UI.

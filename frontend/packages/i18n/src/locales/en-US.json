@@ -1,1 +1,14 @@
-{}
+{
+  "businessTypes": {
+    "centre": "Tutoring center"
+  },
+  "settings": {
+    "primaryColour": "Brand color"
+  },
+  "onboarding": {
+    "colour": "Brand color",
+    "steps": {
+      "branding": "Logo and color"
+    }
+  }
+}
