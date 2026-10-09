@@ -66,6 +66,7 @@ ROLES: dict[str, RoleDef] = {
                "matching.*", "billing.invoice.view", "billing.rates.view_charge",
                "org.settings.view", "team.view", "privacy.consent.view",
                "privacy.consent.record"),
+            denies=("people.tutor.view_financial",),
         ),
         RoleDef(
             "finance", "Finance",
@@ -77,6 +78,7 @@ ROLES: dict[str, RoleDef] = {
             "tutor", "Tutor",
             "Own schedule and students, lesson reports, own pay and expenses, availability.",
             _g("scheduling.lesson.view:own", "scheduling.availability.*:own",
+               "people.tutor.view:own", "people.tutor.edit:own",
                "people.student.view:own", "delivery.*:own", "payroll.payitem.view:own",
                "payroll.expense.*:own", "learning.*:own"),
         ),

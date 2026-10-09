@@ -279,6 +279,112 @@ export interface paths {
     patch: operations["branches_partial_update"];
     trace?: never;
   };
+  "/api/v1/clients": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Clients (billing accounts). ``DELETE`` archives (FR-05-14). */
+    get: operations["clients_list"];
+    put?: never;
+    /** @description Clients (billing accounts). ``DELETE`` archives (FR-05-14). */
+    post: operations["clients_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/clients/{client_id}/contacts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Contacts of one client: ``/clients/{client_id}/contacts``. */
+    get: operations["clients_contacts_list"];
+    put?: never;
+    /** @description Contacts of one client: ``/clients/{client_id}/contacts``. */
+    post: operations["clients_contacts_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/clients/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Clients (billing accounts). ``DELETE`` archives (FR-05-14). */
+    get: operations["clients_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description Clients (billing accounts). ``DELETE`` archives (FR-05-14). */
+    delete: operations["clients_destroy"];
+    options?: never;
+    head?: never;
+    /** @description Clients (billing accounts). ``DELETE`` archives (FR-05-14). */
+    patch: operations["clients_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/clients/{id}/restore": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Clients (billing accounts). ``DELETE`` archives (FR-05-14). */
+    post: operations["clients_restore_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/clients/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Clients (billing accounts). ``DELETE`` archives (FR-05-14). */
+    get: operations["clients_export_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/clients/quick-add": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Client + primary contact + students in one step (FR-05-1). */
+    post: operations["clients_quick_add_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/consent-types": {
     parameters: {
       query?: never;
@@ -371,6 +477,42 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/api/v1/contacts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description All contacts (search, edit, archive). Create through ``/clients/{id}/contacts``. */
+    get: operations["contacts_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/contacts/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description All contacts (search, edit, archive). Create through ``/clients/{id}/contacts``. */
+    get: operations["contacts_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description All contacts (search, edit, archive). Create through ``/clients/{id}/contacts``. */
+    delete: operations["contacts_destroy"];
+    options?: never;
+    head?: never;
+    /** @description All contacts (search, edit, archive). Create through ``/clients/{id}/contacts``. */
+    patch: operations["contacts_partial_update"];
     trace?: never;
   };
   "/api/v1/demo-data": {
@@ -948,6 +1090,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/people/duplicates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Possible duplicates before creating a record (FR-05-13): same email or phone, or same
+     *     name and date of birth.
+     */
+    get: operations["people_duplicates_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/permissions": {
     parameters: {
       query?: never;
@@ -1185,6 +1347,166 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/students": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Students. ``DELETE`` archives; ``status`` changes the lifecycle status. */
+    get: operations["students_list"];
+    put?: never;
+    /** @description Students. ``DELETE`` archives; ``status`` changes the lifecycle status. */
+    post: operations["students_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/students/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Students. ``DELETE`` archives; ``status`` changes the lifecycle status. */
+    get: operations["students_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description Students. ``DELETE`` archives; ``status`` changes the lifecycle status. */
+    delete: operations["students_destroy"];
+    options?: never;
+    head?: never;
+    /** @description Students. ``DELETE`` archives; ``status`` changes the lifecycle status. */
+    patch: operations["students_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/students/{id}/status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Students. ``DELETE`` archives; ``status`` changes the lifecycle status. */
+    post: operations["students_status_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/students/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Students. ``DELETE`` archives; ``status`` changes the lifecycle status. */
+    get: operations["students_export_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutors": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false. */
+    get: operations["tutors_list"];
+    put?: never;
+    /** @description Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false. */
+    post: operations["tutors_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutors/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false. */
+    get: operations["tutors_retrieve"];
+    /** @description Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false. */
+    put: operations["tutors_update"];
+    post?: never;
+    /** @description Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false. */
+    delete: operations["tutors_destroy"];
+    options?: never;
+    head?: never;
+    /** @description Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false. */
+    patch: operations["tutors_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/tutors/{id}/status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false. */
+    post: operations["tutors_status_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutors/{id}/subjects": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** @description Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false. */
+    put: operations["tutors_subjects_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutors/{id}/subjects/{subject_id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false. */
+    post: operations["tutors_subjects_approve_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1194,6 +1516,62 @@ export interface components {
       first_name?: string;
       last_name?: string;
       password?: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Address: {
+      line1?: string;
+      line2?: string;
+      city?: string;
+      region?: string;
+      postcode?: string;
+      country?: string;
+      /** Format: decimal */
+      readonly lat: string | null;
+      /** Format: decimal */
+      readonly lng: string | null;
+    };
+    AddressInput: {
+      line1?: string;
+      line2?: string;
+      city?: string;
+      region?: string;
+      postcode?: string;
+      country?: string;
+    };
+    AddressInputRequest: {
+      line1?: string;
+      line2?: string;
+      city?: string;
+      region?: string;
+      postcode?: string;
+      country?: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    AddressRequest: {
+      line1?: string;
+      line2?: string;
+      city?: string;
+      region?: string;
+      postcode?: string;
+      country?: string;
     };
     /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
@@ -1322,6 +1700,143 @@ export interface components {
       | "terms_of_service"
       | "privacy_policy"
       | "other";
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Client: {
+      /** Format: uuid */
+      readonly id: string;
+      type?: components["schemas"]["ClientTypeEnum"];
+      display_name: string;
+      readonly status: components["schemas"]["ClientStatusEnum"];
+      /** Format: uuid */
+      branch?: string;
+      /** Format: uuid */
+      readonly primary_contact: string;
+      /** Format: uuid */
+      readonly billing_contact: string | null;
+      readonly billing_address: components["schemas"]["Address"];
+      currency?: string;
+      payment_terms_days?: number;
+      invoice_delivery?: components["schemas"]["InvoiceDeliveryEnum"];
+      invoice_grouping?: components["schemas"]["InvoiceGroupingEnum"];
+      preferred_payment_method?: string;
+      auto_pay?: boolean;
+      /** Format: decimal */
+      credit_limit_amount?: string | null;
+      prevent_negative_balance?: boolean | null;
+      tax_exempt?: boolean;
+      po_number?: string;
+      referral_source?: string;
+      /** Format: uuid */
+      account_manager?: string | null;
+      custom_fields?: unknown;
+      readonly students_count: number;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    ClientDetail: {
+      /** Format: uuid */
+      readonly id: string;
+      type?: components["schemas"]["ClientTypeEnum"];
+      display_name: string;
+      readonly status: components["schemas"]["ClientStatusEnum"];
+      /** Format: uuid */
+      branch?: string;
+      /** Format: uuid */
+      readonly primary_contact: string;
+      /** Format: uuid */
+      readonly billing_contact: string | null;
+      readonly billing_address: components["schemas"]["Address"];
+      currency?: string;
+      payment_terms_days?: number;
+      invoice_delivery?: components["schemas"]["InvoiceDeliveryEnum"];
+      invoice_grouping?: components["schemas"]["InvoiceGroupingEnum"];
+      preferred_payment_method?: string;
+      auto_pay?: boolean;
+      /** Format: decimal */
+      credit_limit_amount?: string | null;
+      prevent_negative_balance?: boolean | null;
+      tax_exempt?: boolean;
+      po_number?: string;
+      referral_source?: string;
+      /** Format: uuid */
+      account_manager?: string | null;
+      custom_fields?: unknown;
+      readonly students_count: number;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly contacts: components["schemas"]["Contact"][];
+      readonly students: components["schemas"]["Student"][];
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    ClientRequest: {
+      type?: components["schemas"]["ClientTypeEnum"];
+      display_name: string;
+      /** Format: uuid */
+      branch?: string;
+      billing_address_input?: components["schemas"]["AddressInputRequest"];
+      currency?: string;
+      payment_terms_days?: number;
+      invoice_delivery?: components["schemas"]["InvoiceDeliveryEnum"];
+      invoice_grouping?: components["schemas"]["InvoiceGroupingEnum"];
+      preferred_payment_method?: string;
+      auto_pay?: boolean;
+      /** Format: decimal */
+      credit_limit_amount?: string | null;
+      prevent_negative_balance?: boolean | null;
+      tax_exempt?: boolean;
+      po_number?: string;
+      referral_source?: string;
+      /** Format: uuid */
+      account_manager?: string | null;
+      custom_fields?: unknown;
+    };
+    /**
+     * @description * `prospect` - Prospect
+     *     * `active` - Active
+     *     * `dormant` - Dormant
+     *     * `archived` - Archived
+     * @enum {string}
+     */
+    ClientStatusEnum: "prospect" | "active" | "dormant" | "archived";
+    /**
+     * @description * `household` - Household
+     *     * `individual` - Individual learner
+     *     * `organisation` - Organisation
+     * @enum {string}
+     */
+    ClientTypeEnum: "household" | "individual" | "organisation";
     CloseOrganisationRequest: {
       password: string;
       /** @description Type the organisation's subdomain. */
@@ -1430,6 +1945,68 @@ export interface components {
       is_active?: boolean;
     };
     /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Contact: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly client: string;
+      first_name: string;
+      last_name?: string;
+      readonly full_name: string;
+      relationship?: components["schemas"]["RelationshipEnum"];
+      preferred_contact_method?: components["schemas"]["PreferredContactMethodEnum"];
+      use_client_address?: boolean;
+      is_primary?: boolean;
+      is_bill_payer?: boolean;
+      receives_reminders?: boolean;
+      receives_invoices?: boolean;
+      receives_reports?: boolean;
+      receives_marketing?: boolean;
+      is_emergency_contact?: boolean;
+      language?: string;
+      /** Format: uuid */
+      readonly user: string | null;
+      custom_fields?: unknown;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    ContactRequest: {
+      first_name: string;
+      last_name?: string;
+      relationship?: components["schemas"]["RelationshipEnum"];
+      preferred_contact_method?: components["schemas"]["PreferredContactMethodEnum"];
+      address_input?: components["schemas"]["AddressInputRequest"];
+      use_client_address?: boolean;
+      is_primary?: boolean;
+      is_bill_payer?: boolean;
+      receives_reminders?: boolean;
+      receives_invoices?: boolean;
+      receives_reports?: boolean;
+      receives_marketing?: boolean;
+      is_emergency_contact?: boolean;
+      language?: string;
+      custom_fields?: unknown;
+    };
+    /**
      * @description * `locale` - Locale default
      *     * `dd/MM/yyyy` - 31/12/2026
      *     * `MM/dd/yyyy` - 12/31/2026
@@ -1446,12 +2023,35 @@ export interface components {
       url: string;
       expires_in: number;
     };
+    Duplicate: {
+      type: components["schemas"]["DuplicateTypeEnum"];
+      /** Format: uuid */
+      id: string;
+      name: string;
+      /** Format: uuid */
+      client_id: string | null;
+      reason: string;
+    };
+    /**
+     * @description * `contact` - contact
+     *     * `student` - student
+     *     * `tutor` - tutor
+     * @enum {string}
+     */
+    DuplicateTypeEnum: "contact" | "student" | "tutor";
     EmailRequest: {
       /** Format: email */
       email: string;
       /** @default / */
       next: string;
     };
+    /**
+     * @description * `self_employed` - Self-employed
+     *     * `employee` - Employee
+     *     * `other` - Other
+     * @enum {string}
+     */
+    EmploymentTypeEnum: "self_employed" | "employee" | "other";
     Features: {
       features: {
         [key: string]: boolean;
@@ -1539,6 +2139,20 @@ export interface components {
      * @enum {string}
      */
     InvitationStatusEnum: "pending" | "accepted" | "revoked";
+    /**
+     * @description * `email` - Email
+     *     * `portal` - Portal only
+     *     * `post` - Post
+     * @enum {string}
+     */
+    InvoiceDeliveryEnum: "email" | "portal" | "post";
+    /**
+     * @description * `client` - One invoice per client
+     *     * `student` - One per student
+     *     * `job` - One per job
+     * @enum {string}
+     */
+    InvoiceGroupingEnum: "client" | "student" | "job";
     LoginEvent: {
       /** Format: uuid */
       id: string;
@@ -1761,6 +2375,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Branch"][];
     };
+    PaginatedClientList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Client"][];
+    };
     PaginatedConsentRecordList: {
       /**
        * Format: uri
@@ -1799,6 +2426,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["ConsentType"][];
+    };
+    PaginatedContactList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Contact"][];
     };
     PaginatedInvitationList: {
       /**
@@ -1852,6 +2492,45 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Process"][];
     };
+    PaginatedStudentList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Student"][];
+    };
+    PaginatedTutorList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Tutor"][];
+    };
+    PaginatedTutorSubjectList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["TutorSubject"][];
+    };
     PasswordChangeRequest: {
       current_password: string;
       new_password: string;
@@ -1897,6 +2576,38 @@ export interface components {
      *     Fields are removed from output *and* input, so they can't be written either.
      *     Serializers without a request in context (internal use) keep every field.
      */
+    PatchedClientRequest: {
+      type?: components["schemas"]["ClientTypeEnum"];
+      display_name?: string;
+      /** Format: uuid */
+      branch?: string;
+      billing_address_input?: components["schemas"]["AddressInputRequest"];
+      currency?: string;
+      payment_terms_days?: number;
+      invoice_delivery?: components["schemas"]["InvoiceDeliveryEnum"];
+      invoice_grouping?: components["schemas"]["InvoiceGroupingEnum"];
+      preferred_payment_method?: string;
+      auto_pay?: boolean;
+      /** Format: decimal */
+      credit_limit_amount?: string | null;
+      prevent_negative_balance?: boolean | null;
+      tax_exempt?: boolean;
+      po_number?: string;
+      referral_source?: string;
+      /** Format: uuid */
+      account_manager?: string | null;
+      custom_fields?: unknown;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
     PatchedConsentTypeRequest: {
       key?: string;
       name?: string;
@@ -1906,6 +2617,33 @@ export interface components {
       required?: boolean;
       applies_to?: unknown;
       is_active?: boolean;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    PatchedContactRequest: {
+      first_name?: string;
+      last_name?: string;
+      relationship?: components["schemas"]["RelationshipEnum"];
+      preferred_contact_method?: components["schemas"]["PreferredContactMethodEnum"];
+      address_input?: components["schemas"]["AddressInputRequest"];
+      use_client_address?: boolean;
+      is_primary?: boolean;
+      is_bill_payer?: boolean;
+      receives_reminders?: boolean;
+      receives_invoices?: boolean;
+      receives_reports?: boolean;
+      receives_marketing?: boolean;
+      is_emergency_contact?: boolean;
+      language?: string;
+      custom_fields?: unknown;
     };
     PatchedMembershipUpdateRequest: {
       role?: components["schemas"]["RoleEnum"];
@@ -1965,6 +2703,71 @@ export interface components {
      *     Fields are removed from output *and* input, so they can't be written either.
      *     Serializers without a request in context (internal use) keep every field.
      */
+    PatchedStudentRequest: {
+      /** Format: uuid */
+      client?: string;
+      /** Format: uuid */
+      branch?: string;
+      first_name?: string;
+      last_name?: string;
+      preferred_name?: string;
+      year_group?: string;
+      school?: string;
+      status?: components["schemas"]["StudentStatusEnum"];
+      subjects?: components["schemas"]["SubjectInputRequest"][];
+      goals?: string;
+      exam_boards?: unknown;
+      target_grades?: unknown;
+      availability?: unknown;
+      lesson_address_input?: components["schemas"]["AddressInputRequest"];
+      custom_fields?: unknown;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    PatchedTutorRequest: {
+      /** Format: email */
+      email?: string;
+      first_name?: string;
+      last_name?: string;
+      display_name?: string;
+      phone?: string;
+      headline?: string;
+      bio_public?: string;
+      bio_private?: string;
+      languages?: unknown;
+      years_experience?: number | null;
+      employment_type?: components["schemas"]["EmploymentTypeEnum"];
+      address_input?: components["schemas"]["AddressInputRequest"];
+      travel_radius_km?: number | null;
+      delivers_online?: boolean;
+      delivers_in_person?: boolean;
+      max_weekly_hours?: number | null;
+      min_lesson_minutes?: number | null;
+      branches?: string[];
+      public_profile?: boolean;
+      emergency_contact?: unknown;
+      custom_fields?: unknown;
+      /** @default true */
+      invite: boolean;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
     PatchedUserRequest: {
       first_name?: string;
       last_name?: string;
@@ -1980,6 +2783,13 @@ export interface components {
       category: string;
       description: string;
     };
+    /**
+     * @description * `email` - Email
+     *     * `sms` - SMS
+     *     * `phone` - Phone
+     * @enum {string}
+     */
+    PreferredContactMethodEnum: "email" | "sms" | "phone";
     PresignedUpload: {
       /** Format: uri */
       url: string;
@@ -2056,6 +2866,37 @@ export interface components {
      */
     ProcessStatusEnum:
       "running" | "completed" | "failed" | "cancelled" | "terminated" | "timed_out";
+    /**
+     * @description * `good` - Good
+     *     * `strong` - Strong
+     *     * `expert` - Expert
+     * @enum {string}
+     */
+    ProficiencyEnum: "good" | "strong" | "expert";
+    QuickAddContactRequest: {
+      first_name: string;
+      last_name?: string;
+      email?: string;
+      phone?: string;
+      /** @default parent */
+      relationship: components["schemas"]["RelationshipEnum"];
+    };
+    /** @description One-screen "add a family" (FR-05-1 AC). */
+    QuickAddRequest: {
+      contact: components["schemas"]["QuickAddContactRequest"];
+      students?: components["schemas"]["QuickAddStudentRequest"][];
+      billing_address?: components["schemas"]["AddressInputRequest"];
+      /** Format: uuid */
+      branch?: string;
+    };
+    QuickAddStudentRequest: {
+      first_name: string;
+      last_name?: string;
+      year_group?: string;
+      /** Format: date */
+      date_of_birth?: string | null;
+      subjects?: components["schemas"]["SubjectInputRequest"][];
+    };
     ReasonRequest: {
       reason: string;
     };
@@ -2089,6 +2930,16 @@ export interface components {
      * @enum {string}
      */
     RegionEnum: "uk" | "eu" | "us" | "au";
+    /**
+     * @description * `parent` - Parent
+     *     * `guardian` - Guardian
+     *     * `carer` - Carer
+     *     * `self` - Self (adult learner)
+     *     * `finance` - Finance contact
+     *     * `other` - Other
+     * @enum {string}
+     */
+    RelationshipEnum: "parent" | "guardian" | "carer" | "self" | "finance" | "other";
     Role: {
       key: string;
       name: string;
@@ -2160,7 +3011,7 @@ export interface components {
      */
     SettingDescription: {
       key: string;
-      type: components["schemas"]["TypeEnum"];
+      type: components["schemas"]["SettingDescriptionTypeEnum"];
       scope: components["schemas"]["ScopeEnum"];
       default: unknown;
       label: string;
@@ -2175,6 +3026,15 @@ export interface components {
         [key: string]: unknown;
       };
     };
+    /**
+     * @description * `int` - int
+     *     * `str` - str
+     *     * `bool` - bool
+     *     * `choice` - choice
+     *     * `object` - object
+     * @enum {string}
+     */
+    SettingDescriptionTypeEnum: "int" | "str" | "bool" | "choice" | "object";
     SettingsArea: {
       area: string;
       /** Format: uuid */
@@ -2229,6 +3089,9 @@ export interface components {
       reason: string | null;
       suggestion: string | null;
     };
+    StatusRequest: {
+      status: string;
+    };
     /**
      * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
      *
@@ -2259,6 +3122,99 @@ export interface components {
      * @enum {string}
      */
     StoredFileStatusEnum: "pending_upload" | "uploaded" | "rejected";
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Student: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      client: string;
+      /** Format: uuid */
+      branch?: string;
+      first_name: string;
+      last_name?: string;
+      preferred_name?: string;
+      readonly full_name: string;
+      /** Format: date */
+      date_of_birth?: string | null;
+      year_group?: string;
+      school?: string;
+      status?: components["schemas"]["StudentStatusEnum"];
+      /** Format: date-time */
+      readonly status_changed_at: string | null;
+      subjects?: components["schemas"]["SubjectInput"][];
+      goals?: string;
+      learning_needs?: string;
+      exam_boards?: unknown;
+      target_grades?: unknown;
+      availability?: unknown;
+      readonly lesson_address: components["schemas"]["Address"];
+      /** Format: uuid */
+      readonly contact: string | null;
+      /** Format: uuid */
+      readonly user: string | null;
+      custom_fields?: unknown;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    StudentRequest: {
+      /** Format: uuid */
+      client: string;
+      /** Format: uuid */
+      branch?: string;
+      first_name: string;
+      last_name?: string;
+      preferred_name?: string;
+      year_group?: string;
+      school?: string;
+      status?: components["schemas"]["StudentStatusEnum"];
+      subjects?: components["schemas"]["SubjectInputRequest"][];
+      goals?: string;
+      exam_boards?: unknown;
+      target_grades?: unknown;
+      availability?: unknown;
+      lesson_address_input?: components["schemas"]["AddressInputRequest"];
+      custom_fields?: unknown;
+    };
+    /**
+     * @description * `lead` - Lead
+     *     * `trial` - Trial
+     *     * `active` - Active
+     *     * `waiting` - Waiting list
+     *     * `paused` - Paused
+     *     * `finished` - Finished
+     *     * `archived` - Archived
+     * @enum {string}
+     */
+    StudentStatusEnum: "lead" | "trial" | "active" | "waiting" | "paused" | "finished" | "archived";
+    SubjectInput: {
+      subject: string;
+      level?: string;
+    };
+    SubjectInputRequest: {
+      subject: string;
+      level?: string;
+    };
     TOTPConfirmRequest: {
       /** Format: uuid */
       device_id: string;
@@ -2283,14 +3239,169 @@ export interface components {
       token: string;
     };
     /**
-     * @description * `int` - int
-     *     * `str` - str
-     *     * `bool` - bool
-     *     * `choice` - choice
-     *     * `object` - object
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    Tutor: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: email */
+      email: string;
+      first_name: string;
+      last_name?: string;
+      display_name?: string;
+      readonly full_name: string;
+      phone?: string;
+      headline?: string;
+      bio_public?: string;
+      bio_private?: string;
+      languages?: unknown;
+      years_experience?: number | null;
+      employment_type?: components["schemas"]["EmploymentTypeEnum"];
+      readonly address: components["schemas"]["Address"];
+      travel_radius_km?: number | null;
+      delivers_online?: boolean;
+      delivers_in_person?: boolean;
+      max_weekly_hours?: number | null;
+      min_lesson_minutes?: number | null;
+      branches?: string[];
+      readonly status: components["schemas"]["TutorStatusEnum"];
+      /** Format: date-time */
+      readonly status_changed_at: string | null;
+      public_profile?: boolean;
+      emergency_contact?: unknown;
+      readonly subjects: components["schemas"]["TutorSubject"][];
+      readonly qualifications: components["schemas"]["TutorQualification"][];
+      custom_fields?: unknown;
+      readonly has_joined: boolean;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    TutorQualification: {
+      /** Format: uuid */
+      readonly id: string;
+      title: string;
+      institution?: string;
+      year?: number | null;
+      /** Format: uuid */
+      document?: string | null;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    TutorQualificationRequest: {
+      title: string;
+      institution?: string;
+      year?: number | null;
+      /** Format: uuid */
+      document?: string | null;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    TutorRequest: {
+      /** Format: email */
+      email: string;
+      first_name: string;
+      last_name?: string;
+      display_name?: string;
+      phone?: string;
+      headline?: string;
+      bio_public?: string;
+      bio_private?: string;
+      languages?: unknown;
+      years_experience?: number | null;
+      employment_type?: components["schemas"]["EmploymentTypeEnum"];
+      address_input?: components["schemas"]["AddressInputRequest"];
+      travel_radius_km?: number | null;
+      delivers_online?: boolean;
+      delivers_in_person?: boolean;
+      max_weekly_hours?: number | null;
+      min_lesson_minutes?: number | null;
+      branches?: string[];
+      public_profile?: boolean;
+      emergency_contact?: unknown;
+      custom_fields?: unknown;
+      /** @default true */
+      invite: boolean;
+    };
+    /**
+     * @description * `applicant` - Applicant
+     *     * `onboarding` - Onboarding
+     *     * `active` - Active
+     *     * `restricted` - Restricted
+     *     * `inactive` - Inactive
+     *     * `archived` - Archived
      * @enum {string}
      */
-    TypeEnum: "int" | "str" | "bool" | "choice" | "object";
+    TutorStatusEnum: "applicant" | "onboarding" | "active" | "restricted" | "inactive" | "archived";
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    TutorSubject: {
+      /** Format: uuid */
+      readonly id: string;
+      subject: string;
+      level?: string;
+      proficiency?: components["schemas"]["ProficiencyEnum"];
+      readonly approved: boolean;
+      /** Format: uuid */
+      readonly approved_by: string | null;
+    };
+    /**
+     * @description Drops fields the viewer may not see (FR-03-5 field-level permissions).
+     *
+     *         class Meta:
+     *             field_permissions = {"pay_rate": "billing.rates.view_pay",
+     *                                  "charge_rate": "billing.rates.view_charge"}
+     *
+     *     Fields are removed from output *and* input, so they can't be written either.
+     *     Serializers without a request in context (internal use) keep every field.
+     */
+    TutorSubjectRequest: {
+      subject: string;
+      level?: string;
+      proficiency?: components["schemas"]["ProficiencyEnum"];
+    };
     UploadRequestRequest: {
       filename: string;
       content_type: string;
@@ -2851,6 +3962,298 @@ export interface operations {
       };
     };
   };
+  clients_list: {
+    parameters: {
+      query?: {
+        account_manager?: string;
+        branch?: string;
+        /** @description Filter by a custom field value. */
+        "cf_<key>"?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        include_archived?: boolean;
+        /** @description Records missing required custom fields. */
+        missing_required?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /** @description Search names, emails and phones. */
+        q?: string;
+        /**
+         * @description * `prospect` - Prospect
+         *     * `active` - Active
+         *     * `dormant` - Dormant
+         *     * `archived` - Archived
+         */
+        status?: "active" | "archived" | "dormant" | "prospect";
+        /** @description Tag id (repeatable). */
+        tag?: string[];
+        /**
+         * @description * `household` - Household
+         *     * `individual` - Individual learner
+         *     * `organisation` - Organisation
+         */
+        type?: "household" | "individual" | "organisation";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedClientList"];
+        };
+      };
+    };
+  };
+  clients_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ClientRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ClientRequest"];
+        "multipart/form-data": components["schemas"]["ClientRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Client"];
+        };
+      };
+    };
+  };
+  clients_contacts_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path: {
+        client_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Contact"][];
+        };
+      };
+    };
+  };
+  clients_contacts_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        client_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ContactRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ContactRequest"];
+        "multipart/form-data": components["schemas"]["ContactRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Contact"];
+        };
+      };
+    };
+  };
+  clients_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this client. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ClientDetail"];
+        };
+      };
+    };
+  };
+  clients_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this client. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  clients_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this client. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedClientRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedClientRequest"];
+        "multipart/form-data": components["schemas"]["PatchedClientRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Client"];
+        };
+      };
+    };
+  };
+  clients_restore_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this client. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Client"];
+        };
+      };
+    };
+  };
+  clients_export_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Filter by a custom field value. */
+        "cf_<key>"?: string;
+        include_archived?: boolean;
+        /** @description Records missing required custom fields. */
+        missing_required?: boolean;
+        /** @description Search names, emails and phones. */
+        q?: string;
+        /** @description Tag id (repeatable). */
+        tag?: string[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv": string;
+        };
+      };
+    };
+  };
+  clients_quick_add_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuickAddRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["QuickAddRequest"];
+        "multipart/form-data": components["schemas"]["QuickAddRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ClientDetail"];
+        };
+      };
+    };
+  };
   consent_types_list: {
     parameters: {
       query?: {
@@ -3069,6 +4472,117 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PaginatedConsentStatusList"];
+        };
+      };
+    };
+  };
+  contacts_list: {
+    parameters: {
+      query?: {
+        /** @description Filter by a custom field value. */
+        "cf_<key>"?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        include_archived?: boolean;
+        /** @description Records missing required custom fields. */
+        missing_required?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /** @description Search names, emails and phones. */
+        q?: string;
+        /** @description Tag id (repeatable). */
+        tag?: string[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedContactList"];
+        };
+      };
+    };
+  };
+  contacts_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this contact. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Contact"];
+        };
+      };
+    };
+  };
+  contacts_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this contact. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  contacts_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this contact. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedContactRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedContactRequest"];
+        "multipart/form-data": components["schemas"]["PatchedContactRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Contact"];
         };
       };
     };
@@ -4146,6 +5660,31 @@ export interface operations {
       };
     };
   };
+  people_duplicates_list: {
+    parameters: {
+      query?: {
+        date_of_birth?: string;
+        email?: string;
+        first_name?: string;
+        last_name?: string;
+        phone?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Duplicate"][];
+        };
+      };
+    };
+  };
   permissions_list: {
     parameters: {
       query?: never;
@@ -4499,6 +6038,499 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SignupUser"];
+        };
+      };
+    };
+  };
+  students_list: {
+    parameters: {
+      query?: {
+        branch?: string;
+        /** @description Filter by a custom field value. */
+        "cf_<key>"?: string;
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        include_archived?: boolean;
+        /** @description Records missing required custom fields. */
+        missing_required?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /** @description Search names, emails and phones. */
+        q?: string;
+        /**
+         * @description * `lead` - Lead
+         *     * `trial` - Trial
+         *     * `active` - Active
+         *     * `waiting` - Waiting list
+         *     * `paused` - Paused
+         *     * `finished` - Finished
+         *     * `archived` - Archived
+         */
+        status?: ("active" | "archived" | "finished" | "lead" | "paused" | "trial" | "waiting")[];
+        subject?: string;
+        /** @description Tag id (repeatable). */
+        tag?: string[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedStudentList"];
+        };
+      };
+    };
+  };
+  students_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StudentRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["StudentRequest"];
+        "multipart/form-data": components["schemas"]["StudentRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Student"];
+        };
+      };
+    };
+  };
+  students_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this student. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Student"];
+        };
+      };
+    };
+  };
+  students_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this student. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  students_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this student. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedStudentRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedStudentRequest"];
+        "multipart/form-data": components["schemas"]["PatchedStudentRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Student"];
+        };
+      };
+    };
+  };
+  students_status_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this student. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StatusRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["StatusRequest"];
+        "multipart/form-data": components["schemas"]["StatusRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Student"];
+        };
+      };
+    };
+  };
+  students_export_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Filter by a custom field value. */
+        "cf_<key>"?: string;
+        include_archived?: boolean;
+        /** @description Records missing required custom fields. */
+        missing_required?: boolean;
+        /** @description Search names, emails and phones. */
+        q?: string;
+        /** @description Tag id (repeatable). */
+        tag?: string[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv": string;
+        };
+      };
+    };
+  };
+  tutors_list: {
+    parameters: {
+      query?: {
+        branch?: string;
+        /** @description Filter by a custom field value. */
+        "cf_<key>"?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        include_archived?: boolean;
+        /** @description Records missing required custom fields. */
+        missing_required?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /** @description Search names, emails and phones. */
+        q?: string;
+        /**
+         * @description * `applicant` - Applicant
+         *     * `onboarding` - Onboarding
+         *     * `active` - Active
+         *     * `restricted` - Restricted
+         *     * `inactive` - Inactive
+         *     * `archived` - Archived
+         */
+        status?: ("active" | "applicant" | "archived" | "inactive" | "onboarding" | "restricted")[];
+        subject?: string;
+        /** @description Tag id (repeatable). */
+        tag?: string[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedTutorList"];
+        };
+      };
+    };
+  };
+  tutors_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TutorRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TutorRequest"];
+        "multipart/form-data": components["schemas"]["TutorRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tutor"];
+        };
+      };
+    };
+  };
+  tutors_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this tutor profile. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tutor"];
+        };
+      };
+    };
+  };
+  tutors_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this tutor profile. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TutorRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TutorRequest"];
+        "multipart/form-data": components["schemas"]["TutorRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tutor"];
+        };
+      };
+    };
+  };
+  tutors_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this tutor profile. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  tutors_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this tutor profile. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedTutorRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedTutorRequest"];
+        "multipart/form-data": components["schemas"]["PatchedTutorRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tutor"];
+        };
+      };
+    };
+  };
+  tutors_status_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this tutor profile. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StatusRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["StatusRequest"];
+        "multipart/form-data": components["schemas"]["StatusRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tutor"];
+        };
+      };
+    };
+  };
+  tutors_subjects_update: {
+    parameters: {
+      query?: {
+        branch?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `applicant` - Applicant
+         *     * `onboarding` - Onboarding
+         *     * `active` - Active
+         *     * `restricted` - Restricted
+         *     * `inactive` - Inactive
+         *     * `archived` - Archived
+         */
+        status?: ("active" | "applicant" | "archived" | "inactive" | "onboarding" | "restricted")[];
+        subject?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this tutor profile. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SubjectInputRequest"][];
+        "application/x-www-form-urlencoded": components["schemas"]["SubjectInputRequest"][];
+        "multipart/form-data": components["schemas"]["SubjectInputRequest"][];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedTutorSubjectList"];
+        };
+      };
+    };
+  };
+  tutors_subjects_approve_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this tutor profile. */
+        id: string;
+        subject_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorSubject"];
         };
       };
     };

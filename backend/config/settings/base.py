@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
     # third party
     "rest_framework",
     "django_filters",
@@ -38,6 +39,8 @@ INSTALLED_APPS = [
     "tutortrack.identity",
     "tutortrack.workflows",
     "tutortrack.privacy",
+    "tutortrack.people",
+    "tutortrack.crm",
 ]
 
 MIDDLEWARE = [
@@ -269,6 +272,10 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,
     "ENUM_NAME_OVERRIDES": {
         "ProcessStatusEnum": "tutortrack.core.models.workflows.WorkflowLink.Status",
+        "ClientStatusEnum": "tutortrack.people.models.Client.Status",
+        "ClientTypeEnum": "tutortrack.people.models.Client.Type",
+        "StudentStatusEnum": "tutortrack.people.models.Student.Status",
+        "TutorStatusEnum": "tutortrack.people.models.TutorProfile.Status",
     },
     "POSTPROCESSING_HOOKS": ["drf_spectacular.hooks.postprocess_schema_enums"],
 }
@@ -314,6 +321,10 @@ ALLOW_HTTP_OUTBOUND = False  # SSRF guard (core.net): https only
 # Alert the owners when one person runs this many exports within the window (FR-29-2).
 MASS_EXPORT_ALERT_THRESHOLD = 5
 MASS_EXPORT_WINDOW_MINUTES = 60
+
+# --- Geocoding (E05 FR-05-15) ------------------------------------------------------------------
+GEOCODER = env("GEOCODER", default="tutortrack.core.geo.NullGeocoder")
+GOOGLE_MAPS_API_KEY = env("GOOGLE_MAPS_API_KEY", default="")
 
 # --- Organisation lifecycle (E02-T09) ---------------------------------------------------------
 # Writes still allowed while suspended (billing, so the owner can pay; E04 adds its paths).

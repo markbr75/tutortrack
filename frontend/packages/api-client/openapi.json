@@ -1025,6 +1025,657 @@
                 }
             }
         },
+        "/api/v1/clients": {
+            "get": {
+                "operationId": "clients_list",
+                "description": "Clients (billing accounts). ``DELETE`` archives (FR-05-14).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "account_manager",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "cf_<key>",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by a custom field value."
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "include_archived",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "missing_required",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Records missing required custom fields."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search names, emails and phones."
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "archived",
+                                "dormant",
+                                "prospect"
+                            ]
+                        },
+                        "description": "* `prospect` - Prospect\n* `active` - Active\n* `dormant` - Dormant\n* `archived` - Archived"
+                    },
+                    {
+                        "in": "query",
+                        "name": "tag",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "description": "Tag id (repeatable)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "type",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "household",
+                                "individual",
+                                "organisation"
+                            ]
+                        },
+                        "description": "* `household` - Household\n* `individual` - Individual learner\n* `organisation` - Organisation"
+                    }
+                ],
+                "tags": [
+                    "clients"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedClientList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "clients_create",
+                "description": "Clients (billing accounts). ``DELETE`` archives (FR-05-14).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "clients"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClientRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClientRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClientRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Client"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/clients/{client_id}/contacts": {
+            "get": {
+                "operationId": "clients_contacts_list",
+                "description": "Contacts of one client: ``/clients/{client_id}/contacts``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "client_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "clients"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Contact"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "clients_contacts_create",
+                "description": "Contacts of one client: ``/clients/{client_id}/contacts``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "client_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "clients"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ContactRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ContactRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ContactRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Contact"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/clients/{id}": {
+            "get": {
+                "operationId": "clients_retrieve",
+                "description": "Clients (billing accounts). ``DELETE`` archives (FR-05-14).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this client.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "clients"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "clients_partial_update",
+                "description": "Clients (billing accounts). ``DELETE`` archives (FR-05-14).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this client.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "clients"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedClientRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedClientRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedClientRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Client"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "clients_destroy",
+                "description": "Clients (billing accounts). ``DELETE`` archives (FR-05-14).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this client.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "clients"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/clients/{id}/restore": {
+            "post": {
+                "operationId": "clients_restore_create",
+                "description": "Clients (billing accounts). ``DELETE`` archives (FR-05-14).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this client.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "clients"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Client"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/clients/export": {
+            "get": {
+                "operationId": "clients_export_retrieve",
+                "description": "Clients (billing accounts). ``DELETE`` archives (FR-05-14).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "cf_<key>",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by a custom field value."
+                    },
+                    {
+                        "in": "query",
+                        "name": "include_archived",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "missing_required",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Records missing required custom fields."
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search names, emails and phones."
+                    },
+                    {
+                        "in": "query",
+                        "name": "tag",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "description": "Tag id (repeatable)."
+                    }
+                ],
+                "tags": [
+                    "clients"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "text/csv": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/clients/quick-add": {
+            "post": {
+                "operationId": "clients_quick_add_create",
+                "description": "Client + primary contact + students in one step (FR-05-1).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "clients"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/QuickAddRequest"
+                            },
+                            "examples": {
+                                "FamilyWithTwoChildren": {
+                                    "value": {
+                                        "contact": {
+                                            "first_name": "Priya",
+                                            "last_name": "Patel",
+                                            "email": "priya@example.com"
+                                        },
+                                        "students": [
+                                            {
+                                                "first_name": "Arjun",
+                                                "year_group": "Year 10",
+                                                "subjects": [
+                                                    {
+                                                        "subject": "Maths",
+                                                        "level": "GCSE"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "first_name": "Maya"
+                                            }
+                                        ]
+                                    },
+                                    "summary": "Family with two children"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/QuickAddRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/QuickAddRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/consent-types": {
             "get": {
                 "operationId": "consent_types_list",
@@ -1512,6 +2163,241 @@
                             }
                         },
                         "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/contacts": {
+            "get": {
+                "operationId": "contacts_list",
+                "description": "All contacts (search, edit, archive). Create through ``/clients/{id}/contacts``.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "cf_<key>",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by a custom field value."
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "include_archived",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "missing_required",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Records missing required custom fields."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search names, emails and phones."
+                    },
+                    {
+                        "in": "query",
+                        "name": "tag",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "description": "Tag id (repeatable)."
+                    }
+                ],
+                "tags": [
+                    "contacts"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedContactList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/contacts/{id}": {
+            "get": {
+                "operationId": "contacts_retrieve",
+                "description": "All contacts (search, edit, archive). Create through ``/clients/{id}/contacts``.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this contact.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "contacts"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Contact"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "contacts_partial_update",
+                "description": "All contacts (search, edit, archive). Create through ``/clients/{id}/contacts``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this contact.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "contacts"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedContactRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedContactRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedContactRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Contact"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "contacts_destroy",
+                "description": "All contacts (search, edit, archive). Create through ``/clients/{id}/contacts``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this contact.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "contacts"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
                     }
                 }
             }
@@ -3425,6 +4311,72 @@
                 }
             }
         },
+        "/api/v1/people/duplicates": {
+            "get": {
+                "operationId": "people_duplicates_list",
+                "description": "Possible duplicates before creating a record (FR-05-13): same email or phone, or same\nname and date of birth.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "date_of_birth",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "email",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "first_name",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "last_name",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "phone",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "people"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Duplicate"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/permissions": {
             "get": {
                 "operationId": "permissions_list",
@@ -4148,6 +5100,1108 @@
                     }
                 }
             }
+        },
+        "/api/v1/students": {
+            "get": {
+                "operationId": "students_list",
+                "description": "Students. ``DELETE`` archives; ``status`` changes the lifecycle status.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "cf_<key>",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by a custom field value."
+                    },
+                    {
+                        "in": "query",
+                        "name": "client",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "include_archived",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "missing_required",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Records missing required custom fields."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search names, emails and phones."
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "active",
+                                    "archived",
+                                    "finished",
+                                    "lead",
+                                    "paused",
+                                    "trial",
+                                    "waiting"
+                                ]
+                            }
+                        },
+                        "description": "* `lead` - Lead\n* `trial` - Trial\n* `active` - Active\n* `waiting` - Waiting list\n* `paused` - Paused\n* `finished` - Finished\n* `archived` - Archived",
+                        "explode": true,
+                        "style": "form"
+                    },
+                    {
+                        "in": "query",
+                        "name": "subject",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tag",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "description": "Tag id (repeatable)."
+                    }
+                ],
+                "tags": [
+                    "students"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedStudentList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "students_create",
+                "description": "Students. ``DELETE`` archives; ``status`` changes the lifecycle status.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "students"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Student"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/students/{id}": {
+            "get": {
+                "operationId": "students_retrieve",
+                "description": "Students. ``DELETE`` archives; ``status`` changes the lifecycle status.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this student.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "students"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Student"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "students_partial_update",
+                "description": "Students. ``DELETE`` archives; ``status`` changes the lifecycle status.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this student.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "students"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedStudentRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedStudentRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedStudentRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Student"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "students_destroy",
+                "description": "Students. ``DELETE`` archives; ``status`` changes the lifecycle status.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this student.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "students"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/students/{id}/status": {
+            "post": {
+                "operationId": "students_status_create",
+                "description": "Students. ``DELETE`` archives; ``status`` changes the lifecycle status.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this student.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "students"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StatusRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StatusRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StatusRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Student"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/students/export": {
+            "get": {
+                "operationId": "students_export_retrieve",
+                "description": "Students. ``DELETE`` archives; ``status`` changes the lifecycle status.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "cf_<key>",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by a custom field value."
+                    },
+                    {
+                        "in": "query",
+                        "name": "include_archived",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "missing_required",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Records missing required custom fields."
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search names, emails and phones."
+                    },
+                    {
+                        "in": "query",
+                        "name": "tag",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "description": "Tag id (repeatable)."
+                    }
+                ],
+                "tags": [
+                    "students"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "text/csv": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/tutors": {
+            "get": {
+                "operationId": "tutors_list",
+                "description": "Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "cf_<key>",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by a custom field value."
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "include_archived",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "missing_required",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Records missing required custom fields."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search names, emails and phones."
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "active",
+                                    "applicant",
+                                    "archived",
+                                    "inactive",
+                                    "onboarding",
+                                    "restricted"
+                                ]
+                            }
+                        },
+                        "description": "* `applicant` - Applicant\n* `onboarding` - Onboarding\n* `active` - Active\n* `restricted` - Restricted\n* `inactive` - Inactive\n* `archived` - Archived",
+                        "explode": true,
+                        "style": "form"
+                    },
+                    {
+                        "in": "query",
+                        "name": "subject",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tag",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "description": "Tag id (repeatable)."
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedTutorList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "tutors_create",
+                "description": "Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tutor"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/tutors/{id}": {
+            "get": {
+                "operationId": "tutors_retrieve",
+                "description": "Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tutor profile.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tutor"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "tutors_update",
+                "description": "Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tutor profile.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tutor"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "tutors_partial_update",
+                "description": "Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tutor profile.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedTutorRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedTutorRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedTutorRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tutor"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "tutors_destroy",
+                "description": "Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tutor profile.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/tutors/{id}/status": {
+            "post": {
+                "operationId": "tutors_status_create",
+                "description": "Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tutor profile.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StatusRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StatusRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StatusRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tutor"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/tutors/{id}/subjects": {
+            "put": {
+                "operationId": "tutors_subjects_update",
+                "description": "Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tutor profile.",
+                        "required": true
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "active",
+                                    "applicant",
+                                    "archived",
+                                    "inactive",
+                                    "onboarding",
+                                    "restricted"
+                                ]
+                            }
+                        },
+                        "description": "* `applicant` - Applicant\n* `onboarding` - Onboarding\n* `active` - Active\n* `restricted` - Restricted\n* `inactive` - Inactive\n* `archived` - Archived",
+                        "explode": true,
+                        "style": "form"
+                    },
+                    {
+                        "in": "query",
+                        "name": "subject",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/SubjectInputRequest"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/SubjectInputRequest"
+                                }
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/SubjectInputRequest"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedTutorSubjectList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/tutors/{id}/subjects/{subject_id}/approve": {
+            "post": {
+                "operationId": "tutors_subjects_approve_create",
+                "description": "Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tutor profile.",
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "subject_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TutorSubject"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -4174,6 +6228,142 @@
                 "required": [
                     "token"
                 ]
+            },
+            "Address": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "line1": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "line2": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "city": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "region": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "postcode": {
+                        "type": "string",
+                        "maxLength": 20
+                    },
+                    "country": {
+                        "type": "string",
+                        "maxLength": 2
+                    },
+                    "lat": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,6})?$",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "lng": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,6})?$",
+                        "readOnly": true,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "lat",
+                    "lng"
+                ]
+            },
+            "AddressInput": {
+                "type": "object",
+                "properties": {
+                    "line1": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "line2": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "city": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "region": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "postcode": {
+                        "type": "string",
+                        "maxLength": 20
+                    },
+                    "country": {
+                        "type": "string",
+                        "maxLength": 2
+                    }
+                }
+            },
+            "AddressInputRequest": {
+                "type": "object",
+                "properties": {
+                    "line1": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "line2": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "city": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "region": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "postcode": {
+                        "type": "string",
+                        "maxLength": 20
+                    },
+                    "country": {
+                        "type": "string",
+                        "maxLength": 2
+                    }
+                }
+            },
+            "AddressRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "line1": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "line2": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "city": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "region": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "postcode": {
+                        "type": "string",
+                        "maxLength": 20
+                    },
+                    "country": {
+                        "type": "string",
+                        "maxLength": 2
+                    }
+                }
             },
             "AuditEntry": {
                 "type": "object",
@@ -4462,6 +6652,368 @@
                 "type": "string",
                 "description": "* `data_processing` - Data processing\n* `photo_video` - Photos and video\n* `marketing_email` - Marketing email\n* `marketing_sms` - Marketing SMS\n* `lesson_recording` - Lesson recording\n* `terms_of_service` - Terms of service\n* `privacy_policy` - Privacy policy\n* `other` - Other"
             },
+            "Client": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/ClientTypeEnum"
+                    },
+                    "display_name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ClientStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "primary_contact": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "billing_contact": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "billing_address": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Address"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "currency": {
+                        "type": "string",
+                        "maxLength": 3
+                    },
+                    "payment_terms_days": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "invoice_delivery": {
+                        "$ref": "#/components/schemas/InvoiceDeliveryEnum"
+                    },
+                    "invoice_grouping": {
+                        "$ref": "#/components/schemas/InvoiceGroupingEnum"
+                    },
+                    "preferred_payment_method": {
+                        "type": "string",
+                        "maxLength": 30
+                    },
+                    "auto_pay": {
+                        "type": "boolean"
+                    },
+                    "credit_limit_amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,12}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "prevent_negative_balance": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "tax_exempt": {
+                        "type": "boolean"
+                    },
+                    "po_number": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "referral_source": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "account_manager": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "custom_fields": {},
+                    "students_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "archived_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "archived_at",
+                    "billing_address",
+                    "billing_contact",
+                    "created_at",
+                    "display_name",
+                    "id",
+                    "primary_contact",
+                    "status",
+                    "students_count"
+                ]
+            },
+            "ClientDetail": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/ClientTypeEnum"
+                    },
+                    "display_name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ClientStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "primary_contact": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "billing_contact": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "billing_address": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Address"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "currency": {
+                        "type": "string",
+                        "maxLength": 3
+                    },
+                    "payment_terms_days": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "invoice_delivery": {
+                        "$ref": "#/components/schemas/InvoiceDeliveryEnum"
+                    },
+                    "invoice_grouping": {
+                        "$ref": "#/components/schemas/InvoiceGroupingEnum"
+                    },
+                    "preferred_payment_method": {
+                        "type": "string",
+                        "maxLength": 30
+                    },
+                    "auto_pay": {
+                        "type": "boolean"
+                    },
+                    "credit_limit_amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,12}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "prevent_negative_balance": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "tax_exempt": {
+                        "type": "boolean"
+                    },
+                    "po_number": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "referral_source": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "account_manager": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "custom_fields": {},
+                    "students_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "archived_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "contacts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Contact"
+                        },
+                        "readOnly": true
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Student"
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "archived_at",
+                    "billing_address",
+                    "billing_contact",
+                    "contacts",
+                    "created_at",
+                    "display_name",
+                    "id",
+                    "primary_contact",
+                    "status",
+                    "students",
+                    "students_count"
+                ]
+            },
+            "ClientRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "type": {
+                        "$ref": "#/components/schemas/ClientTypeEnum"
+                    },
+                    "display_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "billing_address_input": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AddressInputRequest"
+                            }
+                        ],
+                        "writeOnly": true
+                    },
+                    "currency": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 3
+                    },
+                    "payment_terms_days": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "invoice_delivery": {
+                        "$ref": "#/components/schemas/InvoiceDeliveryEnum"
+                    },
+                    "invoice_grouping": {
+                        "$ref": "#/components/schemas/InvoiceGroupingEnum"
+                    },
+                    "preferred_payment_method": {
+                        "type": "string",
+                        "maxLength": 30
+                    },
+                    "auto_pay": {
+                        "type": "boolean"
+                    },
+                    "credit_limit_amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,12}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "prevent_negative_balance": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "tax_exempt": {
+                        "type": "boolean"
+                    },
+                    "po_number": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "referral_source": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "account_manager": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "custom_fields": {}
+                },
+                "required": [
+                    "display_name"
+                ]
+            },
+            "ClientStatusEnum": {
+                "enum": [
+                    "prospect",
+                    "active",
+                    "dormant",
+                    "archived"
+                ],
+                "type": "string",
+                "description": "* `prospect` - Prospect\n* `active` - Active\n* `dormant` - Dormant\n* `archived` - Archived"
+            },
+            "ClientTypeEnum": {
+                "enum": [
+                    "household",
+                    "individual",
+                    "organisation"
+                ],
+                "type": "string",
+                "description": "* `household` - Household\n* `individual` - Individual learner\n* `organisation` - Organisation"
+            },
             "CloseOrganisationRequest": {
                 "type": "object",
                 "properties": {
@@ -4749,6 +7301,149 @@
                     "name"
                 ]
             },
+            "Contact": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "client": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "relationship": {
+                        "$ref": "#/components/schemas/RelationshipEnum"
+                    },
+                    "preferred_contact_method": {
+                        "$ref": "#/components/schemas/PreferredContactMethodEnum"
+                    },
+                    "use_client_address": {
+                        "type": "boolean"
+                    },
+                    "is_primary": {
+                        "type": "boolean"
+                    },
+                    "is_bill_payer": {
+                        "type": "boolean"
+                    },
+                    "receives_reminders": {
+                        "type": "boolean"
+                    },
+                    "receives_invoices": {
+                        "type": "boolean"
+                    },
+                    "receives_reports": {
+                        "type": "boolean"
+                    },
+                    "receives_marketing": {
+                        "type": "boolean"
+                    },
+                    "is_emergency_contact": {
+                        "type": "boolean"
+                    },
+                    "language": {
+                        "type": "string",
+                        "maxLength": 10
+                    },
+                    "user": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "custom_fields": {},
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "client",
+                    "created_at",
+                    "first_name",
+                    "full_name",
+                    "id",
+                    "user"
+                ]
+            },
+            "ContactRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "first_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "relationship": {
+                        "$ref": "#/components/schemas/RelationshipEnum"
+                    },
+                    "preferred_contact_method": {
+                        "$ref": "#/components/schemas/PreferredContactMethodEnum"
+                    },
+                    "address_input": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AddressInputRequest"
+                            }
+                        ],
+                        "writeOnly": true
+                    },
+                    "use_client_address": {
+                        "type": "boolean"
+                    },
+                    "is_primary": {
+                        "type": "boolean"
+                    },
+                    "is_bill_payer": {
+                        "type": "boolean"
+                    },
+                    "receives_reminders": {
+                        "type": "boolean"
+                    },
+                    "receives_invoices": {
+                        "type": "boolean"
+                    },
+                    "receives_reports": {
+                        "type": "boolean"
+                    },
+                    "receives_marketing": {
+                        "type": "boolean"
+                    },
+                    "is_emergency_contact": {
+                        "type": "boolean"
+                    },
+                    "language": {
+                        "type": "string",
+                        "maxLength": 10
+                    },
+                    "custom_fields": {}
+                },
+                "required": [
+                    "first_name"
+                ]
+            },
             "DateFormatEnum": {
                 "enum": [
                     "locale",
@@ -4790,6 +7485,45 @@
                     "url"
                 ]
             },
+            "Duplicate": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "$ref": "#/components/schemas/DuplicateTypeEnum"
+                    },
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "client_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "reason": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "client_id",
+                    "id",
+                    "name",
+                    "reason",
+                    "type"
+                ]
+            },
+            "DuplicateTypeEnum": {
+                "enum": [
+                    "contact",
+                    "student",
+                    "tutor"
+                ],
+                "type": "string",
+                "description": "* `contact` - contact\n* `student` - student\n* `tutor` - tutor"
+            },
             "EmailRequest": {
                 "type": "object",
                 "properties": {
@@ -4807,6 +7541,15 @@
                 "required": [
                     "email"
                 ]
+            },
+            "EmploymentTypeEnum": {
+                "enum": [
+                    "self_employed",
+                    "employee",
+                    "other"
+                ],
+                "type": "string",
+                "description": "* `self_employed` - Self-employed\n* `employee` - Employee\n* `other` - Other"
             },
             "Features": {
                 "type": "object",
@@ -5014,6 +7757,24 @@
                 ],
                 "type": "string",
                 "description": "* `pending` - Pending\n* `accepted` - Accepted\n* `revoked` - Revoked"
+            },
+            "InvoiceDeliveryEnum": {
+                "enum": [
+                    "email",
+                    "portal",
+                    "post"
+                ],
+                "type": "string",
+                "description": "* `email` - Email\n* `portal` - Portal only\n* `post` - Post"
+            },
+            "InvoiceGroupingEnum": {
+                "enum": [
+                    "client",
+                    "student",
+                    "job"
+                ],
+                "type": "string",
+                "description": "* `client` - One invoice per client\n* `student` - One per student\n* `job` - One per job"
             },
             "LoginEvent": {
                 "type": "object",
@@ -5651,6 +8412,32 @@
                     }
                 }
             },
+            "PaginatedClientList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Client"
+                        }
+                    }
+                }
+            },
             "PaginatedConsentRecordList": {
                 "type": "object",
                 "required": [
@@ -5725,6 +8512,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/ConsentType"
+                        }
+                    }
+                }
+            },
+            "PaginatedContactList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Contact"
                         }
                     }
                 }
@@ -5829,6 +8642,84 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Process"
+                        }
+                    }
+                }
+            },
+            "PaginatedStudentList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Student"
+                        }
+                    }
+                }
+            },
+            "PaginatedTutorList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Tutor"
+                        }
+                    }
+                }
+            },
+            "PaginatedTutorSubjectList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TutorSubject"
                         }
                     }
                 }
@@ -5942,6 +8833,82 @@
                     }
                 }
             },
+            "PatchedClientRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "type": {
+                        "$ref": "#/components/schemas/ClientTypeEnum"
+                    },
+                    "display_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "billing_address_input": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AddressInputRequest"
+                            }
+                        ],
+                        "writeOnly": true
+                    },
+                    "currency": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 3
+                    },
+                    "payment_terms_days": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "invoice_delivery": {
+                        "$ref": "#/components/schemas/InvoiceDeliveryEnum"
+                    },
+                    "invoice_grouping": {
+                        "$ref": "#/components/schemas/InvoiceGroupingEnum"
+                    },
+                    "preferred_payment_method": {
+                        "type": "string",
+                        "maxLength": 30
+                    },
+                    "auto_pay": {
+                        "type": "boolean"
+                    },
+                    "credit_limit_amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,12}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "prevent_negative_balance": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "tax_exempt": {
+                        "type": "boolean"
+                    },
+                    "po_number": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "referral_source": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "account_manager": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "custom_fields": {}
+                }
+            },
             "PatchedConsentTypeRequest": {
                 "type": "object",
                 "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
@@ -5983,6 +8950,64 @@
                     "is_active": {
                         "type": "boolean"
                     }
+                }
+            },
+            "PatchedContactRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "first_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "relationship": {
+                        "$ref": "#/components/schemas/RelationshipEnum"
+                    },
+                    "preferred_contact_method": {
+                        "$ref": "#/components/schemas/PreferredContactMethodEnum"
+                    },
+                    "address_input": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AddressInputRequest"
+                            }
+                        ],
+                        "writeOnly": true
+                    },
+                    "use_client_address": {
+                        "type": "boolean"
+                    },
+                    "is_primary": {
+                        "type": "boolean"
+                    },
+                    "is_bill_payer": {
+                        "type": "boolean"
+                    },
+                    "receives_reminders": {
+                        "type": "boolean"
+                    },
+                    "receives_invoices": {
+                        "type": "boolean"
+                    },
+                    "receives_reports": {
+                        "type": "boolean"
+                    },
+                    "receives_marketing": {
+                        "type": "boolean"
+                    },
+                    "is_emergency_contact": {
+                        "type": "boolean"
+                    },
+                    "language": {
+                        "type": "string",
+                        "maxLength": 10
+                    },
+                    "custom_fields": {}
                 }
             },
             "PatchedMembershipUpdateRequest": {
@@ -6135,6 +9160,163 @@
                     }
                 }
             },
+            "PatchedStudentRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "client": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "preferred_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "year_group": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "school": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/StudentStatusEnum"
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SubjectInputRequest"
+                        }
+                    },
+                    "goals": {
+                        "type": "string"
+                    },
+                    "exam_boards": {},
+                    "target_grades": {},
+                    "availability": {},
+                    "lesson_address_input": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AddressInputRequest"
+                            }
+                        ],
+                        "writeOnly": true
+                    },
+                    "custom_fields": {}
+                }
+            },
+            "PatchedTutorRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 1,
+                        "maxLength": 254
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "display_name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "headline": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "bio_public": {
+                        "type": "string"
+                    },
+                    "bio_private": {
+                        "type": "string"
+                    },
+                    "languages": {},
+                    "years_experience": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "employment_type": {
+                        "$ref": "#/components/schemas/EmploymentTypeEnum"
+                    },
+                    "address_input": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AddressInputRequest"
+                            }
+                        ],
+                        "writeOnly": true
+                    },
+                    "travel_radius_km": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "delivers_online": {
+                        "type": "boolean"
+                    },
+                    "delivers_in_person": {
+                        "type": "boolean"
+                    },
+                    "max_weekly_hours": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "min_lesson_minutes": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "branches": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "public_profile": {
+                        "type": "boolean"
+                    },
+                    "emergency_contact": {},
+                    "custom_fields": {},
+                    "invite": {
+                        "type": "boolean",
+                        "writeOnly": true,
+                        "default": true
+                    }
+                }
+            },
             "PatchedUserRequest": {
                 "type": "object",
                 "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
@@ -6190,6 +9372,15 @@
                     "codename",
                     "description"
                 ]
+            },
+            "PreferredContactMethodEnum": {
+                "enum": [
+                    "email",
+                    "sms",
+                    "phone"
+                ],
+                "type": "string",
+                "description": "* `email` - Email\n* `sms` - SMS\n* `phone` - Phone"
             },
             "PresignedUpload": {
                 "type": "object",
@@ -6378,6 +9569,113 @@
                 "type": "string",
                 "description": "* `running` - Running\n* `completed` - Completed\n* `failed` - Failed\n* `cancelled` - Cancelled\n* `terminated` - Terminated\n* `timed_out` - Timed Out"
             },
+            "ProficiencyEnum": {
+                "enum": [
+                    "good",
+                    "strong",
+                    "expert"
+                ],
+                "type": "string",
+                "description": "* `good` - Good\n* `strong` - Strong\n* `expert` - Expert"
+            },
+            "QuickAddContactRequest": {
+                "type": "object",
+                "properties": {
+                    "first_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "email": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "relationship": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RelationshipEnum"
+                            }
+                        ],
+                        "default": "parent"
+                    }
+                },
+                "required": [
+                    "first_name"
+                ]
+            },
+            "QuickAddRequest": {
+                "type": "object",
+                "description": "One-screen \"add a family\" (FR-05-1 AC).",
+                "properties": {
+                    "contact": {
+                        "$ref": "#/components/schemas/QuickAddContactRequest"
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/QuickAddStudentRequest"
+                        }
+                    },
+                    "billing_address": {
+                        "$ref": "#/components/schemas/AddressInputRequest"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "contact"
+                ]
+            },
+            "QuickAddStudentRequest": {
+                "type": "object",
+                "properties": {
+                    "first_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "year_group": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SubjectInputRequest"
+                        }
+                    }
+                },
+                "required": [
+                    "first_name"
+                ]
+            },
             "ReasonRequest": {
                 "type": "object",
                 "properties": {
@@ -6469,6 +9767,18 @@
                 ],
                 "type": "string",
                 "description": "* `uk` - United Kingdom\n* `eu` - European Union\n* `us` - United States\n* `au` - Australia"
+            },
+            "RelationshipEnum": {
+                "enum": [
+                    "parent",
+                    "guardian",
+                    "carer",
+                    "self",
+                    "finance",
+                    "other"
+                ],
+                "type": "string",
+                "description": "* `parent` - Parent\n* `guardian` - Guardian\n* `carer` - Carer\n* `self` - Self (adult learner)\n* `finance` - Finance contact\n* `other` - Other"
             },
             "Role": {
                 "type": "object",
@@ -6617,7 +9927,7 @@
                         "type": "string"
                     },
                     "type": {
-                        "$ref": "#/components/schemas/TypeEnum"
+                        "$ref": "#/components/schemas/SettingDescriptionTypeEnum"
                     },
                     "scope": {
                         "$ref": "#/components/schemas/ScopeEnum"
@@ -6658,6 +9968,17 @@
                     "scope",
                     "type"
                 ]
+            },
+            "SettingDescriptionTypeEnum": {
+                "enum": [
+                    "int",
+                    "str",
+                    "bool",
+                    "choice",
+                    "object"
+                ],
+                "type": "string",
+                "description": "* `int` - int\n* `str` - str\n* `bool` - bool\n* `choice` - choice\n* `object` - object"
             },
             "SettingsArea": {
                 "type": "object",
@@ -6860,6 +10181,19 @@
                     "suggestion"
                 ]
             },
+            "StatusRequest": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 15
+                    }
+                },
+                "required": [
+                    "status"
+                ]
+            },
             "StoredFile": {
                 "type": "object",
                 "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
@@ -6936,6 +10270,231 @@
                 "type": "string",
                 "description": "* `pending_upload` - Pending Upload\n* `uploaded` - Uploaded\n* `rejected` - Rejected"
             },
+            "Student": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "client": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "preferred_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "year_group": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "school": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/StudentStatusEnum"
+                    },
+                    "status_changed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SubjectInput"
+                        }
+                    },
+                    "goals": {
+                        "type": "string"
+                    },
+                    "learning_needs": {
+                        "type": "string"
+                    },
+                    "exam_boards": {},
+                    "target_grades": {},
+                    "availability": {},
+                    "lesson_address": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Address"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "contact": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "user": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "custom_fields": {},
+                    "archived_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "archived_at",
+                    "client",
+                    "contact",
+                    "created_at",
+                    "first_name",
+                    "full_name",
+                    "id",
+                    "lesson_address",
+                    "status_changed_at",
+                    "user"
+                ]
+            },
+            "StudentRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "client": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "preferred_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "year_group": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "school": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/StudentStatusEnum"
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SubjectInputRequest"
+                        }
+                    },
+                    "goals": {
+                        "type": "string"
+                    },
+                    "exam_boards": {},
+                    "target_grades": {},
+                    "availability": {},
+                    "lesson_address_input": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AddressInputRequest"
+                            }
+                        ],
+                        "writeOnly": true
+                    },
+                    "custom_fields": {}
+                },
+                "required": [
+                    "client",
+                    "first_name"
+                ]
+            },
+            "StudentStatusEnum": {
+                "enum": [
+                    "lead",
+                    "trial",
+                    "active",
+                    "waiting",
+                    "paused",
+                    "finished",
+                    "archived"
+                ],
+                "type": "string",
+                "description": "* `lead` - Lead\n* `trial` - Trial\n* `active` - Active\n* `waiting` - Waiting list\n* `paused` - Paused\n* `finished` - Finished\n* `archived` - Archived"
+            },
+            "SubjectInput": {
+                "type": "object",
+                "properties": {
+                    "subject": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "level": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "subject"
+                ]
+            },
+            "SubjectInputRequest": {
+                "type": "object",
+                "properties": {
+                    "subject": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "level": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "subject"
+                ]
+            },
             "TOTPConfirmRequest": {
                 "type": "object",
                 "properties": {
@@ -7000,16 +10559,398 @@
                     "token"
                 ]
             },
-            "TypeEnum": {
+            "Tutor": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 254
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "display_name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "headline": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "bio_public": {
+                        "type": "string"
+                    },
+                    "bio_private": {
+                        "type": "string"
+                    },
+                    "languages": {},
+                    "years_experience": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "employment_type": {
+                        "$ref": "#/components/schemas/EmploymentTypeEnum"
+                    },
+                    "address": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Address"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "travel_radius_km": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "delivers_online": {
+                        "type": "boolean"
+                    },
+                    "delivers_in_person": {
+                        "type": "boolean"
+                    },
+                    "max_weekly_hours": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "min_lesson_minutes": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "branches": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TutorStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "status_changed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "public_profile": {
+                        "type": "boolean"
+                    },
+                    "emergency_contact": {},
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TutorSubject"
+                        },
+                        "readOnly": true
+                    },
+                    "qualifications": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TutorQualification"
+                        },
+                        "readOnly": true
+                    },
+                    "custom_fields": {},
+                    "has_joined": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "archived_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "address",
+                    "archived_at",
+                    "created_at",
+                    "email",
+                    "first_name",
+                    "full_name",
+                    "has_joined",
+                    "id",
+                    "qualifications",
+                    "status",
+                    "status_changed_at",
+                    "subjects"
+                ]
+            },
+            "TutorQualification": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "institution": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "year": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "document": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "id",
+                    "title"
+                ]
+            },
+            "TutorQualificationRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "institution": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "year": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "document": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "title"
+                ]
+            },
+            "TutorRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 1,
+                        "maxLength": 254
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "display_name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "headline": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "bio_public": {
+                        "type": "string"
+                    },
+                    "bio_private": {
+                        "type": "string"
+                    },
+                    "languages": {},
+                    "years_experience": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "employment_type": {
+                        "$ref": "#/components/schemas/EmploymentTypeEnum"
+                    },
+                    "address_input": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AddressInputRequest"
+                            }
+                        ],
+                        "writeOnly": true
+                    },
+                    "travel_radius_km": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "delivers_online": {
+                        "type": "boolean"
+                    },
+                    "delivers_in_person": {
+                        "type": "boolean"
+                    },
+                    "max_weekly_hours": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "min_lesson_minutes": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "branches": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "public_profile": {
+                        "type": "boolean"
+                    },
+                    "emergency_contact": {},
+                    "custom_fields": {},
+                    "invite": {
+                        "type": "boolean",
+                        "writeOnly": true,
+                        "default": true
+                    }
+                },
+                "required": [
+                    "email",
+                    "first_name"
+                ]
+            },
+            "TutorStatusEnum": {
                 "enum": [
-                    "int",
-                    "str",
-                    "bool",
-                    "choice",
-                    "object"
+                    "applicant",
+                    "onboarding",
+                    "active",
+                    "restricted",
+                    "inactive",
+                    "archived"
                 ],
                 "type": "string",
-                "description": "* `int` - int\n* `str` - str\n* `bool` - bool\n* `choice` - choice\n* `object` - object"
+                "description": "* `applicant` - Applicant\n* `onboarding` - Onboarding\n* `active` - Active\n* `restricted` - Restricted\n* `inactive` - Inactive\n* `archived` - Archived"
+            },
+            "TutorSubject": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "subject": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "level": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "proficiency": {
+                        "$ref": "#/components/schemas/ProficiencyEnum"
+                    },
+                    "approved": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "approved_by": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "approved",
+                    "approved_by",
+                    "id",
+                    "subject"
+                ]
+            },
+            "TutorSubjectRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "subject": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "level": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "proficiency": {
+                        "$ref": "#/components/schemas/ProficiencyEnum"
+                    }
+                },
+                "required": [
+                    "subject"
+                ]
             },
             "UploadRequestRequest": {
                 "type": "object",

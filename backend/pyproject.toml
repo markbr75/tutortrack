@@ -33,6 +33,7 @@ dependencies = [
     "pyjwt[crypto]>=2.10",
     "segno>=1.6",
     "temporalio>=1.11",
+    "nh3>=0.2.18",
 ]
 
 [dependency-groups]
