@@ -9,9 +9,10 @@ import { api, usePermission } from "../api";
 import { ErrorList } from "../calendar/ErrorList";
 import { toDateInput } from "../calendar/dates";
 import { useCursorList } from "../lists";
+import { PaymentsList } from "../payments/PaymentsPages";
 import { StatusBadge } from "./InvoicePage";
 
-type Tab = "invoices" | "charges" | "requests" | "runs" | "ageing";
+type Tab = "invoices" | "payments" | "charges" | "requests" | "runs" | "ageing";
 type InvoiceFilter = "draft" | "open" | "overdue" | "paid" | "all";
 type Money = { amount: string; currency: string };
 
@@ -420,8 +421,10 @@ export function BillingPage() {
   const { t } = useTranslation();
   const canCharges = usePermission("billing.charge.view");
   const canRequests = usePermission("billing.payment_request.view");
+  const canPayments = usePermission("payments.payment.view");
   const tabs = [
     { key: "invoices" as const, label: t("billing.tabs.invoices") },
+    ...(canPayments ? [{ key: "payments" as const, label: t("payments.title") }] : []),
     ...(canCharges ? [{ key: "charges" as const, label: t("billing.tabs.charges") }] : []),
     ...(canRequests ? [{ key: "requests" as const, label: t("billing.tabs.requests") }] : []),
     { key: "runs" as const, label: t("billing.tabs.runs") },
@@ -433,6 +436,7 @@ export function BillingPage() {
       <h1 className="text-2xl font-semibold">{t("billing.title")}</h1>
       <Tabs label={t("billing.title")} tabs={tabs} value={tab} onChange={setTab}>
         {tab === "invoices" ? <Invoices /> : null}
+        {tab === "payments" ? <PaymentsList /> : null}
         {tab === "charges" ? <Charges /> : null}
         {tab === "requests" ? <Requests /> : null}
         {tab === "runs" ? <Runs /> : null}

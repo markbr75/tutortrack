@@ -42,12 +42,12 @@ resource "aws_cloudfront_response_headers_policy" "spa" {
       override = true
       content_security_policy = join("; ", [
         "default-src 'self'",
-        "script-src 'self' https://js.stripe.com https://challenges.cloudflare.com",
+        "script-src 'self' https://js.stripe.com https://*.js.stripe.com https://challenges.cloudflare.com",
         "style-src 'self' 'unsafe-inline'",
         "img-src 'self' data: blob: https:",
         "font-src 'self' data:",
-        "connect-src 'self' https://*.ingest.sentry.io",
-        "frame-src https://js.stripe.com https://challenges.cloudflare.com",
+        "connect-src 'self' https://*.ingest.sentry.io https://api.stripe.com",
+        "frame-src https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com https://challenges.cloudflare.com",
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",

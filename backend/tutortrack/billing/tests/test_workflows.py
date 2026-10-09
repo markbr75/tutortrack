@@ -109,11 +109,15 @@ def test_dunning_sends_each_reminder_once_and_stops_when_paid(org, temporal_env)
 
 
 def test_paying_closes_dunning(org, temporal_env):
-    # Far-off reminders: the shared test server's clock may already be days ahead.
-    settings_for(org, {"billing.reminder_offsets": [3650, 3660]})
+    settings_for(org, {"billing.reminder_offsets": [7, 14]})
     client = charged_client(org)
+    # Due dates are absolute: anchor this one to the shared test server's clock.
+    server_today = temporal_env.run(temporal_env.env.get_current_time()).date()
     with transaction.atomic(), tenant_context(org):
-        invoice = services.issue_invoice(services.create_draft(client))
+        draft = services.update_draft(
+            services.create_draft(client), due_date=server_today + timedelta(days=30)
+        )
+        invoice = services.issue_invoice(draft)
     dispatch_batch()
     with transaction.atomic(), tenant_context(org):
         services.allocate_payment(invoice, Money("40.00", "GBP"))

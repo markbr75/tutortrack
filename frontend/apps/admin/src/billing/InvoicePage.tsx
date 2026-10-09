@@ -37,6 +37,7 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
   const canVoid = usePermission("billing.invoice.void");
   const canWriteOff = usePermission("billing.invoice.write_off");
   const canCredit = usePermission("billing.credit_note.issue");
+  const canCollect = usePermission("payments.payment.record");
   const [mode, setMode] = useState<Mode>("view");
   const [reason, setReason] = useState("");
   const [application, setApplication] = useState<"invoice" | "credit">("invoice");
@@ -50,7 +51,9 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
   });
 
   const act = useMutation({
-    mutationFn: async (kind: Mode | "issue" | "send" | "apply" | "remove" | "delete") => {
+    mutationFn: async (
+      kind: Mode | "issue" | "send" | "apply" | "remove" | "delete" | "collect",
+    ) => {
       const path = { params: { path: { id: invoiceId } } };
       const inv = invoice.data!;
       switch (kind) {
@@ -94,6 +97,13 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
           );
         case "delete":
           await api.DELETE("/api/v1/invoices/{id}", path);
+          return null;
+        case "collect":
+          await api
+            .POST("/api/v1/invoices/{invoice_id}/collect", {
+              params: { path: { invoice_id: invoiceId } },
+            })
+            .then(unwrap);
           return null;
         default:
           return null;
@@ -185,6 +195,11 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
                 {t("billing.applyCredit")}
               </Button>
             </>
+          ) : null}
+          {open && canCollect ? (
+            <Button size="sm" variant="secondary" onClick={() => act.mutate("collect")}>
+              {t("payments.collectNow")}
+            </Button>
           ) : null}
           {open && canVoid ? (
             <Button size="sm" variant="ghost" onClick={() => setMode("void")}>

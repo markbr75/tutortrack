@@ -80,9 +80,9 @@ All ─► E26, E27, E28, E31
 | E08 | ✅ Done (2026-10-09) | MVP scope (rooms, reschedule requests, self-booking, time-off approval + TW1 are Phase 2). See Implementation notes |
 | E09 | ✅ Done (2026-10-09) | MVP scope (T09 feedback surveys are Phase 2). See Implementation notes and ADR 0006 |
 | E10 | ✅ Done (2026-10-09) | Phase 1 scope (packages, fixed fees, late fees and split billing are Phase 2). See Implementation notes and ADR 0007 |
-| E11 | ⏭ Next | |
+| E11 | ✅ Done (2026-10-09) | Stripe + manual (GoCardless, PayPal, bank feeds and split payments are Phase 2). See Implementation notes and ADR 0008 |
 | E12 | ☐ | |
-| E13 | ☐ | |
+| E13 | ⏭ Next | |
 | E14 | ☐ | |
 | E15 | ☐ | |
 | E16 | ☐ | |

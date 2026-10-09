@@ -35,6 +35,7 @@ dependencies = [
     "temporalio>=1.11",
     "nh3>=0.2.18",
     "weasyprint>=62",
+    "stripe>=12,<13",
 ]
 
 [dependency-groups]

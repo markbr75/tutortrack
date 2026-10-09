@@ -4497,6 +4497,70 @@
                 }
             }
         },
+        "/api/v1/clients/{client_id}/autopay": {
+            "post": {
+                "operationId": "clients_autopay_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "client_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "clients"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AutoPayRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AutoPayRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AutoPayRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientMethods"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/clients/{client_id}/balance": {
             "get": {
                 "operationId": "clients_balance_retrieve",
@@ -4762,6 +4826,87 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/LedgerEntry"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/clients/{client_id}/payment-methods": {
+            "get": {
+                "operationId": "clients_payment_methods_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "client_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "clients"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientMethods"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/clients/{client_id}/payment-methods/setup-link": {
+            "post": {
+                "operationId": "clients_payment_methods_setup_link_create",
+                "description": "A link the client opens to save a card or mandate (and opt in to auto-pay).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "client_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "clients"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SetupLinkOut"
                                 }
                             }
                         },
@@ -8043,6 +8188,44 @@
                             }
                         },
                         "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/invoices/{invoice_id}/collect": {
+            "post": {
+                "operationId": "invoices_collect_create",
+                "description": "Charge the client's default method for this invoice now (FR-11-3). 409\n``collection_in_progress`` while another attempt is in flight.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "invoice_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "invoices"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "No response body"
                     }
                 }
             }
@@ -13536,6 +13719,366 @@
                 }
             }
         },
+        "/api/v1/pay/{token}": {
+            "get": {
+                "operationId": "pay_retrieve",
+                "description": "The hosted pay page for an invoice or payment request (link from the email).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pay"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PayPage"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/pay/{token}/confirm": {
+            "post": {
+                "operationId": "pay_confirm_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pay"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConfirmRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConfirmRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConfirmRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConfirmResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/pay/{token}/intent": {
+            "post": {
+                "operationId": "pay_intent_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pay"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PayIntentRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PayIntentRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PayIntentRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PayIntent"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/pay/{token}/pdf": {
+            "get": {
+                "operationId": "pay_pdf_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pay"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/pay/setup/{token}": {
+            "get": {
+                "operationId": "pay_setup_retrieve",
+                "description": "Save a payment method from a setup link (and, if the client agrees, turn on\nauto-pay with their recorded consent).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pay"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SetupPage"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "pay_setup_create",
+                "description": "Save a payment method from a setup link (and, if the client agrees, turn on\nauto-pay with their recorded consent).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pay"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SetupCompleteRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SetupCompleteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SetupCompleteRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SetupDone"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/payment-methods/{id}": {
+            "delete": {
+                "operationId": "payment_methods_destroy",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this payment method.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "payment-methods"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/payment-methods/{id}/default": {
+            "post": {
+                "operationId": "payment_methods_default_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this payment method.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "payment-methods"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaymentMethod"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/payment-requests": {
             "get": {
                 "operationId": "payment_requests_list",
@@ -13818,6 +14361,757 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/BulkRequestResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/payments": {
+            "get": {
+                "operationId": "payments_list",
+                "description": "Payments (FR-11-4..7). ``POST`` records a manual payment (bank transfer, cash,\ncheque, other) and allocates it, oldest invoices first unless told otherwise.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "client",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "method",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "bank_transfer",
+                                    "card",
+                                    "cash",
+                                    "cheque",
+                                    "direct_debit",
+                                    "other"
+                                ]
+                            }
+                        },
+                        "description": "* `card` - Card\n* `direct_debit` - Direct debit\n* `bank_transfer` - Bank transfer\n* `cash` - Cash\n* `cheque` - Cheque\n* `other` - Other",
+                        "explode": true,
+                        "style": "form"
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "disputed",
+                                    "failed",
+                                    "partially_refunded",
+                                    "pending",
+                                    "refunded",
+                                    "succeeded"
+                                ]
+                            }
+                        },
+                        "description": "* `pending` - Pending\n* `succeeded` - Succeeded\n* `failed` - Failed\n* `refunded` - Refunded\n* `partially_refunded` - Partly refunded\n* `disputed` - Disputed",
+                        "explode": true,
+                        "style": "form"
+                    }
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedPaymentList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "payments_create",
+                "description": "Payments (FR-11-4..7). ``POST`` records a manual payment (bank transfer, cash,\ncheque, other) and allocates it, oldest invoices first unless told otherwise.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecordPaymentRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecordPaymentRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecordPaymentRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Payment"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/payments/{id}": {
+            "get": {
+                "operationId": "payments_retrieve",
+                "description": "Payments (FR-11-4..7). ``POST`` records a manual payment (bank transfer, cash,\ncheque, other) and allocates it, oldest invoices first unless told otherwise.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this payment.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Payment"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/payments/{id}/allocate": {
+            "post": {
+                "operationId": "payments_allocate_create",
+                "description": "Replace the payment's allocations (re-allocation is audited).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this payment.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AllocateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AllocateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AllocateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Payment"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/payments/{id}/receipt": {
+            "get": {
+                "operationId": "payments_receipt_retrieve",
+                "description": "Payments (FR-11-4..7). ``POST`` records a manual payment (bank transfer, cash,\ncheque, other) and allocates it, oldest invoices first unless told otherwise.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this payment.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/payments/{id}/refund": {
+            "post": {
+                "operationId": "payments_refund_create",
+                "description": "Payments (FR-11-4..7). ``POST`` records a manual payment (bank transfer, cash,\ncheque, other) and allocates it, oldest invoices first unless told otherwise.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this payment.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RefundRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RefundRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RefundRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Refund"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/payments/disputes": {
+            "get": {
+                "operationId": "payments_disputes_list",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedDisputeList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/payments/payouts": {
+            "get": {
+                "operationId": "payments_payouts_list",
+                "description": "Provider payouts (FR-11-10): what reached the bank, for reconciliation (E23).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedPayoutList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/payments/providers": {
+            "get": {
+                "operationId": "payments_providers_list",
+                "description": "Connected payment accounts (Settings → Payments).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ProviderAccount"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/payments/providers/{id}": {
+            "get": {
+                "operationId": "payments_providers_retrieve",
+                "description": "Connected payment accounts (Settings → Payments).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this provider account.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProviderAccount"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/payments/providers/{id}/disconnect": {
+            "post": {
+                "operationId": "payments_providers_disconnect_create",
+                "description": "Connected payment accounts (Settings → Payments).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this provider account.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProviderAccount"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/payments/providers/{id}/refresh": {
+            "post": {
+                "operationId": "payments_providers_refresh_create",
+                "description": "Connected payment accounts (Settings → Payments).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this provider account.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProviderAccount"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/payments/providers/stripe/connect": {
+            "post": {
+                "operationId": "payments_providers_stripe_connect_create",
+                "description": "Start or resume Stripe onboarding; open the returned ``url``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConnectRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConnectRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConnectRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Onboarding"
                                 }
                             }
                         },
@@ -17606,6 +18900,91 @@
                     "total"
                 ]
             },
+            "AllocateRequest": {
+                "type": "object",
+                "properties": {
+                    "allocations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AllocationInputRequest"
+                        }
+                    }
+                },
+                "required": [
+                    "allocations"
+                ]
+            },
+            "Allocation": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "invoice": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "invoice_number": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "amount": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "amount",
+                    "created_at",
+                    "id",
+                    "invoice",
+                    "invoice_number"
+                ]
+            },
+            "AllocationInputRequest": {
+                "type": "object",
+                "properties": {
+                    "invoice": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,12}(?:\\.\\d{0,2})?$"
+                    }
+                },
+                "required": [
+                    "amount",
+                    "invoice"
+                ]
+            },
             "ApplicationEnum": {
                 "enum": [
                     "invoice",
@@ -17816,6 +19195,17 @@
                     "object_repr",
                     "object_type",
                     "request_id"
+                ]
+            },
+            "AutoPayRequest": {
+                "type": "object",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "enabled"
                 ]
             },
             "Availability": {
@@ -19436,6 +20826,30 @@
                     "students_count"
                 ]
             },
+            "ClientMethods": {
+                "type": "object",
+                "properties": {
+                    "auto_pay": {
+                        "type": "boolean"
+                    },
+                    "consent_given_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "methods": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PaymentMethod"
+                        }
+                    }
+                },
+                "required": [
+                    "auto_pay",
+                    "consent_given_at",
+                    "methods"
+                ]
+            },
             "ClientRequest": {
                 "type": "object",
                 "properties": {
@@ -19602,6 +21016,30 @@
                     }
                 }
             },
+            "ConfirmRequest": {
+                "type": "object",
+                "properties": {
+                    "intent": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "intent"
+                ]
+            },
+            "ConfirmResult": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "status"
+                ]
+            },
             "Conflict": {
                 "type": "object",
                 "properties": {
@@ -19699,6 +21137,29 @@
                 ],
                 "type": "string",
                 "description": "* `skip` - skip\n* `create` - create\n* `fail` - fail"
+            },
+            "ConnectRequest": {
+                "type": "object",
+                "properties": {
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "email": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email",
+                                "default": ""
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    }
+                }
             },
             "ConsentRecord": {
                 "type": "object",
@@ -20638,6 +22099,97 @@
                     "has_demo_data",
                     "records"
                 ]
+            },
+            "Dispute": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "payment": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "provider_ref": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "amount": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "readOnly": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/DisputeStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "evidence_due_by": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "closed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "amount",
+                    "closed_at",
+                    "created_at",
+                    "evidence_due_by",
+                    "id",
+                    "payment",
+                    "provider_ref",
+                    "reason",
+                    "status"
+                ]
+            },
+            "DisputeStatusEnum": {
+                "enum": [
+                    "needs_response",
+                    "under_review",
+                    "won",
+                    "lost"
+                ],
+                "type": "string",
+                "description": "* `needs_response` - Needs a response\n* `under_review` - Under review\n* `won` - Won\n* `lost` - Lost"
             },
             "Document": {
                 "type": "object",
@@ -24997,6 +26549,22 @@
                     "nudged"
                 ]
             },
+            "Onboarding": {
+                "type": "object",
+                "properties": {
+                    "account": {
+                        "$ref": "#/components/schemas/ProviderAccount"
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    }
+                },
+                "required": [
+                    "account",
+                    "url"
+                ]
+            },
             "OnboardingState": {
                 "type": "object",
                 "properties": {
@@ -25717,6 +27285,32 @@
                     }
                 }
             },
+            "PaginatedDisputeList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Dispute"
+                        }
+                    }
+                }
+            },
             "PaginatedDocumentList": {
                 "type": "object",
                 "required": [
@@ -26081,6 +27675,32 @@
                     }
                 }
             },
+            "PaginatedPaymentList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Payment"
+                        }
+                    }
+                }
+            },
             "PaginatedPaymentRequestList": {
                 "type": "object",
                 "required": [
@@ -26103,6 +27723,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/PaymentRequest"
+                        }
+                    }
+                }
+            },
+            "PaginatedPayoutList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Payout"
                         }
                     }
                 }
@@ -28023,6 +29669,48 @@
                     }
                 }
             },
+            "PayIntent": {
+                "type": "object",
+                "properties": {
+                    "publishable_key": {
+                        "type": "string"
+                    },
+                    "account": {
+                        "type": "string"
+                    },
+                    "client_secret": {
+                        "type": "string"
+                    },
+                    "intent": {
+                        "type": "string"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    }
+                },
+                "required": [
+                    "account",
+                    "amount",
+                    "client_secret",
+                    "intent",
+                    "publishable_key"
+                ]
+            },
+            "PayIntentRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,12}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "save_method": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                }
+            },
             "PayLine": {
                 "type": "object",
                 "properties": {
@@ -28062,6 +29750,89 @@
                     "unit"
                 ]
             },
+            "PayPage": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "$ref": "#/components/schemas/PayPageKindEnum"
+                    },
+                    "organisation": {
+                        "type": "string"
+                    },
+                    "number": {
+                        "type": "string"
+                    },
+                    "client_name": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "due_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "total": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "amount_due": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "lines": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PayPageLine"
+                        }
+                    },
+                    "allow_partial": {
+                        "type": "boolean"
+                    },
+                    "can_pay_online": {
+                        "type": "boolean"
+                    },
+                    "has_pdf": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "allow_partial",
+                    "amount_due",
+                    "can_pay_online",
+                    "client_name",
+                    "due_date",
+                    "has_pdf",
+                    "kind",
+                    "lines",
+                    "number",
+                    "organisation",
+                    "status",
+                    "total"
+                ]
+            },
+            "PayPageKindEnum": {
+                "enum": [
+                    "invoice",
+                    "payment_request"
+                ],
+                "type": "string",
+                "description": "* `invoice` - invoice\n* `payment_request` - payment_request"
+            },
+            "PayPageLine": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    }
+                },
+                "required": [
+                    "amount",
+                    "description"
+                ]
+            },
             "PayUnitEnum": {
                 "enum": [
                     "per_hour",
@@ -28069,6 +29840,319 @@
                 ],
                 "type": "string",
                 "description": "* `per_hour` - Per hour\n* `per_lesson` - Per lesson"
+            },
+            "Payment": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "client": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "client_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "currency": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "amount": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "readOnly": true
+                    },
+                    "refunded": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "readOnly": true
+                    },
+                    "fee": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "net": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "unallocated": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "readOnly": true
+                    },
+                    "method": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PaymentMethodEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "provider": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ProviderEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "provider_ref": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PaymentStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "source": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PaymentSourceEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "received_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "reference": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "notes": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "payment_request": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "failure_code": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "failure_message": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "allocations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Allocation"
+                        },
+                        "readOnly": true
+                    },
+                    "refunds": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Refund"
+                        },
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "allocations",
+                    "amount",
+                    "client",
+                    "client_name",
+                    "created_at",
+                    "currency",
+                    "failure_code",
+                    "failure_message",
+                    "fee",
+                    "id",
+                    "method",
+                    "net",
+                    "notes",
+                    "payment_request",
+                    "provider",
+                    "provider_ref",
+                    "received_at",
+                    "reference",
+                    "refunded",
+                    "refunds",
+                    "source",
+                    "status",
+                    "unallocated"
+                ]
+            },
+            "PaymentMethod": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "brand": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "last4": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "exp_month": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "exp_year": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "mandate_status": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "is_default": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PaymentMethodStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "brand",
+                    "created_at",
+                    "exp_month",
+                    "exp_year",
+                    "id",
+                    "is_default",
+                    "last4",
+                    "mandate_status",
+                    "status",
+                    "type"
+                ]
+            },
+            "PaymentMethodEnum": {
+                "enum": [
+                    "card",
+                    "direct_debit",
+                    "bank_transfer",
+                    "cash",
+                    "cheque",
+                    "other"
+                ],
+                "type": "string",
+                "description": "* `card` - Card\n* `direct_debit` - Direct debit\n* `bank_transfer` - Bank transfer\n* `cash` - Cash\n* `cheque` - Cheque\n* `other` - Other"
+            },
+            "PaymentMethodStatusEnum": {
+                "enum": [
+                    "active",
+                    "removed"
+                ],
+                "type": "string",
+                "description": "* `active` - Active\n* `removed` - Removed"
             },
             "PaymentRequest": {
                 "type": "object",
@@ -28154,7 +30238,7 @@
                     "source": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/SourceEnum"
+                                "$ref": "#/components/schemas/PaymentSourceEnum"
                             }
                         ],
                         "readOnly": true
@@ -28251,6 +30335,86 @@
                 ],
                 "type": "string",
                 "description": "* `open` - Awaiting payment\n* `paid` - Paid\n* `cancelled` - Cancelled"
+            },
+            "PaymentSourceEnum": {
+                "enum": [
+                    "auto_pay",
+                    "pay_page",
+                    "manual"
+                ],
+                "type": "string",
+                "description": "* `auto_pay` - Auto-pay\n* `pay_page` - Pay page\n* `manual` - Recorded by staff"
+            },
+            "PaymentStatusEnum": {
+                "enum": [
+                    "pending",
+                    "succeeded",
+                    "failed",
+                    "refunded",
+                    "partially_refunded",
+                    "disputed"
+                ],
+                "type": "string",
+                "description": "* `pending` - Pending\n* `succeeded` - Succeeded\n* `failed` - Failed\n* `refunded` - Refunded\n* `partially_refunded` - Partly refunded\n* `disputed` - Disputed"
+            },
+            "Payout": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "provider_ref": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "amount": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "readOnly": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "arrival_date": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "amount",
+                    "arrival_date",
+                    "created_at",
+                    "id",
+                    "provider_ref",
+                    "status"
+                ]
             },
             "PercentPair": {
                 "type": "object",
@@ -28790,6 +30954,97 @@
                 "type": "string",
                 "description": "* `good` - Good\n* `strong` - Strong\n* `expert` - Expert"
             },
+            "ProviderAccount": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "provider": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ProviderEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "account_ref": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ProviderAccountStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "charges_enabled": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "payouts_enabled": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "requirements": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "readOnly": true
+                    },
+                    "default_currency": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "connected_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "account_ref",
+                    "branch",
+                    "charges_enabled",
+                    "connected_at",
+                    "default_currency",
+                    "id",
+                    "payouts_enabled",
+                    "provider",
+                    "requirements",
+                    "status"
+                ]
+            },
+            "ProviderAccountStatusEnum": {
+                "enum": [
+                    "pending",
+                    "active",
+                    "restricted",
+                    "disconnected"
+                ],
+                "type": "string",
+                "description": "* `pending` - Onboarding not finished\n* `active` - Active\n* `restricted` - Action needed\n* `disconnected` - Disconnected"
+            },
+            "ProviderEnum": {
+                "enum": [
+                    "stripe",
+                    "manual"
+                ],
+                "type": "string",
+                "description": "* `stripe` - Stripe\n* `manual` - Manual"
+            },
             "QuantityTypeEnum": {
                 "enum": [
                     "hours",
@@ -29255,6 +31510,82 @@
                     "subject_type"
                 ]
             },
+            "RecordPaymentMethodEnum": {
+                "enum": [
+                    "direct_debit",
+                    "bank_transfer",
+                    "cash",
+                    "cheque",
+                    "other"
+                ],
+                "type": "string",
+                "description": "* `direct_debit` - Direct debit\n* `bank_transfer` - Bank transfer\n* `cash` - Cash\n* `cheque` - Cheque\n* `other` - Other"
+            },
+            "RecordPaymentRequest": {
+                "type": "object",
+                "properties": {
+                    "client": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "amount": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ]
+                    },
+                    "method": {
+                        "$ref": "#/components/schemas/RecordPaymentMethodEnum"
+                    },
+                    "received_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "reference": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 120
+                    },
+                    "notes": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "payment_request": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "allocations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AllocationInputRequest"
+                        },
+                        "nullable": true,
+                        "description": "Leave out to pay the oldest invoices first (the rest is credit)."
+                    }
+                },
+                "required": [
+                    "amount",
+                    "client",
+                    "method"
+                ]
+            },
             "RecoveryCodes": {
                 "type": "object",
                 "properties": {
@@ -29270,6 +31601,74 @@
                     "recovery_codes"
                 ]
             },
+            "Refund": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "amount": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "readOnly": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RefundStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "provider_ref": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "credit_note": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "amount",
+                    "created_at",
+                    "credit_note",
+                    "id",
+                    "provider_ref",
+                    "reason",
+                    "status"
+                ]
+            },
             "RefundPolicyEnum": {
                 "enum": [
                     "none",
@@ -29278,6 +31677,39 @@
                 ],
                 "type": "string",
                 "description": "* `none` - Not refundable\n* `unused_pro_rata` - Unused part refundable\n* `full` - Fully refundable before first use"
+            },
+            "RefundRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,12}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 300
+                    },
+                    "credit_note": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Also credit the invoices the refunded money had paid."
+                    }
+                },
+                "required": [
+                    "reason"
+                ]
+            },
+            "RefundStatusEnum": {
+                "enum": [
+                    "pending",
+                    "succeeded",
+                    "failed"
+                ],
+                "type": "string",
+                "description": "* `pending` - Pending\n* `succeeded` - Refunded\n* `failed` - Failed"
             },
             "RegionEnum": {
                 "enum": [
@@ -30706,6 +33138,85 @@
                     "values"
                 ]
             },
+            "SetupCompleteRequest": {
+                "type": "object",
+                "properties": {
+                    "intent": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "autopay": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "intent"
+                ]
+            },
+            "SetupDone": {
+                "type": "object",
+                "properties": {
+                    "method": {
+                        "$ref": "#/components/schemas/PaymentMethod"
+                    },
+                    "auto_pay": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "auto_pay",
+                    "method"
+                ]
+            },
+            "SetupLinkOut": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    }
+                },
+                "required": [
+                    "url"
+                ]
+            },
+            "SetupPage": {
+                "type": "object",
+                "properties": {
+                    "organisation": {
+                        "type": "string"
+                    },
+                    "client_name": {
+                        "type": "string"
+                    },
+                    "publishable_key": {
+                        "type": "string"
+                    },
+                    "account": {
+                        "type": "string"
+                    },
+                    "client_secret": {
+                        "type": "string"
+                    },
+                    "intent": {
+                        "type": "string"
+                    },
+                    "consent_text": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "account",
+                    "client_name",
+                    "client_secret",
+                    "consent_text",
+                    "intent",
+                    "organisation",
+                    "publishable_key"
+                ]
+            },
             "SeverityEnum": {
                 "enum": [
                     "hard",
@@ -30924,15 +33435,6 @@
                     "slug",
                     "suggestion"
                 ]
-            },
-            "SourceEnum": {
-                "enum": [
-                    "manual",
-                    "bulk",
-                    "threshold"
-                ],
-                "type": "string",
-                "description": "* `manual` - Created by staff\n* `bulk` - Bulk request\n* `threshold` - Automatic top-up"
             },
             "StartBulkRequest": {
                 "type": "object",

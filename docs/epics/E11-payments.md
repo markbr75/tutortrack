@@ -84,16 +84,16 @@ Collect money from clients through a **provider-agnostic payment layer**: card a
 - Webhook replay and out-of-order event tests; idempotent processing; double-collection prevention.
 
 ## 9. Delivery plan
-- [ ] **E11-T01** Provider interface, ProviderAccount, webhook ingestion pipeline (store raw → process idempotently).
-- [ ] **E11-T02** Stripe Connect onboarding and account status.
-- [ ] **E11-T03** Payment methods via SetupIntent; portal and staff-sent setup links; consent capture.
-- [ ] **E11-T04** Payment, attempt and allocation models; ledger posting via E10 services; manual payment recording.
-- [ ] **E11-T05** Hosted pay page for invoices/payment requests (Payment Element, wallets).
-- [ ] **E11-T06** Auto-pay on issue, retry schedule, failure notifications, collection lock.
-- [ ] **E11-T07** Refunds and disputes.
-- [ ] **E11-T08** Stripe payouts/balance transactions import.
-- [ ] **E11-T09** Receipts.
-- [ ] **E11-T10** Frontend: payments settings, client payment methods, record payment, allocation UI.
+- [x] **E11-T01** Provider interface, ProviderAccount, webhook ingestion pipeline (store raw → process idempotently).
+- [x] **E11-T02** Stripe Connect onboarding and account status.
+- [x] **E11-T03** Payment methods via SetupIntent; portal and staff-sent setup links; consent capture.
+- [x] **E11-T04** Payment, attempt and allocation models; ledger posting via E10 services; manual payment recording.
+- [x] **E11-T05** Hosted pay page for invoices/payment requests (Payment Element, wallets).
+- [x] **E11-T06** Auto-pay on issue, retry schedule, failure notifications, collection lock.
+- [x] **E11-T07** Refunds and disputes.
+- [x] **E11-T08** Stripe payouts/balance transactions import.
+- [x] **E11-T09** Receipts.
+- [x] **E11-T10** Frontend: payments settings, client payment methods, record payment, allocation UI.
 - [ ] **E11-T11** (Phase 2) GoCardless provider (mandates, payments, payouts).
 - [ ] **E11-T12** (Phase 2) PayPal provider.
 - [ ] **E11-T13** (Phase 2) Bank statement import and Open Banking feeds with matching queue.
@@ -103,10 +103,24 @@ Collect money from clients through a **provider-agnostic payment layer**: card a
 
 Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
 
-- [ ] **E11-TW1** Payment collection, dispute and provider-migration workflows (requires E32).
+- [x] **E11-TW1** Payment collection, dispute and provider-migration workflows (requires E32).
 
 | Workflow | Started by | Steps, timers and signals | Replaces |
 |---|---|---|---|
 | `PaymentCollectionWorkflow` `collect:{org}:{invoice}` | Invoice issued with auto-pay, or manual "collect" | Charge default method (activity, idempotency key) → for direct debit wait for `confirmed`/`failed` webhook signal (days) → retry schedule (card +3d, +5d; DD once) → notify client with pay link → final failure notify staff. The workflow *is* the per-invoice collection lock (FR-11-2) | PaymentAttempt `next_retry_at` + retry beat job |
 | `DisputeWorkflow` | Provider `dispute.created` webhook | Alert staff → evidence deadline timer with reminders → outcome signal → ledger reversal and invoice reopen if lost | Manual tracking |
 | `ProviderMigrationWorkflow` | Admin moves a client between providers | Send new mandate/card setup link → wait for `method_added` → switch default → cancel old mandate after in-flight collections settle | Manual steps |
+
+## Implementation notes (as built 2026-10-09)
+- **App:** `payments` with `ProviderAccount` (per branch or organisation default), `ProviderCustomer`, `PaymentMethod`, `SetupLink`, `AutoPayConsent`, `Payment`, `PaymentAllocation`, `PaymentAttempt`, `Refund`, `Dispute`, `ProviderPayout` and `ProviderWebhookEvent`, all with RLS. There is also a platform `AccountRoute` table for webhook routing. See ADR 0008. Without `STRIPE_SECRET_KEY` a deterministic fake provider is used (development and tests).
+- **Onboarding (T02):** `POST /payments/providers/stripe/connect` creates a Standard connected account and returns the Stripe onboarding link (it resumes onboarding if already started). Status comes from `account.updated` webhooks or `refresh`: pending → active, or restricted with requirements. Disconnecting is blocked while auto-pay clients use the account. Enabling individual methods per branch and card surcharges are follow-ups (Stripe's dashboard controls which methods the Payment Element offers).
+- **Methods and consent (T03):** staff create a setup link (`/pay/setup/<token>`; only the hash is stored; valid 14 days, single use). The client saves a card or debit mandate in Stripe's Payment Element and may tick the auto-pay consent, which records the wording, a version hash, IP address and user agent. Staff can turn auto-pay off; turning it back on needs a consent on record. Choosing the default method is how a client moves between methods or providers (FR-11-2). The portal entry point comes with E15.
+- **Payments (T04):** `POST /payments` records bank transfer, cash, cheque, direct debit or other. Card payments only come through Stripe. The money pays the oldest invoices first or the chosen allocations, and the rest is credit. Payments against payment requests become credit (E10). `allocate` replaces allocations (audited). Split payments across clients are Phase 2.
+- **Pay page (T05):** `/pay/<token>` (the invoice's or request's `pay_token`, emailed by E10) shows the summary, PDF and amount due, creates a PaymentIntent (optionally saving the method), and confirms. Partial payments follow `payments.allow_partial`. A payment is recorded once whether the confirm call or the `payment_intent.succeeded` webhook arrives first. Fees and net come from the balance transaction. Payment links for arbitrary amounts use payment requests.
+- **Auto-pay (T06, TW1):** `invoice.issued` starts `PaymentCollectionWorkflow` for auto-pay clients with an active default method. Retries follow `payments.card_retry_days` ([3, 5]) or `payments.debit_retry_days` ([3]). Debits stay pending until the webhook confirms or fails them; "authentication required" counts as a failed attempt. Each failure publishes `payment.failed` (with `final` on the last); `payments.pause_autopay_after_failure` is optional. `POST /invoices/{id}/collect` returns 409 `collection_in_progress` while a collection runs.
+- **Refunds and disputes (T07, TW1):** refunds go back to the card through Stripe (or are recorded for manual payments). Unused credit is refunded first; then invoices are un-allocated and reopen, unless `credit_note` also credits them. Dispute webhooks mark the payment disputed and start `DisputeWorkflow` (evidence reminders 3 days and 1 day before the deadline). A lost dispute reverses the payment (`refund` ledger entry "Chargeback") and reopens the invoice. Evidence submission stays in Stripe.
+- **Payouts (T08):** `payout.paid` webhooks become `ProviderPayout` rows (`/payments/payouts`). Fees are stored per payment. Accounting sync is E23.
+- **Receipts (T09):** an emailed PDF receipt per payment (`payments.send_receipts`) and `/payments/{id}/receipt`.
+- **Frontend (T10):** Settings → Payments (connect, finish setup, status, disconnect); client billing tabs for Payments (record a payment with allocation, list, refund, receipt) and Payment methods (saved methods, default/remove, setup link, auto-pay); Billing → Payments; "Collect now" on invoices; public pay and setup pages loading Stripe.js from js.stripe.com. The CloudFront CSP now allows Stripe's API and 3-D Secure frames.
+- **Fixes along the way:** billing workflows that end early now report completion, so their links don't stay "running". Workflow tests anchor absolute deadlines to the shared test server's clock.
+- **Deferred (Phase 2):** GoCardless (T11), PayPal (T12), bank statement import and Open Banking (T13), split payments (T14), and the ProviderMigrationWorkflow that comes with GoCardless.

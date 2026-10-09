@@ -221,14 +221,15 @@ class ScheduledInvoiceRunWorkflow:
             open_scheduled_run, input, start_to_close_timeout=TIMEOUT
         )
         if not run_id:
+            await report_step(input, "already_run", status="completed")
             return "already_run"
-        return str(
-            await workflow.execute_child_workflow(
-                InvoiceRunWorkflow.run,
-                InvoiceRunInput(organisation_id=input.organisation_id, run_id=run_id),
-                id=run_workflow_id(input.organisation_id, run_id),
-            )
+        result = await workflow.execute_child_workflow(
+            InvoiceRunWorkflow.run,
+            InvoiceRunInput(organisation_id=input.organisation_id, run_id=run_id),
+            id=run_workflow_id(input.organisation_id, run_id),
         )
+        await report_step(input, str(result), status="completed")
+        return str(result)
 
 
 @register_workflow(
@@ -259,6 +260,7 @@ class InvoiceDunningWorkflow:
             start_to_close_timeout=TIMEOUT,
         )
         if not settings.get("billing.reminders_enabled", True):
+            await report_step(input, "disabled", status="completed")
             return "disabled"
         calendar = BusinessCalendar(timezone=str(settings["timezone"]))
         due = date.fromisoformat(input.due_date)

@@ -1001,6 +1001,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/clients/{client_id}/autopay": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["clients_autopay_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/clients/{client_id}/balance": {
     parameters: {
       query?: never;
@@ -1047,6 +1063,39 @@ export interface paths {
     put?: never;
     /** @description The client's ledger entries, newest first (append-only). */
     post: operations["clients_ledger_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/clients/{client_id}/payment-methods": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["clients_payment_methods_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/clients/{client_id}/payment-methods/setup-link": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description A link the client opens to save a card or mandate (and opt in to auto-pay). */
+    post: operations["clients_payment_methods_setup_link_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -1820,6 +1869,26 @@ export interface paths {
     put?: never;
     /** @description A draft now from the client's uninvoiced charges. */
     post: operations["invoices_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoices/{invoice_id}/collect": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Charge the client's default method for this invoice now (FR-11-3). 409
+     *     ``collection_in_progress`` while another attempt is in flight.
+     */
+    post: operations["invoices_collect_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -3247,6 +3316,141 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/pay/{token}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The hosted pay page for an invoice or payment request (link from the email). */
+    get: operations["pay_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay/{token}/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["pay_confirm_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay/{token}/intent": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["pay_intent_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay/{token}/pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["pay_pdf_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay/setup/{token}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Save a payment method from a setup link (and, if the client agrees, turn on
+     *     auto-pay with their recorded consent).
+     */
+    get: operations["pay_setup_retrieve"];
+    put?: never;
+    /**
+     * @description Save a payment method from a setup link (and, if the client agrees, turn on
+     *     auto-pay with their recorded consent).
+     */
+    post: operations["pay_setup_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payment-methods/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    delete: operations["payment_methods_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payment-methods/{id}/default": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["payment_methods_default_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/payment-requests": {
     parameters: {
       query?: never;
@@ -3310,6 +3514,232 @@ export interface paths {
     put?: never;
     /** @description Payment requests (FR-10-6): top-ups for prepaid credit. Not tax invoices. */
     post: operations["payment_requests_bulk_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Payments (FR-11-4..7). ``POST`` records a manual payment (bank transfer, cash,
+     *     cheque, other) and allocates it, oldest invoices first unless told otherwise.
+     */
+    get: operations["payments_list"];
+    put?: never;
+    /**
+     * @description Payments (FR-11-4..7). ``POST`` records a manual payment (bank transfer, cash,
+     *     cheque, other) and allocates it, oldest invoices first unless told otherwise.
+     */
+    post: operations["payments_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Payments (FR-11-4..7). ``POST`` records a manual payment (bank transfer, cash,
+     *     cheque, other) and allocates it, oldest invoices first unless told otherwise.
+     */
+    get: operations["payments_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/{id}/allocate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Replace the payment's allocations (re-allocation is audited). */
+    post: operations["payments_allocate_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/{id}/receipt": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Payments (FR-11-4..7). ``POST`` records a manual payment (bank transfer, cash,
+     *     cheque, other) and allocates it, oldest invoices first unless told otherwise.
+     */
+    get: operations["payments_receipt_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/{id}/refund": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Payments (FR-11-4..7). ``POST`` records a manual payment (bank transfer, cash,
+     *     cheque, other) and allocates it, oldest invoices first unless told otherwise.
+     */
+    post: operations["payments_refund_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/disputes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["payments_disputes_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/payouts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Provider payouts (FR-11-10): what reached the bank, for reconciliation (E23). */
+    get: operations["payments_payouts_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/providers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Connected payment accounts (Settings → Payments). */
+    get: operations["payments_providers_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/providers/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Connected payment accounts (Settings → Payments). */
+    get: operations["payments_providers_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/providers/{id}/disconnect": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Connected payment accounts (Settings → Payments). */
+    post: operations["payments_providers_disconnect_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/providers/{id}/refresh": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Connected payment accounts (Settings → Payments). */
+    post: operations["payments_providers_refresh_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/providers/stripe/connect": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Start or resume Stripe onboarding; open the returned ``url``. */
+    post: operations["payments_providers_stripe_connect_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -4195,6 +4625,33 @@ export interface components {
       client_name: string;
       total: components["schemas"]["MoneyOut"];
     };
+    AllocateRequest: {
+      allocations: components["schemas"]["AllocationInputRequest"][];
+    };
+    Allocation: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly invoice: string;
+      readonly invoice_number: string;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    AllocationInputRequest: {
+      /** Format: uuid */
+      invoice: string;
+      /** Format: decimal */
+      amount: string;
+    };
     /**
      * @description * `invoice` - Reduce what is owed on the invoice
      *     * `credit` - Keep as client credit
@@ -4270,6 +4727,9 @@ export interface components {
       readonly request_id: string;
       /** Format: date-time */
       readonly created_at: string;
+    };
+    AutoPayRequest: {
+      enabled: boolean;
     };
     Availability: {
       /** Format: date */
@@ -4786,6 +5246,12 @@ export interface components {
       readonly contacts: components["schemas"]["Contact"][];
       readonly students: components["schemas"]["Student"][];
     };
+    ClientMethods: {
+      auto_pay: boolean;
+      /** Format: date-time */
+      consent_given_at: string | null;
+      methods: components["schemas"]["PaymentMethod"][];
+    };
     ClientRequest: {
       type?: components["schemas"]["ClientTypeEnum"];
       display_name: string;
@@ -4847,6 +5313,12 @@ export interface components {
       /** @default false */
       override_balance: boolean;
     };
+    ConfirmRequest: {
+      intent: string;
+    };
+    ConfirmResult: {
+      status: string;
+    };
     Conflict: {
       kind: string;
       severity: components["schemas"]["SeverityEnum"];
@@ -4882,6 +5354,11 @@ export interface components {
      * @enum {string}
      */
     ConflictModeEnum: "skip" | "create" | "fail";
+    ConnectRequest: {
+      /** Format: uuid */
+      branch?: string | null;
+      email?: string;
+    };
     ConsentRecord: {
       /** Format: uuid */
       readonly id: string;
@@ -5213,6 +5690,38 @@ export interface components {
       has_demo_data: boolean;
       records: number;
     };
+    Dispute: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly payment: string;
+      readonly provider_ref: string;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly reason: string;
+      readonly status: components["schemas"]["DisputeStatusEnum"];
+      /** Format: date-time */
+      readonly evidence_due_by: string | null;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `needs_response` - Needs a response
+     *     * `under_review` - Under review
+     *     * `won` - Won
+     *     * `lost` - Lost
+     * @enum {string}
+     */
+    DisputeStatusEnum: "needs_response" | "under_review" | "won" | "lost";
     Document: {
       /** Format: uuid */
       readonly id: string;
@@ -6698,6 +7207,11 @@ export interface components {
     NudgeResult: {
       nudged: number;
     };
+    Onboarding: {
+      account: components["schemas"]["ProviderAccount"];
+      /** Format: uri */
+      url: string;
+    };
     OnboardingState: {
       current_step: string;
       steps: components["schemas"]["OnboardingStepStatus"][];
@@ -6981,6 +7495,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["CreditNote"][];
     };
+    PaginatedDisputeList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Dispute"][];
+    };
     PaginatedDocumentList: {
       /**
        * Format: uri
@@ -7163,6 +7690,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["PackageTemplate"][];
     };
+    PaginatedPaymentList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Payment"][];
+    };
     PaginatedPaymentRequestList: {
       /**
        * Format: uri
@@ -7175,6 +7715,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["PaymentRequest"][];
+    };
+    PaginatedPayoutList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Payout"][];
     };
     PaginatedProcessList: {
       /**
@@ -7786,6 +8339,19 @@ export interface components {
       timezone?: string;
       locale?: string;
     };
+    PayIntent: {
+      publishable_key: string;
+      account: string;
+      client_secret: string;
+      intent: string;
+      amount: components["schemas"]["MoneyOut"];
+    };
+    PayIntentRequestRequest: {
+      /** Format: decimal */
+      amount?: string | null;
+      /** @default false */
+      save_method: boolean;
+    };
     PayLine: {
       tutor_id: string;
       unit: string;
@@ -7794,12 +8360,131 @@ export interface components {
       amount: components["schemas"]["MoneyOut"];
       trace: string[];
     };
+    PayPage: {
+      kind: components["schemas"]["PayPageKindEnum"];
+      organisation: string;
+      number: string;
+      client_name: string;
+      status: string;
+      /** Format: date */
+      due_date: string | null;
+      total: components["schemas"]["MoneyOut"];
+      amount_due: components["schemas"]["MoneyOut"];
+      lines: components["schemas"]["PayPageLine"][];
+      allow_partial: boolean;
+      can_pay_online: boolean;
+      has_pdf: boolean;
+    };
+    /**
+     * @description * `invoice` - invoice
+     *     * `payment_request` - payment_request
+     * @enum {string}
+     */
+    PayPageKindEnum: "invoice" | "payment_request";
+    PayPageLine: {
+      description: string;
+      amount: components["schemas"]["MoneyOut"];
+    };
     /**
      * @description * `per_hour` - Per hour
      *     * `per_lesson` - Per lesson
      * @enum {string}
      */
     PayUnitEnum: "per_hour" | "per_lesson";
+    Payment: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      readonly currency: string;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly refunded: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly fee: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      readonly net: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      readonly unallocated: {
+        [key: string]: string;
+      };
+      readonly method: components["schemas"]["PaymentMethodEnum"];
+      readonly provider: components["schemas"]["ProviderEnum"];
+      readonly provider_ref: string;
+      readonly status: components["schemas"]["PaymentStatusEnum"];
+      readonly source: components["schemas"]["PaymentSourceEnum"];
+      /** Format: date-time */
+      readonly received_at: string | null;
+      readonly reference: string;
+      readonly notes: string;
+      /** Format: uuid */
+      readonly payment_request: string | null;
+      readonly failure_code: string;
+      readonly failure_message: string;
+      readonly allocations: components["schemas"]["Allocation"][];
+      readonly refunds: components["schemas"]["Refund"][];
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    PaymentMethod: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly type: string;
+      readonly brand: string;
+      readonly last4: string;
+      readonly exp_month: number | null;
+      readonly exp_year: number | null;
+      readonly mandate_status: string;
+      readonly is_default: boolean;
+      readonly status: components["schemas"]["PaymentMethodStatusEnum"];
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `card` - Card
+     *     * `direct_debit` - Direct debit
+     *     * `bank_transfer` - Bank transfer
+     *     * `cash` - Cash
+     *     * `cheque` - Cheque
+     *     * `other` - Other
+     * @enum {string}
+     */
+    PaymentMethodEnum: "card" | "direct_debit" | "bank_transfer" | "cash" | "cheque" | "other";
+    /**
+     * @description * `active` - Active
+     *     * `removed` - Removed
+     * @enum {string}
+     */
+    PaymentMethodStatusEnum: "active" | "removed";
     PaymentRequest: {
       /** Format: uuid */
       readonly id: string;
@@ -7828,7 +8513,7 @@ export interface components {
       };
       readonly description: string;
       readonly status: components["schemas"]["PaymentRequestStatusEnum"];
-      readonly source: components["schemas"]["SourceEnum"];
+      readonly source: components["schemas"]["PaymentSourceEnum"];
       /** Format: date */
       readonly due_date: string | null;
       /** Format: date-time */
@@ -7861,6 +8546,43 @@ export interface components {
      * @enum {string}
      */
     PaymentRequestStatusEnum: "open" | "paid" | "cancelled";
+    /**
+     * @description * `auto_pay` - Auto-pay
+     *     * `pay_page` - Pay page
+     *     * `manual` - Recorded by staff
+     * @enum {string}
+     */
+    PaymentSourceEnum: "auto_pay" | "pay_page" | "manual";
+    /**
+     * @description * `pending` - Pending
+     *     * `succeeded` - Succeeded
+     *     * `failed` - Failed
+     *     * `refunded` - Refunded
+     *     * `partially_refunded` - Partly refunded
+     *     * `disputed` - Disputed
+     * @enum {string}
+     */
+    PaymentStatusEnum:
+      "pending" | "succeeded" | "failed" | "refunded" | "partially_refunded" | "disputed";
+    Payout: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly provider_ref: string;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly status: string;
+      /** Format: date */
+      readonly arrival_date: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
     PercentPair: {
       /** Format: decimal */
       charge_percent: string;
@@ -8058,6 +8780,35 @@ export interface components {
      * @enum {string}
      */
     ProficiencyEnum: "good" | "strong" | "expert";
+    ProviderAccount: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly provider: components["schemas"]["ProviderEnum"];
+      /** Format: uuid */
+      readonly branch: string | null;
+      readonly account_ref: string;
+      readonly status: components["schemas"]["ProviderAccountStatusEnum"];
+      readonly charges_enabled: boolean;
+      readonly payouts_enabled: boolean;
+      readonly requirements: string[];
+      readonly default_currency: string;
+      /** Format: date-time */
+      readonly connected_at: string | null;
+    };
+    /**
+     * @description * `pending` - Onboarding not finished
+     *     * `active` - Active
+     *     * `restricted` - Action needed
+     *     * `disconnected` - Disconnected
+     * @enum {string}
+     */
+    ProviderAccountStatusEnum: "pending" | "active" | "restricted" | "disconnected";
+    /**
+     * @description * `stripe` - Stripe
+     *     * `manual` - Manual
+     * @enum {string}
+     */
+    ProviderEnum: "stripe" | "manual";
     /**
      * @description * `hours` - Hours
      *     * `lessons` - Lessons
@@ -8213,9 +8964,62 @@ export interface components {
       /** @default false */
       on_behalf_of_child: boolean;
     };
+    /**
+     * @description * `direct_debit` - Direct debit
+     *     * `bank_transfer` - Bank transfer
+     *     * `cash` - Cash
+     *     * `cheque` - Cheque
+     *     * `other` - Other
+     * @enum {string}
+     */
+    RecordPaymentMethodEnum: "direct_debit" | "bank_transfer" | "cash" | "cheque" | "other";
+    RecordPaymentRequest: {
+      /** Format: uuid */
+      client: string;
+      amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      method: components["schemas"]["RecordPaymentMethodEnum"];
+      /** Format: date-time */
+      received_at?: string | null;
+      /** @default  */
+      reference: string;
+      /** @default  */
+      notes: string;
+      /** Format: uuid */
+      payment_request?: string | null;
+      /** @description Leave out to pay the oldest invoices first (the rest is credit). */
+      allocations?: components["schemas"]["AllocationInputRequest"][] | null;
+    };
     RecoveryCodes: {
       /** @description Shown once. Each works one time. */
       recovery_codes: string[];
+    };
+    Refund: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly reason: string;
+      readonly status: components["schemas"]["RefundStatusEnum"];
+      readonly provider_ref: string;
+      /** Format: uuid */
+      readonly credit_note: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
     };
     /**
      * @description * `none` - Not refundable
@@ -8224,6 +9028,23 @@ export interface components {
      * @enum {string}
      */
     RefundPolicyEnum: "none" | "unused_pro_rata" | "full";
+    RefundRequestRequest: {
+      /** Format: decimal */
+      amount?: string | null;
+      reason: string;
+      /**
+       * @description Also credit the invoices the refunded money had paid.
+       * @default false
+       */
+      credit_note: boolean;
+    };
+    /**
+     * @description * `pending` - Pending
+     *     * `succeeded` - Refunded
+     *     * `failed` - Failed
+     * @enum {string}
+     */
+    RefundStatusEnum: "pending" | "succeeded" | "failed";
     /**
      * @description * `uk` - United Kingdom
      *     * `eu` - European Union
@@ -8720,6 +9541,28 @@ export interface components {
       overrides: string[];
       schema: components["schemas"]["SettingDescription"][];
     };
+    SetupCompleteRequest: {
+      intent: string;
+      /** @default false */
+      autopay: boolean;
+    };
+    SetupDone: {
+      method: components["schemas"]["PaymentMethod"];
+      auto_pay: boolean;
+    };
+    SetupLinkOut: {
+      /** Format: uri */
+      url: string;
+    };
+    SetupPage: {
+      organisation: string;
+      client_name: string;
+      publishable_key: string;
+      account: string;
+      client_secret: string;
+      intent: string;
+      consent_text: string;
+    };
     /**
      * @description * `hard` - hard
      *     * `soft` - soft
@@ -8789,13 +9632,6 @@ export interface components {
       reason: string | null;
       suggestion: string | null;
     };
-    /**
-     * @description * `manual` - Created by staff
-     *     * `bulk` - Bulk request
-     *     * `threshold` - Automatic top-up
-     * @enum {string}
-     */
-    SourceEnum: "manual" | "bulk" | "threshold";
     StartBulkRequest: {
       target_ids: string[];
       params?: {
@@ -11546,6 +12382,36 @@ export interface operations {
       };
     };
   };
+  clients_autopay_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        client_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AutoPayRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AutoPayRequest"];
+        "multipart/form-data": components["schemas"]["AutoPayRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ClientMethods"];
+        };
+      };
+    };
+  };
   clients_balance_retrieve: {
     parameters: {
       query?: {
@@ -11674,6 +12540,51 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["LedgerEntry"];
+        };
+      };
+    };
+  };
+  clients_payment_methods_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        client_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ClientMethods"];
+        };
+      };
+    };
+  };
+  clients_payment_methods_setup_link_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        client_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SetupLinkOut"];
         };
       };
     };
@@ -13316,6 +14227,29 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["InvoiceDetail"];
         };
+      };
+    };
+  };
+  invoices_collect_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        invoice_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -15977,6 +16911,205 @@ export interface operations {
       };
     };
   };
+  pay_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayPage"];
+        };
+      };
+    };
+  };
+  pay_confirm_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ConfirmRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ConfirmRequest"];
+        "multipart/form-data": components["schemas"]["ConfirmRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ConfirmResult"];
+        };
+      };
+    };
+  };
+  pay_intent_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PayIntentRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PayIntentRequestRequest"];
+        "multipart/form-data": components["schemas"]["PayIntentRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayIntent"];
+        };
+      };
+    };
+  };
+  pay_pdf_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": string;
+        };
+      };
+    };
+  };
+  pay_setup_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SetupPage"];
+        };
+      };
+    };
+  };
+  pay_setup_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetupCompleteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SetupCompleteRequest"];
+        "multipart/form-data": components["schemas"]["SetupCompleteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SetupDone"];
+        };
+      };
+    };
+  };
+  payment_methods_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this payment method. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  payment_methods_default_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this payment method. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaymentMethod"];
+        };
+      };
+    };
+  };
   payment_requests_list: {
     parameters: {
       query?: {
@@ -16114,6 +17247,375 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["BulkRequestResult"];
+        };
+      };
+    };
+  };
+  payments_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /**
+         * @description * `card` - Card
+         *     * `direct_debit` - Direct debit
+         *     * `bank_transfer` - Bank transfer
+         *     * `cash` - Cash
+         *     * `cheque` - Cheque
+         *     * `other` - Other
+         */
+        method?: ("bank_transfer" | "card" | "cash" | "cheque" | "direct_debit" | "other")[];
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `pending` - Pending
+         *     * `succeeded` - Succeeded
+         *     * `failed` - Failed
+         *     * `refunded` - Refunded
+         *     * `partially_refunded` - Partly refunded
+         *     * `disputed` - Disputed
+         */
+        status?: (
+          "disputed" | "failed" | "partially_refunded" | "pending" | "refunded" | "succeeded"
+        )[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPaymentList"];
+        };
+      };
+    };
+  };
+  payments_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RecordPaymentRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RecordPaymentRequest"];
+        "multipart/form-data": components["schemas"]["RecordPaymentRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Payment"];
+        };
+      };
+    };
+  };
+  payments_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this payment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Payment"];
+        };
+      };
+    };
+  };
+  payments_allocate_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this payment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AllocateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AllocateRequest"];
+        "multipart/form-data": components["schemas"]["AllocateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Payment"];
+        };
+      };
+    };
+  };
+  payments_receipt_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this payment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": string;
+        };
+      };
+    };
+  };
+  payments_refund_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this payment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RefundRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RefundRequestRequest"];
+        "multipart/form-data": components["schemas"]["RefundRequestRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Refund"];
+        };
+      };
+    };
+  };
+  payments_disputes_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedDisputeList"];
+        };
+      };
+    };
+  };
+  payments_payouts_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPayoutList"];
+        };
+      };
+    };
+  };
+  payments_providers_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProviderAccount"][];
+        };
+      };
+    };
+  };
+  payments_providers_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this provider account. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProviderAccount"];
+        };
+      };
+    };
+  };
+  payments_providers_disconnect_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this provider account. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProviderAccount"];
+        };
+      };
+    };
+  };
+  payments_providers_refresh_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this provider account. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProviderAccount"];
+        };
+      };
+    };
+  };
+  payments_providers_stripe_connect_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ConnectRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ConnectRequest"];
+        "multipart/form-data": components["schemas"]["ConnectRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Onboarding"];
         };
       };
     };

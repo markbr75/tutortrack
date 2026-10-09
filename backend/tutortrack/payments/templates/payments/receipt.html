@@ -1,0 +1,21 @@
+{% load i18n %}<!doctype html>
+<html lang="{{ org.locale|default:'en-GB' }}">
+<head><meta charset="utf-8"><title>{% trans "Receipt" %}</title>
+{% include "billing/_style.html" %}</head>
+<body>
+  <div class="row">
+    <div><h1>{% trans "Receipt" %}</h1><div><strong>{{ org.name }}</strong></div></div>
+    <div class="muted">
+      <div>{% trans "Received" %}: {{ payment.received_at|date:"j F Y" }}</div>
+      <div>{% trans "Reference" %}: {{ payment.reference|default:payment.pk }}</div>
+    </div>
+  </div>
+  <p>{% blocktrans with name=payment.client.display_name %}Received from {{ name }}{% endblocktrans %}: <strong>{{ amount }}</strong> ({{ payment.get_method_display }})</p>
+  {% if rows %}
+  <table>
+    <thead><tr><th>{% trans "Invoice" %}</th><th class="num">{% trans "Paid" %}</th></tr></thead>
+    <tbody>{% for row in rows %}<tr><td>{{ row.number }}</td><td class="num">{{ row.amount }}</td></tr>{% endfor %}</tbody>
+  </table>
+  {% endif %}
+</body>
+</html>

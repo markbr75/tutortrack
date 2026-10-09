@@ -7,9 +7,11 @@ import { useState } from "react";
 
 import { api, usePermission } from "../api";
 import { ErrorList } from "../calendar/ErrorList";
+import { ClientPaymentMethods, RecordPayment } from "../payments/ClientPayments";
+import { PaymentsList } from "../payments/PaymentsPages";
 import { InvoiceTable, RequestTable } from "./BillingPage";
 
-type Tab = "invoices" | "ledger" | "requests" | "charge";
+type Tab = "invoices" | "payments" | "methods" | "ledger" | "requests" | "charge";
 
 /** The client's billing tab (FR-10-14): balances, invoices, ledger, payment requests and
  * one-off charges. */
@@ -21,6 +23,8 @@ export function ClientBilling({ clientId, currency }: { clientId: string; curren
   const canCharge = usePermission("billing.charge.create");
   const canInvoice = usePermission("billing.invoice.create");
   const canRequest = usePermission("billing.payment_request.manage");
+  const canPayments = usePermission("payments.payment.view");
+  const canRecord = usePermission("payments.payment.record");
   const [tab, setTab] = useState<Tab>("invoices");
   const [charge, setCharge] = useState({ description: "", amount: "" });
   const [request, setRequest] = useState("");
@@ -95,6 +99,12 @@ export function ClientBilling({ clientId, currency }: { clientId: string; curren
   const b = balance.data;
   const tabs = [
     { key: "invoices" as const, label: t("billing.tabs.invoices") },
+    ...(canPayments
+      ? [
+          { key: "payments" as const, label: t("payments.title") },
+          { key: "methods" as const, label: t("payments.savedMethods") },
+        ]
+      : []),
     ...(canLedger ? [{ key: "ledger" as const, label: t("billing.ledger") }] : []),
     { key: "requests" as const, label: t("billing.tabs.requests") },
     ...(canCharge ? [{ key: "charge" as const, label: t("billing.addCharge") }] : []),
@@ -142,6 +152,15 @@ export function ClientBilling({ clientId, currency }: { clientId: string; curren
       <ErrorList error={invoiceNow.error} />
       <Tabs label={t("billing.title")} tabs={tabs} value={tab} onChange={setTab}>
         {tab === "invoices" ? <InvoiceTable rows={invoices.data?.results ?? []} /> : null}
+        {tab === "payments" ? (
+          <div className="space-y-4">
+            {canRecord ? (
+              <RecordPayment clientId={clientId} currency={currency} onDone={refresh} />
+            ) : null}
+            <PaymentsList clientId={clientId} />
+          </div>
+        ) : null}
+        {tab === "methods" ? <ClientPaymentMethods clientId={clientId} /> : null}
         {tab === "ledger" ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">

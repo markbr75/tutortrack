@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "tutortrack.scheduling",
     "tutortrack.delivery",
     "tutortrack.billing",
+    "tutortrack.payments",
 ]
 
 MIDDLEWARE = [
@@ -309,6 +310,14 @@ SPECTACULAR_SETTINGS = {
 }
 
 # --- Temporal (E32) ---------------------------------------------------------------------------
+# Payments (E11). Without a secret key a fake provider is used (development and tests).
+STRIPE = {
+    "SECRET_KEY": env("STRIPE_SECRET_KEY", default=""),
+    "PUBLISHABLE_KEY": env("STRIPE_PUBLISHABLE_KEY", default=""),
+    "WEBHOOK_SECRET": env("STRIPE_WEBHOOK_SECRET", default=""),
+    "APPLICATION_FEE_PERCENT": env("STRIPE_APPLICATION_FEE_PERCENT", default="0"),
+}
+
 TEMPORAL = {
     "ADDRESS": env("TEMPORAL_ADDRESS", default="localhost:7233"),
     "NAMESPACE": env("TEMPORAL_NAMESPACE", default="tutortrack-local"),

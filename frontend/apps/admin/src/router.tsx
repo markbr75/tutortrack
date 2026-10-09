@@ -9,6 +9,8 @@ import {
 
 import { BillingPage } from "./billing/BillingPage";
 import { InvoicePage } from "./billing/InvoicePage";
+import { PayPage, SetupPage } from "./payments/PayPage";
+import { PaymentsSettingsPage } from "./payments/PaymentsPages";
 import { AvailabilityPage } from "./calendar/AvailabilityPage";
 import { CalendarPage } from "./calendar/CalendarPage";
 import { CataloguePage } from "./catalogue/CataloguePage";
@@ -76,6 +78,20 @@ const forgotRoute = publicPage("/forgot-password", ForgotPasswordPage);
 const resetRoute = publicPage("/reset-password", ResetPasswordPage);
 const continueRoute = publicPage("/auth/continue", ContinuePage);
 const acceptInviteRoute = publicPage("/accept-invite", AcceptInvitePage);
+const payRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/pay/$token",
+  component: function PayRoute() {
+    return <PayPage token={payRoute.useParams().token} />;
+  },
+});
+const paySetupRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/pay/setup/$token",
+  component: function PaySetupRoute() {
+    return <SetupPage token={paySetupRoute.useParams().token} />;
+  },
+});
 
 // Signed-in app.
 const appRoute = createRoute({ getParentRoute: () => rootRoute, id: "app", component: AppShell });
@@ -144,6 +160,7 @@ const reportRoute = createRoute({
 const unconfirmedRoute = appPage("/unconfirmed", UnconfirmedPage);
 const deliverySettingsRoute = appPage("/lesson-policies", DeliverySettingsPage);
 const billingRoute = appPage("/billing", BillingPage);
+const paymentsSettingsRoute = appPage("/settings/payments", PaymentsSettingsPage);
 const invoiceRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/invoices/$invoiceId",
@@ -169,6 +186,8 @@ const routeTree = rootRoute.addChildren([
   resetRoute,
   continueRoute,
   acceptInviteRoute,
+  payRoute,
+  paySetupRoute,
   appRoute.addChildren([
     homeRoute,
     clientsRoute,
@@ -190,6 +209,7 @@ const routeTree = rootRoute.addChildren([
     deliverySettingsRoute,
     billingRoute,
     invoiceRoute,
+    paymentsSettingsRoute,
     teamRoute,
     auditRoute,
     settingsRoute,

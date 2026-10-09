@@ -24,6 +24,7 @@ const NAV = [
   { to: "/lesson-policies", key: "nav.deliverySettings", permission: "delivery.policy.manage" },
   { to: "/team", key: "nav.team", permission: "team.view" },
   { to: "/audit", key: "nav.audit", permission: "audit.view" },
+  { to: "/settings/payments", key: "nav.payments", permission: "payments.provider.manage" },
   { to: "/settings", key: "nav.settings", permission: "org.settings.view" },
   { to: "/account", key: "nav.account", permission: null },
 ] as const;
