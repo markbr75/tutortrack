@@ -5,10 +5,15 @@ import { useMutation } from "@tanstack/react-query";
 import { Link, Outlet } from "@tanstack/react-router";
 import { useEffect } from "react";
 
+import { CommandPalette } from "../crm/CommandPalette";
 import { api, isAuthError, useMe, useMyOrganisations, useOrganisation } from "../api";
 
 const NAV = [
   { to: "/", key: "nav.home", permission: null },
+  { to: "/clients", key: "nav.clients", permission: "people.client.view" },
+  { to: "/students", key: "nav.students", permission: "people.student.view" },
+  { to: "/tutors", key: "nav.tutors", permission: "people.tutor.view" },
+  { to: "/tasks", key: "nav.tasks", permission: "crm.task.view" },
   { to: "/team", key: "nav.team", permission: "team.view" },
   { to: "/audit", key: "nav.audit", permission: "audit.view" },
   { to: "/settings", key: "nav.settings", permission: "org.settings.view" },
@@ -31,9 +36,7 @@ function OrgSwitcher() {
               className="block rounded-md px-2 py-1 hover:bg-muted aria-[current=page]:font-medium"
             >
               {org.name}
-              {org.is_current ? (
-                <span className="sr-only"> ({t("switcher.current")})</span>
-              ) : null}
+              {org.is_current ? <span className="sr-only"> ({t("switcher.current")})</span> : null}
             </a>
           </li>
         ))}
@@ -132,6 +135,7 @@ export function AppShell() {
         className="flex gap-1 border-b border-border p-3 md:w-56 md:flex-col md:border-r md:border-b-0"
       >
         <span className="mr-4 px-2 py-1 font-semibold md:mb-4 md:mr-0">{t("app.name")}</span>
+        {permissions["crm.search"] ? <CommandPalette /> : null}
         {NAV.filter((item) => !item.permission || permissions[item.permission]).map((item) => (
           <Link
             key={item.to}

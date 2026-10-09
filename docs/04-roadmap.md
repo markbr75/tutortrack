@@ -74,8 +74,8 @@ All ─► E26, E27, E28, E31
 | E02 | ✅ Done (2026-10-09) | Incl. E02-TW1 (closure workflow, built with E32). Follow-ups in E04, E05, E06, E11, E24 |
 | E03 | ✅ Done (2026-10-09) | Phase 1 scope (T08/T11/T12 are Phase 2). See Implementation notes |
 | E04 | ☐ | |
-| E05 | ⏭ Next | |
-| E06 | ☐ | |
+| E05 | ✅ Done (2026-10-09) | Phase 1 scope (merge tool and map view are Phase 2). See Implementation notes |
+| E06 | ⏭ Next | |
 | E07 | ☐ | |
 | E08 | ☐ | |
 | E09 | ☐ | |

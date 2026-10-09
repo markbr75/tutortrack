@@ -7,7 +7,11 @@ import {
   type RouterHistory,
 } from "@tanstack/react-router";
 
+import { TasksPage } from "./crm/TasksPage";
 import { AppShell } from "./layout/AppShell";
+import { ClientsPage, StudentsPage, TutorsPage } from "./people/PeopleLists";
+import { QuickAddFamilyPage } from "./people/QuickAddFamilyPage";
+import { ClientPage, StudentPage, TutorPage } from "./people/RecordPages";
 import { AcceptInvitePage } from "./routes/AcceptInvitePage";
 import { AccountPage } from "./routes/AccountPage";
 import { AuditPage } from "./routes/AuditPage";
@@ -53,7 +57,7 @@ const onboardingRoute = createRoute({
   component: OnboardingPage,
 });
 
-const publicPage = (path: string, component: () => JSX.Element) =>
+const publicPage = <P extends string>(path: P, component: () => JSX.Element) =>
   createRoute({ getParentRoute: () => rootRoute, path, component });
 const loginRoute = publicPage("/login", LoginPage);
 const magicLinkRoute = publicPage("/login/magic", MagicLinkPage);
@@ -86,6 +90,35 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 });
 
+const appPage = <P extends string>(path: P, component: () => JSX.Element) =>
+  createRoute({ getParentRoute: () => appRoute, path, component });
+const clientsRoute = appPage("/clients", ClientsPage);
+const quickAddRoute = appPage("/clients/new", QuickAddFamilyPage);
+const clientRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/clients/$clientId",
+  component: function ClientRoute() {
+    return <ClientPage clientId={clientRoute.useParams().clientId} />;
+  },
+});
+const studentsRoute = appPage("/students", StudentsPage);
+const studentRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/students/$studentId",
+  component: function StudentRoute() {
+    return <StudentPage studentId={studentRoute.useParams().studentId} />;
+  },
+});
+const tutorsRoute = appPage("/tutors", TutorsPage);
+const tutorRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/tutors/$tutorId",
+  component: function TutorRoute() {
+    return <TutorPage tutorId={tutorRoute.useParams().tutorId} />;
+  },
+});
+const tasksRoute = appPage("/tasks", TasksPage);
+
 const routeTree = rootRoute.addChildren([
   signupRoute,
   verifyEmailRoute,
@@ -96,7 +129,21 @@ const routeTree = rootRoute.addChildren([
   resetRoute,
   continueRoute,
   acceptInviteRoute,
-  appRoute.addChildren([homeRoute, teamRoute, auditRoute, settingsRoute, accountRoute]),
+  appRoute.addChildren([
+    homeRoute,
+    clientsRoute,
+    quickAddRoute,
+    clientRoute,
+    studentsRoute,
+    studentRoute,
+    tutorsRoute,
+    tutorRoute,
+    tasksRoute,
+    teamRoute,
+    auditRoute,
+    settingsRoute,
+    accountRoute,
+  ]),
 ]);
 
 export function createAppRouter(queryClient: QueryClient, history?: RouterHistory) {

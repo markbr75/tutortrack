@@ -120,6 +120,8 @@ class FieldPermissionMixin:
         request = self.context.get("request")  # type: ignore[attr-defined]
         if not rules or request is None:
             return
+        if getattr(self.context.get("view"), "swagger_fake_view", False):  # type: ignore[attr-defined]
+            return  # the OpenAPI schema documents every field; access is per viewer
         from ..permissions import has_perm
 
         for field, codename in rules.items():

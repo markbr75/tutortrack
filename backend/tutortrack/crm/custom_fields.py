@@ -125,7 +125,7 @@ def clean_custom_fields(
         else:
             merged[key] = cleaned
     for key, definition in defs.items():
-        must_check = creating or key in incoming
+        must_check = (creating or key in incoming) and key not in errors
         if definition.required and must_check and merged.get(key) in (None, "", []):
             errors[key] = _("This field is required.")
     if errors:

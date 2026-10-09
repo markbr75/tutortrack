@@ -11,7 +11,11 @@
     "settings": "Settings",
     "team": "Team",
     "account": "Account",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "clients": "Clients",
+    "students": "Students",
+    "tutors": "Tutors",
+    "tasks": "My tasks"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -338,5 +342,156 @@
     "analytics": "Analytics",
     "marketing": "Marketing",
     "necessary": "Necessary (always on)"
+  },
+  "people": {
+    "search": "Search",
+    "status": "Status",
+    "anyStatus": "Any status",
+    "apply": "Apply",
+    "export": "Export CSV",
+    "clients": "Clients",
+    "studentsTitle": "Students",
+    "tutorsTitle": "Tutors",
+    "students": "Students",
+    "contacts": "Contacts",
+    "name": "Name",
+    "type": "Type",
+    "email": "Email",
+    "phone": "Phone",
+    "yearGroup": "Year group",
+    "subjects": "Subjects",
+    "school": "School",
+    "dateOfBirth": "Date of birth",
+    "goals": "Goals",
+    "learningNeeds": "Learning needs",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "details": "Details",
+    "family": "Family",
+    "billing": "Billing",
+    "currency": "Currency",
+    "paymentTerms": "Payment terms",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "poNumber": "PO number",
+    "billingAddress": "Billing address",
+    "primary": "Primary",
+    "billPayer": "Bill payer",
+    "noStudents": "No students yet.",
+    "archivedOn": "Archived {{when}}",
+    "changeStatus": "Change status",
+    "headline": "Headline",
+    "payRate": "Pay rate",
+    "delivery": "Teaches",
+    "online": "Online",
+    "inPerson": "In person",
+    "approved": "Approved",
+    "approve": "Approve",
+    "approveSubject": "Approve {{subject}}",
+    "awaitingApproval": "Awaiting approval",
+    "invitePending": "Invitation not yet accepted",
+    "address": {
+      "line1": "Address",
+      "city": "Town or city",
+      "postcode": "Postcode"
+    },
+    "clientType": {
+      "household": "Household",
+      "individual": "Individual learner",
+      "organisation": "Organisation"
+    },
+    "clientStatus": {
+      "prospect": "Prospect",
+      "active": "Active",
+      "dormant": "Dormant",
+      "archived": "Archived"
+    },
+    "studentStatus": {
+      "lead": "Lead",
+      "trial": "Trial",
+      "active": "Active",
+      "waiting": "Waiting list",
+      "paused": "Paused",
+      "finished": "Finished",
+      "archived": "Archived"
+    },
+    "tutorStatus": {
+      "applicant": "Applicant",
+      "onboarding": "Onboarding",
+      "active": "Active",
+      "restricted": "Restricted",
+      "inactive": "Inactive",
+      "archived": "Archived"
+    },
+    "relationship": {
+      "parent": "Parent",
+      "guardian": "Guardian",
+      "carer": "Carer",
+      "self": "Self",
+      "finance": "Pays the bills",
+      "other": "Other"
+    },
+    "quickAdd": {
+      "title": "Add a family",
+      "parent": "Parent or guardian",
+      "studentName": "Student {{n}} first name",
+      "subject": "Subject",
+      "addStudent": "Add another student",
+      "remove": "Remove",
+      "removeStudent": "Remove student {{n}}",
+      "save": "Create family",
+      "failed": "We couldn't create the family. Check the details and try again."
+    }
+  },
+  "crm": {
+    "activity": "Activity",
+    "tabs": {
+      "notes": "Notes",
+      "tasks": "Tasks",
+      "timeline": "Timeline"
+    },
+    "note": {
+      "add": "Add a note",
+      "save": "Save note",
+      "visibility": "Who can see this",
+      "staff_only": "Staff only",
+      "staff_and_tutors": "Staff and tutors",
+      "shared_with_client": "Shared with the client",
+      "pinned": "Pinned",
+      "none": "No notes yet."
+    },
+    "task": {
+      "title": "Task",
+      "due": "Due",
+      "add": "Add task",
+      "none": "No tasks.",
+      "complete": "Mark \"{{title}}\" done",
+      "dueOn": "Due {{when}}",
+      "noDue": "No due date",
+      "overdue": "Overdue",
+      "mine": "My tasks",
+      "overdueOnly": "Only overdue tasks",
+      "allDone": "Nothing to do. Nice."
+    },
+    "timeline": {
+      "note": "Note",
+      "task": "Task",
+      "document": "Document",
+      "change": "Change",
+      "none": "Nothing has happened yet."
+    }
+  },
+  "search": {
+    "open": "Search",
+    "title": "Search people",
+    "placeholder": "Name, email or phone",
+    "results": "Results",
+    "none": "No matches.",
+    "type": {
+      "client": "Client",
+      "contact": "Contact",
+      "student": "Student",
+      "tutor": "Tutor"
+    }
   }
 }

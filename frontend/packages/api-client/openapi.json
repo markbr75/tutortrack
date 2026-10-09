@@ -1025,6 +1025,187 @@
                 }
             }
         },
+        "/api/v1/bulk-jobs": {
+            "get": {
+                "operationId": "bulk_jobs_list",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "bulk-jobs"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedBulkJobList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/bulk-jobs/{id}": {
+            "get": {
+                "operationId": "bulk_jobs_retrieve",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this bulk job.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "bulk-jobs"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BulkJob"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/bulk/{entity}/{bulk_action}": {
+            "post": {
+                "operationId": "bulk_create",
+                "description": "Run a bulk action in the background: ``POST /bulk/{entity}/{action}``; poll\n``/bulk-jobs/{id}`` for progress and the per-record report (FR-05-12).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "bulk_action",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "entity",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "bulk"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StartBulkRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StartBulkRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StartBulkRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BulkJob"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/clients": {
             "get": {
                 "operationId": "clients_list",
@@ -2402,6 +2583,216 @@
                 }
             }
         },
+        "/api/v1/custom-fields": {
+            "get": {
+                "operationId": "custom_fields_list",
+                "description": "Custom field definitions per record type (FR-05-5). Deactivate instead of deleting.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "entity_type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "custom-fields"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CustomField"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "custom_fields_create",
+                "description": "Custom field definitions per record type (FR-05-5). Deactivate instead of deleting.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "custom-fields"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomFieldRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomFieldRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomFieldRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomField"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/custom-fields/{id}": {
+            "get": {
+                "operationId": "custom_fields_retrieve",
+                "description": "Custom field definitions per record type (FR-05-5). Deactivate instead of deleting.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this custom field definition.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "custom-fields"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomField"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "custom_fields_partial_update",
+                "description": "Custom field definitions per record type (FR-05-5). Deactivate instead of deleting.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this custom field definition.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "custom-fields"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCustomFieldRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCustomFieldRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCustomFieldRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomField"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/demo-data": {
             "post": {
                 "operationId": "demo_data_create",
@@ -2458,6 +2849,168 @@
                             }
                         },
                         "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/documents": {
+            "get": {
+                "operationId": "documents_list",
+                "description": "Documents on a record (FR-05-9): upload via ``/files/uploads``, then attach here.\nDownload through ``/files/{id}/download``.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "target_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "target_type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "documents"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedDocumentList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "documents_create",
+                "description": "Documents on a record (FR-05-9): upload via ``/files/uploads``, then attach here.\nDownload through ``/files/{id}/download``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "documents"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DocumentRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DocumentRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DocumentRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Document"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/documents/{id}": {
+            "delete": {
+                "operationId": "documents_destroy",
+                "description": "Documents on a record (FR-05-9): upload via ``/files/uploads``, then attach here.\nDownload through ``/files/{id}/download``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this document.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "documents"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
                     }
                 }
             }
@@ -4055,6 +4608,267 @@
                 }
             }
         },
+        "/api/v1/notes": {
+            "get": {
+                "operationId": "notes_list",
+                "description": "Notes on a record (``?target_type=&target_id=``). HTML is sanitised; mention staff with\n``<span data-mention=\"<user id>\">``. Visibility hides staff-only notes from tutors.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "target_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "target_type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "notes"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedNoteList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "notes_create",
+                "description": "Notes on a record (``?target_type=&target_id=``). HTML is sanitised; mention staff with\n``<span data-mention=\"<user id>\">``. Visibility hides staff-only notes from tutors.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "notes"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NoteRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NoteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NoteRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Note"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/notes/{id}": {
+            "get": {
+                "operationId": "notes_retrieve",
+                "description": "Notes on a record (``?target_type=&target_id=``). HTML is sanitised; mention staff with\n``<span data-mention=\"<user id>\">``. Visibility hides staff-only notes from tutors.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this note.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "notes"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Note"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "notes_partial_update",
+                "description": "Notes on a record (``?target_type=&target_id=``). HTML is sanitised; mention staff with\n``<span data-mention=\"<user id>\">``. Visibility hides staff-only notes from tutors.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this note.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "notes"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedNoteRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedNoteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedNoteRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Note"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "notes_destroy",
+                "description": "Notes on a record (``?target_type=&target_id=``). HTML is sanitised; mention staff with\n``<span data-mention=\"<user id>\">``. Visibility hides staff-only notes from tutors.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this note.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "notes"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/v1/onboarding/{step}": {
             "post": {
                 "operationId": "onboarding_create",
@@ -4737,6 +5551,284 @@
                                     "type": "array",
                                     "items": {
                                         "$ref": "#/components/schemas/Role"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/saved-views": {
+            "get": {
+                "operationId": "saved_views_list",
+                "description": "Your saved list views and the ones shared with the team (FR-05-11).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "entity_type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "saved-views"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SavedView"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "saved_views_create",
+                "description": "Your saved list views and the ones shared with the team (FR-05-11).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "saved-views"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SavedViewRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SavedViewRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SavedViewRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SavedView"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/saved-views/{id}": {
+            "get": {
+                "operationId": "saved_views_retrieve",
+                "description": "Your saved list views and the ones shared with the team (FR-05-11).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this saved view.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "saved-views"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SavedView"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "saved_views_partial_update",
+                "description": "Your saved list views and the ones shared with the team (FR-05-11).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this saved view.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "saved-views"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSavedViewRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSavedViewRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSavedViewRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SavedView"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "saved_views_destroy",
+                "description": "Your saved list views and the ones shared with the team (FR-05-11).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this saved view.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "saved-views"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/search": {
+            "get": {
+                "operationId": "search_list",
+                "description": "Global search (⌘K) across people; results respect your permissions.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "search"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SearchHit"
                                     }
                                 }
                             }
@@ -5571,6 +6663,618 @@
                 }
             }
         },
+        "/api/v1/tags": {
+            "get": {
+                "operationId": "tags_list",
+                "description": "Organisation tags (FR-05-6). ``apply`` tags or untags many records at once.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "tags"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Tag"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "tags_create",
+                "description": "Organisation tags (FR-05-6). ``apply`` tags or untags many records at once.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "tags"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TagRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TagRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TagRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tag"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/tags/{id}": {
+            "get": {
+                "operationId": "tags_retrieve",
+                "description": "Organisation tags (FR-05-6). ``apply`` tags or untags many records at once.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tag.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tags"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tag"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "tags_partial_update",
+                "description": "Organisation tags (FR-05-6). ``apply`` tags or untags many records at once.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tag.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tags"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedTagRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedTagRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedTagRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tag"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "tags_destroy",
+                "description": "Organisation tags (FR-05-6). ``apply`` tags or untags many records at once.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tag.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tags"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/tags/{id}/apply": {
+            "post": {
+                "operationId": "tags_apply_create",
+                "description": "Organisation tags (FR-05-6). ``apply`` tags or untags many records at once.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tag.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tags"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplyTagRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplyTagRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplyTagRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApplyTagResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks": {
+            "get": {
+                "operationId": "tasks_list",
+                "description": "Tasks (FR-05-8). ``?mine=true`` is \"My tasks\"; ``?overdue=true`` the overdue badge.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "mine",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Only tasks assigned to me"
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "overdue",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "cancelled",
+                                "done",
+                                "open"
+                            ]
+                        },
+                        "description": "* `open` - Open\n* `done` - Done\n* `cancelled` - Cancelled"
+                    },
+                    {
+                        "in": "query",
+                        "name": "target_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "target_type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedTaskList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "tasks_create",
+                "description": "Tasks (FR-05-8). ``?mine=true`` is \"My tasks\"; ``?overdue=true`` the overdue badge.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaskRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaskRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaskRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Task"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks/{id}": {
+            "get": {
+                "operationId": "tasks_retrieve",
+                "description": "Tasks (FR-05-8). ``?mine=true`` is \"My tasks\"; ``?overdue=true`` the overdue badge.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this task.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Task"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "tasks_partial_update",
+                "description": "Tasks (FR-05-8). ``?mine=true`` is \"My tasks\"; ``?overdue=true`` the overdue badge.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this task.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedTaskRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedTaskRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedTaskRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Task"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/timeline": {
+            "get": {
+                "operationId": "timeline_list",
+                "description": "Activity feed for one record (FR-05-10), newest first. ``?kinds=note,task``.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "kinds",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "target_id",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "target_type",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "timeline"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TimelineItem"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/tutors": {
             "get": {
                 "operationId": "tutors_list",
@@ -6365,6 +8069,43 @@
                     }
                 }
             },
+            "ApplyTagRequest": {
+                "type": "object",
+                "properties": {
+                    "target_type": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "target_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "maxItems": 500,
+                        "minItems": 1
+                    },
+                    "remove": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "target_ids",
+                    "target_type"
+                ]
+            },
+            "ApplyTagResult": {
+                "type": "object",
+                "properties": {
+                    "changed": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "changed"
+                ]
+            },
             "AuditEntry": {
                 "type": "object",
                 "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
@@ -6627,6 +8368,85 @@
                     "skipped"
                 ]
             },
+            "BulkJob": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "entity_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "action": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "params": {
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/BulkJobStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "total": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "processed": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "succeeded": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "errors": {
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "finished_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "action",
+                    "created_at",
+                    "entity_type",
+                    "errors",
+                    "finished_at",
+                    "id",
+                    "params",
+                    "processed",
+                    "status",
+                    "succeeded",
+                    "total"
+                ]
+            },
+            "BulkJobStatusEnum": {
+                "enum": [
+                    "queued",
+                    "running",
+                    "completed",
+                    "failed"
+                ],
+                "type": "string",
+                "description": "* `queued` - Queued\n* `running` - Running\n* `completed` - Completed\n* `failed` - Failed"
+            },
             "BusinessTypeEnum": {
                 "enum": [
                     "sole_trader",
@@ -6637,20 +8457,6 @@
                 ],
                 "type": "string",
                 "description": "* `sole_trader` - Sole trader\n* `team` - Small team\n* `agency` - Agency\n* `centre` - Tuition centre\n* `online` - Online school"
-            },
-            "CategoryEnum": {
-                "enum": [
-                    "data_processing",
-                    "photo_video",
-                    "marketing_email",
-                    "marketing_sms",
-                    "lesson_recording",
-                    "terms_of_service",
-                    "privacy_policy",
-                    "other"
-                ],
-                "type": "string",
-                "description": "* `data_processing` - Data processing\n* `photo_video` - Photos and video\n* `marketing_email` - Marketing email\n* `marketing_sms` - Marketing SMS\n* `lesson_recording` - Lesson recording\n* `terms_of_service` - Terms of service\n* `privacy_policy` - Privacy policy\n* `other` - Other"
             },
             "Client": {
                 "type": "object",
@@ -6733,6 +8539,9 @@
                     },
                     "tax_exempt": {
                         "type": "boolean"
+                    },
+                    "tax_id": {
+                        "type": "string"
                     },
                     "po_number": {
                         "type": "string",
@@ -6858,6 +8667,9 @@
                     "tax_exempt": {
                         "type": "boolean"
                     },
+                    "tax_id": {
+                        "type": "string"
+                    },
                     "po_number": {
                         "type": "string",
                         "maxLength": 60
@@ -6975,6 +8787,9 @@
                     },
                     "tax_exempt": {
                         "type": "boolean"
+                    },
+                    "tax_id": {
+                        "type": "string"
                     },
                     "po_number": {
                         "type": "string",
@@ -7212,7 +9027,7 @@
                         "type": "string"
                     },
                     "category": {
-                        "$ref": "#/components/schemas/CategoryEnum"
+                        "$ref": "#/components/schemas/ConsentTypeCategoryEnum"
                     },
                     "version": {
                         "type": "integer",
@@ -7253,6 +9068,20 @@
                     "version"
                 ]
             },
+            "ConsentTypeCategoryEnum": {
+                "enum": [
+                    "data_processing",
+                    "photo_video",
+                    "marketing_email",
+                    "marketing_sms",
+                    "lesson_recording",
+                    "terms_of_service",
+                    "privacy_policy",
+                    "other"
+                ],
+                "type": "string",
+                "description": "* `data_processing` - Data processing\n* `photo_video` - Photos and video\n* `marketing_email` - Marketing email\n* `marketing_sms` - Marketing SMS\n* `lesson_recording` - Lesson recording\n* `terms_of_service` - Terms of service\n* `privacy_policy` - Privacy policy\n* `other` - Other"
+            },
             "ConsentTypeRequest": {
                 "type": "object",
                 "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
@@ -7272,7 +9101,7 @@
                         "type": "string"
                     },
                     "category": {
-                        "$ref": "#/components/schemas/CategoryEnum"
+                        "$ref": "#/components/schemas/ConsentTypeCategoryEnum"
                     },
                     "document_url": {
                         "oneOf": [
@@ -7330,8 +9159,37 @@
                     "relationship": {
                         "$ref": "#/components/schemas/RelationshipEnum"
                     },
+                    "email": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email",
+                                "maxLength": 254
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "mobile": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
                     "preferred_contact_method": {
                         "$ref": "#/components/schemas/PreferredContactMethodEnum"
+                    },
+                    "address": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Address"
+                            }
+                        ],
+                        "readOnly": true
                     },
                     "use_client_address": {
                         "type": "boolean"
@@ -7375,6 +9233,7 @@
                     }
                 },
                 "required": [
+                    "address",
                     "client",
                     "created_at",
                     "first_name",
@@ -7398,6 +9257,27 @@
                     },
                     "relationship": {
                         "$ref": "#/components/schemas/RelationshipEnum"
+                    },
+                    "email": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email",
+                                "maxLength": 254
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "mobile": {
+                        "type": "string",
+                        "maxLength": 32
                     },
                     "preferred_contact_method": {
                         "$ref": "#/components/schemas/PreferredContactMethodEnum"
@@ -7444,6 +9324,163 @@
                     "first_name"
                 ]
             },
+            "CustomField": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "entity_type": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "key": {
+                        "type": "string",
+                        "maxLength": 60,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "label": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/CustomFieldTypeEnum"
+                    },
+                    "required": {
+                        "type": "boolean"
+                    },
+                    "options": {},
+                    "help_text": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/CustomFieldVisibilityEnum"
+                    },
+                    "editable_by": {
+                        "$ref": "#/components/schemas/EditableByEnum"
+                    },
+                    "group": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "order": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0
+                    },
+                    "validation_regex": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "active": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "entity_type",
+                    "id",
+                    "key",
+                    "label",
+                    "type"
+                ]
+            },
+            "CustomFieldRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "entity_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                    },
+                    "key": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/CustomFieldTypeEnum"
+                    },
+                    "required": {
+                        "type": "boolean"
+                    },
+                    "options": {},
+                    "help_text": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/CustomFieldVisibilityEnum"
+                    },
+                    "editable_by": {
+                        "$ref": "#/components/schemas/EditableByEnum"
+                    },
+                    "group": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "order": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0
+                    },
+                    "validation_regex": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "active": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "entity_type",
+                    "key",
+                    "label",
+                    "type"
+                ]
+            },
+            "CustomFieldTypeEnum": {
+                "enum": [
+                    "text",
+                    "long_text",
+                    "number",
+                    "decimal",
+                    "currency",
+                    "date",
+                    "datetime",
+                    "boolean",
+                    "select",
+                    "multi_select",
+                    "email",
+                    "phone",
+                    "url",
+                    "file",
+                    "user",
+                    "address"
+                ],
+                "type": "string",
+                "description": "* `text` - Text\n* `long_text` - Long text\n* `number` - Number\n* `decimal` - Decimal\n* `currency` - Money\n* `date` - Date\n* `datetime` - Date and time\n* `boolean` - Yes/no\n* `select` - Single choice\n* `multi_select` - Multiple choice\n* `email` - Email\n* `phone` - Phone\n* `url` - URL\n* `file` - File\n* `user` - Staff member\n* `address` - Address"
+            },
+            "CustomFieldVisibilityEnum": {
+                "enum": [
+                    "staff",
+                    "tutor",
+                    "client_portal",
+                    "public"
+                ],
+                "type": "string",
+                "description": "* `staff` - Staff\n* `tutor` - Staff and tutors\n* `client_portal` - Also in the client portal\n* `public` - Public forms"
+            },
             "DateFormatEnum": {
                 "enum": [
                     "locale",
@@ -7467,6 +9504,120 @@
                 "required": [
                     "has_demo_data",
                     "records"
+                ]
+            },
+            "Document": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "target_type": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "target_id": {
+                        "type": "string",
+                        "maxLength": 64
+                    },
+                    "file": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "filename": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "category": {
+                        "$ref": "#/components/schemas/DocumentCategoryEnum"
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/NoteVisibilityEnum"
+                    },
+                    "expires_on": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "created_by": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "created_by",
+                    "file",
+                    "filename",
+                    "id",
+                    "target_id",
+                    "target_type"
+                ]
+            },
+            "DocumentCategoryEnum": {
+                "enum": [
+                    "contract",
+                    "consent_form",
+                    "report",
+                    "id",
+                    "other"
+                ],
+                "type": "string",
+                "description": "* `contract` - Contract\n* `consent_form` - Consent form\n* `report` - Report\n* `id` - Identity document\n* `other` - Other"
+            },
+            "DocumentRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "target_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                    },
+                    "target_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                    },
+                    "file": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "category": {
+                        "$ref": "#/components/schemas/DocumentCategoryEnum"
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/NoteVisibilityEnum"
+                    },
+                    "expires_on": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "file",
+                    "target_id",
+                    "target_type"
                 ]
             },
             "Download": {
@@ -7524,6 +9675,15 @@
                 "type": "string",
                 "description": "* `contact` - contact\n* `student` - student\n* `tutor` - tutor"
             },
+            "EditableByEnum": {
+                "enum": [
+                    "staff",
+                    "tutor",
+                    "client"
+                ],
+                "type": "string",
+                "description": "* `staff` - Staff\n* `tutor` - Staff and tutors\n* `client` - Staff, tutors and clients"
+            },
             "EmailRequest": {
                 "type": "object",
                 "properties": {
@@ -7579,6 +9739,15 @@
                     "file",
                     "upload"
                 ]
+            },
+            "FileVisibilityEnum": {
+                "enum": [
+                    "private",
+                    "internal",
+                    "shared"
+                ],
+                "type": "string",
+                "description": "* `private` - Private\n* `internal` - Internal\n* `shared` - Shared"
             },
             "ImpersonateRequest": {
                 "type": "object",
@@ -7775,6 +9944,16 @@
                 ],
                 "type": "string",
                 "description": "* `client` - One invoice per client\n* `student` - One per student\n* `job` - One per job"
+            },
+            "KindEnum": {
+                "enum": [
+                    "note",
+                    "task",
+                    "document",
+                    "change"
+                ],
+                "type": "string",
+                "description": "* `note` - note\n* `task` - task\n* `document` - document\n* `change` - change"
             },
             "LoginEvent": {
                 "type": "object",
@@ -8144,6 +10323,117 @@
                     "url"
                 ]
             },
+            "Note": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "target_type": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "target_id": {
+                        "type": "string",
+                        "maxLength": 64
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "pinned": {
+                        "type": "boolean"
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/NoteVisibilityEnum"
+                    },
+                    "mentions": {
+                        "readOnly": true
+                    },
+                    "attachments": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "created_by": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "body",
+                    "created_at",
+                    "created_by",
+                    "id",
+                    "mentions",
+                    "target_id",
+                    "target_type",
+                    "updated_at"
+                ]
+            },
+            "NoteRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "target_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                    },
+                    "target_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                    },
+                    "body": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "pinned": {
+                        "type": "boolean"
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/NoteVisibilityEnum"
+                    },
+                    "attachments": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                },
+                "required": [
+                    "body",
+                    "target_id",
+                    "target_type"
+                ]
+            },
+            "NoteVisibilityEnum": {
+                "enum": [
+                    "staff_only",
+                    "staff_and_tutors",
+                    "shared_with_client"
+                ],
+                "type": "string",
+                "description": "* `staff_only` - Staff only\n* `staff_and_tutors` - Staff and tutors\n* `shared_with_client` - Shared with the client"
+            },
             "OnboardingState": {
                 "type": "object",
                 "properties": {
@@ -8412,6 +10702,32 @@
                     }
                 }
             },
+            "PaginatedBulkJobList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BulkJob"
+                        }
+                    }
+                }
+            },
             "PaginatedClientList": {
                 "type": "object",
                 "required": [
@@ -8542,6 +10858,32 @@
                     }
                 }
             },
+            "PaginatedDocumentList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Document"
+                        }
+                    }
+                }
+            },
             "PaginatedInvitationList": {
                 "type": "object",
                 "required": [
@@ -8620,6 +10962,32 @@
                     }
                 }
             },
+            "PaginatedNoteList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Note"
+                        }
+                    }
+                }
+            },
             "PaginatedProcessList": {
                 "type": "object",
                 "required": [
@@ -8668,6 +11036,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Student"
+                        }
+                    }
+                }
+            },
+            "PaginatedTaskList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Task"
                         }
                     }
                 }
@@ -8893,6 +11287,9 @@
                     "tax_exempt": {
                         "type": "boolean"
                     },
+                    "tax_id": {
+                        "type": "string"
+                    },
                     "po_number": {
                         "type": "string",
                         "maxLength": 60
@@ -8928,7 +11325,7 @@
                         "type": "string"
                     },
                     "category": {
-                        "$ref": "#/components/schemas/CategoryEnum"
+                        "$ref": "#/components/schemas/ConsentTypeCategoryEnum"
                     },
                     "document_url": {
                         "oneOf": [
@@ -8967,6 +11364,27 @@
                     },
                     "relationship": {
                         "$ref": "#/components/schemas/RelationshipEnum"
+                    },
+                    "email": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email",
+                                "maxLength": 254
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "mobile": {
+                        "type": "string",
+                        "maxLength": 32
                     },
                     "preferred_contact_method": {
                         "$ref": "#/components/schemas/PreferredContactMethodEnum"
@@ -9010,6 +11428,61 @@
                     "custom_fields": {}
                 }
             },
+            "PatchedCustomFieldRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "entity_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                    },
+                    "key": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/CustomFieldTypeEnum"
+                    },
+                    "required": {
+                        "type": "boolean"
+                    },
+                    "options": {},
+                    "help_text": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/CustomFieldVisibilityEnum"
+                    },
+                    "editable_by": {
+                        "$ref": "#/components/schemas/EditableByEnum"
+                    },
+                    "group": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "order": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0
+                    },
+                    "validation_regex": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "active": {
+                        "type": "boolean"
+                    }
+                }
+            },
             "PatchedMembershipUpdateRequest": {
                 "type": "object",
                 "properties": {
@@ -9027,6 +11500,39 @@
                         "$ref": "#/components/schemas/BranchScopeEnum"
                     },
                     "branches": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                }
+            },
+            "PatchedNoteRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "target_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                    },
+                    "target_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                    },
+                    "body": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "pinned": {
+                        "type": "boolean"
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/NoteVisibilityEnum"
+                    },
+                    "attachments": {
                         "type": "array",
                         "items": {
                             "type": "string",
@@ -9148,6 +11654,31 @@
                     }
                 }
             },
+            "PatchedSavedViewRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "entity_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "shared": {
+                        "type": "boolean"
+                    },
+                    "filters": {},
+                    "columns": {},
+                    "ordering": {
+                        "type": "string",
+                        "maxLength": 60
+                    }
+                }
+            },
             "PatchedSettingsPatchRequest": {
                 "type": "object",
                 "properties": {
@@ -9185,6 +11716,11 @@
                         "type": "string",
                         "maxLength": 100
                     },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
                     "year_group": {
                         "type": "string",
                         "maxLength": 40
@@ -9205,6 +11741,9 @@
                     "goals": {
                         "type": "string"
                     },
+                    "learning_needs": {
+                        "type": "string"
+                    },
                     "exam_boards": {},
                     "target_grades": {},
                     "availability": {},
@@ -9217,6 +11756,66 @@
                         "writeOnly": true
                     },
                     "custom_fields": {}
+                }
+            },
+            "PatchedTagRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                    },
+                    "colour": {
+                        "type": "string",
+                        "minLength": 1,
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                    },
+                    "entity_types": {}
+                }
+            },
+            "PatchedTaskRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "due_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "assignee": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "priority": {
+                        "$ref": "#/components/schemas/PriorityEnum"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/TaskStatusEnum"
+                    },
+                    "target_type": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "target_id": {
+                        "type": "string",
+                        "maxLength": 64
+                    },
+                    "remind_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
                 }
             },
             "PatchedTutorRequest": {
@@ -9266,6 +11865,12 @@
                     "employment_type": {
                         "$ref": "#/components/schemas/EmploymentTypeEnum"
                     },
+                    "pay_rate_amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,4})?$",
+                        "nullable": true
+                    },
                     "address_input": {
                         "allOf": [
                             {
@@ -9307,6 +11912,14 @@
                     },
                     "public_profile": {
                         "type": "boolean"
+                    },
+                    "tax_reference": {
+                        "type": "string"
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
                     },
                     "emergency_contact": {},
                     "custom_fields": {},
@@ -9408,6 +12021,15 @@
                     "method",
                     "url"
                 ]
+            },
+            "PriorityEnum": {
+                "enum": [
+                    "low",
+                    "normal",
+                    "high"
+                ],
+                "type": "string",
+                "description": "* `low` - Low\n* `normal` - Normal\n* `high` - High"
             },
             "Process": {
                 "type": "object",
@@ -9851,6 +12473,80 @@
                     "start_url"
                 ]
             },
+            "SavedView": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "entity_type": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "shared": {
+                        "type": "boolean"
+                    },
+                    "filters": {},
+                    "columns": {},
+                    "ordering": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "owner": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "entity_type",
+                    "id",
+                    "name",
+                    "owner"
+                ]
+            },
+            "SavedViewRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "entity_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "shared": {
+                        "type": "boolean"
+                    },
+                    "filters": {},
+                    "columns": {},
+                    "ordering": {
+                        "type": "string",
+                        "maxLength": 60
+                    }
+                },
+                "required": [
+                    "entity_type",
+                    "name"
+                ]
+            },
             "ScanStatusEnum": {
                 "enum": [
                     "pending",
@@ -9869,6 +12565,39 @@
                 ],
                 "type": "string",
                 "description": "* `organisation` - organisation\n* `branch` - branch"
+            },
+            "SearchHit": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "subtitle": {
+                        "type": "string"
+                    },
+                    "score": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "client_id": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "client_id",
+                    "id",
+                    "score",
+                    "subtitle",
+                    "title",
+                    "type"
+                ]
             },
             "Session": {
                 "type": "object",
@@ -10181,6 +12910,27 @@
                     "suggestion"
                 ]
             },
+            "StartBulkRequest": {
+                "type": "object",
+                "properties": {
+                    "target_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "maxItems": 5000,
+                        "minItems": 1
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "target_ids"
+                ]
+            },
             "StatusRequest": {
                 "type": "object",
                 "properties": {
@@ -10234,7 +12984,7 @@
                     "visibility": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/VisibilityEnum"
+                                "$ref": "#/components/schemas/FileVisibilityEnum"
                             }
                         ],
                         "readOnly": true
@@ -10411,6 +13161,11 @@
                         "type": "string",
                         "maxLength": 100
                     },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
                     "year_group": {
                         "type": "string",
                         "maxLength": 40
@@ -10429,6 +13184,9 @@
                         }
                     },
                     "goals": {
+                        "type": "string"
+                    },
+                    "learning_needs": {
                         "type": "string"
                     },
                     "exam_boards": {},
@@ -10538,6 +13296,181 @@
                     "secret"
                 ]
             },
+            "Tag": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "colour": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                    },
+                    "entity_types": {}
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            },
+            "TagRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                    },
+                    "colour": {
+                        "type": "string",
+                        "minLength": 1,
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                    },
+                    "entity_types": {}
+                },
+                "required": [
+                    "name"
+                ]
+            },
+            "Task": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "due_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "assignee": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "priority": {
+                        "$ref": "#/components/schemas/PriorityEnum"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/TaskStatusEnum"
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "target_type": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "target_id": {
+                        "type": "string",
+                        "maxLength": 64
+                    },
+                    "remind_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "is_overdue": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "created_by": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "completed_at",
+                    "created_at",
+                    "created_by",
+                    "id",
+                    "is_overdue",
+                    "title"
+                ]
+            },
+            "TaskRequest": {
+                "type": "object",
+                "description": "Drops fields the viewer may not see (FR-03-5 field-level permissions).\n\n    class Meta:\n        field_permissions = {\"pay_rate\": \"billing.rates.view_pay\",\n                             \"charge_rate\": \"billing.rates.view_charge\"}\n\nFields are removed from output *and* input, so they can't be written either.\nSerializers without a request in context (internal use) keep every field.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "due_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "assignee": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "priority": {
+                        "$ref": "#/components/schemas/PriorityEnum"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/TaskStatusEnum"
+                    },
+                    "target_type": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "target_id": {
+                        "type": "string",
+                        "maxLength": 64
+                    },
+                    "remind_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "title"
+                ]
+            },
+            "TaskStatusEnum": {
+                "enum": [
+                    "open",
+                    "done",
+                    "cancelled"
+                ],
+                "type": "string",
+                "description": "* `open` - Open\n* `done` - Done\n* `cancelled` - Cancelled"
+            },
             "TimeFormatEnum": {
                 "enum": [
                     "locale",
@@ -10546,6 +13479,39 @@
                 ],
                 "type": "string",
                 "description": "* `locale` - Locale default\n* `24h` - 24-hour\n* `12h` - 12-hour"
+            },
+            "TimelineItem": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "$ref": "#/components/schemas/KindEnum"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "actor_id": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "actor_id",
+                    "at",
+                    "body",
+                    "id",
+                    "kind",
+                    "title"
+                ]
             },
             "TokenRequest": {
                 "type": "object",
@@ -10613,6 +13579,12 @@
                     "employment_type": {
                         "$ref": "#/components/schemas/EmploymentTypeEnum"
                     },
+                    "pay_rate_amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,4})?$",
+                        "nullable": true
+                    },
                     "address": {
                         "allOf": [
                             {
@@ -10668,6 +13640,14 @@
                     },
                     "public_profile": {
                         "type": "boolean"
+                    },
+                    "tax_reference": {
+                        "type": "string"
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
                     },
                     "emergency_contact": {},
                     "subjects": {
@@ -10826,6 +13806,12 @@
                     "employment_type": {
                         "$ref": "#/components/schemas/EmploymentTypeEnum"
                     },
+                    "pay_rate_amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,4})?$",
+                        "nullable": true
+                    },
                     "address_input": {
                         "allOf": [
                             {
@@ -10867,6 +13853,14 @@
                     },
                     "public_profile": {
                         "type": "boolean"
+                    },
+                    "tax_reference": {
+                        "type": "string"
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
                     },
                     "emergency_contact": {},
                     "custom_fields": {},
@@ -10972,7 +13966,7 @@
                     "visibility": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/VisibilityEnum"
+                                "$ref": "#/components/schemas/FileVisibilityEnum"
                             }
                         ],
                         "default": "private"
@@ -11048,15 +14042,6 @@
                     "has_mfa",
                     "id"
                 ]
-            },
-            "VisibilityEnum": {
-                "enum": [
-                    "private",
-                    "internal",
-                    "shared"
-                ],
-                "type": "string",
-                "description": "* `private` - Private\n* `internal` - Internal\n* `shared` - Shared"
             },
             "WeekStartDayEnum": {
                 "enum": [

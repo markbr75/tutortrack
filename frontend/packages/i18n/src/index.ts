@@ -45,4 +45,11 @@ export function formatDateTime(
   return new Intl.DateTimeFormat(locale, { ...options, timeZone }).format(new Date(iso));
 }
 
+/** Formats an ISO date (or datetime) as a calendar date, e.g. "9 Oct 2026". */
+export function formatDate(iso: string, locale: string = "en-GB"): string {
+  // Plain dates are calendar days: format them in UTC so they never shift a day.
+  const timeZone = iso.length === 10 ? "UTC" : undefined;
+  return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone }).format(new Date(iso));
+}
+
 export { I18nextProvider, useTranslation } from "react-i18next";

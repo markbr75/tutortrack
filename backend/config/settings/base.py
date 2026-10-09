@@ -276,6 +276,9 @@ SPECTACULAR_SETTINGS = {
         "ClientTypeEnum": "tutortrack.people.models.Client.Type",
         "StudentStatusEnum": "tutortrack.people.models.Student.Status",
         "TutorStatusEnum": "tutortrack.people.models.TutorProfile.Status",
+        "FileVisibilityEnum": "tutortrack.core.models.files.StoredFile.Visibility",
+        "CustomFieldVisibilityEnum": "tutortrack.crm.models.CustomFieldDefinition.Visibility",
+        "NoteVisibilityEnum": "tutortrack.crm.models.Note.Visibility",
     },
     "POSTPROCESSING_HOOKS": ["drf_spectacular.hooks.postprocess_schema_enums"],
 }

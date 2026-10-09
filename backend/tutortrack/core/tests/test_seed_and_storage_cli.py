@@ -20,6 +20,14 @@ def test_seed_demo_is_idempotent(settings):
     assert User.objects.filter(email="admin@tutortrack.localhost", is_superuser=True).count() == 1
     assert Organisation.objects.get(slug="brightminds").name == "Bright Minds Tutoring"
     assert FeatureFlag.objects.filter(key="courses").exists()
+    from tutortrack.core.context import tenant_context
+    from tutortrack.crm.models import Task
+    from tutortrack.people.models import Client, TutorProfile
+
+    with tenant_context(Organisation.objects.get(slug="brightminds")):
+        assert Client.objects.count() == 3
+        assert TutorProfile.objects.count() == 2
+        assert Task.objects.count() == 1
 
 
 @pytest.mark.django_db

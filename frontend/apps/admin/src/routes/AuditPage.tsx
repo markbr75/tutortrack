@@ -6,14 +6,9 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
 import { api, usePermission } from "../api";
+import { cursorFrom } from "../lists";
 
 type AuditEntry = components["schemas"]["AuditEntry"];
-
-function cursorFrom(next: string | null | undefined): string | undefined {
-  return next
-    ? (new URL(next, window.location.origin).searchParams.get("cursor") ?? undefined)
-    : undefined;
-}
 
 /** Reference implementation of a list screen: cursor pagination + DataGrid. */
 interface Filters {
@@ -24,7 +19,13 @@ interface Filters {
   created_before: string;
 }
 
-const EMPTY: Filters = { q: "", actor_email: "", action: "", created_after: "", created_before: "" };
+const EMPTY: Filters = {
+  q: "",
+  actor_email: "",
+  action: "",
+  created_after: "",
+  created_before: "",
+};
 
 /** Only the filters that are set, with dates as ISO timestamps. */
 function activeFilters(filters: Filters): Record<string, string> {

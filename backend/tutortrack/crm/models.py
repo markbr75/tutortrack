@@ -154,9 +154,12 @@ class Task(TenantModel):
     description = models.TextField(blank=True, default="")
     due_at = models.DateTimeField(null=True, blank=True, db_index=True)
     assignee = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
         related_name="+",
-    )  # fmt: skip
+    )
     priority = models.CharField(max_length=6, choices=Priority.choices, default=Priority.NORMAL)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.OPEN)
     completed_at = models.DateTimeField(null=True, blank=True)

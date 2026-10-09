@@ -90,15 +90,31 @@ Tutor scope `own`: students on the tutor's active jobs only; client contact fiel
 - Sole-trader mode shows a merged "Family" page (client + students together).
 
 ## 8. Delivery plan
-- [ ] **E05-T01** Client, Contact and Student models, services and API; quick-add endpoint.
-- [ ] **E05-T02** TutorProfile, TutorSubject and qualifications; link to membership and invitations.
-- [ ] **E05-T03** Address model and async geocoding provider abstraction.
-- [ ] **E05-T04** Custom field definitions and validation; integration into serializers and filters.
-- [ ] **E05-T05** Tags, notes (visibility, mentions), tasks, documents (generic relations).
-- [ ] **E05-T06** Activity timeline aggregator selector.
-- [ ] **E05-T07** List filtering (incl. custom fields and computed fields), saved views, exports.
-- [ ] **E05-T08** Global search (FTS + trigram).
-- [ ] **E05-T09** Bulk actions framework (background job + progress).
-- [ ] **E05-T10** Duplicate detection and merge.
-- [ ] **E05-T11** Frontend: list grids, record pages, quick-add family, tutor profile pages.
+- [x] **E05-T01** Client, Contact and Student models, services and API; quick-add endpoint.
+- [x] **E05-T02** TutorProfile, TutorSubject and qualifications; link to membership and invitations.
+- [x] **E05-T03** Address model and async geocoding provider abstraction.
+- [x] **E05-T04** Custom field definitions and validation; integration into serializers and filters.
+- [x] **E05-T05** Tags, notes (visibility, mentions), tasks, documents (generic relations).
+- [x] **E05-T06** Activity timeline aggregator selector.
+- [x] **E05-T07** List filtering (incl. custom fields and computed fields), saved views, exports.
+- [x] **E05-T08** Global search (FTS + trigram).
+- [x] **E05-T09** Bulk actions framework (background job + progress).
+- [x] **E05-T10** Duplicate detection and merge. *(Detection done; merge is Phase 2, "minus advanced deduplication" in the roadmap.)*
+- [x] **E05-T11** Frontend: list grids, record pages, quick-add family, tutor profile pages.
 - [ ] **E05-T12** (Phase 2) Map view.
+
+## Implementation notes (as built 2026-10-09)
+- **Apps.** `people` holds clients, contacts, students, tutor profiles, subjects, qualifications and addresses; `crm` holds the generic capabilities (custom fields, tags, notes, tasks, documents, saved views, bulk jobs). Every table is a `TenantModel` with RLS.
+- **Generic targets.** CRM items reference records by `target_type` (`people.client`, `people.contact`, `people.student`, `people.tutor`) + `target_id`, not Django generic FKs. Apps register targets in `crm.targets` with the record's view permission, and every CRM read and write checks that the viewer can see the target through `scope_queryset`. A note on a record you cannot see is a 404. See ADR 0005.
+- **Subjects are free text** (`{subject, level}`) until E06 introduces the subject catalogue. E06 migrates them.
+- **Computed list fields** (balance, next lesson, last lesson, hours this term) are placeholders in `people.selectors.client_summary` until E08/E10 provide the data. Custom-field filters (`cf_<key>`), tags, `missing_required` and `include_archived` work now.
+- **Tutor `own` scope.** Tutors see their own profile and tasks. Students and clients on "my active jobs" arrive with E07 (`NoOwnScopeMixin` returns nothing until then).
+- **Notes.** HTML is sanitised server-side with `nh3` (allow-list of simple formatting, links limited to http/https/mailto). Mentions are `<span data-mention="<user id>">` and only active members are kept. Without `crm.note.view_staff_only`, staff-only notes and documents are hidden, and a new note asking for staff-only is downgraded to staff-and-tutors. Safeguarding notes (`crm.note.safeguarding`) wait for E29 Part 2.
+- **Validation errors** from custom fields are 400 problem responses with per-key messages under `errors.custom_fields`.
+- **Bulk actions.** `POST /bulk/{entity}/{action}` creates a `BulkJob` covering only the IDs the user can see, then runs it in Celery. Each record goes through the normal service, so it is audited and emits events. Failures are recorded per record in `errors`. Actions: tag/untag (all), archive, set_status and assign_manager (clients), set_status and archive (students), set_status (tutors).
+- **Search** uses `pg_trgm` similarity (GIN trigram indexes) across clients, contacts, students and tutors, scoped by permission. Full-text ranking can be added when notes become searchable.
+- **OpenAPI.** Field-permission-gated fields (contact phone/email, tutor pay rate, etc.) are now documented in the schema. They are still removed per viewer at runtime.
+- **Exports** are CSV (formula-injection safe, audited, mass-export alerting). XLSX is deferred.
+- **Not built:** merge tool (Phase 2), map view (T12, Phase 2), sole-trader merged family page variant (the family page already shows client and students together).
+- **Frontend:** client/student/tutor lists with search and status filters, family page, student and tutor pages (status change, subject approval), quick-add family, notes/tasks/timeline tabs on each record, "My tasks", and ⌘K global search.
+
