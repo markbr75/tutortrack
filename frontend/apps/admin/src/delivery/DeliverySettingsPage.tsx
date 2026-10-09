@@ -148,7 +148,11 @@ function PolicyForm() {
               })
             }
           />
-          {t(key === "on_free_cancellation" ? "delivery.settings.makeupFree" : "delivery.settings.makeupTutor")}
+          {t(
+            key === "on_free_cancellation"
+              ? "delivery.settings.makeupFree"
+              : "delivery.settings.makeupTutor",
+          )}
         </label>
       ))}
       <TextField
@@ -168,7 +172,9 @@ function PolicyForm() {
       />
       <p className="text-sm text-muted-foreground">{t("delivery.settings.overridesHelp")}</p>
       <ErrorList error={save.error} />
-      {save.isSuccess && !rules ? <Alert tone="success">{t("delivery.settings.saved")}</Alert> : null}
+      {save.isSuccess && !rules ? (
+        <Alert tone="success">{t("delivery.settings.saved")}</Alert>
+      ) : null}
       <Button type="submit" disabled={save.isPending}>
         {t("delivery.settings.savePolicy")}
       </Button>
@@ -205,7 +211,12 @@ function TemplateEditor({ template, onSaved }: { template: Template | null; onSa
         is_default: isDefault,
         fields: fields.map((f) => ({
           ...f,
-          key: f.key || keyFrom(f.label, fields.map((x) => x.key)),
+          key:
+            f.key ||
+            keyFrom(
+              f.label,
+              fields.map((x) => x.key),
+            ),
           options: CHOICES.has(f.type) ? f.options : undefined,
         })),
       };
@@ -286,9 +297,7 @@ function TemplateEditor({ template, onSaved }: { template: Template | null; onSa
             <SelectField
               label={t("delivery.settings.fieldVisibility")}
               value={field.visibility}
-              onChange={(e) =>
-                setField(i, { visibility: e.target.value as Field["visibility"] })
-              }
+              onChange={(e) => setField(i, { visibility: e.target.value as Field["visibility"] })}
               options={(["staff", "client", "student"] as const).map((v) => ({
                 value: v,
                 label: t(`delivery.reports.visibility.${v}`),

@@ -15,6 +15,7 @@ const NAV = [
   { to: "/students", key: "nav.students", permission: "people.student.view" },
   { to: "/tutors", key: "nav.tutors", permission: "people.tutor.view" },
   { to: "/jobs", key: "nav.jobs", permission: "jobs.job.view" },
+  { to: "/billing", key: "nav.billing", permission: "billing.invoice.view" },
   { to: "/tasks", key: "nav.tasks", permission: "crm.task.view" },
   { to: "/reports", key: "nav.reports", permission: "delivery.report.view" },
   { to: "/unconfirmed", key: "nav.unconfirmed", permission: "scheduling.lesson.complete" },

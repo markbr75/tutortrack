@@ -91,8 +91,10 @@ async def wait_until_local(
         if delay > timedelta(0):
             await workflow.sleep(delay)
         return False
+    if delay <= timedelta(0):  # the moment has already come (never wait without a timeout)
+        return until()
     try:
-        await workflow.wait_condition(until, timeout=delay if delay > timedelta(0) else None)
+        await workflow.wait_condition(until, timeout=delay)
     except TimeoutError:
         return False
     return True

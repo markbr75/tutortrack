@@ -107,17 +107,17 @@ Turns delivered (or scheduled) lessons into money owed. An **append-only client 
 - Concurrency test: two simultaneous invoice runs → no duplicate charges invoiced (row locks).
 
 ## 9. Delivery plan
-- [ ] **E10-T01** Ledger entry model, posting service with invariants, balance selectors (invoice/available/uninvoiced/projected).
-- [ ] **E10-T02** Charge model and lesson-event handlers (create/update/void), ad hoc charges.
-- [ ] **E10-T03** Invoice model, numbering, draft builder (grouping rules), issue service, PDF rendering (WeasyPrint templates).
-- [ ] **E10-T04** Invoice runs (scheduled and manual), review window, auto-issue, idempotency, concurrency locks.
-- [ ] **E10-T05** Invoice actions: void, credit notes, write-off, apply credit.
-- [ ] **E10-T06** Payment requests (manual, bulk, threshold auto).
-- [ ] **E10-T07** Invoice-in-advance mode with end-of-period reconciliation.
-- [ ] **E10-T08** Statements and ageing.
-- [ ] **E10-T09** Reminder schedules (E13 templates).
-- [ ] **E10-T10** Billing settings and invoice template customisation.
-- [ ] **E10-T11** Frontend: client billing tab, invoices list/detail/editor, invoice run wizard, payment requests.
+- [x] **E10-T01** Ledger entry model, posting service with invariants, balance selectors (invoice/available/uninvoiced/projected).
+- [x] **E10-T02** Charge model and lesson-event handlers (create/update/void), ad hoc charges.
+- [x] **E10-T03** Invoice model, numbering, draft builder (grouping rules), issue service, PDF rendering (WeasyPrint templates).
+- [x] **E10-T04** Invoice runs (scheduled and manual), review window, auto-issue, idempotency, concurrency locks.
+- [x] **E10-T05** Invoice actions: void, credit notes, write-off, apply credit.
+- [x] **E10-T06** Payment requests (manual, bulk, threshold auto).
+- [x] **E10-T07** Invoice-in-advance mode with end-of-period reconciliation.
+- [x] **E10-T08** Statements and ageing.
+- [x] **E10-T09** Reminder schedules (E13 templates).
+- [x] **E10-T10** Billing settings and invoice template customisation.
+- [x] **E10-T11** Frontend: client billing tab, invoices list/detail/editor, invoice run wizard, payment requests.
 - [ ] **E10-T12** (Phase 2) Packages purchase/consumption/expiry.
 - [ ] **E10-T13** (Phase 2) Recurring fixed-fee billing plans with proration.
 - [ ] **E10-T14** (Phase 2) Late fees and collections blocks.
@@ -127,7 +127,7 @@ Turns delivered (or scheduled) lessons into money owed. An **append-only client 
 
 Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
 
-- [ ] **E10-TW1** Billing workflows (invoice runs, dunning, payment requests, packages) (requires E32).
+- [x] **E10-TW1** Billing workflows (invoice runs, dunning, payment requests, packages) (requires E32).
 
 | Workflow | Started by | Steps, timers and signals | Replaces |
 |---|---|---|---|
@@ -135,3 +135,19 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
 | `InvoiceDunningWorkflow` `invoice-dunning:{org}:{invoice}` | `invoice.issued` | Reminder timers per schedule (−3, 0, +3, +7, +14, +30) → late fee activity → collections task/booking block. Signals `paid`, `credited`, `voided`, `paused` stop or pause it | Reminder log + daily dunning job (FR-10-10) |
 | `PaymentRequestWorkflow` | Payment request sent | Reminders until paid or cancelled; auto top-up retry for threshold requests | Reminder job |
 | `PackageExpiryWorkflow` `package:{org}:{purchase}` | `package.activated` | Timer to N days before expiry → reminder → expiry → expire units + revenue entry. Signals `depleted`, `extended(until)` | Expiry sweeper |
+
+## Implementation notes (as built 2026-10-09)
+- **App:** `billing` with `ClientLedgerEntry` (append-only), `Charge`, `Invoice` (+ `InvoiceLine`), `InvoiceRun`, `CreditNote` (+ lines), `CreditAllocation` and `PaymentRequest`. All have RLS; invoices, charges, credit notes, runs and requests are branch-scoped. See ADR 0007 for the ledger, credit and charge-sync design.
+- **Balances (T01):** `ledger.balances(client)` returns the ledger balance, invoice balance (open invoices), available credit (invoice balance − ledger, when positive), uninvoiced, overdue and projected (credit − uninvoiced − planned lessons). There are property tests for Σ entries and for credit never over-allocating.
+- **Charges (T02):** `sync_attendee_charge` keeps one uninvoiced charge per attendee equal to what is owed minus what is invoiced. It handles lesson, late-cancellation (description "Late cancellation fee – <lesson>", E09 AC), advance and reconciliation charges. Tax per line comes from the lesson's pricing snapshot, inclusive or exclusive per `billing.prices_include_tax`; tax-exempt clients pay no tax. Makeup lessons aren't charged. Ad hoc charges and discounts go through `POST /charges` (negative unit price allowed, any currency) and can be voided while uninvoiced.
+- **Invoices (T03):** grouping per client (siblings together) or per student/job (client setting), one invoice per currency. Lines are sorted by student then date. Totals are sums of rounded lines. Negative or zero totals and amounts under `billing.minimum_invoice_amount` are carried forward. Issuing assigns a gap-free `INV-` number, takes the billing snapshot, sets the due date from payment terms, posts to the ledger, locks delivered lessons, applies credit (`billing.auto_apply_credit`) and emails the PDF (`billing.auto_send`; a Celery task with an attachment and pay link until E13 templates). PDFs are rendered on demand with WeasyPrint (`/invoices/{id}/pdf`).
+- **Runs (T04, TW1):** `POST /invoice-runs` is idempotent per branch, period and mode, and starts `InvoiceRunWorkflow`: collect → drafts → review window (`billing.review_days`, or wait for `approve` when `billing.auto_issue` is off) → issue. `preview` counts what would be invoiced. Drafting row-locks charges with SKIP LOCKED (concurrency test). Weekly/monthly schedules are per-branch Temporal Schedules (`ScheduledInvoiceRunWorkflow`, kept in sync with `billing.invoice_schedule`/`invoice_day`). The tutor pre-review summary was not built.
+- **Actions (T05):** void (no payments and no credit notes; reversing entry; charges return to uninvoiced; lessons unlock), write-off, credit notes (`CN-`, full or per line, applied to the invoice or kept as client credit), apply credit, draft editing (add or remove lines, PO, notes, delete). `allocate_payment`/`unallocate_payment` are the hooks for E11.
+- **Payment requests (T06):** `PR-` numbered, single, bulk (projected balance below X → fixed amount or top up to Y) and automatic (`billing.topup_threshold` → `client.balance_low` + a request). Paying one (E11) posts `payment_request_payment` and applies credit to open invoices. Prepaid jobs get a receipt invoice per lesson paid from credit (`billing.prepaid_invoice_each_lesson`). The negative-balance guard for E09 is `PrepaidBalanceGuard` (prepaid jobs; client override or `billing.prevent_negative_balance`; credit limit included). `PaymentRequestWorkflow` reminds after 3 and 7 days until paid or cancelled.
+- **Advance mode (T07):** a new job billing method `invoice_in_advance`. An advance run charges planned lessons in the period. Later cancellations or edits reconcile continuously as credit or extra lines on the next invoice, instead of one end-of-period batch. Completing an advance-billed lesson doesn't charge again.
+- **Statements (T08):** `/clients/{id}/statement?from&to` (JSON or `?pdf=true`) gives the opening balance, movements, closing balance and ageing. `/billing/ageing` is the overdue report. Scheduled statement emails are left to E13.
+- **Reminders (T09, TW1):** `InvoiceDunningWorkflow` sends one `invoice.reminder` per `billing.reminder_offsets` day at 09:00 local, plus `invoice.overdue` once. Paid, voided or written-off invoices signal `closed`. E13 sends the messages.
+- **Settings (T10):** numbering prefixes, schedule, review days, auto-issue/send/credit, minimum amount, zero totals, tutor names, payment instructions, footer, reminders, negative balance and top-ups, all in the `billing` settings area. Template layouts and colours are left for E24 branding.
+- **Frontend (T11):** Billing area (invoices by state, uninvoiced charges, payment requests with bulk top-ups, invoice runs with preview and approve, ageing); invoice page (issue, email, PDF, credit note per line, apply credit, void, write-off, draft lines); client billing section (balances, invoices, ledger, payment requests, add charge or discount, invoice now, statement PDF).
+- **Fix:** `core.workflows.timers.wait_until_local` waited forever when its deadline had already passed and an early-exit condition was given; it now returns at once.
+- **Deferred:** packages (T12), recurring fees (T13), late fees and collections blocks (T14), split billing (T15), PackageExpiryWorkflow (Phase 2). Credit note PDFs, the invoice template designer and tutor draft review are follow-ups.

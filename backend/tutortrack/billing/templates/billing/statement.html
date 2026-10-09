@@ -1,0 +1,22 @@
+{% load i18n %}<!doctype html>
+<html lang="{{ org.locale|default:'en-GB' }}">
+<head><meta charset="utf-8"><title>{% trans "Statement" %}</title>
+{% include "billing/_style.html" %}</head>
+<body>
+  <div class="row">
+    <div><h1>{% trans "Statement" %}</h1><div><strong>{{ org.name }}</strong></div></div>
+    <div class="muted">{{ client.display_name }}<br>{{ statement.start|date:"j M Y" }} – {{ statement.end|date:"j M Y" }}</div>
+  </div>
+  <table>
+    <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Description" %}</th><th class="num">{% trans "Amount" %}</th><th class="num">{% trans "Balance" %}</th></tr></thead>
+    <tbody>
+      <tr><td></td><td>{% trans "Opening balance" %}</td><td></td><td class="num">{{ opening }}</td></tr>
+      {% for row in rows %}<tr><td>{{ row.date|date:"j M Y" }}</td><td>{{ row.description }}</td><td class="num">{{ row.amount }}</td><td class="num">{{ row.balance }}</td></tr>{% endfor %}
+      <tr class="grand"><td></td><td>{% trans "Closing balance" %}</td><td></td><td class="num">{{ closing }}</td></tr>
+    </tbody>
+  </table>
+  <table class="totals">
+    {% for label, value in ageing %}<tr><td>{{ label }}</td><td class="num">{{ value }}</td></tr>{% endfor %}
+  </table>
+</body>
+</html>

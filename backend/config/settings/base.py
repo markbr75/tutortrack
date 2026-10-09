@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "tutortrack.jobs",
     "tutortrack.scheduling",
     "tutortrack.delivery",
+    "tutortrack.billing",
 ]
 
 MIDDLEWARE = [
@@ -290,6 +291,13 @@ SPECTACULAR_SETTINGS = {
         "LessonStatusEnum": "tutortrack.scheduling.models.Lesson.Status",
         "AttendanceOutcomeEnum": "tutortrack.scheduling.models.LessonAttendee.Outcome",
         "CancellationPolicyScopeEnum": "tutortrack.delivery.models.CancellationPolicy.Scope",
+        "InvoiceStatusEnum": "tutortrack.billing.models.Invoice.Status",
+        "ChargeStatusEnum": "tutortrack.billing.models.Charge.Status",
+        "ChargeKindEnum": "tutortrack.billing.models.Charge.Kind",
+        "InvoiceRunStatusEnum": "tutortrack.billing.models.InvoiceRun.Status",
+        "InvoiceRunModeEnum": "tutortrack.billing.models.InvoiceRun.Mode",
+        "PaymentRequestStatusEnum": "tutortrack.billing.models.PaymentRequest.Status",
+        "LedgerEntryTypeEnum": "tutortrack.billing.models.ClientLedgerEntry.Type",
         "CalendarEventTypeEnum": "tutortrack.scheduling.models.CalendarEvent.Type",
         "AvailabilityExceptionTypeEnum": "tutortrack.scheduling.models.AvailabilityException.Type",
         "FeedKindEnum": "tutortrack.scheduling.models.ICalFeedToken.Kind",

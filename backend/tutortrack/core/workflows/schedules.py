@@ -131,3 +131,16 @@ def unpause_organisation_schedules(organisation_id: Any, note: str = "") -> list
 
 def delete_organisation_schedules(organisation_id: Any) -> list[str]:
     return _apply(organisation_id, "delete")
+
+
+def delete_schedule(organisation_id: Any, sid: str) -> bool:
+    """Delete one schedule (e.g. invoicing switched back to manual). False if unknown."""
+    from ..models import ScheduleLink
+
+    with tenant_context(organisation_id):
+        if not ScheduleLink.objects.filter(schedule_id=sid).exists():
+            return False
+    runtime.run(_each([sid], "delete", ""))
+    with tenant_context(organisation_id):
+        ScheduleLink.objects.filter(schedule_id=sid).delete()
+    return True

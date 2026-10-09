@@ -35,6 +35,7 @@ class Job(BranchScopedModel, CustomisableModel):
 
     class BillingMethod(models.TextChoices):
         PAYG = "pay_as_you_go", _("Pay as you go")
+        ADVANCE = "invoice_in_advance", _("Invoice in advance")
         PREPAID = "prepaid_credit", _("Prepaid credit")
         PACKAGE = "package", _("Package")
         RECURRING = "recurring_fixed", _("Recurring fixed fee")
@@ -63,7 +64,7 @@ class Job(BranchScopedModel, CustomisableModel):
     currency = CurrencyField()
     charge_rate = RateField(null=True, blank=True)  # overrides the service rate
     billing_method = models.CharField(
-        max_length=16, choices=BillingMethod.choices, default=BillingMethod.PAYG
+        max_length=18, choices=BillingMethod.choices, default=BillingMethod.PAYG
     )
     package_template = models.ForeignKey(
         "catalogue.PackageTemplate", null=True, blank=True, on_delete=models.PROTECT,

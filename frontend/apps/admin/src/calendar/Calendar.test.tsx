@@ -106,9 +106,7 @@ describe("calendar", () => {
       within(dialog).getAllByRole("button", { name: "Cancel lesson", hidden: true })[0]!,
     );
     await waitFor(() =>
-      expect(
-        calls.find((c) => c.path === "/api/v1/lessons/l1/cancel" && !c.search)?.body,
-      ).toEqual({
+      expect(calls.find((c) => c.path === "/api/v1/lessons/l1/cancel" && !c.search)?.body).toEqual({
         cancelled_by: "client",
         reason: "Ill",
         notify: true,

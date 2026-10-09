@@ -200,9 +200,7 @@ describe("lesson delivery", () => {
     );
     render(<App />);
     fireEvent.click(await screen.findByRole("tab", { name: "To approve" }));
-    await waitFor(() =>
-      expect(calls.some((c) => c.path === "/api/v1/lesson-reports")).toBe(true),
-    );
+    await waitFor(() => expect(calls.some((c) => c.path === "/api/v1/lesson-reports")).toBe(true));
     fireEvent.click(await screen.findByRole("link", { name: "GCSE Maths – Arjun Patel" }));
     fireEvent.click(await screen.findByRole("button", { name: "Approve" }));
     expect(await screen.findByText(/Shared with the client/)).toBeInTheDocument();
@@ -251,8 +249,10 @@ describe("lesson delivery", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save policy" }));
     await waitFor(() =>
       expect(
-        (calls.find((c) => c.path === "/api/v1/cancellation-policies" && c.method === "POST")
-          ?.body as { rules: { free_window_hours: number } }).rules.free_window_hours,
+        (
+          calls.find((c) => c.path === "/api/v1/cancellation-policies" && c.method === "POST")
+            ?.body as { rules: { free_window_hours: number } }
+        ).rules.free_window_hours,
       ).toBe(48),
     );
 

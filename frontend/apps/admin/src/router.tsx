@@ -7,6 +7,8 @@ import {
   type RouterHistory,
 } from "@tanstack/react-router";
 
+import { BillingPage } from "./billing/BillingPage";
+import { InvoicePage } from "./billing/InvoicePage";
 import { AvailabilityPage } from "./calendar/AvailabilityPage";
 import { CalendarPage } from "./calendar/CalendarPage";
 import { CataloguePage } from "./catalogue/CataloguePage";
@@ -141,6 +143,14 @@ const reportRoute = createRoute({
 });
 const unconfirmedRoute = appPage("/unconfirmed", UnconfirmedPage);
 const deliverySettingsRoute = appPage("/lesson-policies", DeliverySettingsPage);
+const billingRoute = appPage("/billing", BillingPage);
+const invoiceRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/invoices/$invoiceId",
+  component: function InvoiceRoute() {
+    return <InvoicePage invoiceId={invoiceRoute.useParams().invoiceId} />;
+  },
+});
 const jobRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/jobs/$jobId",
@@ -178,6 +188,8 @@ const routeTree = rootRoute.addChildren([
     reportRoute,
     unconfirmedRoute,
     deliverySettingsRoute,
+    billingRoute,
+    invoiceRoute,
     teamRoute,
     auditRoute,
     settingsRoute,

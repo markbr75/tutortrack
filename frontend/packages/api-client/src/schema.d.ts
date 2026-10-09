@@ -277,6 +277,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/billing/ageing": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Open invoices by client in ageing buckets (the overdue report). */
+    get: operations["billing_ageing_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/branches": {
     parameters: {
       query?: never;
@@ -902,6 +919,70 @@ export interface paths {
     patch: operations["catalogue_tax_rates_partial_update"];
     trace?: never;
   };
+  "/api/v1/charges": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Charges awaiting (or on) invoices. ``POST`` adds a one-off charge or (negative)
+     *     discount.
+     */
+    get: operations["charges_list"];
+    put?: never;
+    /**
+     * @description Charges awaiting (or on) invoices. ``POST`` adds a one-off charge or (negative)
+     *     discount.
+     */
+    post: operations["charges_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/charges/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Charges awaiting (or on) invoices. ``POST`` adds a one-off charge or (negative)
+     *     discount.
+     */
+    get: operations["charges_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/charges/{id}/void": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Charges awaiting (or on) invoices. ``POST`` adds a one-off charge or (negative)
+     *     discount.
+     */
+    post: operations["charges_void_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/clients": {
     parameters: {
       query?: never;
@@ -920,6 +1001,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/clients/{client_id}/balance": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["clients_balance_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/clients/{client_id}/contacts": {
     parameters: {
       query?: never;
@@ -932,6 +1029,40 @@ export interface paths {
     put?: never;
     /** @description Contacts of one client: ``/clients/{client_id}/contacts``. */
     post: operations["clients_contacts_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/clients/{client_id}/ledger": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The client's ledger entries, newest first (append-only). */
+    get: operations["clients_ledger_list"];
+    put?: never;
+    /** @description The client's ledger entries, newest first (append-only). */
+    post: operations["clients_ledger_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/clients/{client_id}/statement": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["clients_statement_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -1153,6 +1284,52 @@ export interface paths {
     head?: never;
     /** @description All contacts (search, edit, archive). Create through ``/clients/{id}/contacts``. */
     patch: operations["contacts_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/credit-notes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["credit_notes_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/credit-notes/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["credit_notes_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/custom-fields": {
@@ -1541,6 +1718,313 @@ export interface paths {
     get: operations["invitations_lookup_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoice-runs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Invoice runs (FR-10-3, TW1). ``POST`` starts one (idempotent per branch, period and
+     *     mode); ``approve`` issues the drafts without waiting for the review period.
+     */
+    get: operations["invoice_runs_list"];
+    put?: never;
+    /**
+     * @description Invoice runs (FR-10-3, TW1). ``POST`` starts one (idempotent per branch, period and
+     *     mode); ``approve`` issues the drafts without waiting for the review period.
+     */
+    post: operations["invoice_runs_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoice-runs/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Invoice runs (FR-10-3, TW1). ``POST`` starts one (idempotent per branch, period and
+     *     mode); ``approve`` issues the drafts without waiting for the review period.
+     */
+    get: operations["invoice_runs_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoice-runs/{id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Invoice runs (FR-10-3, TW1). ``POST`` starts one (idempotent per branch, period and
+     *     mode); ``approve`` issues the drafts without waiting for the review period.
+     */
+    post: operations["invoice_runs_approve_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoice-runs/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description How many clients and charges a run would invoice (nothing is created). */
+    post: operations["invoice_runs_preview_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoices": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Invoices (FR-10-3/4). Drafts can be edited; issued invoices are immutable and are
+     *     corrected with credit notes.
+     */
+    get: operations["invoices_list"];
+    put?: never;
+    /** @description A draft now from the client's uninvoiced charges. */
+    post: operations["invoices_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoices/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Invoices (FR-10-3/4). Drafts can be edited; issued invoices are immutable and are
+     *     corrected with credit notes.
+     */
+    get: operations["invoices_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Invoices (FR-10-3/4). Drafts can be edited; issued invoices are immutable and are
+     *     corrected with credit notes.
+     */
+    delete: operations["invoices_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Invoices (FR-10-3/4). Drafts can be edited; issued invoices are immutable and are
+     *     corrected with credit notes.
+     */
+    patch: operations["invoices_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/invoices/{id}/add-line": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Invoices (FR-10-3/4). Drafts can be edited; issued invoices are immutable and are
+     *     corrected with credit notes.
+     */
+    post: operations["invoices_add_line_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoices/{id}/apply-credit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Invoices (FR-10-3/4). Drafts can be edited; issued invoices are immutable and are
+     *     corrected with credit notes.
+     */
+    post: operations["invoices_apply_credit_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoices/{id}/credit-note": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Invoices (FR-10-3/4). Drafts can be edited; issued invoices are immutable and are
+     *     corrected with credit notes.
+     */
+    post: operations["invoices_credit_note_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoices/{id}/issue": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Invoices (FR-10-3/4). Drafts can be edited; issued invoices are immutable and are
+     *     corrected with credit notes.
+     */
+    post: operations["invoices_issue_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoices/{id}/pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Invoices (FR-10-3/4). Drafts can be edited; issued invoices are immutable and are
+     *     corrected with credit notes.
+     */
+    get: operations["invoices_pdf_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoices/{id}/remove-line": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Invoices (FR-10-3/4). Drafts can be edited; issued invoices are immutable and are
+     *     corrected with credit notes.
+     */
+    post: operations["invoices_remove_line_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoices/{id}/send": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Email the invoice (with its PDF) to the billing contact now. */
+    post: operations["invoices_send_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoices/{id}/void": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Invoices (FR-10-3/4). Drafts can be edited; issued invoices are immutable and are
+     *     corrected with credit notes.
+     */
+    post: operations["invoices_void_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoices/{id}/write-off": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Invoices (FR-10-3/4). Drafts can be edited; issued invoices are immutable and are
+     *     corrected with credit notes.
+     */
+    post: operations["invoices_write_off_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -2763,6 +3247,75 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/payment-requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Payment requests (FR-10-6): top-ups for prepaid credit. Not tax invoices. */
+    get: operations["payment_requests_list"];
+    put?: never;
+    /** @description Payment requests (FR-10-6): top-ups for prepaid credit. Not tax invoices. */
+    post: operations["payment_requests_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payment-requests/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Payment requests (FR-10-6): top-ups for prepaid credit. Not tax invoices. */
+    get: operations["payment_requests_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payment-requests/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Payment requests (FR-10-6): top-ups for prepaid credit. Not tax invoices. */
+    post: operations["payment_requests_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payment-requests/bulk": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Payment requests (FR-10-6): top-ups for prepaid credit. Not tax invoices. */
+    post: operations["payment_requests_bulk_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/people/duplicates": {
     parameters: {
       query?: never;
@@ -3516,6 +4069,72 @@ export interface components {
      * @enum {string}
      */
     ActionEnum: "complete" | "cancel" | "reassign_tutor" | "change_location" | "delete";
+    AdHocChargeRequest: {
+      /** Format: uuid */
+      client: string;
+      /** Format: uuid */
+      student?: string | null;
+      /** Format: uuid */
+      job?: string | null;
+      /** Format: uuid */
+      product?: string | null;
+      /** Format: uuid */
+      tax_rate?: string | null;
+      description: string;
+      /** Format: date */
+      day?: string | null;
+      /**
+       * Format: decimal
+       * @default 1.0000
+       */
+      quantity: string;
+      /** @description Negative for a discount */
+      unit_price: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /** @default  */
+      category: string;
+      /** Format: uuid */
+      tutor?: string | null;
+      tutor_share?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
+    AddLineRequest: {
+      description: string;
+      unit_price: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /**
+       * Format: decimal
+       * @default 1.0000
+       */
+      quantity: string;
+      /** Format: uuid */
+      student?: string | null;
+      /** Format: uuid */
+      tax_rate?: string | null;
+      /** Format: uuid */
+      product?: string | null;
+    };
     Address: {
       line1?: string;
       line2?: string;
@@ -3557,6 +4176,38 @@ export interface components {
       /** Format: date-time */
       starts_at: string;
       conflict: string;
+    };
+    Ageing: {
+      current: components["schemas"]["MoneyOut"];
+      one_to_30: components["schemas"]["MoneyOut"];
+      thirty_one_to_60: components["schemas"]["MoneyOut"];
+      sixty_one_to_90: components["schemas"]["MoneyOut"];
+      over_90: components["schemas"]["MoneyOut"];
+    };
+    AgeingRow: {
+      current: components["schemas"]["MoneyOut"];
+      one_to_30: components["schemas"]["MoneyOut"];
+      thirty_one_to_60: components["schemas"]["MoneyOut"];
+      sixty_one_to_90: components["schemas"]["MoneyOut"];
+      over_90: components["schemas"]["MoneyOut"];
+      /** Format: uuid */
+      client: string;
+      client_name: string;
+      total: components["schemas"]["MoneyOut"];
+    };
+    /**
+     * @description * `invoice` - Reduce what is owed on the invoice
+     *     * `credit` - Keep as client credit
+     * @enum {string}
+     */
+    ApplicationEnum: "invoice" | "credit";
+    Applied: {
+      applied: components["schemas"]["MoneyOut"];
+      invoice: components["schemas"]["Invoice"];
+    };
+    ApplyCreditRequest: {
+      /** Format: decimal */
+      amount?: string | null;
     };
     ApplyTagRequest: {
       target_type: string;
@@ -3638,14 +4289,28 @@ export interface components {
       timezone: string;
       windows: components["schemas"]["WindowRequest"][];
     };
+    Balances: {
+      currency: string;
+      ledger: components["schemas"]["MoneyOut"];
+      invoice_balance: components["schemas"]["MoneyOut"];
+      available_credit: components["schemas"]["MoneyOut"];
+      uninvoiced: components["schemas"]["MoneyOut"];
+      projected: components["schemas"]["MoneyOut"];
+      overdue: components["schemas"]["MoneyOut"];
+    };
     /**
      * @description * `pay_as_you_go` - Pay as you go
+     *     * `invoice_in_advance` - Invoice in advance
      *     * `prepaid_credit` - Prepaid credit
      *     * `package` - Package
      *     * `recurring_fixed` - Recurring fixed fee
      * @enum {string}
      */
-    BillingMethodEnum: "pay_as_you_go" | "prepaid_credit" | "package" | "recurring_fixed";
+    BillingMethodEnum:
+      "pay_as_you_go" | "invoice_in_advance" | "prepaid_credit" | "package" | "recurring_fixed";
+    BillingReasonRequest: {
+      reason: string;
+    };
     /** @enum {unknown} */
     BlankEnum: "";
     Branch: {
@@ -3732,6 +4397,41 @@ export interface components {
       reason: string;
       /** @default admin */
       cancelled_by: components["schemas"]["CancelledByEnum"];
+    };
+    BulkRequestRequest: {
+      /** @description Leave out for every active client with prepaid jobs. */
+      clients?: string[];
+      below?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      amount?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      top_up_to?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      description?: string;
+    };
+    BulkRequestResult: {
+      created: components["schemas"]["PaymentRequest"][];
     };
     BulkResult: {
       succeeded: string[];
@@ -3919,6 +4619,82 @@ export interface components {
       name: string;
       order?: number;
     };
+    Charge: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      /** Format: uuid */
+      readonly student: string | null;
+      readonly student_name: string;
+      /** Format: uuid */
+      readonly job: string | null;
+      /** Format: uuid */
+      readonly lesson: string | null;
+      readonly kind: components["schemas"]["ChargeKindEnum"];
+      readonly description: string;
+      /** Format: date */
+      readonly date: string;
+      readonly currency: string;
+      /** Format: decimal */
+      readonly quantity: string;
+      readonly unit: string;
+      readonly unit_price: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /** Format: decimal */
+      readonly tax_percent: string;
+      readonly net: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly tax: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly gross: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly status: components["schemas"]["ChargeStatusEnum"];
+      /** Format: uuid */
+      readonly invoice: string | null;
+      readonly invoice_number: string;
+      readonly category: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `lesson` - Lesson
+     *     * `advance` - Lesson (invoiced in advance)
+     *     * `late_cancellation` - Late cancellation fee
+     *     * `reconciliation` - Adjustment for a changed lesson
+     *     * `ad_hoc` - One-off charge
+     * @enum {string}
+     */
+    ChargeKindEnum: "lesson" | "advance" | "late_cancellation" | "reconciliation" | "ad_hoc";
     ChargeLine: {
       student_id: string;
       client_id: string | null;
@@ -3931,6 +4707,13 @@ export interface components {
       tax_amount: components["schemas"]["MoneyOut"];
       trace: string[];
     };
+    /**
+     * @description * `uninvoiced` - Not invoiced
+     *     * `invoiced` - Invoiced
+     *     * `void` - Void
+     * @enum {string}
+     */
+    ChargeStatusEnum: "uninvoiced" | "invoiced" | "void";
     Client: {
       /** Format: uuid */
       readonly id: string;
@@ -4245,6 +5028,96 @@ export interface components {
      * @enum {string}
      */
     CreatedViaEnum: "admin" | "tutor" | "client_booking" | "api" | "import" | "series";
+    CreditLineRequest: {
+      /** Format: uuid */
+      line: string;
+      /** Format: decimal */
+      amount: string;
+    };
+    CreditNote: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly number: string;
+      /** Format: uuid */
+      readonly invoice: string;
+      readonly invoice_number: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly currency: string;
+      readonly reason: string;
+      readonly application: components["schemas"]["ApplicationEnum"];
+      readonly net: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly tax: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly total: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /** Format: date-time */
+      readonly issued_at: string;
+      readonly lines: components["schemas"]["CreditNoteLine"][];
+    };
+    CreditNoteLine: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly invoice_line: string | null;
+      readonly description: string;
+      readonly net: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly tax: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly gross: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+    };
+    CreditNoteRequestRequest: {
+      reason: string;
+      /** @default invoice */
+      application: components["schemas"]["ApplicationEnum"];
+      /** @description Leave out to credit everything still owed. */
+      lines?: components["schemas"]["CreditLineRequest"][];
+    };
     CustomField: {
       /** Format: uuid */
       readonly id: string;
@@ -4627,6 +5500,95 @@ export interface components {
      * @enum {string}
      */
     InvitationStatusEnum: "pending" | "accepted" | "revoked";
+    Invoice: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly number: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      /** Format: uuid */
+      readonly branch: string;
+      readonly currency: string;
+      readonly status: components["schemas"]["InvoiceStatusEnum"];
+      readonly is_overdue: boolean;
+      /** Format: date */
+      readonly issue_date: string | null;
+      /** Format: date */
+      readonly due_date: string | null;
+      /** Format: date */
+      readonly period_start: string | null;
+      /** Format: date */
+      readonly period_end: string | null;
+      readonly subtotal: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly tax_total: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly total: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly amount_paid: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly amount_credited: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly balance_due: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly po_number: string;
+      readonly notes: string;
+      /** Format: date-time */
+      readonly sent_at: string | null;
+      /** Format: uuid */
+      readonly invoice_run: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    InvoiceCreateRequest: {
+      /** Format: uuid */
+      client: string;
+      /** Format: date */
+      until?: string | null;
+    };
     /**
      * @description * `email` - Email
      *     * `portal` - Portal only
@@ -4634,6 +5596,92 @@ export interface components {
      * @enum {string}
      */
     InvoiceDeliveryEnum: "email" | "portal" | "post";
+    InvoiceDetail: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly number: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      /** Format: uuid */
+      readonly branch: string;
+      readonly currency: string;
+      readonly status: components["schemas"]["InvoiceStatusEnum"];
+      readonly is_overdue: boolean;
+      /** Format: date */
+      readonly issue_date: string | null;
+      /** Format: date */
+      readonly due_date: string | null;
+      /** Format: date */
+      readonly period_start: string | null;
+      /** Format: date */
+      readonly period_end: string | null;
+      readonly subtotal: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly tax_total: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly total: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly amount_paid: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly amount_credited: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly balance_due: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly po_number: string;
+      readonly notes: string;
+      /** Format: date-time */
+      readonly sent_at: string | null;
+      /** Format: uuid */
+      readonly invoice_run: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly billing_snapshot: unknown;
+      readonly lines: components["schemas"]["InvoiceLine"][];
+      readonly credit_notes: components["schemas"]["CreditNote"][];
+    };
     /**
      * @description * `client` - One invoice per client
      *     * `student` - One per student
@@ -4641,6 +5689,125 @@ export interface components {
      * @enum {string}
      */
     InvoiceGroupingEnum: "client" | "student" | "job";
+    InvoiceLine: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly charge: string | null;
+      readonly position: number;
+      /** Format: date */
+      readonly date: string;
+      readonly description: string;
+      readonly student_name: string;
+      readonly tutor_name: string;
+      /** Format: decimal */
+      readonly quantity: string;
+      readonly unit: string;
+      readonly unit_price: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /** Format: decimal */
+      readonly tax_percent: string;
+      readonly net: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly tax: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly gross: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly credited: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+    };
+    InvoiceRun: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly branch: string;
+      /** Format: date */
+      readonly period_start: string;
+      /** Format: date */
+      readonly period_end: string;
+      readonly mode: components["schemas"]["InvoiceRunModeEnum"];
+      readonly filters: unknown;
+      readonly status: components["schemas"]["InvoiceRunStatusEnum"];
+      readonly stats: unknown;
+      /** Format: date-time */
+      readonly review_until: string | null;
+      /** Format: date-time */
+      readonly approved_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    InvoiceRunCreateRequest: {
+      /** Format: date */
+      period_start: string;
+      /** Format: date */
+      period_end: string;
+      /** @default arrears */
+      mode: components["schemas"]["InvoiceRunModeEnum"];
+      /** Format: uuid */
+      branch?: string | null;
+      /** Format: uuid */
+      client?: string | null;
+    };
+    /**
+     * @description * `arrears` - Delivered lessons and charges
+     *     * `advance` - Scheduled lessons, in advance
+     * @enum {string}
+     */
+    InvoiceRunModeEnum: "arrears" | "advance";
+    /**
+     * @description * `collecting` - Collecting charges
+     *     * `review` - Drafts in review
+     *     * `issuing` - Issuing
+     *     * `completed` - Completed
+     *     * `failed` - Failed
+     * @enum {string}
+     */
+    InvoiceRunStatusEnum: "collecting" | "review" | "issuing" | "completed" | "failed";
+    /**
+     * @description * `draft` - Draft
+     *     * `issued` - Issued
+     *     * `partially_paid` - Partially paid
+     *     * `paid` - Paid
+     *     * `void` - Void
+     *     * `written_off` - Written off
+     * @enum {string}
+     */
+    InvoiceStatusEnum: "draft" | "issued" | "partially_paid" | "paid" | "void" | "written_off";
     Job: {
       /** Format: uuid */
       readonly id: string;
@@ -4958,6 +6125,70 @@ export interface components {
      * @enum {string}
      */
     KindEnum: "note" | "task" | "document" | "change";
+    LedgerAdjustRequest: {
+      /** @description Positive adds to what the client owes */
+      amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      reason: string;
+    };
+    LedgerEntry: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly type: components["schemas"]["LedgerEntryTypeEnum"];
+      readonly currency: string;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly balance_after: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly ref_type: string;
+      readonly ref_id: string;
+      readonly description: string;
+      /** Format: date-time */
+      readonly occurred_at: string;
+    };
+    /**
+     * @description * `invoice` - Invoice
+     *     * `invoice_void` - Invoice voided
+     *     * `payment` - Payment
+     *     * `credit_note` - Credit note
+     *     * `refund` - Refund
+     *     * `payment_request_payment` - Credit top-up
+     *     * `adjustment` - Adjustment
+     *     * `write_off` - Write-off
+     *     * `package_purchase` - Package purchase
+     * @enum {string}
+     */
+    LedgerEntryTypeEnum:
+      | "invoice"
+      | "invoice_void"
+      | "payment"
+      | "credit_note"
+      | "refund"
+      | "payment_request_payment"
+      | "adjustment"
+      | "write_off"
+      | "package_purchase";
     Lesson: {
       /** Format: uuid */
       readonly id: string;
@@ -5646,6 +6877,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["CalendarEvent"][];
     };
+    PaginatedChargeList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Charge"][];
+    };
     PaginatedClientList: {
       /**
        * Format: uri
@@ -5724,6 +6968,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Contact"][];
     };
+    PaginatedCreditNoteList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["CreditNote"][];
+    };
     PaginatedDocumentList: {
       /**
        * Format: uri
@@ -5762,6 +7019,32 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Invitation"][];
+    };
+    PaginatedInvoiceList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Invoice"][];
+    };
+    PaginatedInvoiceRunList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["InvoiceRun"][];
     };
     PaginatedJobList: {
       /**
@@ -5879,6 +7162,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["PackageTemplate"][];
+    };
+    PaginatedPaymentRequestList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PaymentRequest"][];
     };
     PaginatedProcessList: {
       /**
@@ -6087,6 +7383,12 @@ export interface components {
       order?: number;
       validation_regex?: string;
       active?: boolean;
+    };
+    PatchedInvoiceUpdateRequest: {
+      po_number?: string;
+      notes?: string;
+      /** Format: date */
+      due_date?: string | null;
     };
     PatchedJobRequest: {
       name?: string;
@@ -6498,6 +7800,67 @@ export interface components {
      * @enum {string}
      */
     PayUnitEnum: "per_hour" | "per_lesson";
+    PaymentRequest: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly number: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      readonly currency: string;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly amount_paid: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly description: string;
+      readonly status: components["schemas"]["PaymentRequestStatusEnum"];
+      readonly source: components["schemas"]["SourceEnum"];
+      /** Format: date */
+      readonly due_date: string | null;
+      /** Format: date-time */
+      readonly sent_at: string | null;
+      /** Format: date-time */
+      readonly paid_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    PaymentRequestCreateRequest: {
+      /** Format: uuid */
+      client: string;
+      amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      description?: string;
+      /** Format: date */
+      due_date?: string | null;
+    };
+    /**
+     * @description * `open` - Awaiting payment
+     *     * `paid` - Paid
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    PaymentRequestStatusEnum: "open" | "paid" | "cancelled";
     PercentPair: {
       /** Format: decimal */
       charge_percent: string;
@@ -6879,6 +8242,10 @@ export interface components {
      * @enum {string}
      */
     RelationshipEnum: "parent" | "guardian" | "carer" | "self" | "finance" | "other";
+    RemoveLineRequest: {
+      /** Format: uuid */
+      line: string;
+    };
     ReplaceRequest: {
       /** Format: uuid */
       tutor: string;
@@ -7010,6 +8377,13 @@ export interface components {
       | "client"
       | "student"
       | "affiliate";
+    RunPreview: {
+      clients: number;
+      charges: number;
+      totals: {
+        [key: string]: string;
+      };
+    };
     SSOProvider: {
       key: string;
       start_url: string;
@@ -7415,11 +8789,31 @@ export interface components {
       reason: string | null;
       suggestion: string | null;
     };
+    /**
+     * @description * `manual` - Created by staff
+     *     * `bulk` - Bulk request
+     *     * `threshold` - Automatic top-up
+     * @enum {string}
+     */
+    SourceEnum: "manual" | "bulk" | "threshold";
     StartBulkRequest: {
       target_ids: string[];
       params?: {
         [key: string]: unknown;
       };
+    };
+    Statement: {
+      /** Format: uuid */
+      client_id: string;
+      currency: string;
+      /** Format: date */
+      start: string;
+      /** Format: date */
+      end: string;
+      opening: components["schemas"]["MoneyOut"];
+      closing: components["schemas"]["MoneyOut"];
+      entries: components["schemas"]["LedgerEntry"][];
+      ageing: components["schemas"]["Ageing"];
     };
     StatusChangeRequest: {
       status: components["schemas"]["JobStatusEnum"];
@@ -8427,6 +9821,27 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Slot"][];
+        };
+      };
+    };
+  };
+  billing_ageing_list: {
+    parameters: {
+      query?: {
+        currency?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AgeingRow"][];
         };
       };
     };
@@ -9927,6 +11342,130 @@ export interface operations {
       };
     };
   };
+  charges_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        job?: string;
+        /**
+         * @description * `lesson` - Lesson
+         *     * `advance` - Lesson (invoiced in advance)
+         *     * `late_cancellation` - Late cancellation fee
+         *     * `reconciliation` - Adjustment for a changed lesson
+         *     * `ad_hoc` - One-off charge
+         */
+        kind?: ("ad_hoc" | "advance" | "late_cancellation" | "lesson" | "reconciliation")[];
+        lesson?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `uninvoiced` - Not invoiced
+         *     * `invoiced` - Invoiced
+         *     * `void` - Void
+         */
+        status?: ("invoiced" | "uninvoiced" | "void")[];
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedChargeList"];
+        };
+      };
+    };
+  };
+  charges_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AdHocChargeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AdHocChargeRequest"];
+        "multipart/form-data": components["schemas"]["AdHocChargeRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Charge"];
+        };
+      };
+    };
+  };
+  charges_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this charge. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Charge"];
+        };
+      };
+    };
+  };
+  charges_void_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this charge. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Charge"];
+        };
+      };
+    };
+  };
   clients_list: {
     parameters: {
       query?: {
@@ -10007,6 +11546,29 @@ export interface operations {
       };
     };
   };
+  clients_balance_retrieve: {
+    parameters: {
+      query?: {
+        currency?: string;
+      };
+      header?: never;
+      path: {
+        client_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Balances"];
+        };
+      };
+    };
+  };
   clients_contacts_list: {
     parameters: {
       query?: {
@@ -10059,6 +11621,87 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Contact"];
+        };
+      };
+    };
+  };
+  clients_ledger_list: {
+    parameters: {
+      query?: {
+        currency?: string;
+      };
+      header?: never;
+      path: {
+        client_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LedgerEntry"][];
+        };
+      };
+    };
+  };
+  clients_ledger_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        client_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LedgerAdjustRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LedgerAdjustRequest"];
+        "multipart/form-data": components["schemas"]["LedgerAdjustRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LedgerEntry"];
+        };
+      };
+    };
+  };
+  clients_statement_retrieve: {
+    parameters: {
+      query?: {
+        currency?: string;
+        from?: string;
+        /** @description Download as PDF instead of JSON */
+        pdf?: boolean;
+        to?: string;
+      };
+      header?: never;
+      path: {
+        client_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Statement"];
+          "application/pdf": string;
         };
       };
     };
@@ -10576,6 +12219,59 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Contact"];
+        };
+      };
+    };
+  };
+  credit_notes_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedCreditNoteList"];
+        };
+      };
+    };
+  };
+  credit_notes_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this credit note. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CreditNote"];
         };
       };
     };
@@ -11406,6 +13102,551 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["InvitationLookup"];
+        };
+      };
+    };
+  };
+  invoice_runs_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedInvoiceRunList"];
+        };
+      };
+    };
+  };
+  invoice_runs_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["InvoiceRunCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["InvoiceRunCreateRequest"];
+        "multipart/form-data": components["schemas"]["InvoiceRunCreateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceRun"];
+        };
+      };
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceRun"];
+        };
+      };
+    };
+  };
+  invoice_runs_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this invoice run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceRun"];
+        };
+      };
+    };
+  };
+  invoice_runs_approve_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this invoice run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceRun"];
+        };
+      };
+    };
+  };
+  invoice_runs_preview_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["InvoiceRunCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["InvoiceRunCreateRequest"];
+        "multipart/form-data": components["schemas"]["InvoiceRunCreateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RunPreview"];
+        };
+      };
+    };
+  };
+  invoices_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        issued_from?: string;
+        issued_to?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Open and past due */
+        overdue?: boolean;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        run?: string;
+        /**
+         * @description * `draft` - Draft
+         *     * `issued` - Issued
+         *     * `partially_paid` - Partially paid
+         *     * `paid` - Paid
+         *     * `void` - Void
+         *     * `written_off` - Written off
+         */
+        status?: ("draft" | "issued" | "paid" | "partially_paid" | "void" | "written_off")[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedInvoiceList"];
+        };
+      };
+    };
+  };
+  invoices_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["InvoiceCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["InvoiceCreateRequest"];
+        "multipart/form-data": components["schemas"]["InvoiceCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceDetail"];
+        };
+      };
+    };
+  };
+  invoices_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this invoice. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceDetail"];
+        };
+      };
+    };
+  };
+  invoices_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this invoice. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  invoices_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this invoice. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedInvoiceUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedInvoiceUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedInvoiceUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceDetail"];
+        };
+      };
+    };
+  };
+  invoices_add_line_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this invoice. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddLineRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AddLineRequest"];
+        "multipart/form-data": components["schemas"]["AddLineRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceDetail"];
+        };
+      };
+    };
+  };
+  invoices_apply_credit_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this invoice. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ApplyCreditRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ApplyCreditRequest"];
+        "multipart/form-data": components["schemas"]["ApplyCreditRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Applied"];
+        };
+      };
+    };
+  };
+  invoices_credit_note_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this invoice. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreditNoteRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CreditNoteRequestRequest"];
+        "multipart/form-data": components["schemas"]["CreditNoteRequestRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CreditNote"];
+        };
+      };
+    };
+  };
+  invoices_issue_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this invoice. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceDetail"];
+        };
+      };
+    };
+  };
+  invoices_pdf_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this invoice. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": string;
+        };
+      };
+    };
+  };
+  invoices_remove_line_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this invoice. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RemoveLineRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RemoveLineRequest"];
+        "multipart/form-data": components["schemas"]["RemoveLineRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceDetail"];
+        };
+      };
+    };
+  };
+  invoices_send_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this invoice. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceDetail"];
+        };
+      };
+    };
+  };
+  invoices_void_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this invoice. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BillingReasonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BillingReasonRequest"];
+        "multipart/form-data": components["schemas"]["BillingReasonRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceDetail"];
+        };
+      };
+    };
+  };
+  invoices_write_off_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this invoice. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BillingReasonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BillingReasonRequest"];
+        "multipart/form-data": components["schemas"]["BillingReasonRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceDetail"];
         };
       };
     };
@@ -13732,6 +15973,147 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Organisation"];
+        };
+      };
+    };
+  };
+  payment_requests_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `open` - Awaiting payment
+         *     * `paid` - Paid
+         *     * `cancelled` - Cancelled
+         */
+        status?: ("cancelled" | "open" | "paid")[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPaymentRequestList"];
+        };
+      };
+    };
+  };
+  payment_requests_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PaymentRequestCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PaymentRequestCreateRequest"];
+        "multipart/form-data": components["schemas"]["PaymentRequestCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaymentRequest"];
+        };
+      };
+    };
+  };
+  payment_requests_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this payment request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaymentRequest"];
+        };
+      };
+    };
+  };
+  payment_requests_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this payment request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaymentRequest"];
+        };
+      };
+    };
+  };
+  payment_requests_bulk_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["BulkRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BulkRequestRequest"];
+        "multipart/form-data": components["schemas"]["BulkRequestRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BulkRequestResult"];
         };
       };
     };
