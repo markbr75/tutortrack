@@ -73,7 +73,7 @@ All ─► E26, E27, E28, E31
 | E01 | ✅ Done (2026-10-08) | See Implementation notes in the epic; follow-ups carried into E02, E03, E29, E30 |
 | E02 | ✅ Done (2026-10-09) | Incl. E02-TW1 (closure workflow, built with E32). Follow-ups in E04, E05, E06, E11, E24 |
 | E03 | ✅ Done (2026-10-09) | Phase 1 scope (T08/T11/T12 are Phase 2). See Implementation notes |
-| E04 | ☐ | |
+| E04 | ⏭ Next | |
 | E05 | ✅ Done (2026-10-09) | Phase 1 scope (merge tool and map view are Phase 2). See Implementation notes |
 | E06 | ✅ Done (2026-10-09) | MVP scope (T07–T10 pay tiers, premiums, discounts, rooms are Phase 2). See Implementation notes |
 | E07 | ✅ Done (2026-10-09) | Lesson-dependent parts (replace preview, hours used, delivered totals) wired by E08-T10. See Implementation notes |
@@ -85,7 +85,7 @@ All ─► E26, E27, E28, E31
 | E13 | ✅ Done (2026-10-09) | MVP scope (broadcasts, inbox, WhatsApp, custom domains are Phase 2). See Implementation notes |
 | E14 | ☐ | |
 | E15 | ✅ Done (2026-10-10) | MVP scope (booking, reschedule, packages and messaging are Phase 2). See Implementation notes |
-| E16 | ⏭ Next | |
+| E16 | ✅ Done (2026-10-10) | Responsive tutor shell in the portal app (PWA/offline/push are Phase 2; expenses with E12, compliance with E18). See Implementation notes |
 | E17 | ☐ | |
 | E18 | ☐ | |
 | E19 | ☐ | |

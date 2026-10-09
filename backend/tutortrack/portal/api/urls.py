@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
-from . import views
+from . import tutor_views, views
 
 router = SimpleRouter(trailing_slash=False)
 router.register("announcements", views.AnnouncementViewSet, basename="announcements")
@@ -46,6 +46,10 @@ urlpatterns = [
         views.PortalAnnouncementsView.as_view(),
         name="portal-announcements",
     ),
+    path("tutor/me", tutor_views.TutorMeView.as_view(), name="tutor-me"),
+    path("tutor/today", tutor_views.TutorTodayView.as_view(), name="tutor-today"),
+    path("tutor/students", tutor_views.TutorStudentsView.as_view(), name="tutor-students"),
+    path("tutor/earnings", tutor_views.TutorEarningsView.as_view(), name="tutor-earnings"),
     path(
         "<str:kind>/<uuid:record_id>/portal-invite",
         views.InviteView.as_view(),

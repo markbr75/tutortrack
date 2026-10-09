@@ -1,13 +1,14 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
 import { Button, Spinner, TextField } from "@tutortrack/ui";
-import { useMutation } from "@tanstack/react-query";
-import { Link, Outlet } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 
 import { api, problemStatus, usePortalMe } from "./api";
+import { TutorShell } from "./tutor/TutorShell";
 
-function SignIn() {
+export function SignIn() {
   const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const send = useMutation({
@@ -44,10 +45,27 @@ function SignIn() {
   );
 }
 
-/** The portal shell: family (client) or student navigation (FR-15-1). */
+/** Signed in as a tutor → the tutor shell (E16); otherwise the family shell (E15). */
 export function Shell() {
   const { t } = useTranslation();
+  const who = useQuery({
+    queryKey: ["identity", "me"],
+    queryFn: async () => unwrap(await api.GET("/api/v1/me")),
+  });
+  if (who.isPending) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (problemStatus(who.error) === 401) return <SignIn />;
+  if (who.data?.membership?.role === "tutor") return <TutorShell />;
+  return <FamilyShell />;
+}
+
+function FamilyShell() {
+  const { t } = useTranslation();
   const me = usePortalMe();
+  const location = useLocation();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (location.pathname.startsWith("/tutor")) void navigate({ to: "/" });
+  }, [location.pathname, navigate]);
   const logout = useMutation({
     mutationFn: async () => api.POST("/api/v1/auth/logout"),
     onSuccess: () => window.location.assign("/portal/"),

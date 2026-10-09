@@ -4868,6 +4868,70 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/tutor/earnings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["tutor_earnings_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["tutor_me_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor/students": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["tutor_students_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor/today": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["tutor_today_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/tutors": {
     parameters: {
       query?: never;
@@ -6368,6 +6432,14 @@ export interface components {
      * @enum {string}
      */
     DuplicateTypeEnum: "contact" | "student" | "tutor";
+    EarningLine: {
+      lesson: string;
+      title: string;
+      /** Format: date-time */
+      start: string;
+      status: string;
+      pay: components["schemas"]["MoneyOut"];
+    };
     Economics: {
       charge: components["schemas"]["MoneyOut"];
       pay?: components["schemas"]["MoneyOut"];
@@ -11017,6 +11089,27 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    TutorDayLesson: {
+      id: string;
+      title: string;
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      status: string;
+      online: boolean;
+      meeting_url: string;
+      location: string;
+      students: string[];
+    };
+    TutorEarnings: {
+      /** Format: date */
+      start: string;
+      /** Format: date */
+      end: string;
+      lessons: components["schemas"]["EarningLine"][];
+      total: components["schemas"]["MoneyOut"];
+    };
     TutorInput: {
       /** Format: uuid */
       tutor: string;
@@ -11060,6 +11153,14 @@ export interface components {
        * @default false
        */
       offer: boolean;
+    };
+    TutorMe: {
+      id: string;
+      name: string;
+      email: string;
+      can_cancel: boolean;
+      can_edit_lessons: boolean;
+      can_see_pay: boolean;
     };
     TutorQualification: {
       /** Format: uuid */
@@ -11118,6 +11219,14 @@ export interface components {
      * @enum {string}
      */
     TutorStatusEnum: "applicant" | "onboarding" | "active" | "restricted" | "inactive" | "archived";
+    TutorStudent: {
+      id: string;
+      name: string;
+      year_group: string;
+      jobs: string[];
+      /** Format: date-time */
+      next_lesson: string | null;
+    };
     TutorSubject: {
       /** Format: uuid */
       readonly id: string;
@@ -11136,6 +11245,15 @@ export interface components {
       subject: string;
       level?: string;
       proficiency?: components["schemas"]["ProficiencyEnum"];
+    };
+    TutorToday: {
+      /** Format: date */
+      date: string;
+      lessons: components["schemas"]["TutorDayLesson"][];
+      reports_due: number;
+      offers: number;
+      unread: number;
+      earnings_this_month: components["schemas"]["MoneyOut"];
     };
     UnreadCount: {
       unread: number;
@@ -20823,6 +20941,85 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TimelineItem"][];
+        };
+      };
+    };
+  };
+  tutor_earnings_retrieve: {
+    parameters: {
+      query?: {
+        from?: string;
+        to?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorEarnings"];
+        };
+      };
+    };
+  };
+  tutor_me_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorMe"];
+        };
+      };
+    };
+  };
+  tutor_students_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorStudent"][];
+        };
+      };
+    };
+  };
+  tutor_today_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorToday"];
         };
       };
     };

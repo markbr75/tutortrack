@@ -49,14 +49,23 @@ The tutor's daily tool, optimised for phones: today's schedule, one-tap join/com
 - Accessibility AA; large tap targets; dark mode.
 
 ## 4. Delivery plan
-- [ ] **E16-T01** Tutor shell, navigation, Today screen.
-- [ ] **E16-T02** Schedule views and permission-aware lesson actions.
-- [ ] **E16-T03** Complete-lesson flow (attendance, report, expenses) optimised for mobile.
-- [ ] **E16-T04** Students and lesson history views.
-- [ ] **E16-T05** Availability editor and time-off requests.
-- [ ] **E16-T06** Earnings, statements, expenses with camera upload.
-- [ ] **E16-T07** Profile and compliance uploads; Stripe Connect onboarding entry point.
+- [x] **E16-T01** Tutor shell, navigation, Today screen.
+- [x] **E16-T02** Schedule views and permission-aware lesson actions.
+- [x] **E16-T03** Complete-lesson flow (attendance, report, expenses) optimised for mobile.
+- [x] **E16-T04** Students and lesson history views.
+- [x] **E16-T05** Availability editor and time-off requests.
+- [x] **E16-T06** Earnings, statements, expenses with camera upload.
+- [x] **E16-T07** Profile and compliance uploads; Stripe Connect onboarding entry point.
 - [ ] **E16-T08** (Phase 2) PWA manifest, service worker, offline cache + background sync for completions/reports.
 - [ ] **E16-T09** (Phase 2) Web Push subscriptions and delivery channel in E13.
 - [ ] **E16-T10** (Phase 2) Job offers inbox and job board (with E19).
 - [ ] **E16-T11** (Phase 3) Capacitor native shells and white-label build pipeline.
+
+## Implementation notes (as built 2026-10-10)
+- **Shell (T01):** the tutor shell lives in the portal app (`/portal/tutor`), picked by the signed-in member's role (`/api/v1/me`). Tutors who open the admin app are redirected there. Today shows lessons with join and "open and complete", and counts of reports to write, job offers, unread notifications and this month's earnings (`/api/v1/tutor/today`).
+- **Schedule and lesson actions (T02/T03):** the agenda covers yesterday plus the next two weeks from the calendar API, filtered to the tutor. The lesson page shows notes for the tutor and the join link. The complete flow is the register (outcome and minutes late per student), then "complete and write report", which opens the report straight away. Cancelling (when the tutor-access toggle allows it) records the tutor as the canceller, so the policy applies. Reports render every template field type on a phone, with draft and submit. Every action reuses the existing scheduling and delivery APIs, which already limit tutors to their own lessons (tested). Creating and rescheduling from the tutor shell, conflict feedback, voice input and the previous report on the lesson page are follow-ups.
+- **Students (T04):** `/api/v1/tutor/students` lists students on the tutor's active jobs with their next lesson. A full lesson history per student is a follow-up.
+- **Availability (T05):** weekly windows and time off, using the E08 APIs.
+- **Earnings (T06):** `/api/v1/tutor/earnings` shows pay per delivered or paid-cancellation lesson for a month, provisional until payroll (E12) creates pay items. Expenses with receipt capture come with E12.
+- **Profile (T07):** headline, phone and public bio. Compliance uploads (E18) and payout setup (E12) come with those epics.
+- **Deferred:** PWA manifest, offline and background sync (T08), web push (T09), job offers inbox (T10, with E19), native shells (T11).

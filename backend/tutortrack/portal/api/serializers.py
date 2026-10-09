@@ -247,3 +247,59 @@ class InviteSerializer(serializers.Serializer):
 class InviteResultSerializer(serializers.Serializer):
     email = serializers.EmailField()
     expires_at = serializers.DateTimeField()
+
+
+# --- tutor portal (E16) ---------------------------------------------------------------------
+
+
+class TutorMeSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+    email = serializers.CharField()
+    can_cancel = serializers.BooleanField()
+    can_edit_lessons = serializers.BooleanField()
+    can_see_pay = serializers.BooleanField()
+
+
+class TutorDayLessonSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    title = serializers.CharField()
+    start = serializers.DateTimeField()
+    end = serializers.DateTimeField()
+    status = serializers.CharField()
+    online = serializers.BooleanField()
+    meeting_url = serializers.CharField(allow_blank=True)
+    location = serializers.CharField(allow_blank=True)
+    students = serializers.ListField(child=serializers.CharField())
+
+
+class TutorTodaySerializer(serializers.Serializer):
+    date = serializers.DateField()
+    lessons = TutorDayLessonSerializer(many=True)
+    reports_due = serializers.IntegerField()
+    offers = serializers.IntegerField()
+    unread = serializers.IntegerField()
+    earnings_this_month = MoneyOut()
+
+
+class TutorStudentSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+    year_group = serializers.CharField(allow_blank=True)
+    jobs = serializers.ListField(child=serializers.CharField())
+    next_lesson = serializers.DateTimeField(allow_null=True)
+
+
+class EarningLineSerializer(serializers.Serializer):
+    lesson = serializers.CharField()
+    title = serializers.CharField()
+    start = serializers.DateTimeField()
+    status = serializers.CharField()
+    pay = MoneyOut()
+
+
+class TutorEarningsSerializer(serializers.Serializer):
+    start = serializers.DateField()
+    end = serializers.DateField()
+    lessons = EarningLineSerializer(many=True)
+    total = MoneyOut()

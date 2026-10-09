@@ -143,8 +143,10 @@ export function AppShell() {
   if (session.isError && isAuthError(session.error)) {
     return <SignInRequired />;
   }
-  if (["client", "student"].includes(session.data?.membership?.role ?? "")) {
-    window.location.replace("/portal/"); // families use the portal (E15)
+  const role = session.data?.membership?.role ?? "";
+  if (["client", "student", "tutor"].includes(role)) {
+    // Families (E15) and tutors (E16) use the portal app.
+    window.location.replace(role === "tutor" ? "/portal/tutor" : "/portal/");
     return null;
   }
 

@@ -19534,6 +19534,127 @@
                 }
             }
         },
+        "/api/v1/tutor/earnings": {
+            "get": {
+                "operationId": "tutor_earnings_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "to",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "tags": [
+                    "tutor"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TutorEarnings"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/tutor/me": {
+            "get": {
+                "operationId": "tutor_me_retrieve",
+                "tags": [
+                    "tutor"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TutorMe"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/tutor/students": {
+            "get": {
+                "operationId": "tutor_students_list",
+                "tags": [
+                    "tutor"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TutorStudent"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/tutor/today": {
+            "get": {
+                "operationId": "tutor_today_retrieve",
+                "tags": [
+                    "tutor"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TutorToday"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/tutors": {
             "get": {
                 "operationId": "tutors_list",
@@ -24432,6 +24553,34 @@
                 ],
                 "type": "string",
                 "description": "* `contact` - contact\n* `student` - student\n* `tutor` - tutor"
+            },
+            "EarningLine": {
+                "type": "object",
+                "properties": {
+                    "lesson": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "pay": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    }
+                },
+                "required": [
+                    "lesson",
+                    "pay",
+                    "start",
+                    "status",
+                    "title"
+                ]
             },
             "Economics": {
                 "type": "object",
@@ -38117,6 +38266,82 @@
                     "subjects"
                 ]
             },
+            "TutorDayLesson": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "online": {
+                        "type": "boolean"
+                    },
+                    "meeting_url": {
+                        "type": "string"
+                    },
+                    "location": {
+                        "type": "string"
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "end",
+                    "id",
+                    "location",
+                    "meeting_url",
+                    "online",
+                    "start",
+                    "status",
+                    "students",
+                    "title"
+                ]
+            },
+            "TutorEarnings": {
+                "type": "object",
+                "properties": {
+                    "start": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "lessons": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EarningLine"
+                        }
+                    },
+                    "total": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    }
+                },
+                "required": [
+                    "end",
+                    "lessons",
+                    "start",
+                    "total"
+                ]
+            },
             "TutorInput": {
                 "type": "object",
                 "properties": {
@@ -38219,6 +38444,37 @@
                 },
                 "required": [
                     "tutor"
+                ]
+            },
+            "TutorMe": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "can_cancel": {
+                        "type": "boolean"
+                    },
+                    "can_edit_lessons": {
+                        "type": "boolean"
+                    },
+                    "can_see_pay": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "can_cancel",
+                    "can_edit_lessons",
+                    "can_see_pay",
+                    "email",
+                    "id",
+                    "name"
                 ]
             },
             "TutorQualification": {
@@ -38409,6 +38665,38 @@
                 "type": "string",
                 "description": "* `applicant` - Applicant\n* `onboarding` - Onboarding\n* `active` - Active\n* `restricted` - Restricted\n* `inactive` - Inactive\n* `archived` - Archived"
             },
+            "TutorStudent": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "year_group": {
+                        "type": "string"
+                    },
+                    "jobs": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "next_lesson": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "id",
+                    "jobs",
+                    "name",
+                    "next_lesson",
+                    "year_group"
+                ]
+            },
             "TutorSubject": {
                 "type": "object",
                 "properties": {
@@ -38478,6 +38766,41 @@
                 },
                 "required": [
                     "subject"
+                ]
+            },
+            "TutorToday": {
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "lessons": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TutorDayLesson"
+                        }
+                    },
+                    "reports_due": {
+                        "type": "integer"
+                    },
+                    "offers": {
+                        "type": "integer"
+                    },
+                    "unread": {
+                        "type": "integer"
+                    },
+                    "earnings_this_month": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    }
+                },
+                "required": [
+                    "date",
+                    "earnings_this_month",
+                    "lessons",
+                    "offers",
+                    "reports_due",
+                    "unread"
                 ]
             },
             "UnreadCount": {

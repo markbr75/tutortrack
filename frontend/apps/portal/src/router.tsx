@@ -12,6 +12,11 @@ import { ProfilePage } from "./pages/ProfilePage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { SchedulePage } from "./pages/SchedulePage";
 import { Shell } from "./Shell";
+import { LessonPage } from "./tutor/LessonPage";
+import { AvailabilityPage, EarningsPage, StudentsPage, TutorProfilePage } from "./tutor/OtherPages";
+import { TutorReportPage } from "./tutor/ReportPage";
+import { TutorSchedulePage } from "./tutor/SchedulePage";
+import { TodayPage } from "./tutor/TodayPage";
 
 const rootRoute = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   component: Shell,
@@ -19,12 +24,35 @@ const rootRoute = createRootRouteWithContext<{ queryClient: QueryClient }>()({
 const page = <P extends string>(path: P, component: () => JSX.Element | null) =>
   createRoute({ getParentRoute: () => rootRoute, path, component });
 
+const lessonRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/tutor/lessons/$lessonId",
+  component: function LessonRoute() {
+    return <LessonPage lessonId={lessonRoute.useParams().lessonId} />;
+  },
+});
+const reportRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/tutor/reports/$reportId",
+  component: function ReportRoute() {
+    return <TutorReportPage reportId={reportRoute.useParams().reportId} />;
+  },
+});
+
 const routeTree = rootRoute.addChildren([
   page("/", HomePage),
   page("/schedule", SchedulePage),
   page("/reports", ReportsPage),
   page("/billing", BillingPage),
   page("/profile", ProfilePage),
+  page("/tutor", TodayPage),
+  page("/tutor/schedule", TutorSchedulePage),
+  page("/tutor/students", StudentsPage),
+  page("/tutor/availability", AvailabilityPage),
+  page("/tutor/earnings", EarningsPage),
+  page("/tutor/profile", TutorProfilePage),
+  lessonRoute,
+  reportRoute,
 ]);
 
 export function createPortalRouter(queryClient: QueryClient, history?: RouterHistory) {
