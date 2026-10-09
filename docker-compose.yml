@@ -73,7 +73,7 @@ services:
       - s3-data:/data
       - ./infra/local/seaweedfs-s3.json:/etc/seaweedfs/s3.json:ro
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O- http://localhost:9333/cluster/status >/dev/null"]
+      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:9333/cluster/status >/dev/null"]
       interval: 5s
       timeout: 3s
       retries: 30
