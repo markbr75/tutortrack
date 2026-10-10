@@ -305,11 +305,9 @@ def set_student_rate(link: JobStudent, rate: Money | None) -> JobStudent:
 
 
 def _check_tutor(job: Job, tutor: TutorProfile) -> None:
-    if tutor.status not in {TutorProfile.Status.ACTIVE, TutorProfile.Status.ONBOARDING}:
-        raise _invalid(
-            "tutor", _("%(name)s isn't available for jobs (%(status)s).")
-            % {"name": tutor.full_name, "status": tutor.get_status_display()},
-        )  # fmt: skip
+    from tutortrack.people.assignability import check_assignable
+
+    check_assignable(tutor, "tutor")
     branches = set(tutor.branches.values_list("pk", flat=True))
     if branches and job.branch_id not in branches:
         raise _invalid(

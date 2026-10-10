@@ -382,6 +382,18 @@ class TutorSubject(TenantModel):
     proficiency = models.CharField(
         max_length=10, choices=Proficiency.choices, default=Proficiency.STRONG
     )
+
+    class Competency(models.TextChoices):
+        CLAIMED = "claimed", _("Claimed")
+        ASSESSED = "assessed", _("Assessed")
+        APPROVED = "approved", _("Approved")
+        REJECTED = "rejected", _("Rejected")
+
+    # E18 FR-18-3: only approved subjects are used for matching (``approved`` mirrors it).
+    competency = models.CharField(
+        max_length=10, choices=Competency.choices, default=Competency.CLAIMED
+    )
+    evidence = models.TextField(blank=True, default="")
     approved = models.BooleanField(default=False)
     approved_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,

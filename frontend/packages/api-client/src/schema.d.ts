@@ -58,6 +58,259 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/application-stages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["application_stages_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/application-stages/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["application_stages_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/applications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["applications_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/applications/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["applications_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/applications/{id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["applications_approve_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/applications/{id}/interviews": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["applications_interviews_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/applications/{id}/move": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["applications_move_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/applications/{id}/references": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["applications_references_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/applications/{id}/reject": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["applications_reject_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/applications/{id}/score": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["applications_score_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/applications/bulk-reject": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["applications_bulk_reject_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/assignment-rules": {
     parameters: {
       query?: never;
@@ -1104,6 +1357,80 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/checklist-templates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["checklist_templates_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["checklist_templates_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/checklist-templates/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["checklist_templates_retrieve"];
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    put: operations["checklist_templates_update"];
+    post?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    delete: operations["checklist_templates_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["checklist_templates_partial_update"];
+    trace?: never;
+  };
   "/api/v1/clients": {
     parameters: {
       query?: never;
@@ -1325,6 +1652,114 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/api/v1/compliance/dashboard": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["compliance_dashboard_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/compliance/records/{id}/reject": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["compliance_records_reject_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/compliance/records/{id}/verify": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["compliance_records_verify_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/compliance/requirement-types": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["compliance_requirement_types_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["compliance_requirement_types_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/compliance/requirement-types/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["compliance_requirement_types_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["compliance_requirement_types_partial_update"];
     trace?: never;
   };
   "/api/v1/conflicts/check": {
@@ -2707,6 +3142,80 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/job-openings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["job_openings_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["job_openings_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/job-openings/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["job_openings_retrieve"];
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    put: operations["job_openings_update"];
+    post?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    delete: operations["job_openings_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["job_openings_partial_update"];
+    trace?: never;
+  };
   "/api/v1/jobs": {
     parameters: {
       query?: never;
@@ -3570,6 +4079,24 @@ export interface paths {
     patch: operations["me_partial_update"];
     trace?: never;
   };
+  "/api/v1/me/compliance": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The tutor's own checks: upload documents and see what's missing or expiring. */
+    get: operations["me_compliance_retrieve"];
+    put?: never;
+    /** @description The tutor's own checks: upload documents and see what's missing or expiring. */
+    post: operations["me_compliance_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/me/consents": {
     parameters: {
       query?: never;
@@ -3680,6 +4207,39 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations["me_mfa_totp_confirm_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/onboarding": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["me_onboarding_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/onboarding/{key}/done": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description The tutor ticks an agreement or training item. */
+    post: operations["me_onboarding_done_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -5920,6 +6480,54 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/public/interviews/{token}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["public_interviews_retrieve"];
+    put?: never;
+    post: operations["public_interviews_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/job-openings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["public_job_openings_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/job-openings/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["public_job_openings_retrieve"];
+    put?: never;
+    post: operations["public_job_openings_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/public/offers/{token}": {
     parameters: {
       query?: never;
@@ -5932,6 +6540,22 @@ export interface paths {
     put?: never;
     /** @description ``/public/offers/{token}``: the family sees and answers a waitlist offer. */
     post: operations["public_offers_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/references/{token}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["public_references_retrieve"];
+    put?: never;
+    post: operations["public_references_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -6824,6 +7448,56 @@ export interface paths {
     patch: operations["tutors_partial_update"];
     trace?: never;
   };
+  "/api/v1/tutors/{id}/compliance": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``/tutors/{id}/compliance``: requirements, records and restriction (FR-18-6). */
+    get: operations["tutors_compliance_retrieve"];
+    put?: never;
+    /** @description ``/tutors/{id}/compliance``: requirements, records and restriction (FR-18-6). */
+    post: operations["tutors_compliance_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutors/{id}/onboarding": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["tutors_onboarding_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutors/{id}/onboarding/{key}/done": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["tutors_onboarding_done_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/tutors/{id}/pay-profile": {
     parameters: {
       query?: never;
@@ -6894,6 +7568,23 @@ export interface paths {
     put?: never;
     /** @description Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false. */
     post: operations["tutors_subjects_approve_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutors/{id}/subjects/{subject_id}/assess": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Subject competency (FR-18-3): claimed → assessed → approved, with evidence. */
+    post: operations["tutors_subjects_assess_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -7265,12 +7956,118 @@ export interface components {
       type: string;
       value: unknown;
     };
+    Application: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly opening: string | null;
+      /** @default  */
+      readonly opening_title: string;
+      readonly first_name: string;
+      readonly last_name: string;
+      readonly full_name: string;
+      /** Format: email */
+      readonly email: string;
+      readonly phone: string;
+      readonly postcode: string;
+      readonly subjects: unknown;
+      readonly qualifications: string;
+      readonly experience: string;
+      readonly right_to_work: string;
+      /** Format: uri */
+      readonly video_url: string;
+      /** Format: uuid */
+      readonly cv: string | null;
+      readonly answers: unknown;
+      /** Format: uuid */
+      readonly stage: string;
+      readonly stage_name: string;
+      /** Format: date-time */
+      readonly stage_entered_at: string;
+      readonly status: components["schemas"]["ApplicationStatusEnum"];
+      /** Format: uuid */
+      readonly owner: string | null;
+      readonly decision_reason: string;
+      /** Format: date-time */
+      readonly decided_at: string | null;
+      /** Format: uuid */
+      readonly tutor: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ApplicationDetail: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly opening: string | null;
+      /** @default  */
+      readonly opening_title: string;
+      readonly first_name: string;
+      readonly last_name: string;
+      readonly full_name: string;
+      /** Format: email */
+      readonly email: string;
+      readonly phone: string;
+      readonly postcode: string;
+      readonly subjects: unknown;
+      readonly qualifications: string;
+      readonly experience: string;
+      readonly right_to_work: string;
+      /** Format: uri */
+      readonly video_url: string;
+      /** Format: uuid */
+      readonly cv: string | null;
+      readonly answers: unknown;
+      /** Format: uuid */
+      readonly stage: string;
+      readonly stage_name: string;
+      /** Format: date-time */
+      readonly stage_entered_at: string;
+      readonly status: components["schemas"]["ApplicationStatusEnum"];
+      /** Format: uuid */
+      readonly owner: string | null;
+      readonly decision_reason: string;
+      /** Format: date-time */
+      readonly decided_at: string | null;
+      /** Format: uuid */
+      readonly tutor: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly scorecards: components["schemas"]["Scorecard"][];
+      readonly references: components["schemas"]["Reference"][];
+      readonly interviews: components["schemas"]["Interview"][];
+    };
     /**
      * @description * `invoice` - Reduce what is owed on the invoice
      *     * `credit` - Keep as client credit
      * @enum {string}
      */
     ApplicationEnum: "invoice" | "credit";
+    ApplicationStage: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      order?: number;
+      kind?: components["schemas"]["ApplicationStageKindEnum"];
+      criteria?: unknown;
+      reminder_days?: number | null;
+    };
+    /**
+     * @description * `open` - Open
+     *     * `hired` - Hired
+     *     * `rejected` - Rejected
+     * @enum {string}
+     */
+    ApplicationStageKindEnum: "open" | "hired" | "rejected";
+    /**
+     * @description * `open` - Open
+     *     * `hired` - Hired
+     *     * `rejected` - Rejected
+     *     * `talent_pool` - Talent pool
+     *     * `withdrawn` - Withdrawn
+     * @enum {string}
+     */
+    ApplicationStatusEnum: "open" | "hired" | "rejected" | "talent_pool" | "withdrawn";
     Applied: {
       applied: components["schemas"]["MoneyOut"];
       invoice: components["schemas"]["Invoice"];
@@ -7288,6 +8085,30 @@ export interface components {
     ApplyTagResult: {
       changed: number;
     };
+    /**
+     * @description * `self_employed` - self_employed
+     *     * `employee` - employee
+     *     * `other` - other
+     * @enum {string}
+     */
+    ApproveEmploymentTypeEnum: "self_employed" | "employee" | "other";
+    ApproveRequest: {
+      /** @default self_employed */
+      employment_type: components["schemas"]["ApproveEmploymentTypeEnum"];
+    };
+    AssessSubjectRequest: {
+      status: components["schemas"]["AssessSubjectStatusEnum"];
+      /** @default  */
+      evidence: string;
+    };
+    /**
+     * @description * `claimed` - claimed
+     *     * `assessed` - assessed
+     *     * `approved` - approved
+     *     * `rejected` - rejected
+     * @enum {string}
+     */
+    AssessSubjectStatusEnum: "claimed" | "assessed" | "approved" | "rejected";
     AssignmentRule: {
       /** Format: uuid */
       readonly id: string;
@@ -7478,6 +8299,9 @@ export interface components {
       stage: components["schemas"]["Stage"];
       enquiries: components["schemas"]["Enquiry"][];
     };
+    BookInterviewRequest: {
+      start: string;
+    };
     Branch: {
       /** Format: uuid */
       readonly id: string;
@@ -7576,6 +8400,10 @@ export interface components {
       reason: string;
       /** @default admin */
       cancelled_by: components["schemas"]["CancelledByEnum"];
+    };
+    BulkRejectRequest: {
+      applications: string[];
+      reason: string;
     };
     BulkRequestRequest: {
       /** @description Leave out for every active client with prepaid jobs. */
@@ -7911,6 +8739,29 @@ export interface components {
      * @enum {string}
      */
     ChargeStatusEnum: "uninvoiced" | "invoiced" | "void";
+    ChecklistItem: {
+      key: string;
+      label: string;
+      kind: string;
+      mandatory: boolean;
+      link?: string;
+      done: boolean;
+      done_at: string | null;
+    };
+    ChecklistTemplate: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      employment_type?: string;
+      items?: unknown;
+      is_default?: boolean;
+    };
+    ChecklistTemplateRequest: {
+      name: string;
+      employment_type?: string;
+      items?: unknown;
+      is_default?: boolean;
+    };
     Client: {
       /** Format: uuid */
       readonly id: string;
@@ -8053,6 +8904,41 @@ export interface components {
       /** @default false */
       override_balance: boolean;
     };
+    ComplianceDashboard: {
+      requirements: components["schemas"]["RequirementType"][];
+      rows: components["schemas"]["DashboardRow"][];
+    };
+    ComplianceRecord: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      /** Format: uuid */
+      readonly requirement: string;
+      readonly requirement_key: string;
+      readonly requirement_name: string;
+      readonly status: components["schemas"]["ComplianceStatusEnum"];
+      readonly number: string;
+      /** Format: date */
+      readonly issue_date: string | null;
+      /** Format: date */
+      readonly expiry_date: string | null;
+      readonly files: string[];
+      /** Format: date-time */
+      readonly verified_at: string | null;
+      readonly rejection_reason: string;
+      readonly notes: string;
+      readonly valid: boolean;
+    };
+    /**
+     * @description * `missing` - Missing
+     *     * `submitted` - Waiting for verification
+     *     * `verified` - Verified
+     *     * `rejected` - Rejected
+     *     * `expired` - Expired
+     * @enum {string}
+     */
+    ComplianceStatusEnum: "missing" | "submitted" | "verified" | "rejected" | "expired";
     /**
      * @description * `base_fee` - Base fee
      *     * `active_tutor` - Per active tutor
@@ -8272,6 +9158,9 @@ export interface components {
     Count: {
       count: number;
     };
+    CountResult: {
+      count: number;
+    };
     /**
      * @description * `admin` - Admin
      *     * `tutor` - Tutor
@@ -8488,6 +9377,20 @@ export interface components {
       amount_due: components["schemas"]["MoneyOut"] | null;
       credit: components["schemas"]["MoneyOut"] | null;
     };
+    DashboardCell: {
+      status: string;
+      /** Format: date */
+      expiry_date: string | null;
+    };
+    DashboardRow: {
+      /** Format: uuid */
+      tutor: string;
+      name: string;
+      status: string;
+      cells: {
+        [key: string]: components["schemas"]["DashboardCell"];
+      };
+    };
     /**
      * @description * `locale` - Locale default
      *     * `dd/MM/yyyy` - 31/12/2026
@@ -8681,13 +9584,6 @@ export interface components {
       /** @default / */
       next: string;
     };
-    /**
-     * @description * `self_employed` - Self-employed
-     *     * `employee` - Employee
-     *     * `other` - Other
-     * @enum {string}
-     */
-    EmploymentTypeEnum: "self_employed" | "employee" | "other";
     EndRequest: {
       /** Format: date */
       end_date?: string;
@@ -9126,10 +10022,11 @@ export interface components {
     /**
      * @description * `enquiry` - Enquiry
      *     * `registration` - Registration
+     *     * `application` - Tutor application
      *     * `custom` - Other
      * @enum {string}
      */
-    FormTypeEnum: "enquiry" | "registration" | "custom";
+    FormTypeEnum: "enquiry" | "registration" | "application" | "custom";
     /**
      * @description * `one_to_one` - One to one
      *     * `small_group` - Small group
@@ -9166,6 +10063,14 @@ export interface components {
      * @enum {string}
      */
     FutureLessonsEnum: "keep" | "cancel";
+    GiveReferenceRequest: {
+      responses: {
+        [key: string]: string;
+      };
+      rating: number;
+      /** @default false */
+      concerns: boolean;
+    };
     GrantRequestRequest: {
       days: number;
       /** @default false */
@@ -9223,6 +10128,25 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    Interview: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      interviewer: string;
+      options?: unknown;
+      minutes?: number;
+      meeting_url?: string;
+      /** Format: date-time */
+      start?: string | null;
+      status?: components["schemas"]["InterviewStatusEnum"];
+    };
+    /**
+     * @description * `proposed` - Waiting for the applicant
+     *     * `booked` - Booked
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    InterviewStatusEnum: "proposed" | "booked" | "cancelled";
     Invitation: {
       /** Format: uuid */
       readonly id: string;
@@ -9800,6 +10724,36 @@ export interface components {
      * @enum {string}
      */
     JobCreateStatusEnum: "draft" | "seeking_tutor" | "active";
+    JobOpening: {
+      /** Format: uuid */
+      readonly id: string;
+      title: string;
+      slug: string;
+      description?: string;
+      subjects?: unknown;
+      location?: string;
+      /** Format: uuid */
+      branch?: string | null;
+      /** Format: uuid */
+      form: string;
+      published?: boolean;
+      /** Format: date */
+      closes_on?: string | null;
+    };
+    JobOpeningRequest: {
+      title: string;
+      slug: string;
+      description?: string;
+      subjects?: unknown;
+      location?: string;
+      /** Format: uuid */
+      branch?: string | null;
+      /** Format: uuid */
+      form: string;
+      published?: boolean;
+      /** Format: date */
+      closes_on?: string | null;
+    };
     /**
      * @description * `draft` - Draft
      *     * `seeking_tutor` - Seeking tutor
@@ -10913,6 +11867,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Announcement"][];
     };
+    PaginatedApplicationList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Application"][];
+    };
     PaginatedAuditEntryList: {
       /**
        * Format: uri
@@ -11536,6 +12503,13 @@ export interface components {
       token: string;
       new_password: string;
     };
+    PatchedApplicationStageRequest: {
+      name?: string;
+      order?: number;
+      kind?: components["schemas"]["ApplicationStageKindEnum"];
+      criteria?: unknown;
+      reminder_days?: number | null;
+    };
     PatchedAssignmentRuleRequest: {
       /** Format: uuid */
       pipeline?: string | null;
@@ -11582,6 +12556,12 @@ export interface components {
     PatchedCategoryRequest: {
       name?: string;
       order?: number;
+    };
+    PatchedChecklistTemplateRequest: {
+      name?: string;
+      employment_type?: string;
+      items?: unknown;
+      is_default?: boolean;
     };
     PatchedClientRequest: {
       type?: components["schemas"]["ClientTypeEnum"];
@@ -11709,6 +12689,20 @@ export interface components {
       notes?: string;
       /** Format: date */
       due_date?: string | null;
+    };
+    PatchedJobOpeningRequest: {
+      title?: string;
+      slug?: string;
+      description?: string;
+      subjects?: unknown;
+      location?: string;
+      /** Format: uuid */
+      branch?: string | null;
+      /** Format: uuid */
+      form?: string;
+      published?: boolean;
+      /** Format: date */
+      closes_on?: string | null;
     };
     PatchedJobRequest: {
       name?: string;
@@ -11952,6 +12946,18 @@ export interface components {
       subjects?: string[];
       jobs?: string[];
     };
+    PatchedRequirementTypeRequest: {
+      key?: string;
+      name?: string;
+      description?: string;
+      has_number?: boolean;
+      has_expiry?: boolean;
+      renewal_months?: number | null;
+      mandatory?: boolean;
+      blocking?: boolean;
+      applies_to?: unknown;
+      active?: boolean;
+    };
     PatchedSavedViewRequest: {
       entity_type?: string;
       name?: string;
@@ -12125,7 +13131,7 @@ export interface components {
       bio_private?: string;
       languages?: unknown;
       years_experience?: number | null;
-      employment_type?: components["schemas"]["EmploymentTypeEnum"];
+      employment_type?: components["schemas"]["TutorEmploymentTypeEnum"];
       /** Format: decimal */
       pay_rate_amount?: string | null;
       address_input?: components["schemas"]["AddressInputRequest"];
@@ -13155,6 +14161,12 @@ export interface components {
      * @enum {string}
      */
     ProficiencyEnum: "good" | "strong" | "expert";
+    ProposeInterviewRequest: {
+      options: string[];
+      /** @default 30 */
+      minutes: number;
+      meeting_url?: string;
+    };
     ProviderAccount: {
       /** Format: uuid */
       readonly id: string;
@@ -13184,6 +14196,15 @@ export interface components {
      * @enum {string}
      */
     ProviderEnum: "stripe" | "manual";
+    PublicApplyRequest: {
+      data: {
+        [key: string]: unknown;
+      };
+      /** @default  */
+      captcha_token: string;
+      /** @default  */
+      website: string;
+    };
     /** @description ``POST /public/enquiries`` (TutorCruncher-style API). */
     PublicEnquiryRequest: {
       first_name: string;
@@ -13214,6 +14235,16 @@ export interface components {
       turnstile_site_key: string;
       organisation: string;
     };
+    PublicInterview: {
+      applicant: string;
+      options: string[];
+      minutes: number;
+      status: string;
+      /** Format: date-time */
+      start: string | null;
+      meeting_url: string;
+      organisation: string;
+    };
     PublicOffer: {
       student: string;
       subject: string;
@@ -13221,6 +14252,39 @@ export interface components {
       status: string;
       /** Format: date-time */
       expires_at: string | null;
+      organisation: string;
+    };
+    PublicOpening: {
+      title: string;
+      slug: string;
+      description: string;
+      location: string;
+      subjects: {
+        [key: string]: unknown;
+      }[];
+      /** Format: date */
+      closes_on: string | null;
+    };
+    PublicOpeningDetail: {
+      title: string;
+      slug: string;
+      description: string;
+      location: string;
+      subjects: {
+        [key: string]: unknown;
+      }[];
+      /** Format: date */
+      closes_on: string | null;
+      schema: {
+        [key: string]: unknown;
+      };
+      turnstile_site_key: string;
+      organisation: string;
+    };
+    PublicReference: {
+      applicant: string;
+      status: string;
+      questions: string[];
       organisation: string;
     };
     PublicSubmitRequest: {
@@ -13393,6 +14457,13 @@ export interface components {
       reason: string;
     };
     /**
+     * @description * `yes` - Hire
+     *     * `maybe` - Not sure
+     *     * `no` - Don't hire
+     * @enum {string}
+     */
+    RecommendationEnum: "yes" | "maybe" | "no";
+    /**
      * @description * `staff` - staff
      *     * `form` - form
      *     * `import` - import
@@ -13450,6 +14521,30 @@ export interface components {
     Redirect: {
       url: string;
     };
+    Reference: {
+      /** Format: uuid */
+      readonly id: string;
+      referee_name: string;
+      /** Format: email */
+      referee_email: string;
+      relationship?: string;
+      status?: components["schemas"]["ReferenceStatusEnum"];
+      responses?: unknown;
+      rating?: number | null;
+      concerns?: boolean;
+      /** Format: date-time */
+      received_at?: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `requested` - Requested
+     *     * `received` - Received
+     *     * `declined` - Declined
+     *     * `expired` - No reply
+     * @enum {string}
+     */
+    ReferenceStatusEnum: "requested" | "received" | "declined" | "expired";
     Refund: {
       /** Format: uuid */
       readonly id: string;
@@ -13502,6 +14597,16 @@ export interface components {
      * @enum {string}
      */
     RegionEnum: "uk" | "eu" | "us" | "au";
+    RejectRecordRequest: {
+      reason: string;
+    };
+    RejectRequest: {
+      reason: string;
+      /** @default false */
+      talent_pool: boolean;
+      /** @default true */
+      notify: boolean;
+    };
     /**
      * @description * `parent` - Parent
      *     * `guardian` - Guardian
@@ -13611,6 +14716,38 @@ export interface components {
       subjects?: string[];
       jobs?: string[];
     };
+    RequestReferenceRequest: {
+      name: string;
+      /** Format: email */
+      email: string;
+      relationship?: string;
+    };
+    RequirementType: {
+      /** Format: uuid */
+      readonly id: string;
+      key: string;
+      name: string;
+      description?: string;
+      has_number?: boolean;
+      has_expiry?: boolean;
+      renewal_months?: number | null;
+      mandatory?: boolean;
+      blocking?: boolean;
+      applies_to?: unknown;
+      active?: boolean;
+    };
+    RequirementTypeRequest: {
+      key: string;
+      name: string;
+      description?: string;
+      has_number?: boolean;
+      has_expiry?: boolean;
+      renewal_months?: number | null;
+      mandatory?: boolean;
+      blocking?: boolean;
+      applies_to?: unknown;
+      active?: boolean;
+    };
     RescheduleRequest: {
       /** Format: date-time */
       start: string;
@@ -13714,6 +14851,26 @@ export interface components {
       weekday: number;
       time: string;
       duration_minutes?: number;
+    };
+    ScoreRequest: {
+      scores: {
+        [key: string]: number;
+      };
+      recommendation: components["schemas"]["RecommendationEnum"];
+      notes?: string;
+    };
+    Scorecard: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      stage: string;
+      readonly stage_name: string;
+      readonly reviewer_name: string;
+      scores?: unknown;
+      recommendation: components["schemas"]["RecommendationEnum"];
+      notes?: string;
+      /** Format: date-time */
+      readonly created_at: string;
     };
     SearchHit: {
       type: string;
@@ -14114,6 +15271,10 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    StageMoveRequest: {
+      /** Format: uuid */
+      stage: string;
+    };
     StageRequest: {
       /** Format: uuid */
       id?: string;
@@ -14319,6 +15480,19 @@ export interface components {
       category?: string | null;
       exam_boards?: string[];
       order?: number;
+    };
+    SubmitRecordRequest: {
+      /** Format: uuid */
+      requirement: string;
+      /** @default  */
+      number: string;
+      /** Format: date */
+      issue_date?: string | null;
+      /** Format: date */
+      expiry_date?: string | null;
+      files?: string[];
+      /** @default  */
+      notes: string;
     };
     Subscription: {
       plan: string;
@@ -14705,7 +15879,7 @@ export interface components {
       bio_private?: string;
       languages?: unknown;
       years_experience?: number | null;
-      employment_type?: components["schemas"]["EmploymentTypeEnum"];
+      employment_type?: components["schemas"]["TutorEmploymentTypeEnum"];
       /** Format: decimal */
       pay_rate_amount?: string | null;
       readonly address: components["schemas"]["Address"];
@@ -14732,6 +15906,12 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    TutorCompliance: {
+      restricted: boolean;
+      problems: string[];
+      requirements: components["schemas"]["RequirementType"][];
+      records: components["schemas"]["ComplianceRecord"][];
+    };
     TutorDayLesson: {
       id: string;
       title: string;
@@ -14753,6 +15933,13 @@ export interface components {
       lessons: components["schemas"]["EarningLine"][];
       total: components["schemas"]["MoneyOut"];
     };
+    /**
+     * @description * `self_employed` - Self-employed
+     *     * `employee` - Employee
+     *     * `other` - Other
+     * @enum {string}
+     */
+    TutorEmploymentTypeEnum: "self_employed" | "employee" | "other";
     TutorInput: {
       /** Format: uuid */
       tutor: string;
@@ -14804,6 +15991,11 @@ export interface components {
       can_cancel: boolean;
       can_edit_lessons: boolean;
       can_see_pay: boolean;
+    };
+    TutorOnboardingState: {
+      items: components["schemas"]["ChecklistItem"][];
+      /** Format: date-time */
+      completed_at: string | null;
     };
     /**
      * @description * `stripe_connect` - Stripe (paid to their Stripe account)
@@ -14876,7 +16068,7 @@ export interface components {
       bio_private?: string;
       languages?: unknown;
       years_experience?: number | null;
-      employment_type?: components["schemas"]["EmploymentTypeEnum"];
+      employment_type?: components["schemas"]["TutorEmploymentTypeEnum"];
       /** Format: decimal */
       pay_rate_amount?: string | null;
       address_input?: components["schemas"]["AddressInputRequest"];
@@ -15231,6 +16423,321 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  application_stages_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApplicationStage"][];
+        };
+      };
+    };
+  };
+  application_stages_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this application stage. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedApplicationStageRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedApplicationStageRequest"];
+        "multipart/form-data": components["schemas"]["PatchedApplicationStageRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApplicationStage"];
+        };
+      };
+    };
+  };
+  applications_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        opening?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        stage?: string;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedApplicationList"];
+        };
+      };
+    };
+  };
+  applications_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this tutor application. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApplicationDetail"];
+        };
+      };
+    };
+  };
+  applications_approve_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this tutor application. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ApproveRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ApproveRequest"];
+        "multipart/form-data": components["schemas"]["ApproveRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApplicationDetail"];
+        };
+      };
+    };
+  };
+  applications_interviews_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this tutor application. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProposeInterviewRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ProposeInterviewRequest"];
+        "multipart/form-data": components["schemas"]["ProposeInterviewRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApplicationDetail"];
+        };
+      };
+    };
+  };
+  applications_move_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this tutor application. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StageMoveRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["StageMoveRequest"];
+        "multipart/form-data": components["schemas"]["StageMoveRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApplicationDetail"];
+        };
+      };
+    };
+  };
+  applications_references_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this tutor application. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RequestReferenceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RequestReferenceRequest"];
+        "multipart/form-data": components["schemas"]["RequestReferenceRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApplicationDetail"];
+        };
+      };
+    };
+  };
+  applications_reject_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this tutor application. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RejectRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RejectRequest"];
+        "multipart/form-data": components["schemas"]["RejectRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApplicationDetail"];
+        };
+      };
+    };
+  };
+  applications_score_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this tutor application. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScoreRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ScoreRequest"];
+        "multipart/form-data": components["schemas"]["ScoreRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApplicationDetail"];
+        };
+      };
+    };
+  };
+  applications_bulk_reject_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BulkRejectRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BulkRejectRequest"];
+        "multipart/form-data": components["schemas"]["BulkRejectRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CountResult"];
+        };
       };
     };
   };
@@ -17442,6 +18949,155 @@ export interface operations {
       };
     };
   };
+  checklist_templates_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChecklistTemplate"][];
+        };
+      };
+    };
+  };
+  checklist_templates_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChecklistTemplateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ChecklistTemplateRequest"];
+        "multipart/form-data": components["schemas"]["ChecklistTemplateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChecklistTemplate"];
+        };
+      };
+    };
+  };
+  checklist_templates_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this checklist template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChecklistTemplate"];
+        };
+      };
+    };
+  };
+  checklist_templates_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this checklist template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChecklistTemplateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ChecklistTemplateRequest"];
+        "multipart/form-data": components["schemas"]["ChecklistTemplateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChecklistTemplate"];
+        };
+      };
+    };
+  };
+  checklist_templates_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this checklist template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  checklist_templates_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this checklist template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedChecklistTemplateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedChecklistTemplateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedChecklistTemplateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChecklistTemplate"];
+        };
+      };
+    };
+  };
   clients_list: {
     parameters: {
       query?: {
@@ -17956,6 +19612,179 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Preferences"];
+        };
+      };
+    };
+  };
+  compliance_dashboard_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceDashboard"];
+        };
+      };
+    };
+  };
+  compliance_records_reject_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RejectRecordRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RejectRecordRequest"];
+        "multipart/form-data": components["schemas"]["RejectRecordRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceRecord"];
+        };
+      };
+    };
+  };
+  compliance_records_verify_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ComplianceRecord"];
+        };
+      };
+    };
+  };
+  compliance_requirement_types_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RequirementType"][];
+        };
+      };
+    };
+  };
+  compliance_requirement_types_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RequirementTypeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RequirementTypeRequest"];
+        "multipart/form-data": components["schemas"]["RequirementTypeRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RequirementType"];
+        };
+      };
+    };
+  };
+  compliance_requirement_types_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this requirement type. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RequirementType"];
+        };
+      };
+    };
+  };
+  compliance_requirement_types_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this requirement type. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedRequirementTypeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedRequirementTypeRequest"];
+        "multipart/form-data": components["schemas"]["PatchedRequirementTypeRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RequirementType"];
         };
       };
     };
@@ -20485,6 +22314,155 @@ export interface operations {
       };
     };
   };
+  job_openings_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobOpening"][];
+        };
+      };
+    };
+  };
+  job_openings_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["JobOpeningRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["JobOpeningRequest"];
+        "multipart/form-data": components["schemas"]["JobOpeningRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobOpening"];
+        };
+      };
+    };
+  };
+  job_openings_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this job opening. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobOpening"];
+        };
+      };
+    };
+  };
+  job_openings_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this job opening. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["JobOpeningRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["JobOpeningRequest"];
+        "multipart/form-data": components["schemas"]["JobOpeningRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobOpening"];
+        };
+      };
+    };
+  };
+  job_openings_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this job opening. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  job_openings_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this job opening. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedJobOpeningRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedJobOpeningRequest"];
+        "multipart/form-data": components["schemas"]["PatchedJobOpeningRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobOpening"];
+        };
+      };
+    };
+  };
   jobs_list: {
     parameters: {
       query?: {
@@ -22112,6 +24090,53 @@ export interface operations {
       };
     };
   };
+  me_compliance_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorCompliance"];
+        };
+      };
+    };
+  };
+  me_compliance_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SubmitRecordRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SubmitRecordRequest"];
+        "multipart/form-data": components["schemas"]["SubmitRecordRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorCompliance"];
+        };
+      };
+    };
+  };
   me_consents_list: {
     parameters: {
       query?: never;
@@ -22298,6 +24323,49 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["RecoveryCodes"];
+        };
+      };
+    };
+  };
+  me_onboarding_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorOnboardingState"];
+        };
+      };
+    };
+  };
+  me_onboarding_done_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorOnboardingState"];
         };
       };
     };
@@ -26014,6 +28082,126 @@ export interface operations {
       };
     };
   };
+  public_interviews_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicInterview"];
+        };
+      };
+    };
+  };
+  public_interviews_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BookInterviewRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BookInterviewRequest"];
+        "multipart/form-data": components["schemas"]["BookInterviewRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicInterview"];
+        };
+      };
+    };
+  };
+  public_job_openings_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicOpening"][];
+        };
+      };
+    };
+  };
+  public_job_openings_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicOpeningDetail"];
+        };
+      };
+    };
+  };
+  public_job_openings_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublicApplyRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PublicApplyRequest"];
+        "multipart/form-data": components["schemas"]["PublicApplyRequest"];
+      };
+    };
+    responses: {
+      /** @description No response body */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   public_offers_retrieve: {
     parameters: {
       query?: never;
@@ -26061,6 +28249,57 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PublicOffer"];
+        };
+      };
+    };
+  };
+  public_references_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicReference"];
+        };
+      };
+    };
+  };
+  public_references_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GiveReferenceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["GiveReferenceRequest"];
+        "multipart/form-data": components["schemas"]["GiveReferenceRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicReference"];
         };
       };
     };
@@ -27859,6 +30098,103 @@ export interface operations {
       };
     };
   };
+  tutors_compliance_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorCompliance"];
+        };
+      };
+    };
+  };
+  tutors_compliance_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SubmitRecordRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SubmitRecordRequest"];
+        "multipart/form-data": components["schemas"]["SubmitRecordRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorCompliance"];
+        };
+      };
+    };
+  };
+  tutors_onboarding_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorOnboardingState"];
+        };
+      };
+    };
+  };
+  tutors_onboarding_done_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorOnboardingState"];
+        };
+      };
+    };
+  };
   tutors_pay_profile_retrieve: {
     parameters: {
       query?: {
@@ -28036,6 +30372,36 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["TutorSubject"];
         };
+      };
+    };
+  };
+  tutors_subjects_assess_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+        subject_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssessSubjectRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AssessSubjectRequest"];
+        "multipart/form-data": components["schemas"]["AssessSubjectRequest"];
+      };
+    };
+    responses: {
+      /** @description No response body */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

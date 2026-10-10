@@ -199,7 +199,10 @@ class JobViewSet(
     def add_tutor(self, request: Request, pk: Any = None) -> Response:
         payload = s.TutorInput(data=request.data)
         payload.is_valid(raise_exception=True)
-        link = services.add_tutor(self.get_object(), **payload.validated_data)
+        from tutortrack.people.assignability import override_from_request
+
+        with override_from_request(request):
+            link = services.add_tutor(self.get_object(), **payload.validated_data)
         return Response(
             s.JobTutorSerializer(link, context=self.get_serializer_context()).data,
             status=status.HTTP_201_CREATED,

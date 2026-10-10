@@ -61,26 +61,51 @@ Attract and vet tutors: public application forms, a recruitment pipeline (screen
 `recruitment.application.*`, `recruitment.pipeline.manage`, `compliance.view`, `compliance.verify`, `compliance.manage_types`, `compliance.override_restriction`; compliance docs visible only to `compliance.view` holders and the tutor themself.
 
 ## 7. Delivery plan
-- [ ] **E18-T01** Job openings and public application form (form builder reuse).
-- [ ] **E18-T02** Recruitment pipeline, stages, scorecards, templated emails, bulk actions.
-- [ ] **E18-T03** Interview scheduling via slot engine.
-- [ ] **E18-T04** Reference requests with secure referee forms.
-- [ ] **E18-T05** Approval → tutor creation + onboarding checklist instance.
-- [ ] **E18-T06** Compliance requirement types (seed UK/US/AU/CA/IE/NZ), records, verification.
-- [ ] **E18-T07** Restriction rules, nightly expiry job, assignment guard in E07/E08, pay hold hook in E12.
-- [ ] **E18-T08** Compliance dashboard and alerts.
-- [ ] **E18-T09** Subject competency approvals.
-- [ ] **E18-T10** Frontend: recruitment board, application detail, tutor onboarding (tutor portal), compliance UI.
+- [x] **E18-T01** Job openings and public application form (form builder reuse).
+- [x] **E18-T02** Recruitment pipeline, stages, scorecards, templated emails, bulk actions.
+- [x] **E18-T03** Interview scheduling via slot engine.
+- [x] **E18-T04** Reference requests with secure referee forms.
+- [x] **E18-T05** Approval → tutor creation + onboarding checklist instance.
+- [x] **E18-T06** Compliance requirement types (seed UK/US/AU/CA/IE/NZ), records, verification.
+- [x] **E18-T07** Restriction rules, nightly expiry job, assignment guard in E07/E08, pay hold hook in E12.
+- [x] **E18-T08** Compliance dashboard and alerts.
+- [x] **E18-T09** Subject competency approvals.
+- [x] **E18-T10** Frontend: recruitment board, application detail, tutor onboarding (tutor portal), compliance UI.
 - [ ] **E18-T11** (Phase 3) Background check provider integrations.
 
 ## Temporal workflows (E32)
 
 Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
 
-- [ ] **E18-TW1** Recruitment, onboarding and compliance workflows (requires E32).
+- [x] **E18-TW1** Recruitment, onboarding and compliance workflows (requires E32).
 
 | Workflow | Started by | Steps, timers and signals | Replaces |
 |---|---|---|---|
 | `TutorApplicationWorkflow` | `application.submitted` | Screening tasks → interview scheduling (wait for booking signal) → references (child `ReferenceRequestWorkflow` per referee with reminders and timeout) → decision signal → on approval start onboarding | Stage reminders |
 | `TutorOnboardingWorkflow` `onboarding:{org}:{tutor}` | Application approved / tutor invited | Track checklist items via signals → reminders → activate tutor when mandatory items are done | Checklist polling |
 | `ComplianceRecordWorkflow` `compliance:{org}:{record}` | `compliance.record_verified` with an expiry date | Timers at 60/30/7 days before expiry (reminders) → on expiry restrict tutor and hold pay. Signal `renewed` restarts with the new expiry (`continue_as_new`) | Nightly expiry job (FR-18-6) |
+
+## Implementation notes (as built 2026-10-10)
+- **App:** `recruitment`, with RLS on every table: `JobOpening`, `ApplicationStage`, `TutorApplication` (CRM target), `Scorecard`, `Interview`, `ReferenceRequest`, `ChecklistTemplate`, `ChecklistInstance`, `RequirementType`, `ComplianceRecord` (number encrypted) and `TutorComplianceState`. See ADR 0012.
+- **Openings and applications (T01):** application forms reuse the E17 form builder (`type=application`, `applicant.*` mappings, a `referees` field). Public pages are `/vacancies` and `/vacancies/<slug>` (`/public/job-openings`); they use Turnstile, a honeypot and throttling. Referees named on the form get reference requests straight away.
+  - Deviations: CV and video are links rather than uploads (anonymous uploads come with E24 widgets). The paths are `/vacancies` because `/jobs` is the tuition-jobs screen.
+- **Pipeline (T02):** stages are Applied, Screening, Interview, References & checks, Decision, Hired, Rejected. Stages carry scorecard criteria and reminder days. Recruiters move applications between stages, score them (1-5 plus a recommendation), and reject them (single or bulk, with a templated email, optionally into the talent pool).
+  - Deviations: the board shows open stages without drag and drop; email templates are editable through E13 templates (`application_rejected`, `interview_invite`, `reference_*`).
+- **Interviews (T03):** staff propose times; the applicant picks one at `/interviews/<token>`.
+  - Deviation: the E08 slot engine covers tutors' availability, not staff, so times are proposed by hand. Video links come with E22.
+- **References (T04):** secure referee forms at `/references/<token>`: questions, a 1-5 rating and a concern flag. `ReferenceRequestWorkflow` reminds after 3 and 7 days and marks the request "no reply" after `recruitment.reference_days`.
+- **Approval (T05):** AC: approving creates the tutor (status `onboarding`, subjects from the application) with an invitation, plus an onboarding checklist instance.
+  - Checklist items: agreements and training are ticked by the tutor. Self-billing, payout details, availability, profile and documents complete themselves from the tutor's data.
+  - `TutorOnboardingWorkflow` re-checks the checklist on item, compliance and availability events and every 3 days (with a reminder). It activates the tutor when every mandatory item is done (`recruitment.auto_activate`).
+  - Deviation: e-signature is a recorded "I agree" with a timestamp.
+- **Compliance (T06–T08):** requirement types are seeded from the organisation's country plus common types (photo ID, safeguarding training, qualifications, insurance), and staff can edit them. A requirement can apply only to some employment types or only to in-person work.
+  - Records hold a number, issue and expiry dates (filled in from the renewal interval) and files. They are submitted by the tutor or staff and verified or rejected by `compliance.verify` holders (not the tutor themself).
+  - The restriction rule is in ADR 0012. AC: a DBS expiring today is expired and the tutor restricted by the nightly sweep; the dashboard shows it; and lesson or job assignment fails with `tutor_not_compliant` unless overridden with permission and a reason.
+  - Pay is held while restricted (`compliance.hold_pay`).
+  - `ComplianceRecordWorkflow` sends reminders 60, 30 and 7 days before expiry, to the tutor and to staff, and expires the record on the date.
+  - The dashboard (`/compliance`) shows tutors × requirements, and the tutor record shows a card with verify and reject. Tutors upload documents in the portal (`/portal/tutor/compliance`).
+  - Deviations: no export or bulk "request missing documents" yet.
+- **Subject competency (T09):** `TutorSubject.competency` moves `claimed → assessed → approved` (or rejected) with evidence; `approved` mirrors it for matching (E19). A data migration carried existing approvals over.
+- **Frontend (T10):** admin recruitment board, application detail (stage, interview, references, approve or reject), compliance dashboard and tutor compliance card. Tutor portal: Getting started (checklist) and Checks (uploads). Public: vacancies, interview choice and reference pages.
+- **Workflows (TW1):** application reminders when an application sits in a stage too long, plus the reference, onboarding and compliance-record workflows above.
+- **Not built:** T11 (Phase 3 background-check providers); FR-18-9 probation reviews and offboarding checklists; public CV uploads.

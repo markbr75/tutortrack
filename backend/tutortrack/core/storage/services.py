@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import re
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -159,8 +160,18 @@ def _reject(stored: StoredFile) -> None:
     stored.save(update_fields=["status", "updated_at"])
 
 
+AccessRule = Callable[[Any, StoredFile], bool]
+_access_rules: dict[str, AccessRule] = {}
+
+
+def register_access_rule(owner_label: str, rule: AccessRule) -> None:
+    """Who else may open private files attached to ``owner_label`` records (e.g.
+    ``recruitment.compliancerecord``: holders of ``compliance.view``)."""
+    _access_rules[owner_label] = rule
+
+
 def can_access(user: Any, stored: StoredFile) -> bool:
-    """Coarse access rule until E03 adds roles and permissions.
+    """Uploader, superusers, non-private files, or an owner-specific rule.
 
     The tenant manager already guarantees the file belongs to the current organisation.
     """
@@ -168,7 +179,22 @@ def can_access(user: Any, stored: StoredFile) -> bool:
         return False
     if user.is_superuser or stored.uploaded_by_id == user.pk:
         return True
-    return stored.visibility != StoredFile.Visibility.PRIVATE
+    if stored.visibility != StoredFile.Visibility.PRIVATE:
+        return True
+    owner_type = stored.owner_content_type
+    if owner_type is not None:
+        label = f"{owner_type.app_label}.{owner_type.model}"
+        rule = _access_rules.get(label)
+        return bool(rule and rule(user, stored))
+    return False
+
+
+def attach(stored: StoredFile, owner: models.Model) -> StoredFile:
+    """Link an uploaded file to the record it belongs to."""
+    stored.owner_content_type = ContentType.objects.get_for_model(owner)
+    stored.owner_object_id = str(owner.pk)
+    stored.save(update_fields=["owner_content_type", "owner_object_id"])
+    return stored
 
 
 def download_url(user: Any, stored: StoredFile, *, inline: bool = False) -> tuple[str, int]:

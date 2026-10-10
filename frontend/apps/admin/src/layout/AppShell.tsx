@@ -22,6 +22,8 @@ const NAV = [
   { to: "/billing", key: "nav.billing", permission: "billing.invoice.view" },
   { to: "/payroll", key: "nav.payroll", permission: "payroll.view" },
   { to: "/leads", key: "nav.leads", permission: "leads.enquiry.view" },
+  { to: "/recruitment", key: "nav.recruitment", permission: "recruitment.application.view" },
+  { to: "/compliance", key: "nav.compliance", permission: "compliance.view" },
   { to: "/tasks", key: "nav.tasks", permission: "crm.task.view" },
   { to: "/announcements", key: "nav.announcements", permission: "comms.announcement.manage" },
   { to: "/reports", key: "nav.reports", permission: "delivery.report.view" },

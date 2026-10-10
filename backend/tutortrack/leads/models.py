@@ -19,6 +19,7 @@ class Form(TenantModel):
     class Type(models.TextChoices):
         ENQUIRY = "enquiry", _("Enquiry")
         REGISTRATION = "registration", _("Registration")
+        APPLICATION = "application", _("Tutor application")
         CUSTOM = "custom", _("Other")
 
     type = models.CharField(max_length=15, choices=Type.choices, default=Type.ENQUIRY)

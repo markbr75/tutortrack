@@ -29,6 +29,8 @@ export function TutorShell() {
     { to: "/tutor/availability", label: t("tutor.nav.availability") },
     ...(me.data.can_see_pay ? [{ to: "/tutor/earnings", label: t("tutor.nav.earnings") }] : []),
     { to: "/tutor/expenses", label: t("tutor.nav.expenses") },
+    { to: "/tutor/onboarding", label: t("tutor.nav.onboarding") },
+    { to: "/tutor/compliance", label: t("tutor.nav.compliance") },
     { to: "/tutor/profile", label: t("tutor.nav.profile") },
   ] as const;
   return (

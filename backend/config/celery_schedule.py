@@ -33,6 +33,11 @@ BEAT_SCHEDULE = {
         "task": "tutortrack.subscriptions.tasks.report_all_revenue",
         "schedule": crontab(hour=3, minute=40),
     },
+    # Compliance safety net (E18): overdue checks expire and tutors are restricted.
+    "compliance-sweep": {
+        "task": "tutortrack.recruitment.tasks.compliance_sweep_all",
+        "schedule": crontab(hour=0, minute=30),
+    },
     # Platform metrics for CloudWatch alarms (E30): outbox lag, queues, webhook backlog.
     "platform-metrics": {
         "task": "tutortrack.platform_admin.tasks.emit_metrics",

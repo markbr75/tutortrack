@@ -486,7 +486,10 @@ def approve_subject(subject: TutorSubject, approver: Any, approved: bool = True)
     with audit.track(subject, action="approve" if approved else "unapprove"):
         subject.approved = approved
         subject.approved_by = approver if approved else None
-        subject.save(update_fields=["approved", "approved_by", "updated_at"])
+        subject.competency = (
+            TutorSubject.Competency.APPROVED if approved else TutorSubject.Competency.CLAIMED
+        )
+        subject.save(update_fields=["approved", "approved_by", "competency", "updated_at"])
     return subject
 
 

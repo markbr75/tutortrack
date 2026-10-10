@@ -780,6 +780,9 @@ for _key, _label, _code in (
     ("staff_pay_run_review", _("Pay run waiting for approval"), "payroll.payrun.approve"),
     ("staff_payout_failed", _("A tutor payout failed"), "payroll.payrun.pay"),
     ("staff_enquiry_sla", _("Enquiry needs attention"), "leads.enquiry.edit"),
+    ("staff_compliance_submitted", _("Compliance document to verify"), "compliance.verify"),
+    ("staff_compliance_expiring", _("A tutor's check is expiring"), "compliance.view"),
+    ("staff_application_waiting", _("Application waiting"), "recruitment.application.edit"),
 ):
     register(
         NotificationType(
@@ -917,6 +920,113 @@ register(
                                          "expires_at": None, "link": "https://example.com"}},
     )
 )  # fmt: skip
+
+
+# --- recruitment and compliance (E18) -----------------------------------------------------------
+
+
+def _applicant(application: Any) -> Recipient:
+    return Recipient(kind="applicant", id=str(application.pk), name=application.full_name,
+                     first_name=application.first_name, email=application.email,
+                     target=("recruitment.application", str(application.pk)))  # fmt: skip
+
+
+def _base(r: Recipient, **extra: Any) -> dict[str, Any]:
+    return {"organisation": organisation(),
+            "recipient": {"name": r.name, "first_name": r.first_name}, **extra}  # fmt: skip
+
+
+def _interview_invite(payload: Any) -> list[Delivery]:
+    from tutortrack.recruitment.models import Interview
+
+    interview_id, token = payload
+    interview = Interview.objects.select_related("application").filter(pk=interview_id).first()
+    if interview is None:
+        return []
+    r = _applicant(interview.application)
+    return [Delivery(r, _base(r, interview={"link": tenant_link(f"/interviews/{token}"),
+                                            "minutes": interview.minutes}))]  # fmt: skip
+
+
+def _referee(reference: Any) -> Recipient:
+    return Recipient(kind="referee", id=str(reference.pk), name=reference.referee_name,
+                     first_name=reference.referee_name.split(" ")[0], email=reference.referee_email,
+                     target=("recruitment.application", str(reference.application_id)))  # fmt: skip
+
+
+def _reference_request(payload: Any) -> list[Delivery]:
+    from tutortrack.recruitment.models import ReferenceRequest
+
+    reference_id, token = payload
+    reference = (
+        ReferenceRequest.objects.select_related("application").filter(pk=reference_id).first()
+    )
+    if reference is None:
+        return []
+    r = _referee(reference)
+    link = tenant_link(f"/references/{token}")
+    details = {"applicant": reference.application.full_name, "link": link}
+    return [Delivery(r, _base(r, reference=details))]
+
+
+def _reference_reminder(reference: Any) -> list[Delivery]:
+    r = _referee(reference)
+    return [Delivery(r, _base(r, reference={"applicant": reference.application.full_name,
+                                            "link": ""}))]  # fmt: skip
+
+
+def _application_rejected(application: Any) -> list[Delivery]:
+    r = _applicant(application)
+    return [Delivery(r, _base(r))]
+
+
+def _compliance_reminder(payload: Any) -> list[Delivery]:
+    from tutortrack.recruitment.models import ComplianceRecord
+
+    record_id, days = payload
+    record = ComplianceRecord.objects.select_related("tutor__membership", "requirement").filter(
+        pk=record_id
+    ).first()  # fmt: skip
+    if record is None:
+        return []
+    r = tutor_recipient(record.tutor)
+    return [Delivery(r, _base(r, check={"name": record.requirement.name, "days": days,
+                                        "expiry_date": record.expiry_date}))]  # fmt: skip
+
+
+def _onboarding_reminder(tutor: Any) -> list[Delivery]:
+    r = tutor_recipient(tutor)
+    return [Delivery(r, _base(r))]
+
+
+def _load_none(pk: str) -> Any:
+    return None
+
+
+for _key, _label, _audience, _channels, _resolve, _vars, _sample in (
+    ("interview_invite", _("Interview invitation"), "applicant", ("email",), _interview_invite,
+     ("interview.link", "interview.minutes"), {"interview": {"link": "https://x", "minutes": 30}}),
+    ("reference_request", _("Reference request"), "referee", ("email",), _reference_request,
+     ("reference.applicant", "reference.link"),
+     {"reference": {"applicant": "Nia Okafor", "link": "https://x"}}),
+    ("reference_reminder", _("Reference reminder"), "referee", ("email",), _reference_reminder,
+     ("reference.applicant",), {"reference": {"applicant": "Nia Okafor", "link": ""}}),
+    ("application_rejected", _("Application unsuccessful"), "applicant", ("email",),
+     _application_rejected, (), {}),
+    ("compliance_reminder", _("A check is about to expire"), "tutor", ("email", "in_app"),
+     _compliance_reminder, ("check.name", "check.days", "check.expiry_date"),
+     {"check": {"name": "Enhanced DBS check", "days": 30, "expiry_date": None}}),
+    ("onboarding_reminder", _("Finish your onboarding"), "tutor", ("email", "in_app"),
+     _onboarding_reminder, (), {}),
+):  # fmt: skip
+    register(
+        NotificationType(
+            key=_key, label=str(_label), category="account", audience=_audience,
+            channels=_channels, default_channels=_channels, resolve=_resolve, load=_load_none,
+            related_type="", variables=_vars, sample={**SAMPLE_BASE, **_sample},
+            transactional=True,
+        )
+    )  # fmt: skip
 
 
 def _task(task: Any) -> list[Delivery]:

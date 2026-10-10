@@ -75,7 +75,7 @@ def clean_schema(schema: Any) -> dict[str, Any]:
             if f.get("maps_to") and f["maps_to"] not in MAPPINGS:
                 raise BusinessRuleViolation(_("Unknown mapping: %(m)s") % {"m": f["maps_to"]})
     mapped = {f.get("maps_to") for f in fields_of(schema)}
-    if "contact.email" not in mapped and "contact.phone" not in mapped:
+    if not mapped & {"contact.email", "contact.phone", "applicant.email"}:
         raise BusinessRuleViolation(_("Ask for an email address or phone number."))
     return schema
 
@@ -106,6 +106,11 @@ def clean_submission(schema: dict[str, Any], data: dict[str, Any]) -> dict[str, 
             errors[key] = [_("Enter a valid email address.")]
         elif kind in ("select",) and f.get("options") and value not in f["options"]:
             errors[key] = [_("Choose one of the options.")]
+        elif kind == "referees":
+            if not isinstance(value, list) or not all(
+                isinstance(r, dict) and EMAIL.match(str(r.get("email", "")).strip()) for r in value
+            ):
+                errors[key] = [_("Give each referee's name and email address.")]
         elif kind == "students":
             if not isinstance(value, list) or not all(isinstance(s, dict) for s in value):
                 errors[key] = [_("Add each student.")]

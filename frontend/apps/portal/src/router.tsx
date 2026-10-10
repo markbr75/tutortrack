@@ -14,6 +14,7 @@ import { SchedulePage } from "./pages/SchedulePage";
 import { Shell } from "./Shell";
 import { LessonPage } from "./tutor/LessonPage";
 import { AvailabilityPage, StudentsPage, TutorProfilePage } from "./tutor/OtherPages";
+import { ChecksPage, OnboardingPage } from "./tutor/OnboardingPages";
 import { EarningsPage, ExpensesPage } from "./tutor/PayPages";
 import { TutorReportPage } from "./tutor/ReportPage";
 import { TutorSchedulePage } from "./tutor/SchedulePage";
@@ -52,6 +53,8 @@ const routeTree = rootRoute.addChildren([
   page("/tutor/availability", AvailabilityPage),
   page("/tutor/earnings", EarningsPage),
   page("/tutor/expenses", ExpensesPage),
+  page("/tutor/onboarding", OnboardingPage),
+  page("/tutor/compliance", ChecksPage),
   page("/tutor/profile", TutorProfilePage),
   lessonRoute,
   reportRoute,

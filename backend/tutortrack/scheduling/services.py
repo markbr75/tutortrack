@@ -121,10 +121,10 @@ def _validate_people(
     for student in students:
         if student.archived_at is not None:
             raise _invalid("attendees", _("%(name)s is archived.") % {"name": student.full_name})
+    from tutortrack.people.assignability import check_assignable
+
     for row in tutors:
-        tutor = row["tutor"]
-        if tutor.status not in {TutorProfile.Status.ACTIVE, TutorProfile.Status.ONBOARDING}:
-            raise _invalid("tutors", _("%(name)s isn't available.") % {"name": tutor.full_name})
+        check_assignable(row["tutor"], "tutors")
 
 
 def _title(service: Service, job: Any, students: list[Student]) -> str:

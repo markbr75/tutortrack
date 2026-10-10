@@ -11,7 +11,7 @@ import { LeadsPage } from "./LeadsPages";
 
 type FormDef = components["schemas"]["Form"];
 
-interface Field {
+export interface Field {
   key: string;
   label: string;
   type: string;
@@ -21,7 +21,7 @@ interface Field {
   show_if?: { field: string; equals: unknown };
 }
 
-interface Schema {
+export interface Schema {
   steps: { title: string; fields: Field[] }[];
 }
 
@@ -477,7 +477,7 @@ export function PublicFormPage({ slug }: { slug: string }) {
   );
 }
 
-function PublicField({
+export function PublicField({
   field,
   value,
   error,
@@ -520,6 +520,41 @@ function PublicField({
         >
           {t("leads.addStudent")}
         </Button>
+        {error ? <p className="text-sm text-danger">{error}</p> : null}
+      </div>
+    );
+  }
+  if (field.type === "referees") {
+    const referees = (value as
+      { name: string; email: string; relationship: string }[] | undefined) ?? [
+      { name: "", email: "", relationship: "" },
+      { name: "", email: "", relationship: "" },
+    ];
+    const change = (i: number, patch: Record<string, string>) =>
+      onChange(referees.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+    return (
+      <div className="space-y-2">
+        <p className="text-sm font-medium">{field.label}</p>
+        {referees.map((r, i) => (
+          <div key={i} className="grid gap-2 sm:grid-cols-3">
+            <TextField
+              label={t("recruitment.refereeName", { n: i + 1 })}
+              value={r.name}
+              onChange={(e) => change(i, { name: e.target.value })}
+            />
+            <TextField
+              label={t("recruitment.refereeEmail", { n: i + 1 })}
+              type="email"
+              value={r.email}
+              onChange={(e) => change(i, { email: e.target.value })}
+            />
+            <TextField
+              label={t("recruitment.refereeRelationship", { n: i + 1 })}
+              value={r.relationship}
+              onChange={(e) => change(i, { relationship: e.target.value })}
+            />
+          </div>
+        ))}
         {error ? <p className="text-sm text-danger">{error}</p> : null}
       </div>
     );

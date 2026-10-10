@@ -209,6 +209,9 @@ for _key in (
     "staff_pay_run_review",
     "staff_payout_failed",
     "staff_enquiry_sla",
+    "staff_compliance_submitted",
+    "staff_compliance_expiring",
+    "staff_application_waiting",
 ):
     DEFAULTS[(_key, "in_app")] = ("{{ alert.title }}", "{{ alert.body }}")
     DEFAULTS[(_key, "email")] = ("{{ alert.title }}", "{{ alert.body }}" + SIGN)
@@ -243,6 +246,47 @@ DEFAULTS[("waitlist_offer", "sms")] = (
     "",
     "{{ organisation.name }}: a place is available for {{ offer.student }}. Reply here: "
     "{{ offer.link }}",
+)
+
+
+DEFAULTS[("interview_invite", "email")] = (
+    "Interview with {{ organisation.name }}",
+    "Hello {{ recipient.first_name }},\n\nThank you for applying. Please choose a time for a "
+    "{{ interview.minutes }}-minute interview: {{ interview.link }}" + SIGN,
+)
+DEFAULTS[("reference_request", "email")] = (
+    "Reference for {{ reference.applicant }}",
+    "Hello {{ recipient.first_name }},\n\n{{ reference.applicant }} has applied to tutor with "
+    "us and gave your name as a referee. Please give a short reference here: "
+    "{{ reference.link }}" + SIGN,
+)
+DEFAULTS[("reference_reminder", "email")] = (
+    "Reminder: reference for {{ reference.applicant }}",
+    "Hello {{ recipient.first_name }},\n\nA reminder that we'd be grateful for your reference "
+    "for {{ reference.applicant }}. Please use the link in our first email." + SIGN,
+)
+DEFAULTS[("application_rejected", "email")] = (
+    "Your application to {{ organisation.name }}",
+    "Hello {{ recipient.first_name }},\n\nThank you for applying. We won't be taking your "
+    "application further this time, but we wish you well." + SIGN,
+)
+DEFAULTS[("compliance_reminder", "email")] = (
+    "{{ check.name }} expires soon",
+    "Hello {{ recipient.first_name }},\n\nYour {{ check.name }} expires in {{ check.days }} "
+    "days. Please upload the renewal in the tutor portal so you can keep teaching." + SIGN,
+)
+DEFAULTS[("compliance_reminder", "in_app")] = (
+    "{{ check.name }} expires in {{ check.days }} days",
+    "Upload the renewal in your profile.",
+)
+DEFAULTS[("onboarding_reminder", "email")] = (
+    "Finish setting up with {{ organisation.name }}",
+    "Hello {{ recipient.first_name }},\n\nThere are still a few onboarding steps to finish "
+    "in the tutor portal before you can start." + SIGN,
+)
+DEFAULTS[("onboarding_reminder", "in_app")] = (
+    "Finish your onboarding",
+    "A few steps are left before you can start.",
 )
 
 

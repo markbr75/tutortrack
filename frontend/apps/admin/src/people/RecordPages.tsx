@@ -6,6 +6,7 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 import { PayProfileCard } from "../payroll/PayProfileCard";
+import { TutorComplianceCard } from "../recruitment/RecruitmentPages";
 import { api, usePermission } from "../api";
 import { ClientBilling } from "../billing/ClientBilling";
 import { InviteButton } from "../portal/InviteButton";
@@ -320,6 +321,7 @@ export function TutorPage({ tutorId }: { tutorId: string }) {
       </p>
       <div className="grid gap-4 lg:grid-cols-2">
         <PayProfileCard tutorId={tutorId} />
+        <TutorComplianceCard tutorId={tutorId} />
         <Card title={t("people.details")}>
           <Facts
             items={[

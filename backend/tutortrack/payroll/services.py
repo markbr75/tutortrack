@@ -1159,3 +1159,13 @@ def statement_pdf(statement: PayStatement) -> bytes:
                                    "settings": settings},
     )  # fmt: skip
     return bytes(HTML(string=html).write_pdf())
+
+
+@transaction.atomic
+def reevaluate_tutor(tutor: TutorProfile) -> int:
+    """Re-check holds on a tutor's open items (their compliance changed, E18)."""
+    count = 0
+    for item in PayItem.objects.select_for_update().filter(tutor=tutor, status__in=OPEN):
+        evaluate_holds(item)
+        count += 1
+    return count

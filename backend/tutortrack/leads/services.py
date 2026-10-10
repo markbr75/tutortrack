@@ -322,8 +322,8 @@ def submit_form(
 ) -> dict[str, Any]:
     """A public submission (FR-17-1, FR-17-7). Spam (the hidden field filled in) is stored
     and silently accepted."""
-    if not form.published:
-        raise NotFound()
+    if not form.published or form.type == Form.Type.APPLICATION:
+        raise NotFound()  # applications are made through a job opening (E18)
     clean_utm = {
         k: str(v)[:300]
         for k, v in (utm or {}).items()

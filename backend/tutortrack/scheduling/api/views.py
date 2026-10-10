@@ -127,7 +127,10 @@ class LessonViewSet(
         payload.is_valid(raise_exception=True)
         data = dict(payload.validated_data)
         override = _override(request, data.pop("override_conflicts"))
-        result = services.create_lesson(override_conflicts=override, **data)
+        from tutortrack.people.assignability import override_from_request
+
+        with override_from_request(request):
+            result = services.create_lesson(override_conflicts=override, **data)
         return Response(_result(result, request), status=status.HTTP_201_CREATED)
 
     @extend_schema(request=s.LessonUpdateSerializer, responses=s.LessonResultSerializer)

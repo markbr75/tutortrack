@@ -27,7 +27,9 @@
     "announcements": "News",
     "plan": "Billing & plan",
     "payroll": "Payroll",
-    "leads": "Enquiries"
+    "leads": "Enquiries",
+    "recruitment": "Recruitment",
+    "compliance": "Compliance"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -1452,7 +1454,9 @@
       "availability": "Availability",
       "earnings": "Earnings",
       "profile": "Profile",
-      "expenses": "Expenses"
+      "expenses": "Expenses",
+      "onboarding": "Getting started",
+      "compliance": "Checks"
     },
     "today": "Today",
     "reportsDue": "Reports to write",
@@ -1965,5 +1969,91 @@
       "waiting": "",
       "removed": "This offer was withdrawn."
     }
+  },
+  "recruitment": {
+    "title": "Recruitment",
+    "applications": "Applications",
+    "compliance": "Compliance",
+    "status": {
+      "open": "Open",
+      "hired": "Hired",
+      "rejected": "Rejected",
+      "talent_pool": "Talent pool",
+      "withdrawn": "Withdrawn"
+    },
+    "subjects": "Subjects",
+    "stage": "Stage",
+    "interviewTime": "Interview time",
+    "inviteToInterview": "Invite to interview",
+    "refereeName": "Referee {{n}} name",
+    "refereeEmail": "Referee {{n}} email",
+    "refereeRelationship": "Referee {{n}}: how they know you",
+    "requestReference": "Ask for a reference",
+    "approve": "Approve and onboard",
+    "rejectReason": "Reason",
+    "reject": "Reject",
+    "references": "References",
+    "referenceStatus": {
+      "requested": "Waiting",
+      "received": "Received",
+      "declined": "Declined",
+      "expired": "No reply"
+    },
+    "concerns": "Concerns raised",
+    "interviews": "Interviews",
+    "awaitingChoice": "Waiting for the applicant to choose a time",
+    "scorecards": "Scorecards",
+    "recommendations": {
+      "yes": "Hire",
+      "maybe": "Not sure",
+      "no": "Don't hire"
+    },
+    "tutor": "Tutor",
+    "restricted": "Restricted",
+    "cell": {
+      "verified": "Verified",
+      "submitted": "To check",
+      "missing": "Missing",
+      "rejected": "Rejected",
+      "expired": "Expired",
+      "n/a": "–"
+    },
+    "verify": "Verify",
+    "defaultRejectReason": "Please upload a clearer copy.",
+    "jobsTitle": "Tutor vacancies",
+    "noOpenings": "There are no vacancies at the moment.",
+    "noOpening": "This vacancy isn't available",
+    "applied": "Thank you for applying. We'll be in touch.",
+    "apply": "Apply",
+    "linkExpired": "This link has expired",
+    "chooseTime": "Choose an interview time with {{organisation}}",
+    "interviewBooked": "Your interview is booked for {{when}}.",
+    "referenceFor": "Reference for {{name}}",
+    "referenceThanks": "Thank you for your reference.",
+    "overallRating": "Overall (5 = excellent)",
+    "raiseConcern": "I have a concern about this person working with children",
+    "sendReference": "Send reference"
+  },
+  "onboard": {
+    "title": "Getting started",
+    "done": "Done",
+    "markDone": "Mark done",
+    "auto": "Completes when you do it in the portal",
+    "complete": "You're all set.",
+    "checksTitle": "Your checks",
+    "missing": "Missing",
+    "upload": "Send",
+    "number": "Reference number",
+    "issueDate": "Issue date",
+    "expiryDate": "Expiry date",
+    "file": "Document",
+    "status": {
+      "missing": "Missing",
+      "submitted": "Being checked",
+      "verified": "Verified",
+      "rejected": "Rejected",
+      "expired": "Expired"
+    },
+    "restricted": "You can't take new lessons until your checks are up to date."
   }
 }

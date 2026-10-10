@@ -50,6 +50,15 @@ import { TenantsPage } from "./platform/TenantsPage";
 import { ExpensesPage, PayItemsPage, PayRunPage, PayRunsPage } from "./payroll/PayrollPages";
 import { BoardPage, EnquiryPage } from "./leads/LeadsPages";
 import { FormsPage, FunnelPage, OfferPage, PublicFormPage, WaitlistPage } from "./leads/MorePages";
+import {
+  ApplicationPage,
+  ApplicationsPage,
+  ComplianceDashboardPage,
+  InterviewChoicePage,
+  ReferencePage,
+  VacanciesPage,
+  VacancyPage,
+} from "./recruitment/RecruitmentPages";
 import { PlanPage } from "./subscription/PlanPage";
 import { TeamPage } from "./routes/TeamPage";
 import { VerifyEmailPage } from "./routes/VerifyEmailPage";
@@ -117,6 +126,34 @@ const offerRoute = createRoute({
   path: "/offers/$token",
   component: function OfferRoute() {
     return <OfferPage token={offerRoute.useParams().token} />;
+  },
+});
+
+// Tutor recruitment (E18): open roles, applications, interview times and references.
+const vacanciesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/vacancies",
+  component: VacanciesPage,
+});
+const vacancyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/vacancies/$slug",
+  component: function VacancyRoute() {
+    return <VacancyPage slug={vacancyRoute.useParams().slug} />;
+  },
+});
+const interviewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/interviews/$token",
+  component: function InterviewRoute() {
+    return <InterviewChoicePage token={interviewRoute.useParams().token} />;
+  },
+});
+const referenceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/references/$token",
+  component: function ReferenceRoute() {
+    return <ReferencePage token={referenceRoute.useParams().token} />;
   },
 });
 
@@ -233,6 +270,15 @@ const enquiryRoute = createRoute({
     return <EnquiryPage id={enquiryRoute.useParams().id} />;
   },
 });
+const recruitmentRoute = appPage("/recruitment", ApplicationsPage);
+const complianceRoute = appPage("/compliance", ComplianceDashboardPage);
+const applicationRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/recruitment/$id",
+  component: function ApplicationRoute() {
+    return <ApplicationPage id={applicationRoute.useParams().id} />;
+  },
+});
 const payRunRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/payroll/runs/$id",
@@ -270,6 +316,10 @@ const routeTree = rootRoute.addChildren([
   paySetupRoute,
   publicFormRoute,
   offerRoute,
+  vacanciesRoute,
+  vacancyRoute,
+  interviewRoute,
+  referenceRoute,
   platformRoute.addChildren([
     platformTenantsRoute,
     platformTenantRoute,
@@ -304,6 +354,9 @@ const routeTree = rootRoute.addChildren([
     payExpensesRoute,
     payItemsRoute,
     payRunRoute,
+    recruitmentRoute,
+    complianceRoute,
+    applicationRoute,
     leadsRoute,
     leadsFormsRoute,
     leadsWaitlistRoute,
