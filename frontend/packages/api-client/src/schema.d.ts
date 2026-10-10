@@ -58,6 +58,73 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/assignment-rules": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["assignment_rules_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["assignment_rules_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/assignment-rules/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    put: operations["assignment_rules_update"];
+    post?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    delete: operations["assignment_rules_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["assignment_rules_partial_update"];
+    trace?: never;
+  };
   "/api/v1/audit": {
     parameters: {
       query?: never;
@@ -1551,6 +1618,221 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/enquiries": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["enquiries_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["enquiries_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enquiries/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["enquiries_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["enquiries_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/enquiries/{id}/convert": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["enquiries_convert_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enquiries/{id}/history": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["enquiries_history_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enquiries/{id}/lose": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["enquiries_lose_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enquiries/{id}/move": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["enquiries_move_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enquiries/{id}/trial": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["enquiries_trial_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enquiries/{id}/trial-outcome": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["enquiries_trial_outcome_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enquiries/board": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Open enquiries by stage for the Kanban board (FR-17-2). */
+    get: operations["enquiries_board_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/entitlements": {
     parameters: {
       query?: never;
@@ -1857,6 +2139,73 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/api/v1/forms": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["forms_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["forms_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/forms/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["forms_retrieve"];
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    put: operations["forms_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["forms_partial_update"];
     trace?: never;
   };
   "/api/v1/ical-feeds": {
@@ -2632,6 +2981,22 @@ export interface paths {
     put?: never;
     /** @description "Set up lessons" for a student: service, rate, tutor and weekly times in one step. */
     post: operations["jobs_quick_setup_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/leads/reports/funnel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["leads_reports_funnel_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -4723,6 +5088,66 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/pipelines": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["pipelines_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["pipelines_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pipelines/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["pipelines_retrieve"];
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    put: operations["pipelines_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/platform/dead-letters": {
     parameters: {
       query?: never;
@@ -5454,6 +5879,59 @@ export interface paths {
     put?: never;
     /** @description Platform operations: stop a stuck process immediately (audited with a reason). */
     post: operations["processes_terminate_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/enquiries": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description ``POST /public/enquiries``: website or partner integrations (FR-17-1). */
+    post: operations["public_enquiries_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/forms/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``/public/forms/{slug}``: the published form's schema, and submissions (FR-17-1). */
+    get: operations["public_forms_retrieve"];
+    put?: never;
+    /** @description ``/public/forms/{slug}``: the published form's schema, and submissions (FR-17-1). */
+    post: operations["public_forms_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/offers/{token}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``/public/offers/{token}``: the family sees and answers a waitlist offer. */
+    get: operations["public_offers_retrieve"];
+    put?: never;
+    /** @description ``/public/offers/{token}``: the family sees and answers a waitlist offer. */
+    post: operations["public_offers_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -6464,6 +6942,105 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/waitlist": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["waitlist_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["waitlist_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/waitlist/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["waitlist_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/waitlist/{id}/offer": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["waitlist_offer_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/waitlist/{id}/remove": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["waitlist_remove_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -6711,6 +7288,28 @@ export interface components {
     ApplyTagResult: {
       changed: number;
     };
+    AssignmentRule: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      pipeline?: string | null;
+      /** Format: uuid */
+      branch?: string | null;
+      subject?: string;
+      owners: string[];
+      order?: number;
+      active?: boolean;
+    };
+    AssignmentRuleRequest: {
+      /** Format: uuid */
+      pipeline?: string | null;
+      /** Format: uuid */
+      branch?: string | null;
+      subject?: string;
+      owners: string[];
+      order?: number;
+      active?: boolean;
+    };
     /**
      * @description * `present` - Present
      *     * `late` - Late
@@ -6875,6 +7474,10 @@ export interface components {
     };
     /** @enum {unknown} */
     BlankEnum: "";
+    BoardColumn: {
+      stage: components["schemas"]["Stage"];
+      enquiries: components["schemas"]["Enquiry"][];
+    };
     Branch: {
       /** Format: uuid */
       readonly id: string;
@@ -6914,6 +7517,11 @@ export interface components {
      * @enum {string}
      */
     BranchScopeEnum: "all" | "selected";
+    Breakdown: {
+      key: string;
+      total: number;
+      won: number;
+    };
     BulkInviteRequest: {
       emails: string[];
       role: components["schemas"]["RoleEnum"];
@@ -7641,6 +8249,26 @@ export interface components {
       language?: string;
       custom_fields?: unknown;
     };
+    ConvertJobRequest: {
+      /** Format: uuid */
+      service: string;
+      /** Format: uuid */
+      tutor?: string | null;
+      students?: string[];
+    };
+    ConvertRequest: {
+      jobs: components["schemas"]["ConvertJobRequest"][];
+      /** @default false */
+      invite_to_portal: boolean;
+      /** @default false */
+      payment_setup_link: boolean;
+    };
+    ConvertResult: {
+      enquiry: components["schemas"]["Enquiry"];
+      job_ids: string[];
+      setup_url: string;
+      invited: boolean;
+    };
     Count: {
       count: number;
     };
@@ -8072,6 +8700,119 @@ export interface components {
       /** @default  */
       reason: string;
     };
+    Enquiry: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly title: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      /** Format: uuid */
+      readonly contact: string | null;
+      readonly contact_name: string;
+      /** @default  */
+      readonly contact_email: string;
+      /** @default  */
+      readonly contact_phone: string;
+      readonly students: string[];
+      readonly student_names: string[];
+      /** Format: uuid */
+      readonly pipeline: string;
+      /** Format: uuid */
+      readonly stage: string;
+      readonly stage_name: string;
+      /** Format: date-time */
+      readonly stage_entered_at: string;
+      readonly status: components["schemas"]["EnquiryStatusEnum"];
+      /** Format: uuid */
+      readonly owner: string | null;
+      readonly owner_name: string;
+      readonly priority: components["schemas"]["PriorityEnum"];
+      readonly subjects: unknown;
+      readonly notes: string;
+      readonly value_estimate: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: date */
+      readonly expected_start: string | null;
+      readonly source: components["schemas"]["EnquirySourceEnum"];
+      readonly source_detail: string;
+      readonly utm: unknown;
+      /** Format: date-time */
+      readonly first_response_at: string | null;
+      readonly sla_breached: boolean;
+      readonly lost_reason: string;
+      readonly lost_note: string;
+      /** Format: date-time */
+      readonly won_at: string | null;
+      /** Format: date-time */
+      readonly lost_at: string | null;
+      /** Format: uuid */
+      readonly trial_lesson: string | null;
+      readonly trial_outcome: components["schemas"]["TrialOutcomeEnum"];
+      readonly trial_feedback: string;
+      readonly converted_job_ids: unknown;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly age_hours: number;
+    };
+    EnquiryCreateRequest: {
+      first_name: string;
+      last_name?: string;
+      email?: string;
+      phone?: string;
+      students?: components["schemas"]["StudentInRequest"][];
+      subjects?: components["schemas"]["EnquirySubjectRequest"][];
+      notes?: string;
+      /** @default phone */
+      source: components["schemas"]["EnquirySourceEnum"];
+      /** Format: uuid */
+      pipeline?: string | null;
+      /** Format: uuid */
+      owner?: string | null;
+      /** @default normal */
+      priority: components["schemas"]["PriorityEnum"];
+      value_estimate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: date */
+      expected_start?: string | null;
+    };
+    /**
+     * @description * `form` - Website form
+     *     * `api` - API
+     *     * `email` - Email
+     *     * `phone` - Phone
+     *     * `manual` - Added by staff
+     *     * `import` - Import
+     *     * `referral` - Referral
+     * @enum {string}
+     */
+    EnquirySourceEnum: "form" | "api" | "email" | "phone" | "manual" | "import" | "referral";
+    /**
+     * @description * `open` - Open
+     *     * `won` - Won
+     *     * `lost` - Lost
+     * @enum {string}
+     */
+    EnquiryStatusEnum: "open" | "won" | "lost";
+    EnquirySubjectRequest: {
+      subject: string;
+      /** @default  */
+      level: string;
+    };
     EnterUrl: {
       url: string;
     };
@@ -8360,6 +9101,35 @@ export interface components {
       /** @default  */
       reason: string;
     };
+    Form: {
+      /** Format: uuid */
+      readonly id: string;
+      type?: components["schemas"]["FormTypeEnum"];
+      name: string;
+      slug: string;
+      schema?: unknown;
+      settings?: unknown;
+      published?: boolean;
+      /** Format: uuid */
+      branch?: string | null;
+    };
+    FormRequest: {
+      type?: components["schemas"]["FormTypeEnum"];
+      name: string;
+      slug: string;
+      schema?: unknown;
+      settings?: unknown;
+      published?: boolean;
+      /** Format: uuid */
+      branch?: string | null;
+    };
+    /**
+     * @description * `enquiry` - Enquiry
+     *     * `registration` - Registration
+     *     * `custom` - Other
+     * @enum {string}
+     */
+    FormTypeEnum: "enquiry" | "registration" | "custom";
     /**
      * @description * `one_to_one` - One to one
      *     * `small_group` - Small group
@@ -8367,6 +9137,29 @@ export interface components {
      * @enum {string}
      */
     FormatEnum: "one_to_one" | "small_group" | "class";
+    Funnel: {
+      total: number;
+      stages: components["schemas"]["FunnelStage"][];
+      /** Format: double */
+      win_rate: number;
+      /** Format: double */
+      first_response_hours: number | null;
+      by_source: components["schemas"]["Breakdown"][];
+      by_owner: components["schemas"]["Breakdown"][];
+      lost_reasons: {
+        [key: string]: unknown;
+      }[];
+      won_value: {
+        [key: string]: string;
+      };
+    };
+    FunnelStage: {
+      stage: string;
+      kind: string;
+      reached: number;
+      /** Format: double */
+      rate: number;
+    };
     /**
      * @description * `keep` - keep
      *     * `cancel` - cancel
@@ -9572,6 +10365,12 @@ export interface components {
       /** @default false */
       remember: boolean;
     };
+    LoseRequest: {
+      reason: string;
+      note?: string;
+      /** @default false */
+      nurture: boolean;
+    };
     MakeupCredit: {
       /** Format: uuid */
       readonly id: string;
@@ -9796,6 +10595,10 @@ export interface components {
       amount: string;
       currency: string;
     };
+    MoveRequest: {
+      /** Format: uuid */
+      stage: string;
+    };
     MyConsentRequest: {
       consent_type: string;
       granted: boolean;
@@ -9906,6 +10709,13 @@ export interface components {
     };
     NudgeResult: {
       nudged: number;
+    };
+    OfferRequest: {
+      details: string;
+      hours?: number;
+    };
+    OfferResponseRequest: {
+      accept: boolean;
     };
     Onboarding: {
       account: components["schemas"]["ProviderAccount"];
@@ -10298,6 +11108,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Document"][];
     };
+    PaginatedEnquiryList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Enquiry"][];
+    };
     PaginatedExceptionList: {
       /**
        * Format: uri
@@ -10688,6 +11511,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["TutorSubject"][];
     };
+    PaginatedWaitlistEntryList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["WaitlistEntry"][];
+    };
     PasswordChangeRequest: {
       current_password: string;
       new_password: string;
@@ -10699,6 +11535,16 @@ export interface components {
       uid: string;
       token: string;
       new_password: string;
+    };
+    PatchedAssignmentRuleRequest: {
+      /** Format: uuid */
+      pipeline?: string | null;
+      /** Format: uuid */
+      branch?: string | null;
+      subject?: string;
+      owners?: string[];
+      order?: number;
+      active?: boolean;
     };
     PatchedAttendanceRequest: {
       attendance?: components["schemas"]["AttendanceRowRequest"][];
@@ -10811,6 +11657,25 @@ export interface components {
       validation_regex?: string;
       active?: boolean;
     };
+    PatchedEnquiryUpdateRequest: {
+      title?: string;
+      /** Format: uuid */
+      owner?: string | null;
+      priority?: components["schemas"]["PriorityEnum"];
+      subjects?: components["schemas"]["EnquirySubjectRequest"][];
+      notes?: string;
+      value_estimate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: date */
+      expected_start?: string | null;
+    };
     PatchedExpenseCategoryRequest: {
       name?: string;
       kind?: components["schemas"]["ExpenseCategoryKindEnum"];
@@ -10828,6 +11693,16 @@ export interface components {
       enabled_globally?: boolean;
       plan_keys?: string[];
       rollout_percent?: number;
+    };
+    PatchedFormRequest: {
+      type?: components["schemas"]["FormTypeEnum"];
+      name?: string;
+      slug?: string;
+      schema?: unknown;
+      settings?: unknown;
+      published?: boolean;
+      /** Format: uuid */
+      branch?: string | null;
     };
     PatchedInvoiceUpdateRequest: {
       po_number?: string;
@@ -11278,6 +12153,17 @@ export interface components {
       phone?: string;
       timezone?: string;
       locale?: string;
+    };
+    PatchedWaitlistEntryRequest: {
+      /** Format: uuid */
+      student?: string;
+      subject?: string;
+      level?: string;
+      /** Format: uuid */
+      tutor?: string | null;
+      /** Format: uuid */
+      service?: string | null;
+      notes?: string;
     };
     PayIntent: {
       publishable_key: string;
@@ -11763,6 +12649,20 @@ export interface components {
      * @enum {string}
      */
     PersonTypeEnum: "contact" | "tutor" | "user";
+    Pipeline: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      is_default?: boolean;
+      active?: boolean;
+      stages: components["schemas"]["Stage"][];
+    };
+    PipelineRequest: {
+      name: string;
+      is_default?: boolean;
+      active?: boolean;
+      stages: components["schemas"]["StageRequest"][];
+    };
     Plan: {
       key: string;
       name: string;
@@ -12284,6 +13184,64 @@ export interface components {
      * @enum {string}
      */
     ProviderEnum: "stripe" | "manual";
+    /** @description ``POST /public/enquiries`` (TutorCruncher-style API). */
+    PublicEnquiryRequest: {
+      first_name: string;
+      last_name?: string;
+      email?: string;
+      phone?: string;
+      students?: components["schemas"]["StudentInRequest"][];
+      subjects?: components["schemas"]["EnquirySubjectRequest"][];
+      notes?: string;
+      postcode?: string;
+      utm?: {
+        [key: string]: unknown;
+      };
+      /** @default  */
+      captcha_token: string;
+      /** @default  */
+      website: string;
+    };
+    PublicForm: {
+      name: string;
+      type: string;
+      schema: {
+        [key: string]: unknown;
+      };
+      thank_you: string;
+      redirect_url: string;
+      consent_text: string;
+      turnstile_site_key: string;
+      organisation: string;
+    };
+    PublicOffer: {
+      student: string;
+      subject: string;
+      details: string;
+      status: string;
+      /** Format: date-time */
+      expires_at: string | null;
+      organisation: string;
+    };
+    PublicSubmitRequest: {
+      data: {
+        [key: string]: unknown;
+      };
+      utm?: {
+        [key: string]: unknown;
+      };
+      /** @default  */
+      captcha_token: string;
+      /**
+       * @description Honeypot: leave empty
+       * @default
+       */
+      website: string;
+    };
+    PublicSubmitResult: {
+      ok: boolean;
+      pay_url: string;
+    };
     /**
      * @description * `hours` - Hours
      *     * `lessons` - Lessons
@@ -13137,6 +14095,34 @@ export interface components {
       reason: string | null;
       suggestion: string | null;
     };
+    Stage: {
+      /** Format: uuid */
+      id?: string;
+      name: string;
+      readonly order: number;
+      kind?: components["schemas"]["EnquiryStatusEnum"];
+      probability?: number;
+      sla_hours?: number | null;
+      colour?: string;
+    };
+    StageHistory: {
+      /** Format: uuid */
+      readonly id: string;
+      from_stage_name?: string;
+      to_stage_name: string;
+      seconds_in_previous?: number | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    StageRequest: {
+      /** Format: uuid */
+      id?: string;
+      name: string;
+      kind?: components["schemas"]["EnquiryStatusEnum"];
+      probability?: number;
+      sla_hours?: number | null;
+      colour?: string;
+    };
     StartBulkRequest: {
       target_ids: string[];
       params?: {
@@ -13229,6 +14215,11 @@ export interface components {
       readonly archived_at: string | null;
       /** Format: date-time */
       readonly created_at: string;
+    };
+    StudentInRequest: {
+      first_name: string;
+      last_name?: string;
+      subjects?: components["schemas"]["EnquirySubjectRequest"][];
     };
     StudentInput: {
       /** Format: uuid */
@@ -13668,6 +14659,37 @@ export interface components {
      * @enum {string}
      */
     TopUpResultStatusEnum: "paid" | "redirect";
+    /**
+     * @description * `continuing` - Continuing
+     *     * `not_continuing` - Not continuing
+     *     * `undecided` - Undecided
+     * @enum {string}
+     */
+    TrialOutcomeEnum: "continuing" | "not_continuing" | "undecided";
+    TrialOutcomeRequest: {
+      outcome: components["schemas"]["TrialOutcomeEnum"];
+      feedback?: string;
+    };
+    TrialRequest: {
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      /** Format: uuid */
+      service: string;
+      /** Format: uuid */
+      tutor?: string | null;
+      /** @description 0 for a free trial */
+      price?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
     Tutor: {
       /** Format: uuid */
       readonly id: string;
@@ -13962,6 +14984,52 @@ export interface components {
       /** @default  */
       note: string;
     };
+    WaitlistEntry: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      student: string;
+      readonly student_name: string;
+      subject?: string;
+      level?: string;
+      /** Format: uuid */
+      tutor?: string | null;
+      /** Format: uuid */
+      service?: string | null;
+      notes?: string;
+      readonly status: components["schemas"]["WaitlistStatusEnum"];
+      readonly offer_details: string;
+      /** Format: date-time */
+      readonly offered_at: string | null;
+      /** Format: date-time */
+      readonly offer_expires_at: string | null;
+      /** Format: date-time */
+      readonly responded_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly position: number | null;
+    };
+    WaitlistEntryRequest: {
+      /** Format: uuid */
+      student: string;
+      subject?: string;
+      level?: string;
+      /** Format: uuid */
+      tutor?: string | null;
+      /** Format: uuid */
+      service?: string | null;
+      notes?: string;
+    };
+    /**
+     * @description * `waiting` - Waiting
+     *     * `offered` - Offered a place
+     *     * `accepted` - Accepted
+     *     * `declined` - Declined
+     *     * `expired` - Offer expired
+     *     * `removed` - Removed
+     * @enum {string}
+     */
+    WaitlistStatusEnum: "waiting" | "offered" | "accepted" | "declined" | "expired" | "removed";
     /**
      * @description * `0` - Monday
      *     * `1` - Tuesday
@@ -14163,6 +15231,133 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  assignment_rules_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssignmentRule"][];
+        };
+      };
+    };
+  };
+  assignment_rules_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssignmentRuleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AssignmentRuleRequest"];
+        "multipart/form-data": components["schemas"]["AssignmentRuleRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssignmentRule"];
+        };
+      };
+    };
+  };
+  assignment_rules_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this assignment rule. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssignmentRuleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AssignmentRuleRequest"];
+        "multipart/form-data": components["schemas"]["AssignmentRuleRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssignmentRule"];
+        };
+      };
+    };
+  };
+  assignment_rules_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this assignment rule. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  assignment_rules_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this assignment rule. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedAssignmentRuleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedAssignmentRuleRequest"];
+        "multipart/form-data": components["schemas"]["PatchedAssignmentRuleRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AssignmentRule"];
+        };
       };
     };
   };
@@ -17405,6 +18600,324 @@ export interface operations {
       };
     };
   };
+  enquiries_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        owner?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        pipeline?: string;
+        q?: string;
+        source?: string;
+        stage?: string;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedEnquiryList"];
+        };
+      };
+    };
+  };
+  enquiries_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EnquiryCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["EnquiryCreateRequest"];
+        "multipart/form-data": components["schemas"]["EnquiryCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Enquiry"];
+        };
+      };
+    };
+  };
+  enquiries_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this enquiry. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Enquiry"];
+        };
+      };
+    };
+  };
+  enquiries_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this enquiry. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedEnquiryUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedEnquiryUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedEnquiryUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Enquiry"];
+        };
+      };
+    };
+  };
+  enquiries_convert_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this enquiry. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ConvertRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ConvertRequest"];
+        "multipart/form-data": components["schemas"]["ConvertRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ConvertResult"];
+        };
+      };
+    };
+  };
+  enquiries_history_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this enquiry. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StageHistory"][];
+        };
+      };
+    };
+  };
+  enquiries_lose_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this enquiry. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LoseRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LoseRequest"];
+        "multipart/form-data": components["schemas"]["LoseRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Enquiry"];
+        };
+      };
+    };
+  };
+  enquiries_move_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this enquiry. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MoveRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["MoveRequest"];
+        "multipart/form-data": components["schemas"]["MoveRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Enquiry"];
+        };
+      };
+    };
+  };
+  enquiries_trial_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this enquiry. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TrialRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TrialRequest"];
+        "multipart/form-data": components["schemas"]["TrialRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Enquiry"];
+        };
+      };
+    };
+  };
+  enquiries_trial_outcome_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this enquiry. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TrialOutcomeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TrialOutcomeRequest"];
+        "multipart/form-data": components["schemas"]["TrialOutcomeRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Enquiry"];
+        };
+      };
+    };
+  };
+  enquiries_board_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        pipeline?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BoardColumn"][];
+        };
+      };
+    };
+  };
   entitlements_retrieve: {
     parameters: {
       query?: never;
@@ -17917,6 +19430,134 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["FileUploadCreated"];
+        };
+      };
+    };
+  };
+  forms_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Form"][];
+        };
+      };
+    };
+  };
+  forms_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FormRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["FormRequest"];
+        "multipart/form-data": components["schemas"]["FormRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Form"];
+        };
+      };
+    };
+  };
+  forms_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this form. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Form"];
+        };
+      };
+    };
+  };
+  forms_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this form. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FormRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["FormRequest"];
+        "multipart/form-data": components["schemas"]["FormRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Form"];
+        };
+      };
+    };
+  };
+  forms_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this form. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedFormRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedFormRequest"];
+        "multipart/form-data": components["schemas"]["PatchedFormRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Form"];
         };
       };
     };
@@ -19389,6 +21030,29 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Job"];
+        };
+      };
+    };
+  };
+  leads_reports_funnel_retrieve: {
+    parameters: {
+      query?: {
+        from?: string;
+        pipeline?: string;
+        to?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Funnel"];
         };
       };
     };
@@ -22954,6 +24618,106 @@ export interface operations {
       };
     };
   };
+  pipelines_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Pipeline"][];
+        };
+      };
+    };
+  };
+  pipelines_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PipelineRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PipelineRequest"];
+        "multipart/form-data": components["schemas"]["PipelineRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Pipeline"];
+        };
+      };
+    };
+  };
+  pipelines_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this pipeline. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Pipeline"];
+        };
+      };
+    };
+  };
+  pipelines_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this pipeline. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PipelineRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PipelineRequest"];
+        "multipart/form-data": components["schemas"]["PipelineRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Pipeline"];
+        };
+      };
+    };
+  };
   platform_dead_letters_list: {
     parameters: {
       query?: {
@@ -24167,6 +25931,136 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Process"];
+        };
+      };
+    };
+  };
+  public_enquiries_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublicEnquiryRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PublicEnquiryRequest"];
+        "multipart/form-data": components["schemas"]["PublicEnquiryRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicSubmitResult"];
+        };
+      };
+    };
+  };
+  public_forms_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicForm"];
+        };
+      };
+    };
+  };
+  public_forms_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublicSubmitRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PublicSubmitRequest"];
+        "multipart/form-data": components["schemas"]["PublicSubmitRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicSubmitResult"];
+        };
+      };
+    };
+  };
+  public_offers_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicOffer"];
+        };
+      };
+    };
+  };
+  public_offers_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OfferResponseRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["OfferResponseRequest"];
+        "multipart/form-data": components["schemas"]["OfferResponseRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicOffer"];
         };
       };
     };
@@ -26233,6 +28127,147 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Unsubscribe"];
+        };
+      };
+    };
+  };
+  waitlist_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedWaitlistEntryList"];
+        };
+      };
+    };
+  };
+  waitlist_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WaitlistEntryRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["WaitlistEntryRequest"];
+        "multipart/form-data": components["schemas"]["WaitlistEntryRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WaitlistEntry"];
+        };
+      };
+    };
+  };
+  waitlist_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this waitlist entry. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedWaitlistEntryRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedWaitlistEntryRequest"];
+        "multipart/form-data": components["schemas"]["PatchedWaitlistEntryRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WaitlistEntry"];
+        };
+      };
+    };
+  };
+  waitlist_offer_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this waitlist entry. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OfferRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["OfferRequest"];
+        "multipart/form-data": components["schemas"]["OfferRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WaitlistEntry"];
+        };
+      };
+    };
+  };
+  waitlist_remove_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this waitlist entry. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WaitlistEntry"];
         };
       };
     };

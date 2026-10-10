@@ -779,6 +779,7 @@ for _key, _label, _code in (
     ("staff_expense_submitted", _("Expense claim waiting for approval"), "payroll.expense.approve"),
     ("staff_pay_run_review", _("Pay run waiting for approval"), "payroll.payrun.approve"),
     ("staff_payout_failed", _("A tutor payout failed"), "payroll.payrun.pay"),
+    ("staff_enquiry_sla", _("Enquiry needs attention"), "leads.enquiry.edit"),
 ):
     register(
         NotificationType(
@@ -817,6 +818,105 @@ register(
         link=lambda payload: payload[2],
     )
 )
+
+
+# --- leads (E17) --------------------------------------------------------------------------------
+
+
+def _enquiry_ack(enquiry: Any) -> list[Delivery]:
+    if enquiry.contact is None:
+        return []
+    r = contact_recipient(enquiry.contact)
+    return [Delivery(r, {"organisation": organisation(),
+                         "recipient": {"name": r.name, "first_name": r.first_name},
+                         "enquiry": {"title": enquiry.title}})]  # fmt: skip
+
+
+def _enquiry_owner(enquiry: Any) -> list[Delivery]:
+    if enquiry.owner is None:
+        return []
+    r = user_recipient(enquiry.owner)
+    return [Delivery(r, {"organisation": organisation(),
+                         "recipient": {"name": r.name, "first_name": r.first_name},
+                         "enquiry": {"title": enquiry.title, "source": enquiry.source,
+                                     "link": f"/leads/{enquiry.pk}"}})]  # fmt: skip
+
+
+def load_enquiry(pk: str) -> Any:
+    from tutortrack.leads.models import Enquiry
+
+    return Enquiry.objects.select_related("contact", "owner").filter(pk=pk).first()
+
+
+def _waitlist_offer(payload: Any) -> list[Delivery]:
+    from tutortrack.leads.models import WaitlistEntry
+
+    entry_id, token = payload
+    entry = WaitlistEntry.objects.select_related("student__client").filter(pk=entry_id).first()
+    if entry is None:
+        return []
+    offer = {"student": entry.student.first_name, "subject": entry.subject,
+             "details": entry.offer_details, "expires_at": entry.offer_expires_at,
+             "link": tenant_link(f"/offers/{token}")}  # fmt: skip
+    return [
+        Delivery(contact_recipient(c), {"organisation": organisation(),
+                                        "recipient": {"name": c.full_name,
+                                                      "first_name": c.first_name},
+                                        "offer": offer})
+        for c in client_contacts(entry.student.client)
+    ]  # fmt: skip
+
+
+register(
+    NotificationType(
+        key="enquiry_acknowledgement",
+        label=str(_("Reply to a new enquiry")),
+        category="account",
+        audience="client",
+        channels=("email", "sms"),
+        default_channels=("email",),
+        resolve=_enquiry_ack,
+        load=load_enquiry,
+        related_type="leads.enquiry",
+        variables=("recipient.first_name", "organisation.name", "enquiry.title"),
+        sample={**SAMPLE_BASE, "enquiry": {"title": "Maths tutoring for Arjun"}},
+    )
+)
+register(
+    NotificationType(
+        key="enquiry_assigned",
+        label=str(_("New enquiry assigned to you")),
+        category="staff",
+        audience="staff",
+        channels=("in_app", "email"),
+        default_channels=("in_app", "email"),
+        resolve=_enquiry_owner,
+        load=load_enquiry,
+        related_type="leads.enquiry",
+        variables=("enquiry.title", "enquiry.source", "enquiry.link"),
+        sample={**SAMPLE_BASE, "enquiry": {"title": "Maths tutoring for Arjun",
+                                           "source": "form", "link": "/leads"}},
+        link=lambda enquiry: f"/leads/{enquiry.pk}",
+    )
+)  # fmt: skip
+register(
+    NotificationType(
+        key="waitlist_offer",
+        label=str(_("A place is available")),
+        category="scheduling",
+        audience="client",
+        channels=("email", "sms"),
+        default_channels=("email",),
+        resolve=_waitlist_offer,
+        load=lambda pk: None,
+        related_type="",
+        variables=("offer.student", "offer.subject", "offer.details", "offer.expires_at",
+                   "offer.link"),
+        sample={**SAMPLE_BASE, "offer": {"student": "Arjun", "subject": "Maths",
+                                         "details": "Tuesdays 4pm with Nia",
+                                         "expires_at": None, "link": "https://example.com"}},
+    )
+)  # fmt: skip
 
 
 def _task(task: Any) -> list[Delivery]:

@@ -208,9 +208,42 @@ for _key in (
     "staff_expense_submitted",
     "staff_pay_run_review",
     "staff_payout_failed",
+    "staff_enquiry_sla",
 ):
     DEFAULTS[(_key, "in_app")] = ("{{ alert.title }}", "{{ alert.body }}")
     DEFAULTS[(_key, "email")] = ("{{ alert.title }}", "{{ alert.body }}" + SIGN)
+
+
+DEFAULTS[("enquiry_acknowledgement", "email")] = (
+    "Thanks for getting in touch",
+    "Hello {{ recipient.first_name }},\n\nThank you for your enquiry. We've received it and "
+    "will be in touch soon." + SIGN,
+)
+DEFAULTS[("enquiry_acknowledgement", "sms")] = (
+    "",
+    "{{ organisation.name }}: thanks for your enquiry, we'll be in touch soon.",
+)
+DEFAULTS[("enquiry_assigned", "in_app")] = (
+    "New enquiry: {{ enquiry.title }}",
+    "From {{ enquiry.source }}",
+)
+DEFAULTS[("enquiry_assigned", "email")] = (
+    "New enquiry: {{ enquiry.title }}",
+    "A new enquiry has been assigned to you ({{ enquiry.source }})." + SIGN,
+)
+DEFAULTS[("waitlist_offer", "email")] = (
+    "A place is available for {{ offer.student }}",
+    "Hello {{ recipient.first_name }},\n\nA place has come up for {{ offer.student }}"
+    "{% if offer.subject %} ({{ offer.subject }}){% endif %}: {{ offer.details }}\n\n"
+    "Accept or decline here: {{ offer.link }}"
+    '{% if offer.expires_at %}\nThe offer is held until {{ offer.expires_at|datetime("short") }}.'
+    "{% endif %}" + SIGN,
+)
+DEFAULTS[("waitlist_offer", "sms")] = (
+    "",
+    "{{ organisation.name }}: a place is available for {{ offer.student }}. Reply here: "
+    "{{ offer.link }}",
+)
 
 
 def default_template(type_key: str, channel: str) -> tuple[str, str] | None:

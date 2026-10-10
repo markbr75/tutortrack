@@ -4,6 +4,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 
 from tutortrack.comms.api.views import postmark_webhook, twilio_inbound, twilio_status
 from tutortrack.core.api.health import healthz, readyz
+from tutortrack.leads.api.views import inbound_email
 from tutortrack.payments.api.views import stripe_webhook
 from tutortrack.scheduling.api.views import ical_feed
 from tutortrack.subscriptions.api.views import stripe_billing_webhook
@@ -24,6 +25,7 @@ api_v1: list[URLPattern | URLResolver] = [
     path("", include("tutortrack.billing.api.urls")),
     path("", include("tutortrack.payments.api.urls")),
     path("", include("tutortrack.payroll.api.urls")),
+    path("", include("tutortrack.leads.api.urls")),
     path("", include("tutortrack.comms.api.urls")),
     path("", include("tutortrack.portal.api.urls")),
     path("", include("tutortrack.subscriptions.api.urls")),
@@ -42,6 +44,7 @@ urlpatterns = [
     path("webhooks/stripe", stripe_webhook, name="stripe-webhook"),
     path("webhooks/stripe/platform", stripe_billing_webhook, name="stripe-billing-webhook"),
     path("webhooks/postmark", postmark_webhook, name="postmark-webhook"),
+    path("webhooks/inbound-email", inbound_email, name="inbound-email"),
     path("webhooks/twilio/status", twilio_status, name="twilio-status"),
     path("webhooks/twilio/inbound", twilio_inbound, name="twilio-inbound"),
     # Temporal Web UI codec server (staff-only, E32 FR-32-9).

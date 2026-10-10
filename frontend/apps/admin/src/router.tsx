@@ -48,6 +48,8 @@ import { PlatformShell } from "./platform/PlatformShell";
 import { TenantPage } from "./platform/TenantPage";
 import { TenantsPage } from "./platform/TenantsPage";
 import { ExpensesPage, PayItemsPage, PayRunPage, PayRunsPage } from "./payroll/PayrollPages";
+import { BoardPage, EnquiryPage } from "./leads/LeadsPages";
+import { FormsPage, FunnelPage, OfferPage, PublicFormPage, WaitlistPage } from "./leads/MorePages";
 import { PlanPage } from "./subscription/PlanPage";
 import { TeamPage } from "./routes/TeamPage";
 import { VerifyEmailPage } from "./routes/VerifyEmailPage";
@@ -99,6 +101,22 @@ const paySetupRoute = createRoute({
   path: "/pay/setup/$token",
   component: function PaySetupRoute() {
     return <SetupPage token={paySetupRoute.useParams().token} />;
+  },
+});
+
+// Public enquiry forms and waitlist offers (E17).
+const publicFormRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/f/$slug",
+  component: function PublicFormRoute() {
+    return <PublicFormPage slug={publicFormRoute.useParams().slug} />;
+  },
+});
+const offerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/offers/$token",
+  component: function OfferRoute() {
+    return <OfferPage token={offerRoute.useParams().token} />;
   },
 });
 
@@ -204,6 +222,17 @@ const planRoute = appPage("/settings/plan", PlanPage);
 const payRunsRoute = appPage("/payroll", PayRunsPage);
 const payExpensesRoute = appPage("/payroll/expenses", ExpensesPage);
 const payItemsRoute = appPage("/payroll/items", PayItemsPage);
+const leadsRoute = appPage("/leads", BoardPage);
+const leadsFormsRoute = appPage("/leads/forms", FormsPage);
+const leadsWaitlistRoute = appPage("/leads/waitlist", WaitlistPage);
+const leadsReportsRoute = appPage("/leads/reports", FunnelPage);
+const enquiryRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/leads/$id",
+  component: function EnquiryRoute() {
+    return <EnquiryPage id={enquiryRoute.useParams().id} />;
+  },
+});
 const payRunRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/payroll/runs/$id",
@@ -239,6 +268,8 @@ const routeTree = rootRoute.addChildren([
   acceptInviteRoute,
   payRoute,
   paySetupRoute,
+  publicFormRoute,
+  offerRoute,
   platformRoute.addChildren([
     platformTenantsRoute,
     platformTenantRoute,
@@ -273,6 +304,11 @@ const routeTree = rootRoute.addChildren([
     payExpensesRoute,
     payItemsRoute,
     payRunRoute,
+    leadsRoute,
+    leadsFormsRoute,
+    leadsWaitlistRoute,
+    leadsReportsRoute,
+    enquiryRoute,
     announcementsRoute,
     teamRoute,
     auditRoute,

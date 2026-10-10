@@ -86,8 +86,8 @@ All ─► E26, E27, E28, E31
 | E14 | ☐ | |
 | E15 | ✅ Done (2026-10-10) | MVP scope (booking, reschedule, packages and messaging are Phase 2). See Implementation notes |
 | E16 | ✅ Done (2026-10-10) | Responsive tutor shell in the portal app (PWA/offline/push are Phase 2; expenses with E12, compliance with E18). See Implementation notes |
-| E17 | ⏭ Next | |
-| E18 | ☐ | |
+| E17 | ✅ Done (2026-10-10) | T01–T08, T10 + TW1 (proposals T09 are Phase 2b). See Implementation notes |
+| E18 | ⏭ Next | |
 | E19 | ☐ | |
 | E20 | ☐ | |
 | E21 | ☐ | |

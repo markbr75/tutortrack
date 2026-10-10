@@ -126,7 +126,7 @@ Naming: `<aggregate>.<past_tense_verb>`. Each epic lists its events; this table 
 | `payment.succeeded/pending/failed/refunded/disputed/dispute_evidence_due/dispute_closed`, `payment_method.added/removed` (`expiring` with E13), `provider_account.connected/disconnected/requirements_due`, `payout.received`, `mandate.created/cancelled` (Phase 2, GoCardless) | E11 |
 | `pay_item.created/held/released`, `pay_run.created/approved/paid/partially_failed`, `payout.paid/failed`, `expense.submitted/approved/rejected`, `self_billing_statement.issued` | E12 |
 | `message.sent/delivered/bounced/received` (MVP: kept in the message log, not yet published as domain events) | E13 |
-| `enquiry.received`, `enquiry.stage_changed`, `enquiry.won/lost` | E17 |
+| `enquiry.received/assigned/stage_changed/won/lost/sla_breached`, `trial_lesson.booked/completed`, `waitlist.place_offered/place_accepted/place_declined/expired`, `form.submitted` | E17 |
 | `application.submitted/stage_changed/approved/rejected`, `compliance.document_expiring/expired/verified` | E18 |
 | `job_offer.sent/accepted/declined`, `job_posting.application_received` | E19 |
 | `enrolment.created/cancelled`, `waitlist.place_offered`, `class.full` | E20 |

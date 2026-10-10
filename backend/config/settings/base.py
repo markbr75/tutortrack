@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "tutortrack.billing",
     "tutortrack.payments",
     "tutortrack.payroll",
+    "tutortrack.leads",
     "tutortrack.comms",
     "tutortrack.portal",
     "tutortrack.subscriptions",
@@ -270,6 +271,7 @@ REST_FRAMEWORK = {
         "magic_link": "10/hour",
         "password_reset": "10/hour",
         "mfa": "20/minute",
+        "public_form": env("THROTTLE_PUBLIC_FORM", default="20/hour"),
     },
     "COERCE_DECIMAL_TO_STRING": True,
 }
@@ -297,6 +299,10 @@ SPECTACULAR_SETTINGS = {
         "TutorPayMethodEnum": "tutortrack.payroll.models.PayMethod",
         "BankFileFormatEnum": "tutortrack.payroll.bankfiles.FORMAT_CHOICES",
         "FormatEnum": "tutortrack.catalogue.models.Service.Format",
+        "EnquiryStatusEnum": "tutortrack.leads.models.Enquiry.Status",
+        "EnquirySourceEnum": "tutortrack.leads.models.Enquiry.Source",
+        "TrialOutcomeEnum": "tutortrack.leads.models.Enquiry.TrialOutcome",
+        "WaitlistStatusEnum": "tutortrack.leads.models.WaitlistEntry.Status",
         "CustomFieldVisibilityEnum": "tutortrack.crm.models.CustomFieldDefinition.Visibility",
         "NoteVisibilityEnum": "tutortrack.crm.models.Note.Visibility",
         "JobStatusEnum": "tutortrack.jobs.models.Job.Status",
@@ -332,6 +338,9 @@ STRIPE = {
     "WEBHOOK_SECRET": env("STRIPE_WEBHOOK_SECRET", default=""),
     "APPLICATION_FEE_PERCENT": env("STRIPE_APPLICATION_FEE_PERCENT", default="0"),
 }
+
+# Leads (E17): Postmark inbound webhook secret for enquiries+<subdomain>@ addresses.
+INBOUND_EMAIL_TOKEN = env("INBOUND_EMAIL_TOKEN", default="")
 
 # Payroll (E12): Stripe Express payouts to tutors need the account set up as a Connect platform.
 PAYROLL_STRIPE_PAYOUTS = env.bool("PAYROLL_STRIPE_PAYOUTS", default=False)

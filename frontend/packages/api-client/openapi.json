@@ -326,6 +326,242 @@
                 }
             }
         },
+        "/api/v1/assignment-rules": {
+            "get": {
+                "operationId": "assignment_rules_list",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "assignment-rules"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AssignmentRule"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "assignment_rules_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "assignment-rules"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentRuleRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentRuleRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentRuleRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentRule"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/assignment-rules/{id}": {
+            "put": {
+                "operationId": "assignment_rules_update",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this assignment rule.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "assignment-rules"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentRuleRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentRuleRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentRuleRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentRule"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "assignment_rules_partial_update",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this assignment rule.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "assignment-rules"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAssignmentRuleRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAssignmentRuleRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAssignmentRuleRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentRule"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "assignment_rules_destroy",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this assignment rule.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "assignment-rules"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/v1/audit": {
             "get": {
                 "operationId": "audit_list",
@@ -7049,6 +7285,693 @@
                 }
             }
         },
+        "/api/v1/enquiries": {
+            "get": {
+                "operationId": "enquiries_list",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "owner",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "pipeline",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "source",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "stage",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "enquiries"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedEnquiryList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "enquiries_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "enquiries"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EnquiryCreateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EnquiryCreateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EnquiryCreateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Enquiry"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/enquiries/{id}": {
+            "get": {
+                "operationId": "enquiries_retrieve",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this enquiry.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "enquiries"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Enquiry"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "enquiries_partial_update",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this enquiry.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "enquiries"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedEnquiryUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedEnquiryUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedEnquiryUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Enquiry"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/enquiries/{id}/convert": {
+            "post": {
+                "operationId": "enquiries_convert_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this enquiry.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "enquiries"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConvertRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConvertRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConvertRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConvertResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/enquiries/{id}/history": {
+            "get": {
+                "operationId": "enquiries_history_list",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this enquiry.",
+                        "required": true
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "enquiries"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/StageHistory"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/enquiries/{id}/lose": {
+            "post": {
+                "operationId": "enquiries_lose_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this enquiry.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "enquiries"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoseRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoseRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoseRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Enquiry"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/enquiries/{id}/move": {
+            "post": {
+                "operationId": "enquiries_move_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this enquiry.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "enquiries"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MoveRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MoveRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MoveRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Enquiry"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/enquiries/{id}/trial": {
+            "post": {
+                "operationId": "enquiries_trial_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this enquiry.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "enquiries"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TrialRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TrialRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TrialRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Enquiry"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/enquiries/{id}/trial-outcome": {
+            "post": {
+                "operationId": "enquiries_trial_outcome_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this enquiry.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "enquiries"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TrialOutcomeRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TrialOutcomeRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TrialOutcomeRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Enquiry"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/enquiries/board": {
+            "get": {
+                "operationId": "enquiries_board_list",
+                "description": "Open enquiries by stage for the Kanban board (FR-17-2).",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "pipeline",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "enquiries"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/BoardColumn"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/entitlements": {
             "get": {
                 "operationId": "entitlements_retrieve",
@@ -8041,6 +8964,249 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/FileUploadCreated"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/forms": {
+            "get": {
+                "operationId": "forms_list",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "forms"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Form"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "forms_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "forms"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FormRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FormRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FormRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Form"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/forms/{id}": {
+            "get": {
+                "operationId": "forms_retrieve",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this form.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "forms"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Form"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "forms_update",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this form.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "forms"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FormRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FormRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FormRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Form"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "forms_partial_update",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this form.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "forms"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedFormRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedFormRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedFormRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Form"
                                 }
                             }
                         },
@@ -11061,6 +12227,56 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Job"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/leads/reports/funnel": {
+            "get": {
+                "operationId": "leads_reports_funnel_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "pipeline",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "to",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "tags": [
+                    "leads"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Funnel"
                                 }
                             }
                         },
@@ -18191,6 +19407,194 @@
                 }
             }
         },
+        "/api/v1/pipelines": {
+            "get": {
+                "operationId": "pipelines_list",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "pipelines"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Pipeline"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "pipelines_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "pipelines"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PipelineRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PipelineRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PipelineRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Pipeline"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/pipelines/{id}": {
+            "get": {
+                "operationId": "pipelines_retrieve",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this pipeline.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pipelines"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Pipeline"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "pipelines_update",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this pipeline.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pipelines"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PipelineRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PipelineRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PipelineRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Pipeline"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/platform/dead-letters": {
             "get": {
                 "operationId": "platform_dead_letters_list",
@@ -20567,6 +21971,248 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Process"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/public/enquiries": {
+            "post": {
+                "operationId": "public_enquiries_create",
+                "description": "``POST /public/enquiries``: website or partner integrations (FR-17-1).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PublicEnquiryRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PublicEnquiryRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PublicEnquiryRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicSubmitResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/public/forms/{slug}": {
+            "get": {
+                "operationId": "public_forms_retrieve",
+                "description": "``/public/forms/{slug}``: the published form's schema, and submissions (FR-17-1).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "slug",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicForm"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "public_forms_create",
+                "description": "``/public/forms/{slug}``: the published form's schema, and submissions (FR-17-1).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "slug",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PublicSubmitRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PublicSubmitRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PublicSubmitRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicSubmitResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/public/offers/{token}": {
+            "get": {
+                "operationId": "public_offers_retrieve",
+                "description": "``/public/offers/{token}``: the family sees and answers a waitlist offer.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicOffer"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "public_offers_create",
+                "description": "``/public/offers/{token}``: the family sees and answers a waitlist offer.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OfferResponseRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OfferResponseRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OfferResponseRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicOffer"
                                 }
                             }
                         },
@@ -24633,6 +26279,299 @@
                     }
                 }
             }
+        },
+        "/api/v1/waitlist": {
+            "get": {
+                "operationId": "waitlist_list",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "waitlist"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedWaitlistEntryList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "waitlist_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "waitlist"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WaitlistEntryRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WaitlistEntryRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WaitlistEntryRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WaitlistEntry"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/waitlist/{id}": {
+            "patch": {
+                "operationId": "waitlist_partial_update",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this waitlist entry.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "waitlist"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedWaitlistEntryRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedWaitlistEntryRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedWaitlistEntryRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WaitlistEntry"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/waitlist/{id}/offer": {
+            "post": {
+                "operationId": "waitlist_offer_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this waitlist entry.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "waitlist"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OfferRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OfferRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OfferRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WaitlistEntry"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/waitlist/{id}/remove": {
+            "post": {
+                "operationId": "waitlist_remove_create",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this waitlist entry.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "waitlist"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WaitlistEntry"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -25376,6 +27315,86 @@
                     "changed"
                 ]
             },
+            "AssignmentRule": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "pipeline": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "subject": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "owners": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "order": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "active": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "id",
+                    "owners"
+                ]
+            },
+            "AssignmentRuleRequest": {
+                "type": "object",
+                "properties": {
+                    "pipeline": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "subject": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "owners": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "order": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "active": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "owners"
+                ]
+            },
             "AttendanceOutcomeEnum": {
                 "enum": [
                     "present",
@@ -25826,6 +27845,24 @@
                     ""
                 ]
             },
+            "BoardColumn": {
+                "type": "object",
+                "properties": {
+                    "stage": {
+                        "$ref": "#/components/schemas/Stage"
+                    },
+                    "enquiries": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Enquiry"
+                        }
+                    }
+                },
+                "required": [
+                    "enquiries",
+                    "stage"
+                ]
+            },
             "Branch": {
                 "type": "object",
                 "properties": {
@@ -25966,6 +28003,25 @@
                 ],
                 "type": "string",
                 "description": "* `all` - All\n* `selected` - Selected"
+            },
+            "Breakdown": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "total": {
+                        "type": "integer"
+                    },
+                    "won": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "key",
+                    "total",
+                    "won"
+                ]
             },
             "BulkInviteRequest": {
                 "type": "object",
@@ -28242,6 +30298,79 @@
                     "first_name"
                 ]
             },
+            "ConvertJobRequest": {
+                "type": "object",
+                "properties": {
+                    "service": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                },
+                "required": [
+                    "service"
+                ]
+            },
+            "ConvertRequest": {
+                "type": "object",
+                "properties": {
+                    "jobs": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ConvertJobRequest"
+                        }
+                    },
+                    "invite_to_portal": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "payment_setup_link": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "jobs"
+                ]
+            },
+            "ConvertResult": {
+                "type": "object",
+                "properties": {
+                    "enquiry": {
+                        "$ref": "#/components/schemas/Enquiry"
+                    },
+                    "job_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "setup_url": {
+                        "type": "string"
+                    },
+                    "invited": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "enquiry",
+                    "invited",
+                    "job_ids",
+                    "setup_url"
+                ]
+            },
             "Count": {
                 "type": "object",
                 "properties": {
@@ -29413,6 +31542,400 @@
                     }
                 }
             },
+            "Enquiry": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "client": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "client_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "contact": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "contact_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "contact_email": {
+                        "type": "string",
+                        "readOnly": true,
+                        "default": ""
+                    },
+                    "contact_phone": {
+                        "type": "string",
+                        "readOnly": true,
+                        "default": ""
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "readOnly": true
+                    },
+                    "student_names": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "readOnly": true
+                    },
+                    "pipeline": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "stage": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "stage_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "stage_entered_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/EnquiryStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "owner": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "owner_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "priority": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PriorityEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "subjects": {
+                        "readOnly": true
+                    },
+                    "notes": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "value_estimate": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "expected_start": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "source": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/EnquirySourceEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "source_detail": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "utm": {
+                        "readOnly": true
+                    },
+                    "first_response_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "sla_breached": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "lost_reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "lost_note": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "won_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "lost_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "trial_lesson": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "trial_outcome": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TrialOutcomeEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "trial_feedback": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "converted_job_ids": {
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "age_hours": {
+                        "type": "integer",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "age_hours",
+                    "client",
+                    "client_name",
+                    "contact",
+                    "contact_email",
+                    "contact_name",
+                    "contact_phone",
+                    "converted_job_ids",
+                    "created_at",
+                    "expected_start",
+                    "first_response_at",
+                    "id",
+                    "lost_at",
+                    "lost_note",
+                    "lost_reason",
+                    "notes",
+                    "owner",
+                    "owner_name",
+                    "pipeline",
+                    "priority",
+                    "sla_breached",
+                    "source",
+                    "source_detail",
+                    "stage",
+                    "stage_entered_at",
+                    "stage_name",
+                    "status",
+                    "student_names",
+                    "students",
+                    "subjects",
+                    "title",
+                    "trial_feedback",
+                    "trial_lesson",
+                    "trial_outcome",
+                    "utm",
+                    "value_estimate",
+                    "won_at"
+                ]
+            },
+            "EnquiryCreateRequest": {
+                "type": "object",
+                "properties": {
+                    "first_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "email": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StudentInRequest"
+                        }
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EnquirySubjectRequest"
+                        }
+                    },
+                    "notes": {
+                        "type": "string"
+                    },
+                    "source": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/EnquirySourceEnum"
+                            }
+                        ],
+                        "default": "phone"
+                    },
+                    "pipeline": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "owner": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "priority": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PriorityEnum"
+                            }
+                        ],
+                        "default": "normal"
+                    },
+                    "value_estimate": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "nullable": true
+                    },
+                    "expected_start": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "first_name"
+                ]
+            },
+            "EnquirySourceEnum": {
+                "enum": [
+                    "form",
+                    "api",
+                    "email",
+                    "phone",
+                    "manual",
+                    "import",
+                    "referral"
+                ],
+                "type": "string",
+                "description": "* `form` - Website form\n* `api` - API\n* `email` - Email\n* `phone` - Phone\n* `manual` - Added by staff\n* `import` - Import\n* `referral` - Referral"
+            },
+            "EnquiryStatusEnum": {
+                "enum": [
+                    "open",
+                    "won",
+                    "lost"
+                ],
+                "type": "string",
+                "description": "* `open` - Open\n* `won` - Won\n* `lost` - Lost"
+            },
+            "EnquirySubjectRequest": {
+                "type": "object",
+                "properties": {
+                    "subject": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "level": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "subject"
+                ]
+            },
             "EnterUrl": {
                 "type": "object",
                 "properties": {
@@ -30290,6 +32813,85 @@
                     "organisation"
                 ]
             },
+            "Form": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/FormTypeEnum"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 150
+                    },
+                    "slug": {
+                        "type": "string",
+                        "maxLength": 80,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "schema": {},
+                    "settings": {},
+                    "published": {
+                        "type": "boolean"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "slug"
+                ]
+            },
+            "FormRequest": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "$ref": "#/components/schemas/FormTypeEnum"
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 150
+                    },
+                    "slug": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "schema": {},
+                    "settings": {},
+                    "published": {
+                        "type": "boolean"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "name",
+                    "slug"
+                ]
+            },
+            "FormTypeEnum": {
+                "enum": [
+                    "enquiry",
+                    "registration",
+                    "custom"
+                ],
+                "type": "string",
+                "description": "* `enquiry` - Enquiry\n* `registration` - Registration\n* `custom` - Other"
+            },
             "FormatEnum": {
                 "enum": [
                     "one_to_one",
@@ -30298,6 +32900,88 @@
                 ],
                 "type": "string",
                 "description": "* `one_to_one` - One to one\n* `small_group` - Small group\n* `class` - Class"
+            },
+            "Funnel": {
+                "type": "object",
+                "properties": {
+                    "total": {
+                        "type": "integer"
+                    },
+                    "stages": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FunnelStage"
+                        }
+                    },
+                    "win_rate": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "first_response_hours": {
+                        "type": "number",
+                        "format": "double",
+                        "nullable": true
+                    },
+                    "by_source": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Breakdown"
+                        }
+                    },
+                    "by_owner": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Breakdown"
+                        }
+                    },
+                    "lost_reasons": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "won_value": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "by_owner",
+                    "by_source",
+                    "first_response_hours",
+                    "lost_reasons",
+                    "stages",
+                    "total",
+                    "win_rate",
+                    "won_value"
+                ]
+            },
+            "FunnelStage": {
+                "type": "object",
+                "properties": {
+                    "stage": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "type": "string"
+                    },
+                    "reached": {
+                        "type": "integer"
+                    },
+                    "rate": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "kind",
+                    "rate",
+                    "reached",
+                    "stage"
+                ]
             },
             "FutureLessonsEnum": {
                 "enum": [
@@ -33770,6 +36454,27 @@
                     "token"
                 ]
             },
+            "LoseRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                    },
+                    "note": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "nurture": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "reason"
+                ]
+            },
             "MakeupCredit": {
                 "type": "object",
                 "properties": {
@@ -34454,6 +37159,18 @@
                     "currency"
                 ]
             },
+            "MoveRequest": {
+                "type": "object",
+                "properties": {
+                    "stage": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "stage"
+                ]
+            },
             "MyConsentRequest": {
                 "type": "object",
                 "properties": {
@@ -34845,6 +37562,35 @@
                 },
                 "required": [
                     "nudged"
+                ]
+            },
+            "OfferRequest": {
+                "type": "object",
+                "properties": {
+                    "details": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                    },
+                    "hours": {
+                        "type": "integer",
+                        "maximum": 336,
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "details"
+                ]
+            },
+            "OfferResponseRequest": {
+                "type": "object",
+                "properties": {
+                    "accept": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "accept"
                 ]
             },
             "Onboarding": {
@@ -35874,6 +38620,32 @@
                     }
                 }
             },
+            "PaginatedEnquiryList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Enquiry"
+                        }
+                    }
+                }
+            },
             "PaginatedExceptionList": {
                 "type": "object",
                 "required": [
@@ -36654,6 +39426,32 @@
                     }
                 }
             },
+            "PaginatedWaitlistEntryList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WaitlistEntry"
+                        }
+                    }
+                }
+            },
             "PasswordChangeRequest": {
                 "type": "object",
                 "properties": {
@@ -36708,6 +39506,40 @@
                     "token",
                     "uid"
                 ]
+            },
+            "PatchedAssignmentRuleRequest": {
+                "type": "object",
+                "properties": {
+                    "pipeline": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "subject": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "owners": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "order": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "active": {
+                        "type": "boolean"
+                    }
+                }
             },
             "PatchedAttendanceRequest": {
                 "type": "object",
@@ -37114,6 +39946,60 @@
                     }
                 }
             },
+            "PatchedEnquiryUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "owner": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "priority": {
+                        "$ref": "#/components/schemas/PriorityEnum"
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EnquirySubjectRequest"
+                        }
+                    },
+                    "notes": {
+                        "type": "string"
+                    },
+                    "value_estimate": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "nullable": true
+                    },
+                    "expected_start": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    }
+                }
+            },
             "PatchedExpenseCategoryRequest": {
                 "type": "object",
                 "properties": {
@@ -37174,6 +40060,35 @@
                         "type": "integer",
                         "maximum": 100,
                         "minimum": 0
+                    }
+                }
+            },
+            "PatchedFormRequest": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "$ref": "#/components/schemas/FormTypeEnum"
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 150
+                    },
+                    "slug": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "schema": {},
+                    "settings": {},
+                    "published": {
+                        "type": "boolean"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
                     }
                 }
             },
@@ -38626,6 +41541,36 @@
                     }
                 }
             },
+            "PatchedWaitlistEntryRequest": {
+                "type": "object",
+                "properties": {
+                    "student": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "subject": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "level": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "service": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "notes": {
+                        "type": "string"
+                    }
+                }
+            },
             "PayIntent": {
                 "type": "object",
                 "properties": {
@@ -40056,6 +43001,63 @@
                 ],
                 "type": "string",
                 "description": "* `contact` - contact\n* `tutor` - tutor\n* `user` - user"
+            },
+            "Pipeline": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "is_default": {
+                        "type": "boolean"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "stages": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Stage"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "stages"
+                ]
+            },
+            "PipelineRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "is_default": {
+                        "type": "boolean"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "stages": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StageRequest"
+                        }
+                    }
+                },
+                "required": [
+                    "name",
+                    "stages"
+                ]
             },
             "Plan": {
                 "type": "object",
@@ -41743,6 +44745,185 @@
                 ],
                 "type": "string",
                 "description": "* `stripe` - Stripe\n* `manual` - Manual"
+            },
+            "PublicEnquiryRequest": {
+                "type": "object",
+                "description": "``POST /public/enquiries`` (TutorCruncher-style API).",
+                "properties": {
+                    "first_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "email": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "email"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "phone": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StudentInRequest"
+                        }
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EnquirySubjectRequest"
+                        }
+                    },
+                    "notes": {
+                        "type": "string",
+                        "maxLength": 5000
+                    },
+                    "postcode": {
+                        "type": "string",
+                        "maxLength": 20
+                    },
+                    "utm": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "captcha_token": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "website": {
+                        "type": "string",
+                        "default": ""
+                    }
+                },
+                "required": [
+                    "first_name"
+                ]
+            },
+            "PublicForm": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "schema": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "thank_you": {
+                        "type": "string"
+                    },
+                    "redirect_url": {
+                        "type": "string"
+                    },
+                    "consent_text": {
+                        "type": "string"
+                    },
+                    "turnstile_site_key": {
+                        "type": "string"
+                    },
+                    "organisation": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "consent_text",
+                    "name",
+                    "organisation",
+                    "redirect_url",
+                    "schema",
+                    "thank_you",
+                    "turnstile_site_key",
+                    "type"
+                ]
+            },
+            "PublicOffer": {
+                "type": "object",
+                "properties": {
+                    "student": {
+                        "type": "string"
+                    },
+                    "subject": {
+                        "type": "string"
+                    },
+                    "details": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "organisation": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "details",
+                    "expires_at",
+                    "organisation",
+                    "status",
+                    "student",
+                    "subject"
+                ]
+            },
+            "PublicSubmitRequest": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "utm": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "captcha_token": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "website": {
+                        "type": "string",
+                        "default": "",
+                        "description": "Honeypot: leave empty"
+                    }
+                },
+                "required": [
+                    "data"
+                ]
+            },
+            "PublicSubmitResult": {
+                "type": "object",
+                "properties": {
+                    "ok": {
+                        "type": "boolean"
+                    },
+                    "pay_url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "ok",
+                    "pay_url"
+                ]
             },
             "QuantityTypeEnum": {
                 "enum": [
@@ -44241,6 +47422,112 @@
                     "suggestion"
                 ]
             },
+            "Stage": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "order": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/EnquiryStatusEnum"
+                    },
+                    "probability": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "sla_hours": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "colour": {
+                        "type": "string",
+                        "maxLength": 7
+                    }
+                },
+                "required": [
+                    "name",
+                    "order"
+                ]
+            },
+            "StageHistory": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "from_stage_name": {
+                        "type": "string"
+                    },
+                    "to_stage_name": {
+                        "type": "string"
+                    },
+                    "seconds_in_previous": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "to_stage_name"
+                ]
+            },
+            "StageRequest": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/EnquiryStatusEnum"
+                    },
+                    "probability": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "sla_hours": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "colour": {
+                        "type": "string",
+                        "maxLength": 7
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            },
             "StartBulkRequest": {
                 "type": "object",
                 "properties": {
@@ -44565,6 +47852,29 @@
                     "lesson_address",
                     "status_changed_at",
                     "user"
+                ]
+            },
+            "StudentInRequest": {
+                "type": "object",
+                "properties": {
+                    "first_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EnquirySubjectRequest"
+                        }
+                    }
+                },
+                "required": [
+                    "first_name"
                 ]
             },
             "StudentInput": {
@@ -45926,6 +49236,79 @@
                 "type": "string",
                 "description": "* `paid` - paid\n* `redirect` - redirect"
             },
+            "TrialOutcomeEnum": {
+                "enum": [
+                    "continuing",
+                    "not_continuing",
+                    "undecided"
+                ],
+                "type": "string",
+                "description": "* `continuing` - Continuing\n* `not_continuing` - Not continuing\n* `undecided` - Undecided"
+            },
+            "TrialOutcomeRequest": {
+                "type": "object",
+                "properties": {
+                    "outcome": {
+                        "$ref": "#/components/schemas/TrialOutcomeEnum"
+                    },
+                    "feedback": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "outcome"
+                ]
+            },
+            "TrialRequest": {
+                "type": "object",
+                "properties": {
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "service": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "price": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "nullable": true,
+                        "description": "0 for a free trial"
+                    }
+                },
+                "required": [
+                    "end",
+                    "service",
+                    "start"
+                ]
+            },
             "Tutor": {
                 "type": "object",
                 "properties": {
@@ -46919,6 +50302,142 @@
                         "maxLength": 300
                     }
                 }
+            },
+            "WaitlistEntry": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "student": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "student_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "subject": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "level": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "service": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "notes": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/WaitlistStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "offer_details": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "offered_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "offer_expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "responded_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "position": {
+                        "type": "integer",
+                        "nullable": true,
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "offer_details",
+                    "offer_expires_at",
+                    "offered_at",
+                    "position",
+                    "responded_at",
+                    "status",
+                    "student",
+                    "student_name"
+                ]
+            },
+            "WaitlistEntryRequest": {
+                "type": "object",
+                "properties": {
+                    "student": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "subject": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "level": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "service": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "notes": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "student"
+                ]
+            },
+            "WaitlistStatusEnum": {
+                "enum": [
+                    "waiting",
+                    "offered",
+                    "accepted",
+                    "declined",
+                    "expired",
+                    "removed"
+                ],
+                "type": "string",
+                "description": "* `waiting` - Waiting\n* `offered` - Offered a place\n* `accepted` - Accepted\n* `declined` - Declined\n* `expired` - Offer expired\n* `removed` - Removed"
             },
             "WeekStartDayEnum": {
                 "enum": [
