@@ -132,6 +132,7 @@ Naming: `<aggregate>.<past_tense_verb>`. Each epic lists its events; this table 
 | `automation.saved/deleted/run_failed` (never trigger automations) | E14 |
 | `report.exported`, `saved_report.created/deleted`, `scheduled_report.saved/deleted`, `report_run.delivered/failed` | E26 |
 | `job_offer.sent/accepted/declined`, `job_posting.application_received` | E19 |
+| `integration.connected/disconnected/error`, `calendar.busy_updated/settings_changed/reschedule_proposed`, `online_meeting.created/updated/deleted/failed` (`online_meeting.participant_joined/left`, `recording.available`: Phase 3) | E22 |
 | `enrolment.created/cancelled`, `waitlist.place_offered`, `class.full` | E20 |
 | `homework.assigned/submitted/graded`, `goal.achieved` | E21 |
 | `review.submitted`, `referral.converted`, `commission.earned` | E25 |

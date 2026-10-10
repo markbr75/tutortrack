@@ -8,6 +8,7 @@ from typing import Any
 from django.db.models import Q, QuerySet
 
 from tutortrack.core.time import now
+from tutortrack.scheduling.external import join_link
 from tutortrack.tenancy.settings_service import get_setting
 
 from .household import Household
@@ -18,6 +19,7 @@ def lesson_card(lesson: Any, household: Household) -> dict[str, Any]:
     """A lesson as families see it (no internal notes, no pay)."""
     show_contact = bool(get_setting("portal.show_tutor_contact"))
     students = [a for a in lesson.attendees.all() if a.student_id in set(household.student_ids)]
+    join = join_link(lesson, "participant", str(students[0].student_id) if students else "")
     return {
         "id": str(lesson.pk),
         "title": lesson.title,
@@ -27,6 +29,8 @@ def lesson_card(lesson: Any, household: Household) -> dict[str, Any]:
         "status": lesson.status,
         "online": lesson.online,
         "meeting_url": lesson.meeting_url,
+        "join_url": join.url if join else "",
+        "join_opens_at": join.opens_at if join else None,
         "location": lesson.location.name if lesson.location else "",
         "notes_for_client": lesson.notes_for_client,
         "tutors": [

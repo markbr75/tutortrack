@@ -8,7 +8,8 @@ from __future__ import annotations
 
 WHEN = '{{ lesson.start|datetime("full") }}'
 WHERE = (
-    "{% if lesson.online %}Online{% if lesson.meeting_url %}: {{ lesson.meeting_url }}"
+    "{% if lesson.online %}Online{% if lesson.join_url %}: {{ lesson.join_url }}"
+    "{% elif lesson.meeting_url %}: {{ lesson.meeting_url }}"
     "{% endif %}{% elif lesson.location %}{{ lesson.location }}{% endif %}"
 )
 SIGN = "\n\n{{ organisation.name }}"

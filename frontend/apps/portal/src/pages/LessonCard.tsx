@@ -5,10 +5,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, usePortalMe } from "../api";
+import { JoinButton } from "../JoinButton";
 
 export type PortalLesson = components["schemas"]["PortalLesson"];
-
-const JOIN_EARLY_MS = 10 * 60_000;
 
 /** One lesson for families: when, who, where, join link, add to calendar, and
  * cancel or report an absence with the policy shown first (FR-15-3/4). */
@@ -59,11 +58,6 @@ export function LessonCard({
   });
 
   const start = new Date(lesson.start);
-  const joinable =
-    lesson.online &&
-    lesson.meeting_url &&
-    Date.now() >= start.getTime() - JOIN_EARLY_MS &&
-    Date.now() < new Date(lesson.end).getTime();
   const future = start.getTime() > Date.now() && lesson.status === "planned";
   const features = me.data?.features;
 
@@ -89,13 +83,14 @@ export function LessonCard({
       ) : null}
       {lesson.notes_for_client ? <p className="text-sm">{lesson.notes_for_client}</p> : null}
       <div className="flex flex-wrap gap-2 text-sm">
-        {joinable ? (
-          <a
-            className="rounded-md bg-primary px-3 py-1.5 text-primary-foreground"
-            href={lesson.meeting_url}
-          >
-            {t("portal.join")}
-          </a>
+        {lesson.online && lesson.status === "planned" ? (
+          <JoinButton
+            url={lesson.join_url || lesson.meeting_url}
+            start={lesson.start}
+            end={lesson.end}
+            opensAt={lesson.join_opens_at}
+            className="py-1.5"
+          />
         ) : null}
         <a
           className="rounded-md border border-border px-3 py-1.5"

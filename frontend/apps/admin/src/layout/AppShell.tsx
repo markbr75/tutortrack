@@ -42,6 +42,11 @@ const NAV = [
     key: "nav.notifications",
     permission: "comms.settings.manage",
   },
+  {
+    to: "/settings/integrations",
+    key: "nav.integrations",
+    permission: "integrations.personal",
+  },
   { to: "/settings/plan", key: "nav.plan", permission: "subscription.view" },
   { to: "/settings", key: "nav.settings", permission: "org.settings.view" },
   { to: "/account", key: "nav.account", permission: null },

@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import URLPattern, URLResolver, include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
+from tutortrack.calendar_sync.api.webhooks import google_calendar, microsoft_graph
 from tutortrack.comms.api.views import postmark_webhook, twilio_inbound, twilio_status
 from tutortrack.core.api.health import healthz, readyz
 from tutortrack.leads.api.views import inbound_email
@@ -30,6 +31,8 @@ api_v1: list[URLPattern | URLResolver] = [
     path("", include("tutortrack.matching.api.urls")),
     path("", include("tutortrack.automations.api.urls")),
     path("", include("tutortrack.reporting.api.urls")),
+    path("", include("tutortrack.integrations.api.urls")),
+    path("", include("tutortrack.calendar_sync.api.urls")),
     path("", include("tutortrack.comms.api.urls")),
     path("", include("tutortrack.portal.api.urls")),
     path("", include("tutortrack.subscriptions.api.urls")),
@@ -51,6 +54,8 @@ urlpatterns = [
     path("webhooks/inbound-email", inbound_email, name="inbound-email"),
     path("webhooks/twilio/status", twilio_status, name="twilio-status"),
     path("webhooks/twilio/inbound", twilio_inbound, name="twilio-inbound"),
+    path("webhooks/google-calendar", google_calendar, name="google-calendar-webhook"),
+    path("webhooks/microsoft-graph", microsoft_graph, name="microsoft-graph-webhook"),
     # Temporal Web UI codec server (staff-only, E32 FR-32-9).
     path("temporal-codec/<slug:operation>", codec, name="temporal-codec"),
 ]

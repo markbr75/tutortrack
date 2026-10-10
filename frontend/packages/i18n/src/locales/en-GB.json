@@ -32,7 +32,8 @@
     "compliance": "Compliance",
     "matching": "Matching",
     "automations": "Automations",
-    "analytics": "Reports and dashboards"
+    "analytics": "Reports and dashboards",
+    "integrations": "Integrations"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -1429,7 +1430,8 @@
     "school": "School",
     "yearGroup": "Year group",
     "learningNeeds": "Learning needs, medical or support information",
-    "learningNeedsHelp": "Only staff and the student's tutors see this. We'll be told when it changes."
+    "learningNeedsHelp": "Only staff and the student's tutors see this. We'll be told when it changes.",
+    "joinOpensAt": "Join opens at {{time}}"
   },
   "announcements": {
     "title": "News for families and tutors",
@@ -1460,7 +1462,8 @@
       "expenses": "Expenses",
       "onboarding": "Getting started",
       "compliance": "Checks",
-      "jobs": "Jobs"
+      "jobs": "Jobs",
+      "calendar": "Calendar and video"
     },
     "today": "Today",
     "reportsDue": "Reports to write",
@@ -2486,5 +2489,68 @@
     "rows_one": "{{count}} row",
     "rows_other": "{{count}} rows",
     "download": "Download file"
+  },
+  "integrations": {
+    "title": "Integrations",
+    "help": "Connect calendars so lessons appear in them and busy time blocks bookings, and choose how online lessons get their meeting rooms.",
+    "simulated": "Some providers aren't set up with keys on this server, so a simulated provider stands in for them.",
+    "finishing": "Finishing the connection…",
+    "connected": "Connected.",
+    "denied": "The connection was cancelled or refused.",
+    "mine": "Your calendars and video accounts",
+    "organisation": "Organisation integrations",
+    "organisationLevel": "Whole organisation",
+    "noneYet": "Nothing connected yet.",
+    "videoDefaults": "Online lessons",
+    "connect": "Connect {{provider}}",
+    "credentialsFor": "Connect {{provider}}",
+    "save": "Connect",
+    "saved": "Saved.",
+    "check": "Check connection",
+    "disconnect": "Disconnect",
+    "reconnectNeeded": "Connect this account again.",
+    "lastSync": "last synced {{when}}",
+    "syncSettings": "Sync settings",
+    "syncNow": "Sync now",
+    "readCalendars": "Calendars that make you busy",
+    "readHelp": "Only the times are copied, never titles or details.",
+    "writeEnabled": "Add my lessons to a calendar",
+    "writeCalendar": "Calendar for lessons",
+    "ownCalendar": "A separate “TutorTrack” calendar",
+    "twoWay": "Two-way sync",
+    "twoWayHelp": "Moving a lesson in your calendar asks the office to reschedule it. Deleting it there never cancels it.",
+    "titleFormat": "Lesson title",
+    "titleHelp": "Leave empty for the organisation's format. Placeholders: {service}, {students}, {student_initials}, {tutors}, {title}.",
+    "appPasswordHint": "For iCloud, create an app-specific password at appleid.apple.com.",
+    "fields": {
+      "username": "Username or email",
+      "password": "App-specific password",
+      "server_url": "Server address (optional)",
+      "api_key": "API key"
+    },
+    "status": {
+      "active": "Connected",
+      "error": "Error",
+      "needs_reconnect": "Needs reconnecting",
+      "disconnected": "Disconnected"
+    },
+    "video": {
+      "none": "No online meeting",
+      "builtin": "Built-in room",
+      "zoom": "Zoom",
+      "teams": "Microsoft Teams",
+      "google_meet": "Google Meet",
+      "lessonspace": "Lessonspace"
+    },
+    "myVideoProvider": "My video provider for online lessons",
+    "orgDefault": "Organisation default",
+    "personalRoom": "Use my personal Zoom room",
+    "defaultVideo": "Default video provider",
+    "autoCreate": "Create meeting rooms automatically for online lessons",
+    "joinWindow": "Join buttons open this many minutes before the lesson",
+    "allowTwoWay": "Let tutors turn on two-way calendar sync",
+    "join": "Join the lesson",
+    "joinOpensAt": "Join opens at {{time}}",
+    "pageTitle": "Calendar and video"
   }
 }

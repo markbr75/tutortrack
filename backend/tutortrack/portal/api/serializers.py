@@ -59,6 +59,8 @@ class PortalLessonSerializer(serializers.Serializer):
     status = serializers.CharField()
     online = serializers.BooleanField()
     meeting_url = serializers.CharField(allow_blank=True)
+    join_url = serializers.CharField(allow_blank=True, help_text="Role-specific link (E22).")
+    join_opens_at = serializers.DateTimeField(allow_null=True)
     location = serializers.CharField(allow_blank=True)
     notes_for_client = serializers.CharField(allow_blank=True)
     tutors = PortalTutorSerializer(many=True)
@@ -269,6 +271,8 @@ class TutorDayLessonSerializer(serializers.Serializer):
     status = serializers.CharField()
     online = serializers.BooleanField()
     meeting_url = serializers.CharField(allow_blank=True)
+    join_url = serializers.CharField(allow_blank=True, help_text="Role-specific link (E22).")
+    join_opens_at = serializers.DateTimeField(allow_null=True)
     location = serializers.CharField(allow_blank=True)
     students = serializers.ListField(child=serializers.CharField())
 

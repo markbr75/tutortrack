@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
 import { api } from "../api";
+import { JoinButton } from "../JoinButton";
 import { useTutorMe } from "./useTutorMe";
 
 function time(iso: string, locale: string) {
@@ -50,10 +51,6 @@ export function TodayPage() {
       {d.lessons.length ? (
         <ol className="space-y-2">
           {d.lessons.map((lesson) => {
-            const joinable =
-              lesson.online &&
-              lesson.meeting_url &&
-              Date.now() >= new Date(lesson.start).getTime() - 600_000;
             return (
               <li key={lesson.id} className="rounded-lg border border-border p-3">
                 <p className="text-sm text-muted-foreground">
@@ -70,13 +67,13 @@ export function TodayPage() {
                       : ""}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2 text-sm">
-                  {joinable ? (
-                    <a
-                      className="rounded-md bg-primary px-3 py-2 text-primary-foreground"
-                      href={lesson.meeting_url}
-                    >
-                      {t("portal.join")}
-                    </a>
+                  {lesson.online && lesson.status === "planned" ? (
+                    <JoinButton
+                      url={lesson.join_url || lesson.meeting_url}
+                      start={lesson.start}
+                      end={lesson.end}
+                      opensAt={lesson.join_opens_at}
+                    />
                   ) : null}
                   <Link
                     to="/tutor/lessons/$lessonId"

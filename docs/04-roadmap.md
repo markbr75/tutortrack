@@ -91,8 +91,8 @@ All ─► E26, E27, E28, E31
 | E19 | ✅ Done (2026-10-10) | T01–T07, T09 + TW1 (client shortlist sharing T08 is Phase 2b). See Implementation notes |
 | E20 | ☐ | |
 | E21 | ☐ | |
-| E22 | ⏭ Next | |
-| E23 | ☐ | |
+| E22 | ✅ Done (2026-10-10) | T01–T09 + TW1: integration framework (OAuth+PKCE, encrypted tokens, health), Google/Microsoft/CalDAV two-way calendar sync with busy blocks in conflicts, Zoom/Teams/Meet/Lessonspace/built-in rooms, timed join links (T10 is Phase 3). See Implementation notes |
+| E23 | ⏭ Next | |
 | E24 | ☐ | |
 | E25 | ☐ | |
 | E26 | ✅ Done (2026-10-10) | T01–T07 + scheduled-report workflow (T08 custom builder is Phase 2b, T09 warehouse export Enterprise). See Implementation notes |

@@ -133,6 +133,7 @@ def lesson_context(lesson: Any) -> dict[str, Any]:
         "duration_minutes": lesson.duration_minutes,
         "online": lesson.online,
         "meeting_url": lesson.meeting_url,
+        "join_url": lesson.meeting_url,
         "location": lesson.location.name if lesson.location else "",
         "tutor_names": ", ".join(t.full_name for t in tutors),
         "student_names": ", ".join(s.full_name for s in students),
@@ -150,12 +151,23 @@ def lesson_people(lesson: Any, *, clients: bool = True, tutors: bool = True) -> 
     return _dedupe(out)
 
 
+def _join_url(lesson: Any, recipient: Recipient) -> str:
+    """Role-specific online join link (E22-T09): tutors get the host link."""
+    from tutortrack.scheduling.external import join_link
+
+    link = join_link(lesson, "host" if recipient.kind == "tutor" else "participant")
+    return link.url if link else ""
+
+
 def lesson_deliveries(lesson: Any, **extra: Any) -> list[Delivery]:
     base = {"organisation": organisation(), "lesson": lesson_context(lesson), **extra}
-    return [
-        Delivery(r, {**base, "recipient": {"name": r.name, "first_name": r.first_name}})
-        for r in lesson_people(lesson)
-    ]
+    out = []
+    for r in lesson_people(lesson):
+        context = {**base, "recipient": {"name": r.name, "first_name": r.first_name}}
+        if lesson.online:
+            context["lesson"] = {**base["lesson"], "join_url": _join_url(lesson, r)}
+        out.append(Delivery(r, context))
+    return out
 
 
 SAMPLE_LESSON = {
@@ -167,6 +179,7 @@ SAMPLE_LESSON = {
     "duration_minutes": 60,
     "online": False,
     "meeting_url": "",
+    "join_url": "",
     "location": "Bright Minds Centre",
     "tutor_names": "Nia Adeyemi",
     "student_names": "Arjun Patel",
@@ -185,6 +198,7 @@ LESSON_VARS = (
     "lesson.location",
     "lesson.online",
     "lesson.meeting_url",
+    "lesson.join_url",
     "lesson.tutor_names",
     "lesson.student_names",
 )

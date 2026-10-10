@@ -27,6 +27,7 @@ export function TutorShell() {
     { to: "/tutor/schedule", label: t("tutor.nav.schedule") },
     { to: "/tutor/students", label: t("tutor.nav.students") },
     { to: "/tutor/availability", label: t("tutor.nav.availability") },
+    { to: "/tutor/calendar", label: t("tutor.nav.calendar") },
     { to: "/tutor/jobs", label: t("tutor.nav.jobs") },
     ...(me.data.can_see_pay ? [{ to: "/tutor/earnings", label: t("tutor.nav.earnings") }] : []),
     { to: "/tutor/expenses", label: t("tutor.nav.expenses") },

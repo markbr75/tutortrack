@@ -6,6 +6,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api } from "../api";
+import { JoinButton } from "../JoinButton";
 import { useTutorMe } from "./useTutorMe";
 
 type Outcome = components["schemas"]["AttendanceOutcomeEnum"];
@@ -95,14 +96,7 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
         </p>
       </header>
       {l.notes_for_tutor ? <Alert>{l.notes_for_tutor}</Alert> : null}
-      {l.online && l.meeting_url ? (
-        <a
-          className="inline-block rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground"
-          href={l.meeting_url}
-        >
-          {t("portal.join")}
-        </a>
-      ) : null}
+      {l.online && planned ? <HostJoin lesson={l} /> : null}
 
       {planned && started ? (
         <form
@@ -173,5 +167,29 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
         <Alert tone="danger">{(complete.error ?? cancel.error ?? openReport.error)?.message}</Alert>
       ) : null}
     </article>
+  );
+}
+
+/** The tutor's host link from `/lessons/{id}/join` (E22-T09). */
+function HostJoin({ lesson }: { lesson: { id: string; start: string; end: string } }) {
+  const join = useQuery({
+    queryKey: ["tutor", "lesson", lesson.id, "join"],
+    queryFn: async () => {
+      const { data } = await api.GET("/api/v1/lessons/{id}/join", {
+        params: { path: { id: lesson.id } },
+      });
+      return data ?? null;
+    },
+  });
+  if (!join.data) return null;
+  return (
+    <div>
+      <JoinButton
+        url={join.data.url}
+        start={lesson.start}
+        end={lesson.end}
+        opensAt={join.data.opens_at}
+      />
+    </div>
   );
 }

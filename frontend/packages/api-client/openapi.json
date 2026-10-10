@@ -3547,6 +3547,265 @@
                 }
             }
         },
+        "/api/v1/calendar-sync/busy-blocks": {
+            "get": {
+                "operationId": "calendar_sync_busy_blocks_list",
+                "description": "Busy time from connected calendars (times only). ``?user=``, ``?start=``, ``?end=``.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "end",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "start",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "calendar-sync"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedExternalBusyBlockList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/calendar-sync/busy-blocks/{id}": {
+            "get": {
+                "operationId": "calendar_sync_busy_blocks_retrieve",
+                "description": "Busy time from connected calendars (times only). ``?user=``, ``?start=``, ``?end=``.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this external busy block.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "calendar-sync"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExternalBusyBlock"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/calendar-sync/connections/{id}/settings": {
+            "get": {
+                "operationId": "calendar_sync_connections_settings_retrieve",
+                "description": "A personal calendar connection's sync settings and the calendars to choose from.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "calendar-sync"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CalendarSyncPage"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "calendar_sync_connections_settings_partial_update",
+                "description": "Choose busy calendars (free/busy only), the write calendar (\"\" = a \"TutorTrack\"\ncalendar we create), two-way edits and the event title format.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "calendar-sync"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCalendarSyncSettingsUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCalendarSyncSettingsUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCalendarSyncSettingsUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CalendarSyncPage"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/calendar-sync/connections/{id}/sync": {
+            "post": {
+                "operationId": "calendar_sync_connections_sync_create",
+                "description": "Sync this calendar now (instead of waiting for the next poll).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "calendar-sync"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/v1/cancellation-policies": {
             "get": {
                 "operationId": "cancellation_policies_list",
@@ -11792,6 +12051,480 @@
                 }
             }
         },
+        "/api/v1/integrations/connections": {
+            "get": {
+                "operationId": "integrations_connections_list",
+                "description": "Connected accounts. Admins (``integrations.view``) see every connection with its\nhealth and last error; everyone else sees their own. ``?mine=1`` limits to your own,\n``?capability=calendar|video`` filters.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "capability",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "calendar",
+                                "video"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "mine",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "integrations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedIntegrationConnectionList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "integrations_connections_create",
+                "description": "Connect with credentials: CalDAV (iCloud app-specific password) or an API key\n(Lessonspace). Verified at the provider, then stored encrypted.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "integrations"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CredentialConnectRequest"
+                            },
+                            "examples": {
+                                "ICloud": {
+                                    "value": {
+                                        "provider": "caldav",
+                                        "username": "sam@icloud.com",
+                                        "password": "abcd-efgh-ijkl-mnop"
+                                    },
+                                    "summary": "iCloud"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CredentialConnectRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CredentialConnectRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationConnection"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/integrations/connections/{id}": {
+            "get": {
+                "operationId": "integrations_connections_retrieve",
+                "description": "Connected accounts. Admins (``integrations.view``) see every connection with its\nhealth and last error; everyone else sees their own. ``?mine=1`` limits to your own,\n``?capability=calendar|video`` filters.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this integration connection.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "integrations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationConnection"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/integrations/connections/{id}/check": {
+            "post": {
+                "operationId": "integrations_connections_check_create",
+                "description": "Health check: refresh the token if needed and make a light provider call.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this integration connection.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "integrations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationConnection"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/integrations/connections/{id}/disconnect": {
+            "post": {
+                "operationId": "integrations_connections_disconnect_create",
+                "description": "Revoke our access at the provider (best effort) and forget the tokens. Calendar\nsync stops; events already written stay in the calendar.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this integration connection.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "integrations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationConnection"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/integrations/oauth/callback": {
+            "get": {
+                "operationId": "integrations_oauth_callback_retrieve",
+                "description": "The provider redirects here (root app host); we forward the browser to the\norganisation's app, which completes the connection while signed in.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "code",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "state",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "integrations"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "302": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/integrations/oauth/complete": {
+            "post": {
+                "operationId": "integrations_oauth_complete_create",
+                "description": "Finish connecting: exchange the code (PKCE). Only the person who started the\nconnection, in the same organisation, can finish it.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "integrations"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OAuthCompleteRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OAuthCompleteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OAuthCompleteRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationConnection"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/integrations/oauth/start": {
+            "post": {
+                "operationId": "integrations_oauth_start_create",
+                "description": "Begin connecting an OAuth provider: open ``authorize_url`` in the browser.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "integrations"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OAuthStartRequest"
+                            },
+                            "examples": {
+                                "GoogleCalendar": {
+                                    "value": {
+                                        "provider": "google",
+                                        "level": "user",
+                                        "next": "/settings/integrations"
+                                    },
+                                    "summary": "Google Calendar"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OAuthStartRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OAuthStartRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OAuthStartResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/integrations/providers": {
+            "get": {
+                "operationId": "integrations_providers_list",
+                "description": "Providers that can be connected, what they do and how they connect.",
+                "tags": [
+                    "integrations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Provider"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/invitations": {
             "get": {
                 "operationId": "invitations_list",
@@ -17072,6 +17805,46 @@
                 }
             }
         },
+        "/api/v1/lessons/{id}/join": {
+            "get": {
+                "operationId": "lessons_join_retrieve",
+                "description": "The requester's join link for an online lesson: the host link for its tutors, the\nparticipant link otherwise. ``open`` is true from N minutes before the start (org\nsetting ``integrations.join_window_minutes``) until the end.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JoinLink"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/v1/lessons/{id}/missed": {
             "post": {
                 "operationId": "lessons_missed_create",
@@ -18487,6 +19260,75 @@
                                     "items": {
                                         "$ref": "#/components/schemas/LoginEvent"
                                     }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me/meeting-preference": {
+            "get": {
+                "operationId": "me_meeting_preference_retrieve",
+                "description": "Your default video provider for your online lessons.",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MeetingPreference"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "me_meeting_preference_update",
+                "description": "Your default video provider for your online lessons.",
+                "tags": [
+                    "me"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MeetingPreferenceRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MeetingPreferenceRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MeetingPreferenceRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MeetingPreference"
                                 }
                             }
                         },
@@ -20430,6 +21272,185 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/OnboardingState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/online-meetings": {
+            "get": {
+                "operationId": "online_meetings_list",
+                "description": "Online meetings of lessons you can see (``?lesson=``, ``?status=failed``).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "lesson",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "online-meetings"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedOnlineMeetingList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/online-meetings/{id}": {
+            "get": {
+                "operationId": "online_meetings_retrieve",
+                "description": "Online meetings of lessons you can see (``?lesson=``, ``?status=failed``).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this online meeting.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "online-meetings"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OnlineMeeting"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/online-meetings/provision": {
+            "post": {
+                "operationId": "online_meetings_provision_create",
+                "description": "Create (or re-create) the lesson's online meeting now, e.g. after a failure.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "online-meetings"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProvisionRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProvisionRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProvisionRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProvisionResult"
                                 }
                             }
                         },
@@ -33886,6 +34907,15 @@
                     "request_id"
                 ]
             },
+            "AuthEnum": {
+                "enum": [
+                    "oauth2",
+                    "credentials",
+                    "platform"
+                ],
+                "type": "string",
+                "description": "* `oauth2` - oauth2\n* `credentials` - credentials\n* `platform` - platform"
+            },
             "AutoPayRequest": {
                 "type": "object",
                 "properties": {
@@ -35226,6 +36256,95 @@
                 ],
                 "type": "string",
                 "description": "* `lesson` - lesson\n* `event` - event"
+            },
+            "CalendarOption": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "primary": {
+                        "type": "boolean"
+                    },
+                    "writable": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "primary",
+                    "writable"
+                ]
+            },
+            "CalendarSyncPage": {
+                "type": "object",
+                "properties": {
+                    "settings": {
+                        "$ref": "#/components/schemas/CalendarSyncSettings"
+                    },
+                    "calendars": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CalendarOption"
+                        }
+                    },
+                    "calendars_error": {
+                        "type": "string"
+                    },
+                    "two_way_allowed": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "calendars",
+                    "calendars_error",
+                    "settings",
+                    "two_way_allowed"
+                ]
+            },
+            "CalendarSyncSettings": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "connection": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "read_calendar_ids": {},
+                    "write_enabled": {
+                        "type": "boolean"
+                    },
+                    "write_calendar_id": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "two_way": {
+                        "type": "boolean"
+                    },
+                    "title_format": {
+                        "type": "string",
+                        "maxLength": 120
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "connection",
+                    "id",
+                    "updated_at"
+                ]
             },
             "CancelOutcome": {
                 "type": "object",
@@ -36707,6 +37826,27 @@
                     }
                 }
             },
+            "ConnectionUser": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    }
+                },
+                "required": [
+                    "email",
+                    "id",
+                    "name"
+                ]
+            },
             "ConsentRecord": {
                 "type": "object",
                 "properties": {
@@ -37427,6 +38567,56 @@
                 ],
                 "type": "string",
                 "description": "* `admin` - Admin\n* `tutor` - Tutor\n* `client_booking` - Client booking\n* `api` - API\n* `import` - Import\n* `series` - Series"
+            },
+            "CredentialConnectRequest": {
+                "type": "object",
+                "properties": {
+                    "provider": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "level": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/IntegrationLevelEnum"
+                            }
+                        ],
+                        "default": "user"
+                    },
+                    "username": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 255
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "default": "",
+                        "maxLength": 500
+                    },
+                    "server_url": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "uri",
+                                "default": ""
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "api_key": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "default": "",
+                        "maxLength": 500
+                    }
+                },
+                "required": [
+                    "provider"
+                ]
             },
             "CreditAccount": {
                 "type": "object",
@@ -39718,6 +40908,47 @@
                     "reason"
                 ]
             },
+            "ExternalBusyBlock": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "user": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "source": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "all_day": {
+                        "type": "boolean",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "all_day",
+                    "end",
+                    "id",
+                    "source",
+                    "start",
+                    "user"
+                ]
+            },
             "Factor": {
                 "type": "object",
                 "properties": {
@@ -40303,7 +41534,7 @@
                 "type": "object",
                 "properties": {
                     "level": {
-                        "$ref": "#/components/schemas/LevelEnum"
+                        "$ref": "#/components/schemas/HoursCheckLevelEnum"
                     },
                     "used": {
                         "type": "string"
@@ -40330,6 +41561,16 @@
                     "period_start",
                     "used"
                 ]
+            },
+            "HoursCheckLevelEnum": {
+                "enum": [
+                    "none",
+                    "ok",
+                    "warning",
+                    "blocked"
+                ],
+                "type": "string",
+                "description": "* `none` - none\n* `ok` - ok\n* `warning` - warning\n* `blocked` - blocked"
             },
             "ImpersonateRequest": {
                 "type": "object",
@@ -40417,6 +41658,151 @@
                     "title",
                     "type_key"
                 ]
+            },
+            "IntegrationConnection": {
+                "type": "object",
+                "description": "Tokens and secrets are never serialised.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "provider": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "provider_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "level": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/IntegrationLevelEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/IntegrationConnectionStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "user": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ConnectionUser"
+                            }
+                        ],
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "account_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "capabilities": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "readOnly": true
+                    },
+                    "scopes": {
+                        "readOnly": true
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_sync_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_checked_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "error_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "error_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "connected_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "disconnected_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "account_name",
+                    "capabilities",
+                    "connected_at",
+                    "created_at",
+                    "disconnected_at",
+                    "error",
+                    "error_at",
+                    "error_count",
+                    "expires_at",
+                    "id",
+                    "last_checked_at",
+                    "last_sync_at",
+                    "level",
+                    "provider",
+                    "provider_name",
+                    "scopes",
+                    "status",
+                    "user"
+                ]
+            },
+            "IntegrationConnectionStatusEnum": {
+                "enum": [
+                    "active",
+                    "error",
+                    "needs_reconnect",
+                    "disconnected"
+                ],
+                "type": "string",
+                "description": "* `active` - Connected\n* `error` - Error\n* `needs_reconnect` - Needs reconnecting\n* `disconnected` - Disconnected"
+            },
+            "IntegrationLevelEnum": {
+                "enum": [
+                    "user",
+                    "organisation"
+                ],
+                "type": "string",
+                "description": "* `user` - Personal\n* `organisation` - Organisation"
             },
             "Interview": {
                 "type": "object",
@@ -42799,6 +44185,45 @@
                 "type": "string",
                 "description": "* `offered` - Offered\n* `active` - Active\n* `ended` - Ended\n* `declined` - Declined"
             },
+            "JoinLink": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "opens_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "provider": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/JoinLinkRoleEnum"
+                    },
+                    "open": {
+                        "type": "boolean",
+                        "description": "Whether the join button is enabled now."
+                    }
+                },
+                "required": [
+                    "open",
+                    "opens_at",
+                    "provider",
+                    "role",
+                    "url"
+                ]
+            },
+            "JoinLinkRoleEnum": {
+                "enum": [
+                    "host",
+                    "participant"
+                ],
+                "type": "string",
+                "description": "* `host` - host\n* `participant` - participant"
+            },
             "KeyEnum": {
                 "enum": [
                     "accounting_integrations",
@@ -43858,16 +45283,6 @@
                     "subject"
                 ]
             },
-            "LevelEnum": {
-                "enum": [
-                    "none",
-                    "ok",
-                    "warning",
-                    "blocked"
-                ],
-                "type": "string",
-                "description": "* `none` - none\n* `ok` - ok\n* `warning` - warning\n* `blocked` - blocked"
-            },
             "LevelRequest": {
                 "type": "object",
                 "properties": {
@@ -44839,6 +46254,42 @@
                     "status"
                 ]
             },
+            "MeetingPreference": {
+                "type": "object",
+                "properties": {
+                    "provider": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/VideoProviderEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    },
+                    "use_personal_room": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "MeetingPreferenceRequest": {
+                "type": "object",
+                "properties": {
+                    "provider": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/VideoProviderEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    },
+                    "use_personal_room": {
+                        "type": "boolean"
+                    }
+                }
+            },
             "Member": {
                 "type": "object",
                 "properties": {
@@ -45699,6 +47150,63 @@
                     "nudged"
                 ]
             },
+            "OAuthCompleteRequest": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4000
+                    },
+                    "state": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4000
+                    }
+                },
+                "required": [
+                    "code",
+                    "state"
+                ]
+            },
+            "OAuthStartRequest": {
+                "type": "object",
+                "properties": {
+                    "provider": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "level": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/IntegrationLevelEnum"
+                            }
+                        ],
+                        "default": "user"
+                    },
+                    "next": {
+                        "type": "string",
+                        "minLength": 1,
+                        "default": "/settings/integrations",
+                        "maxLength": 300
+                    }
+                },
+                "required": [
+                    "provider"
+                ]
+            },
+            "OAuthStartResult": {
+                "type": "object",
+                "properties": {
+                    "authorize_url": {
+                        "type": "string",
+                        "format": "uri"
+                    }
+                },
+                "required": [
+                    "authorize_url"
+                ]
+            },
             "OfferBatch": {
                 "type": "object",
                 "properties": {
@@ -45972,6 +47480,87 @@
                 ],
                 "type": "string",
                 "description": "* `pending` - pending\n* `completed` - completed\n* `skipped` - skipped"
+            },
+            "OnlineMeeting": {
+                "type": "object",
+                "description": "Staff view: no passcode or host link (those reach tutors through join links).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "lesson": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "provider": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/OnlineMeetingStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "join_url": {
+                        "type": "string",
+                        "format": "uri",
+                        "readOnly": true
+                    },
+                    "provisioned_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "provisioned_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "join_url",
+                    "last_error",
+                    "lesson",
+                    "provider",
+                    "provisioned_end",
+                    "provisioned_start",
+                    "status",
+                    "updated_at"
+                ]
+            },
+            "OnlineMeetingStatusEnum": {
+                "enum": [
+                    "pending",
+                    "active",
+                    "failed",
+                    "deleted"
+                ],
+                "type": "string",
+                "description": "* `pending` - Being created\n* `active` - Ready\n* `failed` - Failed\n* `deleted` - Deleted"
             },
             "Operations": {
                 "type": "object",
@@ -47090,6 +48679,32 @@
                     }
                 }
             },
+            "PaginatedExternalBusyBlockList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ExternalBusyBlock"
+                        }
+                    }
+                }
+            },
             "PaginatedInAppList": {
                 "type": "object",
                 "required": [
@@ -47112,6 +48727,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/InApp"
+                        }
+                    }
+                }
+            },
+            "PaginatedIntegrationConnectionList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/IntegrationConnection"
                         }
                     }
                 }
@@ -47476,6 +49117,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/OfferBatch"
+                        }
+                    }
+                }
+            },
+            "PaginatedOnlineMeetingList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OnlineMeeting"
                         }
                     }
                 }
@@ -48239,6 +49906,34 @@
                     },
                     "cancel_lessons": {
                         "type": "boolean"
+                    }
+                }
+            },
+            "PatchedCalendarSyncSettingsUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "read_calendar_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 500
+                        },
+                        "maxItems": 20
+                    },
+                    "write_enabled": {
+                        "type": "boolean"
+                    },
+                    "write_calendar_id": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "two_way": {
+                        "type": "boolean"
+                    },
+                    "title_format": {
+                        "type": "string",
+                        "maxLength": 120
                     }
                 }
             },
@@ -52561,6 +54256,15 @@
                     "meeting_url": {
                         "type": "string"
                     },
+                    "join_url": {
+                        "type": "string",
+                        "description": "Role-specific link (E22)."
+                    },
+                    "join_opens_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
                     "location": {
                         "type": "string"
                     },
@@ -52583,6 +54287,8 @@
                 "required": [
                     "end",
                     "id",
+                    "join_opens_at",
+                    "join_url",
                     "location",
                     "meeting_url",
                     "notes_for_client",
@@ -53515,6 +55221,51 @@
                     "options"
                 ]
             },
+            "Provider": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "capabilities": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "auth": {
+                        "$ref": "#/components/schemas/AuthEnum"
+                    },
+                    "levels": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "credential_fields": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "simulated": {
+                        "type": "boolean",
+                        "description": "No platform keys: a fake stands in."
+                    }
+                },
+                "required": [
+                    "auth",
+                    "capabilities",
+                    "credential_fields",
+                    "key",
+                    "levels",
+                    "name",
+                    "simulated"
+                ]
+            },
             "ProviderAccount": {
                 "type": "object",
                 "properties": {
@@ -53605,6 +55356,29 @@
                 ],
                 "type": "string",
                 "description": "* `stripe` - Stripe\n* `manual` - Manual"
+            },
+            "ProvisionRequest": {
+                "type": "object",
+                "properties": {
+                    "lesson": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "lesson"
+                ]
+            },
+            "ProvisionResult": {
+                "type": "object",
+                "properties": {
+                    "started": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "started"
+                ]
             },
             "PublicApplyRequest": {
                 "type": "object",
@@ -59909,6 +61683,15 @@
                     "meeting_url": {
                         "type": "string"
                     },
+                    "join_url": {
+                        "type": "string",
+                        "description": "Role-specific link (E22)."
+                    },
+                    "join_opens_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
                     "location": {
                         "type": "string"
                     },
@@ -59922,6 +61705,8 @@
                 "required": [
                     "end",
                     "id",
+                    "join_opens_at",
+                    "join_url",
                     "location",
                     "meeting_url",
                     "online",
@@ -60758,6 +62543,18 @@
                     "has_mfa",
                     "id"
                 ]
+            },
+            "VideoProviderEnum": {
+                "enum": [
+                    "none",
+                    "builtin",
+                    "zoom",
+                    "teams",
+                    "google_meet",
+                    "lessonspace"
+                ],
+                "type": "string",
+                "description": "* `none` - none\n* `builtin` - builtin\n* `zoom` - zoom\n* `teams` - teams\n* `google_meet` - google_meet\n* `lessonspace` - lessonspace"
             },
             "VoidRequest": {
                 "type": "object",

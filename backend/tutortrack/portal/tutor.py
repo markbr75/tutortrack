@@ -25,6 +25,14 @@ def _zone(tutor: TutorProfile) -> ZoneInfo:
     return ZoneInfo(Organisation.objects.get(pk=require_organisation_id()).timezone)
 
 
+def _join(lesson: Any) -> dict[str, Any]:
+    """The tutor's (host) join link and when the join button opens (E22-T09)."""
+    from tutortrack.scheduling.external import join_link
+
+    link = join_link(lesson, "host")
+    return {"join_url": link.url if link else "", "join_opens_at": link.opens_at if link else None}
+
+
 def lesson_pay(link: Any) -> Money | None:
     if link.pay_amount is None or not link.payable:
         return None
@@ -63,6 +71,7 @@ def today(tutor: TutorProfile, user: Any) -> dict[str, Any]:
                 "status": lesson.status,
                 "online": lesson.online,
                 "meeting_url": lesson.meeting_url,
+                **_join(lesson),
                 "location": lesson.location.name if lesson.location else "",
                 "students": [a.student.full_name for a in lesson.attendees.all()],
             }

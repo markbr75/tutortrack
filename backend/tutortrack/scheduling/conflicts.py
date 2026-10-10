@@ -1,8 +1,9 @@
 """Conflict engine (FR-08-6).
 
 Hard conflicts block unless the user may override (``scheduling.override_conflicts``):
-the tutor is already teaching or busy (lesson, blocking event, time off), or the job's
-hours cap would be exceeded. Everything else is a warning.
+the tutor is already teaching or busy (lesson, blocking event, time off, busy time in a
+connected calendar, E22), or the job's hours cap would be exceeded. Everything else is a
+warning.
 """
 
 from __future__ import annotations
@@ -49,8 +50,10 @@ def check(
 ) -> list[Conflict]:
     from tutortrack.tenancy.settings_service import get_setting
 
-    from . import availability
+    from . import availability, external
 
+    tutors = list(tutors)
+    outside = external.external_busy([t.pk for t in tutors], start, end)
     excluded = [str(i) for i in exclude_lesson_ids]
     found: list[Conflict] = []
 
@@ -75,6 +78,11 @@ def check(
         if busy:
             message = _("%(tutor)s is busy: %(event)s.") % {**name, "event": busy.title}
             add("tutor_busy", HARD, message, tutor_id=tutor.pk)
+        if any(
+            b_start < end and b_end > start for b_start, b_end in outside.get(str(tutor.pk), [])
+        ):
+            message = _("%(tutor)s is busy in their own calendar then.") % name
+            add("tutor_external_busy", HARD, message, tutor_id=tutor.pk)
         time_off = AvailabilityException.objects.filter(
             tutor=tutor, type="off", status="approved", start__lt=end, end__gt=start
         )

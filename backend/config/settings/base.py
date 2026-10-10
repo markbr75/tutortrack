@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     "tutortrack.matching",
     "tutortrack.automations",
     "tutortrack.reporting",
+    "tutortrack.integrations",
+    "tutortrack.calendar_sync",
     "tutortrack.comms",
     "tutortrack.portal",
     "tutortrack.subscriptions",
@@ -289,6 +291,9 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,
     "ENUM_NAME_OVERRIDES": {
         "ProcessStatusEnum": "tutortrack.core.models.workflows.WorkflowLink.Status",
+        "IntegrationLevelEnum": "tutortrack.integrations.models.IntegrationConnection.Level",
+        "VideoProviderEnum": "tutortrack.calendar_sync.api.serializers.VIDEO_CHOICES",
+        "ProviderEnum": "tutortrack.payments.models.Provider",
         "ClientStatusEnum": "tutortrack.people.models.Client.Status",
         "ClientTypeEnum": "tutortrack.people.models.Client.Type",
         "StudentStatusEnum": "tutortrack.people.models.Student.Status",
@@ -469,6 +474,28 @@ GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID", default="")
 GOOGLE_CLIENT_SECRET = env("GOOGLE_CLIENT_SECRET", default="")
 MICROSOFT_CLIENT_ID = env("MICROSOFT_CLIENT_ID", default="")
 MICROSOFT_CLIENT_SECRET = env("MICROSOFT_CLIENT_SECRET", default="")
+
+# --- Integrations (E22): calendars and video. A provider whose platform keys are empty uses
+# an in-memory fake (development and tests), so every flow works without credentials.
+INTEGRATIONS = {
+    "GOOGLE_CLIENT_ID": env("INTEGRATIONS_GOOGLE_CLIENT_ID", default=GOOGLE_CLIENT_ID),
+    "GOOGLE_CLIENT_SECRET": env("INTEGRATIONS_GOOGLE_CLIENT_SECRET", default=GOOGLE_CLIENT_SECRET),
+    "MICROSOFT_CLIENT_ID": env("INTEGRATIONS_MICROSOFT_CLIENT_ID", default=MICROSOFT_CLIENT_ID),
+    "MICROSOFT_CLIENT_SECRET": env(
+        "INTEGRATIONS_MICROSOFT_CLIENT_SECRET", default=MICROSOFT_CLIENT_SECRET
+    ),
+    "ZOOM_CLIENT_ID": env("ZOOM_CLIENT_ID", default=""),
+    "ZOOM_CLIENT_SECRET": env("ZOOM_CLIENT_SECRET", default=""),
+    "DAILY_API_KEY": env("DAILY_API_KEY", default=""),
+    "WHEREBY_API_KEY": env("WHEREBY_API_KEY", default=""),
+    # Built-in rooms that need no tutor account: "daily" or "whereby".
+    "BUILTIN_ROOMS": env("INTEGRATIONS_BUILTIN_ROOMS", default="daily"),
+    # CalDAV and Lessonspace use credentials typed in by the tenant; set false to use the
+    # fakes for them too (development).
+    "CREDENTIAL_PROVIDERS_LIVE": env.bool("INTEGRATIONS_CREDENTIAL_PROVIDERS_LIVE", default=True),
+    # Public base URL that Google/Microsoft push notifications reach (the API host).
+    "WEBHOOK_BASE_URL": env("INTEGRATIONS_WEBHOOK_BASE_URL", default=PLATFORM_BASE_URL),
+}
 
 # --- Observability ----------------------------------------------------------------------------
 LOG_LEVEL = env("LOG_LEVEL", default="INFO")

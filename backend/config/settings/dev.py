@@ -21,6 +21,12 @@ CSRF_TRUSTED_ORIGINS = env.list(
     ],
 )
 
+# E22: CalDAV and Lessonspace use their fakes locally unless switched on.
+INTEGRATIONS = {
+    **INTEGRATIONS,
+    "CREDENTIAL_PROVIDERS_LIVE": env.bool("INTEGRATIONS_CREDENTIAL_PROVIDERS_LIVE", default=False),
+}
+
 # Browsable API is handy locally.
 REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = [
     "rest_framework.renderers.JSONRenderer",

@@ -14,6 +14,7 @@ import { PaymentsSettingsPage } from "./payments/PaymentsPages";
 import { AvailabilityPage } from "./calendar/AvailabilityPage";
 import { CalendarPage } from "./calendar/CalendarPage";
 import { CataloguePage } from "./catalogue/CataloguePage";
+import { IntegrationsPage } from "./integrations/IntegrationsPage";
 import { NotificationSettingsPage } from "./comms/NotificationSettingsPage";
 import { AnnouncementsPage } from "./portal/AnnouncementsPage";
 import { TasksPage } from "./crm/TasksPage";
@@ -268,6 +269,7 @@ const billingRoute = appPage("/billing", BillingPage);
 const paymentsSettingsRoute = appPage("/settings/payments", PaymentsSettingsPage);
 const notificationSettingsRoute = appPage("/settings/notifications", NotificationSettingsPage);
 const planRoute = appPage("/settings/plan", PlanPage);
+const integrationsRoute = appPage("/settings/integrations", IntegrationsPage);
 const payRunsRoute = appPage("/payroll", PayRunsPage);
 const payExpensesRoute = appPage("/payroll/expenses", ExpensesPage);
 const payItemsRoute = appPage("/payroll/items", PayItemsPage);
@@ -385,6 +387,7 @@ const routeTree = rootRoute.addChildren([
     paymentsSettingsRoute,
     notificationSettingsRoute,
     planRoute,
+    integrationsRoute,
     payRunsRoute,
     payExpensesRoute,
     payItemsRoute,

@@ -2,7 +2,8 @@
 
 Weekly windows are wall-clock times in the template's timezone. Free slots subtract the
 tutor's lessons (plus the travel buffer), blocking calendar events, time off and
-organisation-wide closures, and respect the minimum notice.
+organisation-wide closures and busy time in connected calendars (E22, via
+``scheduling.external``), and respect the minimum notice.
 """
 
 from __future__ import annotations
@@ -126,6 +127,9 @@ def busy_intervals(
         end__gt=start,
     )
     busy.extend((o.start, o.end) for o in off)
+    from .external import external_busy
+
+    busy.extend(external_busy([tutor_id], start, end).get(str(tutor_id), []))
     return _merge(busy)
 
 
@@ -258,6 +262,10 @@ def interval_fit(
         tutor_id__in=ids, event__start__lt=hi, event__end__gt=lo
     ).values_list("tutor_id", "event__start", "event__end"):
         busy[str(tutor_id)].append((start, end))
+    from .external import external_busy
+
+    for tutor_id, intervals in external_busy(ids, lo, hi).items():
+        busy.setdefault(tutor_id, []).extend(intervals)
     closures = [
         (e.start, e.end)
         for e in CalendarEvent.objects.filter(

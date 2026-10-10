@@ -1011,6 +1011,78 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/calendar-sync/busy-blocks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Busy time from connected calendars (times only). ``?user=``, ``?start=``, ``?end=``. */
+    get: operations["calendar_sync_busy_blocks_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/calendar-sync/busy-blocks/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Busy time from connected calendars (times only). ``?user=``, ``?start=``, ``?end=``. */
+    get: operations["calendar_sync_busy_blocks_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/calendar-sync/connections/{id}/settings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description A personal calendar connection's sync settings and the calendars to choose from. */
+    get: operations["calendar_sync_connections_settings_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Choose busy calendars (free/busy only), the write calendar ("" = a "TutorTrack"
+     *     calendar we create), two-way edits and the event title format.
+     */
+    patch: operations["calendar_sync_connections_settings_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/calendar-sync/connections/{id}/sync": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Sync this calendar now (instead of waiting for the next poll). */
+    post: operations["calendar_sync_connections_sync_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/cancellation-policies": {
     parameters: {
       query?: never;
@@ -3020,6 +3092,163 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/integrations/connections": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Connected accounts. Admins (``integrations.view``) see every connection with its
+     *     health and last error; everyone else sees their own. ``?mine=1`` limits to your own,
+     *     ``?capability=calendar|video`` filters.
+     */
+    get: operations["integrations_connections_list"];
+    put?: never;
+    /**
+     * @description Connect with credentials: CalDAV (iCloud app-specific password) or an API key
+     *     (Lessonspace). Verified at the provider, then stored encrypted.
+     */
+    post: operations["integrations_connections_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/integrations/connections/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Connected accounts. Admins (``integrations.view``) see every connection with its
+     *     health and last error; everyone else sees their own. ``?mine=1`` limits to your own,
+     *     ``?capability=calendar|video`` filters.
+     */
+    get: operations["integrations_connections_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/integrations/connections/{id}/check": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Health check: refresh the token if needed and make a light provider call. */
+    post: operations["integrations_connections_check_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/integrations/connections/{id}/disconnect": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Revoke our access at the provider (best effort) and forget the tokens. Calendar
+     *     sync stops; events already written stay in the calendar.
+     */
+    post: operations["integrations_connections_disconnect_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/integrations/oauth/callback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The provider redirects here (root app host); we forward the browser to the
+     *     organisation's app, which completes the connection while signed in.
+     */
+    get: operations["integrations_oauth_callback_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/integrations/oauth/complete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Finish connecting: exchange the code (PKCE). Only the person who started the
+     *     connection, in the same organisation, can finish it.
+     */
+    post: operations["integrations_oauth_complete_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/integrations/oauth/start": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Begin connecting an OAuth provider: open ``authorize_url`` in the browser. */
+    post: operations["integrations_oauth_start_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/integrations/providers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Providers that can be connected, what they do and how they connect. */
+    get: operations["integrations_providers_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/invitations": {
     parameters: {
       query?: never;
@@ -4350,6 +4579,27 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/lessons/{id}/join": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The requester's join link for an online lesson: the host link for its tutors, the
+     *     participant link otherwise. ``open`` is true from N minutes before the start (org
+     *     setting ``integrations.join_window_minutes``) until the end.
+     */
+    get: operations["lessons_join_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/lessons/{id}/missed": {
     parameters: {
       query?: never;
@@ -4771,6 +5021,24 @@ export interface paths {
     /** @description Your recent sign-in attempts (FR-29-2 login history). */
     get: operations["me_logins_list"];
     put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/meeting-preference": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Your default video provider for your online lessons. */
+    get: operations["me_meeting_preference_retrieve"];
+    /** @description Your default video provider for your online lessons. */
+    put: operations["me_meeting_preference_update"];
     post?: never;
     delete?: never;
     options?: never;
@@ -5332,6 +5600,57 @@ export interface paths {
     get: operations["onboarding_state_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/online-meetings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Online meetings of lessons you can see (``?lesson=``, ``?status=failed``). */
+    get: operations["online_meetings_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/online-meetings/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Online meetings of lessons you can see (``?lesson=``, ``?status=failed``). */
+    get: operations["online_meetings_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/online-meetings/provision": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Create (or re-create) the lesson's online meeting now, e.g. after a failure. */
+    post: operations["online_meetings_provision_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -9147,6 +9466,13 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    /**
+     * @description * `oauth2` - oauth2
+     *     * `credentials` - credentials
+     *     * `platform` - platform
+     * @enum {string}
+     */
+    AuthEnum: "oauth2" | "credentials" | "platform";
     AutoPayRequest: {
       enabled: boolean;
     };
@@ -9586,6 +9912,31 @@ export interface components {
      * @enum {string}
      */
     CalendarItemKindEnum: "lesson" | "event";
+    CalendarOption: {
+      id: string;
+      name: string;
+      primary: boolean;
+      writable: boolean;
+    };
+    CalendarSyncPage: {
+      settings: components["schemas"]["CalendarSyncSettings"];
+      calendars: components["schemas"]["CalendarOption"][];
+      calendars_error: string;
+      two_way_allowed: boolean;
+    };
+    CalendarSyncSettings: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly connection: string;
+      read_calendar_ids?: unknown;
+      write_enabled?: boolean;
+      write_calendar_id?: string;
+      two_way?: boolean;
+      title_format?: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
     CancelOutcome: {
       kind: components["schemas"]["CancelOutcomeKindEnum"];
       /** Format: decimal */
@@ -10053,6 +10404,13 @@ export interface components {
       branch?: string | null;
       email?: string;
     };
+    ConnectionUser: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      /** Format: email */
+      email: string;
+    };
     ConsentRecord: {
       /** Format: uuid */
       readonly id: string;
@@ -10272,6 +10630,18 @@ export interface components {
      * @enum {string}
      */
     CreatedViaEnum: "admin" | "tutor" | "client_booking" | "api" | "import" | "series";
+    CredentialConnectRequest: {
+      provider: string;
+      /** @default user */
+      level: components["schemas"]["IntegrationLevelEnum"];
+      /** @default  */
+      username: string;
+      /** @default  */
+      password: string;
+      server_url?: string;
+      /** @default  */
+      api_key: string;
+    };
     CreditAccount: {
       credit_type: components["schemas"]["CreditTypeEnum"];
       balance: number;
@@ -11042,6 +11412,18 @@ export interface components {
       reason: string;
       days: number;
     };
+    ExternalBusyBlock: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly user: string;
+      readonly source: string;
+      /** Format: date-time */
+      readonly start: string;
+      /** Format: date-time */
+      readonly end: string;
+      readonly all_day: boolean;
+    };
     Factor: {
       /** Format: double */
       weight: number;
@@ -11240,7 +11622,7 @@ export interface components {
      */
     HoursCapPeriodEnum: "week" | "month" | "total";
     HoursCheck: {
-      level: components["schemas"]["LevelEnum"];
+      level: components["schemas"]["HoursCheckLevelEnum"];
       used: string;
       cap: string | null;
       /** Format: date */
@@ -11248,6 +11630,14 @@ export interface components {
       /** Format: date */
       period_end: string | null;
     };
+    /**
+     * @description * `none` - none
+     *     * `ok` - ok
+     *     * `warning` - warning
+     *     * `blocked` - blocked
+     * @enum {string}
+     */
+    HoursCheckLevelEnum: "none" | "ok" | "warning" | "blocked";
     ImpersonateRequest: {
       /** Format: uuid */
       membership_id: string;
@@ -11274,6 +11664,49 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    /** @description Tokens and secrets are never serialised. */
+    IntegrationConnection: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly provider: string;
+      readonly provider_name: string;
+      readonly level: components["schemas"]["IntegrationLevelEnum"];
+      readonly status: components["schemas"]["IntegrationConnectionStatusEnum"];
+      readonly user: components["schemas"]["ConnectionUser"] | null;
+      readonly account_name: string;
+      readonly capabilities: string[];
+      readonly scopes: unknown;
+      /** Format: date-time */
+      readonly expires_at: string | null;
+      /** Format: date-time */
+      readonly last_sync_at: string | null;
+      /** Format: date-time */
+      readonly last_checked_at: string | null;
+      readonly error: string;
+      /** Format: date-time */
+      readonly error_at: string | null;
+      readonly error_count: number;
+      /** Format: date-time */
+      readonly connected_at: string | null;
+      /** Format: date-time */
+      readonly disconnected_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `active` - Connected
+     *     * `error` - Error
+     *     * `needs_reconnect` - Needs reconnecting
+     *     * `disconnected` - Disconnected
+     * @enum {string}
+     */
+    IntegrationConnectionStatusEnum: "active" | "error" | "needs_reconnect" | "disconnected";
+    /**
+     * @description * `user` - Personal
+     *     * `organisation` - Organisation
+     * @enum {string}
+     */
+    IntegrationLevelEnum: "user" | "organisation";
     Interview: {
       /** Format: uuid */
       readonly id: string;
@@ -12079,6 +12512,22 @@ export interface components {
      * @enum {string}
      */
     JobTutorStatusEnum: "offered" | "active" | "ended" | "declined";
+    JoinLink: {
+      /** Format: uri */
+      url: string;
+      /** Format: date-time */
+      opens_at: string | null;
+      provider: string;
+      role: components["schemas"]["JoinLinkRoleEnum"];
+      /** @description Whether the join button is enabled now. */
+      open: boolean;
+    };
+    /**
+     * @description * `host` - host
+     *     * `participant` - participant
+     * @enum {string}
+     */
+    JoinLinkRoleEnum: "host" | "participant";
     /**
      * @description * `accounting_integrations` - accounting_integrations
      *     * `advanced_reports` - advanced_reports
@@ -12459,14 +12908,6 @@ export interface components {
       /** Format: date-time */
       readonly archived_at: string | null;
     };
-    /**
-     * @description * `none` - none
-     *     * `ok` - ok
-     *     * `warning` - warning
-     *     * `blocked` - blocked
-     * @enum {string}
-     */
-    LevelEnum: "none" | "ok" | "warning" | "blocked";
     LevelRequest: {
       /** Format: uuid */
       subject: string;
@@ -12749,6 +13190,14 @@ export interface components {
       status: string;
       mode: string;
     };
+    MeetingPreference: {
+      provider?: components["schemas"]["VideoProviderEnum"] | components["schemas"]["BlankEnum"];
+      use_personal_room?: boolean;
+    };
+    MeetingPreferenceRequest: {
+      provider?: components["schemas"]["VideoProviderEnum"] | components["schemas"]["BlankEnum"];
+      use_personal_room?: boolean;
+    };
     Member: {
       /** Format: uuid */
       id: string;
@@ -13012,6 +13461,21 @@ export interface components {
     NudgeResult: {
       nudged: number;
     };
+    OAuthCompleteRequest: {
+      code: string;
+      state: string;
+    };
+    OAuthStartRequest: {
+      provider: string;
+      /** @default user */
+      level: components["schemas"]["IntegrationLevelEnum"];
+      /** @default /settings/integrations */
+      next: string;
+    };
+    OAuthStartResult: {
+      /** Format: uri */
+      authorize_url: string;
+    };
     OfferBatch: {
       /** Format: uuid */
       readonly id: string;
@@ -13102,6 +13566,34 @@ export interface components {
      * @enum {string}
      */
     OnboardingStepStatusStatusEnum: "pending" | "completed" | "skipped";
+    /** @description Staff view: no passcode or host link (those reach tutors through join links). */
+    OnlineMeeting: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly lesson: string;
+      readonly provider: string;
+      readonly status: components["schemas"]["OnlineMeetingStatusEnum"];
+      /** Format: uri */
+      readonly join_url: string;
+      /** Format: date-time */
+      readonly provisioned_start: string | null;
+      /** Format: date-time */
+      readonly provisioned_end: string | null;
+      readonly last_error: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    /**
+     * @description * `pending` - Being created
+     *     * `active` - Ready
+     *     * `failed` - Failed
+     *     * `deleted` - Deleted
+     * @enum {string}
+     */
+    OnlineMeetingStatusEnum: "pending" | "active" | "failed" | "deleted";
     Operations: {
       outbox_pending: number;
       outbox_lag_seconds: number;
@@ -13546,6 +14038,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Expense"][];
     };
+    PaginatedExternalBusyBlockList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ExternalBusyBlock"][];
+    };
     PaginatedInAppList: {
       /**
        * Format: uri
@@ -13558,6 +14063,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["InApp"][];
+    };
+    PaginatedIntegrationConnectionList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["IntegrationConnection"][];
     };
     PaginatedInvitationList: {
       /**
@@ -13740,6 +14258,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["OfferBatch"][];
+    };
+    PaginatedOnlineMeetingList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["OnlineMeeting"][];
     };
     PaginatedPackageTemplateList: {
       /**
@@ -14064,6 +14595,13 @@ export interface components {
       tutors?: string[];
       paid?: boolean;
       cancel_lessons?: boolean;
+    };
+    PatchedCalendarSyncSettingsUpdateRequest: {
+      read_calendar_ids?: string[];
+      write_enabled?: boolean;
+      write_calendar_id?: string;
+      two_way?: boolean;
+      title_format?: string;
     };
     PatchedCategoryRequest: {
       name?: string;
@@ -15421,6 +15959,10 @@ export interface components {
       status: string;
       online: boolean;
       meeting_url: string;
+      /** @description Role-specific link (E22). */
+      join_url: string;
+      /** Format: date-time */
+      join_opens_at: string | null;
       location: string;
       notes_for_client: string;
       tutors: components["schemas"]["PortalTutor"][];
@@ -15725,6 +16267,16 @@ export interface components {
       minutes: number;
       meeting_url?: string;
     };
+    Provider: {
+      key: string;
+      name: string;
+      capabilities: string[];
+      auth: components["schemas"]["AuthEnum"];
+      levels: string[];
+      credential_fields: string[];
+      /** @description No platform keys: a fake stands in. */
+      simulated: boolean;
+    };
     ProviderAccount: {
       /** Format: uuid */
       readonly id: string;
@@ -15754,6 +16306,13 @@ export interface components {
      * @enum {string}
      */
     ProviderEnum: "stripe" | "manual";
+    ProvisionRequest: {
+      /** Format: uuid */
+      lesson: string;
+    };
+    ProvisionResult: {
+      started: boolean;
+    };
     PublicApplyRequest: {
       data: {
         [key: string]: unknown;
@@ -17786,6 +18345,10 @@ export interface components {
       status: string;
       online: boolean;
       meeting_url: string;
+      /** @description Role-specific link (E22). */
+      join_url: string;
+      /** Format: date-time */
+      join_opens_at: string | null;
       location: string;
       students: string[];
     };
@@ -18050,6 +18613,16 @@ export interface components {
       /** Format: date-time */
       readonly date_joined: string;
     };
+    /**
+     * @description * `none` - none
+     *     * `builtin` - builtin
+     *     * `zoom` - zoom
+     *     * `teams` - teams
+     *     * `google_meet` - google_meet
+     *     * `lessonspace` - lessonspace
+     * @enum {string}
+     */
+    VideoProviderEnum: "none" | "builtin" | "zoom" | "teams" | "google_meet" | "lessonspace";
     VoidRequest: {
       /** @default  */
       note: string;
@@ -19922,6 +20495,133 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["CalendarItem"][];
         };
+      };
+    };
+  };
+  calendar_sync_busy_blocks_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        end?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        start?: string;
+        user?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedExternalBusyBlockList"];
+        };
+      };
+    };
+  };
+  calendar_sync_busy_blocks_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this external busy block. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ExternalBusyBlock"];
+        };
+      };
+    };
+  };
+  calendar_sync_connections_settings_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalendarSyncPage"];
+        };
+      };
+    };
+  };
+  calendar_sync_connections_settings_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedCalendarSyncSettingsUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedCalendarSyncSettingsUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedCalendarSyncSettingsUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalendarSyncPage"];
+        };
+      };
+    };
+  };
+  calendar_sync_connections_sync_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -24022,6 +24722,236 @@ export interface operations {
       };
     };
   };
+  integrations_connections_list: {
+    parameters: {
+      query?: {
+        capability?: "calendar" | "video";
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        mine?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedIntegrationConnectionList"];
+        };
+      };
+    };
+  };
+  integrations_connections_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CredentialConnectRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CredentialConnectRequest"];
+        "multipart/form-data": components["schemas"]["CredentialConnectRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["IntegrationConnection"];
+        };
+      };
+    };
+  };
+  integrations_connections_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this integration connection. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["IntegrationConnection"];
+        };
+      };
+    };
+  };
+  integrations_connections_check_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this integration connection. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["IntegrationConnection"];
+        };
+      };
+    };
+  };
+  integrations_connections_disconnect_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this integration connection. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["IntegrationConnection"];
+        };
+      };
+    };
+  };
+  integrations_oauth_callback_retrieve: {
+    parameters: {
+      query?: {
+        code?: string;
+        error?: string;
+        state?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  integrations_oauth_complete_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OAuthCompleteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["OAuthCompleteRequest"];
+        "multipart/form-data": components["schemas"]["OAuthCompleteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["IntegrationConnection"];
+        };
+      };
+    };
+  };
+  integrations_oauth_start_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OAuthStartRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["OAuthStartRequest"];
+        "multipart/form-data": components["schemas"]["OAuthStartRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OAuthStartResult"];
+        };
+      };
+    };
+  };
+  integrations_providers_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Provider"][];
+        };
+      };
+    };
+  };
   invitations_list: {
     parameters: {
       query?: {
@@ -26580,6 +27510,34 @@ export interface operations {
       };
     };
   };
+  lessons_join_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JoinLink"];
+        };
+      };
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   lessons_missed_create: {
     parameters: {
       query?: never;
@@ -27299,6 +28257,50 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["LoginEvent"][];
+        };
+      };
+    };
+  };
+  me_meeting_preference_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MeetingPreference"];
+        };
+      };
+    };
+  };
+  me_meeting_preference_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["MeetingPreferenceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["MeetingPreferenceRequest"];
+        "multipart/form-data": components["schemas"]["MeetingPreferenceRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MeetingPreference"];
         };
       };
     };
@@ -28346,6 +29348,89 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["OnboardingState"];
+        };
+      };
+    };
+  };
+  online_meetings_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        lesson?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedOnlineMeetingList"];
+        };
+      };
+    };
+  };
+  online_meetings_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this online meeting. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OnlineMeeting"];
+        };
+      };
+    };
+  };
+  online_meetings_provision_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProvisionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ProvisionRequest"];
+        "multipart/form-data": components["schemas"]["ProvisionRequest"];
+      };
+    };
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProvisionResult"];
         };
       };
     };
