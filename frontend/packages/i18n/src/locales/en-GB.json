@@ -24,7 +24,8 @@
     "deliverySettings": "Lesson policies",
     "payments": "Payments setup",
     "notifications": "Notifications",
-    "announcements": "News"
+    "announcements": "News",
+    "plan": "Billing & plan"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -96,7 +97,8 @@
     "cancel": "Cancel",
     "loading": "Loading…",
     "optional": "Optional",
-    "actions": "Actions"
+    "actions": "Actions",
+    "close": "Close"
   },
   "signup": {
     "title": "Create your TutorTrack account",
@@ -1450,5 +1452,146 @@
     "provisional": "These amounts are confirmed when your pay run is processed.",
     "headline": "Headline",
     "bio": "About you (shown to families)"
+  },
+  "plan": {
+    "title": "Billing & plan",
+    "noSubscription": "This organisation isn't on a TutorTrack plan.",
+    "thanks": "Thank you. Your plan is set up.",
+    "current": "Your plan: {{plan}}",
+    "status": {
+      "trialing": "Free trial",
+      "active": "Active",
+      "past_due": "Payment overdue",
+      "suspended": "Read-only",
+      "cancelled": "Cancelled"
+    },
+    "trialLeft_one": "{{count}} day of your free trial left.",
+    "trialLeft_other": "{{count}} days of your free trial left.",
+    "trialThen": "Then you'll carry on with {{plan}}.",
+    "trialNoCard": "Add a payment method before it ends to keep everything running.",
+    "pastDue": "We couldn't take your last payment. Update your payment details to avoid the account becoming read-only.",
+    "locked": "Your account is read-only. Choose a plan to pick up where you left off: nothing has been deleted.",
+    "renewsOn": "Renews on {{date}}.",
+    "endsOn": "Your subscription ends on {{date}}.",
+    "pendingChange": "Changes to {{plan}} at the end of this billing period.",
+    "card": "Paying by {{brand}} ending {{last4}}",
+    "addCard": "Add payment method",
+    "reactivate": "Subscribe again",
+    "managePayment": "Payment details and invoices",
+    "usage": "Usage",
+    "usedOf": "{{used}} of {{allowed}}",
+    "usedUnlimited": "{{used}} (unlimited)",
+    "seats": "Billable tutors this period: {{billable}} ({{included}} included).",
+    "nextInvoice": "Next invoice about {{amount}}.",
+    "plans": "Plans",
+    "billing": "Billing period",
+    "interval": {
+      "month": "Monthly",
+      "year": "Annual (2 months free)"
+    },
+    "price": {
+      "base_fee": {
+        "month": "{{amount}} a month",
+        "year": "{{amount}} a year"
+      },
+      "active_tutor": {
+        "month": "+ {{amount}} a month per tutor after {{included}}",
+        "year": "+ {{amount}} a year per tutor after {{included}}"
+      },
+      "branch": {
+        "month": "+ {{amount}} a month per extra branch",
+        "year": "+ {{amount}} a year per extra branch"
+      },
+      "revenue_share": "{{percent}}% of payments you take through TutorTrack"
+    },
+    "contactSales": "Contact us for a price",
+    "upToTutors_one": "Up to {{count}} tutor",
+    "upToTutors_other": "Up to {{count}} tutors",
+    "unlimitedTutors": "Unlimited tutors",
+    "yourPlan": "Your plan",
+    "choose": "Choose {{plan}}",
+    "confirmTitle": "Change plan",
+    "blockersTitle": "Some things need to change first",
+    "effective": {
+      "now": "The change applies straight away.",
+      "period_end": "The change applies at the end of this billing period.",
+      "checkout": "You'll add a payment method next."
+    },
+    "dueNow": "You'll pay {{amount}} now for the rest of this period.",
+    "confirm": "Confirm",
+    "credits": "SMS and AI credits",
+    "creditTypes": {
+      "sms": "SMS credits",
+      "ai": "AI credits"
+    },
+    "creditBalance": "{{balance}} left · {{used}} used this period · {{allowance}} included each month",
+    "buy": "Buy {{count}}",
+    "auto_top_up": "Top up automatically when running low",
+    "allow_overage": "Keep sending when credits run out (charged next period)",
+    "invoices": "Invoices",
+    "invoiceNumber": "Number",
+    "invoiceDate": "Date",
+    "invoiceTotal": "Total",
+    "invoiceStatus": "Status",
+    "download": "Download {{number}}",
+    "cancelTitle": "Cancel subscription",
+    "cancel": "Cancel subscription",
+    "cancelHelp": "Your subscription stays active until the end of the period. You can change your mind until then.",
+    "cancelReason": "Why are you leaving?",
+    "cancelFeedback": "Anything else we should know? (optional)",
+    "reasons": {
+      "too_expensive": "It's too expensive",
+      "missing_features": "It's missing features I need",
+      "switching": "I'm moving to another tool",
+      "closing": "I'm closing my business",
+      "other": "Something else"
+    },
+    "confirmCancel": "Cancel at the end of the period",
+    "keepSubscription": "Keep my subscription",
+    "cancelScheduled": "Your subscription is set to end at the end of this period.",
+    "seePlans": "See plans",
+    "lockedBody": "Available on {{plan}} and above.",
+    "upgradeTitle": "Upgrade to {{plan}}",
+    "limitReached": "Your plan allows {{allowed}} {{what}}. Upgrade to add more.",
+    "featureMissing": "{{feature}} isn't included in your plan.",
+    "names": {
+      "solo": "Solo",
+      "team": "Team",
+      "agency": "Agency",
+      "agency_payg": "Agency (pay as you go)",
+      "enterprise": "Enterprise"
+    },
+    "features": {
+      "multi_branch": "Multiple branches",
+      "payroll": "Tutor payroll and expenses",
+      "pipeline": "Enquiry pipeline",
+      "recruitment": "Tutor recruitment and compliance",
+      "matching": "Matching and job board",
+      "automation": "Automations",
+      "courses": "Courses and group programmes",
+      "api_access": "API access",
+      "webhooks": "Webhooks",
+      "custom_domain": "Custom domain",
+      "white_label": "White-label apps",
+      "sso_saml": "SAML single sign-on",
+      "accounting_integrations": "Accounting integrations",
+      "advanced_reports": "Advanced reports",
+      "ai_assistant": "AI assistant"
+    },
+    "limits": {
+      "max_tutors": "tutors",
+      "max_branches": "branches",
+      "max_active_students": "active students",
+      "storage_gb": "GB of storage",
+      "sms_credits_monthly": "SMS credits a month",
+      "automation_rules": "automation rules"
+    },
+    "banner": {
+      "pastDue": "Your TutorTrack payment failed. Update your payment details to avoid interruption.",
+      "locked": "Your account is read-only until you choose a plan.",
+      "trialEnding_one": "Your free trial ends in {{count}} day.",
+      "trialEnding_other": "Your free trial ends in {{count}} days.",
+      "action": "Billing & plan"
+    }
   }
 }

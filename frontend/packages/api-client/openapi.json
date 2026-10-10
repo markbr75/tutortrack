@@ -7049,6 +7049,32 @@
                 }
             }
         },
+        "/api/v1/entitlements": {
+            "get": {
+                "operationId": "entitlements_retrieve",
+                "description": "What the organisation's plan includes, for ``useEntitlement()`` (FR-04-2).",
+                "tags": [
+                    "entitlements"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Entitlements"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/events": {
             "get": {
                 "operationId": "events_list",
@@ -18767,6 +18793,586 @@
                 }
             }
         },
+        "/api/v1/subscription": {
+            "get": {
+                "operationId": "subscription_retrieve",
+                "tags": [
+                    "subscription"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Subscription"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/subscription/cancel": {
+            "post": {
+                "operationId": "subscription_cancel_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CancelSubscriptionRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CancelSubscriptionRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CancelSubscriptionRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Subscription"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/subscription/change-plan": {
+            "post": {
+                "operationId": "subscription_change_plan_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "query",
+                        "name": "preview",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Only preview the change"
+                    }
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanChoiceRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanChoiceRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanChoiceRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Subscription"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "202": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChangePreview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/subscription/checkout-session": {
+            "post": {
+                "operationId": "subscription_checkout_session_create",
+                "description": "Start paying for a plan with Stripe Checkout; the browser goes to ``url``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanChoiceRequest"
+                            },
+                            "examples": {
+                                "Team,Annual": {
+                                    "value": {
+                                        "plan": "team",
+                                        "interval": "year"
+                                    },
+                                    "summary": "Team, annual"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanChoiceRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlanChoiceRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Redirect"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/subscription/checkout-session/complete": {
+            "post": {
+                "operationId": "subscription_checkout_session_complete_create",
+                "description": "Called when Checkout returns, so the plan shows straight away (the webhook also\narrives; both are idempotent).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteCheckoutRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteCheckoutRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteCheckoutRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Subscription"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/subscription/credits/{credit_type}": {
+            "get": {
+                "operationId": "subscription_credits_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "credit_type",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreditDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "subscription_credits_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "credit_type",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCreditSettingsRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCreditSettingsRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCreditSettingsRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreditAccount"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/subscription/credits/{credit_type}/top-up": {
+            "post": {
+                "operationId": "subscription_credits_top_up_create",
+                "description": "Buy a pack: charged to the saved card, or a Checkout page when there isn't one.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "credit_type",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TopUpRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TopUpRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TopUpRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TopUpResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/subscription/invoices": {
+            "get": {
+                "operationId": "subscription_invoices_list",
+                "description": "Our invoices to the organisation (PDFs hosted by Stripe).",
+                "tags": [
+                    "subscription"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/InvoiceSummary"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/subscription/plans": {
+            "get": {
+                "operationId": "subscription_plans_list",
+                "description": "Public plans with prices in the organisation's billing currency (FR-04-1).",
+                "tags": [
+                    "subscription"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Plan"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/subscription/portal-session": {
+            "post": {
+                "operationId": "subscription_portal_session_create",
+                "description": "Stripe's customer portal: card, billing details and invoices.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Redirect"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/subscription/reactivate": {
+            "post": {
+                "operationId": "subscription_reactivate_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Reactivate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/subscription/usage": {
+            "get": {
+                "operationId": "subscription_usage_retrieve",
+                "description": "Settings → Billing & plan: limits used, seats, credits, next invoice (FR-04-7).",
+                "tags": [
+                    "subscription"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Usage"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/tags": {
             "get": {
                 "operationId": "tags_list",
@@ -22256,6 +22862,21 @@
                 "type": "string",
                 "description": "* `this` - this\n* `following` - following"
             },
+            "CancelSubscriptionRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "$ref": "#/components/schemas/ReasonEnum"
+                    },
+                    "feedback": {
+                        "type": "string",
+                        "maxLength": 2000
+                    }
+                },
+                "required": [
+                    "reason"
+                ]
+            },
             "CancellationPolicy": {
                 "type": "object",
                 "properties": {
@@ -22345,6 +22966,31 @@
                 "type": "string",
                 "description": "* `client` - Client\n* `student` - Student\n* `tutor` - Tutor\n* `admin` - Us"
             },
+            "Card": {
+                "type": "object",
+                "properties": {
+                    "brand": {
+                        "type": "string"
+                    },
+                    "last4": {
+                        "type": "string"
+                    },
+                    "exp_month": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "exp_year": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "brand",
+                    "exp_month",
+                    "exp_year",
+                    "last4"
+                ]
+            },
             "Category": {
                 "type": "object",
                 "properties": {
@@ -22391,6 +23037,45 @@
                 },
                 "required": [
                     "name"
+                ]
+            },
+            "ChangePreview": {
+                "type": "object",
+                "properties": {
+                    "plan": {
+                        "type": "string"
+                    },
+                    "interval": {
+                        "type": "string"
+                    },
+                    "direction": {
+                        "$ref": "#/components/schemas/DirectionEnum"
+                    },
+                    "effective": {
+                        "$ref": "#/components/schemas/EffectiveEnum"
+                    },
+                    "blockers": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "amount_due_now": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MoneyOut"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "amount_due_now",
+                    "blockers",
+                    "direction",
+                    "effective",
+                    "interval",
+                    "plan"
                 ]
             },
             "Charge": {
@@ -23116,6 +23801,19 @@
                     "code"
                 ]
             },
+            "CompleteCheckoutRequest": {
+                "type": "object",
+                "properties": {
+                    "session_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    }
+                },
+                "required": [
+                    "session_id"
+                ]
+            },
             "CompleteRequest": {
                 "type": "object",
                 "properties": {
@@ -23140,6 +23838,16 @@
                         "default": false
                     }
                 }
+            },
+            "ComponentEnum": {
+                "enum": [
+                    "base_fee",
+                    "active_tutor",
+                    "revenue_share",
+                    "branch"
+                ],
+                "type": "string",
+                "description": "* `base_fee` - Base fee\n* `active_tutor` - Per active tutor\n* `revenue_share` - Share of payments processed\n* `branch` - Per extra branch"
             },
             "ConfirmRequest": {
                 "type": "object",
@@ -23759,6 +24467,108 @@
                 "type": "string",
                 "description": "* `admin` - Admin\n* `tutor` - Tutor\n* `client_booking` - Client booking\n* `api` - API\n* `import` - Import\n* `series` - Series"
             },
+            "CreditAccount": {
+                "type": "object",
+                "properties": {
+                    "credit_type": {
+                        "$ref": "#/components/schemas/CreditTypeEnum"
+                    },
+                    "balance": {
+                        "type": "integer"
+                    },
+                    "allowance": {
+                        "type": "integer"
+                    },
+                    "included_balance": {
+                        "type": "integer"
+                    },
+                    "purchased_balance": {
+                        "type": "integer"
+                    },
+                    "used_this_period": {
+                        "type": "integer"
+                    },
+                    "auto_top_up": {
+                        "type": "boolean"
+                    },
+                    "top_up_pack": {
+                        "type": "integer"
+                    },
+                    "low_threshold": {
+                        "type": "integer"
+                    },
+                    "allow_overage": {
+                        "type": "boolean"
+                    },
+                    "packs": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "allow_overage",
+                    "allowance",
+                    "auto_top_up",
+                    "balance",
+                    "credit_type",
+                    "included_balance",
+                    "low_threshold",
+                    "packs",
+                    "purchased_balance",
+                    "top_up_pack",
+                    "used_this_period"
+                ]
+            },
+            "CreditDetail": {
+                "type": "object",
+                "properties": {
+                    "account": {
+                        "$ref": "#/components/schemas/CreditAccount"
+                    },
+                    "ledger": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CreditLedgerEntry"
+                        }
+                    }
+                },
+                "required": [
+                    "account",
+                    "ledger"
+                ]
+            },
+            "CreditLedgerEntry": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "delta": {
+                        "type": "integer"
+                    },
+                    "reason": {
+                        "type": "string"
+                    },
+                    "balance_after": {
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "balance_after",
+                    "created_at",
+                    "delta",
+                    "id",
+                    "reason"
+                ]
+            },
             "CreditLineRequest": {
                 "type": "object",
                 "properties": {
@@ -24036,6 +24846,14 @@
                     "reason"
                 ]
             },
+            "CreditTypeEnum": {
+                "enum": [
+                    "sms",
+                    "ai"
+                ],
+                "type": "string",
+                "description": "* `sms` - SMS credits\n* `ai` - AI credits"
+            },
             "CustomField": {
                 "type": "object",
                 "properties": {
@@ -24279,6 +25097,15 @@
                     "has_demo_data",
                     "records"
                 ]
+            },
+            "DirectionEnum": {
+                "enum": [
+                    "upgrade",
+                    "downgrade",
+                    "same"
+                ],
+                "type": "string",
+                "description": "* `upgrade` - upgrade\n* `downgrade` - downgrade\n* `same` - same"
             },
             "Dispute": {
                 "type": "object",
@@ -24612,6 +25439,15 @@
                 "type": "string",
                 "description": "* `staff` - Staff\n* `tutor` - Staff and tutors\n* `client` - Staff, tutors and clients"
             },
+            "EffectiveEnum": {
+                "enum": [
+                    "now",
+                    "period_end",
+                    "checkout"
+                ],
+                "type": "string",
+                "description": "* `now` - now\n* `period_end` - period_end\n* `checkout` - checkout"
+            },
             "EmailRequest": {
                 "type": "object",
                 "properties": {
@@ -24666,6 +25502,45 @@
                         "maxLength": 300
                     }
                 }
+            },
+            "Entitlements": {
+                "type": "object",
+                "properties": {
+                    "plan": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "features": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "boolean"
+                        }
+                    },
+                    "limits": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer",
+                            "nullable": true
+                        }
+                    },
+                    "required_plans": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "features",
+                    "limits",
+                    "plan",
+                    "required_plans",
+                    "status"
+                ]
             },
             "Exception": {
                 "type": "object",
@@ -25073,6 +25948,14 @@
                     "title",
                     "type_key"
                 ]
+            },
+            "IntervalEnum": {
+                "enum": [
+                    "month",
+                    "year"
+                ],
+                "type": "string",
+                "description": "* `month` - Monthly\n* `year` - Annual"
             },
             "Invitation": {
                 "type": "object",
@@ -26121,6 +27004,42 @@
                 ],
                 "type": "string",
                 "description": "* `draft` - Draft\n* `issued` - Issued\n* `partially_paid` - Partially paid\n* `paid` - Paid\n* `void` - Void\n* `written_off` - Written off"
+            },
+            "InvoiceSummary": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "number": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "total": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "created": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "pdf_url": {
+                        "type": "string"
+                    },
+                    "hosted_url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "created",
+                    "hosted_url",
+                    "id",
+                    "number",
+                    "pdf_url",
+                    "status",
+                    "total"
+                ]
             },
             "Job": {
                 "type": "object",
@@ -28035,6 +28954,30 @@
                 "required": [
                     "name",
                     "subject"
+                ]
+            },
+            "LimitUsage": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "used": {
+                        "type": "integer"
+                    },
+                    "allowed": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "allowed",
+                    "key",
+                    "title",
+                    "used"
                 ]
             },
             "Location": {
@@ -30985,6 +31928,26 @@
                     "custom_fields": {}
                 }
             },
+            "PatchedCreditSettingsRequest": {
+                "type": "object",
+                "properties": {
+                    "auto_top_up": {
+                        "type": "boolean"
+                    },
+                    "top_up_pack": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "low_threshold": {
+                        "type": "integer",
+                        "maximum": 100000,
+                        "minimum": 0
+                    },
+                    "allow_overage": {
+                        "type": "boolean"
+                    }
+                }
+            },
             "PatchedCustomFieldRequest": {
                 "type": "object",
                 "properties": {
@@ -33215,6 +34178,113 @@
                 "type": "string",
                 "description": "* `contact` - contact\n* `tutor` - tutor\n* `user` - user"
             },
+            "Plan": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/PlanVisibilityEnum"
+                    },
+                    "rank": {
+                        "type": "integer"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "prices": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PlanPrice"
+                        }
+                    },
+                    "features": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "boolean"
+                        }
+                    },
+                    "limits": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer",
+                            "nullable": true
+                        }
+                    }
+                },
+                "required": [
+                    "currency",
+                    "description",
+                    "features",
+                    "key",
+                    "limits",
+                    "name",
+                    "prices",
+                    "rank",
+                    "visibility"
+                ]
+            },
+            "PlanChoiceRequest": {
+                "type": "object",
+                "properties": {
+                    "plan": {
+                        "type": "string",
+                        "minLength": 1,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "interval": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/IntervalEnum"
+                            }
+                        ],
+                        "default": "month"
+                    }
+                },
+                "required": [
+                    "plan"
+                ]
+            },
+            "PlanPrice": {
+                "type": "object",
+                "properties": {
+                    "interval": {
+                        "$ref": "#/components/schemas/IntervalEnum"
+                    },
+                    "component": {
+                        "$ref": "#/components/schemas/ComponentEnum"
+                    },
+                    "unit_amount": {
+                        "type": "string",
+                        "description": "An amount, or a percentage for revenue_share"
+                    },
+                    "included_quantity": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "component",
+                    "included_quantity",
+                    "interval",
+                    "unit_amount"
+                ]
+            },
+            "PlanVisibilityEnum": {
+                "enum": [
+                    "public",
+                    "legacy",
+                    "custom"
+                ],
+                "type": "string",
+                "description": "* `public` - Public\n* `legacy` - Legacy (existing subscribers only)\n* `custom` - Custom (contact sales)"
+            },
             "PolicyOverrideRequest": {
                 "type": "object",
                 "properties": {
@@ -34942,6 +36012,32 @@
                     "duration_minutes"
                 ]
             },
+            "Reactivate": {
+                "type": "object",
+                "properties": {
+                    "subscription": {
+                        "$ref": "#/components/schemas/Subscription"
+                    },
+                    "url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "subscription",
+                    "url"
+                ]
+            },
+            "ReasonEnum": {
+                "enum": [
+                    "too_expensive",
+                    "missing_features",
+                    "switching",
+                    "closing",
+                    "other"
+                ],
+                "type": "string",
+                "description": "* `too_expensive` - too_expensive\n* `missing_features` - missing_features\n* `switching` - switching\n* `closing` - closing\n* `other` - other"
+            },
             "ReasonRequest": {
                 "type": "object",
                 "properties": {
@@ -35098,6 +36194,26 @@
                 },
                 "required": [
                     "recovery_codes"
+                ]
+            },
+            "Redirect": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "uri"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "url"
                 ]
             },
             "Refund": {
@@ -37564,6 +38680,96 @@
                     "name"
                 ]
             },
+            "Subscription": {
+                "type": "object",
+                "properties": {
+                    "plan": {
+                        "type": "string"
+                    },
+                    "plan_name": {
+                        "type": "string"
+                    },
+                    "effective_plan": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/SubscriptionStatusEnum"
+                    },
+                    "interval": {
+                        "$ref": "#/components/schemas/IntervalEnum"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "trial_ends_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "current_period_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "pending_plan": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "pending_interval": {
+                        "type": "string"
+                    },
+                    "cancel_at_period_end": {
+                        "type": "boolean"
+                    },
+                    "past_due_since": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "has_payment_method": {
+                        "type": "boolean"
+                    },
+                    "card": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Card"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "can_manage": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "can_manage",
+                    "cancel_at_period_end",
+                    "card",
+                    "currency",
+                    "current_period_end",
+                    "effective_plan",
+                    "has_payment_method",
+                    "interval",
+                    "past_due_since",
+                    "pending_interval",
+                    "pending_plan",
+                    "plan",
+                    "plan_name",
+                    "status",
+                    "trial_ends_at"
+                ]
+            },
+            "SubscriptionStatusEnum": {
+                "enum": [
+                    "trialing",
+                    "active",
+                    "past_due",
+                    "suspended",
+                    "cancelled"
+                ],
+                "type": "string",
+                "description": "* `trialing` - Trial\n* `active` - Active\n* `past_due` - Payment overdue\n* `suspended` - Suspended (read-only)\n* `cancelled` - Cancelled (read-only)"
+            },
             "TOTPConfirmRequest": {
                 "type": "object",
                 "properties": {
@@ -38095,6 +39301,45 @@
                 "required": [
                     "token"
                 ]
+            },
+            "TopUpRequest": {
+                "type": "object",
+                "properties": {
+                    "credits": {
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "credits"
+                ]
+            },
+            "TopUpResult": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "$ref": "#/components/schemas/TopUpResultStatusEnum"
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "account": {
+                        "$ref": "#/components/schemas/CreditAccount"
+                    }
+                },
+                "required": [
+                    "account",
+                    "status",
+                    "url"
+                ]
+            },
+            "TopUpResultStatusEnum": {
+                "enum": [
+                    "paid",
+                    "redirect"
+                ],
+                "type": "string",
+                "description": "* `paid` - paid\n* `redirect` - redirect"
             },
             "Tutor": {
                 "type": "object",
@@ -38859,6 +40104,44 @@
                     "content_type",
                     "filename",
                     "size_bytes"
+                ]
+            },
+            "Usage": {
+                "type": "object",
+                "properties": {
+                    "limits": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LimitUsage"
+                        }
+                    },
+                    "billable_tutors": {
+                        "type": "integer"
+                    },
+                    "included_tutors": {
+                        "type": "integer"
+                    },
+                    "next_invoice": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MoneyOut"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "credits": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CreditAccount"
+                        }
+                    }
+                },
+                "required": [
+                    "billable_tutors",
+                    "credits",
+                    "included_tutors",
+                    "limits",
+                    "next_invoice"
                 ]
             },
             "User": {

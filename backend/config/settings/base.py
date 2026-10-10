@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "tutortrack.payments",
     "tutortrack.comms",
     "tutortrack.portal",
+    "tutortrack.subscriptions",
 ]
 
 MIDDLEWARE = [
@@ -319,6 +320,15 @@ STRIPE = {
     "PUBLISHABLE_KEY": env("STRIPE_PUBLISHABLE_KEY", default=""),
     "WEBHOOK_SECRET": env("STRIPE_WEBHOOK_SECRET", default=""),
     "APPLICATION_FEE_PERCENT": env("STRIPE_APPLICATION_FEE_PERCENT", default="0"),
+}
+
+# Our own SaaS subscription (E04): Stripe Billing on the platform account above.
+SUBSCRIPTIONS = {
+    "STRIPE_WEBHOOK_SECRET": env("STRIPE_BILLING_WEBHOOK_SECRET", default=""),
+    "TRIAL_DAYS": env.int("SUBSCRIPTION_TRIAL_DAYS", default=30),
+    "TRIAL_PLAN": "agency",  # trials get this plan's features
+    "DUNNING_NOTICE_DAYS": [0, 3, 7, 14],
+    "SUSPEND_AFTER_DAYS": 21,
 }
 
 # Communications (E13): Twilio for SMS (empty = a fake that records texts); Postmark

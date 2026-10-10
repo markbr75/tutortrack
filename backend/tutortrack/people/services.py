@@ -8,7 +8,7 @@ from typing import Any
 from django.db import transaction
 from django.utils.translation import gettext as _
 
-from tutortrack.core import audit
+from tutortrack.core import audit, entitlements
 from tutortrack.core.events import DomainEvent, publish
 from tutortrack.core.exceptions import BusinessRuleViolation
 from tutortrack.core.time import now
@@ -88,6 +88,22 @@ CLIENT_FIELDS = {
 
 def household_name(last_name: str) -> str:
     return _("The %(name)s Family") % {"name": last_name} if last_name else _("New family")
+
+
+# --- plan limits (E04 FR-04-2) ------------------------------------------------------------------
+
+COUNTED_TUTOR_STATUSES = frozenset({"onboarding", "active", "restricted"})
+ACTIVE_STUDENT_STATUSES = frozenset({"active", "trial"})
+
+
+def _check_tutor_capacity() -> None:
+    used = TutorProfile.objects.filter(status__in=COUNTED_TUTOR_STATUSES).count()
+    entitlements.require_capacity("max_tutors", used=used)
+
+
+def _check_student_capacity() -> None:
+    used = Student.objects.filter(status__in=ACTIVE_STUDENT_STATUSES).count()
+    entitlements.require_capacity("max_active_students", used=used)
 
 
 @transaction.atomic
@@ -268,6 +284,8 @@ def create_student(
     if "subjects" in fields:
         fields["subjects"] = _validate_subjects(fields["subjects"])
     fields.setdefault("branch_id", client.branch_id)
+    if status in ACTIVE_STUDENT_STATUSES:
+        _check_student_capacity()
     student = Student(client=client, status=status, status_changed_at=now(), **fields)
     student.custom_fields = clean_custom_fields(
         "people.student", custom_fields, None, creating=True
@@ -304,6 +322,8 @@ def change_student_status(student: Student, status: str) -> Student:
     old = student.status
     if old == status:
         return student
+    if status in ACTIVE_STUDENT_STATUSES and old not in ACTIVE_STUDENT_STATUSES:
+        _check_student_capacity()
     with audit.track(student, action="status_change"):
         student.status = status
         student.status_changed_at = now()
@@ -389,6 +409,8 @@ def create_tutor(
     ).first()
     if tutor.membership is not None:
         tutor.status = TutorProfile.Status.ACTIVE
+    if tutor.status in COUNTED_TUTOR_STATUSES:
+        _check_tutor_capacity()
     tutor.save()
     tutor.branches.set(list(branches))
     audit.record_create(tutor)
@@ -423,6 +445,8 @@ def change_tutor_status(tutor: TutorProfile, status: str) -> TutorProfile:
     old = tutor.status
     if old == status:
         return tutor
+    if status in COUNTED_TUTOR_STATUSES and old not in COUNTED_TUTOR_STATUSES:
+        _check_tutor_capacity()
     with audit.track(tutor, action="status_change"):
         tutor.status = status
         tutor.status_changed_at = now()

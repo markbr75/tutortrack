@@ -1,11 +1,15 @@
 import { ApiError, createApiClient, unwrap, type components } from "@tutortrack/api-client";
-import { QueryClient, useQuery } from "@tanstack/react-query";
+import { MutationCache, QueryClient, useQuery } from "@tanstack/react-query";
+
+import { reportUpgradeRequired } from "./subscription/upgradeStore";
 
 /** Same-origin in every environment (Vite proxies /api in development). */
 export const api = createApiClient();
 
 export function createQueryClient(): QueryClient {
   return new QueryClient({
+    // A plan limit or locked feature anywhere opens the upgrade dialog (E04 FR-04-2).
+    mutationCache: new MutationCache({ onError: reportUpgradeRequired }),
     defaultOptions: {
       queries: {
         staleTime: 30_000,

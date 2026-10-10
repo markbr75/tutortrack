@@ -794,6 +794,27 @@ for _key, _label, _code in (
     )
 
 
+# Our own subscription (E04): trial, payment and credit notices to whoever holds
+# ``subscription.view``. Account notices: recipients can't opt out of the email.
+register(
+    NotificationType(
+        key="subscription_notice",
+        label=str(_("TutorTrack account and billing notices")),
+        category="account",
+        audience="staff",
+        channels=("in_app", "email"),
+        default_channels=("in_app", "email"),
+        resolve=_alert("subscription.view"),
+        load=lambda pk: None,
+        related_type="",
+        variables=("alert.title", "alert.body", "alert.link"),
+        sample=SAMPLE_ALERT,
+        transactional=True,
+        link=lambda payload: payload[2],
+    )
+)
+
+
 def _task(task: Any) -> list[Delivery]:
     if task.assignee_id is None:
         return []

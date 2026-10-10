@@ -6,6 +6,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 
 import { api, fieldErrors, useFeature, useOrganisation, type Term } from "../api";
 import { ProcessTimeline } from "../components/ProcessTimeline";
+import { Locked } from "../subscription/UpgradePrompts";
 
 const TERMS = ["tutor", "student", "client", "lesson", "job"] as const;
 
@@ -135,7 +136,10 @@ function GeneralSection() {
                 onChange={(e) =>
                   setTerms((all) => ({
                     ...all,
-                    [term]: { ...(all[term] ?? { singular: "", plural: "" }), [form]: e.target.value },
+                    [term]: {
+                      ...(all[term] ?? { singular: "", plural: "" }),
+                      [form]: e.target.value,
+                    },
                   }))
                 }
               />
@@ -196,29 +200,31 @@ function BranchesSection() {
           </li>
         ))}
       </ul>
-      <form
-        className="mt-4 grid gap-3 sm:grid-cols-[1fr_8rem_auto] sm:items-end"
-        onSubmit={(e) => {
-          e.preventDefault();
-          create.mutate();
-        }}
-      >
-        <TextField
-          label={t("settings.branchName")}
-          value={form.name}
-          error={errors.name}
-          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-        />
-        <TextField
-          label={t("settings.branchCode")}
-          value={form.code}
-          error={errors.code}
-          onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
-        />
-        <Button type="submit" loading={create.isPending}>
-          {t("settings.addBranch")}
-        </Button>
-      </form>
+      <Locked feature="multi_branch">
+        <form
+          className="mt-4 grid gap-3 sm:grid-cols-[1fr_8rem_auto] sm:items-end"
+          onSubmit={(e) => {
+            e.preventDefault();
+            create.mutate();
+          }}
+        >
+          <TextField
+            label={t("settings.branchName")}
+            value={form.name}
+            error={errors.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+          />
+          <TextField
+            label={t("settings.branchCode")}
+            value={form.code}
+            error={errors.code}
+            onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
+          />
+          <Button type="submit" loading={create.isPending}>
+            {t("settings.addBranch")}
+          </Button>
+        </form>
+      </Locked>
     </Section>
   );
 }
@@ -233,7 +239,12 @@ function DemoDataSection() {
   return (
     <Section title={t("settings.demo")}>
       <p className="text-sm">{t("settings.demoBody")}</p>
-      <Button className="mt-3" variant="secondary" loading={wipe.isPending} onClick={() => wipe.mutate()}>
+      <Button
+        className="mt-3"
+        variant="secondary"
+        loading={wipe.isPending}
+        onClick={() => wipe.mutate()}
+      >
         {t("settings.wipeDemo")}
       </Button>
     </Section>

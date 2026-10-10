@@ -45,19 +45,20 @@ def _g(*raw: str) -> tuple[Grant, ...]:
 
 
 # Codenames an Admin never gets (ownership and the SaaS subscription, FR-03-5).
-OWNER_ONLY = ("org.close", "subscription.*", "membership.transfer_ownership")
+OWNER_ONLY = ("org.close", "subscription.manage", "membership.transfer_ownership")
 
 ROLES: dict[str, RoleDef] = {
     r.key: r
     for r in (
         RoleDef("owner", "Owner", "Everything, including subscription and closing the account.",
                 _g("*")),
-        RoleDef("admin", "Admin", "Everything except subscription and ownership.",
+        RoleDef("admin", "Admin", "Everything except changing the subscription and ownership.",
                 _g("*"), denies=(*OWNER_ONLY, "impersonation.write")),
         RoleDef(
             "branch_manager", "Branch Manager", "Admin rights within assigned branches.",
             _g("*:branch", "org.settings.view"),
-            denies=(*OWNER_ONLY, "org.settings.manage", "org.branch.manage", "audit.*"),
+            denies=(*OWNER_ONLY, "subscription.view", "org.settings.manage", "org.branch.manage",
+                    "audit.*"),
         ),
         RoleDef(
             "coordinator", "Coordinator",
@@ -73,7 +74,8 @@ ROLES: dict[str, RoleDef] = {
             "Billing, payments, payroll, accounting integrations and reports.",
             _g("billing.*", "payments.*", "payroll.*", "integrations.accounting.*",
                "reporting.*", "people.client.view", "org.settings.view", "team.view",
-               "crm.note.view", "crm.search", "catalogue.view", "rates.manage"),
+               "crm.note.view", "crm.search", "catalogue.view", "rates.manage",
+               "subscription.view"),
         ),
         RoleDef(
             "tutor", "Tutor",

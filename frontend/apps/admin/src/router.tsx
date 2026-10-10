@@ -42,6 +42,7 @@ import { NotFoundPage } from "./routes/NotFoundPage";
 import { OnboardingPage } from "./routes/OnboardingPage";
 import { SettingsPage } from "./routes/SettingsPage";
 import { SignupPage } from "./routes/SignupPage";
+import { PlanPage } from "./subscription/PlanPage";
 import { TeamPage } from "./routes/TeamPage";
 import { VerifyEmailPage } from "./routes/VerifyEmailPage";
 
@@ -164,6 +165,7 @@ const deliverySettingsRoute = appPage("/lesson-policies", DeliverySettingsPage);
 const billingRoute = appPage("/billing", BillingPage);
 const paymentsSettingsRoute = appPage("/settings/payments", PaymentsSettingsPage);
 const notificationSettingsRoute = appPage("/settings/notifications", NotificationSettingsPage);
+const planRoute = appPage("/settings/plan", PlanPage);
 const announcementsRoute = appPage("/announcements", AnnouncementsPage);
 const invoiceRoute = createRoute({
   getParentRoute: () => appRoute,
@@ -215,6 +217,7 @@ const routeTree = rootRoute.addChildren([
     invoiceRoute,
     paymentsSettingsRoute,
     notificationSettingsRoute,
+    planRoute,
     announcementsRoute,
     teamRoute,
     auditRoute,

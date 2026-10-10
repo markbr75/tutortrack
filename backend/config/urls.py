@@ -6,6 +6,7 @@ from tutortrack.comms.api.views import postmark_webhook, twilio_inbound, twilio_
 from tutortrack.core.api.health import healthz, readyz
 from tutortrack.payments.api.views import stripe_webhook
 from tutortrack.scheduling.api.views import ical_feed
+from tutortrack.subscriptions.api.views import stripe_billing_webhook
 from tutortrack.workflows.api.views import codec
 
 api_v1: list[URLPattern | URLResolver] = [
@@ -24,6 +25,7 @@ api_v1: list[URLPattern | URLResolver] = [
     path("", include("tutortrack.payments.api.urls")),
     path("", include("tutortrack.comms.api.urls")),
     path("", include("tutortrack.portal.api.urls")),
+    path("", include("tutortrack.subscriptions.api.urls")),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger"),
     path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
@@ -36,6 +38,7 @@ urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("ical/<str:token>.ics", ical_feed, name="ical-feed"),
     path("webhooks/stripe", stripe_webhook, name="stripe-webhook"),
+    path("webhooks/stripe/platform", stripe_billing_webhook, name="stripe-billing-webhook"),
     path("webhooks/postmark", postmark_webhook, name="postmark-webhook"),
     path("webhooks/twilio/status", twilio_status, name="twilio-status"),
     path("webhooks/twilio/inbound", twilio_inbound, name="twilio-inbound"),

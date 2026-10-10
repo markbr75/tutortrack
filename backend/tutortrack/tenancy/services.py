@@ -8,7 +8,7 @@ from typing import Any
 from django.db import IntegrityError, transaction
 from django.utils.translation import gettext as _
 
-from tutortrack.core import audit, flags
+from tutortrack.core import audit, entitlements, flags
 from tutortrack.core.context import require_organisation_id, tenant_context
 from tutortrack.core.events import publish
 from tutortrack.core.exceptions import BusinessRuleViolation
@@ -195,11 +195,15 @@ def change_slug(organisation: Organisation, new_slug: str) -> Organisation:
 def create_branch(*, name: str, code: str, is_default: bool = False, **fields: Any) -> Branch:
     """Create a branch in the organisation in context.
 
-    Extra branches need the ``multi_branch`` feature (plan-gated in E04); the default
-    branch is created at signup regardless.
+    Extra branches need the ``multi_branch`` feature flag and plan entitlement, within the
+    plan's ``max_branches`` (E04); the default branch is created at signup regardless.
     """
     if not is_default:
         flags.require("multi_branch")
+        entitlements.require("multi_branch")
+        entitlements.require_capacity(
+            "max_branches", used=Branch.objects.filter(archived_at__isnull=True).count()
+        )
     unknown = set(fields) - BRANCH_EDITABLE
     if unknown:
         raise BusinessRuleViolation(f"Unknown branch fields: {', '.join(sorted(unknown))}")

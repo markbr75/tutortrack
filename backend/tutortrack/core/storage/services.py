@@ -62,6 +62,22 @@ def _validate(content_type: str, size_bytes: int) -> None:
         )
 
 
+def _check_quota(size_bytes: int) -> None:
+    """The plan's ``storage_gb`` (E04)."""
+    from django.db.models import Sum
+
+    from tutortrack.core import entitlements
+
+    if entitlements.limit("storage_gb") is None:
+        return
+    used = StoredFile.objects.exclude(status=StoredFile.Status.REJECTED).aggregate(
+        total=Sum("size_bytes")
+    )["total"]
+    entitlements.require_capacity(
+        "storage_gb", used=int(used or 0), adding=size_bytes, unit=1024**3
+    )
+
+
 @transaction.atomic
 def create_upload(
     *,
@@ -73,6 +89,7 @@ def create_upload(
 ) -> tuple[StoredFile, PresignedUpload]:
     _validate(content_type, size_bytes)
     org_id = require_organisation_id()
+    _check_quota(size_bytes)
     today = now()
     key = f"org/{org_id}/{today:%Y/%m}/{uuid.uuid4().hex}/{safe_filename(filename)}"
     stored = StoredFile(

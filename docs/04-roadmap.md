@@ -73,7 +73,7 @@ All ─► E26, E27, E28, E31
 | E01 | ✅ Done (2026-10-08) | See Implementation notes in the epic; follow-ups carried into E02, E03, E29, E30 |
 | E02 | ✅ Done (2026-10-09) | Incl. E02-TW1 (closure workflow, built with E32). Follow-ups in E04, E05, E06, E11, E24 |
 | E03 | ✅ Done (2026-10-09) | Phase 1 scope (T08/T11/T12 are Phase 2). See Implementation notes |
-| E04 | ⏭ Next | |
+| E04 | ✅ Done (2026-10-10) | Incl. E04-TW1 (trial and dunning workflows). API under `/subscription`; console for overrides with E30. See Implementation notes |
 | E05 | ✅ Done (2026-10-09) | Phase 1 scope (merge tool and map view are Phase 2). See Implementation notes |
 | E06 | ✅ Done (2026-10-09) | MVP scope (T07–T10 pay tiers, premiums, discounts, rooms are Phase 2). See Implementation notes |
 | E07 | ✅ Done (2026-10-09) | Lesson-dependent parts (replace preview, hours used, delivered totals) wired by E08-T10. See Implementation notes |
@@ -99,6 +99,6 @@ All ─► E26, E27, E28, E31
 | E27 | ☐ | |
 | E28 | ☐ | |
 | E29 | 🟡 Part 1 done (2026-10-09) | T01–T04 (security baseline, KMS encryption, audit search, consent). Part 2 (T05–T12, TW1) in Phase 3 |
-| E30 | ☐ | |
+| E30 | ⏭ Next (part 1) | |
 | E31 | ☐ | |
 | E32 | ✅ Done (2026-10-09) | Runtime, bridge, codec, timers, schedules, processes API, test harness; reference + closure workflows |

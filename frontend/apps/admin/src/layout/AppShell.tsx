@@ -8,6 +8,8 @@ import { useEffect } from "react";
 import { NotificationBell } from "../comms/NotificationBell";
 import { CommandPalette } from "../crm/CommandPalette";
 import { api, isAuthError, useMe, useMyOrganisations, useOrganisation } from "../api";
+import { SubscriptionBanner } from "../subscription/SubscriptionBanner";
+import { UpgradeDialog } from "../subscription/UpgradePrompts";
 
 const NAV = [
   { to: "/", key: "nav.home", permission: null },
@@ -32,6 +34,7 @@ const NAV = [
     key: "nav.notifications",
     permission: "comms.settings.manage",
   },
+  { to: "/settings/plan", key: "nav.plan", permission: "subscription.view" },
   { to: "/settings", key: "nav.settings", permission: "org.settings.view" },
   { to: "/account", key: "nav.account", permission: null },
 ] as const;
@@ -176,7 +179,9 @@ export function AppShell() {
       <main className="flex-1 p-4 md:p-8">
         <ImpersonationBanner />
         <SuspendedBanner />
+        <SubscriptionBanner />
         <Outlet />
+        <UpgradeDialog />
       </main>
     </div>
   );

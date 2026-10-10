@@ -1551,6 +1551,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/entitlements": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description What the organisation's plan includes, for ``useEntitlement()`` (FR-04-2). */
+    get: operations["entitlements_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/events": {
     parameters: {
       query?: never;
@@ -4717,6 +4734,208 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/subscription": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["subscription_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/subscription/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["subscription_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/subscription/change-plan": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["subscription_change_plan_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/subscription/checkout-session": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Start paying for a plan with Stripe Checkout; the browser goes to ``url``. */
+    post: operations["subscription_checkout_session_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/subscription/checkout-session/complete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Called when Checkout returns, so the plan shows straight away (the webhook also
+     *     arrives; both are idempotent).
+     */
+    post: operations["subscription_checkout_session_complete_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/subscription/credits/{credit_type}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["subscription_credits_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations["subscription_credits_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/subscription/credits/{credit_type}/top-up": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Buy a pack: charged to the saved card, or a Checkout page when there isn't one. */
+    post: operations["subscription_credits_top_up_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/subscription/invoices": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Our invoices to the organisation (PDFs hosted by Stripe). */
+    get: operations["subscription_invoices_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/subscription/plans": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Public plans with prices in the organisation's billing currency (FR-04-1). */
+    get: operations["subscription_plans_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/subscription/portal-session": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Stripe's customer portal: card, billing details and invoices. */
+    post: operations["subscription_portal_session_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/subscription/reactivate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["subscription_reactivate_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/subscription/usage": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Settings → Billing & plan: limits used, seats, credits, next invoice (FR-04-7). */
+    get: operations["subscription_usage_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/tags": {
     parameters: {
       query?: never;
@@ -5668,6 +5887,10 @@ export interface components {
      * @enum {string}
      */
     CancelScopeEnum: "this" | "following";
+    CancelSubscriptionRequest: {
+      reason: components["schemas"]["ReasonEnum"];
+      feedback?: string;
+    };
     CancellationPolicy: {
       /** Format: uuid */
       readonly id: string;
@@ -5704,6 +5927,12 @@ export interface components {
      * @enum {string}
      */
     CancelledByEnum: "client" | "student" | "tutor" | "admin";
+    Card: {
+      brand: string;
+      last4: string;
+      exp_month: number | null;
+      exp_year: number | null;
+    };
     Category: {
       /** Format: uuid */
       readonly id: string;
@@ -5715,6 +5944,14 @@ export interface components {
     CategoryRequest: {
       name: string;
       order?: number;
+    };
+    ChangePreview: {
+      plan: string;
+      interval: string;
+      direction: components["schemas"]["DirectionEnum"];
+      effective: components["schemas"]["EffectiveEnum"];
+      blockers: string[];
+      amount_due_now: components["schemas"]["MoneyOut"] | null;
     };
     Charge: {
       /** Format: uuid */
@@ -5941,6 +6178,9 @@ export interface components {
     CodeRequest: {
       code: string;
     };
+    CompleteCheckoutRequest: {
+      session_id: string;
+    };
     CompleteRequest: {
       attendance?: components["schemas"]["AttendanceRowRequest"][];
       /** Format: date-time */
@@ -5950,6 +6190,14 @@ export interface components {
       /** @default false */
       override_balance: boolean;
     };
+    /**
+     * @description * `base_fee` - Base fee
+     *     * `active_tutor` - Per active tutor
+     *     * `revenue_share` - Share of payments processed
+     *     * `branch` - Per extra branch
+     * @enum {string}
+     */
+    ComponentEnum: "base_fee" | "active_tutor" | "revenue_share" | "branch";
     ConfirmRequest: {
       intent: string;
     };
@@ -6142,6 +6390,32 @@ export interface components {
      * @enum {string}
      */
     CreatedViaEnum: "admin" | "tutor" | "client_booking" | "api" | "import" | "series";
+    CreditAccount: {
+      credit_type: components["schemas"]["CreditTypeEnum"];
+      balance: number;
+      allowance: number;
+      included_balance: number;
+      purchased_balance: number;
+      used_this_period: number;
+      auto_top_up: boolean;
+      top_up_pack: number;
+      low_threshold: number;
+      allow_overage: boolean;
+      readonly packs: number[];
+    };
+    CreditDetail: {
+      account: components["schemas"]["CreditAccount"];
+      ledger: components["schemas"]["CreditLedgerEntry"][];
+    };
+    CreditLedgerEntry: {
+      /** Format: uuid */
+      id: string;
+      delta: number;
+      reason: string;
+      balance_after: number;
+      /** Format: date-time */
+      created_at: string;
+    };
     CreditLineRequest: {
       /** Format: uuid */
       line: string;
@@ -6232,6 +6506,12 @@ export interface components {
       /** @description Leave out to credit everything still owed. */
       lines?: components["schemas"]["CreditLineRequest"][];
     };
+    /**
+     * @description * `sms` - SMS credits
+     *     * `ai` - AI credits
+     * @enum {string}
+     */
+    CreditTypeEnum: "sms" | "ai";
     CustomField: {
       /** Format: uuid */
       readonly id: string;
@@ -6335,6 +6615,13 @@ export interface components {
       has_demo_data: boolean;
       records: number;
     };
+    /**
+     * @description * `upgrade` - upgrade
+     *     * `downgrade` - downgrade
+     *     * `same` - same
+     * @enum {string}
+     */
+    DirectionEnum: "upgrade" | "downgrade" | "same";
     Dispute: {
       /** Format: uuid */
       readonly id: string;
@@ -6453,6 +6740,13 @@ export interface components {
      * @enum {string}
      */
     EditableByEnum: "staff" | "tutor" | "client";
+    /**
+     * @description * `now` - now
+     *     * `period_end` - period_end
+     *     * `checkout` - checkout
+     * @enum {string}
+     */
+    EffectiveEnum: "now" | "period_end" | "checkout";
     EmailRequest: {
       /** Format: email */
       email: string;
@@ -6477,6 +6771,19 @@ export interface components {
       after?: string;
       /** @default  */
       reason: string;
+    };
+    Entitlements: {
+      plan: string | null;
+      status: string | null;
+      features: {
+        [key: string]: boolean;
+      };
+      limits: {
+        [key: string]: number | null;
+      };
+      required_plans: {
+        [key: string]: string;
+      };
     };
     Exception: {
       /** Format: uuid */
@@ -6630,6 +6937,12 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    /**
+     * @description * `month` - Monthly
+     *     * `year` - Annual
+     * @enum {string}
+     */
+    IntervalEnum: "month" | "year";
     Invitation: {
       /** Format: uuid */
       readonly id: string;
@@ -6991,6 +7304,16 @@ export interface components {
      * @enum {string}
      */
     InvoiceStatusEnum: "draft" | "issued" | "partially_paid" | "paid" | "void" | "written_off";
+    InvoiceSummary: {
+      id: string;
+      number: string;
+      status: string;
+      total: components["schemas"]["MoneyOut"];
+      /** Format: date-time */
+      created: string;
+      pdf_url: string;
+      hosted_url: string;
+    };
     Job: {
       /** Format: uuid */
       readonly id: string;
@@ -7637,6 +7960,12 @@ export interface components {
       subject: string;
       name: string;
       order?: number;
+    };
+    LimitUsage: {
+      key: string;
+      title: string;
+      used: number;
+      allowed: number | null;
     };
     Location: {
       /** Format: uuid */
@@ -8720,6 +9049,12 @@ export interface components {
       language?: string;
       custom_fields?: unknown;
     };
+    PatchedCreditSettingsRequest: {
+      auto_top_up?: boolean;
+      top_up_pack?: number;
+      low_threshold?: number;
+      allow_overage?: boolean;
+    };
     PatchedCustomFieldRequest: {
       entity_type?: string;
       key?: string;
@@ -9425,6 +9760,40 @@ export interface components {
      * @enum {string}
      */
     PersonTypeEnum: "contact" | "tutor" | "user";
+    Plan: {
+      key: string;
+      name: string;
+      description: string;
+      visibility: components["schemas"]["PlanVisibilityEnum"];
+      rank: number;
+      currency: string;
+      prices: components["schemas"]["PlanPrice"][];
+      features: {
+        [key: string]: boolean;
+      };
+      limits: {
+        [key: string]: number | null;
+      };
+    };
+    PlanChoiceRequest: {
+      plan: string;
+      /** @default month */
+      interval: components["schemas"]["IntervalEnum"];
+    };
+    PlanPrice: {
+      interval: components["schemas"]["IntervalEnum"];
+      component: components["schemas"]["ComponentEnum"];
+      /** @description An amount, or a percentage for revenue_share */
+      unit_amount: string;
+      included_quantity: number;
+    };
+    /**
+     * @description * `public` - Public
+     *     * `legacy` - Legacy (existing subscribers only)
+     *     * `custom` - Custom (contact sales)
+     * @enum {string}
+     */
+    PlanVisibilityEnum: "public" | "legacy" | "custom";
     PolicyOverrideRequest: {
       /** Format: decimal */
       charge_percent: string;
@@ -9977,6 +10346,19 @@ export interface components {
       charges?: components["schemas"]["ChargeLine"][];
       pay?: components["schemas"]["PayLine"][];
     };
+    Reactivate: {
+      subscription: components["schemas"]["Subscription"];
+      url: string;
+    };
+    /**
+     * @description * `too_expensive` - too_expensive
+     *     * `missing_features` - missing_features
+     *     * `switching` - switching
+     *     * `closing` - closing
+     *     * `other` - other
+     * @enum {string}
+     */
+    ReasonEnum: "too_expensive" | "missing_features" | "switching" | "closing" | "other";
     ReasonRequest: {
       reason: string;
     };
@@ -10034,6 +10416,9 @@ export interface components {
     RecoveryCodes: {
       /** @description Shown once. Each works one time. */
       recovery_codes: string[];
+    };
+    Redirect: {
+      url: string;
     };
     Refund: {
       /** Format: uuid */
@@ -10861,6 +11246,35 @@ export interface components {
       exam_boards?: string[];
       order?: number;
     };
+    Subscription: {
+      plan: string;
+      plan_name: string;
+      effective_plan: string;
+      status: components["schemas"]["SubscriptionStatusEnum"];
+      interval: components["schemas"]["IntervalEnum"];
+      currency: string;
+      /** Format: date-time */
+      trial_ends_at: string | null;
+      /** Format: date-time */
+      current_period_end: string | null;
+      pending_plan: string | null;
+      pending_interval: string;
+      cancel_at_period_end: boolean;
+      /** Format: date-time */
+      past_due_since: string | null;
+      has_payment_method: boolean;
+      card: components["schemas"]["Card"] | null;
+      can_manage: boolean;
+    };
+    /**
+     * @description * `trialing` - Trial
+     *     * `active` - Active
+     *     * `past_due` - Payment overdue
+     *     * `suspended` - Suspended (read-only)
+     *     * `cancelled` - Cancelled (read-only)
+     * @enum {string}
+     */
+    SubscriptionStatusEnum: "trialing" | "active" | "past_due" | "suspended" | "cancelled";
     TOTPConfirmRequest: {
       /** Format: uuid */
       device_id: string;
@@ -11047,6 +11461,20 @@ export interface components {
     TokenRequest: {
       token: string;
     };
+    TopUpRequest: {
+      credits: number;
+    };
+    TopUpResult: {
+      status: components["schemas"]["TopUpResultStatusEnum"];
+      url: string;
+      account: components["schemas"]["CreditAccount"];
+    };
+    /**
+     * @description * `paid` - paid
+     *     * `redirect` - redirect
+     * @enum {string}
+     */
+    TopUpResultStatusEnum: "paid" | "redirect";
     Tutor: {
       /** Format: uuid */
       readonly id: string;
@@ -11268,6 +11696,13 @@ export interface components {
       size_bytes: number;
       /** @default private */
       visibility: components["schemas"]["FileVisibilityEnum"];
+    };
+    Usage: {
+      limits: components["schemas"]["LimitUsage"][];
+      billable_tutors: number;
+      included_tutors: number;
+      next_invoice: components["schemas"]["MoneyOut"] | null;
+      credits: components["schemas"]["CreditAccount"][];
     };
     User: {
       /** Format: uuid */
@@ -14731,6 +15166,25 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  entitlements_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Entitlements"];
+        };
       };
     };
   };
@@ -20563,6 +21017,327 @@ export interface operations {
         };
         content: {
           "text/csv": string;
+        };
+      };
+    };
+  };
+  subscription_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Subscription"];
+        };
+      };
+    };
+  };
+  subscription_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CancelSubscriptionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CancelSubscriptionRequest"];
+        "multipart/form-data": components["schemas"]["CancelSubscriptionRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Subscription"];
+        };
+      };
+    };
+  };
+  subscription_change_plan_create: {
+    parameters: {
+      query?: {
+        /** @description Only preview the change */
+        preview?: boolean;
+      };
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanChoiceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PlanChoiceRequest"];
+        "multipart/form-data": components["schemas"]["PlanChoiceRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Subscription"];
+        };
+      };
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChangePreview"];
+        };
+      };
+    };
+  };
+  subscription_checkout_session_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanChoiceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PlanChoiceRequest"];
+        "multipart/form-data": components["schemas"]["PlanChoiceRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Redirect"];
+        };
+      };
+    };
+  };
+  subscription_checkout_session_complete_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CompleteCheckoutRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CompleteCheckoutRequest"];
+        "multipart/form-data": components["schemas"]["CompleteCheckoutRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Subscription"];
+        };
+      };
+    };
+  };
+  subscription_credits_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        credit_type: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CreditDetail"];
+        };
+      };
+    };
+  };
+  subscription_credits_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        credit_type: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedCreditSettingsRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedCreditSettingsRequest"];
+        "multipart/form-data": components["schemas"]["PatchedCreditSettingsRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CreditAccount"];
+        };
+      };
+    };
+  };
+  subscription_credits_top_up_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        credit_type: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TopUpRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TopUpRequest"];
+        "multipart/form-data": components["schemas"]["TopUpRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TopUpResult"];
+        };
+      };
+    };
+  };
+  subscription_invoices_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceSummary"][];
+        };
+      };
+    };
+  };
+  subscription_plans_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Plan"][];
+        };
+      };
+    };
+  };
+  subscription_portal_session_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Redirect"];
+        };
+      };
+    };
+  };
+  subscription_reactivate_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Reactivate"];
+        };
+      };
+    };
+  };
+  subscription_usage_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Usage"];
         };
       };
     };

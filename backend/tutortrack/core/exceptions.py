@@ -69,3 +69,15 @@ class FeatureDisabled(DomainError):
 
     def __init__(self, feature: str):
         super().__init__(f"Feature '{feature}' is not enabled.", extra={"feature": feature})
+
+
+class UpgradeRequired(DomainError):
+    """The organisation's plan doesn't include a feature or has reached a limit (E04).
+
+    ``extra`` carries ``feature`` or ``limit`` (with ``allowed`` and ``used``) and
+    ``required_plan``: the cheapest public plan that would allow it.
+    """
+
+    status_code = 403
+    problem_type = "upgrade-required"
+    title = "Your plan doesn't include this"

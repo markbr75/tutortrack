@@ -130,3 +130,26 @@ def request_reopen(organisation: Organisation) -> bool:
     if not organisation.is_closed:
         raise BusinessRuleViolation(_("The organisation is not closed."))
     return signal_now(closure_workflow_id(organisation.pk), "reactivate")
+
+
+BILLING_STATUSES = {
+    Organisation.Status.TRIAL,
+    Organisation.Status.ACTIVE,
+    Organisation.Status.PAST_DUE,
+}
+
+
+@transaction.atomic
+def set_billing_status(organisation: Organisation, status: str) -> Organisation:
+    """The subscription (E04) moves an operational organisation between trial, active and
+    past due. Suspension and reactivation go through ``suspend_organisation`` and
+    ``reactivate_organisation``; closed organisations are left alone."""
+    if status not in BILLING_STATUSES:
+        raise BusinessRuleViolation("Use suspend/reactivate for other statuses.")
+    organisation = Organisation.objects.select_for_update().get(pk=organisation.pk)
+    if organisation.is_closed or organisation.is_suspended or organisation.status == status:
+        return organisation
+    with tenant_context(organisation), audit.track(organisation, action="billing_status"):
+        organisation.status = status
+        organisation.save(update_fields=["status", "updated_at"])
+    return organisation

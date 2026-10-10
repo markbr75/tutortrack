@@ -146,6 +146,23 @@ def _actor() -> User | None:
     return User.objects.filter(pk=user_id).first() if user_id else None
 
 
+def _check_tutor_capacity() -> None:
+    """Inviting a tutor directly counts against the plan's ``max_tutors`` (E04): tutor
+    profiles plus tutor invitations still pending."""
+    from django.apps import apps
+
+    from tutortrack.core import entitlements
+
+    tutor_profile = apps.get_model("people", "TutorProfile")
+    used = (
+        tutor_profile.objects.filter(status__in=("onboarding", "active", "restricted")).count()
+        + Invitation.objects.filter(
+            role=Membership.Role.TUTOR, status=Invitation.Status.PENDING, target_type=""
+        ).count()
+    )
+    entitlements.require_capacity("max_tutors", used=used)
+
+
 @transaction.atomic
 def invite(
     email: str,
@@ -182,6 +199,8 @@ def invite(
             "There is already a pending invitation for this email. Resend it instead.",
             extra={"errors": {"email": ["Invitation already pending."]}},
         )
+    if role == Membership.Role.TUTOR and target_type != "people.tutor":
+        _check_tutor_capacity()
     branch_ids = sorted({str(getattr(b, "pk", b)) for b in branches})
     if branch_scope == Membership.BranchScope.SELECTED and not branch_ids:
         raise BusinessRuleViolation("Select at least one branch.")
