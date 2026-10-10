@@ -120,6 +120,19 @@ def apply_tag(
     return count
 
 
+@transaction.atomic
+def get_or_create_tag(name: str) -> Tag:
+    """The tag called ``name`` (case-insensitive), created if new (automations, E14)."""
+    name = name.strip()[:60]
+    if not name:
+        raise BusinessRuleViolation(_("Name the tag."))
+    tag = Tag.objects.filter(name__iexact=name).first()
+    if tag is None:
+        tag = Tag.objects.create(name=name)
+        audit.record_create(tag)
+    return tag
+
+
 def tags_for(target_type: str, target_ids: Iterable[str]) -> dict[str, list[Tag]]:
     out: dict[str, list[Tag]] = {}
     for item in TaggedItem.objects.filter(

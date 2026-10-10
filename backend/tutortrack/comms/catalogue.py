@@ -1179,6 +1179,38 @@ for _row in _MATCHING_TYPES:
     )  # fmt: skip
 
 
+# --- automations (E14) --------------------------------------------------------------------------
+
+
+def _automation_message(payload: Any) -> list[Delivery]:
+    """Inline messages written in an automation: the subject and body are rendered per
+    recipient with the automation's context, then shown through ``message.*``."""
+    from . import render
+
+    base = {**payload["context"], "organisation": organisation()}
+    tz = str(base["organisation"].get("timezone", ""))
+    out = []
+    for r in payload["recipients"]:
+        ctx = {**base, "recipient": {"name": r.name, "first_name": r.first_name}}
+        message = {
+            "subject": render.render(payload["subject"], ctx, timezone=tz),
+            "body": render.render(payload["body"], ctx, timezone=tz),
+        }
+        out.append(Delivery(r, {**ctx, "message": message}))
+    return out
+
+
+register(
+    NotificationType(
+        key="automation_message", label=str(_("Automation message")), category="account",
+        audience="client", channels=("email", "sms", "in_app"), default_channels=("email",),
+        resolve=_automation_message, load=_load_none, related_type="",
+        variables=("message.subject", "message.body"),
+        sample={**SAMPLE_BASE, "message": {"subject": "Hello", "body": "Thanks for your lesson"}},
+    )
+)  # fmt: skip
+
+
 def reminder_window(now: datetime, minutes: int) -> tuple[datetime, datetime]:
     """Lessons whose reminder at ``minutes`` before the start falls due in the last hour."""
     end = now + timedelta(minutes=minutes)

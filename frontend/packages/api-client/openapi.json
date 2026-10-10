@@ -1978,6 +1978,795 @@
                 }
             }
         },
+        "/api/v1/automation-recipes": {
+            "get": {
+                "operationId": "automation_recipes_list",
+                "tags": [
+                    "automation-recipes"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Recipe"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/automation-recipes/{key}/install": {
+            "post": {
+                "operationId": "automation_recipes_install_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automation-recipes"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Automation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/automation-runs": {
+            "get": {
+                "operationId": "automation_runs_list",
+                "description": "Automation runs and their step log (``?status=``).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "automation-runs"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAutomationRunList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/automation-runs/{id}": {
+            "get": {
+                "operationId": "automation_runs_retrieve",
+                "description": "Automation runs and their step log (``?status=``).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation run.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automation-runs"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AutomationRunDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/automation-runs/{id}/retry": {
+            "post": {
+                "operationId": "automation_runs_retry_create",
+                "description": "Re-run a failed run from its failed step.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation run.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automation-runs"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AutomationRunDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/automation-schema": {
+            "get": {
+                "operationId": "automation_schema_retrieve",
+                "description": "What the builder can offer: subjects and their fields, events, actions.",
+                "tags": [
+                    "automation-schema"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AutomationSchema"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/automations": {
+            "get": {
+                "operationId": "automations_list",
+                "description": "Automations: When → If → Then.",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Automation"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "automations_create",
+                "description": "Automations: When → If → Then.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AutomationWriteRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AutomationWriteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AutomationWriteRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Automation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/automations/{id}": {
+            "get": {
+                "operationId": "automations_retrieve",
+                "description": "Automations: When → If → Then.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Automation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "automations_update",
+                "description": "Automations: When → If → Then.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AutomationWriteRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AutomationWriteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AutomationWriteRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Automation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "automations_partial_update",
+                "description": "Automations: When → If → Then.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAutomationPatchRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAutomationPatchRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAutomationPatchRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Automation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "automations_destroy",
+                "description": "Automations: When → If → Then.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/automations/{id}/disable": {
+            "post": {
+                "operationId": "automations_disable_create",
+                "description": "Automations: When → If → Then.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Automation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/automations/{id}/enable": {
+            "post": {
+                "operationId": "automations_enable_create",
+                "description": "Automations: When → If → Then.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Automation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/automations/{id}/run": {
+            "post": {
+                "operationId": "automations_run_create",
+                "description": "Run now for the chosen records (manual trigger or bulk action).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ManualRunRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ManualRunRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ManualRunRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Started"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/automations/{id}/runs": {
+            "get": {
+                "operationId": "automations_runs_list",
+                "description": "Automations: When → If → Then.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AutomationRun"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/automations/{id}/test": {
+            "post": {
+                "operationId": "automations_test_create",
+                "description": "Dry run against a record: whether it matches and what each step would do.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DryRunRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DryRunRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DryRunRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DryRun"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/availability/{tutor_id}": {
             "get": {
                 "operationId": "availability_retrieve",
@@ -31854,6 +32643,334 @@
                     "enabled"
                 ]
             },
+            "Automation": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 150
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "trigger_type": {
+                        "$ref": "#/components/schemas/AutomationTriggerEnum"
+                    },
+                    "trigger_config": {},
+                    "subject_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "conditions": {},
+                    "steps": {},
+                    "version": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "max_runs_per_record": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "recipe_key": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "name",
+                    "recipe_key",
+                    "subject_type",
+                    "trigger_type",
+                    "updated_at",
+                    "version"
+                ]
+            },
+            "AutomationRun": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "automation": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "automation_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "version": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "subject_type": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "subject_id": {
+                        "type": "string",
+                        "maxLength": 64
+                    },
+                    "event_type": {
+                        "type": "string",
+                        "maxLength": 80
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AutomationRunStatusEnum"
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "finished_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "causation_depth": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "attempts": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "error": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "automation",
+                    "automation_name",
+                    "id",
+                    "started_at",
+                    "subject_type",
+                    "version"
+                ]
+            },
+            "AutomationRunDetail": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "automation": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "automation_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "version": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "subject_type": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "subject_id": {
+                        "type": "string",
+                        "maxLength": 64
+                    },
+                    "event_type": {
+                        "type": "string",
+                        "maxLength": 80
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AutomationRunStatusEnum"
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "finished_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "causation_depth": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "attempts": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RunStep"
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "automation",
+                    "automation_name",
+                    "id",
+                    "started_at",
+                    "steps",
+                    "subject_type",
+                    "version"
+                ]
+            },
+            "AutomationRunStatusEnum": {
+                "enum": [
+                    "running",
+                    "waiting",
+                    "completed",
+                    "failed",
+                    "skipped"
+                ],
+                "type": "string",
+                "description": "* `running` - Running\n* `waiting` - Waiting\n* `completed` - Completed\n* `failed` - Failed\n* `skipped` - Skipped"
+            },
+            "AutomationSchema": {
+                "type": "object",
+                "properties": {
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SchemaSubject"
+                        }
+                    },
+                    "triggers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SchemaTrigger"
+                        }
+                    },
+                    "actions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SchemaAction"
+                        }
+                    },
+                    "operators": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "predicates": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "actions",
+                    "operators",
+                    "predicates",
+                    "subjects",
+                    "triggers"
+                ]
+            },
+            "AutomationStepStatusEnum": {
+                "enum": [
+                    "completed",
+                    "failed",
+                    "skipped",
+                    "waiting"
+                ],
+                "type": "string",
+                "description": "* `completed` - Completed\n* `failed` - Failed\n* `skipped` - Skipped\n* `waiting` - Waiting"
+            },
+            "AutomationTriggerEnum": {
+                "enum": [
+                    "event",
+                    "schedule",
+                    "date",
+                    "manual"
+                ],
+                "type": "string",
+                "description": "* `event` - When something happens\n* `schedule` - On a schedule\n* `date` - Relative to a date\n* `manual` - Run by hand"
+            },
+            "AutomationWriteRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 150
+                    },
+                    "description": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "trigger_type": {
+                        "$ref": "#/components/schemas/AutomationTriggerEnum"
+                    },
+                    "trigger_config": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "conditions": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "max_runs_per_record": {
+                        "type": "integer",
+                        "maximum": 50,
+                        "minimum": 1,
+                        "default": 1
+                    }
+                },
+                "required": [
+                    "name",
+                    "steps",
+                    "trigger_config",
+                    "trigger_type"
+                ]
+            },
             "Availability": {
                 "type": "object",
                 "properties": {
@@ -36040,6 +37157,65 @@
                 "required": [
                     "expires_in",
                     "url"
+                ]
+            },
+            "DryRun": {
+                "type": "object",
+                "properties": {
+                    "matched": {
+                        "type": "boolean"
+                    },
+                    "record": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DryRunStep"
+                        }
+                    }
+                },
+                "required": [
+                    "matched",
+                    "record",
+                    "steps"
+                ]
+            },
+            "DryRunRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "subject_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                    }
+                },
+                "required": [
+                    "subject_id"
+                ]
+            },
+            "DryRunStep": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "ok": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "description",
+                    "key",
+                    "ok",
+                    "type"
                 ]
             },
             "Duplicate": {
@@ -41863,6 +43039,24 @@
                     "tutor"
                 ]
             },
+            "ManualRunRequest": {
+                "type": "object",
+                "properties": {
+                    "subject_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                        },
+                        "maxItems": 200,
+                        "minItems": 1
+                    }
+                },
+                "required": [
+                    "subject_ids"
+                ]
+            },
             "MarkPaidRequest": {
                 "type": "object",
                 "properties": {
@@ -44054,6 +45248,32 @@
                     }
                 }
             },
+            "PaginatedAutomationRunList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AutomationRun"
+                        }
+                    }
+                }
+            },
             "PaginatedBranchList": {
                 "type": "object",
                 "required": [
@@ -45451,6 +46671,42 @@
                             "$ref": "#/components/schemas/AttendanceRowRequest"
                         },
                         "minItems": 1
+                    }
+                }
+            },
+            "PatchedAutomationPatchRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 150
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "trigger_type": {
+                        "$ref": "#/components/schemas/AutomationTriggerEnum"
+                    },
+                    "trigger_config": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "conditions": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "max_runs_per_record": {
+                        "type": "integer",
+                        "maximum": 50,
+                        "minimum": 1
                     }
                 }
             },
@@ -51687,6 +52943,38 @@
                     "reason"
                 ]
             },
+            "Recipe": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "trigger_type": {
+                        "type": "string"
+                    },
+                    "trigger_config": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "installed": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "description",
+                    "installed",
+                    "key",
+                    "name",
+                    "trigger_config",
+                    "trigger_type"
+                ]
+            },
             "RecommendationEnum": {
                 "enum": [
                     "yes",
@@ -52657,6 +53945,42 @@
                     "totals"
                 ]
             },
+            "RunStep": {
+                "type": "object",
+                "properties": {
+                    "step_key": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "step_type": {
+                        "type": "string",
+                        "maxLength": 20
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AutomationStepStatusEnum"
+                    },
+                    "resume_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "result": {},
+                    "error": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "status",
+                    "step_key",
+                    "step_type",
+                    "updated_at"
+                ]
+            },
             "SSOProvider": {
                 "type": "object",
                 "properties": {
@@ -52820,6 +54144,165 @@
                 "required": [
                     "time",
                     "weekday"
+                ]
+            },
+            "SchemaAction": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "fields": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SchemaActionField"
+                        }
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "permission": {
+                        "type": "string"
+                    },
+                    "allowed": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "allowed",
+                    "fields",
+                    "key",
+                    "label",
+                    "permission",
+                    "subjects"
+                ]
+            },
+            "SchemaActionField": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "required": {
+                        "type": "boolean"
+                    },
+                    "choices": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "choices",
+                    "label",
+                    "name",
+                    "required",
+                    "type"
+                ]
+            },
+            "SchemaField": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "choices": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "choices",
+                    "label",
+                    "path",
+                    "type"
+                ]
+            },
+            "SchemaSubject": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "fields": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SchemaField"
+                        }
+                    },
+                    "recipients": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "setters": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "date_fields": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "taggable": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "date_fields",
+                    "fields",
+                    "key",
+                    "label",
+                    "recipients",
+                    "setters",
+                    "taggable"
+                ]
+            },
+            "SchemaTrigger": {
+                "type": "object",
+                "properties": {
+                    "event": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "subject": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "event",
+                    "label",
+                    "subject"
                 ]
             },
             "ScoreRequest": {
@@ -54303,6 +55786,17 @@
                 "required": [
                     "job",
                     "tutors"
+                ]
+            },
+            "Started": {
+                "type": "object",
+                "properties": {
+                    "started": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "started"
                 ]
             },
             "Statement": {

@@ -25,6 +25,7 @@ const NAV = [
   { to: "/recruitment", key: "nav.recruitment", permission: "recruitment.application.view" },
   { to: "/compliance", key: "nav.compliance", permission: "compliance.view" },
   { to: "/matching", key: "nav.matching", permission: "matching.search" },
+  { to: "/automations", key: "nav.automations", permission: "automation.view" },
   { to: "/tasks", key: "nav.tasks", permission: "crm.task.view" },
   { to: "/announcements", key: "nav.announcements", permission: "comms.announcement.manage" },
   { to: "/reports", key: "nav.reports", permission: "delivery.report.view" },

@@ -616,6 +616,229 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/automation-recipes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["automation_recipes_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automation-recipes/{key}/install": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["automation_recipes_install_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automation-runs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Automation runs and their step log (``?status=``). */
+    get: operations["automation_runs_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automation-runs/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Automation runs and their step log (``?status=``). */
+    get: operations["automation_runs_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automation-runs/{id}/retry": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Re-run a failed run from its failed step. */
+    post: operations["automation_runs_retry_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automation-schema": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description What the builder can offer: subjects and their fields, events, actions. */
+    get: operations["automation_schema_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Automations: When → If → Then. */
+    get: operations["automations_list"];
+    put?: never;
+    /** @description Automations: When → If → Then. */
+    post: operations["automations_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automations/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Automations: When → If → Then. */
+    get: operations["automations_retrieve"];
+    /** @description Automations: When → If → Then. */
+    put: operations["automations_update"];
+    post?: never;
+    /** @description Automations: When → If → Then. */
+    delete: operations["automations_destroy"];
+    options?: never;
+    head?: never;
+    /** @description Automations: When → If → Then. */
+    patch: operations["automations_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/automations/{id}/disable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Automations: When → If → Then. */
+    post: operations["automations_disable_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automations/{id}/enable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Automations: When → If → Then. */
+    post: operations["automations_enable_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automations/{id}/run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Run now for the chosen records (manual trigger or bulk action). */
+    post: operations["automations_run_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automations/{id}/runs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Automations: When → If → Then. */
+    get: operations["automations_runs_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automations/{id}/test": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Dry run against a record: whether it matches and what each step would do. */
+    post: operations["automations_test_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/availability/{tutor_id}": {
     parameters: {
       query?: never;
@@ -8658,6 +8881,117 @@ export interface components {
     AutoPayRequest: {
       enabled: boolean;
     };
+    Automation: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      description?: string;
+      trigger_type: components["schemas"]["AutomationTriggerEnum"];
+      trigger_config?: unknown;
+      readonly subject_type: string;
+      conditions?: unknown;
+      steps?: unknown;
+      readonly version: number;
+      enabled?: boolean;
+      max_runs_per_record?: number;
+      readonly recipe_key: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    AutomationRun: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      automation: string;
+      readonly automation_name: string;
+      readonly version: number;
+      subject_type: string;
+      subject_id?: string;
+      event_type?: string;
+      status?: components["schemas"]["AutomationRunStatusEnum"];
+      /** Format: date-time */
+      readonly started_at: string;
+      /** Format: date-time */
+      finished_at?: string | null;
+      causation_depth?: number;
+      attempts?: number;
+      error?: string;
+    };
+    AutomationRunDetail: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      automation: string;
+      readonly automation_name: string;
+      readonly version: number;
+      subject_type: string;
+      subject_id?: string;
+      event_type?: string;
+      status?: components["schemas"]["AutomationRunStatusEnum"];
+      /** Format: date-time */
+      readonly started_at: string;
+      /** Format: date-time */
+      finished_at?: string | null;
+      causation_depth?: number;
+      attempts?: number;
+      error?: string;
+      readonly steps: components["schemas"]["RunStep"][];
+    };
+    /**
+     * @description * `running` - Running
+     *     * `waiting` - Waiting
+     *     * `completed` - Completed
+     *     * `failed` - Failed
+     *     * `skipped` - Skipped
+     * @enum {string}
+     */
+    AutomationRunStatusEnum: "running" | "waiting" | "completed" | "failed" | "skipped";
+    AutomationSchema: {
+      subjects: components["schemas"]["SchemaSubject"][];
+      triggers: components["schemas"]["SchemaTrigger"][];
+      actions: components["schemas"]["SchemaAction"][];
+      operators: string[];
+      predicates: {
+        [key: string]: string;
+      };
+    };
+    /**
+     * @description * `completed` - Completed
+     *     * `failed` - Failed
+     *     * `skipped` - Skipped
+     *     * `waiting` - Waiting
+     * @enum {string}
+     */
+    AutomationStepStatusEnum: "completed" | "failed" | "skipped" | "waiting";
+    /**
+     * @description * `event` - When something happens
+     *     * `schedule` - On a schedule
+     *     * `date` - Relative to a date
+     *     * `manual` - Run by hand
+     * @enum {string}
+     */
+    AutomationTriggerEnum: "event" | "schedule" | "date" | "manual";
+    AutomationWriteRequest: {
+      name: string;
+      /** @default  */
+      description: string;
+      trigger_type: components["schemas"]["AutomationTriggerEnum"];
+      trigger_config: {
+        [key: string]: unknown;
+      };
+      conditions?: {
+        [key: string]: unknown;
+      };
+      steps: {
+        [key: string]: unknown;
+      }[];
+      /** @default false */
+      enabled: boolean;
+      /** @default 1 */
+      max_runs_per_record: number;
+    };
     Availability: {
       /** Format: date */
       effective_from: string;
@@ -10019,6 +10353,22 @@ export interface components {
       /** Format: uri */
       url: string;
       expires_in: number;
+    };
+    DryRun: {
+      matched: boolean;
+      record: {
+        [key: string]: unknown;
+      };
+      steps: components["schemas"]["DryRunStep"][];
+    };
+    DryRunRequestRequest: {
+      subject_id: string;
+    };
+    DryRunStep: {
+      key: string;
+      type: string;
+      description: string;
+      ok: boolean;
     };
     Duplicate: {
       type: components["schemas"]["DuplicateTypeEnum"];
@@ -11986,6 +12336,9 @@ export interface components {
       /** Format: date */
       date: string;
     };
+    ManualRunRequest: {
+      subject_ids: string[];
+    };
     MarkPaidRequest: {
       payouts?: string[];
       reference?: string;
@@ -12655,6 +13008,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["AuditEntry"][];
     };
+    PaginatedAutomationRunList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["AutomationRun"][];
+    };
     PaginatedBranchList: {
       /**
        * Format: uri
@@ -13323,6 +13689,21 @@ export interface components {
     };
     PatchedAttendanceRequest: {
       attendance?: components["schemas"]["AttendanceRowRequest"][];
+    };
+    PatchedAutomationPatchRequest: {
+      name?: string;
+      description?: string;
+      trigger_type?: components["schemas"]["AutomationTriggerEnum"];
+      trigger_config?: {
+        [key: string]: unknown;
+      };
+      conditions?: {
+        [key: string]: unknown;
+      };
+      steps?: {
+        [key: string]: unknown;
+      }[];
+      max_runs_per_record?: number;
     };
     PatchedBranchRequest: {
       name?: string;
@@ -15299,6 +15680,16 @@ export interface components {
     ReasonRequest: {
       reason: string;
     };
+    Recipe: {
+      key: string;
+      name: string;
+      description: string;
+      trigger_type: string;
+      trigger_config: {
+        [key: string]: unknown;
+      };
+      installed: boolean;
+    };
     /**
      * @description * `yes` - Hire
      *     * `maybe` - Not sure
@@ -15644,6 +16035,17 @@ export interface components {
         [key: string]: string;
       };
     };
+    RunStep: {
+      step_key: string;
+      step_type: string;
+      status: components["schemas"]["AutomationStepStatusEnum"];
+      /** Format: date-time */
+      resume_at?: string | null;
+      result?: unknown;
+      error?: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
     SSOProvider: {
       key: string;
       start_url: string;
@@ -15694,6 +16096,41 @@ export interface components {
       weekday: number;
       time: string;
       duration_minutes?: number;
+    };
+    SchemaAction: {
+      key: string;
+      label: string;
+      fields: components["schemas"]["SchemaActionField"][];
+      subjects: string[];
+      permission: string;
+      allowed: boolean;
+    };
+    SchemaActionField: {
+      name: string;
+      label: string;
+      type: string;
+      required: boolean;
+      choices: string[];
+    };
+    SchemaField: {
+      path: string;
+      label: string;
+      type: string;
+      choices: string[];
+    };
+    SchemaSubject: {
+      key: string;
+      label: string;
+      fields: components["schemas"]["SchemaField"][];
+      recipients: string[];
+      setters: string[];
+      date_fields: string[];
+      taggable: boolean;
+    };
+    SchemaTrigger: {
+      event: string;
+      label: string;
+      subject: string;
     };
     ScoreRequest: {
       scores: {
@@ -16172,6 +16609,9 @@ export interface components {
         /** @example GBP */
         currency: string;
       } | null;
+    };
+    Started: {
+      started: number;
     };
     Statement: {
       /** Format: uuid */
@@ -18126,6 +18566,428 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SSOProvider"][];
+        };
+      };
+    };
+  };
+  automation_recipes_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Recipe"][];
+        };
+      };
+    };
+  };
+  automation_recipes_install_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  automation_runs_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAutomationRunList"];
+        };
+      };
+    };
+  };
+  automation_runs_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AutomationRunDetail"];
+        };
+      };
+    };
+  };
+  automation_runs_retry_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AutomationRunDetail"];
+        };
+      };
+    };
+  };
+  automation_schema_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AutomationSchema"];
+        };
+      };
+    };
+  };
+  automations_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"][];
+        };
+      };
+    };
+  };
+  automations_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AutomationWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AutomationWriteRequest"];
+        "multipart/form-data": components["schemas"]["AutomationWriteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  automations_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  automations_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AutomationWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AutomationWriteRequest"];
+        "multipart/form-data": components["schemas"]["AutomationWriteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  automations_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  automations_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedAutomationPatchRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedAutomationPatchRequest"];
+        "multipart/form-data": components["schemas"]["PatchedAutomationPatchRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  automations_disable_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  automations_enable_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  automations_run_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ManualRunRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ManualRunRequest"];
+        "multipart/form-data": components["schemas"]["ManualRunRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Started"];
+        };
+      };
+    };
+  };
+  automations_runs_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AutomationRun"][];
+        };
+      };
+    };
+  };
+  automations_test_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DryRunRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["DryRunRequestRequest"];
+        "multipart/form-data": components["schemas"]["DryRunRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DryRun"];
         };
       };
     };

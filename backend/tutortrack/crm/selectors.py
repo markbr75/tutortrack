@@ -173,3 +173,15 @@ def search(user: Any, q: str, limit: int = 20) -> list[SearchHit]:
     )
     hits.sort(key=lambda h: h.score, reverse=True)
     return hits[:limit]
+
+
+def open_task_counts(user_ids: list[Any]) -> dict[Any, int]:
+    """Open tasks per assignee (round-robin assignment in automations, E14)."""
+    from django.db.models import Count
+
+    rows = (
+        Task.objects.filter(assignee_id__in=user_ids, status=Task.Status.OPEN)
+        .values("assignee_id")
+        .annotate(n=Count("id"))
+    )
+    return {r["assignee_id"]: r["n"] for r in rows}

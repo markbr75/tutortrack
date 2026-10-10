@@ -122,3 +122,12 @@ def lessons_on_invoice(invoice_id: Any) -> list[Any]:
         .values_list("lesson_id", flat=True)
         .distinct()
     )
+
+
+def balance_due(client_id: Any) -> Decimal:
+    """What the client owes on issued invoices (all currencies summed; automations, E14)."""
+    total = Invoice.objects.filter(
+        client_id=client_id,
+        status__in=[Invoice.Status.ISSUED, Invoice.Status.PARTIALLY_PAID],
+    ).aggregate(total=Sum("balance_due_amount"))["total"]
+    return Decimal(total or 0)

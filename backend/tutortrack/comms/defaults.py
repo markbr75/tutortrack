@@ -351,5 +351,9 @@ DEFAULTS[("cover_request", "sms")] = (
 DEFAULTS[("cover_request", "in_app")] = ("Cover needed", "{{ cover.title }}")
 
 
+for _channel in ("email", "sms", "in_app"):
+    DEFAULTS[("automation_message", _channel)] = ("{{ message.subject }}", "{{ message.body }}")
+
+
 def default_template(type_key: str, channel: str) -> tuple[str, str] | None:
     return DEFAULTS.get((type_key, channel))

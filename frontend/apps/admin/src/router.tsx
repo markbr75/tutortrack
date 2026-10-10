@@ -21,6 +21,7 @@ import { DeliverySettingsPage } from "./delivery/DeliverySettingsPage";
 import { ReportPage } from "./delivery/ReportPage";
 import { ReportsPage } from "./delivery/ReportsPage";
 import { UnconfirmedPage } from "./delivery/UnconfirmedPage";
+import { AutomationBuilderPage, AutomationsPage } from "./automations/AutomationPages";
 import { JobPage } from "./jobs/JobPage";
 import { JobMatchPage, MatchingPage } from "./matching/MatchingPages";
 import { JobsPage } from "./jobs/JobsPage";
@@ -274,6 +275,14 @@ const enquiryRoute = createRoute({
 const recruitmentRoute = appPage("/recruitment", ApplicationsPage);
 const complianceRoute = appPage("/compliance", ComplianceDashboardPage);
 const matchingRoute = appPage("/matching", MatchingPage);
+const automationsRoute = appPage("/automations", AutomationsPage);
+const automationRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/automations/$id",
+  component: function AutomationRoute() {
+    return <AutomationBuilderPage id={automationRoute.useParams().id} />;
+  },
+});
 const jobMatchRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/jobs/$jobId/match",
@@ -350,6 +359,8 @@ const routeTree = rootRoute.addChildren([
     jobRoute,
     jobMatchRoute,
     matchingRoute,
+    automationsRoute,
+    automationRoute,
     calendarRoute,
     availabilityRoute,
     reportsRoute,
