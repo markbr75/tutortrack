@@ -95,7 +95,7 @@ All ─► E26, E27, E28, E31
 | E23 | ☐ | |
 | E24 | ☐ | |
 | E25 | ☐ | |
-| E26 | ☐ | |
+| E26 | ✅ Done (2026-10-10) | T01–T07 + scheduled-report workflow (T08 custom builder is Phase 2b, T09 warehouse export Enterprise). See Implementation notes |
 | E27 | ☐ | |
 | E28 | ☐ | |
 | E29 | 🟡 Part 1 done (2026-10-09) | T01–T04 (security baseline, KMS encryption, audit search, consent). Part 2 (T05–T12, TW1) in Phase 3 |

@@ -26465,6 +26465,137 @@
                 }
             }
         },
+        "/api/v1/report-runs": {
+            "get": {
+                "operationId": "report_runs_list",
+                "description": "Report exports and scheduled deliveries.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "report-runs"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedReportRunList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/report-runs/{id}": {
+            "get": {
+                "operationId": "report_runs_retrieve",
+                "description": "Report exports and scheduled deliveries.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this report run.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "report-runs"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReportRun"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/report-runs/{id}/download": {
+            "get": {
+                "operationId": "report_runs_download_retrieve",
+                "description": "A short-lived link to a scheduled run's file.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this report run.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "report-runs"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReportDownload"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/report-templates": {
             "get": {
                 "operationId": "report_templates_list",
@@ -26697,6 +26828,620 @@
                 }
             }
         },
+        "/api/v1/reporting/dashboard": {
+            "get": {
+                "operationId": "reporting_dashboard_retrieve",
+                "description": "The user's dashboard layout: their own, or their role's (``simple`` for sole\ntraders, FR-26-1 MVP).",
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DashboardLayout"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "reporting_dashboard_update",
+                "description": "Save the user's own layout (widget order and sizes).",
+                "tags": [
+                    "reporting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DashboardLayoutRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DashboardLayoutRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DashboardLayoutRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DashboardLayout"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "reporting_dashboard_destroy",
+                "description": "Go back to the role's default layout.",
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/reporting/rebuild": {
+            "post": {
+                "operationId": "reporting_rebuild_create",
+                "description": "Recompute the reporting facts from the operational records (repair, backfill).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Rebuild"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/reporting/reports": {
+            "get": {
+                "operationId": "reporting_reports_list",
+                "description": "The standard reports the user may run, by category (FR-26-2).",
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ReportDefinition"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/reporting/reports/{key}": {
+            "get": {
+                "operationId": "reporting_reports_retrieve",
+                "description": "Run a report with filters, grouping and sorting. Figures follow the data scope of\nthe report's permission (e.g. tutors see only their own).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Branch ids, comma separated"
+                    },
+                    {
+                        "in": "query",
+                        "name": "client",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Client ids, comma separated"
+                    },
+                    {
+                        "in": "query",
+                        "name": "currency",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Reporting currency (converted at FX rates)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "custom_field",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Client custom field, key=value"
+                    },
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "Start (custom period)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "group_by",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "ordering",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Column key, '-' for descending"
+                    },
+                    {
+                        "in": "query",
+                        "name": "period",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "this_month, last_month, last_30_days, custom..."
+                    },
+                    {
+                        "in": "query",
+                        "name": "service",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Service ids, comma separated"
+                    },
+                    {
+                        "in": "query",
+                        "name": "subject",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Subject ids, comma separated"
+                    },
+                    {
+                        "in": "query",
+                        "name": "tag",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Tag id (clients, students or tutors)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "to",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "End (custom period)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Tutor ids, comma separated"
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReportResult"
+                                },
+                                "examples": {
+                                    "RevenueByMonth": {
+                                        "value": {
+                                            "report": {
+                                                "key": "revenue",
+                                                "title": "Revenue",
+                                                "category": "finance"
+                                            },
+                                            "params": {
+                                                "period": "this_month",
+                                                "group_by": "month"
+                                            },
+                                            "period": {
+                                                "from": "2026-10-01",
+                                                "to": "2026-10-31"
+                                            },
+                                            "columns": [
+                                                {
+                                                    "key": "group",
+                                                    "label": "Month",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "net",
+                                                    "label": "Net",
+                                                    "type": "money"
+                                                }
+                                            ],
+                                            "rows": [
+                                                {
+                                                    "group": "2026-10-01",
+                                                    "currency": "GBP",
+                                                    "net": "1250.00"
+                                                }
+                                            ],
+                                            "totals": [
+                                                {
+                                                    "currency": "GBP",
+                                                    "net": "1250.00"
+                                                }
+                                            ],
+                                            "chart": {
+                                                "kind": "bar",
+                                                "x": "group",
+                                                "y": [
+                                                    "net"
+                                                ],
+                                                "stacked": false
+                                            },
+                                            "notes": [],
+                                            "generated_at": "2026-10-10T09:00:00Z"
+                                        },
+                                        "summary": "Revenue by month"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/reporting/reports/{key}/export": {
+            "get": {
+                "operationId": "reporting_reports_export_retrieve",
+                "description": "Download the report as CSV, Excel or PDF (audited as an export).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Branch ids, comma separated"
+                    },
+                    {
+                        "in": "query",
+                        "name": "client",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Client ids, comma separated"
+                    },
+                    {
+                        "in": "query",
+                        "name": "currency",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Reporting currency (converted at FX rates)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "custom_field",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Client custom field, key=value"
+                    },
+                    {
+                        "in": "query",
+                        "name": "file_format",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "csv",
+                                "pdf",
+                                "xlsx"
+                            ]
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "Start (custom period)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "group_by",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "ordering",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Column key, '-' for descending"
+                    },
+                    {
+                        "in": "query",
+                        "name": "period",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "this_month, last_month, last_30_days, custom..."
+                    },
+                    {
+                        "in": "query",
+                        "name": "service",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Service ids, comma separated"
+                    },
+                    {
+                        "in": "query",
+                        "name": "subject",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Subject ids, comma separated"
+                    },
+                    {
+                        "in": "query",
+                        "name": "tag",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Tag id (clients, students or tutors)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "to",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "End (custom period)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Tutor ids, comma separated"
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/reporting/widgets": {
+            "get": {
+                "operationId": "reporting_widgets_list",
+                "description": "The widget library the user may add.",
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WidgetInfo"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/reporting/widgets/{key}": {
+            "get": {
+                "operationId": "reporting_widgets_retrieve",
+                "description": "One widget's figures for the period, compared with the previous period.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Branch ids, comma separated"
+                    },
+                    {
+                        "in": "query",
+                        "name": "compare",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "none",
+                                "previous_period",
+                                "previous_year"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "Start (custom period)"
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "period",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "this_month, last_month, last_30_days, custom..."
+                    },
+                    {
+                        "in": "query",
+                        "name": "to",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "End (custom period)"
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WidgetData"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/roles": {
             "get": {
                 "operationId": "roles_list",
@@ -26721,6 +27466,244 @@
                             }
                         },
                         "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/saved-reports": {
+            "get": {
+                "operationId": "saved_reports_list",
+                "description": "Saved report views (``?report=`` filters by report key).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "report",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "saved-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedSavedReportList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "saved_reports_create",
+                "description": "Saved report views (``?report=`` filters by report key).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "saved-reports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SavedReportRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SavedReportRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SavedReportRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SavedReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/saved-reports/{id}": {
+            "get": {
+                "operationId": "saved_reports_retrieve",
+                "description": "Saved report views (``?report=`` filters by report key).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this saved report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "saved-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SavedReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "saved_reports_partial_update",
+                "description": "Saved report views (``?report=`` filters by report key).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this saved report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "saved-reports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSavedReportUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSavedReportUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSavedReportUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SavedReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "saved_reports_destroy",
+                "description": "Saved report views (``?report=`` filters by report key).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this saved report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "saved-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
                     }
                 }
             }
@@ -26960,6 +27943,277 @@
                 "responses": {
                     "204": {
                         "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/scheduled-reports": {
+            "get": {
+                "operationId": "scheduled_reports_list",
+                "description": "Reports emailed to staff on a schedule (FR-26-4).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "scheduled-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedScheduledReportList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "scheduled_reports_create",
+                "description": "Reports emailed to staff on a schedule (FR-26-4).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "scheduled-reports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScheduledReportRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScheduledReportRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScheduledReportRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ScheduledReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/scheduled-reports/{id}": {
+            "get": {
+                "operationId": "scheduled_reports_retrieve",
+                "description": "Reports emailed to staff on a schedule (FR-26-4).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this scheduled report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "scheduled-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ScheduledReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "scheduled_reports_partial_update",
+                "description": "Reports emailed to staff on a schedule (FR-26-4).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this scheduled report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "scheduled-reports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedScheduledReportUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedScheduledReportUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedScheduledReportUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ScheduledReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "scheduled_reports_destroy",
+                "description": "Reports emailed to staff on a schedule (FR-26-4).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this scheduled report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "scheduled-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/scheduled-reports/recipients": {
+            "get": {
+                "operationId": "scheduled_reports_recipients_list",
+                "description": "Active staff who could receive scheduled reports.",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "scheduled-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/StaffMember"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -36788,6 +38042,44 @@
                     "status"
                 ]
             },
+            "DashboardLayout": {
+                "type": "object",
+                "properties": {
+                    "preset": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "customised": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "widgets": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LayoutItem"
+                        }
+                    }
+                },
+                "required": [
+                    "customised",
+                    "preset",
+                    "widgets"
+                ]
+            },
+            "DashboardLayoutRequest": {
+                "type": "object",
+                "properties": {
+                    "widgets": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LayoutItemRequest"
+                        }
+                    }
+                },
+                "required": [
+                    "widgets"
+                ]
+            },
             "DashboardRow": {
                 "type": "object",
                 "properties": {
@@ -41534,6 +42826,47 @@
                 "type": "string",
                 "description": "* `accounting_integrations` - accounting_integrations\n* `advanced_reports` - advanced_reports\n* `ai_assistant` - ai_assistant\n* `api_access` - api_access\n* `automation` - automation\n* `automation_rules` - automation_rules\n* `courses` - courses\n* `custom_domain` - custom_domain\n* `matching` - matching\n* `max_active_students` - max_active_students\n* `max_branches` - max_branches\n* `max_tutors` - max_tutors\n* `multi_branch` - multi_branch\n* `payroll` - payroll\n* `pipeline` - pipeline\n* `recruitment` - recruitment\n* `sms_credits_monthly` - sms_credits_monthly\n* `sso_saml` - sso_saml\n* `storage_gb` - storage_gb\n* `webhooks` - webhooks\n* `white_label` - white_label"
             },
+            "LayoutItem": {
+                "type": "object",
+                "properties": {
+                    "widget": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "size": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SizeEnum"
+                            }
+                        ],
+                        "default": "s"
+                    }
+                },
+                "required": [
+                    "widget"
+                ]
+            },
+            "LayoutItemRequest": {
+                "type": "object",
+                "properties": {
+                    "widget": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 40
+                    },
+                    "size": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SizeEnum"
+                            }
+                        ],
+                        "default": "s"
+                    }
+                },
+                "required": [
+                    "widget"
+                ]
+            },
             "LedgerAdjustRequest": {
                 "type": "object",
                 "properties": {
@@ -44690,6 +46023,21 @@
                     "queues"
                 ]
             },
+            "Option": {
+                "type": "object",
+                "properties": {
+                    "value": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "label",
+                    "value"
+                ]
+            },
             "Organisation": {
                 "type": "object",
                 "properties": {
@@ -46362,6 +47710,84 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Product"
+                        }
+                    }
+                }
+            },
+            "PaginatedReportRunList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ReportRun"
+                        }
+                    }
+                }
+            },
+            "PaginatedSavedReportList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SavedReport"
+                        }
+                    }
+                }
+            },
+            "PaginatedScheduledReportList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ScheduledReport"
                         }
                     }
                 }
@@ -48176,6 +49602,25 @@
                     }
                 }
             },
+            "PatchedSavedReportUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "shared": {
+                        "type": "boolean"
+                    }
+                }
+            },
             "PatchedSavedViewRequest": {
                 "type": "object",
                 "properties": {
@@ -48197,6 +49642,41 @@
                     "ordering": {
                         "type": "string",
                         "maxLength": 60
+                    }
+                }
+            },
+            "PatchedScheduledReportUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "frequency": {
+                        "$ref": "#/components/schemas/ReportFrequencyEnum"
+                    },
+                    "weekday": {
+                        "type": "integer",
+                        "maximum": 6,
+                        "minimum": 0
+                    },
+                    "day_of_month": {
+                        "type": "integer",
+                        "maximum": 28,
+                        "minimum": 1
+                    },
+                    "time": {
+                        "type": "string",
+                        "format": "time"
+                    },
+                    "format": {
+                        "$ref": "#/components/schemas/ReportFormatEnum"
+                    },
+                    "recipients": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "enabled": {
+                        "type": "boolean"
                     }
                 }
             },
@@ -52943,6 +54423,29 @@
                     "reason"
                 ]
             },
+            "Rebuild": {
+                "type": "object",
+                "properties": {
+                    "lessons": {
+                        "type": "integer"
+                    },
+                    "charges": {
+                        "type": "integer"
+                    },
+                    "payments": {
+                        "type": "integer"
+                    },
+                    "pay_items": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "charges",
+                    "lessons",
+                    "pay_items",
+                    "payments"
+                ]
+            },
             "Recipe": {
                 "type": "object",
                 "properties": {
@@ -52973,6 +54476,27 @@
                     "name",
                     "trigger_config",
                     "trigger_type"
+                ]
+            },
+            "Recipient": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    }
+                },
+                "required": [
+                    "email",
+                    "id",
+                    "name"
                 ]
             },
             "RecommendationEnum": {
@@ -53500,6 +55024,73 @@
                     "answers"
                 ]
             },
+            "ReportChart": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "$ref": "#/components/schemas/ReportChartKindEnum"
+                    },
+                    "x": {
+                        "type": "string"
+                    },
+                    "y": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "stacked": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "kind",
+                    "x",
+                    "y"
+                ]
+            },
+            "ReportChartKindEnum": {
+                "enum": [
+                    "bar",
+                    "line",
+                    "pie"
+                ],
+                "type": "string",
+                "description": "* `bar` - bar\n* `line` - line\n* `pie` - pie"
+            },
+            "ReportColumn": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/ReportColumnTypeEnum"
+                    }
+                },
+                "required": [
+                    "key",
+                    "label",
+                    "type"
+                ]
+            },
+            "ReportColumnTypeEnum": {
+                "enum": [
+                    "text",
+                    "number",
+                    "count",
+                    "money",
+                    "hours",
+                    "percent",
+                    "date"
+                ],
+                "type": "string",
+                "description": "* `text` - text\n* `number` - number\n* `count` - count\n* `money` - money\n* `hours` - hours\n* `percent` - percent\n* `date` - date"
+            },
             "ReportComment": {
                 "type": "object",
                 "properties": {
@@ -53554,6 +55145,89 @@
                 "type": "string",
                 "description": "* `staff` - Staff and tutor only\n* `client` - Visible to the client"
             },
+            "ReportDefinition": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "string"
+                    },
+                    "category_label": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "filters": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "group_by": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Option"
+                        }
+                    },
+                    "period": {
+                        "type": "boolean"
+                    },
+                    "default_period": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "category",
+                    "category_label",
+                    "default_period",
+                    "description",
+                    "filters",
+                    "group_by",
+                    "key",
+                    "period",
+                    "title"
+                ]
+            },
+            "ReportDownload": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "expires_in": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "expires_in",
+                    "url"
+                ]
+            },
+            "ReportFormatEnum": {
+                "enum": [
+                    "csv",
+                    "xlsx",
+                    "pdf"
+                ],
+                "type": "string",
+                "description": "* `csv` - CSV\n* `xlsx` - Excel\n* `pdf` - PDF"
+            },
+            "ReportFrequencyEnum": {
+                "enum": [
+                    "daily",
+                    "weekly",
+                    "monthly"
+                ],
+                "type": "string",
+                "description": "* `daily` - Daily\n* `weekly` - Weekly\n* `monthly` - Monthly"
+            },
             "ReportOpenRequest": {
                 "type": "object",
                 "properties": {
@@ -53577,6 +55251,76 @@
                     "body"
                 ]
             },
+            "ReportResult": {
+                "type": "object",
+                "properties": {
+                    "report": {
+                        "$ref": "#/components/schemas/ReportDefinition"
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "period": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
+                    "columns": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ReportColumn"
+                        }
+                    },
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "totals": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "chart": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ReportChart"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "notes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "generated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "chart",
+                    "columns",
+                    "generated_at",
+                    "notes",
+                    "params",
+                    "period",
+                    "report",
+                    "rows",
+                    "totals"
+                ]
+            },
             "ReportReturnRequest": {
                 "type": "object",
                 "properties": {
@@ -53586,6 +55330,91 @@
                         "maxLength": 500
                     }
                 }
+            },
+            "ReportRun": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "report_key": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "format": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ReportFormatEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ReportRunStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "row_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "recipients": {
+                        "readOnly": true
+                    },
+                    "error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "file_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "saved_report_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "completed_at",
+                    "created_at",
+                    "error",
+                    "file_name",
+                    "format",
+                    "id",
+                    "recipients",
+                    "report_key",
+                    "row_count",
+                    "saved_report_name",
+                    "status"
+                ]
+            },
+            "ReportRunStatusEnum": {
+                "enum": [
+                    "running",
+                    "completed",
+                    "delivered",
+                    "failed"
+                ],
+                "type": "string",
+                "description": "* `running` - Running\n* `completed` - Completed\n* `delivered` - Delivered\n* `failed` - Failed"
             },
             "ReportSubmitRequest": {
                 "type": "object",
@@ -53996,6 +55825,88 @@
                     "start_url"
                 ]
             },
+            "SavedReport": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 120
+                    },
+                    "report_key": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "shared": {
+                        "type": "boolean"
+                    },
+                    "owner_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "is_mine": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "is_mine",
+                    "name",
+                    "owner_name",
+                    "report_key",
+                    "updated_at"
+                ]
+            },
+            "SavedReportRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                    },
+                    "report_key": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "shared": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "name",
+                    "report_key"
+                ]
+            },
             "SavedView": {
                 "type": "object",
                 "properties": {
@@ -54144,6 +56055,126 @@
                 "required": [
                     "time",
                     "weekday"
+                ]
+            },
+            "ScheduledReport": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "saved_report": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "saved_report_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "report_key": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "frequency": {
+                        "$ref": "#/components/schemas/ReportFrequencyEnum"
+                    },
+                    "weekday": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "day_of_month": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "time": {
+                        "type": "string",
+                        "format": "time"
+                    },
+                    "format": {
+                        "$ref": "#/components/schemas/ReportFormatEnum"
+                    },
+                    "recipient_details": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Recipient"
+                        },
+                        "readOnly": true
+                    },
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "last_run_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "frequency",
+                    "id",
+                    "last_run_at",
+                    "recipient_details",
+                    "report_key",
+                    "saved_report",
+                    "saved_report_name",
+                    "time"
+                ]
+            },
+            "ScheduledReportRequest": {
+                "type": "object",
+                "properties": {
+                    "saved_report": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "frequency": {
+                        "$ref": "#/components/schemas/ReportFrequencyEnum"
+                    },
+                    "weekday": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "day_of_month": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "time": {
+                        "type": "string",
+                        "format": "time"
+                    },
+                    "format": {
+                        "$ref": "#/components/schemas/ReportFormatEnum"
+                    },
+                    "recipients": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "writeOnly": true
+                    },
+                    "enabled": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "frequency",
+                    "recipients",
+                    "saved_report",
+                    "time"
                 ]
             },
             "SchemaAction": {
@@ -55516,6 +57547,15 @@
                     "id"
                 ]
             },
+            "SizeEnum": {
+                "enum": [
+                    "s",
+                    "m",
+                    "l"
+                ],
+                "type": "string",
+                "description": "* `s` - s\n* `m` - m\n* `l` - l"
+            },
             "Skipped": {
                 "type": "object",
                 "properties": {
@@ -55586,6 +57626,27 @@
                     "reason",
                     "slug",
                     "suggestion"
+                ]
+            },
+            "StaffMember": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    }
+                },
+                "required": [
+                    "email",
+                    "id",
+                    "name"
                 ]
             },
             "Stage": {
@@ -58505,6 +60566,16 @@
                     "unread"
                 ]
             },
+            "UnitEnum": {
+                "enum": [
+                    "count",
+                    "money",
+                    "percent",
+                    "hours"
+                ],
+                "type": "string",
+                "description": "* `count` - count\n* `money` - money\n* `percent` - percent\n* `hours` - hours"
+            },
             "UnmatchedDemand": {
                 "type": "object",
                 "properties": {
@@ -58846,6 +60917,169 @@
                 ],
                 "type": "integer",
                 "description": "* `0` - Monday\n* `1` - Tuesday\n* `2` - Wednesday\n* `3` - Thursday\n* `4` - Friday\n* `5` - Saturday\n* `6` - Sunday"
+            },
+            "WidgetData": {
+                "type": "object",
+                "properties": {
+                    "widget": {
+                        "$ref": "#/components/schemas/WidgetInfo"
+                    },
+                    "unit": {
+                        "$ref": "#/components/schemas/UnitEnum"
+                    },
+                    "period": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "previous_period": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WidgetValue"
+                        }
+                    },
+                    "series": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WidgetPoint"
+                        }
+                    },
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WidgetRow"
+                        }
+                    },
+                    "report_params": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "period",
+                    "previous_period",
+                    "report_params",
+                    "rows",
+                    "series",
+                    "unit",
+                    "values",
+                    "widget"
+                ]
+            },
+            "WidgetInfo": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/WidgetInfoKindEnum"
+                    },
+                    "default_size": {
+                        "type": "string"
+                    },
+                    "report": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "category",
+                    "default_size",
+                    "key",
+                    "kind",
+                    "report",
+                    "title"
+                ]
+            },
+            "WidgetInfoKindEnum": {
+                "enum": [
+                    "kpi",
+                    "chart",
+                    "list"
+                ],
+                "type": "string",
+                "description": "* `kpi` - kpi\n* `chart` - chart\n* `list` - list"
+            },
+            "WidgetPoint": {
+                "type": "object",
+                "properties": {
+                    "x": {
+                        "type": "string"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "y": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "currency",
+                    "x",
+                    "y"
+                ]
+            },
+            "WidgetRow": {
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    },
+                    "detail": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "detail",
+                    "label",
+                    "value"
+                ]
+            },
+            "WidgetValue": {
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "type": "string"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "currency",
+                    "label",
+                    "previous",
+                    "value"
+                ]
             },
             "Window": {
                 "type": "object",

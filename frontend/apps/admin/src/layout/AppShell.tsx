@@ -28,6 +28,7 @@ const NAV = [
   { to: "/automations", key: "nav.automations", permission: "automation.view" },
   { to: "/tasks", key: "nav.tasks", permission: "crm.task.view" },
   { to: "/announcements", key: "nav.announcements", permission: "comms.announcement.manage" },
+  { to: "/analytics", key: "nav.analytics", permission: "reporting.dashboard.view" },
   { to: "/reports", key: "nav.reports", permission: "delivery.report.view" },
   { to: "/unconfirmed", key: "nav.unconfirmed", permission: "scheduling.lesson.complete" },
   { to: "/availability", key: "nav.availability", permission: "scheduling.availability.view" },

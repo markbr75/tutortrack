@@ -45,6 +45,21 @@ def scope_queryset(user: Any, queryset: QuerySet[Any], codename: str) -> QuerySe
     return result
 
 
+def permission_scope(user: Any, codename: str) -> str | None:
+    """The broadest data scope (``all``/``branch``/``own``) the user holds for ``codename``,
+    or None. For queries ``scope_queryset`` cannot scope directly (aggregates over models
+    without a ``branch`` field)."""
+    if not getattr(user, "is_authenticated", False) or not user.is_active:
+        return None
+    if user.is_superuser:
+        return "all"
+    resolver: Any = import_string(
+        getattr(settings, "PERMISSION_SCOPE_RESOLVER", "tutortrack.identity.rbac.scope_for")
+    )
+    scope: str | None = resolver(user, codename)
+    return scope
+
+
 class HasPermission(BasePermission):
     """DRF permission: ``permission_classes = [HasPermission.for_("audit.view")]``."""
 

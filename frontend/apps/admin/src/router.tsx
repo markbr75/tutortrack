@@ -63,6 +63,7 @@ import {
 } from "./recruitment/RecruitmentPages";
 import { PlanPage } from "./subscription/PlanPage";
 import { TeamPage } from "./routes/TeamPage";
+import { ReportsLibraryPage, ReportViewPage, SavedReportsPage } from "./reporting/ReportingPages";
 import { VerifyEmailPage } from "./routes/VerifyEmailPage";
 
 interface RouterContext {
@@ -252,6 +253,15 @@ const reportRoute = createRoute({
     return <ReportPage reportId={reportRoute.useParams().reportId} />;
   },
 });
+const analyticsRoute = appPage("/analytics", ReportsLibraryPage);
+const analyticsSavedRoute = appPage("/analytics/saved", SavedReportsPage);
+const analyticsReportRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/analytics/$key",
+  component: function AnalyticsReportRoute() {
+    return <ReportViewPage reportKey={analyticsReportRoute.useParams().key} />;
+  },
+});
 const unconfirmedRoute = appPage("/unconfirmed", UnconfirmedPage);
 const deliverySettingsRoute = appPage("/lesson-policies", DeliverySettingsPage);
 const billingRoute = appPage("/billing", BillingPage);
@@ -365,6 +375,9 @@ const routeTree = rootRoute.addChildren([
     availabilityRoute,
     reportsRoute,
     reportRoute,
+    analyticsRoute,
+    analyticsSavedRoute,
+    analyticsReportRoute,
     unconfirmedRoute,
     deliverySettingsRoute,
     billingRoute,

@@ -7211,6 +7211,57 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/report-runs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Report exports and scheduled deliveries. */
+    get: operations["report_runs_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/report-runs/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Report exports and scheduled deliveries. */
+    get: operations["report_runs_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/report-runs/{id}/download": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description A short-lived link to a scheduled run's file. */
+    get: operations["report_runs_download_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/report-templates": {
     parameters: {
       query?: never;
@@ -7263,6 +7314,133 @@ export interface paths {
     patch: operations["report_templates_partial_update"];
     trace?: never;
   };
+  "/api/v1/reporting/dashboard": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The user's dashboard layout: their own, or their role's (``simple`` for sole
+     *     traders, FR-26-1 MVP).
+     */
+    get: operations["reporting_dashboard_retrieve"];
+    /** @description Save the user's own layout (widget order and sizes). */
+    put: operations["reporting_dashboard_update"];
+    post?: never;
+    /** @description Go back to the role's default layout. */
+    delete: operations["reporting_dashboard_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/rebuild": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Recompute the reporting facts from the operational records (repair, backfill). */
+    post: operations["reporting_rebuild_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/reports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The standard reports the user may run, by category (FR-26-2). */
+    get: operations["reporting_reports_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/reports/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Run a report with filters, grouping and sorting. Figures follow the data scope of
+     *     the report's permission (e.g. tutors see only their own).
+     */
+    get: operations["reporting_reports_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/reports/{key}/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Download the report as CSV, Excel or PDF (audited as an export). */
+    get: operations["reporting_reports_export_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/widgets": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The widget library the user may add. */
+    get: operations["reporting_widgets_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/widgets/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description One widget's figures for the period, compared with the previous period. */
+    get: operations["reporting_widgets_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/roles": {
     parameters: {
       query?: never;
@@ -7277,6 +7455,43 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/api/v1/saved-reports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Saved report views (``?report=`` filters by report key). */
+    get: operations["saved_reports_list"];
+    put?: never;
+    /** @description Saved report views (``?report=`` filters by report key). */
+    post: operations["saved_reports_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/saved-reports/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Saved report views (``?report=`` filters by report key). */
+    get: operations["saved_reports_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description Saved report views (``?report=`` filters by report key). */
+    delete: operations["saved_reports_destroy"];
+    options?: never;
+    head?: never;
+    /** @description Saved report views (``?report=`` filters by report key). */
+    patch: operations["saved_reports_partial_update"];
     trace?: never;
   };
   "/api/v1/saved-views": {
@@ -7314,6 +7529,60 @@ export interface paths {
     head?: never;
     /** @description Your saved list views and the ones shared with the team (FR-05-11). */
     patch: operations["saved_views_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/scheduled-reports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Reports emailed to staff on a schedule (FR-26-4). */
+    get: operations["scheduled_reports_list"];
+    put?: never;
+    /** @description Reports emailed to staff on a schedule (FR-26-4). */
+    post: operations["scheduled_reports_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/scheduled-reports/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Reports emailed to staff on a schedule (FR-26-4). */
+    get: operations["scheduled_reports_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description Reports emailed to staff on a schedule (FR-26-4). */
+    delete: operations["scheduled_reports_destroy"];
+    options?: never;
+    head?: never;
+    /** @description Reports emailed to staff on a schedule (FR-26-4). */
+    patch: operations["scheduled_reports_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/scheduled-reports/recipients": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Active staff who could receive scheduled reports. */
+    get: operations["scheduled_reports_recipients_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/search": {
@@ -10214,6 +10483,14 @@ export interface components {
       /** Format: date */
       expiry_date: string | null;
     };
+    DashboardLayout: {
+      readonly preset: string;
+      readonly customised: boolean;
+      widgets: components["schemas"]["LayoutItem"][];
+    };
+    DashboardLayoutRequest: {
+      widgets: components["schemas"]["LayoutItemRequest"][];
+    };
     DashboardRow: {
       /** Format: uuid */
       tutor: string;
@@ -11848,6 +12125,16 @@ export interface components {
       | "storage_gb"
       | "webhooks"
       | "white_label";
+    LayoutItem: {
+      widget: string;
+      /** @default s */
+      size: components["schemas"]["SizeEnum"];
+    };
+    LayoutItemRequest: {
+      widget: string;
+      /** @default s */
+      size: components["schemas"]["SizeEnum"];
+    };
     LedgerAdjustRequest: {
       /** @description Positive adds to what the client owes */
       amount: {
@@ -12830,6 +13117,10 @@ export interface components {
         [key: string]: unknown;
       }[];
     };
+    Option: {
+      value: string;
+      label: string;
+    };
     Organisation: {
       /** Format: uuid */
       readonly id: string;
@@ -13567,6 +13858,45 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Product"][];
     };
+    PaginatedReportRunList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ReportRun"][];
+    };
+    PaginatedSavedReportList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["SavedReport"][];
+    };
+    PaginatedScheduledReportList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ScheduledReport"][];
+    };
     PaginatedServiceList: {
       /**
        * Format: uri
@@ -14140,6 +14470,13 @@ export interface components {
       applies_to?: unknown;
       active?: boolean;
     };
+    PatchedSavedReportUpdateRequest: {
+      name?: string;
+      params?: {
+        [key: string]: string;
+      };
+      shared?: boolean;
+    };
     PatchedSavedViewRequest: {
       entity_type?: string;
       name?: string;
@@ -14147,6 +14484,16 @@ export interface components {
       filters?: unknown;
       columns?: unknown;
       ordering?: string;
+    };
+    PatchedScheduledReportUpdateRequest: {
+      frequency?: components["schemas"]["ReportFrequencyEnum"];
+      weekday?: number;
+      day_of_month?: number;
+      /** Format: time */
+      time?: string;
+      format?: components["schemas"]["ReportFormatEnum"];
+      recipients?: string[];
+      enabled?: boolean;
     };
     PatchedSeriesUpdateRequest: {
       scope?: components["schemas"]["SeriesUpdateScopeEnum"];
@@ -15680,6 +16027,12 @@ export interface components {
     ReasonRequest: {
       reason: string;
     };
+    Rebuild: {
+      lessons: number;
+      charges: number;
+      payments: number;
+      pay_items: number;
+    };
     Recipe: {
       key: string;
       name: string;
@@ -15689,6 +16042,13 @@ export interface components {
         [key: string]: unknown;
       };
       installed: boolean;
+    };
+    Recipient: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      /** Format: email */
+      email: string;
     };
     /**
      * @description * `yes` - Hire
@@ -15889,6 +16249,36 @@ export interface components {
         [key: string]: unknown;
       };
     };
+    ReportChart: {
+      kind: components["schemas"]["ReportChartKindEnum"];
+      x: string;
+      y: string[];
+      /** @default false */
+      stacked: boolean;
+    };
+    /**
+     * @description * `bar` - bar
+     *     * `line` - line
+     *     * `pie` - pie
+     * @enum {string}
+     */
+    ReportChartKindEnum: "bar" | "line" | "pie";
+    ReportColumn: {
+      key: string;
+      label: string;
+      type: components["schemas"]["ReportColumnTypeEnum"];
+    };
+    /**
+     * @description * `text` - text
+     *     * `number` - number
+     *     * `count` - count
+     *     * `money` - money
+     *     * `hours` - hours
+     *     * `percent` - percent
+     *     * `date` - date
+     * @enum {string}
+     */
+    ReportColumnTypeEnum: "text" | "number" | "count" | "money" | "hours" | "percent" | "date";
     ReportComment: {
       /** Format: uuid */
       readonly id: string;
@@ -15908,6 +16298,36 @@ export interface components {
      * @enum {string}
      */
     ReportCommentVisibilityEnum: "staff" | "client";
+    ReportDefinition: {
+      key: string;
+      title: string;
+      category: string;
+      category_label: string;
+      description: string;
+      filters: string[];
+      group_by: components["schemas"]["Option"][];
+      period: boolean;
+      default_period: string;
+    };
+    ReportDownload: {
+      /** Format: uri */
+      url: string;
+      expires_in: number;
+    };
+    /**
+     * @description * `csv` - CSV
+     *     * `xlsx` - Excel
+     *     * `pdf` - PDF
+     * @enum {string}
+     */
+    ReportFormatEnum: "csv" | "xlsx" | "pdf";
+    /**
+     * @description * `daily` - Daily
+     *     * `weekly` - Weekly
+     *     * `monthly` - Monthly
+     * @enum {string}
+     */
+    ReportFrequencyEnum: "daily" | "weekly" | "monthly";
     ReportOpenRequest: {
       /**
        * Format: uuid
@@ -15918,10 +16338,54 @@ export interface components {
     ReportReplyRequest: {
       body: string;
     };
+    ReportResult: {
+      report: components["schemas"]["ReportDefinition"];
+      params: {
+        [key: string]: string;
+      };
+      period: {
+        [key: string]: string;
+      } | null;
+      columns: components["schemas"]["ReportColumn"][];
+      rows: {
+        [key: string]: unknown;
+      }[];
+      totals: {
+        [key: string]: unknown;
+      }[];
+      chart: components["schemas"]["ReportChart"] | null;
+      notes: string[];
+      /** Format: date-time */
+      generated_at: string;
+    };
     ReportReturnRequest: {
       /** @default  */
       note: string;
     };
+    ReportRun: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly report_key: string;
+      readonly format: components["schemas"]["ReportFormatEnum"];
+      readonly status: components["schemas"]["ReportRunStatusEnum"];
+      readonly row_count: number;
+      readonly recipients: unknown;
+      readonly error: string;
+      readonly file_name: string | null;
+      readonly saved_report_name: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly completed_at: string | null;
+    };
+    /**
+     * @description * `running` - Running
+     *     * `completed` - Completed
+     *     * `delivered` - Delivered
+     *     * `failed` - Failed
+     * @enum {string}
+     */
+    ReportRunStatusEnum: "running" | "completed" | "delivered" | "failed";
     ReportSubmitRequest: {
       answers?: {
         [key: string]: unknown;
@@ -16050,6 +16514,30 @@ export interface components {
       key: string;
       start_url: string;
     };
+    SavedReport: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      report_key: string;
+      params?: {
+        [key: string]: string;
+      };
+      shared?: boolean;
+      readonly owner_name: string;
+      readonly is_mine: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    SavedReportRequest: {
+      name: string;
+      report_key: string;
+      params?: {
+        [key: string]: string;
+      };
+      shared?: boolean;
+    };
     SavedView: {
       /** Format: uuid */
       readonly id: string;
@@ -16096,6 +16584,38 @@ export interface components {
       weekday: number;
       time: string;
       duration_minutes?: number;
+    };
+    ScheduledReport: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      saved_report: string;
+      readonly saved_report_name: string;
+      readonly report_key: string;
+      frequency: components["schemas"]["ReportFrequencyEnum"];
+      weekday?: number;
+      day_of_month?: number;
+      /** Format: time */
+      time: string;
+      format?: components["schemas"]["ReportFormatEnum"];
+      readonly recipient_details: components["schemas"]["Recipient"][];
+      enabled?: boolean;
+      /** Format: date-time */
+      readonly last_run_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ScheduledReportRequest: {
+      /** Format: uuid */
+      saved_report: string;
+      frequency: components["schemas"]["ReportFrequencyEnum"];
+      weekday?: number;
+      day_of_month?: number;
+      /** Format: time */
+      time: string;
+      format?: components["schemas"]["ReportFormatEnum"];
+      recipients: string[];
+      enabled?: boolean;
     };
     SchemaAction: {
       key: string;
@@ -16528,6 +17048,13 @@ export interface components {
       email: string;
       email_verified: boolean;
     };
+    /**
+     * @description * `s` - s
+     *     * `m` - m
+     *     * `l` - l
+     * @enum {string}
+     */
+    SizeEnum: "s" | "m" | "l";
     Skipped: {
       /** Format: date */
       date: string;
@@ -16553,6 +17080,13 @@ export interface components {
       available: boolean;
       reason: string | null;
       suggestion: string | null;
+    };
+    StaffMember: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      /** Format: email */
+      email: string;
     };
     Stage: {
       /** Format: uuid */
@@ -17463,6 +17997,14 @@ export interface components {
       unread: number;
       earnings_this_month: components["schemas"]["MoneyOut"];
     };
+    /**
+     * @description * `count` - count
+     *     * `money` - money
+     *     * `percent` - percent
+     *     * `hours` - hours
+     * @enum {string}
+     */
+    UnitEnum: "count" | "money" | "percent" | "hours";
     UnmatchedDemand: {
       subject: string;
       area: string;
@@ -17569,6 +18111,55 @@ export interface components {
      * @enum {integer}
      */
     WeekStartDayEnum: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+    WidgetData: {
+      widget: components["schemas"]["WidgetInfo"];
+      unit: components["schemas"]["UnitEnum"];
+      period: {
+        [key: string]: string;
+      };
+      previous_period: {
+        [key: string]: string;
+      } | null;
+      values: components["schemas"]["WidgetValue"][];
+      series: components["schemas"]["WidgetPoint"][];
+      rows: components["schemas"]["WidgetRow"][];
+      report_params: {
+        [key: string]: string;
+      };
+    };
+    WidgetInfo: {
+      key: string;
+      title: string;
+      category: string;
+      kind: components["schemas"]["WidgetInfoKindEnum"];
+      default_size: string;
+      report: string;
+    };
+    /**
+     * @description * `kpi` - kpi
+     *     * `chart` - chart
+     *     * `list` - list
+     * @enum {string}
+     */
+    WidgetInfoKindEnum: "kpi" | "chart" | "list";
+    WidgetPoint: {
+      x: string;
+      currency: string;
+      y: {
+        [key: string]: string;
+      };
+    };
+    WidgetRow: {
+      label: string;
+      value: string;
+      detail: string;
+    };
+    WidgetValue: {
+      label: string;
+      currency: string;
+      value: string;
+      previous: string | null;
+    };
     Window: {
       weekday: number;
       /** Format: time */
@@ -30822,6 +31413,76 @@ export interface operations {
       };
     };
   };
+  report_runs_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedReportRunList"];
+        };
+      };
+    };
+  };
+  report_runs_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this report run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportRun"];
+        };
+      };
+    };
+  };
+  report_runs_download_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this report run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportDownload"];
+        };
+      };
+    };
+  };
   report_templates_list: {
     parameters: {
       query?: {
@@ -30948,6 +31609,254 @@ export interface operations {
       };
     };
   };
+  reporting_dashboard_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DashboardLayout"];
+        };
+      };
+    };
+  };
+  reporting_dashboard_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DashboardLayoutRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["DashboardLayoutRequest"];
+        "multipart/form-data": components["schemas"]["DashboardLayoutRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DashboardLayout"];
+        };
+      };
+    };
+  };
+  reporting_dashboard_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  reporting_rebuild_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Rebuild"];
+        };
+      };
+    };
+  };
+  reporting_reports_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportDefinition"][];
+        };
+      };
+    };
+  };
+  reporting_reports_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Branch ids, comma separated */
+        branch?: string;
+        /** @description Client ids, comma separated */
+        client?: string;
+        /** @description Reporting currency (converted at FX rates) */
+        currency?: string;
+        /** @description Client custom field, key=value */
+        custom_field?: string;
+        /** @description Start (custom period) */
+        from?: string;
+        group_by?: string;
+        /** @description Column key, '-' for descending */
+        ordering?: string;
+        /** @description this_month, last_month, last_30_days, custom... */
+        period?: string;
+        /** @description Service ids, comma separated */
+        service?: string;
+        /** @description Subject ids, comma separated */
+        subject?: string;
+        /** @description Tag id (clients, students or tutors) */
+        tag?: string;
+        /** @description End (custom period) */
+        to?: string;
+        /** @description Tutor ids, comma separated */
+        tutor?: string;
+      };
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportResult"];
+        };
+      };
+    };
+  };
+  reporting_reports_export_retrieve: {
+    parameters: {
+      query: {
+        /** @description Branch ids, comma separated */
+        branch?: string;
+        /** @description Client ids, comma separated */
+        client?: string;
+        /** @description Reporting currency (converted at FX rates) */
+        currency?: string;
+        /** @description Client custom field, key=value */
+        custom_field?: string;
+        file_format: "csv" | "pdf" | "xlsx";
+        /** @description Start (custom period) */
+        from?: string;
+        group_by?: string;
+        /** @description Column key, '-' for descending */
+        ordering?: string;
+        /** @description this_month, last_month, last_30_days, custom... */
+        period?: string;
+        /** @description Service ids, comma separated */
+        service?: string;
+        /** @description Subject ids, comma separated */
+        subject?: string;
+        /** @description Tag id (clients, students or tutors) */
+        tag?: string;
+        /** @description End (custom period) */
+        to?: string;
+        /** @description Tutor ids, comma separated */
+        tutor?: string;
+      };
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/octet-stream": string;
+        };
+      };
+    };
+  };
+  reporting_widgets_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WidgetInfo"][];
+        };
+      };
+    };
+  };
+  reporting_widgets_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Branch ids, comma separated */
+        branch?: string;
+        compare?: "none" | "previous_period" | "previous_year";
+        /** @description Start (custom period) */
+        from?: string;
+        /** @description this_month, last_month, last_30_days, custom... */
+        period?: string;
+        /** @description End (custom period) */
+        to?: string;
+      };
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WidgetData"];
+        };
+      };
+    };
+  };
   roles_list: {
     parameters: {
       query?: never;
@@ -30963,6 +31872,132 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Role"][];
+        };
+      };
+    };
+  };
+  saved_reports_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        report?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedSavedReportList"];
+        };
+      };
+    };
+  };
+  saved_reports_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SavedReportRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SavedReportRequest"];
+        "multipart/form-data": components["schemas"]["SavedReportRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SavedReport"];
+        };
+      };
+    };
+  };
+  saved_reports_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this saved report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SavedReport"];
+        };
+      };
+    };
+  };
+  saved_reports_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this saved report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  saved_reports_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this saved report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedSavedReportUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedSavedReportUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedSavedReportUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SavedReport"];
         };
       };
     };
@@ -31090,6 +32125,153 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SavedView"];
+        };
+      };
+    };
+  };
+  scheduled_reports_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedScheduledReportList"];
+        };
+      };
+    };
+  };
+  scheduled_reports_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScheduledReportRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ScheduledReportRequest"];
+        "multipart/form-data": components["schemas"]["ScheduledReportRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduledReport"];
+        };
+      };
+    };
+  };
+  scheduled_reports_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this scheduled report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduledReport"];
+        };
+      };
+    };
+  };
+  scheduled_reports_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this scheduled report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  scheduled_reports_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this scheduled report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedScheduledReportUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedScheduledReportUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedScheduledReportUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduledReport"];
+        };
+      };
+    };
+  };
+  scheduled_reports_recipients_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StaffMember"][];
         };
       };
     };

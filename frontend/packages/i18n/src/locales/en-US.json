@@ -10,5 +10,9 @@
     "steps": {
       "branding": "Logo and color"
     }
+  },
+  "reporting": {
+    "customise": "Customize",
+    "emptyDashboard": "Your dashboard is empty. Customize it to add figures."
   }
 }

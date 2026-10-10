@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "tutortrack.recruitment",
     "tutortrack.matching",
     "tutortrack.automations",
+    "tutortrack.reporting",
     "tutortrack.comms",
     "tutortrack.portal",
     "tutortrack.subscriptions",
@@ -317,6 +318,9 @@ SPECTACULAR_SETTINGS = {
         "PostingApplicationStatusEnum": "tutortrack.matching.models.JobPostingApplication.Status",
         "CoverStatusEnum": "tutortrack.matching.models.CoverRequest.Status",
         "MatchModeEnum": "tutortrack.matching.engine.MODES",
+        "ReportFormatEnum": "tutortrack.reporting.models.ScheduledReport.Format",
+        "ReportFrequencyEnum": "tutortrack.reporting.models.ScheduledReport.Frequency",
+        "ReportRunStatusEnum": "tutortrack.reporting.models.ReportRun.Status",
         "AutomationRunStatusEnum": "tutortrack.automations.models.AutomationRun.Status",
         "AutomationStepStatusEnum": "tutortrack.automations.models.AutomationRunStep.Status",
         "AutomationTriggerEnum": "tutortrack.automations.models.Automation.Trigger",
@@ -431,6 +435,11 @@ MASS_EXPORT_WINDOW_MINUTES = 60
 # --- Geocoding (E05 FR-05-15) ------------------------------------------------------------------
 GEOCODER = env("GEOCODER", default="tutortrack.core.geo.NullGeocoder")
 GOOGLE_MAPS_API_KEY = env("GOOGLE_MAPS_API_KEY", default="")
+
+# --- Reporting (E26): exchange rates for a reporting currency --------------------------------
+# "ecb" (no key), "oxr" (needs OPENEXCHANGERATES_APP_ID) or empty for fixed fake rates.
+FX_RATES_PROVIDER = env("FX_RATES_PROVIDER", default="")
+OPENEXCHANGERATES_APP_ID = env("OPENEXCHANGERATES_APP_ID", default="")
 
 # --- Organisation lifecycle (E02-T09) ---------------------------------------------------------
 # Writes still allowed while suspended (billing, so the owner can pay; E04 adds its paths).

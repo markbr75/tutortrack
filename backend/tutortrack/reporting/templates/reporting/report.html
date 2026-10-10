@@ -1,0 +1,35 @@
+{% load i18n %}<!doctype html>
+<html lang="{{ org.locale|default:'en-GB' }}">
+<head>
+<meta charset="utf-8">
+<title>{{ title }}</title>
+<style>
+  @page { size: A4 landscape; margin: 14mm 12mm; }
+  body { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 8.5pt; color: #111827; }
+  h1 { font-size: 16pt; margin: 0 0 2mm; }
+  .muted { color: #4b5563; margin: 0 0 6mm; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; border-bottom: 1px solid #9ca3af; padding: 1.5mm 1mm; }
+  td { border-bottom: 1px solid #e5e7eb; padding: 1.5mm 1mm; vertical-align: top; }
+  .num { text-align: right; white-space: nowrap; }
+  .note { margin-top: 4mm; font-size: 8pt; color: #4b5563; }
+</style>
+</head>
+<body>
+  <h1>{{ title }}</h1>
+  <p class="muted">{{ org.name }}{% if period %} · {{ period.start|date:"DATE_FORMAT" }} – {{ period.end|date:"DATE_FORMAT" }}{% endif %}</p>
+  <table>
+    <thead>
+      <tr>{% for h in header %}<th scope="col">{{ h }}</th>{% endfor %}</tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>{% for cell, num in row %}<td{% if num %} class="num"{% endif %}>{{ cell }}</td>{% endfor %}</tr>
+      {% empty %}
+      <tr><td colspan="{{ header|length }}">{% translate "Nothing to show for this period." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% for note in notes %}<p class="note">{{ note }}</p>{% endfor %}
+</body>
+</html>

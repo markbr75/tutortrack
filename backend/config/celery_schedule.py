@@ -38,6 +38,11 @@ BEAT_SCHEDULE = {
         "task": "tutortrack.recruitment.tasks.compliance_sweep_all",
         "schedule": crontab(hour=0, minute=30),
     },
+    # Exchange rates for multi-currency reports (E26 FR-26-6); global, idempotent per day.
+    "fx-rates": {
+        "task": "tutortrack.reporting.tasks.fetch_fx_rates",
+        "schedule": crontab(hour=17, minute=15),
+    },
     # Platform metrics for CloudWatch alarms (E30): outbox lag, queues, webhook backlog.
     "platform-metrics": {
         "task": "tutortrack.platform_admin.tasks.emit_metrics",

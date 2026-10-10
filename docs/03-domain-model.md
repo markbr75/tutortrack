@@ -130,6 +130,7 @@ Naming: `<aggregate>.<past_tense_verb>`. Each epic lists its events; this table 
 | `application.submitted/stage_changed/approved/rejected/interview_booked`, `reference.requested/received`, `onboarding.started/item_done/completed`, `compliance.record_submitted/record_verified/record_rejected/expiring/expired`, `tutor.restricted/unrestricted` | E18 |
 | `job_offer.batch_started/batch_closed/sent/accepted/declined/expired/withdrawn/decided`, `job_posting.published/application_received/filled`, `cover_request.created/accepted/filled/unfilled/cancelled` | E19 |
 | `automation.saved/deleted/run_failed` (never trigger automations) | E14 |
+| `report.exported`, `saved_report.created/deleted`, `scheduled_report.saved/deleted`, `report_run.delivered/failed` | E26 |
 | `job_offer.sent/accepted/declined`, `job_posting.application_received` | E19 |
 | `enrolment.created/cancelled`, `waitlist.place_offered`, `class.full` | E20 |
 | `homework.assigned/submitted/graded`, `goal.achieved` | E21 |

@@ -29,6 +29,7 @@ api_v1: list[URLPattern | URLResolver] = [
     path("", include("tutortrack.recruitment.api.urls")),
     path("", include("tutortrack.matching.api.urls")),
     path("", include("tutortrack.automations.api.urls")),
+    path("", include("tutortrack.reporting.api.urls")),
     path("", include("tutortrack.comms.api.urls")),
     path("", include("tutortrack.portal.api.urls")),
     path("", include("tutortrack.subscriptions.api.urls")),
