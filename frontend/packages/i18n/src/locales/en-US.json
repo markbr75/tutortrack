@@ -14,5 +14,21 @@
   "reporting": {
     "customise": "Customize",
     "emptyDashboard": "Your dashboard is empty. Customize it to add figures."
+  },
+  "developer": {
+    "sandboxBanner": "This is a sandbox organization. Nothing here affects your live account.",
+    "docs": {
+      "guides": {
+        "auth": {
+          "body": "Send Authorization: Bearer <token>. Use an API key for your own scripts, or OAuth2 (authorization code with PKCE) for apps other organizations connect. Each token has scopes such as clients:read; it can never do more than the person who created it."
+        },
+        "webhooks": {
+          "body": "We POST each event as JSON with Webhook-Id, Webhook-Event and Webhook-Signature headers. Compute HMAC-SHA256 with your endpoint secret over the timestamp, a period and the raw body, compare it with each v1 value and reject timestamps more than five minutes old. Failed deliveries are retried with backoff for about 72 hours; endpoints failing for three days are disabled. Events can arrive out of order: use occurred_at."
+        }
+      }
+    },
+    "sandboxes": {
+      "intro": "A sandbox is a separate organization with a copy of your settings and sample data, for testing integrations safely. Payment, calendar and accounting connections are not copied."
+    }
   }
 }

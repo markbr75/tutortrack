@@ -48,6 +48,8 @@ const NAV = [
     permission: "integrations.personal",
   },
   { to: "/settings/plan", key: "nav.plan", permission: "subscription.view" },
+  { to: "/settings/marketplace", key: "nav.marketplace", permission: "org.settings.view" },
+  { to: "/developer", key: "nav.developer", permission: "developer.webhook.view" },
   { to: "/settings", key: "nav.settings", permission: "org.settings.view" },
   { to: "/account", key: "nav.account", permission: null },
 ] as const;

@@ -108,6 +108,8 @@ class TenantMiddleware:
     def _remember(request: HttpRequest, membership: Any) -> None:
         from tutortrack.identity.services import touch_last_active
 
+        if getattr(request, "api_credential", None) is not None:
+            return  # API token requests (E27) have no session to remember anything in
         session = getattr(request, "session", None)
         org_id = str(membership.organisation_id)
         if session is not None and session.get(SESSION_KEY) != org_id:

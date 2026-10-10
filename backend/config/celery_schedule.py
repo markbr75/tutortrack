@@ -43,6 +43,11 @@ BEAT_SCHEDULE = {
         "task": "tutortrack.reporting.tasks.fetch_fx_rates",
         "schedule": crontab(hour=17, minute=15),
     },
+    # Webhook delivery log retention, 30 days (E27 FR-27-3).
+    "webhook-log-purge": {
+        "task": "tutortrack.developer.tasks.purge_all_webhook_deliveries",
+        "schedule": crontab(hour=4, minute=20),
+    },
     # Platform metrics for CloudWatch alarms (E30): outbox lag, queues, webhook backlog.
     "platform-metrics": {
         "task": "tutortrack.platform_admin.tasks.emit_metrics",

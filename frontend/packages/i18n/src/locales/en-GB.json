@@ -33,7 +33,9 @@
     "matching": "Matching",
     "automations": "Automations",
     "analytics": "Reports and dashboards",
-    "integrations": "Integrations"
+    "integrations": "Integrations",
+    "developer": "Developer",
+    "marketplace": "Integrations"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -2552,5 +2554,181 @@
     "join": "Join the lesson",
     "joinOpensAt": "Join opens at {{time}}",
     "pageTitle": "Calendar and video"
+  },
+  "developer": {
+    "title": "Developer",
+    "tabs": {
+      "overview": "Overview",
+      "keys": "API keys",
+      "webhooks": "Webhooks",
+      "apps": "Apps",
+      "sandboxes": "Sandboxes"
+    },
+    "stats": {
+      "apiKeys": "Active API keys",
+      "connectedApps": "Connected apps",
+      "endpoints": "Webhook endpoints",
+      "deliveries": "Deliveries (24 hours)",
+      "failing": "Failing or retrying (24 hours)"
+    },
+    "rateLimits": "Each token may make {{perMinute}} requests a minute, with bursts of up to {{perSecond}} a second.",
+    "sandboxBanner": "This is a sandbox organisation. Nothing here affects your live account.",
+    "secretOnceTitle": "Copy this secret now",
+    "secretOnce": "For your security we only show it once. Store it somewhere safe, such as a password manager.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "done": "Done",
+    "never": "Never",
+    "actions": "Actions",
+    "scopes": "Scopes",
+    "noPermission": "You don't have permission to manage this.",
+    "keys": {
+      "new": "New API key",
+      "name": "Name",
+      "key": "Key",
+      "allowlist": "Allowed IP addresses (optional)",
+      "allowlistHint": "Addresses or ranges such as 203.0.113.0/24, separated by commas.",
+      "expires": "Expires on (optional)",
+      "create": "Create key",
+      "none": "No API keys yet.",
+      "lastUsed": "Last used",
+      "inactive": "revoked or expired",
+      "rotate": "Rotate",
+      "rotateNamed": "Rotate {{name}}",
+      "revoke": "Revoke",
+      "revokeNamed": "Revoke {{name}}",
+      "confirmRevoke": "Revoke this key? Anything using it stops working straight away."
+    },
+    "webhooks": {
+      "new": "New webhook endpoint",
+      "url": "Endpoint URL",
+      "urlHint": "Must be https and reachable from the internet.",
+      "description": "Description (optional)",
+      "addEvent": "Event",
+      "chooseEvent": "Choose an event…",
+      "add": "Add",
+      "events": "Events",
+      "removeEvent": "Remove {{event}}",
+      "create": "Add endpoint",
+      "none": "No webhook endpoints yet.",
+      "log": "Delivery log",
+      "sendTest": "Send test event",
+      "testQueued": "Test event sent. It appears in the delivery log.",
+      "pause": "Pause",
+      "enable": "Enable",
+      "rotate": "Rotate secret",
+      "delete": "Delete",
+      "confirmDelete": "Delete this endpoint and its delivery log?",
+      "failingSince": "failing since {{when}}",
+      "status": {
+        "active": "Active",
+        "paused": "Paused",
+        "disabled": "Disabled after failures"
+      }
+    },
+    "deliveries": {
+      "none": "No deliveries in the last 30 days.",
+      "event": "Event",
+      "status": "Status",
+      "attempts": "Attempts",
+      "when": "Created",
+      "payload": "Payload",
+      "retryNow": "Retry now",
+      "redeliver": "Redeliver",
+      "statuses": {
+        "pending": "Pending",
+        "retrying": "Retrying",
+        "succeeded": "Delivered",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      }
+    },
+    "apps": {
+      "connected": "Connected apps",
+      "noneConnected": "No third-party apps are connected.",
+      "disconnect": "Disconnect",
+      "disconnectNamed": "Disconnect {{name}}",
+      "registered": "Your OAuth apps",
+      "name": "App name",
+      "redirects": "Redirect URLs",
+      "redirectsHint": "One or more https URLs, separated by spaces.",
+      "confidential": "Confidential client (has a client secret; untick for apps that use PKCE only)",
+      "allowedScopes": "Scopes the app may request",
+      "register": "Register app"
+    },
+    "sandboxes": {
+      "intro": "A sandbox is a separate organisation with a copy of your settings and sample data, for testing integrations safely. Payment, calendar and accounting connections are not copied.",
+      "create": "Create sandbox",
+      "creating": "Creating sandbox…",
+      "open": "Open sandbox"
+    },
+    "docs": {
+      "link": "API documentation",
+      "title": "API documentation",
+      "intro": "The TutorTrack API is the same REST API our own apps use. Public endpoints accept API keys and OAuth access tokens.",
+      "openapi": "Download OpenAPI",
+      "postman": "Download Postman collection",
+      "reference": "Interactive reference",
+      "quickstart": "Quick start",
+      "language": "Language",
+      "changelog": "Changelog",
+      "guides": {
+        "auth": {
+          "title": "Authentication",
+          "body": "Send Authorization: Bearer <token>. Use an API key for your own scripts, or OAuth2 (authorisation code with PKCE) for apps other organisations connect. Each token has scopes such as clients:read; it can never do more than the person who created it."
+        },
+        "pagination": {
+          "title": "Pagination",
+          "body": "Lists are cursor-paginated: follow the next link until it is null. Use page_size (up to 200) to change the page length."
+        },
+        "errors": {
+          "title": "Errors",
+          "body": "Errors use RFC 7807 problem details with type, title, status, detail and, for validation errors, errors per field. 401 means the token is not valid; 403 means a scope or permission is missing."
+        },
+        "idempotency": {
+          "title": "Idempotency",
+          "body": "Send an Idempotency-Key header on POST requests to make them safe to retry for 24 hours. Repeating the key with a different body returns 422."
+        },
+        "webhooks": {
+          "title": "Webhooks",
+          "body": "We POST each event as JSON with Webhook-Id, Webhook-Event and Webhook-Signature headers. Compute HMAC-SHA256 with your endpoint secret over the timestamp, a full stop and the raw body, compare it with each v1 value and reject timestamps more than five minutes old. Failed deliveries are retried with backoff for about 72 hours; endpoints failing for three days are disabled. Events can arrive out of order: use occurred_at."
+        },
+        "rateLimits": {
+          "title": "Rate limits",
+          "body": "Each token may make 600 requests a minute with bursts of up to 100 a second. Every response has X-RateLimit-Limit, X-RateLimit-Remaining and X-RateLimit-Reset; when you exceed the limit you get 429 with Retry-After."
+        },
+        "versioning": {
+          "title": "Versioning",
+          "body": "The major version is in the URL (/api/v1/). Within v1 we only add fields and endpoints. Endpoints being retired send Deprecation and Sunset headers months ahead and appear in the changelog."
+        }
+      }
+    }
+  },
+  "marketplace": {
+    "title": "Integrations",
+    "intro": "Connect TutorTrack to the tools you already use.",
+    "connect": "Connect {{name}}",
+    "manage": "Manage {{name}}",
+    "categories": {
+      "payments": "Payments",
+      "accounting": "Accounting",
+      "calendar": "Calendars",
+      "video": "Video lessons",
+      "messaging": "Messaging",
+      "automation": "Automation and partner apps"
+    },
+    "status": {
+      "connected": "Connected",
+      "available": "Available",
+      "coming_soon": "Coming soon"
+    }
+  },
+  "oauth": {
+    "title": "{{app}} wants to access {{organisation}}",
+    "wants": "It will be able to:",
+    "redirectNotice": "You will be returned to {{url}}.",
+    "allow": "Allow",
+    "deny": "Deny",
+    "invalidTitle": "This connection request isn't valid"
   }
 }

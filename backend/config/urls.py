@@ -33,6 +33,7 @@ api_v1: list[URLPattern | URLResolver] = [
     path("", include("tutortrack.reporting.api.urls")),
     path("", include("tutortrack.integrations.api.urls")),
     path("", include("tutortrack.calendar_sync.api.urls")),
+    path("", include("tutortrack.developer.api.urls")),
     path("", include("tutortrack.comms.api.urls")),
     path("", include("tutortrack.portal.api.urls")),
     path("", include("tutortrack.subscriptions.api.urls")),

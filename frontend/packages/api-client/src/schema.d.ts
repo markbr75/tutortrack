@@ -2390,6 +2390,333 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/developer/api-keys": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description API keys (secrets are shown once, on create and rotate). */
+    get: operations["developer_api_keys_list"];
+    put?: never;
+    /** @description API keys (secrets are shown once, on create and rotate). */
+    post: operations["developer_api_keys_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/api-keys/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description API keys (secrets are shown once, on create and rotate). */
+    get: operations["developer_api_keys_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description API keys (secrets are shown once, on create and rotate). */
+    patch: operations["developer_api_keys_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/developer/api-keys/{id}/revoke": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description API keys (secrets are shown once, on create and rotate). */
+    post: operations["developer_api_keys_revoke_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/api-keys/{id}/rotate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description A replacement key; the old one keeps working for the overlap period. */
+    post: operations["developer_api_keys_rotate_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/changelog": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["developer_changelog_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/connected-apps": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Third-party apps people in this organisation have authorised. */
+    get: operations["developer_connected_apps_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/connected-apps/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Third-party apps people in this organisation have authorised. */
+    get: operations["developer_connected_apps_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/connected-apps/{id}/revoke": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Third-party apps people in this organisation have authorised. */
+    post: operations["developer_connected_apps_revoke_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/connectors/{platform}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The Zapier or Make app definition (triggers, actions, searches, OAuth settings). */
+    get: operations["developer_connectors_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/marketplace": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Native integrations with their connection status, plus partner apps. */
+    get: operations["developer_marketplace_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/oauth-apps": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description OAuth2 apps this organisation registered (authorisation code + PKCE). */
+    get: operations["developer_oauth_apps_list"];
+    put?: never;
+    /** @description OAuth2 apps this organisation registered (authorisation code + PKCE). */
+    post: operations["developer_oauth_apps_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/oauth-apps/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description OAuth2 apps this organisation registered (authorisation code + PKCE). */
+    get: operations["developer_oauth_apps_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description OAuth2 apps this organisation registered (authorisation code + PKCE). */
+    delete: operations["developer_oauth_apps_destroy"];
+    options?: never;
+    head?: never;
+    /** @description OAuth2 apps this organisation registered (authorisation code + PKCE). */
+    patch: operations["developer_oauth_apps_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/developer/oauth-apps/{id}/rotate-secret": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description OAuth2 apps this organisation registered (authorisation code + PKCE). */
+    post: operations["developer_oauth_apps_rotate_secret_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/openapi.json": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The OpenAPI document of the public API only (rendered by the docs portal). */
+    get: operations["developer_openapi.json_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/overview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["developer_overview_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/postman.json": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description A Postman v2.1 collection of the public API. */
+    get: operations["developer_postman.json_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/sandboxes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Sandbox organisations: a copy of the settings with sample data, for testing. */
+    get: operations["developer_sandboxes_list"];
+    put?: never;
+    /** @description Sandbox organisations: a copy of the settings with sample data, for testing. */
+    post: operations["developer_sandboxes_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/sandboxes/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Sandbox organisations: a copy of the settings with sample data, for testing. */
+    get: operations["developer_sandboxes_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/developer/scopes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The scope catalogue and the permissions each scope covers. */
+    get: operations["developer_scopes_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/documents": {
     parameters: {
       query?: never;
@@ -5562,6 +5889,61 @@ export interface paths {
     get: operations["notifications_unread_count_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/oauth/authorize": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The consent screen's data (GET) and the user's decision (POST). */
+    get: operations["oauth_authorize_retrieve"];
+    put?: never;
+    /** @description The consent screen's data (GET) and the user's decision (POST). */
+    post: operations["oauth_authorize_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/oauth/revoke": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description OAuth2 token revocation (RFC 7009). */
+    post: operations["oauth_revoke_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/oauth/token": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description OAuth2 token endpoint (RFC 6749): ``authorization_code`` (with PKCE) and
+     *     ``refresh_token`` grants. Errors use the OAuth format, not problem details.
+     */
+    post: operations["oauth_token_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -8985,6 +9367,214 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/webhook-deliveries": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The delivery log (30 days): each delivery with its attempts. */
+    get: operations["webhook_deliveries_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/webhook-deliveries/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The delivery log (30 days): each delivery with its attempts. */
+    get: operations["webhook_deliveries_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/webhook-deliveries/{id}/redeliver": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description The delivery log (30 days): each delivery with its attempts. */
+    post: operations["webhook_deliveries_redeliver_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/webhook-deliveries/{id}/retry-now": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description The delivery log (30 days): each delivery with its attempts. */
+    post: operations["webhook_deliveries_retry_now_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/webhook-endpoints": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Webhook endpoints: HTTPS URLs that receive signed event notifications. Also the
+     *     REST-hook subscription API used by Zapier and Make.
+     */
+    get: operations["webhook_endpoints_list"];
+    put?: never;
+    /**
+     * @description Webhook endpoints: HTTPS URLs that receive signed event notifications. Also the
+     *     REST-hook subscription API used by Zapier and Make.
+     */
+    post: operations["webhook_endpoints_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/webhook-endpoints/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Webhook endpoints: HTTPS URLs that receive signed event notifications. Also the
+     *     REST-hook subscription API used by Zapier and Make.
+     */
+    get: operations["webhook_endpoints_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Webhook endpoints: HTTPS URLs that receive signed event notifications. Also the
+     *     REST-hook subscription API used by Zapier and Make.
+     */
+    delete: operations["webhook_endpoints_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Webhook endpoints: HTTPS URLs that receive signed event notifications. Also the
+     *     REST-hook subscription API used by Zapier and Make.
+     */
+    patch: operations["webhook_endpoints_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/webhook-endpoints/{id}/reveal-secret": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Show the signing secret (the read is audited). */
+    post: operations["webhook_endpoints_reveal_secret_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/webhook-endpoints/{id}/rotate-secret": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description New signing secret; the old one also signs for 24 hours. */
+    post: operations["webhook_endpoints_rotate_secret_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/webhook-endpoints/{id}/test": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Send a ``webhook.test`` event now. */
+    post: operations["webhook_endpoints_test_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/webhook-event-types": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Event types an endpoint can subscribe to (also ``<aggregate>.*``). */
+    get: operations["webhook_event_types_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/webhook-event-types/{event_type}/sample": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description An example payload: the latest real one of that type, else a synthetic one (Zapier
+     *     and Make use it to show sample data).
+     */
+    get: operations["webhook_event_types_sample_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -9209,6 +9799,132 @@ export interface components {
       type: string;
       value: unknown;
     };
+    ApiKey: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly name: string;
+      readonly display: string;
+      readonly prefix: string;
+      readonly scopes: string[];
+      /** Format: uuid */
+      readonly branch: string | null;
+      /** @default  */
+      readonly branch_name: string;
+      readonly ip_allowlist: string[];
+      /** Format: date-time */
+      readonly expires_at: string | null;
+      /** Format: date-time */
+      readonly revoked_at: string | null;
+      /** Format: date-time */
+      readonly last_used_at: string | null;
+      readonly last_used_ip: string | null;
+      readonly rate_limit_per_minute: number | null;
+      /** Format: uuid */
+      readonly rotated_from: string | null;
+      /** Format: uuid */
+      readonly user: string;
+      readonly user_name: string;
+      readonly active: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ApiKeyCreateRequest: {
+      name: string;
+      scopes: components["schemas"]["ApiScopeEnum"][];
+      /** Format: uuid */
+      branch?: string | null;
+      ip_allowlist?: string[];
+      /** Format: date-time */
+      expires_at?: string | null;
+      rate_limit_per_minute?: number | null;
+    };
+    /** @description Returned once, on creation or rotation. */
+    ApiKeySecret: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly name: string;
+      readonly display: string;
+      readonly prefix: string;
+      readonly scopes: string[];
+      /** Format: uuid */
+      readonly branch: string | null;
+      /** @default  */
+      readonly branch_name: string;
+      readonly ip_allowlist: string[];
+      /** Format: date-time */
+      readonly expires_at: string | null;
+      /** Format: date-time */
+      readonly revoked_at: string | null;
+      /** Format: date-time */
+      readonly last_used_at: string | null;
+      readonly last_used_ip: string | null;
+      readonly rate_limit_per_minute: number | null;
+      /** Format: uuid */
+      readonly rotated_from: string | null;
+      /** Format: uuid */
+      readonly user: string;
+      readonly user_name: string;
+      readonly active: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly secret: string;
+    };
+    /**
+     * @description * `clients:read` - clients:read
+     *     * `clients:write` - clients:write
+     *     * `students:read` - students:read
+     *     * `students:write` - students:write
+     *     * `tutors:read` - tutors:read
+     *     * `tutors:write` - tutors:write
+     *     * `services:read` - services:read
+     *     * `services:write` - services:write
+     *     * `jobs:read` - jobs:read
+     *     * `jobs:write` - jobs:write
+     *     * `lessons:read` - lessons:read
+     *     * `lessons:write` - lessons:write
+     *     * `availability:read` - availability:read
+     *     * `availability:write` - availability:write
+     *     * `invoices:read` - invoices:read
+     *     * `invoices:write` - invoices:write
+     *     * `payments:read` - payments:read
+     *     * `payments:write` - payments:write
+     *     * `payroll:read` - payroll:read
+     *     * `enquiries:read` - enquiries:read
+     *     * `enquiries:write` - enquiries:write
+     *     * `crm:read` - crm:read
+     *     * `crm:write` - crm:write
+     *     * `branches:read` - branches:read
+     *     * `webhooks:read` - webhooks:read
+     *     * `webhooks:write` - webhooks:write
+     * @enum {string}
+     */
+    ApiScopeEnum:
+      | "clients:read"
+      | "clients:write"
+      | "students:read"
+      | "students:write"
+      | "tutors:read"
+      | "tutors:write"
+      | "services:read"
+      | "services:write"
+      | "jobs:read"
+      | "jobs:write"
+      | "lessons:read"
+      | "lessons:write"
+      | "availability:read"
+      | "availability:write"
+      | "invoices:read"
+      | "invoices:write"
+      | "payments:read"
+      | "payments:write"
+      | "payroll:read"
+      | "enquiries:read"
+      | "enquiries:write"
+      | "crm:read"
+      | "crm:write"
+      | "branches:read"
+      | "webhooks:read"
+      | "webhooks:write";
     Application: {
       /** Format: uuid */
       readonly id: string;
@@ -9473,6 +10189,20 @@ export interface components {
      * @enum {string}
      */
     AuthEnum: "oauth2" | "credentials" | "platform";
+    AuthorizeDecisionRequest: {
+      client_id: string;
+      redirect_uri: string;
+      /** @default code */
+      response_type: string;
+      scope: string;
+      /** @default  */
+      state: string;
+      /** @default  */
+      code_challenge: string;
+      /** @default  */
+      code_challenge_method: string;
+      approve: boolean;
+    };
     AutoPayRequest: {
       enabled: boolean;
     };
@@ -10049,6 +10779,13 @@ export interface components {
       blockers: string[];
       amount_due_now: components["schemas"]["MoneyOut"] | null;
     };
+    ChangelogEntry: {
+      /** Format: date */
+      released_on: string;
+      title: string;
+      change_kind: string;
+      description: string;
+    };
     Charge: {
       /** Format: uuid */
       readonly id: string;
@@ -10404,12 +11141,36 @@ export interface components {
       branch?: string | null;
       email?: string;
     };
+    ConnectedApp: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly application: components["schemas"]["OAuthApplication"];
+      /** Format: uuid */
+      readonly user: string;
+      /** Format: email */
+      readonly user_email: string;
+      readonly scopes: string[];
+      /** Format: date-time */
+      readonly last_used_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
     ConnectionUser: {
       /** Format: uuid */
       id: string;
       name: string;
       /** Format: email */
       email: string;
+    };
+    ConnectorManifest: {
+      platform: string;
+    };
+    Consent: {
+      application: components["schemas"]["OAuthApplication"];
+      scopes: components["schemas"]["ConsentScope"][];
+      redirect_uri: string;
+      state: string;
+      organisation_name: string;
     };
     ConsentRecord: {
       /** Format: uuid */
@@ -10437,6 +11198,10 @@ export interface components {
      * @enum {string}
      */
     ConsentRecordMethodEnum: "form" | "portal" | "import" | "staff" | "signup";
+    ConsentScope: {
+      key: string;
+      description: string;
+    };
     ConsentStatus: {
       key: string;
       name: string;
@@ -11240,6 +12005,18 @@ export interface components {
       at: string;
       detail: string;
     };
+    EventSample: {
+      event_type: string;
+      synthetic: boolean;
+      body: unknown;
+    };
+    EventType: {
+      key: string;
+      aggregate: string;
+      subject_type: string;
+      description: string;
+      version: number;
+    };
     Exception: {
       /** Format: uuid */
       readonly id: string;
@@ -11605,6 +12382,12 @@ export interface components {
       allow_write: boolean;
       note?: string;
     };
+    /**
+     * @description * `authorization_code` - authorization_code
+     *     * `refresh_token` - refresh_token
+     * @enum {string}
+     */
+    GrantTypeEnum: "authorization_code" | "refresh_token";
     /**
      * @description * `per_student` - Each student pays the rate
      *     * `split` - The rate is split between students
@@ -13074,6 +13857,30 @@ export interface components {
     MarkReadRequest: {
       ids?: string[] | null;
     };
+    MarketplaceEntry: {
+      key: string;
+      name: string;
+      category: string;
+      description: string;
+      status: components["schemas"]["MarketplaceStatusEnum"];
+      settings_path: string;
+      kind: components["schemas"]["MarketplaceKindEnum"];
+      client_id: string;
+      homepage_url: string;
+    };
+    /**
+     * @description * `native` - native
+     *     * `partner` - partner
+     * @enum {string}
+     */
+    MarketplaceKindEnum: "native" | "partner";
+    /**
+     * @description * `connected` - connected
+     *     * `available` - available
+     *     * `coming_soon` - coming_soon
+     * @enum {string}
+     */
+    MarketplaceStatusEnum: "connected" | "available" | "coming_soon";
     /**
      * @description * `online` - online
      *     * `in_person` - in_person
@@ -13461,9 +14268,58 @@ export interface components {
     NudgeResult: {
       nudged: number;
     };
+    OAuthApplication: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly name: string;
+      readonly description: string;
+      /** Format: uri */
+      readonly homepage_url: string;
+      /** Format: uri */
+      readonly logo_url: string;
+      readonly client_id: string;
+      readonly confidential: boolean;
+      readonly redirect_uris: string[];
+      readonly allowed_scopes: string[];
+      readonly partner_key: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    OAuthApplicationSecret: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly name: string;
+      readonly description: string;
+      /** Format: uri */
+      readonly homepage_url: string;
+      /** Format: uri */
+      readonly logo_url: string;
+      readonly client_id: string;
+      readonly confidential: boolean;
+      readonly redirect_uris: string[];
+      readonly allowed_scopes: string[];
+      readonly partner_key: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly client_secret: string | null;
+    };
+    OAuthApplicationWriteRequest: {
+      name: string;
+      /** @default  */
+      description: string;
+      homepage_url?: string;
+      logo_url?: string;
+      /** @default true */
+      confidential: boolean;
+      redirect_uris: string[];
+      allowed_scopes: components["schemas"]["ApiScopeEnum"][];
+    };
     OAuthCompleteRequest: {
       code: string;
       state: string;
+    };
+    OAuthRedirect: {
+      redirect_to: string;
     };
     OAuthStartRequest: {
       provider: string;
@@ -13693,6 +14549,16 @@ export interface components {
       expires_at?: string | null;
       reason: string;
     };
+    Overview: {
+      api_keys: number;
+      connected_apps: number;
+      webhook_endpoints: number;
+      deliveries_24h: number;
+      failed_24h: number;
+      sandbox_of: string;
+      rate_limit_per_minute: number;
+      burst_per_second: number;
+    };
     PackageTemplate: {
       /** Format: uuid */
       readonly id: string;
@@ -13764,6 +14630,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Announcement"][];
+    };
+    PaginatedApiKeyList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ApiKey"][];
     };
     PaginatedApplicationList: {
       /**
@@ -13881,6 +14760,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Conflict"][];
+    };
+    PaginatedConnectedAppList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ConnectedApp"][];
     };
     PaginatedConsentRecordList: {
       /**
@@ -14246,6 +15138,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Note"][];
     };
+    PaginatedOAuthApplicationList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["OAuthApplication"][];
+    };
     PaginatedOfferBatchList: {
       /**
        * Format: uri
@@ -14402,6 +15307,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["ReportRun"][];
     };
+    PaginatedSandboxList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Sandbox"][];
+    };
     PaginatedSavedReportList: {
       /**
        * Format: uri
@@ -14519,6 +15437,32 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["WaitlistEntry"][];
     };
+    PaginatedWebhookDeliveryList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["WebhookDelivery"][];
+    };
+    PaginatedWebhookEndpointList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["WebhookEndpoint"][];
+    };
     PasswordChangeRequest: {
       current_password: string;
       new_password: string;
@@ -14530,6 +15474,14 @@ export interface components {
       uid: string;
       token: string;
       new_password: string;
+    };
+    PatchedApiKeyUpdateRequest: {
+      name?: string;
+      scopes?: components["schemas"]["ApiScopeEnum"][];
+      ip_allowlist?: string[];
+      /** Format: date-time */
+      expires_at?: string | null;
+      rate_limit_per_minute?: number | null;
     };
     PatchedApplicationStageRequest: {
       name?: string;
@@ -14875,6 +15827,14 @@ export interface components {
       starts_at?: string;
       /** Format: date-time */
       ends_at?: string | null;
+    };
+    PatchedOAuthApplicationPatchRequest: {
+      name?: string;
+      description?: string;
+      homepage_url?: string;
+      logo_url?: string;
+      redirect_uris?: string[];
+      allowed_scopes?: components["schemas"]["ApiScopeEnum"][];
     };
     PatchedOrganisationRequest: {
       name?: string;
@@ -15237,6 +16197,15 @@ export interface components {
       /** Format: uuid */
       service?: string | null;
       notes?: string;
+    };
+    PatchedWebhookEndpointPatchRequest: {
+      /** Format: uri */
+      url?: string;
+      events?: string[];
+      description?: string;
+      /** Format: uuid */
+      branch?: string | null;
+      status?: components["schemas"]["WebhookEndpointToggleEnum"];
     };
     PayIntent: {
       publishable_key: string;
@@ -16081,6 +17050,11 @@ export interface components {
      * @enum {string}
      */
     PostingApplicationStatusEnum: "applied" | "selected" | "rejected" | "withdrawn";
+    PostmanCollection: {
+      info: {
+        [key: string]: unknown;
+      };
+    };
     PreferenceRow: {
       category: components["schemas"]["PreferenceRowCategoryEnum"];
       channels: components["schemas"]["MessageChannelEnum"][];
@@ -16370,6 +17344,9 @@ export interface components {
       /** Format: date-time */
       expires_at: string | null;
       organisation: string;
+    };
+    PublicOpenApi: {
+      openapi: string;
     };
     PublicOpening: {
       title: string;
@@ -17020,6 +17997,12 @@ export interface components {
     RespondRequest: {
       accept: boolean;
     };
+    RevokeRequestRequest: {
+      token: string;
+      client_id: string;
+      /** @default  */
+      client_secret: string;
+    };
     Role: {
       key: string;
       name: string;
@@ -17072,6 +18055,18 @@ export interface components {
     SSOProvider: {
       key: string;
       start_url: string;
+    };
+    Sandbox: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly sandbox_organisation_id: string;
+      readonly name: string;
+      readonly slug: string;
+      readonly records: number;
+      readonly url: string;
+      /** Format: date-time */
+      readonly created_at: string;
     };
     SavedReport: {
       /** Format: uuid */
@@ -17211,6 +18206,19 @@ export interface components {
       label: string;
       subject: string;
     };
+    Scope: {
+      key: string;
+      resource: string;
+      access: components["schemas"]["ScopeAccessEnum"];
+      description: string;
+      permissions: string[];
+    };
+    /**
+     * @description * `read` - read
+     *     * `write` - write
+     * @enum {string}
+     */
+    ScopeAccessEnum: "read" | "write";
     ScoreRequest: {
       scores: {
         [key: string]: number;
@@ -17246,6 +18254,9 @@ export interface components {
      * @enum {string}
      */
     SeatModeEnum: "active" | "delivered";
+    Secret: {
+      secret: string;
+    };
     Series: {
       /** Format: uuid */
       readonly id: string;
@@ -18242,6 +19253,27 @@ export interface components {
     TokenRequest: {
       token: string;
     };
+    TokenRequestRequest: {
+      grant_type: components["schemas"]["GrantTypeEnum"];
+      client_id: string;
+      /** @default  */
+      client_secret: string;
+      /** @default  */
+      code: string;
+      /** @default  */
+      redirect_uri: string;
+      /** @default  */
+      code_verifier: string;
+      /** @default  */
+      refresh_token: string;
+    };
+    TokenResponse: {
+      access_token: string;
+      token_type: string;
+      expires_in: number;
+      refresh_token: string;
+      scope: string;
+    };
     TopUpRequest: {
       credits: number;
     };
@@ -18673,6 +19705,151 @@ export interface components {
      * @enum {string}
      */
     WaitlistStatusEnum: "waiting" | "offered" | "accepted" | "declined" | "expired" | "removed";
+    WebhookAttempt: {
+      readonly number: number;
+      /** Format: date-time */
+      readonly attempted_at: string;
+      readonly status_code: number | null;
+      readonly succeeded: boolean;
+      readonly error: string;
+      readonly request_headers: {
+        [key: string]: string;
+      };
+      readonly response_snippet: string;
+      readonly duration_ms: number;
+    };
+    WebhookDelivery: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly endpoint: string;
+      readonly endpoint_url: string;
+      /** Format: uuid */
+      readonly event_id: string;
+      readonly event_type: string;
+      readonly status: components["schemas"]["WebhookDeliveryStatusEnum"];
+      readonly attempt_count: number;
+      readonly last_status_code: number | null;
+      /** Format: date-time */
+      readonly last_attempt_at: string | null;
+      /** Format: date-time */
+      readonly delivered_at: string | null;
+      /** @default false */
+      readonly is_test: boolean;
+      /** Format: uuid */
+      readonly redelivery_of: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    WebhookDeliveryDetail: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly endpoint: string;
+      readonly endpoint_url: string;
+      /** Format: uuid */
+      readonly event_id: string;
+      readonly event_type: string;
+      readonly status: components["schemas"]["WebhookDeliveryStatusEnum"];
+      readonly attempt_count: number;
+      readonly last_status_code: number | null;
+      /** Format: date-time */
+      readonly last_attempt_at: string | null;
+      /** Format: date-time */
+      readonly delivered_at: string | null;
+      /** @default false */
+      readonly is_test: boolean;
+      /** Format: uuid */
+      readonly redelivery_of: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly attempts: components["schemas"]["WebhookAttempt"][];
+      readonly body: unknown;
+    };
+    /**
+     * @description * `pending` - Pending
+     *     * `retrying` - Retrying
+     *     * `succeeded` - Delivered
+     *     * `failed` - Failed
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    WebhookDeliveryStatusEnum: "pending" | "retrying" | "succeeded" | "failed" | "cancelled";
+    WebhookEndpoint: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uri */
+      readonly url: string;
+      readonly description: string;
+      readonly events: string[];
+      /** Format: uuid */
+      readonly branch: string | null;
+      /** @default  */
+      readonly branch_name: string;
+      readonly status: components["schemas"]["WebhookEndpointStatusEnum"];
+      readonly source: components["schemas"]["WebhookEndpointSourceEnum"];
+      readonly api_version: string;
+      /** Format: date-time */
+      readonly failing_since: string | null;
+      /** Format: date-time */
+      readonly disabled_at: string | null;
+      readonly secret_rotating: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    WebhookEndpointCreateRequest: {
+      /** Format: uri */
+      url: string;
+      events: string[];
+      /** @default  */
+      description: string;
+      /** Format: uuid */
+      branch?: string | null;
+    };
+    WebhookEndpointSecret: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uri */
+      readonly url: string;
+      readonly description: string;
+      readonly events: string[];
+      /** Format: uuid */
+      readonly branch: string | null;
+      /** @default  */
+      readonly branch_name: string;
+      readonly status: components["schemas"]["WebhookEndpointStatusEnum"];
+      readonly source: components["schemas"]["WebhookEndpointSourceEnum"];
+      readonly api_version: string;
+      /** Format: date-time */
+      readonly failing_since: string | null;
+      /** Format: date-time */
+      readonly disabled_at: string | null;
+      readonly secret_rotating: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly secret: string;
+    };
+    /**
+     * @description * `manual` - Added by hand
+     *     * `api` - Added through the API
+     *     * `zapier` - Zapier
+     *     * `make` - Make
+     * @enum {string}
+     */
+    WebhookEndpointSourceEnum: "manual" | "api" | "zapier" | "make";
+    /**
+     * @description * `active` - Active
+     *     * `paused` - Paused
+     *     * `disabled` - Disabled after failures
+     * @enum {string}
+     */
+    WebhookEndpointStatusEnum: "active" | "paused" | "disabled";
+    /**
+     * @description * `active` - active
+     *     * `paused` - paused
+     * @enum {string}
+     */
+    WebhookEndpointToggleEnum: "active" | "paused";
     /**
      * @description * `0` - Monday
      *     * `1` - Tuesday
@@ -23553,6 +24730,587 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["DemoData"];
+        };
+      };
+    };
+  };
+  developer_api_keys_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedApiKeyList"];
+        };
+      };
+    };
+  };
+  developer_api_keys_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ApiKeyCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ApiKeyCreateRequest"];
+        "multipart/form-data": components["schemas"]["ApiKeyCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApiKeySecret"];
+        };
+      };
+    };
+  };
+  developer_api_keys_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this api key. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApiKey"];
+        };
+      };
+    };
+  };
+  developer_api_keys_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this api key. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedApiKeyUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedApiKeyUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedApiKeyUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApiKey"];
+        };
+      };
+    };
+  };
+  developer_api_keys_revoke_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this api key. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApiKey"];
+        };
+      };
+    };
+  };
+  developer_api_keys_rotate_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this api key. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApiKeySecret"];
+        };
+      };
+    };
+  };
+  developer_changelog_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChangelogEntry"][];
+        };
+      };
+    };
+  };
+  developer_connected_apps_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedConnectedAppList"];
+        };
+      };
+    };
+  };
+  developer_connected_apps_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this o auth grant. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ConnectedApp"];
+        };
+      };
+    };
+  };
+  developer_connected_apps_revoke_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this o auth grant. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  developer_connectors_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        platform: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ConnectorManifest"];
+        };
+      };
+    };
+  };
+  developer_marketplace_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MarketplaceEntry"][];
+        };
+      };
+    };
+  };
+  developer_oauth_apps_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedOAuthApplicationList"];
+        };
+      };
+    };
+  };
+  developer_oauth_apps_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OAuthApplicationWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["OAuthApplicationWriteRequest"];
+        "multipart/form-data": components["schemas"]["OAuthApplicationWriteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OAuthApplicationSecret"];
+        };
+      };
+    };
+  };
+  developer_oauth_apps_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this o auth application. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OAuthApplication"];
+        };
+      };
+    };
+  };
+  developer_oauth_apps_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this o auth application. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  developer_oauth_apps_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this o auth application. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedOAuthApplicationPatchRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedOAuthApplicationPatchRequest"];
+        "multipart/form-data": components["schemas"]["PatchedOAuthApplicationPatchRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OAuthApplication"];
+        };
+      };
+    };
+  };
+  developer_oauth_apps_rotate_secret_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this o auth application. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OAuthApplicationSecret"];
+        };
+      };
+    };
+  };
+  "developer_openapi.json_retrieve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicOpenApi"];
+        };
+      };
+    };
+  };
+  developer_overview_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Overview"];
+        };
+      };
+    };
+  };
+  "developer_postman.json_retrieve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PostmanCollection"];
+        };
+      };
+    };
+  };
+  developer_sandboxes_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedSandboxList"];
+        };
+      };
+    };
+  };
+  developer_sandboxes_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Sandbox"];
+        };
+      };
+    };
+  };
+  developer_sandboxes_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this sandbox. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Sandbox"];
+        };
+      };
+    };
+  };
+  developer_scopes_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Scope"][];
         };
       };
     };
@@ -29300,6 +31058,135 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["UnreadCount"];
         };
+      };
+    };
+  };
+  oauth_authorize_retrieve: {
+    parameters: {
+      query: {
+        client_id: string;
+        code_challenge?: string;
+        code_challenge_method?: string;
+        redirect_uri: string;
+        response_type?: string;
+        scope: string;
+        state?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Consent"];
+        };
+      };
+      /** @description OAuth error */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  oauth_authorize_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AuthorizeDecisionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AuthorizeDecisionRequest"];
+        "multipart/form-data": components["schemas"]["AuthorizeDecisionRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OAuthRedirect"];
+        };
+      };
+      /** @description OAuth error */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  oauth_revoke_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/x-www-form-urlencoded": components["schemas"]["RevokeRequestRequest"];
+        "application/json": components["schemas"]["RevokeRequestRequest"];
+      };
+    };
+    responses: {
+      /** @description No response body */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  oauth_token_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/x-www-form-urlencoded": components["schemas"]["TokenRequestRequest"];
+        "application/json": components["schemas"]["TokenRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TokenResponse"];
+        };
+      };
+      /** @description OAuth error */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -35485,6 +37372,345 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["WaitlistEntry"];
+        };
+      };
+    };
+  };
+  webhook_deliveries_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        endpoint?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: "cancelled" | "failed" | "pending" | "retrying" | "succeeded";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedWebhookDeliveryList"];
+        };
+      };
+    };
+  };
+  webhook_deliveries_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this webhook delivery. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WebhookDeliveryDetail"];
+        };
+      };
+    };
+  };
+  webhook_deliveries_redeliver_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this webhook delivery. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WebhookDelivery"];
+        };
+      };
+    };
+  };
+  webhook_deliveries_retry_now_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this webhook delivery. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  webhook_endpoints_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedWebhookEndpointList"];
+        };
+      };
+    };
+  };
+  webhook_endpoints_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WebhookEndpointCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["WebhookEndpointCreateRequest"];
+        "multipart/form-data": components["schemas"]["WebhookEndpointCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WebhookEndpointSecret"];
+        };
+      };
+    };
+  };
+  webhook_endpoints_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this webhook endpoint. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WebhookEndpoint"];
+        };
+      };
+    };
+  };
+  webhook_endpoints_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this webhook endpoint. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  webhook_endpoints_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this webhook endpoint. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedWebhookEndpointPatchRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedWebhookEndpointPatchRequest"];
+        "multipart/form-data": components["schemas"]["PatchedWebhookEndpointPatchRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WebhookEndpoint"];
+        };
+      };
+    };
+  };
+  webhook_endpoints_reveal_secret_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this webhook endpoint. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Secret"];
+        };
+      };
+    };
+  };
+  webhook_endpoints_rotate_secret_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this webhook endpoint. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Secret"];
+        };
+      };
+    };
+  };
+  webhook_endpoints_test_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this webhook endpoint. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WebhookDelivery"];
+        };
+      };
+    };
+  };
+  webhook_event_types_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventType"][];
+        };
+      };
+    };
+  };
+  webhook_event_types_sample_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        event_type: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventSample"];
         };
       };
     };

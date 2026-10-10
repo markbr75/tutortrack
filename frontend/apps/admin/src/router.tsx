@@ -66,6 +66,8 @@ import { PlanPage } from "./subscription/PlanPage";
 import { TeamPage } from "./routes/TeamPage";
 import { ReportsLibraryPage, ReportViewPage, SavedReportsPage } from "./reporting/ReportingPages";
 import { VerifyEmailPage } from "./routes/VerifyEmailPage";
+import { DeveloperPage } from "./developer/DeveloperPages";
+import { DeveloperDocsPage, MarketplacePage, OAuthConsentPage } from "./developer/DocsPages";
 
 interface RouterContext {
   queryClient: QueryClient;
@@ -270,6 +272,10 @@ const paymentsSettingsRoute = appPage("/settings/payments", PaymentsSettingsPage
 const notificationSettingsRoute = appPage("/settings/notifications", NotificationSettingsPage);
 const planRoute = appPage("/settings/plan", PlanPage);
 const integrationsRoute = appPage("/settings/integrations", IntegrationsPage);
+const developerRoute = appPage("/developer", DeveloperPage);
+const developerDocsRoute = appPage("/developer/docs", DeveloperDocsPage);
+const marketplaceRoute = appPage("/settings/marketplace", MarketplacePage);
+const oauthConsentRoute = appPage("/oauth/authorize", OAuthConsentPage);
 const payRunsRoute = appPage("/payroll", PayRunsPage);
 const payExpensesRoute = appPage("/payroll/expenses", ExpensesPage);
 const payItemsRoute = appPage("/payroll/items", PayItemsPage);
@@ -388,6 +394,10 @@ const routeTree = rootRoute.addChildren([
     notificationSettingsRoute,
     planRoute,
     integrationsRoute,
+    developerRoute,
+    developerDocsRoute,
+    marketplaceRoute,
+    oauthConsentRoute,
     payRunsRoute,
     payExpensesRoute,
     payItemsRoute,

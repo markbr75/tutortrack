@@ -59,6 +59,8 @@ INSTALLED_APPS = [
     "tutortrack.portal",
     "tutortrack.subscriptions",
     "tutortrack.platform_admin",
+    # Last: subscribes webhooks to the event types every other app registers (E27).
+    "tutortrack.developer",
 ]
 
 MIDDLEWARE = [
@@ -72,6 +74,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "tutortrack.identity.middleware.SessionSecurityMiddleware",
     "tutortrack.identity.impersonation.ImpersonationMiddleware",
+    # Bearer API keys / OAuth tokens (E27): sets the user and tenant from the token.
+    "tutortrack.developer.auth.ApiTokenMiddleware",
     "tutortrack.core.middleware.UserContextMiddleware",
     "tutortrack.tenancy.middleware.TenantMiddleware",
     "tutortrack.tenancy.middleware.OrganisationStatusMiddleware",
@@ -255,6 +259,7 @@ CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 # --- DRF / OpenAPI ----------------------------------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "tutortrack.developer.auth.ApiTokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
@@ -264,7 +269,8 @@ REST_FRAMEWORK = {
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.OrderingFilter",
     ],
-    "DEFAULT_SCHEMA_CLASS": "tutortrack.core.api.schema.AutoSchema",
+    # Core AutoSchema plus public/internal tagging and the bearer scheme (E27).
+    "DEFAULT_SCHEMA_CLASS": "tutortrack.developer.schema.AutoSchema",
     "EXCEPTION_HANDLER": "tutortrack.core.api.exceptions.problem_exception_handler",
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
@@ -290,6 +296,14 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "COMPONENT_SPLIT_REQUEST": True,
     "ENUM_NAME_OVERRIDES": {
+        "WebhookEndpointStatusEnum": "tutortrack.developer.models.WebhookEndpoint.Status",
+        "WebhookEndpointSourceEnum": "tutortrack.developer.models.WebhookEndpoint.Source",
+        "WebhookDeliveryStatusEnum": "tutortrack.developer.models.WebhookDelivery.Status",
+        "WebhookEndpointToggleEnum": "tutortrack.developer.api.serializers.ENDPOINT_TOGGLE",
+        "MarketplaceStatusEnum": "tutortrack.developer.api.serializers.MARKETPLACE_STATUS",
+        "MarketplaceKindEnum": "tutortrack.developer.api.serializers.MARKETPLACE_KIND",
+        "ScopeAccessEnum": "tutortrack.developer.api.serializers.SCOPE_ACCESS",
+        "ApiScopeEnum": "tutortrack.developer.scopes.ALL_SCOPES",
         "ProcessStatusEnum": "tutortrack.core.models.workflows.WorkflowLink.Status",
         "IntegrationLevelEnum": "tutortrack.integrations.models.IntegrationConnection.Level",
         "VideoProviderEnum": "tutortrack.calendar_sync.api.serializers.VIDEO_CHOICES",
@@ -445,6 +459,18 @@ GOOGLE_MAPS_API_KEY = env("GOOGLE_MAPS_API_KEY", default="")
 # "ecb" (no key), "oxr" (needs OPENEXCHANGERATES_APP_ID) or empty for fixed fake rates.
 FX_RATES_PROVIDER = env("FX_RATES_PROVIDER", default="")
 OPENEXCHANGERATES_APP_ID = env("OPENEXCHANGERATES_APP_ID", default="")
+
+# --- Public API and webhooks (E27) ------------------------------------------------------------
+TENANT_RESOLVER = "tutortrack.developer.auth.resolve"  # API tokens carry their organisation
+DEVELOPER_API = {
+    "RATE_LIMIT_PER_MINUTE": env.int("API_RATE_LIMIT_PER_MINUTE", default=600),
+    "BURST_PER_SECOND": env.int("API_BURST_PER_SECOND", default=100),
+    # Webhook payload version pinned on new endpoints (FR-27-3).
+    "WEBHOOK_API_VERSION": "2026-10-01",
+    "WEBHOOK_LOG_DAYS": 30,
+    "OAUTH_ACCESS_TOKEN_SECONDS": 3600,
+    "OAUTH_REFRESH_TOKEN_DAYS": 90,
+}
 
 # --- Organisation lifecycle (E02-T09) ---------------------------------------------------------
 # Writes still allowed while suspended (billing, so the owner can pay; E04 adds its paths).

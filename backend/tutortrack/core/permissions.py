@@ -26,8 +26,22 @@ PERMISSIONS = {
 }
 
 
+def delegation_allows(user: Any, codename: str) -> bool:
+    """A user acting through an API key or OAuth token (E27) carries
+    ``token_permissions``: codename patterns its scopes cover. Role grants still apply;
+    this only narrows them. Plain session users have no such attribute."""
+    allowed = getattr(user, "token_permissions", None)
+    if allowed is None:
+        return True
+    from .permission_registry import matches
+
+    return any(matches(pattern, codename) for pattern in allowed)
+
+
 def has_perm(user: Any, codename: str, obj: Any = None) -> bool:
     if not getattr(user, "is_authenticated", False) or not user.is_active:
+        return False
+    if not delegation_allows(user, codename):
         return False
     if user.is_superuser:
         return True
@@ -37,6 +51,8 @@ def has_perm(user: Any, codename: str, obj: Any = None) -> bool:
 def scope_queryset(user: Any, queryset: QuerySet[Any], codename: str) -> QuerySet[Any]:
     """Records of ``queryset`` the user may access under ``codename`` (none if no grant)."""
     if not getattr(user, "is_authenticated", False) or not user.is_active:
+        return queryset.none()
+    if not delegation_allows(user, codename):
         return queryset.none()
     scoper: Any = import_string(
         getattr(settings, "PERMISSION_SCOPER", "tutortrack.identity.rbac.scope_queryset")
@@ -50,6 +66,8 @@ def permission_scope(user: Any, codename: str) -> str | None:
     or None. For queries ``scope_queryset`` cannot scope directly (aggregates over models
     without a ``branch`` field)."""
     if not getattr(user, "is_authenticated", False) or not user.is_active:
+        return None
+    if not delegation_allows(user, codename):
         return None
     if user.is_superuser:
         return "all"
