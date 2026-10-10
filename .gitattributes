@@ -3,3 +3,5 @@
 *.jpg binary
 *.pdf binary
 *.woff2 binary
+# Bank file golden outputs: exact bytes (ABA uses CRLF).
+backend/tutortrack/payroll/tests/golden/** -text
