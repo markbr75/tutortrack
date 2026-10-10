@@ -178,3 +178,128 @@ def within_availability(tutor_id: object, start: datetime, end: datetime, tz: st
     day = local_date_of(start, tz)
     intervals = available_intervals(tutor_id, day - timedelta(days=1), day + timedelta(days=1))
     return any(a <= start and end <= b for a, b in intervals)
+
+
+def _templates_by_tutor(
+    tutor_ids: list[str], start: date, end: date
+) -> dict[str, list[AvailabilityTemplate]]:
+    out: dict[str, list[AvailabilityTemplate]] = {t: [] for t in tutor_ids}
+    templates = (
+        AvailabilityTemplate.objects.filter(tutor_id__in=tutor_ids, effective_from__lte=end)
+        .filter(Q(effective_to__isnull=True) | Q(effective_to__gte=start))
+        .prefetch_related("windows")
+        .order_by("-effective_from")
+    )
+    for template in templates:
+        out[str(template.tutor_id)].append(template)
+    return out
+
+
+def interval_fit(
+    tutor_ids: Iterable[object], groups: list[list[Interval]], *, buffer_minutes: int = 0
+) -> dict[str, list[float]]:
+    """For each tutor and each group of UTC intervals, the share of the intervals inside the
+    tutor's availability that clash with nothing (lessons plus ``buffer_minutes``, blocking
+    events, time off, closures). Batched for many tutors (E19-T02): a fixed number of queries
+    whatever the number of tutors."""
+    from .models import CalendarEventParticipant, LessonTutor
+
+    ids = [str(t) for t in tutor_ids]
+    flat = [i for group in groups for i in group]
+    if not ids or not flat:
+        return {t: [0.0 for _ in groups] for t in ids}
+    lo = min(s for s, _e in flat)
+    hi = max(e for _s, e in flat)
+    buffer = timedelta(minutes=buffer_minutes)
+    first_day = (lo - timedelta(days=1)).date()
+    last_day = (hi + timedelta(days=1)).date()
+    templates = _templates_by_tutor(ids, first_day, last_day)
+    free: dict[str, list[Interval]] = {t: [] for t in ids}
+    for tutor_id, tutor_templates in templates.items():
+        day = first_day
+        while day <= last_day:
+            template = next(
+                (
+                    t for t in tutor_templates
+                    if t.effective_from <= day and (t.effective_to is None or t.effective_to >= day)
+                ),
+                None,
+            )  # fmt: skip
+            if template is not None:
+                for window in template.windows.all():
+                    if window.weekday == day.weekday():
+                        free[tutor_id].append(
+                            (
+                                to_utc(day, window.start_time, template.timezone),
+                                to_utc(day, window.end_time, template.timezone),
+                            )
+                        )
+            day += timedelta(days=1)
+    busy: dict[str, list[Interval]] = {t: [] for t in ids}
+    exceptions = AvailabilityException.objects.filter(
+        tutor_id__in=ids,
+        status=AvailabilityException.Status.APPROVED,
+        start__lt=hi + buffer,
+        end__gt=lo - buffer,
+    )
+    for exc in exceptions:
+        target = free if exc.type == AvailabilityException.Type.EXTRA else busy
+        target[str(exc.tutor_id)].append((exc.start, exc.end))
+    lessons = (
+        LessonTutor.objects.filter(
+            tutor_id__in=ids, lesson__start__lt=hi + buffer, lesson__end__gt=lo - buffer
+        )
+        .exclude(lesson__status=Lesson.Status.CANCELLED)
+        .values_list("tutor_id", "lesson__start", "lesson__end")
+    )
+    for tutor_id, start, end in lessons:
+        busy[str(tutor_id)].append((start - buffer, end + buffer))
+    for tutor_id, start, end in CalendarEventParticipant.objects.filter(
+        tutor_id__in=ids, event__start__lt=hi, event__end__gt=lo
+    ).values_list("tutor_id", "event__start", "event__end"):
+        busy[str(tutor_id)].append((start, end))
+    closures = [
+        (e.start, e.end)
+        for e in CalendarEvent.objects.filter(
+            org_wide=True, type=CalendarEvent.Type.HOLIDAY, start__lt=hi, end__gt=lo
+        )
+    ]
+    out: dict[str, list[float]] = {}
+    for tutor_id in ids:
+        available = _merge(free[tutor_id])
+        blocked = _merge(busy[tutor_id] + closures)
+        shares = []
+        for group in groups:
+            if not group:
+                shares.append(0.0)
+                continue
+            fits = sum(
+                1
+                for s, e in group
+                if any(a <= s and e <= b for a, b in available)
+                and not any(bs < e and be > s for bs, be in blocked)
+            )
+            shares.append(round(fits / len(group), 4))
+        out[tutor_id] = shares
+    return out
+
+
+def weekly_occurrences(
+    slots: list[dict[str, object]], *, start: date, weeks: int, tz: str, default_minutes: int = 60
+) -> list[list[Interval]]:
+    """The next ``weeks`` occurrences of each weekly slot ``{weekday, time, duration_minutes}``
+    (wall-clock in ``tz``) as UTC intervals, one list per slot."""
+    from datetime import time as dtime
+
+    groups = []
+    for slot in slots:
+        weekday = int(str(slot["weekday"]))
+        hour, minute = (int(x) for x in str(slot["time"]).split(":"))
+        minutes = int(str(slot.get("duration_minutes") or default_minutes))
+        first = start + timedelta(days=(weekday - start.weekday()) % 7)
+        group = []
+        for week in range(weeks):
+            begin = to_utc(first + timedelta(weeks=week), dtime(hour, minute), tz)
+            group.append((begin, begin + timedelta(minutes=minutes)))
+        groups.append(group)
+    return groups

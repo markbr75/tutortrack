@@ -58,7 +58,7 @@ The tutor's daily tool, optimised for phones: today's schedule, one-tap join/com
 - [x] **E16-T07** Profile and compliance uploads; Stripe Connect onboarding entry point.
 - [ ] **E16-T08** (Phase 2) PWA manifest, service worker, offline cache + background sync for completions/reports.
 - [ ] **E16-T09** (Phase 2) Web Push subscriptions and delivery channel in E13.
-- [ ] **E16-T10** (Phase 2) Job offers inbox and job board (with E19).
+- [x] **E16-T10** (Phase 2) Job offers inbox and job board (with E19).
 - [ ] **E16-T11** (Phase 3) Capacitor native shells and white-label build pipeline.
 
 ## Implementation notes (as built 2026-10-10)
@@ -68,4 +68,4 @@ The tutor's daily tool, optimised for phones: today's schedule, one-tap join/com
 - **Availability (T05):** weekly windows and time off, using the E08 APIs.
 - **Earnings (T06):** `/api/v1/tutor/earnings` shows pay per delivered or paid-cancellation lesson for a month, provisional until payroll (E12) creates pay items. Expenses with receipt capture come with E12.
 - **Profile (T07):** headline, phone and public bio. Compliance uploads (E18) and payout setup (E12) come with those epics.
-- **Deferred:** PWA manifest, offline and background sync (T08), web push (T09), job offers inbox (T10, with E19), native shells (T11).
+- **Deferred:** PWA manifest, offline and background sync (T08), web push (T09), native shells (T11). The job offers inbox (T10) arrived with E19: `/portal/tutor/jobs`.

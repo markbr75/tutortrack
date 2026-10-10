@@ -212,6 +212,10 @@ for _key in (
     "staff_compliance_submitted",
     "staff_compliance_expiring",
     "staff_application_waiting",
+    "staff_offer_accepted",
+    "staff_offers_exhausted",
+    "staff_job_application",
+    "staff_cover_unfilled",
 ):
     DEFAULTS[(_key, "in_app")] = ("{{ alert.title }}", "{{ alert.body }}")
     DEFAULTS[(_key, "email")] = ("{{ alert.title }}", "{{ alert.body }}" + SIGN)
@@ -288,6 +292,63 @@ DEFAULTS[("onboarding_reminder", "in_app")] = (
     "Finish your onboarding",
     "A few steps are left before you can start.",
 )
+
+
+DEFAULTS[("job_offer", "email")] = (
+    "Job offer: {{ offer.brief }}",
+    "Hello {{ recipient.first_name }},\n\nWe'd like to offer you a new job: {{ offer.brief }}."
+    "\n\nAccept or decline in the tutor portal: {{ offer.link }}"
+    '{% if offer.expires_at %}\nPlease answer by {{ offer.expires_at|datetime("short") }}.'
+    "{% endif %}" + SIGN,
+)
+DEFAULTS[("job_offer", "sms")] = (
+    "",
+    "{{ organisation.name }}: new job offer ({{ offer.brief }}). Answer here: {{ offer.link }}",
+)
+DEFAULTS[("job_offer", "in_app")] = ("New job offer", "{{ offer.brief }}")
+DEFAULTS[("job_offer_withdrawn", "email")] = (
+    "Job offer withdrawn",
+    "Hello {{ recipient.first_name }},\n\nThe offer for {{ offer.brief }} has been withdrawn: "
+    "{{ offer.reason }}. Thank you for your interest." + SIGN,
+)
+DEFAULTS[("job_offer_withdrawn", "in_app")] = ("Job offer withdrawn", "{{ offer.brief }}")
+DEFAULTS[("job_intro_tutor", "email")] = (
+    "Your new job: {{ job.name }}",
+    "Hello {{ recipient.first_name }},\n\nYou're now the tutor for {{ job.brief }}. The "
+    "lessons are in your schedule.{% if job.notes %}\n\nNotes: {{ job.notes }}{% endif %}" + SIGN,
+)
+DEFAULTS[("job_intro_tutor", "in_app")] = ("New job: {{ job.name }}", "{{ job.brief }}")
+DEFAULTS[("job_intro_client", "email")] = (
+    "Meet your tutor, {{ job.tutor }}",
+    "Hello {{ recipient.first_name }},\n\n{{ job.tutor }} will be teaching {{ job.name }}."
+    "{% if job.headline %}\n\n{{ job.headline }}{% endif %}" + SIGN,
+)
+DEFAULTS[("job_posting", "email")] = (
+    "New job: {{ posting.title }}",
+    "Hello {{ recipient.first_name }},\n\nA new job is open: {{ posting.brief }}. Apply in "
+    "the tutor portal: {{ posting.link }}" + SIGN,
+)
+DEFAULTS[("job_posting", "in_app")] = ("New job: {{ posting.title }}", "{{ posting.brief }}")
+DEFAULTS[("job_application_unsuccessful", "email")] = (
+    "{{ posting.title }}",
+    "Hello {{ recipient.first_name }},\n\nThank you for applying for {{ posting.title }}. "
+    "Another tutor has been chosen this time." + SIGN,
+)
+DEFAULTS[("job_application_unsuccessful", "in_app")] = (
+    "{{ posting.title }}",
+    "Another tutor was chosen this time.",
+)
+DEFAULTS[("cover_request", "email")] = (
+    "Cover needed: {{ cover.title }}",
+    "Hello {{ recipient.first_name }},\n\nCan you cover {{ cover.lessons }} lesson(s), "
+    'starting {{ cover.first|datetime("short") }}? Accept in the tutor portal: '
+    "{{ cover.link }}" + SIGN,
+)
+DEFAULTS[("cover_request", "sms")] = (
+    "",
+    "{{ organisation.name }}: cover needed for {{ cover.title }}. Accept here: {{ cover.link }}",
+)
+DEFAULTS[("cover_request", "in_app")] = ("Cover needed", "{{ cover.title }}")
 
 
 def default_template(type_key: str, channel: str) -> tuple[str, str] | None:

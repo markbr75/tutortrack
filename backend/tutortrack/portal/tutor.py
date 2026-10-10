@@ -35,6 +35,7 @@ def today(tutor: TutorProfile, user: Any) -> dict[str, Any]:
     from tutortrack.comms.models import InAppNotification
     from tutortrack.delivery.models import LessonReport
     from tutortrack.jobs.models import JobTutor
+    from tutortrack.matching.models import JobOffer
     from tutortrack.scheduling.models import Lesson
 
     zone = _zone(tutor)
@@ -68,7 +69,8 @@ def today(tutor: TutorProfile, user: Any) -> dict[str, Any]:
             for lesson in lessons
         ],
         "reports_due": LessonReport.objects.filter(tutor=tutor).exclude(status__in=written).count(),
-        "offers": JobTutor.objects.filter(tutor=tutor, status=JobTutor.Status.OFFERED).count(),
+        "offers": JobTutor.objects.filter(tutor=tutor, status=JobTutor.Status.OFFERED).count()
+        + JobOffer.objects.filter(tutor=tutor, status=JobOffer.Status.SENT).count(),
         "unread": InAppNotification.objects.filter(user=user, read_at__isnull=True).count(),
         "earnings_this_month": earnings(tutor, month_start, local.date())["total"],
     }

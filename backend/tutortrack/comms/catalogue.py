@@ -783,6 +783,10 @@ for _key, _label, _code in (
     ("staff_compliance_submitted", _("Compliance document to verify"), "compliance.verify"),
     ("staff_compliance_expiring", _("A tutor's check is expiring"), "compliance.view"),
     ("staff_application_waiting", _("Application waiting"), "recruitment.application.edit"),
+    ("staff_offer_accepted", _("A tutor accepted a job offer"), "matching.offer.manage"),
+    ("staff_offers_exhausted", _("No tutor accepted a job"), "matching.offer.manage"),
+    ("staff_job_application", _("A tutor applied for a job"), "matching.posting.manage"),
+    ("staff_cover_unfilled", _("No cover found"), "matching.cover.manage"),
 ):
     register(
         NotificationType(
@@ -1068,6 +1072,111 @@ register(
         link=lambda task: "/tasks",
     )
 )
+
+
+# --- matching (E19) -----------------------------------------------------------------------------
+
+TUTOR_JOBS = "/portal/tutor/jobs"
+
+
+def _brief_text(brief: dict[str, Any]) -> str:
+    subject = " ".join(str(p) for p in (brief.get("subject"), brief.get("level")) if p)
+    what = subject or str(brief.get("service") or "")
+    where = str(_("online")) if brief.get("mode") == "online" else str(brief.get("area") or "")
+    students = ", ".join(str(s) for s in brief.get("students") or [])
+    return ", ".join(p for p in (what, students, where) if p)
+
+
+def _job_offer(offer: Any) -> list[Delivery]:
+    r = tutor_recipient(offer.tutor)
+    details = {"brief": _brief_text(offer.batch.brief), "expires_at": offer.expires_at,
+               "link": tenant_link(TUTOR_JOBS)}  # fmt: skip
+    return [Delivery(r, _base(r, offer=details))]
+
+
+def _job_offer_withdrawn(offer: Any) -> list[Delivery]:
+    r = tutor_recipient(offer.tutor)
+    return [Delivery(r, _base(r, offer={"brief": _brief_text(offer.batch.brief),
+                                        "reason": offer.decline_reason}))]  # fmt: skip
+
+
+def _job_intro_tutor(link: Any) -> list[Delivery]:
+    from tutortrack.matching.services import job_brief
+
+    r = tutor_recipient(link.tutor)
+    brief = job_brief(link.job)
+    return [Delivery(r, _base(r, job={"name": str(link.job), "brief": _brief_text(brief),
+                                      "notes": link.job.notes_for_tutor}))]  # fmt: skip
+
+
+def _job_intro_client(link: Any) -> list[Delivery]:
+    tutor = link.tutor
+    details = {"name": str(link.job.name), "tutor": tutor.full_name,
+               "headline": tutor.headline}  # fmt: skip
+    out = []
+    for contact in client_contacts(link.job.client):
+        r = contact_recipient(contact)
+        out.append(Delivery(r, _base(r, job=details)))
+    return out
+
+
+def _job_posting(payload: Any) -> list[Delivery]:
+    posting, tutor = payload
+    r = tutor_recipient(tutor)
+    return [Delivery(r, _base(r, posting={"title": posting.title,
+                                          "brief": _brief_text(posting.brief),
+                                          "link": tenant_link(TUTOR_JOBS)}))]  # fmt: skip
+
+
+def _job_application_unsuccessful(application: Any) -> list[Delivery]:
+    r = tutor_recipient(application.tutor)
+    return [Delivery(r, _base(r, posting={"title": application.posting.title}))]
+
+
+def _cover_request(payload: Any) -> list[Delivery]:
+    request, tutor = payload
+    lessons = list(request.lessons.select_related("lesson").order_by("lesson__start"))
+    r = tutor_recipient(tutor)
+    first = lessons[0].lesson if lessons else None
+    details = {"lessons": len(lessons), "first": first.start if first else None,
+               "title": first.title if first else "", "link": tenant_link(TUTOR_JOBS)}  # fmt: skip
+    return [Delivery(r, _base(r, cover=details))]
+
+
+_MATCHING_TYPES: list[tuple[Any, ...]] = [
+    ("job_offer", _("Job offer"), "tutor", ("email", "sms", "in_app"), ("email", "in_app"),
+     _job_offer, ("offer.brief", "offer.expires_at", "offer.link"),
+     {"offer": {"brief": "Maths GCSE, Arjun P., SW1A", "expires_at": None, "link": "https://x"}}),
+    ("job_offer_withdrawn", _("Job offer withdrawn"), "tutor", ("email", "in_app"), ("in_app",),
+     _job_offer_withdrawn, ("offer.brief", "offer.reason"),
+     {"offer": {"brief": "Maths GCSE, Arjun P., SW1A", "reason": "Another tutor took the job"}}),
+    ("job_intro_tutor", _("New job: introduction"), "tutor", ("email", "in_app"),
+     ("email", "in_app"), _job_intro_tutor, ("job.name", "job.brief", "job.notes"),
+     {"job": {"name": "J-0001 Arjun Maths", "brief": "Maths GCSE", "notes": ""}}),
+    ("job_intro_client", _("Your tutor"), "client", ("email",), ("email",), _job_intro_client,
+     ("job.name", "job.tutor", "job.headline"),
+     {"job": {"name": "Arjun Maths", "tutor": "Nia Okafor", "headline": "Maths specialist"}}),
+    ("job_posting", _("New job on the job board"), "tutor", ("email", "in_app"), ("in_app",),
+     _job_posting, ("posting.title", "posting.brief", "posting.link"),
+     {"posting": {"title": "Maths GCSE", "brief": "Maths GCSE, SW1A", "link": "https://x"}}),
+    ("job_application_unsuccessful", _("Job application unsuccessful"), "tutor",
+     ("email", "in_app"), ("in_app",), _job_application_unsuccessful, ("posting.title",),
+     {"posting": {"title": "Maths GCSE"}}),
+    ("cover_request", _("Cover needed"), "tutor", ("email", "sms", "in_app"), ("email", "in_app"),
+     _cover_request, ("cover.lessons", "cover.first", "cover.title", "cover.link"),
+     {"cover": {"lessons": 1, "first": None, "title": "Maths with Arjun", "link": "https://x"}}),
+]  # fmt: skip
+for _row in _MATCHING_TYPES:
+    _key, _label, _audience, _channels, _defaults, _resolve, _vars, _sample = _row
+    register(
+        NotificationType(
+            key=_key, label=str(_label), category="scheduling", audience=_audience,
+            channels=_channels, default_channels=_defaults, resolve=_resolve, load=_load_none,
+            related_type="", variables=_vars, sample={**SAMPLE_BASE, **_sample},
+            transactional=_key != "job_posting",
+            link=(lambda payload: TUTOR_JOBS) if _audience == "tutor" else None,
+        )
+    )  # fmt: skip
 
 
 def reminder_window(now: datetime, minutes: int) -> tuple[datetime, datetime]:

@@ -124,3 +124,16 @@ def needing_attention(queryset: QuerySet[Job], *, seeking_days: int = 7) -> Quer
             status__in=[Job.Status.SEEKING_TUTOR, Job.Status.ACTIVE],
         )
     ).distinct()
+
+
+def last_assignment(tutor_ids: list[str]) -> dict[str, Any]:
+    """When each tutor was last given a job (offered or assigned), for fair distribution."""
+    from django.db.models import Max
+
+    rows = (
+        JobTutor.objects.filter(tutor_id__in=tutor_ids)
+        .exclude(status=JobTutor.Status.DECLINED)
+        .values("tutor_id")
+        .annotate(last=Max("created_at"))
+    )
+    return {str(r["tutor_id"]): r["last"] for r in rows}

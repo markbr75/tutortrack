@@ -22,6 +22,7 @@ import { ReportPage } from "./delivery/ReportPage";
 import { ReportsPage } from "./delivery/ReportsPage";
 import { UnconfirmedPage } from "./delivery/UnconfirmedPage";
 import { JobPage } from "./jobs/JobPage";
+import { JobMatchPage, MatchingPage } from "./matching/MatchingPages";
 import { JobsPage } from "./jobs/JobsPage";
 import { AppShell } from "./layout/AppShell";
 import { ClientsPage, StudentsPage, TutorsPage } from "./people/PeopleLists";
@@ -272,6 +273,14 @@ const enquiryRoute = createRoute({
 });
 const recruitmentRoute = appPage("/recruitment", ApplicationsPage);
 const complianceRoute = appPage("/compliance", ComplianceDashboardPage);
+const matchingRoute = appPage("/matching", MatchingPage);
+const jobMatchRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/jobs/$jobId/match",
+  component: function JobMatchRoute() {
+    return <JobMatchPage jobId={jobMatchRoute.useParams().jobId} />;
+  },
+});
 const applicationRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/recruitment/$id",
@@ -339,6 +348,8 @@ const routeTree = rootRoute.addChildren([
     catalogueRoute,
     jobsRoute,
     jobRoute,
+    jobMatchRoute,
+    matchingRoute,
     calendarRoute,
     availabilityRoute,
     reportsRoute,

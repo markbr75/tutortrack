@@ -69,7 +69,8 @@ ROLES: dict[str, RoleDef] = {
                "matching.*", "billing.invoice.view", "billing.rates.view_charge", "catalogue.view",
                "org.settings.view", "team.view", "privacy.consent.view",
                "privacy.consent.record"),
-            denies=("people.tutor.view_financial", "scheduling.edit_locked"),
+            denies=("people.tutor.view_financial", "scheduling.edit_locked",
+                    "matching.include_restricted", "matching.settings.manage"),
         ),
         RoleDef(
             "finance", "Finance",

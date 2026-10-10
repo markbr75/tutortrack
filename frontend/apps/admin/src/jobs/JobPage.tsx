@@ -393,6 +393,7 @@ export function JobPage({ jobId }: { jobId: string }) {
   const { t, i18n } = useTranslation();
   const canSeeCharge = usePermission("billing.rates.view_charge");
   const canChangeStatus = usePermission("jobs.job.change_status");
+  const canMatch = usePermission("matching.search");
   const job = useQuery({
     queryKey: ["job", jobId],
     queryFn: async () =>
@@ -424,6 +425,13 @@ export function JobPage({ jobId }: { jobId: string }) {
       <p className="mb-4 text-sm text-muted-foreground">
         {j.reference} · {t(`jobs.status.${j.status}`)} · {j.service_name}
       </p>
+      {canMatch && j.status !== "completed" && j.status !== "cancelled" ? (
+        <p className="mb-4">
+          <Link to="/jobs/$jobId/match" params={{ jobId: j.id }} className={linkClass}>
+            {t("matching.findTutor")}
+          </Link>
+        </p>
+      ) : null}
       {canChangeStatus ? (
         <div className="mb-6">
           <StatusControl job={j} />

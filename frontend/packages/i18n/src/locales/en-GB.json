@@ -29,7 +29,8 @@
     "payroll": "Payroll",
     "leads": "Enquiries",
     "recruitment": "Recruitment",
-    "compliance": "Compliance"
+    "compliance": "Compliance",
+    "matching": "Matching"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -1456,7 +1457,8 @@
       "profile": "Profile",
       "expenses": "Expenses",
       "onboarding": "Getting started",
-      "compliance": "Checks"
+      "compliance": "Checks",
+      "jobs": "Jobs"
     },
     "today": "Today",
     "reportsDue": "Reports to write",
@@ -2055,5 +2057,173 @@
       "expired": "Expired"
     },
     "restricted": "You can't take new lessons until your checks are up to date."
+  },
+  "matching": {
+    "title": "Matching",
+    "findTutor": "Find a tutor",
+    "includeRestricted": "Include restricted and unapproved tutors",
+    "results_one": "{{count}} match",
+    "results_other": "{{count}} matches",
+    "none": "No tutors match. Try including online lessons, or post the job to the job board.",
+    "offer": "Offer",
+    "tutor": "Tutor",
+    "score": "Score",
+    "distance": "Distance",
+    "availability": "Availability",
+    "actions": "Actions",
+    "choose": "Choose {{name}} for an offer",
+    "restricted": "Restricted",
+    "why": "Score breakdown",
+    "unknown": "Unknown",
+    "shortlist": "Shortlist",
+    "shortlisted": "Shortlisted",
+    "map": "Map",
+    "mapLabel_one": "Map of the lessons and {{count}} tutor",
+    "mapLabel_other": "Map of the lessons and {{count}} tutors",
+    "lessons": "Lessons",
+    "sendOffers": "Send offers",
+    "chosen_one": "{{count}} tutor chosen, in the order you ticked them.",
+    "chosen_other": "{{count}} tutors chosen, in the order you ticked them.",
+    "mode": "How to offer",
+    "modes": {
+      "sequential": "One after another",
+      "simultaneous": "All at once"
+    },
+    "expiryHours": "Hours each tutor has to answer",
+    "send": "Send offers",
+    "board": "Job board",
+    "postJob": "Post to the job board",
+    "posted": "Open to {{eligible}} eligible tutors · {{applied}} applied",
+    "select": "Choose this tutor",
+    "closePosting": "Take off the job board",
+    "offers": "Offers",
+    "confirm": "Confirm tutor",
+    "reject": "Turn down",
+    "cancelOffers": "Withdraw offers",
+    "batchStatus": {
+      "open": "Open",
+      "awaiting_confirmation": "Waiting for your confirmation",
+      "filled": "Filled",
+      "exhausted": "No one accepted",
+      "cancelled": "Withdrawn"
+    },
+    "offerStatus": {
+      "queued": "Queued",
+      "sent": "Waiting for an answer",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "expired": "No answer",
+      "withdrawn": "Withdrawn"
+    },
+    "applicationStatus": {
+      "applied": "Applied",
+      "selected": "Chosen",
+      "rejected": "Not chosen",
+      "withdrawn": "Withdrawn"
+    },
+    "factors": {
+      "availability": "Availability",
+      "distance": "Distance",
+      "rating": "Rating",
+      "experience": "Experience",
+      "workload": "Spare capacity",
+      "history": "Similar lessons taught",
+      "margin": "Margin",
+      "response": "Offer acceptance",
+      "fairness": "Time since last job"
+    },
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "cover": "Cover requests",
+    "analytics": "Analytics",
+    "weights": "Weights",
+    "status": "Status",
+    "coverStatus": {
+      "open": "Looking for cover",
+      "filled": "Covered",
+      "unfilled": "No cover found",
+      "cancelled": "Cancelled"
+    },
+    "noCover": "No cover requests.",
+    "coverDeadline": "Looking until {{when}}",
+    "notified_one": "{{count}} tutor asked",
+    "notified_other": "{{count}} tutors asked",
+    "candidates": "Who's free",
+    "cancelCover": "Cancel",
+    "assign": "Give them the cover",
+    "timeToMatch": "Time to match (90 days)",
+    "jobsMatched": "Jobs matched",
+    "averageHours": "Average hours",
+    "medianHours": "Median hours",
+    "acceptance": "Offer acceptance",
+    "sent": "Sent",
+    "accepted": "Accepted",
+    "unmatched": "Unmatched demand",
+    "subject": "Subject",
+    "area": "Area",
+    "jobs": "Jobs",
+    "oldestDays": "Longest wait (days)",
+    "saved": "Weights saved."
+  },
+  "tutorJobs": {
+    "title": "Jobs",
+    "offers": "Job offers",
+    "noOffers": "No offers waiting for you.",
+    "board": "Job board",
+    "noPostings": "No open jobs for you right now.",
+    "cover": "Cover",
+    "noCover": "No cover requests.",
+    "what": "Lessons",
+    "students": "Students",
+    "where": "Where",
+    "online": "Online",
+    "when": "When",
+    "starts": "Starts",
+    "pay": "Pay rate",
+    "notes": "Notes",
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "offerStatus": {
+      "sent": "Waiting for your answer",
+      "accepted": "You accepted",
+      "declined": "You declined",
+      "expired": "Expired",
+      "withdrawn": "Withdrawn",
+      "queued": "Queued"
+    },
+    "answerBy": "answer by {{when}}",
+    "accept": "Accept",
+    "decline": "Decline",
+    "declineReason": "Reason (optional)",
+    "message": "Message to the coordinator (optional)",
+    "apply": "Apply",
+    "applied": {
+      "applied": "You've applied",
+      "selected": "You got the job",
+      "rejected": "Another tutor was chosen",
+      "withdrawn": "You withdrew"
+    },
+    "coverStatus": {
+      "open": "Cover needed",
+      "filled": "Covered",
+      "unfilled": "No cover found",
+      "cancelled": "Cancelled"
+    },
+    "yourRequest": "Your request:",
+    "takeCover": "I'll cover it"
   }
 }

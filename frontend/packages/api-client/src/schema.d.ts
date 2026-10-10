@@ -1909,6 +1909,92 @@ export interface paths {
     patch: operations["contacts_partial_update"];
     trace?: never;
   };
+  "/api/v1/cover-requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Cover requests for lessons (``?status=``). */
+    get: operations["cover_requests_list"];
+    put?: never;
+    /** @description Cover requests for lessons (``?status=``). */
+    post: operations["cover_requests_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/cover-requests/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Cover requests for lessons (``?status=``). */
+    get: operations["cover_requests_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/cover-requests/{id}/assign": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Give the cover to a tutor directly. */
+    post: operations["cover_requests_assign_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/cover-requests/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Cover requests for lessons (``?status=``). */
+    post: operations["cover_requests_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/cover-requests/{id}/candidates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Tutors free for every lesson, best first. */
+    get: operations["cover_requests_candidates_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/credit-notes": {
     parameters: {
       query?: never;
@@ -3142,6 +3228,91 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/job-offer-batches": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Job offers sent to tutors, in batches (``?job=``). */
+    get: operations["job_offer_batches_list"];
+    put?: never;
+    /** @description Offer the job to the tutors: everyone at once, or one after another. */
+    post: operations["job_offer_batches_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/job-offer-batches/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Job offers sent to tutors, in batches (``?job=``). */
+    get: operations["job_offer_batches_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/job-offer-batches/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Job offers sent to tutors, in batches (``?job=``). */
+    post: operations["job_offer_batches_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/job-offer-batches/{id}/decide": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Confirm (or turn down) the tutor who accepted, when offers need confirmation. */
+    post: operations["job_offer_batches_decide_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/job-offers/{id}/withdraw": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["job_offers_withdraw_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/job-openings": {
     parameters: {
       query?: never;
@@ -3214,6 +3385,92 @@ export interface paths {
      *     instead (it is never evaluated).
      */
     patch: operations["job_openings_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/job-postings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Jobs on the internal job board and their applicants (``?job=``). */
+    get: operations["job_postings_list"];
+    put?: never;
+    /** @description Put the job on the job board for eligible tutors. */
+    post: operations["job_postings_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/job-postings/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Jobs on the internal job board and their applicants (``?job=``). */
+    get: operations["job_postings_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/job-postings/{id}/applications/{app_id}/reject": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Jobs on the internal job board and their applicants (``?job=``). */
+    post: operations["job_postings_applications_reject_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/job-postings/{id}/applications/{app_id}/select": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Choose this applicant: they're assigned and the others are told. */
+    post: operations["job_postings_applications_select_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/job-postings/{id}/close": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Jobs on the internal job board and their applicants (``?job=``). */
+    post: operations["job_postings_close_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/jobs": {
@@ -4061,6 +4318,58 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/matching/analytics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["matching_analytics_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/matching/search": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Ranked tutors for a job or ad hoc criteria, with each factor's score. "Include
+     *     restricted" needs ``matching.include_restricted``.
+     */
+    post: operations["matching_search_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/matching/settings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["matching_settings_retrieve"];
+    put: operations["matching_settings_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/me": {
     parameters: {
       query?: never;
@@ -4115,6 +4424,39 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/me/cover-requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["me_cover_requests_list"];
+    put?: never;
+    /** @description A tutor asks for cover for their own lessons. */
+    post: operations["me_cover_requests_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/cover-requests/{id}/accept": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["me_cover_requests_accept_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/me/earnings": {
     parameters: {
       query?: never;
@@ -4126,6 +4468,70 @@ export interface paths {
     get: operations["me_earnings_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/job-offers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["me_job_offers_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/job-offers/{id}/{answer}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["me_job_offers_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/job-postings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["me_job_postings_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/job-postings/{id}/apply": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["me_job_postings_apply_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -6734,6 +7140,42 @@ export interface paths {
     patch: operations["settings_partial_update"];
     trace?: never;
   };
+  "/api/v1/shortlists": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Tutors shortlisted for jobs (``?job=``). */
+    get: operations["shortlists_list"];
+    put?: never;
+    /** @description Tutors shortlisted for jobs (``?job=``). */
+    post: operations["shortlists_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/shortlists/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Tutors shortlisted for jobs (``?job=``). */
+    get: operations["shortlists_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description Tutors shortlisted for jobs (``?job=``). */
+    delete: operations["shortlists_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/signup": {
     parameters: {
       query?: never;
@@ -8076,6 +8518,11 @@ export interface components {
       /** Format: decimal */
       amount?: string | null;
     };
+    ApplyPostingRequest: {
+      /** @default  */
+      message: string;
+      proposed_availability?: components["schemas"]["MatchSlotRequest"][];
+    };
     ApplyTagRequest: {
       target_type: string;
       target_ids: string[];
@@ -8109,6 +8556,10 @@ export interface components {
      * @enum {string}
      */
     AssessSubjectStatusEnum: "claimed" | "assessed" | "approved" | "rejected";
+    AssignCoverRequest: {
+      /** Format: uuid */
+      tutor: string;
+    };
     AssignmentRule: {
       /** Format: uuid */
       readonly id: string;
@@ -9161,6 +9612,53 @@ export interface components {
     CountResult: {
       count: number;
     };
+    CoverLesson: {
+      /** Format: uuid */
+      id: string;
+      title: string;
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      timezone: string;
+    };
+    CoverRequest: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly original_tutor: string;
+      readonly original_tutor_name: string;
+      readonly reason: string;
+      readonly status: components["schemas"]["CoverStatusEnum"];
+      /** Format: date-time */
+      readonly deadline: string;
+      readonly notified_count: number;
+      /** Format: uuid */
+      readonly accepted_by: string | null;
+      /** @default  */
+      readonly accepted_by_name: string;
+      /** Format: date-time */
+      readonly accepted_at: string | null;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      readonly lessons: components["schemas"]["CoverLesson"][];
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `open` - Open
+     *     * `accepted` - Accepted
+     *     * `filled` - Filled
+     *     * `unfilled` - Unfilled
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    CoverStatusEnum: "open" | "accepted" | "filled" | "unfilled" | "cancelled";
+    CreateCoverRequest: {
+      lessons: string[];
+      /** @default  */
+      reason: string;
+    };
     /**
      * @description * `admin` - Admin
      *     * `tutor` - Tutor
@@ -9411,8 +9909,17 @@ export interface components {
       attempts: number;
       last_error: string;
     };
+    DecideRequest: {
+      approve: boolean;
+      /** @default  */
+      reason: string;
+    };
     DecisionRequest: {
       comment?: string;
+    };
+    DeclineOfferRequest: {
+      /** @default  */
+      reason: string;
     };
     /**
      * @description * `in_person` - In person
@@ -9583,6 +10090,10 @@ export interface components {
       email: string;
       /** @default / */
       next: string;
+    };
+    EmptySearch: {
+      subject: string;
+      searches: number;
     };
     EndRequest: {
       /** Format: date */
@@ -9903,6 +10414,14 @@ export interface components {
     ExtendTrialRequest: {
       reason: string;
       days: number;
+    };
+    Factor: {
+      /** Format: double */
+      weight: number;
+      /** Format: double */
+      score: number;
+      value: unknown;
+      known: boolean;
     };
     FailPayoutRequest: {
       reason: string;
@@ -10724,6 +11243,38 @@ export interface components {
      * @enum {string}
      */
     JobCreateStatusEnum: "draft" | "seeking_tutor" | "active";
+    JobOffer: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly batch: string;
+      /** Format: uuid */
+      readonly job: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      readonly cascade_order: number;
+      readonly status: components["schemas"]["JobOfferStatusEnum"];
+      /** Format: date-time */
+      readonly sent_at: string | null;
+      /** Format: date-time */
+      readonly expires_at: string | null;
+      /** Format: date-time */
+      readonly responded_at: string | null;
+      readonly decline_reason: string;
+      /** Format: date-time */
+      readonly confirmed_at: string | null;
+    };
+    /**
+     * @description * `queued` - Queued
+     *     * `sent` - Sent
+     *     * `accepted` - Accepted
+     *     * `declined` - Declined
+     *     * `expired` - Expired
+     *     * `withdrawn` - Withdrawn
+     * @enum {string}
+     */
+    JobOfferStatusEnum: "queued" | "sent" | "accepted" | "declined" | "expired" | "withdrawn";
     JobOpening: {
       /** Format: uuid */
       readonly id: string;
@@ -10754,6 +11305,50 @@ export interface components {
       /** Format: date */
       closes_on?: string | null;
     };
+    JobPosting: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly job: string;
+      readonly title: string;
+      readonly brief: unknown;
+      readonly audience: unknown;
+      readonly status: components["schemas"]["JobPostingStatusEnum"];
+      /** Format: date-time */
+      readonly published_at: string | null;
+      /** Format: date */
+      readonly closes_on: string | null;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      readonly applications_count: number;
+      readonly eligible_count: number;
+    };
+    JobPostingDetail: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly job: string;
+      readonly title: string;
+      readonly brief: unknown;
+      readonly audience: unknown;
+      readonly status: components["schemas"]["JobPostingStatusEnum"];
+      /** Format: date-time */
+      readonly published_at: string | null;
+      /** Format: date */
+      readonly closes_on: string | null;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      readonly applications_count: number;
+      readonly eligible_count: number;
+      readonly applications: components["schemas"]["PostingApplication"][];
+    };
+    /**
+     * @description * `open` - Open
+     *     * `closed` - Closed
+     *     * `filled` - Filled
+     * @enum {string}
+     */
+    JobPostingStatusEnum: "open" | "closed" | "filled";
     /**
      * @description * `draft` - Draft
      *     * `seeking_tutor` - Seeking tutor
@@ -11398,6 +11993,95 @@ export interface components {
     MarkReadRequest: {
       ids?: string[] | null;
     };
+    /**
+     * @description * `online` - online
+     *     * `in_person` - in_person
+     *     * `either` - either
+     * @enum {string}
+     */
+    MatchModeEnum: "online" | "in_person" | "either";
+    MatchRow: {
+      rank: number;
+      tutor: components["schemas"]["MatchTutor"];
+      /** Format: decimal */
+      score: string;
+      breakdown: {
+        [key: string]: components["schemas"]["Factor"];
+      };
+      /** Format: decimal */
+      distance_km: string | null;
+      slot_fit: number[];
+      restricted: boolean;
+      reasons: string[];
+      point: components["schemas"]["Point"] | null;
+      shortlisted: boolean;
+    };
+    MatchSearchRequest: {
+      /** Format: uuid */
+      job?: string | null;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      mode?: components["schemas"]["MatchModeEnum"];
+      postcode?: string;
+      /** Format: decimal */
+      lat?: string | null;
+      /** Format: decimal */
+      lng?: string | null;
+      slots?: components["schemas"]["MatchSlotRequest"][];
+      /** Format: date */
+      start_date?: string | null;
+      duration_minutes?: number;
+      /** Format: uuid */
+      branch?: string | null;
+      languages?: string[];
+      /** Format: decimal */
+      max_pay_rate?: string | null;
+      requirements?: string[];
+      /** @default false */
+      include_restricted: boolean;
+      /** @default 50 */
+      limit: number;
+    };
+    MatchSearchResult: {
+      /** Format: uuid */
+      query: string;
+      criteria: {
+        [key: string]: unknown;
+      };
+      origin: components["schemas"]["Point"] | null;
+      results: components["schemas"]["MatchRow"][];
+    };
+    MatchSlotRequest: {
+      weekday: number;
+      time: string;
+      duration_minutes?: number;
+    };
+    MatchTutor: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      headline: string;
+      status: string;
+    };
+    MatchingAnalytics: {
+      days: number;
+      time_to_match: components["schemas"]["TimeToMatch"];
+      offers: components["schemas"]["OfferStats"][];
+      unmatched: components["schemas"]["UnmatchedDemand"][];
+      empty_searches: components["schemas"]["EmptySearch"][];
+    };
+    MatchingWeights: {
+      weights: {
+        [key: string]: number;
+      };
+    };
+    MatchingWeightsRequest: {
+      weights: {
+        [key: string]: number;
+      };
+    };
     Me: {
       user: components["schemas"]["User"];
       organisation: components["schemas"]["MeOrganisation"] | null;
@@ -11557,6 +12241,19 @@ export interface components {
       consent_type: string;
       granted: boolean;
     };
+    MyJobOffer: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly status: components["schemas"]["JobOfferStatusEnum"];
+      readonly brief: unknown;
+      /** Format: date-time */
+      readonly sent_at: string | null;
+      /** Format: date-time */
+      readonly expires_at: string | null;
+      /** Format: date-time */
+      readonly responded_at: string | null;
+      readonly decline_reason: string;
+    };
     MyOrganisation: {
       /** Format: uuid */
       id: string;
@@ -11569,6 +12266,17 @@ export interface components {
       is_current: boolean;
       /** Format: date-time */
       last_active_at: string | null;
+    };
+    MyPosting: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly title: string;
+      readonly brief: unknown;
+      /** Format: date-time */
+      readonly published_at: string | null;
+      /** Format: date */
+      readonly closes_on: string | null;
+      readonly applied: string | null;
     };
     NamedRef: {
       id: string;
@@ -11664,12 +12372,66 @@ export interface components {
     NudgeResult: {
       nudged: number;
     };
+    OfferBatch: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly job: string;
+      readonly job_name: string;
+      readonly mode: components["schemas"]["OfferModeEnum"];
+      readonly status: components["schemas"]["OfferBatchStatusEnum"];
+      readonly expiry_hours: number;
+      readonly admin_confirms: boolean;
+      readonly brief: unknown;
+      readonly pay_rate: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: uuid */
+      readonly accepted_offer: string | null;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly offers: components["schemas"]["JobOffer"][];
+    };
+    /**
+     * @description * `open` - Open
+     *     * `awaiting_confirmation` - Waiting for confirmation
+     *     * `filled` - Filled
+     *     * `exhausted` - No one accepted
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    OfferBatchStatusEnum: "open" | "awaiting_confirmation" | "filled" | "exhausted" | "cancelled";
+    /**
+     * @description * `simultaneous` - All at once
+     *     * `sequential` - One after another
+     * @enum {string}
+     */
+    OfferModeEnum: "simultaneous" | "sequential";
     OfferRequest: {
       details: string;
       hours?: number;
     };
     OfferResponseRequest: {
       accept: boolean;
+    };
+    OfferStats: {
+      /** Format: uuid */
+      tutor: string;
+      name: string;
+      sent: number;
+      accepted: number;
+      declined: number;
+      expired: number;
+      /** Format: double */
+      acceptance_rate: number;
     };
     Onboarding: {
       account: components["schemas"]["ProviderAccount"];
@@ -12023,6 +12785,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Contact"][];
     };
+    PaginatedCoverRequestList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["CoverRequest"][];
+    };
     PaginatedCreditNoteList: {
       /**
        * Format: uri
@@ -12179,6 +12954,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Job"][];
     };
+    PaginatedJobPostingList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["JobPosting"][];
+    };
     PaginatedLessonList: {
       /**
        * Format: uri
@@ -12282,6 +13070,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Note"][];
+    };
+    PaginatedOfferBatchList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["OfferBatch"][];
     };
     PaginatedPackageTemplateList: {
       /**
@@ -13772,6 +14573,12 @@ export interface components {
       notices: components["schemas"]["PlatformNotice"][];
       status_page_url: string;
     };
+    Point: {
+      /** Format: double */
+      lat: number;
+      /** Format: double */
+      lng: number;
+    };
     PolicyOverrideRequest: {
       /** Format: decimal */
       charge_percent: string;
@@ -13981,6 +14788,29 @@ export interface components {
       email: string;
       phone: string;
     };
+    PostingApplication: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      readonly message: string;
+      readonly proposed_availability: unknown;
+      readonly status: components["schemas"]["PostingApplicationStatusEnum"];
+      /** Format: decimal */
+      readonly score: string | null;
+      readonly breakdown: unknown;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `applied` - Applied
+     *     * `selected` - Selected
+     *     * `rejected` - Not selected
+     *     * `withdrawn` - Withdrawn
+     * @enum {string}
+     */
+    PostingApplicationStatusEnum: "applied" | "selected" | "rejected" | "withdrawn";
     PreferenceRow: {
       category: components["schemas"]["PreferenceRowCategoryEnum"];
       channels: components["schemas"]["MessageChannelEnum"][];
@@ -14305,6 +15135,19 @@ export interface components {
     PublicSubmitResult: {
       ok: boolean;
       pay_url: string;
+    };
+    PublishPostingRequest: {
+      /** Format: uuid */
+      job: string;
+      /** @default  */
+      title: string;
+      /**
+       * Format: decimal
+       * @default 0.0
+       */
+      min_score: string;
+      /** Format: date */
+      closes_on?: string | null;
     };
     /**
      * @description * `hours` - Hours
@@ -15189,6 +16032,28 @@ export interface components {
       intent: string;
       consent_text: string;
     };
+    Shortlist: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      job: string;
+      /** Format: uuid */
+      tutor: string;
+      readonly tutor_name: string;
+      /** Format: decimal */
+      readonly score: string | null;
+      readonly breakdown: unknown;
+      note?: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ShortlistRequest: {
+      /** Format: uuid */
+      job: string;
+      /** Format: uuid */
+      tutor: string;
+      note?: string;
+    };
     SignupConfig: {
       turnstile_site_key: string;
     };
@@ -15289,6 +16154,24 @@ export interface components {
       params?: {
         [key: string]: unknown;
       };
+    };
+    StartOffersRequest: {
+      /** Format: uuid */
+      job: string;
+      tutors: string[];
+      /** @default sequential */
+      mode: components["schemas"]["OfferModeEnum"];
+      expiry_hours?: number;
+      admin_confirms?: boolean | null;
+      pay_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
     };
     Statement: {
       /** Format: uuid */
@@ -15798,6 +16681,13 @@ export interface components {
      * @enum {string}
      */
     TimeFormatEnum: "locale" | "24h" | "12h";
+    TimeToMatch: {
+      jobs: number;
+      /** Format: double */
+      average_hours: number | null;
+      /** Format: double */
+      median_hours: number | null;
+    };
     TimelineItem: {
       kind: components["schemas"]["TimelineItemKindEnum"];
       id: string;
@@ -16132,6 +17022,12 @@ export interface components {
       offers: number;
       unread: number;
       earnings_this_month: components["schemas"]["MoneyOut"];
+    };
+    UnmatchedDemand: {
+      subject: string;
+      area: string;
+      jobs: number;
+      oldest_days: number;
     };
     UnreadCount: {
       unread: number;
@@ -20150,6 +21046,164 @@ export interface operations {
       };
     };
   };
+  cover_requests_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedCoverRequestList"];
+        };
+      };
+    };
+  };
+  cover_requests_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateCoverRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CreateCoverRequest"];
+        "multipart/form-data": components["schemas"]["CreateCoverRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CoverRequest"];
+        };
+      };
+    };
+  };
+  cover_requests_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this cover request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CoverRequest"];
+        };
+      };
+    };
+  };
+  cover_requests_assign_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this cover request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssignCoverRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AssignCoverRequest"];
+        "multipart/form-data": components["schemas"]["AssignCoverRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CoverRequest"];
+        };
+      };
+    };
+  };
+  cover_requests_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this cover request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CoverRequest"];
+        };
+      };
+    };
+  };
+  cover_requests_candidates_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this cover request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchRow"][];
+        };
+      };
+    };
+  };
   credit_notes_list: {
     parameters: {
       query?: {
@@ -22314,6 +23368,163 @@ export interface operations {
       };
     };
   };
+  job_offer_batches_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        job?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedOfferBatchList"];
+        };
+      };
+    };
+  };
+  job_offer_batches_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StartOffersRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["StartOffersRequest"];
+        "multipart/form-data": components["schemas"]["StartOffersRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OfferBatch"];
+        };
+      };
+    };
+  };
+  job_offer_batches_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this offer batch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OfferBatch"];
+        };
+      };
+    };
+  };
+  job_offer_batches_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this offer batch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OfferBatch"];
+        };
+      };
+    };
+  };
+  job_offer_batches_decide_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this offer batch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DecideRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["DecideRequest"];
+        "multipart/form-data": components["schemas"]["DecideRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OfferBatch"];
+        };
+      };
+    };
+  };
+  job_offers_withdraw_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobOffer"];
+        };
+      };
+    };
+  };
   job_openings_list: {
     parameters: {
       query?: {
@@ -22459,6 +23670,160 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["JobOpening"];
+        };
+      };
+    };
+  };
+  job_postings_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        job?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedJobPostingList"];
+        };
+      };
+    };
+  };
+  job_postings_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublishPostingRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PublishPostingRequest"];
+        "multipart/form-data": components["schemas"]["PublishPostingRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobPostingDetail"];
+        };
+      };
+    };
+  };
+  job_postings_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this job posting. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobPostingDetail"];
+        };
+      };
+    };
+  };
+  job_postings_applications_reject_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        app_id: string;
+        /** @description A UUID string identifying this job posting. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobPostingDetail"];
+        };
+      };
+    };
+  };
+  job_postings_applications_select_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        app_id: string;
+        /** @description A UUID string identifying this job posting. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobPostingDetail"];
+        };
+      };
+    };
+  };
+  job_postings_close_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this job posting. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["JobPostingDetail"];
         };
       };
     };
@@ -24046,6 +25411,99 @@ export interface operations {
       };
     };
   };
+  matching_analytics_retrieve: {
+    parameters: {
+      query?: {
+        days?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchingAnalytics"];
+        };
+      };
+    };
+  };
+  matching_search_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["MatchSearchRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["MatchSearchRequest"];
+        "multipart/form-data": components["schemas"]["MatchSearchRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchSearchResult"];
+        };
+      };
+    };
+  };
+  matching_settings_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchingWeights"];
+        };
+      };
+    };
+  };
+  matching_settings_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MatchingWeightsRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["MatchingWeightsRequest"];
+        "multipart/form-data": components["schemas"]["MatchingWeightsRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchingWeights"];
+        };
+      };
+    };
+  };
   me_retrieve: {
     parameters: {
       query?: never;
@@ -24184,6 +25642,77 @@ export interface operations {
       };
     };
   };
+  me_cover_requests_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CoverRequest"][];
+        };
+      };
+    };
+  };
+  me_cover_requests_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateCoverRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CreateCoverRequest"];
+        "multipart/form-data": components["schemas"]["CreateCoverRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CoverRequest"];
+        };
+      };
+    };
+  };
+  me_cover_requests_accept_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CoverRequest"];
+        };
+      };
+    };
+  };
   me_earnings_retrieve: {
     parameters: {
       query?: never;
@@ -24199,6 +25728,105 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Earnings"];
+        };
+      };
+    };
+  };
+  me_job_offers_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyJobOffer"][];
+        };
+      };
+    };
+  };
+  me_job_offers_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        answer: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["DeclineOfferRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["DeclineOfferRequest"];
+        "multipart/form-data": components["schemas"]["DeclineOfferRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyJobOffer"];
+        };
+      };
+    };
+  };
+  me_job_postings_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyPosting"][];
+        };
+      };
+    };
+  };
+  me_job_postings_apply_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ApplyPostingRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ApplyPostingRequest"];
+        "multipart/form-data": components["schemas"]["ApplyPostingRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyPosting"];
         };
       };
     };
@@ -28676,6 +30304,100 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["SettingsArea"];
         };
+      };
+    };
+  };
+  shortlists_list: {
+    parameters: {
+      query?: {
+        job?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Shortlist"][];
+        };
+      };
+    };
+  };
+  shortlists_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ShortlistRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ShortlistRequest"];
+        "multipart/form-data": components["schemas"]["ShortlistRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Shortlist"];
+        };
+      };
+    };
+  };
+  shortlists_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this shortlist. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Shortlist"];
+        };
+      };
+    };
+  };
+  shortlists_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this shortlist. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

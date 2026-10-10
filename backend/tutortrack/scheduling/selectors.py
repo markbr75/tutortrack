@@ -100,3 +100,32 @@ def project_event(event: CalendarEvent) -> dict[str, Any]:
         "org_wide": event.org_wide,
         "all_day": event.all_day,
     }
+
+
+# --- matching inputs (E19) ----------------------------------------------------------------------
+
+
+def scheduled_minutes(tutor_ids: list[str], start: datetime, end: datetime) -> dict[str, int]:
+    """Minutes of planned or completed lessons per tutor between ``start`` and ``end``."""
+    out: dict[str, int] = {}
+    rows = (
+        LessonTutor.objects.filter(
+            tutor_id__in=tutor_ids, lesson__start__lt=end, lesson__end__gt=start
+        )
+        .exclude(lesson__status=Lesson.Status.CANCELLED)
+        .values_list("tutor_id", "lesson__start", "lesson__end")
+    )
+    for tutor_id, s, e in rows:
+        key = str(tutor_id)
+        out[key] = out.get(key, 0) + int((e - s).total_seconds() // 60)
+    return out
+
+
+def completed_in_subject(tutor_ids: list[str], subject_id: object | None) -> dict[str, int]:
+    """Completed lessons per tutor on jobs for ``subject_id`` (all subjects when ``None``)."""
+    from django.db.models import Count
+
+    qs = LessonTutor.objects.filter(tutor_id__in=tutor_ids, lesson__status=Lesson.Status.COMPLETED)
+    if subject_id is not None:
+        qs = qs.filter(lesson__job__subject_id=subject_id)
+    return {str(r["tutor_id"]): r["n"] for r in qs.values("tutor_id").annotate(n=Count("id"))}
