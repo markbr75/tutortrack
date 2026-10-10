@@ -14,6 +14,9 @@ TENANT_BASE_DOMAIN = "tutortrack.test"
 DB_APP_ROLE = (DATABASES["default"]["USER"], DATABASES["default"]["PASSWORD"])
 DATABASES["default"] = {**DATABASES["owner"]}
 del DATABASES["owner"]  # migrate must target the test database via "default"
+# Concurrent suites (e.g. several git worktrees) need their own test database.
+if env("TEST_DB_NAME", default=""):
+    DATABASES["default"]["TEST"] = {"NAME": env("TEST_DB_NAME")}
 DB_RLS_ROLE_CHECK = "off"
 DB_GRANT_TRUNCATE = True  # Django flushes transactional tests with TRUNCATE
 
