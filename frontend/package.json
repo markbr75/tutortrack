@@ -17,15 +17,15 @@
     "storybook": "pnpm --filter @tutortrack/ui storybook"
   },
   "devDependencies": {
-    "@eslint/js": "^9.26.0",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.52.0",
-    "@types/node": "^22",
-    "eslint": "^9.26.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
-    "globals": "^16.1.0",
+    "@types/node": "^26",
+    "eslint": "^10.12.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.13.0",
     "prettier": "^3.5.3",
-    "typescript": "~5.8.3",
+    "typescript": "~7.0.2",
     "typescript-eslint": "^8.32.0"
   }
 }
