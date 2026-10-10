@@ -47,6 +47,7 @@ import { OperationsPage } from "./platform/OperationsPage";
 import { PlatformShell } from "./platform/PlatformShell";
 import { TenantPage } from "./platform/TenantPage";
 import { TenantsPage } from "./platform/TenantsPage";
+import { ExpensesPage, PayItemsPage, PayRunPage, PayRunsPage } from "./payroll/PayrollPages";
 import { PlanPage } from "./subscription/PlanPage";
 import { TeamPage } from "./routes/TeamPage";
 import { VerifyEmailPage } from "./routes/VerifyEmailPage";
@@ -200,6 +201,16 @@ const billingRoute = appPage("/billing", BillingPage);
 const paymentsSettingsRoute = appPage("/settings/payments", PaymentsSettingsPage);
 const notificationSettingsRoute = appPage("/settings/notifications", NotificationSettingsPage);
 const planRoute = appPage("/settings/plan", PlanPage);
+const payRunsRoute = appPage("/payroll", PayRunsPage);
+const payExpensesRoute = appPage("/payroll/expenses", ExpensesPage);
+const payItemsRoute = appPage("/payroll/items", PayItemsPage);
+const payRunRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/payroll/runs/$id",
+  component: function PayRunRoute() {
+    return <PayRunPage id={payRunRoute.useParams().id} />;
+  },
+});
 const announcementsRoute = appPage("/announcements", AnnouncementsPage);
 const invoiceRoute = createRoute({
   getParentRoute: () => appRoute,
@@ -258,6 +269,10 @@ const routeTree = rootRoute.addChildren([
     paymentsSettingsRoute,
     notificationSettingsRoute,
     planRoute,
+    payRunsRoute,
+    payExpensesRoute,
+    payItemsRoute,
+    payRunRoute,
     announcementsRoute,
     teamRoute,
     auditRoute,

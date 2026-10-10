@@ -20,6 +20,7 @@ const NAV = [
   { to: "/tutors", key: "nav.tutors", permission: "people.tutor.view" },
   { to: "/jobs", key: "nav.jobs", permission: "jobs.job.view" },
   { to: "/billing", key: "nav.billing", permission: "billing.invoice.view" },
+  { to: "/payroll", key: "nav.payroll", permission: "payroll.view" },
   { to: "/tasks", key: "nav.tasks", permission: "crm.task.view" },
   { to: "/announcements", key: "nav.announcements", permission: "comms.announcement.manage" },
   { to: "/reports", key: "nav.reports", permission: "delivery.report.view" },

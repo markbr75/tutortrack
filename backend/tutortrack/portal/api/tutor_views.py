@@ -48,7 +48,7 @@ class TutorMeView(TutorView):
                 "can_cancel": has_perm(request.user, "scheduling.lesson.cancel"),
                 "can_edit_lessons": has_perm(request.user, "scheduling.lesson.edit"),
                 "can_see_pay": has_perm(request.user, "billing.rates.view_pay")
-                or has_perm(request.user, "payroll.payitem.view"),
+                or has_perm(request.user, "payroll.view"),
             }
         )
 

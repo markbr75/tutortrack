@@ -205,6 +205,9 @@ for _key in (
     "staff_dispute",
     "subscription_notice",
     "staff_support_access",
+    "staff_expense_submitted",
+    "staff_pay_run_review",
+    "staff_payout_failed",
 ):
     DEFAULTS[(_key, "in_app")] = ("{{ alert.title }}", "{{ alert.body }}")
     DEFAULTS[(_key, "email")] = ("{{ alert.title }}", "{{ alert.body }}" + SIGN)

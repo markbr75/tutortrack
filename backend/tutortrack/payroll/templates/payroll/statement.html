@@ -1,0 +1,55 @@
+{% load i18n %}<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>{{ statement.number }}</title>
+{% include "billing/_style.html" %}</head>
+<body>
+  <div class="row">
+    <div>
+      {% if statement.kind == "self_billing" %}
+        <h1>{% trans "Self-billing invoice" %}</h1>
+        <div><strong>{{ statement.snapshot.tutor.name }}</strong></div>
+        {% if statement.snapshot.tutor.vat_number %}<div>{% trans "VAT number" %}: {{ statement.snapshot.tutor.vat_number }}</div>{% endif %}
+      {% else %}
+        <h1>{% trans "Remittance advice" %}</h1>
+        <div><strong>{{ statement.snapshot.organisation.name }}</strong></div>
+      {% endif %}
+    </div>
+    <div class="muted">
+      <div>{% trans "Number" %}: <strong>{{ statement.number }}</strong></div>
+      <div>{% trans "Issued" %}: {{ statement.issued_at|date:"j F Y" }}</div>
+      <div>{% trans "Period" %}: {{ statement.snapshot.period.0 }} – {{ statement.snapshot.period.1 }}</div>
+      <div>{% trans "Pay run" %}: {{ statement.snapshot.pay_run }}</div>
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      {% if statement.kind == "self_billing" %}
+        <div class="muted">{% trans "Customer" %}</div>
+        <div><strong>{{ statement.snapshot.organisation.name }}</strong></div>
+        {% if statement.snapshot.organisation.vat_number %}<div>{% trans "VAT number" %}: {{ statement.snapshot.organisation.vat_number }}</div>{% endif %}
+      {% else %}
+        <div class="muted">{% trans "Paid to" %}</div>
+        <div><strong>{{ statement.snapshot.tutor.name }}</strong></div>
+      {% endif %}
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Description" %}</th>
+      <th class="num">{% trans "Qty" %}</th><th class="num">{% trans "Amount" %}</th></tr></thead>
+    <tbody>
+    {% for item in items %}
+      <tr><td>{{ item.date|date:"j M" }}</td><td>{{ item.description }}</td>
+        <td class="num">{{ item.quantity }}</td><td class="num">{{ item.amount.amount }} {{ item.currency }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <table class="totals">
+    <tr><td>{% trans "Net" %}</td><td class="num">{{ statement.net.amount }} {{ statement.currency }}</td></tr>
+    {% if statement.vat.amount %}<tr><td>{% trans "VAT" %}</td><td class="num">{{ statement.vat.amount }} {{ statement.currency }}</td></tr>{% endif %}
+    <tr><td><strong>{% trans "Total" %}</strong></td><td class="num"><strong>{{ statement.total.amount }} {{ statement.currency }}</strong></td></tr>
+  </table>
+  {% if statement.kind == "self_billing" %}
+  <p class="muted">{% blocktrans with org=statement.snapshot.organisation.name version=statement.snapshot.tutor.agreement %}This is a self-billing invoice raised by {{ org }} on behalf of the supplier under the self-billing agreement ({{ version }}). The supplier agrees not to issue their own invoices for these supplies and to tell us if their VAT registration changes.{% endblocktrans %}</p>
+  {% endif %}
+</body>
+</html>

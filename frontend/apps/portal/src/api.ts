@@ -28,3 +28,27 @@ export function usePortalMe() {
 export function problemStatus(error: unknown): number | null {
   return error instanceof ApiError ? error.status : null;
 }
+
+/** Direct-to-storage upload (create → PUT → complete); returns the stored file id. */
+export async function uploadFile(file: File): Promise<string> {
+  const created = unwrap(
+    await api.POST("/api/v1/files/uploads", {
+      body: {
+        filename: file.name,
+        content_type: file.type || "application/octet-stream",
+        size_bytes: file.size,
+        visibility: "private",
+      },
+    }),
+  );
+  const put = await fetch(created.upload.url, {
+    method: created.upload.method,
+    headers: created.upload.headers,
+    body: file,
+  });
+  if (!put.ok) throw new Error("upload failed");
+  unwrap(
+    await api.POST("/api/v1/files/{id}/complete", { params: { path: { id: created.file.id } } }),
+  );
+  return created.file.id;
+}

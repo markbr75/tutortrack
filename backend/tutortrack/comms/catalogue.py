@@ -776,6 +776,9 @@ for _key, _label, _code in (
     ("staff_dispute", _("Card payment disputed"), "payments.payment.view"),
     ("staff_profile_change", _("A family changed sensitive details"), "people.student.edit"),
     ("staff_support_access", _("TutorTrack support accessed the account"), "support.access.view"),
+    ("staff_expense_submitted", _("Expense claim waiting for approval"), "payroll.expense.approve"),
+    ("staff_pay_run_review", _("Pay run waiting for approval"), "payroll.payrun.approve"),
+    ("staff_payout_failed", _("A tutor payout failed"), "payroll.payrun.pay"),
 ):
     register(
         NotificationType(

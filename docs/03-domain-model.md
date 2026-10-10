@@ -124,7 +124,7 @@ Naming: `<aggregate>.<past_tense_verb>`. Each epic lists its events; this table 
 | `attendance.recorded` (published by scheduling), `lesson.completion_blocked`, `lesson.unconfirmed`, `lesson_report.requested/due/overdue/escalated/submitted/returned/approved/shared/commented`, `makeup_credit.issued/consumed/voided` | E09 |
 | `charge.created/voided`, `invoice.drafted/issued/sent/paid/partially_paid/reminder/overdue/voided/written_off`, `credit_note.issued`, `payment_request.created/sent/paid/cancelled`, `client.balance_low`, `package.purchased/depleted/expiring` (Phase 2) | E10 |
 | `payment.succeeded/pending/failed/refunded/disputed/dispute_evidence_due/dispute_closed`, `payment_method.added/removed` (`expiring` with E13), `provider_account.connected/disconnected/requirements_due`, `payout.received`, `mandate.created/cancelled` (Phase 2, GoCardless) | E11 |
-| `pay_item.created`, `pay_run.approved/paid`, `payout.paid/failed`, `expense.submitted/approved/rejected` | E12 |
+| `pay_item.created/held/released`, `pay_run.created/approved/paid/partially_failed`, `payout.paid/failed`, `expense.submitted/approved/rejected`, `self_billing_statement.issued` | E12 |
 | `message.sent/delivered/bounced/received` (MVP: kept in the message log, not yet published as domain events) | E13 |
 | `enquiry.received`, `enquiry.stage_changed`, `enquiry.won/lost` | E17 |
 | `application.submitted/stage_changed/approved/rejected`, `compliance.document_expiring/expired/verified` | E18 |

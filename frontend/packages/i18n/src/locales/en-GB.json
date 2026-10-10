@@ -25,7 +25,8 @@
     "payments": "Payments setup",
     "notifications": "Notifications",
     "announcements": "News",
-    "plan": "Billing & plan"
+    "plan": "Billing & plan",
+    "payroll": "Payroll"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -1241,7 +1242,51 @@
     "setupTitle": "Save your payment details",
     "saveDetails": "Save details",
     "setupDone": "Saved: card or account ending {{last4}}.",
-    "autopayOn": "Invoices will be paid automatically."
+    "autopayOn": "Invoices will be paid automatically.",
+    "upcoming": "Coming up",
+    "yearToDate": "Paid this year",
+    "held": "On hold",
+    "upcomingItems": "Next pay",
+    "history": "Payouts and statements",
+    "holdReasons": {
+      "report_overdue": "Write the lesson report to release this.",
+      "client_unpaid": "Paid once the family pays the invoice.",
+      "compliance": "Update your compliance documents to release this.",
+      "manual": "Held by the office: ask them about it."
+    },
+    "statementKinds": {
+      "self_billing": "Self-billing invoice",
+      "remittance": "Remittance advice"
+    },
+    "expenses": "Expenses",
+    "newClaim": "New claim",
+    "category": "Category",
+    "chooseCategory": "Choose…",
+    "date": "Date",
+    "description": "What was it for?",
+    "distance": "Distance ({{unit}})",
+    "suggestDistance": "Suggest from my lessons",
+    "amount": "Amount",
+    "receipt": "Receipt photo",
+    "submitClaim": "Send claim",
+    "claimSent": "Claim sent for approval.",
+    "claimStatus": {
+      "draft": "Draft",
+      "submitted": "Waiting",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "details": "Pay details",
+    "bankOnFile": "Bank account {{hint}}",
+    "noBank": "No bank details yet",
+    "accountName": "Name on the account",
+    "sortCode": "Sort code",
+    "accountNumber": "Account number",
+    "saveBank": "Save bank details",
+    "selfBillingAgreed": "You've agreed to self-billing.",
+    "selfBillingText": "We'll raise invoices for your work on your behalf (self-billing). You agree not to send your own invoices for the same work and to tell us if your VAT registration changes.",
+    "agreeSelfBilling": "I agree to self-billing",
+    "setUpStripe": "Set up payouts with Stripe"
   },
   "comms": {
     "bell_one": "Notifications ({{count}} new)",
@@ -1405,7 +1450,8 @@
       "students": "Students",
       "availability": "Availability",
       "earnings": "Earnings",
-      "profile": "Profile"
+      "profile": "Profile",
+      "expenses": "Expenses"
     },
     "today": "Today",
     "reportsDue": "Reports to write",
@@ -1724,5 +1770,81 @@
       "outage": "Outage"
     },
     "postNotice": "Post notice"
+  },
+  "payroll": {
+    "title": "Payroll",
+    "runs": "Pay runs",
+    "expenses": "Expense claims",
+    "items": "Pay items",
+    "periodStart": "From",
+    "periodEnd": "To",
+    "newRun": "New pay run",
+    "number": "Number",
+    "period": "Period",
+    "status": "Status",
+    "total": "Total",
+    "run": "Pay run",
+    "runStatus": {
+      "draft": "Collecting",
+      "review": "Ready for review",
+      "approved": "Approved",
+      "paying": "Paying out",
+      "paid": "Paid",
+      "partially_failed": "Paid with failures",
+      "cancelled": "Cancelled"
+    },
+    "approvals": "{{count}} of {{required}} approvals",
+    "approve": "Approve",
+    "cancelRun": "Cancel run",
+    "fileFormat": "Bank file",
+    "defaultFormat": "Default",
+    "makeBankFile": "Make bank file",
+    "markPaid": "Mark all paid",
+    "tutor": "Tutor",
+    "method": "Paid by",
+    "methods": {
+      "manual": "Paid manually",
+      "bank_file": "Bank transfer",
+      "stripe_connect": "Stripe",
+      "external_payroll": "Payroll provider"
+    },
+    "payoutStatus": {
+      "pending": "Waiting",
+      "processing": "Sending",
+      "paid": "Paid",
+      "failed": "Failed",
+      "carried": "Carried forward"
+    },
+    "amount": "Amount",
+    "statement": "Statement",
+    "exportFor": "Export for payroll:",
+    "exports": {
+      "xero": "Xero",
+      "quickbooks": "QuickBooks",
+      "brightpay": "BrightPay",
+      "gusto": "Gusto",
+      "generic": "CSV"
+    },
+    "noClaims": "No claims waiting.",
+    "rebillable": "Rebill to client",
+    "receipt": "Receipt",
+    "comment": "Comment",
+    "approveClaim": "Approve",
+    "rejectClaim": "Reject",
+    "itemStatus": {
+      "held": "On hold",
+      "ready": "Ready",
+      "in_pay_run": "In a pay run",
+      "approved": "Approved",
+      "paid": "Paid"
+    },
+    "date": "Date",
+    "description": "Description",
+    "actions": "Actions",
+    "release": "Release",
+    "payProfile": "Pay",
+    "selfBillingAgreed": "Self-billing agreed",
+    "vatRegistered": "VAT {{number}}",
+    "stripePending": "Waiting for the tutor to finish Stripe setup."
   }
 }

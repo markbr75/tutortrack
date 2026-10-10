@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "tutortrack.delivery",
     "tutortrack.billing",
     "tutortrack.payments",
+    "tutortrack.payroll",
     "tutortrack.comms",
     "tutortrack.portal",
     "tutortrack.subscriptions",
@@ -289,6 +290,13 @@ SPECTACULAR_SETTINGS = {
         "FileVisibilityEnum": "tutortrack.core.models.files.StoredFile.Visibility",
         "PlanVisibilityEnum": "tutortrack.subscriptions.models.Plan.Visibility",
         "BillingIntervalEnum": "tutortrack.subscriptions.models.Interval",
+        "PayItemStatusEnum": "tutortrack.payroll.models.PayItem.Status",
+        "PayRunStatusEnum": "tutortrack.payroll.models.PayRun.Status",
+        "TutorPayoutStatusEnum": "tutortrack.payroll.models.Payout.Status",
+        "ExpenseStatusEnum": "tutortrack.payroll.models.Expense.Status",
+        "TutorPayMethodEnum": "tutortrack.payroll.models.PayMethod",
+        "BankFileFormatEnum": "tutortrack.payroll.bankfiles.FORMAT_CHOICES",
+        "FormatEnum": "tutortrack.catalogue.models.Service.Format",
         "CustomFieldVisibilityEnum": "tutortrack.crm.models.CustomFieldDefinition.Visibility",
         "NoteVisibilityEnum": "tutortrack.crm.models.Note.Visibility",
         "JobStatusEnum": "tutortrack.jobs.models.Job.Status",
@@ -324,6 +332,9 @@ STRIPE = {
     "WEBHOOK_SECRET": env("STRIPE_WEBHOOK_SECRET", default=""),
     "APPLICATION_FEE_PERCENT": env("STRIPE_APPLICATION_FEE_PERCENT", default="0"),
 }
+
+# Payroll (E12): Stripe Express payouts to tutors need the account set up as a Connect platform.
+PAYROLL_STRIPE_PAYOUTS = env.bool("PAYROLL_STRIPE_PAYOUTS", default=False)
 
 # Platform console (E30): staff need 2FA, and the console only answers from these networks
 # (comma-separated CIDRs; empty = anywhere, for development).

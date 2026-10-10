@@ -1605,6 +1605,175 @@ export interface paths {
     patch: operations["events_partial_update"];
     trace?: never;
   };
+  "/api/v1/expense-categories": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["expense_categories_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["expense_categories_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/expense-categories/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["expense_categories_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/expenses": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["expenses_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["expenses_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/expenses/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["expenses_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/expenses/{id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["expenses_approve_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/expenses/{id}/reject": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["expenses_reject_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/expenses/mileage-suggestions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Suggested legs between the tutor's in-person lessons that day (FR-12-3). */
+    get: operations["expenses_mileage_suggestions_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/features": {
     parameters: {
       query?: never;
@@ -3054,6 +3223,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/me/earnings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``/me/earnings`` (FR-12-9): upcoming and held pay, payouts, statements, YTD. */
+    get: operations["me_earnings_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/me/logins": {
     parameters: {
       query?: never;
@@ -3167,6 +3353,57 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations["me_password_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/pay-profile": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The tutor's own pay details (tutor portal). */
+    get: operations["me_pay_profile_retrieve"];
+    /** @description The tutor's own pay details (tutor portal). */
+    put: operations["me_pay_profile_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/pay-profile/self-billing": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["me_pay_profile_self_billing_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/pay-profile/stripe": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Start (or resume) Stripe Express onboarding for payouts (FR-12-7). */
+    post: operations["me_pay_profile_stripe_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -3579,6 +3816,405 @@ export interface paths {
      *     deleted; the subscription is cancelled.
      */
     post: operations["organisation_close_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-items": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["pay_items_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["pay_items_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-items/{id}/hold": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["pay_items_hold_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-items/{id}/release": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["pay_items_release_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-items/{id}/void": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["pay_items_void_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-runs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["pay_runs_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["pay_runs_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-runs/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["pay_runs_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-runs/{id}/adjustments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["pay_runs_adjustments_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-runs/{id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["pay_runs_approve_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-runs/{id}/bank-files": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["pay_runs_bank_files_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-runs/{id}/bank-files/{file_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["pay_runs_bank_files_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-runs/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["pay_runs_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-runs/{id}/mark-paid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["pay_runs_mark_paid_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-runs/{id}/payroll-export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Hours and amounts for the payroll provider (employed tutors, FR-12-8). */
+    get: operations["pay_runs_payroll_export_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-runs/{id}/remove-item": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["pay_runs_remove_item_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-statements": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["pay_statements_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-statements/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["pay_statements_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pay-statements/{id}/pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["pay_statements_pdf_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -4009,6 +4645,41 @@ export interface paths {
     put?: never;
     /** @description Start or resume Stripe onboarding; open the returned ``url``. */
     post: operations["payments_providers_stripe_connect_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payouts/{id}/fail": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Record a bounced or rejected payout: its items go back for the next run. */
+    post: operations["payouts_fail_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payroll/originator": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The account the organisation pays tutors from (bank files). */
+    get: operations["payroll_originator_retrieve"];
+    /** @description The account the organisation pays tutors from (bank files). */
+    put: operations["payroll_originator_update"];
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -5675,6 +6346,31 @@ export interface paths {
     patch: operations["tutors_partial_update"];
     trace?: never;
   };
+  "/api/v1/tutors/{id}/pay-profile": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``/tutors/{id}/pay-profile``: method, payout details and VAT (FR-12-2). Bank details
+     *     are masked unless ``?full=true`` and the user may see them (audited).
+     */
+    get: operations["tutors_pay_profile_retrieve"];
+    /** @description Replace the bank details. */
+    put: operations["tutors_pay_profile_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description ``/tutors/{id}/pay-profile``: method, payout details and VAT (FR-12-2). Bank details
+     *     are masked unless ``?full=true`` and the user may see them (audited).
+     */
+    patch: operations["tutors_pay_profile_partial_update"];
+    trace?: never;
+  };
   "/api/v1/tutors/{id}/status": {
     parameters: {
       query?: never;
@@ -5790,6 +6486,12 @@ export interface components {
       balances: components["schemas"]["BalancesOut"];
       auto_pay: boolean;
     };
+    /**
+     * @description * `checking` - checking
+     *     * `savings` - savings
+     * @enum {string}
+     */
+    AccountTypeEnum: "checking" | "savings";
     AdHocChargeRequest: {
       /** Format: uuid */
       client: string;
@@ -5891,6 +6593,20 @@ export interface components {
       region?: string;
       postcode?: string;
       country?: string;
+    };
+    AdjustmentRequest: {
+      /** Format: uuid */
+      tutor: string;
+      description: string;
+      amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
     };
     AffectedLesson: {
       id: string;
@@ -6103,6 +6819,40 @@ export interface components {
       invoice_balance: components["schemas"]["MoneyOut"];
       available_credit: components["schemas"]["MoneyOut"];
       overdue: components["schemas"]["MoneyOut"];
+    };
+    BankDetailsRequest: {
+      country: string;
+      account_name: string;
+      sort_code?: string;
+      account_number?: string;
+      iban?: string;
+      bic?: string;
+      routing_number?: string;
+      account_type?: components["schemas"]["AccountTypeEnum"];
+      bsb?: string;
+      bank_code?: string;
+    };
+    BankFile: {
+      /** Format: uuid */
+      readonly id: string;
+      format: string;
+      filename: string;
+      payout_count: number;
+      total?: unknown;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `csv` - CSV
+     *     * `bacs18` - BACS18
+     *     * `sepa` - SEPA
+     *     * `nacha` - NACHA
+     *     * `aba` - ABA
+     * @enum {string}
+     */
+    BankFileFormatEnum: "csv" | "bacs18" | "sepa" | "nacha" | "aba";
+    BankFileRequestRequest: {
+      format?: components["schemas"]["BankFileFormatEnum"];
     };
     /**
      * @description * `month` - Monthly
@@ -7130,6 +7880,9 @@ export interface components {
       attempts: number;
       last_error: string;
     };
+    DecisionRequest: {
+      comment?: string;
+    };
     /**
      * @description * `in_person` - In person
      *     * `online` - Online
@@ -7180,6 +7933,12 @@ export interface components {
      * @enum {string}
      */
     DisputeStatusEnum: "needs_response" | "under_review" | "won" | "lost";
+    /**
+     * @description * `km` - km
+     *     * `mi` - miles
+     * @enum {string}
+     */
+    DistanceUnitEnum: "km" | "mi";
     Document: {
       /** Format: uuid */
       readonly id: string;
@@ -7252,6 +8011,21 @@ export interface components {
       start: string;
       status: string;
       pay: components["schemas"]["MoneyOut"];
+    };
+    Earnings: {
+      upcoming: components["schemas"]["PayItem"][];
+      upcoming_total: {
+        [key: string]: string;
+      };
+      held: components["schemas"]["PayItem"][];
+      held_total: {
+        [key: string]: string;
+      };
+      payouts: components["schemas"]["TutorPayout"][];
+      statements: components["schemas"]["PayStatement"][];
+      year_to_date: {
+        [key: string]: string;
+      };
     };
     Economics: {
       charge: components["schemas"]["MoneyOut"];
@@ -7353,6 +8127,138 @@ export interface components {
      * @enum {string}
      */
     ExceptionStatusEnum: "requested" | "approved" | "declined";
+    Expense: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      /** Format: uuid */
+      readonly category: string;
+      readonly category_name: string;
+      readonly status: components["schemas"]["ExpenseStatusEnum"];
+      /** Format: date */
+      readonly date: string;
+      readonly description: string;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly tax: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /** Format: decimal */
+      readonly distance: string | null;
+      /** Format: uuid */
+      readonly receipt: string | null;
+      /** Format: uuid */
+      readonly lesson: string | null;
+      /** Format: uuid */
+      readonly job: string | null;
+      /** Format: uuid */
+      readonly client: string | null;
+      readonly rebillable: boolean;
+      /** Format: date-time */
+      readonly submitted_at: string | null;
+      readonly decided_by_name: string;
+      /** Format: date-time */
+      readonly decided_at: string | null;
+      readonly decision_comment: string;
+      /** Format: uuid */
+      readonly charge_id: string | null;
+    };
+    ExpenseCategory: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      kind?: components["schemas"]["ExpenseCategoryKindEnum"];
+      account_code?: string;
+      /** Format: decimal */
+      limit_amount?: string | null;
+      /** Format: decimal */
+      mileage_rate?: string | null;
+      distance_unit?: components["schemas"]["DistanceUnitEnum"];
+      rebillable_default?: boolean;
+      active?: boolean;
+    };
+    /**
+     * @description * `expense` - Expense
+     *     * `mileage` - Mileage
+     * @enum {string}
+     */
+    ExpenseCategoryKindEnum: "expense" | "mileage";
+    ExpenseCategoryRequest: {
+      name: string;
+      kind?: components["schemas"]["ExpenseCategoryKindEnum"];
+      account_code?: string;
+      /** Format: decimal */
+      limit_amount?: string | null;
+      /** Format: decimal */
+      mileage_rate?: string | null;
+      distance_unit?: components["schemas"]["DistanceUnitEnum"];
+      rebillable_default?: boolean;
+      active?: boolean;
+    };
+    /**
+     * @description * `draft` - Draft
+     *     * `submitted` - Waiting for approval
+     *     * `approved` - Approved
+     *     * `rejected` - Rejected
+     * @enum {string}
+     */
+    ExpenseStatusEnum: "draft" | "submitted" | "approved" | "rejected";
+    ExpenseSubmitRequest: {
+      /**
+       * Format: uuid
+       * @description Staff only; tutors claim for themselves
+       */
+      tutor?: string;
+      /** Format: uuid */
+      category: string;
+      /** Format: date */
+      date: string;
+      description: string;
+      amount?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      tax?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: decimal */
+      distance?: string | null;
+      /** Format: uuid */
+      receipt?: string | null;
+      /** Format: uuid */
+      lesson?: string | null;
+      /** Format: uuid */
+      job?: string | null;
+      /** Format: uuid */
+      client?: string | null;
+      rebillable?: boolean | null;
+    };
     ExtendRequest: {
       /** Format: date-time */
       until: string;
@@ -7360,6 +8266,9 @@ export interface components {
     ExtendTrialRequest: {
       reason: string;
       days: number;
+    };
+    FailPayoutRequest: {
+      reason: string;
     };
     Features: {
       features: {
@@ -7476,6 +8385,9 @@ export interface components {
      * @enum {string}
      */
     GroupChargeEnum: "per_student" | "split";
+    HoldNoteRequest: {
+      note: string;
+    };
     /**
      * @description * `week` - Per week
      *     * `month` - Per month
@@ -8700,6 +9612,36 @@ export interface components {
       on_tutor_cancellation: boolean;
       valid_days: number;
     };
+    /**
+     * @description * `bonus` - bonus
+     *     * `referral` - referral
+     *     * `adjustment` - adjustment
+     *     * `deduction` - deduction
+     *     * `salary` - salary
+     * @enum {string}
+     */
+    ManualItemKindEnum: "bonus" | "referral" | "adjustment" | "deduction" | "salary";
+    ManualItemRequest: {
+      /** Format: uuid */
+      tutor: string;
+      kind: components["schemas"]["ManualItemKindEnum"];
+      description: string;
+      amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /** Format: date */
+      date: string;
+    };
+    MarkPaidRequest: {
+      payouts?: string[];
+      reference?: string;
+    };
     MarkReadRequest: {
       ids?: string[] | null;
     };
@@ -8840,6 +9782,15 @@ export interface components {
       | "complained"
       | "failed"
       | "suppressed";
+    MileageLeg: {
+      origin: string;
+      destination: string;
+      /** Format: uuid */
+      lesson: string;
+      /** Format: decimal */
+      distance: string;
+      unit: string;
+    };
     /** @description Read-only money in computed responses (quotes, summaries). */
     MoneyOut: {
       amount: string;
@@ -8961,6 +9912,9 @@ export interface components {
       /** Format: uri */
       url: string;
     };
+    OnboardingLink: {
+      url: string;
+    };
     OnboardingState: {
       current_step: string;
       steps: components["schemas"]["OnboardingStepStatus"][];
@@ -9044,6 +9998,20 @@ export interface components {
      * @enum {string}
      */
     OrganisationStatusEnum: "trial" | "active" | "past_due" | "suspended" | "cancelled";
+    OriginatorOut: {
+      name: string;
+      bank_hint: string;
+      configured: boolean;
+    };
+    OriginatorRequest: {
+      name: string;
+      bank: components["schemas"]["BankDetailsRequest"];
+      company_id?: string;
+      immediate_destination?: string;
+      destination_name?: string;
+      apca_id?: string;
+      bank_short_name?: string;
+    };
     Override: {
       key: string;
       bool_value: boolean | null;
@@ -9343,6 +10311,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Exception"][];
     };
+    PaginatedExpenseList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Expense"][];
+    };
     PaginatedInAppList: {
       /**
        * Format: uri
@@ -9524,6 +10505,45 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["PackageTemplate"][];
+    };
+    PaginatedPayItemList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PayItem"][];
+    };
+    PaginatedPayRunList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PayRun"][];
+    };
+    PaginatedPayStatementList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PayStatement"][];
     };
     PaginatedPaymentList: {
       /**
@@ -9791,6 +10811,18 @@ export interface components {
       validation_regex?: string;
       active?: boolean;
     };
+    PatchedExpenseCategoryRequest: {
+      name?: string;
+      kind?: components["schemas"]["ExpenseCategoryKindEnum"];
+      account_code?: string;
+      /** Format: decimal */
+      limit_amount?: string | null;
+      /** Format: decimal */
+      mileage_rate?: string | null;
+      distance_unit?: components["schemas"]["DistanceUnitEnum"];
+      rebillable_default?: boolean;
+      active?: boolean;
+    };
     PatchedFlagUpdateRequest: {
       description?: string;
       enabled_globally?: boolean;
@@ -9975,6 +11007,15 @@ export interface components {
       bookable_online?: boolean;
       auto_renew?: boolean;
       active?: boolean;
+    };
+    PatchedPayProfileUpdateRequest: {
+      method?: components["schemas"]["TutorPayMethodEnum"];
+      currency?: string;
+      payee_name?: string;
+      vat_registered?: boolean;
+      vat_number?: string;
+      /** Format: decimal */
+      hourly_rate?: string | null;
     };
     PatchedPlanAdminPriceRequest: {
       /** Format: decimal */
@@ -10251,6 +11292,77 @@ export interface components {
       /** @default false */
       save_method: boolean;
     };
+    PayItem: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      readonly kind: components["schemas"]["PayItemKindEnum"];
+      readonly status: components["schemas"]["PayItemStatusEnum"];
+      readonly description: string;
+      /** Format: date */
+      readonly date: string;
+      /** Format: decimal */
+      readonly quantity: string;
+      readonly unit: string;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly hold_reasons: unknown;
+      readonly hold_note: string;
+      /** Format: uuid */
+      readonly lesson: string | null;
+      /** Format: uuid */
+      readonly pay_run: string | null;
+      readonly pay_run_number: string;
+      /** Format: uuid */
+      readonly expense: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `lesson` - Lesson
+     *     * `cancellation` - Cancelled lesson
+     *     * `event` - Meeting or training
+     *     * `charge_share` - Share of a charge
+     *     * `expense` - Expense
+     *     * `mileage` - Mileage
+     *     * `bonus` - Bonus
+     *     * `referral` - Referral bonus
+     *     * `adjustment` - Adjustment
+     *     * `deduction` - Deduction
+     *     * `salary` - Salary or fixed amount
+     * @enum {string}
+     */
+    PayItemKindEnum:
+      | "lesson"
+      | "cancellation"
+      | "event"
+      | "charge_share"
+      | "expense"
+      | "mileage"
+      | "bonus"
+      | "referral"
+      | "adjustment"
+      | "deduction"
+      | "salary";
+    /**
+     * @description * `ready` - Ready
+     *     * `held` - On hold
+     *     * `in_pay_run` - In a pay run
+     *     * `approved` - Approved
+     *     * `paid` - Paid
+     *     * `void` - Cancelled
+     * @enum {string}
+     */
+    PayItemStatusEnum: "ready" | "held" | "in_pay_run" | "approved" | "paid" | "void";
     PayLine: {
       tutor_id: string;
       unit: string;
@@ -10284,6 +11396,147 @@ export interface components {
       description: string;
       amount: components["schemas"]["MoneyOut"];
     };
+    PayProfile: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      readonly employment_type: string;
+      method?: components["schemas"]["TutorPayMethodEnum"];
+      currency?: string;
+      payee_name?: string;
+      readonly bank_country: string;
+      readonly bank_hint: string;
+      readonly bank: {
+        [key: string]: string;
+      };
+      vat_registered?: boolean;
+      vat_number?: string;
+      /** Format: date-time */
+      readonly self_billing_agreed_at: string | null;
+      readonly self_billing_agreement_version: string;
+      readonly stripe_account_id: string;
+      readonly stripe_payouts_enabled: boolean;
+      /**
+       * Format: decimal
+       * @description For paid meetings and training
+       */
+      hourly_rate?: string | null;
+    };
+    PayRun: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly number: string;
+      readonly all_branches: boolean;
+      /** Format: uuid */
+      readonly branch: string;
+      /** Format: date */
+      readonly period_start: string;
+      /** Format: date */
+      readonly period_end: string;
+      readonly status: components["schemas"]["PayRunStatusEnum"];
+      readonly totals: unknown;
+      readonly warnings: unknown;
+      readonly approvals: unknown;
+      readonly approvals_required: number;
+      /** Format: date-time */
+      readonly approved_at: string | null;
+      /** Format: date-time */
+      readonly paid_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    PayRunCreateRequest: {
+      /** Format: date */
+      period_start: string;
+      /** Format: date */
+      period_end: string;
+      /** Format: uuid */
+      branch?: string | null;
+    };
+    PayRunDetail: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly number: string;
+      readonly all_branches: boolean;
+      /** Format: uuid */
+      readonly branch: string;
+      /** Format: date */
+      readonly period_start: string;
+      /** Format: date */
+      readonly period_end: string;
+      readonly status: components["schemas"]["PayRunStatusEnum"];
+      readonly totals: unknown;
+      readonly warnings: unknown;
+      readonly approvals: unknown;
+      readonly approvals_required: number;
+      /** Format: date-time */
+      readonly approved_at: string | null;
+      /** Format: date-time */
+      readonly paid_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly payouts: components["schemas"]["TutorPayout"][];
+      readonly bank_files: components["schemas"]["BankFile"][];
+    };
+    /**
+     * @description * `draft` - Collecting
+     *     * `review` - Ready for review
+     *     * `approved` - Approved
+     *     * `paying` - Paying out
+     *     * `paid` - Paid
+     *     * `partially_failed` - Paid with failures
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    PayRunStatusEnum:
+      "draft" | "review" | "approved" | "paying" | "paid" | "partially_failed" | "cancelled";
+    PayStatement: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      readonly kind: components["schemas"]["PayStatementKindEnum"];
+      readonly number: string;
+      /** Format: date-time */
+      readonly issued_at: string;
+      readonly net: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly vat: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly total: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly pay_run_number: string;
+    };
+    /**
+     * @description * `self_billing` - Self-billing invoice
+     *     * `remittance` - Remittance advice
+     * @enum {string}
+     */
+    PayStatementKindEnum: "self_billing" | "remittance";
     /**
      * @description * `per_hour` - Per hour
      *     * `per_lesson` - Per lesson
@@ -11301,6 +12554,10 @@ export interface components {
      * @enum {string}
      */
     RelationshipEnum: "parent" | "guardian" | "carer" | "self" | "finance" | "other";
+    RemoveItemRequest: {
+      /** Format: uuid */
+      item: string;
+    };
     RemoveLineRequest: {
       /** Format: uuid */
       line: string;
@@ -12526,6 +13783,49 @@ export interface components {
       can_edit_lessons: boolean;
       can_see_pay: boolean;
     };
+    /**
+     * @description * `stripe_connect` - Stripe (paid to their Stripe account)
+     *     * `bank_file` - Bank transfer (payment file)
+     *     * `manual` - Paid manually
+     *     * `external_payroll` - Payroll provider (employees)
+     * @enum {string}
+     */
+    TutorPayMethodEnum: "stripe_connect" | "bank_file" | "manual" | "external_payroll";
+    TutorPayout: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly method: components["schemas"]["TutorPayMethodEnum"];
+      readonly status: components["schemas"]["TutorPayoutStatusEnum"];
+      readonly provider_ref: string;
+      readonly reference: string;
+      readonly failure_reason: string;
+      /** Format: date-time */
+      readonly paid_at: string | null;
+      readonly statement: {
+        [key: string]: string;
+      } | null;
+    };
+    /**
+     * @description * `pending` - Waiting
+     *     * `processing` - Sending
+     *     * `paid` - Paid
+     *     * `failed` - Failed
+     *     * `carried` - Carried forward
+     * @enum {string}
+     */
+    TutorPayoutStatusEnum: "pending" | "processing" | "paid" | "failed" | "carried";
     TutorQualification: {
       /** Format: uuid */
       readonly id: string;
@@ -16254,6 +17554,254 @@ export interface operations {
       };
     };
   };
+  expense_categories_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ExpenseCategory"][];
+        };
+      };
+    };
+  };
+  expense_categories_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExpenseCategoryRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ExpenseCategoryRequest"];
+        "multipart/form-data": components["schemas"]["ExpenseCategoryRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ExpenseCategory"];
+        };
+      };
+    };
+  };
+  expense_categories_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this expense category. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedExpenseCategoryRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedExpenseCategoryRequest"];
+        "multipart/form-data": components["schemas"]["PatchedExpenseCategoryRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ExpenseCategory"];
+        };
+      };
+    };
+  };
+  expenses_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedExpenseList"];
+        };
+      };
+    };
+  };
+  expenses_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExpenseSubmitRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ExpenseSubmitRequest"];
+        "multipart/form-data": components["schemas"]["ExpenseSubmitRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Expense"];
+        };
+      };
+    };
+  };
+  expenses_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this expense. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Expense"];
+        };
+      };
+    };
+  };
+  expenses_approve_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this expense. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["DecisionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["DecisionRequest"];
+        "multipart/form-data": components["schemas"]["DecisionRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Expense"];
+        };
+      };
+    };
+  };
+  expenses_reject_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this expense. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["DecisionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["DecisionRequest"];
+        "multipart/form-data": components["schemas"]["DecisionRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Expense"];
+        };
+      };
+    };
+  };
+  expenses_mileage_suggestions_list: {
+    parameters: {
+      query: {
+        date: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        unit?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MileageLeg"][];
+        };
+      };
+    };
+  };
   features_retrieve: {
     parameters: {
       query?: never;
@@ -18947,6 +20495,25 @@ export interface operations {
       };
     };
   };
+  me_earnings_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Earnings"];
+        };
+      };
+    };
+  };
   me_logins_list: {
     parameters: {
       query?: never;
@@ -19114,6 +20681,94 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  me_pay_profile_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayProfile"];
+        };
+      };
+    };
+  };
+  me_pay_profile_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BankDetailsRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BankDetailsRequest"];
+        "multipart/form-data": components["schemas"]["BankDetailsRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayProfile"];
+        };
+      };
+    };
+  };
+  me_pay_profile_self_billing_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayProfile"];
+        };
+      };
+    };
+  };
+  me_pay_profile_stripe_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OnboardingLink"];
+        };
       };
     };
   };
@@ -19954,6 +21609,524 @@ export interface operations {
       };
     };
   };
+  pay_items_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        kind?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        pay_run?: string;
+        status?: string;
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPayItemList"];
+        };
+      };
+    };
+  };
+  pay_items_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ManualItemRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ManualItemRequest"];
+        "multipart/form-data": components["schemas"]["ManualItemRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayItem"];
+        };
+      };
+    };
+  };
+  pay_items_hold_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this pay item. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["HoldNoteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["HoldNoteRequest"];
+        "multipart/form-data": components["schemas"]["HoldNoteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayItem"];
+        };
+      };
+    };
+  };
+  pay_items_release_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this pay item. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayItem"];
+        };
+      };
+    };
+  };
+  pay_items_void_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this pay item. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayItem"];
+        };
+      };
+    };
+  };
+  pay_runs_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPayRunList"];
+        };
+      };
+    };
+  };
+  pay_runs_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PayRunCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PayRunCreateRequest"];
+        "multipart/form-data": components["schemas"]["PayRunCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayRunDetail"];
+        };
+      };
+    };
+  };
+  pay_runs_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this pay run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayRunDetail"];
+        };
+      };
+    };
+  };
+  pay_runs_adjustments_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this pay run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AdjustmentRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AdjustmentRequest"];
+        "multipart/form-data": components["schemas"]["AdjustmentRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayRunDetail"];
+        };
+      };
+    };
+  };
+  pay_runs_approve_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this pay run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayRunDetail"];
+        };
+      };
+    };
+  };
+  pay_runs_bank_files_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this pay run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["BankFileRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BankFileRequestRequest"];
+        "multipart/form-data": components["schemas"]["BankFileRequestRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BankFile"];
+        };
+      };
+    };
+  };
+  pay_runs_bank_files_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        file_id: string;
+        /** @description A UUID string identifying this pay run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/octet-stream": string;
+        };
+      };
+    };
+  };
+  pay_runs_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this pay run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayRunDetail"];
+        };
+      };
+    };
+  };
+  pay_runs_mark_paid_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this pay run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["MarkPaidRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["MarkPaidRequest"];
+        "multipart/form-data": components["schemas"]["MarkPaidRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayRunDetail"];
+        };
+      };
+    };
+  };
+  pay_runs_payroll_export_retrieve: {
+    parameters: {
+      query: {
+        format: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this pay run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv": string;
+        };
+      };
+    };
+  };
+  pay_runs_remove_item_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this pay run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RemoveItemRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RemoveItemRequest"];
+        "multipart/form-data": components["schemas"]["RemoveItemRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayRunDetail"];
+        };
+      };
+    };
+  };
+  pay_statements_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPayStatementList"];
+        };
+      };
+    };
+  };
+  pay_statements_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this pay statement. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayStatement"];
+        };
+      };
+    };
+  };
+  pay_statements_pdf_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this pay statement. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": string;
+        };
+      };
+    };
+  };
   pay_retrieve: {
     parameters: {
       query?: never;
@@ -20659,6 +22832,80 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Onboarding"];
+        };
+      };
+    };
+  };
+  payouts_fail_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FailPayoutRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["FailPayoutRequest"];
+        "multipart/form-data": components["schemas"]["FailPayoutRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorPayout"];
+        };
+      };
+    };
+  };
+  payroll_originator_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OriginatorOut"];
+        };
+      };
+    };
+  };
+  payroll_originator_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OriginatorRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["OriginatorRequest"];
+        "multipart/form-data": components["schemas"]["OriginatorRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OriginatorOut"];
         };
       };
     };
@@ -23714,6 +25961,83 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Tutor"];
+        };
+      };
+    };
+  };
+  tutors_pay_profile_retrieve: {
+    parameters: {
+      query?: {
+        full?: boolean;
+      };
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayProfile"];
+        };
+      };
+    };
+  };
+  tutors_pay_profile_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BankDetailsRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BankDetailsRequest"];
+        "multipart/form-data": components["schemas"]["BankDetailsRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayProfile"];
+        };
+      };
+    };
+  };
+  tutors_pay_profile_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedPayProfileUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedPayProfileUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedPayProfileUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayProfile"];
         };
       };
     };

@@ -101,3 +101,24 @@ def ageing_report(user: Any, currency: str) -> list[dict[str, Any]]:
         row[name] = row[name] + invoice.balance_due
         row["total"] = row["total"] + invoice.balance_due
     return sorted(rows.values(), key=lambda r: -r["total"].amount)
+
+
+# --- for payroll (E12: pay tutors only when the client has paid) -------------------------------
+
+
+def lesson_paid(lesson_id: Any) -> bool:
+    """Every charge for the lesson is on a paid invoice (a lesson with no charges counts)."""
+    from .models import Charge
+
+    charges = Charge.objects.filter(lesson_id=lesson_id).exclude(status=Charge.Status.VOID)
+    return not charges.exclude(invoice__status=Invoice.Status.PAID).exists()
+
+
+def lessons_on_invoice(invoice_id: Any) -> list[Any]:
+    from .models import Charge
+
+    return list(
+        Charge.objects.filter(invoice_id=invoice_id, lesson__isnull=False)
+        .values_list("lesson_id", flat=True)
+        .distinct()
+    )

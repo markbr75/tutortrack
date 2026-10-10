@@ -81,12 +81,12 @@ All ─► E26, E27, E28, E31
 | E09 | ✅ Done (2026-10-09) | MVP scope (T09 feedback surveys are Phase 2). See Implementation notes and ADR 0006 |
 | E10 | ✅ Done (2026-10-09) | Phase 1 scope (packages, fixed fees, late fees and split billing are Phase 2). See Implementation notes and ADR 0007 |
 | E11 | ✅ Done (2026-10-09) | Stripe + manual (GoCardless, PayPal, bank feeds and split payments are Phase 2). See Implementation notes and ADR 0008 |
-| E12 | ⏭ Next | |
+| E12 | ✅ Done (2026-10-10) | T01–T11 + TW1 (Wise/1099/commission are Phase 3). Bank files, self-billing, holds, pay runs on Temporal. See Implementation notes |
 | E13 | ✅ Done (2026-10-09) | MVP scope (broadcasts, inbox, WhatsApp, custom domains are Phase 2). See Implementation notes |
 | E14 | ☐ | |
 | E15 | ✅ Done (2026-10-10) | MVP scope (booking, reschedule, packages and messaging are Phase 2). See Implementation notes |
 | E16 | ✅ Done (2026-10-10) | Responsive tutor shell in the portal app (PWA/offline/push are Phase 2; expenses with E12, compliance with E18). See Implementation notes |
-| E17 | ☐ | |
+| E17 | ⏭ Next | |
 | E18 | ☐ | |
 | E19 | ☐ | |
 | E20 | ☐ | |

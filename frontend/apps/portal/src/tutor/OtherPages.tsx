@@ -1,10 +1,11 @@
 import { unwrap } from "@tutortrack/api-client";
-import { formatDate, formatDateTime, formatMoney, useTranslation } from "@tutortrack/i18n";
+import { formatDateTime, useTranslation } from "@tutortrack/i18n";
 import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 
 import { api } from "../api";
+import { PayDetailsSection } from "./PayPages";
 import { useTutorMe } from "./useTutorMe";
 
 /** Students on my active jobs, with their next lesson (E16-T04). */
@@ -216,61 +217,6 @@ export function AvailabilityPage() {
   );
 }
 
-/** Pay for delivered lessons this month (provisional until the pay run, E12) (E16-T06). */
-export function EarningsPage() {
-  const { t, i18n } = useTranslation();
-  const monthId = useId();
-  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
-  const range = () => {
-    const [y, m] = month.split("-").map(Number) as [number, number];
-    const last = new Date(y, m, 0).getDate();
-    return { from: `${month}-01`, to: `${month}-${String(last).padStart(2, "0")}` };
-  };
-  const earnings = useQuery({
-    queryKey: ["tutor", "earnings", month],
-    queryFn: async () =>
-      unwrap(await api.GET("/api/v1/tutor/earnings", { params: { query: range() } })),
-  });
-  return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold">{t("tutor.nav.earnings")}</h1>
-      <div className="space-y-1">
-        <label htmlFor={monthId} className="text-sm font-medium">
-          {t("tutor.month")}
-        </label>
-        <input
-          id={monthId}
-          type="month"
-          className="block rounded-md border border-border bg-background px-3 py-2"
-          value={month}
-          onChange={(e) => setMonth(e.target.value)}
-        />
-      </div>
-      {earnings.data ? (
-        <>
-          <p className="text-lg font-semibold">
-            {t("tutor.total", { amount: formatMoney(earnings.data.total, i18n.language) })}
-          </p>
-          <p className="text-xs text-muted-foreground">{t("tutor.provisional")}</p>
-          <ul className="divide-y divide-border rounded-lg border border-border text-sm">
-            {earnings.data.lessons.map((row) => (
-              <li key={row.lesson} className="flex justify-between gap-2 p-3">
-                <span>
-                  {formatDate(row.start, i18n.language)} · {row.title}
-                  {row.status === "cancelled" ? ` · ${t("portal.status.cancelled")}` : ""}
-                </span>
-                <span>{formatMoney(row.pay, i18n.language)}</span>
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : (
-        <Spinner className="size-5" label={t("grid.loading")} />
-      )}
-    </div>
-  );
-}
-
 /** Public profile basics (E16-T07). Compliance uploads come with E18. */
 export function TutorProfilePage() {
   const { t } = useTranslation();
@@ -302,41 +248,44 @@ export function TutorProfilePage() {
   });
   if (profile.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
   return (
-    <form
-      className="space-y-3"
-      aria-label={t("tutor.nav.profile")}
-      onSubmit={(e) => {
-        e.preventDefault();
-        save.mutate();
-      }}
-    >
-      <h1 className="text-xl font-semibold">{t("tutor.nav.profile")}</h1>
-      <TextField
-        label={t("tutor.headline")}
-        value={value.headline}
-        onChange={(e) => setForm({ ...value, headline: e.target.value })}
-      />
-      <TextField
-        label={t("portal.phone")}
-        value={value.phone}
-        onChange={(e) => setForm({ ...value, phone: e.target.value })}
-      />
-      <div className="space-y-1">
-        <label htmlFor={bioId} className="text-sm font-medium">
-          {t("tutor.bio")}
-        </label>
-        <textarea
-          id={bioId}
-          className="min-h-32 w-full rounded-md border border-border bg-background px-3 py-2"
-          value={value.bio_public}
-          onChange={(e) => setForm({ ...value, bio_public: e.target.value })}
+    <div className="space-y-8">
+      <form
+        className="space-y-3"
+        aria-label={t("tutor.nav.profile")}
+        onSubmit={(e) => {
+          e.preventDefault();
+          save.mutate();
+        }}
+      >
+        <h1 className="text-xl font-semibold">{t("tutor.nav.profile")}</h1>
+        <TextField
+          label={t("tutor.headline")}
+          value={value.headline}
+          onChange={(e) => setForm({ ...value, headline: e.target.value })}
         />
-      </div>
-      {save.isSuccess ? <Alert tone="success">{t("portal.saved")}</Alert> : null}
-      {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
-      <Button type="submit" disabled={save.isPending}>
-        {t("portal.save")}
-      </Button>
-    </form>
+        <TextField
+          label={t("portal.phone")}
+          value={value.phone}
+          onChange={(e) => setForm({ ...value, phone: e.target.value })}
+        />
+        <div className="space-y-1">
+          <label htmlFor={bioId} className="text-sm font-medium">
+            {t("tutor.bio")}
+          </label>
+          <textarea
+            id={bioId}
+            className="min-h-32 w-full rounded-md border border-border bg-background px-3 py-2"
+            value={value.bio_public}
+            onChange={(e) => setForm({ ...value, bio_public: e.target.value })}
+          />
+        </div>
+        {save.isSuccess ? <Alert tone="success">{t("portal.saved")}</Alert> : null}
+        {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
+        <Button type="submit" disabled={save.isPending}>
+          {t("portal.save")}
+        </Button>
+      </form>
+      <PayDetailsSection />
+    </div>
   );
 }

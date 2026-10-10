@@ -80,26 +80,53 @@ Calculates what each tutor has earned (lesson pay, premiums, travel, bonuses, ex
 - Bank file format golden-file tests.
 
 ## 8. Delivery plan
-- [ ] **E12-T01** Pay settings and tutor pay profile (encrypted bank details with validation).
-- [ ] **E12-T02** Pay item model and event handlers (lessons, cancellations, events, ad hoc shares).
-- [ ] **E12-T03** Hold rules (report overdue, compliance, client unpaid) and release automation.
-- [ ] **E12-T04** Expenses and categories with approval; rebillable expenses → E10 charges.
-- [ ] **E12-T05** Mileage/travel calculation (routing provider abstraction).
-- [ ] **E12-T06** Pay runs: auto-create, review, approve (incl. dual approval).
-- [ ] **E12-T07** Self-billing statements and remittance PDFs.
-- [ ] **E12-T08** Bank file exports (BACS, SEPA, NACHA, ABA, CSV) with golden tests.
-- [ ] **E12-T09** Stripe Connect Express tutor onboarding and transfers.
-- [ ] **E12-T10** External payroll exports.
-- [ ] **E12-T11** Frontend: pay runs UI, expenses approval, tutor earnings pages.
+- [x] **E12-T01** Pay settings and tutor pay profile (encrypted bank details with validation).
+- [x] **E12-T02** Pay item model and event handlers (lessons, cancellations, events, ad hoc shares).
+- [x] **E12-T03** Hold rules (report overdue, compliance, client unpaid) and release automation.
+- [x] **E12-T04** Expenses and categories with approval; rebillable expenses → E10 charges.
+- [x] **E12-T05** Mileage/travel calculation (routing provider abstraction).
+- [x] **E12-T06** Pay runs: auto-create, review, approve (incl. dual approval).
+- [x] **E12-T07** Self-billing statements and remittance PDFs.
+- [x] **E12-T08** Bank file exports (BACS, SEPA, NACHA, ABA, CSV) with golden tests.
+- [x] **E12-T09** Stripe Connect Express tutor onboarding and transfers.
+- [x] **E12-T10** External payroll exports.
+- [x] **E12-T11** Frontend: pay runs UI, expenses approval, tutor earnings pages.
 - [ ] **E12-T12** (Phase 3) Wise payouts, 1099 data, commission-based pay.
 
 ## Temporal workflows (E32)
 
 Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
 
-- [ ] **E12-TW1** Pay run and expense workflows (requires E32).
+- [x] **E12-TW1** Pay run and expense workflows (requires E32).
 
 | Workflow | Started by | Steps, timers and signals | Replaces |
 |---|---|---|---|
 | `PayRunWorkflow` `pay-run:{org}:{pay_run}` (**Temporal Schedule** at cut-off) | Schedule or manual create | Assemble items → wait for `approve` signal(s) (dual approval above threshold; reminders) → generate statements → payouts (Stripe Connect transfers / bank file) → wait for payout webhook signals → mark paid; failed payouts return items to the next run. Query exposes status for the pay-run screen | Pay run state machine + polling |
 | `ExpenseApprovalWorkflow` | `expense.submitted` | Notify approver → reminders → `approve`/`reject` signal → pay item and optional rebill charge | Approval queue reminders |
+
+## Implementation notes (as built 2026-10-10)
+- **App:** `payroll`, with RLS on every table: `TutorPayProfile`, `PayItem`, `ExpenseCategory`, `Expense`, `PayRun`, `Payout`, `PayStatement`, `BankFileExport` and `PayrollOriginator` (the account tutors are paid from). See ADR 0011.
+- **Pay settings and profiles (T01):** settings cover pay period (manual, weekly, fortnightly, semi-monthly, monthly; per branch), cut-off day, pay only when the client has paid, hold on overdue reports, include cancellations, minimum payout, dual-approval threshold, bank file format, expense markup, mileage from home, and self-billing VAT %.
+  - Profile: method (`stripe_connect`, `bank_file`, `manual`, `external_payroll`), currency, payee name, VAT, the self-billing agreement (version recorded) and an hourly rate for paid events.
+  - Bank details are validated per country (UK sort code and account, IBAN mod-97, US ABA routing checksum, AU BSB) and encrypted. Responses mask them; `?full=true` needs `payroll.bank_details.view` and is audited.
+  - Tax IDs stay on the tutor (`tax_reference`, E05).
+  - Deviation: re-authentication for the full view is a follow-up.
+- **Pay items (T02):** created from lesson completion and cancellation (pay share), paid calendar events (hourly rate), ad hoc charge tutor shares, approved expenses and mileage, and manual bonus, referral, adjustment, deduction or salary items.
+  - Changes after an item is in a run or paid become adjustment items (ADR 0011).
+  - Deviation: the statuses are `ready → in_pay_run → approved → paid` plus `held` and `void`. There is no separate "pending" step, because expenses have their own approval.
+- **Holds (T03):** `report_overdue` and `client_unpaid` are built in and re-evaluated on report and invoice events. Manual hold and release are supported. E18 registers `compliance` through `register_hold_rule`.
+- **Expenses (T04, T05):** categories have limits, account codes and mileage rates. Tutors claim from the portal with a receipt photo (camera capture); staff can claim for tutors.
+  - Approval creates the reimbursement item. A rebillable claim also creates an E10 ad hoc charge, with the markup setting (AC: £12 → £12 item and £12 charge). Approvers can't approve their own claims, and a rejection needs a comment.
+  - Mileage = distance × the category rate. Suggestions cover the legs between the day's in-person lessons, plus home if that setting is on. Distance comes from Google Distance Matrix through `safe_urlopen` when a key is set, otherwise straight line × 1.25.
+- **Pay runs (T06, TW1):**
+  - Creating a run (or a scheduled run at the cut-off) starts `PayRunWorkflow`. It assembles items (paid events included), sets the run to review, reminds approvers every 3 days, then waits for approval or cancellation. After approval it issues statements, sends payouts and waits for settlement (signal, checked daily), then finishes as paid or partially failed.
+  - Review: shows warnings (negative or small totals carried forward, missing bank details or Stripe setup, held items) and lets staff remove items or add adjustments. Dual approval applies above the threshold.
+  - `ExpenseApprovalWorkflow` notifies approvers and reminds them on days 3 and 7 until a decision.
+- **Statements (T07):** self-billing invoices (per-tutor numbering, VAT if registered, agreement wording) or remittance advice, as PDF. Tutors see them in the portal.
+- **Bank files (T08):** CSV, BACS Standard 18 (with contra), SEPA pain.001.001.03 (EUR), NACHA PPD (blocked to 10, entry hash), and ABA. All have golden-file tests. Files are stored encrypted and downloads are audited.
+- **Stripe payouts (T09):** Express onboarding from the tutor portal and transfers through a provider interface. A fake is used unless `PAYROLL_STRIPE_PAYOUTS` is on (see ADR 0011 for the Connect configuration it needs).
+- **Payroll exports (T10):** CSV for Xero Payroll, QuickBooks, BrightPay, Gusto and generic, covering hours, pay, bonuses and reimbursements for tutors paid through the payroll provider. API sync (Xero Payroll) is in E23.
+- **Frontend (T11):**
+  - Admin `/payroll`: pay runs; run detail with approve, cancel, bank file (by format) and download, mark paid, and payroll exports; expense approvals; pay items with holds. The tutor record shows a pay card.
+  - Tutor portal: earnings (coming up, held with what releases it, payouts, statements, year to date), expenses, and pay details (bank account, self-billing agreement, Stripe setup). This replaces the provisional E16 earnings.
+- **Follow-ups:** Phase 3 (T12: Wise, 1099 data, commission pay); re-auth for full bank details; per-item editing in the run UI beyond remove and adjust; paying tutors through Stripe Connect platform setups.
