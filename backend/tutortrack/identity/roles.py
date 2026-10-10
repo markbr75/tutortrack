@@ -45,7 +45,9 @@ def _g(*raw: str) -> tuple[Grant, ...]:
 
 
 # Codenames an Admin never gets (ownership and the SaaS subscription, FR-03-5).
-OWNER_ONLY = ("org.close", "subscription.manage", "membership.transfer_ownership")
+OWNER_ONLY = (
+    "org.close", "subscription.manage", "membership.transfer_ownership", "support.access.manage",
+)  # fmt: skip
 
 ROLES: dict[str, RoleDef] = {
     r.key: r

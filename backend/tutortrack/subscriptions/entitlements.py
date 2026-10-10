@@ -36,6 +36,18 @@ def invalidate(organisation_id: Any) -> None:
         cache.set(key, 2, None)
 
 
+PLANS_VERSION_KEY = "ent:plans:v"
+
+
+def invalidate_all() -> None:
+    """A plan's entitlements changed (platform console): every snapshot may be stale."""
+    cache.delete("ent:required-plans")
+    try:
+        cache.incr(PLANS_VERSION_KEY)
+    except ValueError:
+        cache.set(PLANS_VERSION_KEY, 2, None)
+
+
 def _version(organisation_id: Any) -> int:
     version = cache.get(_version_key(organisation_id))
     if version is None:
@@ -81,7 +93,8 @@ def snapshot(organisation_id: Any = None) -> dict[str, Any] | None:
     org_id = organisation_id or current_organisation_id()
     if org_id is None:
         return None
-    key = f"ent:{_version(org_id)}:{org_id}"
+    plans = cache.get(PLANS_VERSION_KEY) or 1
+    key = f"ent:{plans}:{_version(org_id)}:{org_id}"
     cached = cache.get(key)
     if cached is not None:
         return cached or None  # {} caches "no subscription"

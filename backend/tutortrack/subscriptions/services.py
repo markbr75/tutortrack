@@ -985,3 +985,43 @@ def _apply_event(subscription: Subscription, kind: str, data: dict[str, Any]) ->
         if data.get("billing_reason") in ("subscription_cycle", "subscription_create"):
             with transaction.atomic():
                 credits.reset_allowances(ref=data["id"])
+
+
+# --- platform console (E30) ---------------------------------------------------------------------
+
+
+@transaction.atomic
+def admin_set_plan(
+    plan_key: str, interval: str, *, note: str, activate: bool = False
+) -> Subscription:
+    """Platform staff move the organisation to any plan (custom ones included), e.g. for an
+    Enterprise contract billed outside Stripe. ``activate`` also lifts a trial or
+    cancellation lock for a manually billed account."""
+    if interval not in Interval.values:
+        raise BusinessRuleViolation(_("Choose monthly or annual billing."))
+    if len(note.strip()) < 3:
+        raise BusinessRuleViolation(_("Add a note explaining the change."))
+    plan = get_plan(plan_key)
+    subscription = _locked()
+    if subscription.stripe_subscription_id and plan_prices(plan, subscription.currency, interval):
+        try:
+            get_gateway().update_items(
+                subscription.stripe_subscription_id,
+                items_for(subscription, plan, interval),
+                prorate=False,
+            )
+        except GatewayError as exc:
+            raise BusinessRuleViolation(str(exc)) from exc
+    with audit.track(subscription, action="platform_set_plan"):
+        subscription.plan = plan
+        subscription.interval = interval
+        subscription.pending_plan = None
+        subscription.pending_interval = ""
+        if activate and subscription.status != Subscription.Status.ACTIVE:
+            subscription.status = Subscription.Status.ACTIVE
+            subscription.past_due_since = None
+        subscription.save()
+    audit.record(subscription, "platform_note", {"note": [None, note.strip()[:500]]})
+    _sync_org(subscription)
+    _changed(subscription, "plan")
+    return subscription

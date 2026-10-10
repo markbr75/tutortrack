@@ -13,8 +13,8 @@ terraform plan -var-file=env/staging.tfvars
 ```
 
 Still to add (tracked in later epics): ClamAV sidecar/service (E29), WAF and rate limiting,
-per-region stacks for data residency (E29), tenant custom domains (E24), alarms and
-dashboards (E30), the OIDC deploy role used by `.github/workflows/deploy.yml`.
+per-region stacks for data residency (E29), tenant custom domains (E24), the OIDC deploy
+role used by `.github/workflows/deploy.yml`.
 
 Notes:
 - Database roles (FR-02-4): the RDS master user owns the tables and is only given to the
@@ -30,3 +30,12 @@ Notes:
   queue. Self-hosting Temporal (server on ECS with its own RDS) is possible but not built.
   Alarms on workflow task failures, retry storms and schedule backlog arrive with E30.
 - Task definitions and services ignore image changes: CI registers new revisions on deploy.
+- Monitoring (E30, `monitoring.tf`): SNS topics for alerts (email) and paging (PagerDuty
+  HTTPS endpoint), SLO alarms on API 5xx rate (> 1%), p95 latency, unhealthy web tasks, RDS
+  CPU and storage, and application metrics written by the beat task in CloudWatch embedded
+  metric format (outbox lag > 60s, dead letters, webhook backlogs, Celery queue depth).
+  Missing application metrics count as breaching, which catches a stopped `beat`. A
+  CloudWatch dashboard shows the same figures. Runbooks: `docs/runbooks/`.
+- Backups (E30): AWS Backup takes daily snapshots of RDS and the uploads bucket (35 days)
+  and copies them to `backup_copy_vault_arn` in the separate backup account (365 days).
+  RDS point-in-time recovery covers the last 35 days (RPO ≤ 5 minutes).

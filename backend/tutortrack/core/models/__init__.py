@@ -12,7 +12,7 @@ from .base import (
     UUIDModel,
 )
 from .files import StoredFile
-from .flags import FeatureFlag, FeatureFlagOverride
+from .flags import FeatureFlag, FeatureFlagOverride, PlatformNotice
 from .idempotency import IdempotencyRecord
 from .outbox import OutboxEvent, ProcessedEvent
 from .sequences import Sequence
@@ -28,6 +28,7 @@ __all__ = [
     "FeatureFlagOverride",
     "IdempotencyRecord",
     "OutboxEvent",
+    "PlatformNotice",
     "ProcessedEvent",
     "ScheduleLink",
     "Sequence",

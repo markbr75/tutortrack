@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
-from . import views
+from . import support_views, views
 
 router = SimpleRouter(trailing_slash=False)
 router.register("me/sessions", views.SessionViewSet, basename="me-sessions")
@@ -40,6 +40,18 @@ urlpatterns = [
     path("invitations/accept", views.AcceptInvitationView.as_view(), name="invitation-accept"),
     path("roles", views.RolesView.as_view(), name="roles"),
     path("permissions", views.PermissionsView.as_view(), name="permissions"),
+    path("support-access", support_views.SupportAccessView.as_view(), name="support-access"),
+    path(
+        "support-access/grants",
+        support_views.SupportGrantsView.as_view(),
+        name="support-access-grants",
+    ),
+    path(
+        "support-access/grants/<uuid:pk>/revoke",
+        support_views.RevokeSupportGrantView.as_view(),
+        name="support-access-revoke",
+    ),
+    path("support/enter", support_views.SupportEnterView.as_view(), name="support-enter"),
     path("impersonate", views.ImpersonateView.as_view(), name="impersonate"),
     path("impersonate/stop", views.StopImpersonationView.as_view(), name="impersonate-stop"),
     *router.urls,

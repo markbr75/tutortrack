@@ -6,6 +6,7 @@ import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { api, problemStatus, usePortalMe } from "./api";
+import { StatusBanner } from "./StatusBanner";
 import { TutorShell } from "./tutor/TutorShell";
 
 export function SignIn() {
@@ -54,8 +55,12 @@ export function Shell() {
   });
   if (who.isPending) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
   if (problemStatus(who.error) === 401) return <SignIn />;
-  if (who.data?.membership?.role === "tutor") return <TutorShell />;
-  return <FamilyShell />;
+  return (
+    <>
+      <StatusBanner />
+      {who.data?.membership?.role === "tutor" ? <TutorShell /> : <FamilyShell />}
+    </>
+  );
 }
 
 function FamilyShell() {

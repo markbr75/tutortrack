@@ -153,3 +153,42 @@ def set_billing_status(organisation: Organisation, status: str) -> Organisation:
         organisation.status = status
         organisation.save(update_fields=["status", "updated_at"])
     return organisation
+
+
+@transaction.atomic
+def request_export(organisation: Organisation, *, reason: str) -> None:
+    """Ask for a full data export (E28 builds it from ``organisation.export_requested``)."""
+    from .closure import OrganisationExportRequested
+
+    with tenant_context(organisation):
+        audit.record(organisation, "export_requested", {"reason": [None, reason[:200]]})
+        publish(
+            OrganisationExportRequested(subject_id=organisation.pk, reason=reason[:200]),
+            organisation_id=organisation.pk,
+        )
+
+
+@transaction.atomic
+def close_for_platform(
+    organisation: Organisation, *, reason: str, export_requested: bool = True
+) -> Organisation:
+    """Platform staff schedule deletion (e.g. at the owner's written request): the same
+    closure process as an owner closing the account, without their password."""
+    if len(reason.strip()) < 5:
+        raise BusinessRuleViolation(_("Give a reason."))
+    organisation = Organisation.objects.select_for_update().get(pk=organisation.pk)
+    if organisation.is_closed:
+        return organisation
+    with tenant_context(organisation):
+        with audit.track(organisation, action="close_by_platform"):
+            organisation.status = Organisation.Status.CANCELLED
+            organisation.closed_at = now()
+            organisation.save(update_fields=["status", "closed_at", "updated_at"])
+        publish(
+            events.OrganisationClosed(
+                subject_id=organisation.pk, reason=reason.strip()[:500],
+                export_requested=export_requested,
+            ),
+            organisation_id=organisation.pk,
+        )  # fmt: skip
+    return organisation

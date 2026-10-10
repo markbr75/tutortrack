@@ -48,3 +48,11 @@ for key, label, default in (
     ("add_students", _("Tutors can add new students"), False),
 ):
     register(f"tutor_access.{key}", type="bool", default=default, label=label)
+register(
+    "security.support_access_requires_grant",
+    type="bool",
+    default=False,
+    label=_("TutorTrack support needs a grant from you to view your account"),
+    help_text=_("Off: support can view (read-only) when you raise a ticket. On: only while a "
+                "grant you created is active."),
+)  # fmt: skip

@@ -7,6 +7,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { api, fieldErrors, useFeature, useOrganisation, type Term } from "../api";
 import { ProcessTimeline } from "../components/ProcessTimeline";
 import { Locked } from "../subscription/UpgradePrompts";
+import { SupportAccessSection } from "./SupportAccessSection";
 
 const TERMS = ["tutor", "student", "client", "lesson", "job"] as const;
 
@@ -324,6 +325,7 @@ export function SettingsPage() {
       <GeneralSection />
       {multiBranch ? <BranchesSection /> : null}
       {org?.has_demo_data ? <DemoDataSection /> : null}
+      <SupportAccessSection />
       {org ? <ProcessTimeline subjectType="organisation" subjectId={org.id} /> : null}
       {org ? <CloseAccountSection slug={org.slug} /> : null}
     </div>

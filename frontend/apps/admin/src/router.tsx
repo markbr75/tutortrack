@@ -42,6 +42,11 @@ import { NotFoundPage } from "./routes/NotFoundPage";
 import { OnboardingPage } from "./routes/OnboardingPage";
 import { SettingsPage } from "./routes/SettingsPage";
 import { SignupPage } from "./routes/SignupPage";
+import { FlagsPage } from "./platform/FlagsPage";
+import { OperationsPage } from "./platform/OperationsPage";
+import { PlatformShell } from "./platform/PlatformShell";
+import { TenantPage } from "./platform/TenantPage";
+import { TenantsPage } from "./platform/TenantsPage";
 import { PlanPage } from "./subscription/PlanPage";
 import { TeamPage } from "./routes/TeamPage";
 import { VerifyEmailPage } from "./routes/VerifyEmailPage";
@@ -94,6 +99,35 @@ const paySetupRoute = createRoute({
   component: function PaySetupRoute() {
     return <SetupPage token={paySetupRoute.useParams().token} />;
   },
+});
+
+// TutorTrack staff console (E30), outside the organisation's shell.
+const platformRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/platform",
+  component: PlatformShell,
+});
+const platformTenantsRoute = createRoute({
+  getParentRoute: () => platformRoute,
+  path: "/",
+  component: TenantsPage,
+});
+const platformTenantRoute = createRoute({
+  getParentRoute: () => platformRoute,
+  path: "/tenants/$id",
+  component: function PlatformTenantRoute() {
+    return <TenantPage id={platformTenantRoute.useParams().id} />;
+  },
+});
+const platformFlagsRoute = createRoute({
+  getParentRoute: () => platformRoute,
+  path: "/flags",
+  component: FlagsPage,
+});
+const platformOpsRoute = createRoute({
+  getParentRoute: () => platformRoute,
+  path: "/operations",
+  component: OperationsPage,
 });
 
 // Signed-in app.
@@ -194,6 +228,12 @@ const routeTree = rootRoute.addChildren([
   acceptInviteRoute,
   payRoute,
   paySetupRoute,
+  platformRoute.addChildren([
+    platformTenantsRoute,
+    platformTenantRoute,
+    platformFlagsRoute,
+    platformOpsRoute,
+  ]),
   appRoute.addChildren([
     homeRoute,
     clientsRoute,

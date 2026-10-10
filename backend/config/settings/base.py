@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "tutortrack.comms",
     "tutortrack.portal",
     "tutortrack.subscriptions",
+    "tutortrack.platform_admin",
 ]
 
 MIDDLEWARE = [
@@ -286,6 +287,8 @@ SPECTACULAR_SETTINGS = {
         "StudentStatusEnum": "tutortrack.people.models.Student.Status",
         "TutorStatusEnum": "tutortrack.people.models.TutorProfile.Status",
         "FileVisibilityEnum": "tutortrack.core.models.files.StoredFile.Visibility",
+        "PlanVisibilityEnum": "tutortrack.subscriptions.models.Plan.Visibility",
+        "BillingIntervalEnum": "tutortrack.subscriptions.models.Interval",
         "CustomFieldVisibilityEnum": "tutortrack.crm.models.CustomFieldDefinition.Visibility",
         "NoteVisibilityEnum": "tutortrack.crm.models.Note.Visibility",
         "JobStatusEnum": "tutortrack.jobs.models.Job.Status",
@@ -321,6 +324,12 @@ STRIPE = {
     "WEBHOOK_SECRET": env("STRIPE_WEBHOOK_SECRET", default=""),
     "APPLICATION_FEE_PERCENT": env("STRIPE_APPLICATION_FEE_PERCENT", default="0"),
 }
+
+# Platform console (E30): staff need 2FA, and the console only answers from these networks
+# (comma-separated CIDRs; empty = anywhere, for development).
+PLATFORM_REQUIRE_MFA = env.bool("PLATFORM_REQUIRE_MFA", default=True)
+PLATFORM_IP_ALLOWLIST = env.list("PLATFORM_IP_ALLOWLIST", default=[])
+STATUS_PAGE_URL = env("STATUS_PAGE_URL", default="")
 
 # Our own SaaS subscription (E04): Stripe Billing on the platform account above.
 SUBSCRIPTIONS = {
@@ -390,7 +399,9 @@ GOOGLE_MAPS_API_KEY = env("GOOGLE_MAPS_API_KEY", default="")
 # Writes still allowed while suspended (billing, so the owner can pay; E04 adds its paths).
 SUSPENDED_ORG_WRITE_ALLOWLIST = ["/api/v1/subscription", "/api/v1/auth/"]
 # Reachable whatever the organisation's status (sign-in, health).
-ORG_STATUS_EXEMPT_PATHS = ["/api/v1/auth/", "/api/v1/me/organisations", "/healthz", "/readyz"]
+ORG_STATUS_EXEMPT_PATHS = [
+    "/api/v1/auth/", "/api/v1/me/organisations", "/api/v1/status", "/healthz", "/readyz",
+]  # fmt: skip
 
 # --- Field encryption (core.crypto; KMS-managed in E29) ---------------------------------------
 # Comma-separated Fernet keys, newest first. Generate: python -c "from cryptography.fernet import

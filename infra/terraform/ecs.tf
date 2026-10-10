@@ -117,6 +117,9 @@ locals {
       { name = "TEMPORAL_ADDRESS", value = var.temporal_address },
       { name = "FIELD_ENCRYPTION_KMS_KEY_ID", value = aws_kms_key.app_data.arn },
       { name = "TEMPORAL_NAMESPACE", value = var.temporal_namespace },
+      { name = "SENTRY_ENVIRONMENT", value = var.environment },
+      { name = "PLATFORM_IP_ALLOWLIST", value = join(",", var.platform_ip_allowlist) },
+      { name = "STATUS_PAGE_URL", value = var.status_page_url },
     ]
   }
 

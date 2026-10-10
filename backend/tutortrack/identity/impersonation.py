@@ -1,7 +1,7 @@
 """Impersonation (FR-03-7): owners/admins view the app as a tutor, client or student of
 their own organisation. Read-only unless the owner turns on write access. Every request
 is audited with the impersonator (``RequestContext.impersonator_id``) and the start/end
-are recorded as events. Platform-staff impersonation with reason capture is E30.
+are recorded as events. Platform-staff support access (with a reason) is ``support.py``.
 """
 
 from __future__ import annotations
@@ -117,6 +117,10 @@ def stop(request: HttpRequest) -> None:
     state = request.session.pop(SESSION_KEY, None)
     if not state:
         return
+    if state.get("support_session_id"):
+        from .support import end
+
+        end(state["support_session_id"])
     target = Membership.objects.filter(pk=state["membership_id"]).first()
     if target is not None:
         audit.record(target, "impersonation_end")

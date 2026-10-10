@@ -775,6 +775,7 @@ for _key, _label, _code in (
     ("staff_payment_failed", _("Automatic payment failed after retries"), "payments.payment.view"),
     ("staff_dispute", _("Card payment disputed"), "payments.payment.view"),
     ("staff_profile_change", _("A family changed sensitive details"), "people.student.edit"),
+    ("staff_support_access", _("TutorTrack support accessed the account"), "support.access.view"),
 ):
     register(
         NotificationType(

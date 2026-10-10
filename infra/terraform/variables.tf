@@ -80,3 +80,36 @@ variable "temporal_worker_desired_count" {
   type        = number
   default     = 1
 }
+
+# --- Operations (E30) -----------------------------------------------------------------------------
+
+variable "alert_email" {
+  description = "Email subscribed to the alarm topic (empty = none)"
+  type        = string
+  default     = ""
+}
+
+variable "pagerduty_endpoint" {
+  description = "PagerDuty (or Opsgenie) CloudWatch integration URL for paging alarms (empty = none)"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "platform_ip_allowlist" {
+  description = "CIDRs allowed to use the platform console (office VPN)"
+  type        = list(string)
+  default     = []
+}
+
+variable "status_page_url" {
+  description = "Public status page shown in the apps"
+  type        = string
+  default     = ""
+}
+
+variable "backup_copy_vault_arn" {
+  description = "AWS Backup vault in the separate backup account to copy daily snapshots to (empty = no copy)"
+  type        = string
+  default     = ""
+}

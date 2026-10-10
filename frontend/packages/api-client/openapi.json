@@ -16312,6 +16312,1382 @@
                 }
             }
         },
+        "/api/v1/platform/dead-letters": {
+            "get": {
+                "operationId": "platform_dead_letters_list",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "event_type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedDeadLetterList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/dead-letters/replay": {
+            "post": {
+                "operationId": "platform_dead_letters_replay_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReplayRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReplayRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReplayRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Count"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/flags": {
+            "get": {
+                "operationId": "platform_flags_list",
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Flag"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "platform_flags_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FlagCreateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FlagCreateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FlagCreateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Flag"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/flags/{key}": {
+            "patch": {
+                "operationId": "platform_flags_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedFlagUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedFlagUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedFlagUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Flag"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/flags/{key}/overrides": {
+            "put": {
+                "operationId": "platform_flags_overrides_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FlagOverrideRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FlagOverrideRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FlagOverrideRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Flag"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/flags/{key}/overrides/{organisation_id}": {
+            "delete": {
+                "operationId": "platform_flags_overrides_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "organisation_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/me": {
+            "get": {
+                "operationId": "platform_me_retrieve",
+                "description": "Whether the signed-in user may use the console, and what's missing if not.",
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlatformMe"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/notices": {
+            "get": {
+                "operationId": "platform_notices_list",
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Notice"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "platform_notices_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NoticeRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NoticeRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NoticeRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Notice"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/notices/{id}": {
+            "patch": {
+                "operationId": "platform_notices_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedNoticeRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedNoticeRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedNoticeRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Notice"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/operations": {
+            "get": {
+                "operationId": "platform_operations_retrieve",
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Operations"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/plans": {
+            "get": {
+                "operationId": "platform_plans_list",
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PlanAdmin"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/plans/{key}": {
+            "patch": {
+                "operationId": "platform_plans_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPlanAdminRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPlanAdminRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPlanAdminRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlanAdmin"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/plans/{key}/prices/{price_id}": {
+            "patch": {
+                "operationId": "platform_plans_prices_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "price_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPlanAdminPriceRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPlanAdminPriceRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPlanAdminPriceRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlanAdminPrice"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/tenants": {
+            "get": {
+                "operationId": "platform_tenants_list",
+                "description": "All organisations with plan, status, MRR and last activity (FR-30-1).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "active_since",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ISO datetime"
+                    },
+                    {
+                        "in": "query",
+                        "name": "created_after",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ISO datetime"
+                    },
+                    {
+                        "in": "query",
+                        "name": "created_before",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ISO datetime"
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "plan",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "region",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedTenantRowList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/tenants/{id}": {
+            "get": {
+                "operationId": "platform_tenants_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TenantDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/tenants/{id}/change-plan": {
+            "post": {
+                "operationId": "platform_tenants_change_plan_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformChangePlanRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformChangePlanRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformChangePlanRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TenantDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/tenants/{id}/export": {
+            "post": {
+                "operationId": "platform_tenants_export_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformReasonRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformReasonRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformReasonRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/tenants/{id}/extend-trial": {
+            "post": {
+                "operationId": "platform_tenants_extend_trial_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExtendTrialRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExtendTrialRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExtendTrialRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TenantDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/tenants/{id}/overrides": {
+            "put": {
+                "operationId": "platform_tenants_overrides_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OverrideRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OverrideRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OverrideRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TenantDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/tenants/{id}/overrides/{key}": {
+            "delete": {
+                "operationId": "platform_tenants_overrides_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/tenants/{id}/resend-verification": {
+            "post": {
+                "operationId": "platform_tenants_resend_verification_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Count"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/tenants/{id}/schedule-deletion": {
+            "post": {
+                "operationId": "platform_tenants_schedule_deletion_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScheduleDeletionRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScheduleDeletionRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScheduleDeletionRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TenantDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/tenants/{id}/support-sessions": {
+            "post": {
+                "operationId": "platform_tenants_support_sessions_create",
+                "description": "Start viewing the organisation as a member (FR-30-2); returns a single-use link.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SupportSessionRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SupportSessionRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SupportSessionRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EnterUrl"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/tenants/{id}/suspend": {
+            "post": {
+                "operationId": "platform_tenants_suspend_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformReasonRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformReasonRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformReasonRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TenantDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/tenants/{id}/unsuspend": {
+            "post": {
+                "operationId": "platform_tenants_unsuspend_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TenantDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/portal/announcements": {
             "get": {
                 "operationId": "portal_announcements_list",
@@ -18288,6 +19664,30 @@
                 }
             }
         },
+        "/api/v1/status": {
+            "get": {
+                "operationId": "status_retrieve",
+                "description": "Incident and maintenance banners for every app, and the public status page.",
+                "tags": [
+                    "status"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlatformStatus"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/students": {
             "get": {
                 "operationId": "students_list",
@@ -19369,6 +20769,158 @@
                             }
                         },
                         "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/support-access": {
+            "get": {
+                "operationId": "support_access_retrieve",
+                "description": "Who from TutorTrack support looked at the account, and the grants in place.",
+                "tags": [
+                    "support-access"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SupportAccess"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/support-access/grants": {
+            "post": {
+                "operationId": "support_access_grants_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "support-access"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GrantRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GrantRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GrantRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SupportGrant"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/support-access/grants/{id}/revoke": {
+            "post": {
+                "operationId": "support_access_grants_revoke_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "support-access"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SupportGrant"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/support/enter": {
+            "get": {
+                "operationId": "support_enter_retrieve",
+                "description": "``GET /support/enter?token=``: the single-use link from the platform console.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "support"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "302": {
+                        "description": "No response body"
                     }
                 }
             }
@@ -21820,6 +23372,47 @@
                 "type": "string",
                 "description": "* `clients` - Families\n* `tutors` - Tutors\n* `everyone` - Everyone"
             },
+            "Audit": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "action": {
+                        "type": "string"
+                    },
+                    "object_type": {
+                        "type": "string"
+                    },
+                    "object_repr": {
+                        "type": "string"
+                    },
+                    "actor_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "impersonator_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "action",
+                    "actor_id",
+                    "created_at",
+                    "id",
+                    "impersonator_id",
+                    "object_repr",
+                    "object_type"
+                ]
+            },
             "AuditEntry": {
                 "type": "object",
                 "properties": {
@@ -22017,6 +23610,14 @@
                     "invoice_balance",
                     "overdue"
                 ]
+            },
+            "BillingIntervalEnum": {
+                "enum": [
+                    "month",
+                    "year"
+                ],
+                "type": "string",
+                "description": "* `month` - Monthly\n* `year` - Annual"
             },
             "BillingMethodEnum": {
                 "enum": [
@@ -23880,7 +25481,7 @@
                         "type": "string"
                     },
                     "severity": {
-                        "$ref": "#/components/schemas/SeverityEnum"
+                        "$ref": "#/components/schemas/ConflictSeverityEnum"
                     },
                     "message": {
                         "type": "string"
@@ -23970,6 +25571,14 @@
                 ],
                 "type": "string",
                 "description": "* `skip` - skip\n* `create` - create\n* `fail` - fail"
+            },
+            "ConflictSeverityEnum": {
+                "enum": [
+                    "hard",
+                    "soft"
+                ],
+                "type": "string",
+                "description": "* `hard` - hard\n* `soft` - soft"
             },
             "ConnectRequest": {
                 "type": "object",
@@ -24453,6 +26062,17 @@
                 },
                 "required": [
                     "first_name"
+                ]
+            },
+            "Count": {
+                "type": "object",
+                "properties": {
+                    "count": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "count"
                 ]
             },
             "CreatedViaEnum": {
@@ -25074,6 +26694,45 @@
                 "type": "string",
                 "description": "* `locale` - Locale default\n* `dd/MM/yyyy` - 31/12/2026\n* `MM/dd/yyyy` - 12/31/2026\n* `yyyy-MM-dd` - 2026-12-31"
             },
+            "DeadLetter": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "event_type": {
+                        "type": "string"
+                    },
+                    "organisation_name": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "occurred_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "dead_lettered_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "attempts": {
+                        "type": "integer"
+                    },
+                    "last_error": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "attempts",
+                    "dead_lettered_at",
+                    "event_type",
+                    "id",
+                    "last_error",
+                    "occurred_at",
+                    "organisation_name"
+                ]
+            },
             "DeliveryModeEnum": {
                 "enum": [
                     "in_person",
@@ -25503,6 +27162,17 @@
                     }
                 }
             },
+            "EnterUrl": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "url"
+                ]
+            },
             "Entitlements": {
                 "type": "object",
                 "properties": {
@@ -25540,6 +27210,30 @@
                     "plan",
                     "required_plans",
                     "status"
+                ]
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "origin": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "type": "string"
+                    },
+                    "at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "detail": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "at",
+                    "detail",
+                    "kind",
+                    "origin"
                 ]
             },
             "Exception": {
@@ -25642,6 +27336,25 @@
                 },
                 "required": [
                     "until"
+                ]
+            },
+            "ExtendTrialRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                    },
+                    "days": {
+                        "type": "integer",
+                        "maximum": 90,
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "days",
+                    "reason"
                 ]
             },
             "Features": {
@@ -25796,6 +27509,143 @@
                 "type": "string",
                 "description": "* `private` - Private\n* `internal` - Internal\n* `shared` - Shared"
             },
+            "Flag": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "enabled_globally": {
+                        "type": "boolean"
+                    },
+                    "plan_keys": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "pattern": "^[-a-zA-Z0-9_]+$"
+                        }
+                    },
+                    "rollout_percent": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "overrides": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FlagOverride"
+                        },
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "key",
+                    "overrides",
+                    "plan_keys",
+                    "updated_at"
+                ]
+            },
+            "FlagCreateRequest": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "enabled_globally": {
+                        "type": "boolean"
+                    },
+                    "plan_keys": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "pattern": "^[-a-zA-Z0-9_]+$"
+                        }
+                    },
+                    "rollout_percent": {
+                        "type": "integer",
+                        "maximum": 100,
+                        "minimum": 0
+                    },
+                    "key": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    }
+                },
+                "required": [
+                    "key"
+                ]
+            },
+            "FlagOverride": {
+                "type": "object",
+                "properties": {
+                    "organisation": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "organisation_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "maxLength": 255
+                    }
+                },
+                "required": [
+                    "enabled",
+                    "organisation",
+                    "organisation_name"
+                ]
+            },
+            "FlagOverrideRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "organisation": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 255
+                    }
+                },
+                "required": [
+                    "enabled",
+                    "organisation"
+                ]
+            },
             "FormatEnum": {
                 "enum": [
                     "one_to_one",
@@ -25812,6 +27662,27 @@
                 ],
                 "type": "string",
                 "description": "* `keep` - keep\n* `cancel` - cancel"
+            },
+            "GrantRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "days": {
+                        "type": "integer",
+                        "maximum": 30,
+                        "minimum": 1
+                    },
+                    "allow_write": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "note": {
+                        "type": "string",
+                        "maxLength": 255
+                    }
+                },
+                "required": [
+                    "days"
+                ]
             },
             "GroupChargeEnum": {
                 "enum": [
@@ -25948,14 +27819,6 @@
                     "title",
                     "type_key"
                 ]
-            },
-            "IntervalEnum": {
-                "enum": [
-                    "month",
-                    "year"
-                ],
-                "type": "string",
-                "description": "* `month` - Monthly\n* `year` - Annual"
             },
             "Invitation": {
                 "type": "object",
@@ -27932,6 +29795,33 @@
                 "type": "string",
                 "description": "* `offered` - Offered\n* `active` - Active\n* `ended` - Ended\n* `declined` - Declined"
             },
+            "KeyEnum": {
+                "enum": [
+                    "accounting_integrations",
+                    "advanced_reports",
+                    "ai_assistant",
+                    "api_access",
+                    "automation",
+                    "automation_rules",
+                    "courses",
+                    "custom_domain",
+                    "matching",
+                    "max_active_students",
+                    "max_branches",
+                    "max_tutors",
+                    "multi_branch",
+                    "payroll",
+                    "pipeline",
+                    "recruitment",
+                    "sms_credits_monthly",
+                    "sso_saml",
+                    "storage_gb",
+                    "webhooks",
+                    "white_label"
+                ],
+                "type": "string",
+                "description": "* `accounting_integrations` - accounting_integrations\n* `advanced_reports` - advanced_reports\n* `ai_assistant` - ai_assistant\n* `api_access` - api_access\n* `automation` - automation\n* `automation_rules` - automation_rules\n* `courses` - courses\n* `custom_domain` - custom_domain\n* `matching` - matching\n* `max_active_students` - max_active_students\n* `max_branches` - max_branches\n* `max_tutors` - max_tutors\n* `multi_branch` - multi_branch\n* `payroll` - payroll\n* `pipeline` - pipeline\n* `recruitment` - recruitment\n* `sms_credits_monthly` - sms_credits_monthly\n* `sso_saml` - sso_saml\n* `storage_gb` - storage_gb\n* `webhooks` - webhooks\n* `white_label` - white_label"
+            },
             "LedgerAdjustRequest": {
                 "type": "object",
                 "properties": {
@@ -29470,6 +31360,50 @@
                     "status"
                 ]
             },
+            "Member": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "last_active_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "email_verified": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "has_mfa": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "email",
+                    "email_verified",
+                    "has_mfa",
+                    "id",
+                    "last_active_at",
+                    "name",
+                    "role",
+                    "status"
+                ]
+            },
             "MemberUser": {
                 "type": "object",
                 "properties": {
@@ -29965,6 +31899,78 @@
                 "type": "string",
                 "description": "* `staff_only` - Staff only\n* `staff_and_tutors` - Staff and tutors\n* `shared_with_client` - Shared with the client"
             },
+            "Notice": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/NoticeSeverityEnum"
+                    },
+                    "starts_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "ends_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "message",
+                    "starts_at"
+                ]
+            },
+            "NoticeRequest": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/NoticeSeverityEnum"
+                    },
+                    "starts_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "ends_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "message",
+                    "starts_at"
+                ]
+            },
+            "NoticeSeverityEnum": {
+                "enum": [
+                    "info",
+                    "warning",
+                    "outage"
+                ],
+                "type": "string",
+                "description": "* `info` - Information\n* `warning` - Degraded service\n* `outage` - Outage"
+            },
             "NotificationSetting": {
                 "type": "object",
                 "properties": {
@@ -30148,6 +32154,56 @@
                 "type": "string",
                 "description": "* `pending` - pending\n* `completed` - completed\n* `skipped` - skipped"
             },
+            "Operations": {
+                "type": "object",
+                "properties": {
+                    "outbox_pending": {
+                        "type": "integer"
+                    },
+                    "outbox_lag_seconds": {
+                        "type": "integer"
+                    },
+                    "dead_letters": {
+                        "type": "integer"
+                    },
+                    "queues": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "payment_webhooks_unprocessed": {
+                        "type": "integer"
+                    },
+                    "payment_webhooks_failed": {
+                        "type": "integer"
+                    },
+                    "billing_webhooks_unprocessed": {
+                        "type": "integer"
+                    },
+                    "billing_webhooks_failed": {
+                        "type": "integer"
+                    },
+                    "dead_letters_by_type": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    }
+                },
+                "required": [
+                    "billing_webhooks_failed",
+                    "billing_webhooks_unprocessed",
+                    "dead_letters",
+                    "dead_letters_by_type",
+                    "outbox_lag_seconds",
+                    "outbox_pending",
+                    "payment_webhooks_failed",
+                    "payment_webhooks_unprocessed",
+                    "queues"
+                ]
+            },
             "Organisation": {
                 "type": "object",
                 "properties": {
@@ -30313,6 +32369,76 @@
                 ],
                 "type": "string",
                 "description": "* `trial` - Trial\n* `active` - Active\n* `past_due` - Past due\n* `suspended` - Suspended\n* `cancelled` - Cancelled"
+            },
+            "Override": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "bool_value": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "int_value": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "unlimited": {
+                        "type": "boolean"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "reason": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "bool_value",
+                    "expires_at",
+                    "int_value",
+                    "key",
+                    "reason",
+                    "unlimited"
+                ]
+            },
+            "OverrideRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "$ref": "#/components/schemas/KeyEnum"
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "unlimited": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                    }
+                },
+                "required": [
+                    "key",
+                    "reason"
+                ]
             },
             "PackageTemplate": {
                 "type": "object",
@@ -30836,6 +32962,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/CreditNote"
+                        }
+                    }
+                }
+            },
+            "PaginatedDeadLetterList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DeadLetter"
                         }
                     }
                 }
@@ -31490,6 +33642,32 @@
                     }
                 }
             },
+            "PaginatedTenantRowList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TenantRow"
+                        }
+                    }
+                }
+            },
             "PaginatedTutorList": {
                 "type": "object",
                 "required": [
@@ -32002,6 +34180,31 @@
                     }
                 }
             },
+            "PatchedFlagUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "enabled_globally": {
+                        "type": "boolean"
+                    },
+                    "plan_keys": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "pattern": "^[-a-zA-Z0-9_]+$"
+                        }
+                    },
+                    "rollout_percent": {
+                        "type": "integer",
+                        "maximum": 100,
+                        "minimum": 0
+                    }
+                }
+            },
             "PatchedInvoiceUpdateRequest": {
                 "type": "object",
                 "properties": {
@@ -32387,6 +34590,28 @@
                     }
                 }
             },
+            "PatchedNoticeRequest": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/NoticeSeverityEnum"
+                    },
+                    "starts_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "ends_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                }
+            },
             "PatchedOrganisationRequest": {
                 "type": "object",
                 "properties": {
@@ -32573,6 +34798,56 @@
                     },
                     "active": {
                         "type": "boolean"
+                    }
+                }
+            },
+            "PatchedPlanAdminPriceRequest": {
+                "type": "object",
+                "properties": {
+                    "unit_amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,4})?$"
+                    },
+                    "included_quantity": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0
+                    },
+                    "stripe_price_id": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                }
+            },
+            "PatchedPlanAdminRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/PlanVisibilityEnum"
+                    },
+                    "rank": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "description": "Higher = bigger plan"
+                    },
+                    "trial_days": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "seat_mode": {
+                        "$ref": "#/components/schemas/SeatModeEnum"
                     }
                 }
             },
@@ -34231,6 +36506,131 @@
                     "visibility"
                 ]
             },
+            "PlanAdmin": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "readOnly": true,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "visibility": {
+                        "$ref": "#/components/schemas/PlanVisibilityEnum"
+                    },
+                    "rank": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0,
+                        "description": "Higher = bigger plan"
+                    },
+                    "trial_days": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": 0
+                    },
+                    "seat_mode": {
+                        "$ref": "#/components/schemas/SeatModeEnum"
+                    },
+                    "prices": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PlanAdminPrice"
+                        },
+                        "readOnly": true
+                    },
+                    "entitlements": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "entitlements",
+                    "key",
+                    "name",
+                    "prices"
+                ]
+            },
+            "PlanAdminPrice": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "currency": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "interval": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/BillingIntervalEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "component": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ComponentEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "unit_amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,4})?$"
+                    },
+                    "included_quantity": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0
+                    },
+                    "stripe_price_id": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "component",
+                    "currency",
+                    "id",
+                    "interval",
+                    "unit_amount"
+                ]
+            },
+            "PlanAdminPriceRequest": {
+                "type": "object",
+                "properties": {
+                    "unit_amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,4})?$"
+                    },
+                    "included_quantity": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0
+                    },
+                    "stripe_price_id": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "unit_amount"
+                ]
+            },
             "PlanChoiceRequest": {
                 "type": "object",
                 "properties": {
@@ -34242,7 +36642,7 @@
                     "interval": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/IntervalEnum"
+                                "$ref": "#/components/schemas/BillingIntervalEnum"
                             }
                         ],
                         "default": "month"
@@ -34256,7 +36656,7 @@
                 "type": "object",
                 "properties": {
                     "interval": {
-                        "$ref": "#/components/schemas/IntervalEnum"
+                        "$ref": "#/components/schemas/BillingIntervalEnum"
                     },
                     "component": {
                         "$ref": "#/components/schemas/ComponentEnum"
@@ -34284,6 +36684,132 @@
                 ],
                 "type": "string",
                 "description": "* `public` - Public\n* `legacy` - Legacy (existing subscribers only)\n* `custom` - Custom (contact sales)"
+            },
+            "PlatformChangePlanRequest": {
+                "type": "object",
+                "properties": {
+                    "plan": {
+                        "type": "string",
+                        "minLength": 1,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "interval": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/BillingIntervalEnum"
+                            }
+                        ],
+                        "default": "month"
+                    },
+                    "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                    },
+                    "activate": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "note",
+                    "plan"
+                ]
+            },
+            "PlatformMe": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "is_platform_staff": {
+                        "type": "boolean"
+                    },
+                    "mfa_verified": {
+                        "type": "boolean"
+                    },
+                    "network_allowed": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "email",
+                    "is_platform_staff",
+                    "mfa_verified",
+                    "network_allowed"
+                ]
+            },
+            "PlatformNotice": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/PlatformNoticeSeverityEnum"
+                    },
+                    "starts_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "ends_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "ends_at",
+                    "id",
+                    "message",
+                    "severity",
+                    "starts_at"
+                ]
+            },
+            "PlatformNoticeSeverityEnum": {
+                "enum": [
+                    "info",
+                    "warning",
+                    "outage"
+                ],
+                "type": "string",
+                "description": "* `info` - info\n* `warning` - warning\n* `outage` - outage"
+            },
+            "PlatformReasonRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                    }
+                },
+                "required": [
+                    "reason"
+                ]
+            },
+            "PlatformStatus": {
+                "type": "object",
+                "properties": {
+                    "notices": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PlatformNotice"
+                        }
+                    },
+                    "status_page_url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "notices",
+                    "status_page_url"
+                ]
             },
             "PolicyOverrideRequest": {
                 "type": "object",
@@ -36430,6 +38956,23 @@
                     "new_assignment"
                 ]
             },
+            "ReplayRequest": {
+                "type": "object",
+                "properties": {
+                    "ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "maxItems": 500,
+                        "minItems": 1
+                    }
+                },
+                "required": [
+                    "ids"
+                ]
+            },
             "ReportAnswersRequest": {
                 "type": "object",
                 "properties": {
@@ -36868,6 +39411,24 @@
                 "type": "string",
                 "description": "* `pending` - Pending\n* `clean` - Clean\n* `infected` - Infected\n* `error` - Error\n* `skipped` - Skipped"
             },
+            "ScheduleDeletionRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                    },
+                    "confirm_slug": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "confirm_slug",
+                    "reason"
+                ]
+            },
             "ScheduleSlot": {
                 "type": "object",
                 "properties": {
@@ -36949,6 +39510,14 @@
                     "title",
                     "type"
                 ]
+            },
+            "SeatModeEnum": {
+                "enum": [
+                    "active",
+                    "delivered"
+                ],
+                "type": "string",
+                "description": "* `active` - Every active tutor\n* `delivered` - Tutors with a completed lesson in the period"
             },
             "Series": {
                 "type": "object",
@@ -37845,14 +40414,6 @@
                     "publishable_key"
                 ]
             },
-            "SeverityEnum": {
-                "enum": [
-                    "hard",
-                    "soft"
-                ],
-                "type": "string",
-                "description": "* `hard` - hard\n* `soft` - soft"
-            },
             "SignupConfig": {
                 "type": "object",
                 "properties": {
@@ -38696,7 +41257,7 @@
                         "$ref": "#/components/schemas/SubscriptionStatusEnum"
                     },
                     "interval": {
-                        "$ref": "#/components/schemas/IntervalEnum"
+                        "$ref": "#/components/schemas/BillingIntervalEnum"
                     },
                     "currency": {
                         "type": "string"
@@ -38769,6 +41330,155 @@
                 ],
                 "type": "string",
                 "description": "* `trialing` - Trial\n* `active` - Active\n* `past_due` - Payment overdue\n* `suspended` - Suspended (read-only)\n* `cancelled` - Cancelled (read-only)"
+            },
+            "SupportAccess": {
+                "type": "object",
+                "properties": {
+                    "requires_grant": {
+                        "type": "boolean"
+                    },
+                    "grants": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SupportGrant"
+                        }
+                    },
+                    "sessions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SupportSession"
+                        }
+                    }
+                },
+                "required": [
+                    "grants",
+                    "requires_grant",
+                    "sessions"
+                ]
+            },
+            "SupportGrant": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "allow_write": {
+                        "type": "boolean"
+                    },
+                    "note": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "revoked_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "granted_by_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "active",
+                    "created_at",
+                    "expires_at",
+                    "granted_by_name",
+                    "id"
+                ]
+            },
+            "SupportSession": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "staff_name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "viewed_as": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "ticket": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "write": {
+                        "type": "boolean"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "entered_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "ended_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "reason",
+                    "staff_name",
+                    "viewed_as"
+                ]
+            },
+            "SupportSessionRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "membership_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                    },
+                    "ticket": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 100
+                    },
+                    "write": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "membership_id",
+                    "reason"
+                ]
             },
             "TOTPConfirmRequest": {
                 "type": "object",
@@ -39235,6 +41945,265 @@
                 },
                 "required": [
                     "body"
+                ]
+            },
+            "TenantDetail": {
+                "type": "object",
+                "properties": {
+                    "organisation": {
+                        "$ref": "#/components/schemas/TenantOrganisation"
+                    },
+                    "subscription": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TenantSubscription"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "overrides": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Override"
+                        }
+                    },
+                    "usage": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "members": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Member"
+                        }
+                    },
+                    "recent_errors": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    },
+                    "dead_letters": {
+                        "type": "integer"
+                    },
+                    "audit": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Audit"
+                        }
+                    }
+                },
+                "required": [
+                    "audit",
+                    "dead_letters",
+                    "members",
+                    "organisation",
+                    "overrides",
+                    "recent_errors",
+                    "subscription",
+                    "usage"
+                ]
+            },
+            "TenantOrganisation": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "business_type": {
+                        "type": "string"
+                    },
+                    "country": {
+                        "type": "string"
+                    },
+                    "region": {
+                        "type": "string"
+                    },
+                    "default_currency": {
+                        "type": "string"
+                    },
+                    "timezone": {
+                        "type": "string"
+                    },
+                    "contact_email": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "suspension_reason": {
+                        "type": "string"
+                    },
+                    "closed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "base_url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "base_url",
+                    "business_type",
+                    "closed_at",
+                    "contact_email",
+                    "country",
+                    "created_at",
+                    "default_currency",
+                    "id",
+                    "name",
+                    "region",
+                    "slug",
+                    "status",
+                    "suspension_reason",
+                    "timezone"
+                ]
+            },
+            "TenantRow": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "region": {
+                        "type": "string"
+                    },
+                    "country": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "plan": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "subscription_status": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "trial_ends_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "last_activity": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "members": {
+                        "type": "integer"
+                    },
+                    "mrr": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MoneyOut"
+                            }
+                        ],
+                        "nullable": true,
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "country",
+                    "created_at",
+                    "id",
+                    "last_activity",
+                    "members",
+                    "mrr",
+                    "name",
+                    "plan",
+                    "region",
+                    "slug",
+                    "status",
+                    "subscription_status",
+                    "trial_ends_at"
+                ]
+            },
+            "TenantSubscription": {
+                "type": "object",
+                "properties": {
+                    "plan": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "interval": {
+                        "type": "string"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "trial_ends_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "current_period_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "pending_plan": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "cancel_at_period_end": {
+                        "type": "boolean"
+                    },
+                    "cancellation_reason": {
+                        "type": "string"
+                    },
+                    "stripe_customer_id": {
+                        "type": "string"
+                    },
+                    "stripe_subscription_id": {
+                        "type": "string"
+                    },
+                    "seats": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "cancel_at_period_end",
+                    "cancellation_reason",
+                    "currency",
+                    "current_period_end",
+                    "interval",
+                    "pending_plan",
+                    "plan",
+                    "seats",
+                    "status",
+                    "stripe_customer_id",
+                    "stripe_subscription_id",
+                    "trial_ends_at"
                 ]
             },
             "TimeFormatEnum": {

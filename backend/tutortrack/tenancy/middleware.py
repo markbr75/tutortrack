@@ -55,9 +55,12 @@ class TenantMiddleware:
         self.resolve: Callable[[HttpRequest], Resolution] = import_string(path)
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
-        if request.path in ("/healthz", "/readyz") or request.path.startswith("/webhooks/"):
+        if request.path in ("/healthz", "/readyz") or request.path.startswith(
+            ("/webhooks/", "/api/v1/platform/")
+        ):
             # Provider webhooks arrive on the platform host; they find their organisation
-            # from the connected account (payments.AccountRoute).
+            # from the connected account (payments.AccountRoute). The platform console (E30)
+            # works across organisations and picks one explicitly per action.
             request.organisation = None  # type: ignore[attr-defined]
             request.membership = None  # type: ignore[attr-defined]
             return self.get_response(request)

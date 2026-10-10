@@ -1,4 +1,5 @@
-"""Feature flags. Resolution: unexpired org override > plan (E04) > global default.
+"""Feature flags. Resolution: unexpired org override > plan (E04) > percentage rollout (E30)
+> global default.
 
 from tutortrack.core.flags import is_enabled, requires_feature
 
@@ -68,7 +69,17 @@ def _resolve(key: str, organisation_id: uuid.UUID | None) -> bool:
         plan_key = import_string(PLAN_RESOLVER)(organisation_id)
         if plan_key and plan_key in (flag.plan_keys or []):
             return True
+        if flag.rollout_percent and in_rollout(key, organisation_id, flag.rollout_percent):
+            return True
     return flag.enabled_globally
+
+
+def in_rollout(key: str, organisation_id: uuid.UUID, percent: int) -> bool:
+    """Stable bucketing: an organisation stays in as the percentage grows."""
+    import hashlib
+
+    digest = hashlib.sha256(f"{key}:{organisation_id}".encode()).digest()
+    return int.from_bytes(digest[:4], "big") % 100 < percent
 
 
 def is_enabled(key: str, organisation_id: uuid.UUID | None = None) -> bool:

@@ -11,7 +11,7 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serial
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -253,3 +253,47 @@ class FeaturesView(APIView):
     )
     def get(self, request: Request) -> Response:
         return Response({"features": flags.enabled_flags()})
+
+
+# --- platform status (E30 FR-30-3) ---------------------------------------------------------------
+
+
+class PlatformNoticeSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    message = serializers.CharField()
+    severity = serializers.ChoiceField(choices=["info", "warning", "outage"])
+    starts_at = serializers.DateTimeField()
+    ends_at = serializers.DateTimeField(allow_null=True)
+
+
+class PlatformStatusSerializer(serializers.Serializer):
+    notices = PlatformNoticeSerializer(many=True)
+    status_page_url = serializers.CharField(allow_blank=True)
+
+
+class PlatformStatusView(APIView):
+    """Incident and maintenance banners for every app, and the public status page."""
+
+    permission_classes = [AllowAny]
+    authentication_classes: list[Any] = []
+
+    @extend_schema(responses=PlatformStatusSerializer)
+    def get(self, request: Request) -> Response:
+        from django.conf import settings
+        from django.core.cache import cache
+        from django.db.models import Q
+
+        from ..models import PlatformNotice
+        from ..time import now
+
+        notices = cache.get("platform-notices")
+        if notices is None:
+            current = now()
+            notices = PlatformNoticeSerializer(
+                PlatformNotice.objects.filter(starts_at__lte=current).filter(
+                    Q(ends_at__isnull=True) | Q(ends_at__gt=current)
+                ),
+                many=True,
+            ).data
+            cache.set("platform-notices", notices, 30)
+        return Response({"notices": notices, "status_page_url": settings.STATUS_PAGE_URL})

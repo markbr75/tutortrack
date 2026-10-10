@@ -329,3 +329,50 @@ class SocialAccount(models.Model):
 
     def __str__(self) -> str:
         return f"{self.provider}:{self.user_id}"
+
+
+# --- TutorTrack support access (E30 FR-30-2) ------------------------------------------------------
+
+
+class SupportAccessGrant(TenantModel):
+    """The organisation lets TutorTrack support in until ``expires_at`` (read-only unless
+    ``allow_write``)."""
+
+    granted_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    expires_at = models.DateTimeField()
+    allow_write = models.BooleanField(default=False)
+    note = models.CharField(max_length=255, blank=True, default="")
+    revoked_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"Support access until {self.expires_at:%Y-%m-%d}"
+
+
+class SupportSession(TenantModel):
+    """A platform staff member viewing the organisation as one of its users: always with a
+    reason; visible to the organisation."""
+
+    staff_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="+")
+    staff_name = models.CharField(max_length=200)
+    target_membership = models.ForeignKey(Membership, on_delete=models.CASCADE, related_name="+")
+    reason = models.CharField(max_length=500)
+    ticket = models.CharField(max_length=100, blank=True, default="")
+    write = models.BooleanField(default=False)
+    grant = models.ForeignKey(
+        SupportAccessGrant, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    token_hash = models.CharField(max_length=64, unique=True)
+    token_expires_at = models.DateTimeField()
+    entered_at = models.DateTimeField(null=True, blank=True)
+    ended_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"Support session by {self.staff_name}"

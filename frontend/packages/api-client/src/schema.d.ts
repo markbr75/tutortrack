@@ -4052,6 +4052,409 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/platform/dead-letters": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["platform_dead_letters_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/dead-letters/replay": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["platform_dead_letters_replay_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/flags": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["platform_flags_list"];
+    put?: never;
+    post: operations["platform_flags_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/flags/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations["platform_flags_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/platform/flags/{key}/overrides": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations["platform_flags_overrides_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/flags/{key}/overrides/{organisation_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations["platform_flags_overrides_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Whether the signed-in user may use the console, and what's missing if not. */
+    get: operations["platform_me_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/notices": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["platform_notices_list"];
+    put?: never;
+    post: operations["platform_notices_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/notices/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations["platform_notices_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/platform/operations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["platform_operations_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/plans": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["platform_plans_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/plans/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations["platform_plans_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/platform/plans/{key}/prices/{price_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations["platform_plans_prices_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/platform/tenants": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description All organisations with plan, status, MRR and last activity (FR-30-1). */
+    get: operations["platform_tenants_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/tenants/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["platform_tenants_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/tenants/{id}/change-plan": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["platform_tenants_change_plan_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/tenants/{id}/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["platform_tenants_export_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/tenants/{id}/extend-trial": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["platform_tenants_extend_trial_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/tenants/{id}/overrides": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations["platform_tenants_overrides_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/tenants/{id}/overrides/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations["platform_tenants_overrides_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/tenants/{id}/resend-verification": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["platform_tenants_resend_verification_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/tenants/{id}/schedule-deletion": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["platform_tenants_schedule_deletion_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/tenants/{id}/support-sessions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Start viewing the organisation as a member (FR-30-2); returns a single-use link. */
+    post: operations["platform_tenants_support_sessions_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/tenants/{id}/suspend": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["platform_tenants_suspend_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/tenants/{id}/unsuspend": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["platform_tenants_unsuspend_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/portal/announcements": {
     parameters: {
       query?: never;
@@ -4647,6 +5050,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Incident and maintenance banners for every app, and the public status page. */
+    get: operations["status_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/students": {
     parameters: {
       query?: never;
@@ -4928,6 +5348,72 @@ export interface paths {
     };
     /** @description Settings → Billing & plan: limits used, seats, credits, next invoice (FR-04-7). */
     get: operations["subscription_usage_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/support-access": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Who from TutorTrack support looked at the account, and the grants in place. */
+    get: operations["support_access_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/support-access/grants": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["support_access_grants_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/support-access/grants/{id}/revoke": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["support_access_grants_revoke_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/support/enter": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``GET /support/enter?token=``: the single-use link from the platform console. */
+    get: operations["support_enter_retrieve"];
     put?: never;
     post?: never;
     delete?: never;
@@ -5550,6 +6036,19 @@ export interface components {
      * @enum {string}
      */
     AudienceEnum: "clients" | "tutors" | "everyone";
+    Audit: {
+      /** Format: uuid */
+      id: string;
+      /** Format: date-time */
+      created_at: string;
+      action: string;
+      object_type: string;
+      object_repr: string;
+      /** Format: uuid */
+      actor_id: string | null;
+      /** Format: uuid */
+      impersonator_id: string | null;
+    };
     AuditEntry: {
       /** Format: uuid */
       readonly id: string;
@@ -5605,6 +6104,12 @@ export interface components {
       available_credit: components["schemas"]["MoneyOut"];
       overdue: components["schemas"]["MoneyOut"];
     };
+    /**
+     * @description * `month` - Monthly
+     *     * `year` - Annual
+     * @enum {string}
+     */
+    BillingIntervalEnum: "month" | "year";
     /**
      * @description * `pay_as_you_go` - Pay as you go
      *     * `invoice_in_advance` - Invoice in advance
@@ -6206,7 +6711,7 @@ export interface components {
     };
     Conflict: {
       kind: string;
-      severity: components["schemas"]["SeverityEnum"];
+      severity: components["schemas"]["ConflictSeverityEnum"];
       message: string;
       lesson_id: string | null;
       tutor_id: string | null;
@@ -6239,6 +6744,12 @@ export interface components {
      * @enum {string}
      */
     ConflictModeEnum: "skip" | "create" | "fail";
+    /**
+     * @description * `hard` - hard
+     *     * `soft` - soft
+     * @enum {string}
+     */
+    ConflictSeverityEnum: "hard" | "soft";
     ConnectRequest: {
       /** Format: uuid */
       branch?: string | null;
@@ -6379,6 +6890,9 @@ export interface components {
       is_emergency_contact?: boolean;
       language?: string;
       custom_fields?: unknown;
+    };
+    Count: {
+      count: number;
     };
     /**
      * @description * `admin` - Admin
@@ -6604,6 +7118,18 @@ export interface components {
      * @enum {string}
      */
     DateFormatEnum: "locale" | "dd/MM/yyyy" | "MM/dd/yyyy" | "yyyy-MM-dd";
+    DeadLetter: {
+      /** Format: uuid */
+      id: string;
+      event_type: string;
+      organisation_name: string | null;
+      /** Format: date-time */
+      occurred_at: string;
+      /** Format: date-time */
+      dead_lettered_at: string;
+      attempts: number;
+      last_error: string;
+    };
     /**
      * @description * `in_person` - In person
      *     * `online` - Online
@@ -6772,6 +7298,9 @@ export interface components {
       /** @default  */
       reason: string;
     };
+    EnterUrl: {
+      url: string;
+    };
     Entitlements: {
       plan: string | null;
       status: string | null;
@@ -6784,6 +7313,13 @@ export interface components {
       required_plans: {
         [key: string]: string;
       };
+    };
+    Error: {
+      origin: string;
+      kind: string;
+      /** Format: date-time */
+      at: string;
+      detail: string;
     };
     Exception: {
       /** Format: uuid */
@@ -6820,6 +7356,10 @@ export interface components {
     ExtendRequest: {
       /** Format: date-time */
       until: string;
+    };
+    ExtendTrialRequest: {
+      reason: string;
+      days: number;
     };
     Features: {
       features: {
@@ -6876,6 +7416,41 @@ export interface components {
      * @enum {string}
      */
     FileVisibilityEnum: "private" | "internal" | "shared";
+    Flag: {
+      key: string;
+      description?: string;
+      enabled_globally?: boolean;
+      plan_keys: string[];
+      rollout_percent?: number;
+      readonly overrides: components["schemas"]["FlagOverride"][];
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    FlagCreateRequest: {
+      description?: string;
+      enabled_globally?: boolean;
+      plan_keys?: string[];
+      rollout_percent?: number;
+      key: string;
+    };
+    FlagOverride: {
+      /** Format: uuid */
+      organisation: string;
+      readonly organisation_name: string;
+      enabled: boolean;
+      /** Format: date-time */
+      expires_at?: string | null;
+      reason?: string;
+    };
+    FlagOverrideRequestRequest: {
+      /** Format: uuid */
+      organisation: string;
+      enabled: boolean;
+      /** Format: date-time */
+      expires_at?: string | null;
+      /** @default  */
+      reason: string;
+    };
     /**
      * @description * `one_to_one` - One to one
      *     * `small_group` - Small group
@@ -6889,6 +7464,12 @@ export interface components {
      * @enum {string}
      */
     FutureLessonsEnum: "keep" | "cancel";
+    GrantRequestRequest: {
+      days: number;
+      /** @default false */
+      allow_write: boolean;
+      note?: string;
+    };
     /**
      * @description * `per_student` - Each student pays the rate
      *     * `split` - The rate is split between students
@@ -6937,12 +7518,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description * `month` - Monthly
-     *     * `year` - Annual
-     * @enum {string}
-     */
-    IntervalEnum: "month" | "year";
     Invitation: {
       /** Format: uuid */
       readonly id: string;
@@ -7623,6 +8198,52 @@ export interface components {
      * @enum {string}
      */
     JobTutorStatusEnum: "offered" | "active" | "ended" | "declined";
+    /**
+     * @description * `accounting_integrations` - accounting_integrations
+     *     * `advanced_reports` - advanced_reports
+     *     * `ai_assistant` - ai_assistant
+     *     * `api_access` - api_access
+     *     * `automation` - automation
+     *     * `automation_rules` - automation_rules
+     *     * `courses` - courses
+     *     * `custom_domain` - custom_domain
+     *     * `matching` - matching
+     *     * `max_active_students` - max_active_students
+     *     * `max_branches` - max_branches
+     *     * `max_tutors` - max_tutors
+     *     * `multi_branch` - multi_branch
+     *     * `payroll` - payroll
+     *     * `pipeline` - pipeline
+     *     * `recruitment` - recruitment
+     *     * `sms_credits_monthly` - sms_credits_monthly
+     *     * `sso_saml` - sso_saml
+     *     * `storage_gb` - storage_gb
+     *     * `webhooks` - webhooks
+     *     * `white_label` - white_label
+     * @enum {string}
+     */
+    KeyEnum:
+      | "accounting_integrations"
+      | "advanced_reports"
+      | "ai_assistant"
+      | "api_access"
+      | "automation"
+      | "automation_rules"
+      | "courses"
+      | "custom_domain"
+      | "matching"
+      | "max_active_students"
+      | "max_branches"
+      | "max_tutors"
+      | "multi_branch"
+      | "payroll"
+      | "pipeline"
+      | "recruitment"
+      | "sms_credits_monthly"
+      | "sso_saml"
+      | "storage_gb"
+      | "webhooks"
+      | "white_label";
     LedgerAdjustRequest: {
       /** @description Positive adds to what the client owes */
       amount: {
@@ -8109,6 +8730,19 @@ export interface components {
       status: string;
       mode: string;
     };
+    Member: {
+      /** Format: uuid */
+      id: string;
+      /** Format: email */
+      email: string;
+      name: string;
+      role: string;
+      status: string;
+      /** Format: date-time */
+      last_active_at: string | null;
+      readonly email_verified: boolean;
+      has_mfa: boolean;
+    };
     MemberUser: {
       /** Format: uuid */
       id: string;
@@ -8271,6 +8905,33 @@ export interface components {
      * @enum {string}
      */
     NoteVisibilityEnum: "staff_only" | "staff_and_tutors" | "shared_with_client";
+    Notice: {
+      /** Format: uuid */
+      readonly id: string;
+      message: string;
+      severity?: components["schemas"]["NoticeSeverityEnum"];
+      /** Format: date-time */
+      starts_at: string;
+      /** Format: date-time */
+      ends_at?: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    NoticeRequest: {
+      message: string;
+      severity?: components["schemas"]["NoticeSeverityEnum"];
+      /** Format: date-time */
+      starts_at: string;
+      /** Format: date-time */
+      ends_at?: string | null;
+    };
+    /**
+     * @description * `info` - Information
+     *     * `warning` - Degraded service
+     *     * `outage` - Outage
+     * @enum {string}
+     */
+    NoticeSeverityEnum: "info" | "warning" | "outage";
     NotificationSetting: {
       key: string;
       label: string;
@@ -8321,6 +8982,21 @@ export interface components {
      * @enum {string}
      */
     OnboardingStepStatusStatusEnum: "pending" | "completed" | "skipped";
+    Operations: {
+      outbox_pending: number;
+      outbox_lag_seconds: number;
+      dead_letters: number;
+      queues: {
+        [key: string]: number;
+      };
+      payment_webhooks_unprocessed: number;
+      payment_webhooks_failed: number;
+      billing_webhooks_unprocessed: number;
+      billing_webhooks_failed: number;
+      dead_letters_by_type: {
+        [key: string]: unknown;
+      }[];
+    };
     Organisation: {
       /** Format: uuid */
       readonly id: string;
@@ -8368,6 +9044,25 @@ export interface components {
      * @enum {string}
      */
     OrganisationStatusEnum: "trial" | "active" | "past_due" | "suspended" | "cancelled";
+    Override: {
+      key: string;
+      bool_value: boolean | null;
+      int_value: number | null;
+      unlimited: boolean;
+      /** Format: date-time */
+      expires_at: string | null;
+      reason: string;
+    };
+    OverrideRequestRequest: {
+      key: components["schemas"]["KeyEnum"];
+      enabled?: boolean | null;
+      limit?: number | null;
+      /** @default false */
+      unlimited: boolean;
+      /** Format: date-time */
+      expires_at?: string | null;
+      reason: string;
+    };
     PackageTemplate: {
       /** Format: uuid */
       readonly id: string;
@@ -8595,6 +9290,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["CreditNote"][];
+    };
+    PaginatedDeadLetterList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["DeadLetter"][];
     };
     PaginatedDisputeList: {
       /**
@@ -8921,6 +9629,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Task"][];
     };
+    PaginatedTenantRowList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["TenantRow"][];
+    };
     PaginatedTutorList: {
       /**
        * Format: uri
@@ -9070,6 +9791,12 @@ export interface components {
       validation_regex?: string;
       active?: boolean;
     };
+    PatchedFlagUpdateRequest: {
+      description?: string;
+      enabled_globally?: boolean;
+      plan_keys?: string[];
+      rollout_percent?: number;
+    };
     PatchedInvoiceUpdateRequest: {
       po_number?: string;
       notes?: string;
@@ -9190,6 +9917,14 @@ export interface components {
       visibility?: components["schemas"]["NoteVisibilityEnum"];
       attachments?: string[];
     };
+    PatchedNoticeRequest: {
+      message?: string;
+      severity?: components["schemas"]["NoticeSeverityEnum"];
+      /** Format: date-time */
+      starts_at?: string;
+      /** Format: date-time */
+      ends_at?: string | null;
+    };
     PatchedOrganisationRequest: {
       name?: string;
       legal_name?: string;
@@ -9240,6 +9975,21 @@ export interface components {
       bookable_online?: boolean;
       auto_renew?: boolean;
       active?: boolean;
+    };
+    PatchedPlanAdminPriceRequest: {
+      /** Format: decimal */
+      unit_amount?: string;
+      included_quantity?: number;
+      stripe_price_id?: string;
+    };
+    PatchedPlanAdminRequest: {
+      name?: string;
+      description?: string;
+      visibility?: components["schemas"]["PlanVisibilityEnum"];
+      /** @description Higher = bigger plan */
+      rank?: number;
+      trial_days?: number;
+      seat_mode?: components["schemas"]["SeatModeEnum"];
     };
     PatchedPortalContactRequest: {
       first_name?: string;
@@ -9775,13 +10525,43 @@ export interface components {
         [key: string]: number | null;
       };
     };
+    PlanAdmin: {
+      readonly key: string;
+      name: string;
+      description?: string;
+      visibility?: components["schemas"]["PlanVisibilityEnum"];
+      /** @description Higher = bigger plan */
+      rank?: number;
+      trial_days?: number;
+      seat_mode?: components["schemas"]["SeatModeEnum"];
+      readonly prices: components["schemas"]["PlanAdminPrice"][];
+      readonly entitlements: {
+        [key: string]: unknown;
+      };
+    };
+    PlanAdminPrice: {
+      readonly id: number;
+      readonly currency: string;
+      readonly interval: components["schemas"]["BillingIntervalEnum"];
+      readonly component: components["schemas"]["ComponentEnum"];
+      /** Format: decimal */
+      unit_amount: string;
+      included_quantity?: number;
+      stripe_price_id?: string;
+    };
+    PlanAdminPriceRequest: {
+      /** Format: decimal */
+      unit_amount: string;
+      included_quantity?: number;
+      stripe_price_id?: string;
+    };
     PlanChoiceRequest: {
       plan: string;
       /** @default month */
-      interval: components["schemas"]["IntervalEnum"];
+      interval: components["schemas"]["BillingIntervalEnum"];
     };
     PlanPrice: {
-      interval: components["schemas"]["IntervalEnum"];
+      interval: components["schemas"]["BillingIntervalEnum"];
       component: components["schemas"]["ComponentEnum"];
       /** @description An amount, or a percentage for revenue_share */
       unit_amount: string;
@@ -9794,6 +10574,45 @@ export interface components {
      * @enum {string}
      */
     PlanVisibilityEnum: "public" | "legacy" | "custom";
+    PlatformChangePlanRequest: {
+      plan: string;
+      /** @default month */
+      interval: components["schemas"]["BillingIntervalEnum"];
+      note: string;
+      /** @default false */
+      activate: boolean;
+    };
+    PlatformMe: {
+      /** Format: email */
+      email: string;
+      is_platform_staff: boolean;
+      mfa_verified: boolean;
+      network_allowed: boolean;
+    };
+    PlatformNotice: {
+      /** Format: uuid */
+      id: string;
+      message: string;
+      severity: components["schemas"]["PlatformNoticeSeverityEnum"];
+      /** Format: date-time */
+      starts_at: string;
+      /** Format: date-time */
+      ends_at: string | null;
+    };
+    /**
+     * @description * `info` - info
+     *     * `warning` - warning
+     *     * `outage` - outage
+     * @enum {string}
+     */
+    PlatformNoticeSeverityEnum: "info" | "warning" | "outage";
+    PlatformReasonRequest: {
+      reason: string;
+    };
+    PlatformStatus: {
+      notices: components["schemas"]["PlatformNotice"][];
+      status_page_url: string;
+    };
     PolicyOverrideRequest: {
       /** Format: decimal */
       charge_percent: string;
@@ -10508,6 +11327,9 @@ export interface components {
       conflicts: number;
       new_assignment: components["schemas"]["JobTutor"] | null;
     };
+    ReplayRequest: {
+      ids: string[];
+    };
     ReportAnswersRequest: {
       answers: {
         [key: string]: unknown;
@@ -10662,6 +11484,10 @@ export interface components {
      * @enum {string}
      */
     ScanStatusEnum: "pending" | "clean" | "infected" | "error" | "skipped";
+    ScheduleDeletionRequest: {
+      reason: string;
+      confirm_slug: string;
+    };
     ScheduleSlot: {
       /** @description Monday is 0. */
       weekday: number;
@@ -10683,6 +11509,12 @@ export interface components {
       score: number;
       client_id: string | null;
     };
+    /**
+     * @description * `active` - Every active tutor
+     *     * `delivered` - Tutors with a completed lesson in the period
+     * @enum {string}
+     */
+    SeatModeEnum: "active" | "delivered";
     Series: {
       /** Format: uuid */
       readonly id: string;
@@ -10985,12 +11817,6 @@ export interface components {
       intent: string;
       consent_text: string;
     };
-    /**
-     * @description * `hard` - hard
-     *     * `soft` - soft
-     * @enum {string}
-     */
-    SeverityEnum: "hard" | "soft";
     SignupConfig: {
       turnstile_site_key: string;
     };
@@ -11251,7 +12077,7 @@ export interface components {
       plan_name: string;
       effective_plan: string;
       status: components["schemas"]["SubscriptionStatusEnum"];
-      interval: components["schemas"]["IntervalEnum"];
+      interval: components["schemas"]["BillingIntervalEnum"];
       currency: string;
       /** Format: date-time */
       trial_ends_at: string | null;
@@ -11275,6 +12101,50 @@ export interface components {
      * @enum {string}
      */
     SubscriptionStatusEnum: "trialing" | "active" | "past_due" | "suspended" | "cancelled";
+    SupportAccess: {
+      requires_grant: boolean;
+      grants: components["schemas"]["SupportGrant"][];
+      sessions: components["schemas"]["SupportSession"][];
+    };
+    SupportGrant: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      expires_at: string;
+      allow_write?: boolean;
+      note?: string;
+      /** Format: date-time */
+      revoked_at?: string | null;
+      readonly granted_by_name: string;
+      readonly active: boolean;
+    };
+    SupportSession: {
+      /** Format: uuid */
+      readonly id: string;
+      staff_name: string;
+      /** Format: email */
+      viewed_as: string;
+      reason: string;
+      ticket?: string;
+      write?: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      entered_at?: string | null;
+      /** Format: date-time */
+      ended_at?: string | null;
+    };
+    SupportSessionRequestRequest: {
+      /** Format: uuid */
+      membership_id: string;
+      reason: string;
+      /** @default  */
+      ticket: string;
+      /** @default false */
+      write: boolean;
+    };
     TOTPConfirmRequest: {
       /** Format: uuid */
       device_id: string;
@@ -11432,6 +12302,72 @@ export interface components {
       /** @default  */
       subject: string;
       body: string;
+    };
+    TenantDetail: {
+      organisation: components["schemas"]["TenantOrganisation"];
+      subscription: components["schemas"]["TenantSubscription"] | null;
+      overrides: components["schemas"]["Override"][];
+      usage: {
+        [key: string]: number;
+      };
+      members: components["schemas"]["Member"][];
+      recent_errors: components["schemas"]["Error"][];
+      dead_letters: number;
+      audit: components["schemas"]["Audit"][];
+    };
+    TenantOrganisation: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      slug: string;
+      status: string;
+      business_type: string;
+      country: string;
+      region: string;
+      default_currency: string;
+      timezone: string;
+      contact_email: string;
+      /** Format: date-time */
+      created_at: string;
+      suspension_reason: string;
+      /** Format: date-time */
+      closed_at: string | null;
+      base_url: string;
+    };
+    TenantRow: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      slug: string;
+      status: string;
+      region: string;
+      country: string;
+      /** Format: date-time */
+      created_at: string;
+      plan: string | null;
+      subscription_status: string | null;
+      /** Format: date-time */
+      trial_ends_at: string | null;
+      /** Format: date-time */
+      last_activity: string | null;
+      members: number;
+      readonly mrr: components["schemas"]["MoneyOut"] | null;
+    };
+    TenantSubscription: {
+      plan: string;
+      status: string;
+      interval: string;
+      currency: string;
+      /** Format: date-time */
+      trial_ends_at: string | null;
+      /** Format: date-time */
+      current_period_end: string | null;
+      pending_plan: string | null;
+      cancel_at_period_end: boolean;
+      cancellation_reason: string;
+      stripe_customer_id: string;
+      stripe_subscription_id: string;
+      seats: number;
     };
     /**
      * @description * `locale` - Locale default
@@ -19771,6 +20707,701 @@ export interface operations {
       };
     };
   };
+  platform_dead_letters_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        event_type?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedDeadLetterList"];
+        };
+      };
+    };
+  };
+  platform_dead_letters_replay_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReplayRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReplayRequest"];
+        "multipart/form-data": components["schemas"]["ReplayRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Count"];
+        };
+      };
+    };
+  };
+  platform_flags_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Flag"][];
+        };
+      };
+    };
+  };
+  platform_flags_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FlagCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["FlagCreateRequest"];
+        "multipart/form-data": components["schemas"]["FlagCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Flag"];
+        };
+      };
+    };
+  };
+  platform_flags_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedFlagUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedFlagUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedFlagUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Flag"];
+        };
+      };
+    };
+  };
+  platform_flags_overrides_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FlagOverrideRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["FlagOverrideRequestRequest"];
+        "multipart/form-data": components["schemas"]["FlagOverrideRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Flag"];
+        };
+      };
+    };
+  };
+  platform_flags_overrides_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        organisation_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  platform_me_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PlatformMe"];
+        };
+      };
+    };
+  };
+  platform_notices_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Notice"][];
+        };
+      };
+    };
+  };
+  platform_notices_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NoticeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["NoticeRequest"];
+        "multipart/form-data": components["schemas"]["NoticeRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Notice"];
+        };
+      };
+    };
+  };
+  platform_notices_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedNoticeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedNoticeRequest"];
+        "multipart/form-data": components["schemas"]["PatchedNoticeRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Notice"];
+        };
+      };
+    };
+  };
+  platform_operations_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Operations"];
+        };
+      };
+    };
+  };
+  platform_plans_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PlanAdmin"][];
+        };
+      };
+    };
+  };
+  platform_plans_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedPlanAdminRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedPlanAdminRequest"];
+        "multipart/form-data": components["schemas"]["PatchedPlanAdminRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PlanAdmin"];
+        };
+      };
+    };
+  };
+  platform_plans_prices_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+        price_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedPlanAdminPriceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedPlanAdminPriceRequest"];
+        "multipart/form-data": components["schemas"]["PatchedPlanAdminPriceRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PlanAdminPrice"];
+        };
+      };
+    };
+  };
+  platform_tenants_list: {
+    parameters: {
+      query?: {
+        /** @description ISO datetime */
+        active_since?: string;
+        /** @description ISO datetime */
+        created_after?: string;
+        /** @description ISO datetime */
+        created_before?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        plan?: string;
+        region?: string;
+        search?: string;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedTenantRowList"];
+        };
+      };
+    };
+  };
+  platform_tenants_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TenantDetail"];
+        };
+      };
+    };
+  };
+  platform_tenants_change_plan_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlatformChangePlanRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PlatformChangePlanRequest"];
+        "multipart/form-data": components["schemas"]["PlatformChangePlanRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TenantDetail"];
+        };
+      };
+    };
+  };
+  platform_tenants_export_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlatformReasonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PlatformReasonRequest"];
+        "multipart/form-data": components["schemas"]["PlatformReasonRequest"];
+      };
+    };
+    responses: {
+      /** @description No response body */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  platform_tenants_extend_trial_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExtendTrialRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ExtendTrialRequest"];
+        "multipart/form-data": components["schemas"]["ExtendTrialRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TenantDetail"];
+        };
+      };
+    };
+  };
+  platform_tenants_overrides_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OverrideRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["OverrideRequestRequest"];
+        "multipart/form-data": components["schemas"]["OverrideRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TenantDetail"];
+        };
+      };
+    };
+  };
+  platform_tenants_overrides_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  platform_tenants_resend_verification_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Count"];
+        };
+      };
+    };
+  };
+  platform_tenants_schedule_deletion_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScheduleDeletionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ScheduleDeletionRequest"];
+        "multipart/form-data": components["schemas"]["ScheduleDeletionRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TenantDetail"];
+        };
+      };
+    };
+  };
+  platform_tenants_support_sessions_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SupportSessionRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SupportSessionRequestRequest"];
+        "multipart/form-data": components["schemas"]["SupportSessionRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EnterUrl"];
+        };
+      };
+    };
+  };
+  platform_tenants_suspend_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlatformReasonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PlatformReasonRequest"];
+        "multipart/form-data": components["schemas"]["PlatformReasonRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TenantDetail"];
+        };
+      };
+    };
+  };
+  platform_tenants_unsuspend_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TenantDetail"];
+        };
+      };
+    };
+  };
   portal_announcements_list: {
     parameters: {
       query?: never;
@@ -20788,6 +22419,25 @@ export interface operations {
       };
     };
   };
+  status_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PlatformStatus"];
+        };
+      };
+    };
+  };
   students_list: {
     parameters: {
       query?: {
@@ -21339,6 +22989,97 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Usage"];
         };
+      };
+    };
+  };
+  support_access_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SupportAccess"];
+        };
+      };
+    };
+  };
+  support_access_grants_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GrantRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["GrantRequestRequest"];
+        "multipart/form-data": components["schemas"]["GrantRequestRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SupportGrant"];
+        };
+      };
+    };
+  };
+  support_access_grants_revoke_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SupportGrant"];
+        };
+      };
+    };
+  };
+  support_enter_retrieve: {
+    parameters: {
+      query: {
+        token: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

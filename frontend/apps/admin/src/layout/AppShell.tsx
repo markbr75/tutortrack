@@ -9,6 +9,7 @@ import { NotificationBell } from "../comms/NotificationBell";
 import { CommandPalette } from "../crm/CommandPalette";
 import { api, isAuthError, useMe, useMyOrganisations, useOrganisation } from "../api";
 import { SubscriptionBanner } from "../subscription/SubscriptionBanner";
+import { StatusBanner } from "./StatusBanner";
 import { UpgradeDialog } from "../subscription/UpgradePrompts";
 
 const NAV = [
@@ -178,6 +179,7 @@ export function AppShell() {
       </nav>
       <main className="flex-1 p-4 md:p-8">
         <ImpersonationBanner />
+        <StatusBanner />
         <SuspendedBanner />
         <SubscriptionBanner />
         <Outlet />

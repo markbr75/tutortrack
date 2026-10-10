@@ -81,7 +81,7 @@ All ─► E26, E27, E28, E31
 | E09 | ✅ Done (2026-10-09) | MVP scope (T09 feedback surveys are Phase 2). See Implementation notes and ADR 0006 |
 | E10 | ✅ Done (2026-10-09) | Phase 1 scope (packages, fixed fees, late fees and split billing are Phase 2). See Implementation notes and ADR 0007 |
 | E11 | ✅ Done (2026-10-09) | Stripe + manual (GoCardless, PayPal, bank feeds and split payments are Phase 2). See Implementation notes and ADR 0008 |
-| E12 | ☐ | |
+| E12 | ⏭ Next | |
 | E13 | ✅ Done (2026-10-09) | MVP scope (broadcasts, inbox, WhatsApp, custom domains are Phase 2). See Implementation notes |
 | E14 | ☐ | |
 | E15 | ✅ Done (2026-10-10) | MVP scope (booking, reschedule, packages and messaging are Phase 2). See Implementation notes |
@@ -99,6 +99,6 @@ All ─► E26, E27, E28, E31
 | E27 | ☐ | |
 | E28 | ☐ | |
 | E29 | 🟡 Part 1 done (2026-10-09) | T01–T04 (security baseline, KMS encryption, audit search, consent). Part 2 (T05–T12, TW1) in Phase 3 |
-| E30 | ⏭ Next (part 1) | |
+| E30 | ◐ Part 1 done (2026-10-10) | Console, tenant actions, flags, ops/dead letters, support access, alarms, backups, runbooks. Part 2 (help, analytics, SaaS metrics) later. See Implementation notes |
 | E31 | ☐ | |
 | E32 | ✅ Done (2026-10-09) | Runtime, bridge, codec, timers, schedules, processes API, test harness; reference + closure workflows |
