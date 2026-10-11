@@ -125,15 +125,17 @@ def test_an_error_waits_for_retry_after_remapping(org, world, temporal_env):
     record(temporal_env, wid, "AccountingSyncWorkflow-retried")
 
 
-def test_transient_failures_are_retried_with_backoff(org, world, temporal_env):
+def test_transient_failures_are_retried_with_backoff(org, world, temporal_local_env):
+    """On the real dev server: the time-skipping test server doesn't skip activity retry
+    backoff inside a child workflow (and used to stall later tests). Takes about 15s."""
     enabled(org, world)
     dispatch_batch()
     fake.fail("xero", 2)
     invoice = issue(org, world)
     dispatch_batch()
     wid = sync_id(org, "invoice.issued", "invoice", invoice.pk)
-    assert temporal_env.result(wid) == "synced"
-    record(temporal_env, wid, "AccountingSyncWorkflow-transient")
+    assert temporal_local_env.result(wid, timeout=120) == "synced"
+    record(temporal_local_env, wid, "AccountingSyncWorkflow-transient")
 
 
 def test_skip_ends_a_waiting_sync(org, world, temporal_env):

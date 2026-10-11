@@ -1,7 +1,7 @@
 """Workflow test harness (E32 FR-32-11).
 
-The ``temporal_env`` pytest fixture (backend/conftest.py) starts a time-skipping test
-server once per session and, per test, workers for every registered task queue. All code
+The ``temporal_env`` pytest fixture (backend/conftest.py) starts a fresh time-skipping
+test server and workers for every registered task queue per test. All code
 (services, the bridge, the API) talks to it through the normal client.
 
 * Timers skip: ``await workflow.sleep(timedelta(days=30))`` completes in milliseconds
@@ -19,7 +19,14 @@ from dataclasses import dataclass
 from typing import Any
 
 from django.conf import settings
-from temporalio.client import Client
+from temporalio.client import (
+    Client,
+    Interceptor,
+    OutboundInterceptor,
+    StartWorkflowInput,
+    WorkflowExecutionStatus,
+    WorkflowHandle,
+)
 from temporalio.testing import WorkflowEnvironment
 
 from . import runtime
@@ -30,16 +37,44 @@ _environments: dict[str, WorkflowEnvironment] = {}
 
 
 def environment(kind: str = "time_skipping") -> WorkflowEnvironment:
-    """Session-wide test server. ``time_skipping`` (fast timers) or ``local`` (a real dev
-    server: needed for Temporal Schedules, which the time-skipping server lacks)."""
+    """Session-wide ``local`` test server (a real dev server: needed for Temporal Schedules,
+    which the time-skipping server lacks). Time-skipping servers are per test: see
+    ``temporal_test_env``."""
     if kind not in _environments:
-        starter = (
-            WorkflowEnvironment.start_time_skipping()
-            if kind == "time_skipping"
-            else WorkflowEnvironment.start_local(namespace="tutortrack-test")
+        _environments[kind] = runtime.run(
+            WorkflowEnvironment.start_local(namespace="tutortrack-test"), timeout=180
         )
-        _environments[kind] = runtime.run(starter, timeout=180)
     return _environments[kind]
+
+
+class _RecordStarts(Interceptor):
+    """Remembers the workflows a test starts so teardown can end the ones still running:
+    the server is shared by the session, and leftover long-running workflows (polling
+    loops, waits for signals, retry timers) would otherwise wake up in later tests."""
+
+    def __init__(self) -> None:
+        self.started: list[str] = []
+
+    def intercept_client(self, next: OutboundInterceptor) -> OutboundInterceptor:
+        recorder = self
+
+        class _Outbound(OutboundInterceptor):
+            async def start_workflow(self, input: StartWorkflowInput) -> WorkflowHandle[Any, Any]:
+                recorder.started.append(input.id)
+                return await super().start_workflow(input)
+
+        return _Outbound(next)
+
+
+async def _terminate_running(client: Client, workflow_ids: list[str]) -> None:
+    for workflow_id in dict.fromkeys(workflow_ids):
+        handle = client.get_workflow_handle(workflow_id)
+        try:
+            description = await handle.describe()
+            if description.status == WorkflowExecutionStatus.RUNNING:
+                await handle.terminate(reason="test finished")
+        except Exception:  # noqa: S112 - best effort cleanup
+            continue
 
 
 @dataclass
@@ -61,11 +96,22 @@ class TemporalTestEnv:
         environment's own client; ours come from ``start_now``/ids, so unlock explicitly.
         """
 
+        async def _await() -> Any:
+            # The close-event long poll can come back empty while time skips ("No
+            # completion event found"); the workflow is still running, so poll again.
+            while True:
+                try:
+                    return await self.handle(workflow_id).result()
+                except RuntimeError as exc:
+                    if "No completion event found" not in str(exc):
+                        raise
+                    await asyncio.sleep(0.05)
+
         async def _result() -> Any:
             if not self.env.supports_time_skipping:
-                return await self.handle(workflow_id).result()
+                return await _await()
             async with self.env.time_skipping_unlocked():  # type: ignore[attr-defined]
-                return await self.handle(workflow_id).result()
+                return await _await()
 
         return self.run(_result(), timeout=timeout)
 
@@ -82,8 +128,19 @@ class TemporalTestEnv:
 def temporal_test_env(
     task_queues: list[str] | None = None, *, kind: str = "time_skipping"
 ) -> Iterator[TemporalTestEnv]:
-    env = environment(kind)
-    client = client_for_environment(env.client)
+    # A fresh time-skipping server per test (it starts in ~0.1s): a shared one can be left
+    # unable to skip time by an earlier test (e.g. activity retries in child workflows),
+    # which made unrelated timer tests time out.
+    fresh = kind == "time_skipping"
+    env = (
+        runtime.run(WorkflowEnvironment.start_time_skipping(), timeout=180)
+        if fresh
+        else environment(kind)
+    )
+    recorder = _RecordStarts()
+    config = client_for_environment(env.client).config()
+    config["interceptors"] = [*config["interceptors"], recorder]
+    client = Client(**config)
     use_client(client)
     queues = task_queues or list(settings.TEMPORAL["TASK_QUEUES"])
 
@@ -95,8 +152,11 @@ def temporal_test_env(
     try:
         yield TemporalTestEnv(env=env, client=client)
     finally:
+        runtime.run(_terminate_running(client, recorder.started), timeout=60)
         for worker in workers:
             runtime.run(worker.shutdown(), timeout=60)
         for future in futures:
             future.result(timeout=60)
         use_client(None)
+        if fresh:
+            runtime.run(env.shutdown(), timeout=60)

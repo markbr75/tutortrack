@@ -113,7 +113,7 @@ def test_retry_now_signal_cuts_the_wait_short(org, public_dns, receiver, tempora
     with tenant_context(org):
         services.retry_now(WebhookDelivery.objects.get(pk=delivery.pk))
     # The 30-second backoff isn't skipped while we poll; only the signal can wake it.
-    wait_for(org, lambda: WebhookDelivery.objects.get(pk=delivery.pk).status == "succeeded", 15)
+    wait_for(org, lambda: WebhookDelivery.objects.get(pk=delivery.pk).status == "succeeded", 25)
     wid = delivery_workflow_id(org.pk, delivery.pk)
     assert temporal_env.result(wid) == "succeeded"
     record(temporal_env, wid, "WebhookDeliveryWorkflow-retry-now")
