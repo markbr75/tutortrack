@@ -52,6 +52,7 @@ const NAV = [
     key: "nav.accounting",
     permission: "integrations.accounting.view",
   },
+  { to: "/data", key: "nav.data", permission: "migration.import.view" },
   { to: "/settings/plan", key: "nav.plan", permission: "subscription.view" },
   { to: "/settings/marketplace", key: "nav.marketplace", permission: "org.settings.view" },
   { to: "/website", key: "nav.website", permission: "sites.view" },

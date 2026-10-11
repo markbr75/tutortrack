@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "tutortrack.integrations",
     "tutortrack.calendar_sync",
     "tutortrack.accounting",
+    "tutortrack.migration",
     "tutortrack.comms",
     "tutortrack.portal",
     "tutortrack.subscriptions",
@@ -304,6 +305,8 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "COMPONENT_SPLIT_REQUEST": True,
     "ENUM_NAME_OVERRIDES": {
+        "ImportSourceEnum": "tutortrack.migration.models.Source",
+        "MigrationSourceEnum": "tutortrack.migration.api.serializers.PROJECT_SOURCES",
         "WebhookEndpointStatusEnum": "tutortrack.developer.models.WebhookEndpoint.Status",
         "WebhookEndpointSourceEnum": "tutortrack.developer.models.WebhookEndpoint.Source",
         "WebhookDeliveryStatusEnum": "tutortrack.developer.models.WebhookDelivery.Status",

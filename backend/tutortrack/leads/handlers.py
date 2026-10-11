@@ -70,6 +70,7 @@ def place_may_be_free(event: EventEnvelope) -> None:
 bridge.on(
     "enquiry.received",
     start=EnquiryFollowUpWorkflow,
+    when=lambda e: e.data.get("source") != "import",  # imported leads: no ack or SLA (E28)
     id=lambda e: enquiry_workflow_id(e.organisation_id, e.subject["id"]),
     input=lambda e: EnquiryInput(
         organisation_id=str(e.organisation_id), enquiry_id=e.subject["id"]

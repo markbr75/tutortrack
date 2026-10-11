@@ -267,6 +267,10 @@ def sync_lesson_charges(lesson_id: Any) -> list[Charge]:
     lesson = Lesson.objects.select_related("job", "service").filter(pk=lesson_id).first()
     if lesson is None:
         return []
+    from tutortrack.scheduling.services import is_imported_history
+
+    if is_imported_history(lesson):
+        return []  # imported history: the opening balance carries the money (E28)
     created = []
     for attendee in lesson.attendees.select_related("client", "student"):
         charge = sync_attendee_charge(attendee)
@@ -1279,3 +1283,155 @@ def scheduled_period(cadence: str, today: date) -> tuple[date, date]:
     first = today.replace(day=1)
     end = first - timedelta(days=1)
     return end.replace(day=1), end
+
+
+# --- imports (E28) ------------------------------------------------------------------------------
+
+IMPORT_STATUSES = {
+    Invoice.Status.ISSUED, Invoice.Status.PARTIALLY_PAID, Invoice.Status.PAID,
+    Invoice.Status.VOID, Invoice.Status.WRITTEN_OFF,
+}  # fmt: skip
+
+
+@transaction.atomic
+def import_invoice(
+    *,
+    client: Client,
+    number: str,
+    issue_date: date,
+    total: Money,
+    tax: Money | None = None,
+    amount_paid: Money | None = None,
+    due_date: date | None = None,
+    status: str | None = None,
+    description: str = "",
+) -> Invoice:
+    """A historic invoice with its original number (E28 FR-28-1). It is history only: no
+    charges and no ledger entry (the opening balance carries what is owed), and it never
+    starts dunning or auto-pay. One summary line holds the total."""
+    number = number.strip()[:40]
+    if not number:
+        raise _invalid("number", _("Give the invoice number."))
+    if Invoice.objects.filter(number__iexact=number).exists():
+        raise _invalid("number", _("An invoice with this number already exists."))
+    tax = tax or Money.zero(total.currency)
+    paid = amount_paid or Money.zero(total.currency)
+    if total.is_negative() or paid.is_negative() or paid > total:
+        raise _invalid("amount_paid", _("Check the total and the amount paid."))
+    balance = total - paid
+    if status is None:
+        status = (
+            Invoice.Status.PAID
+            if balance.is_zero()
+            else Invoice.Status.PARTIALLY_PAID
+            if paid.is_positive()
+            else Invoice.Status.ISSUED
+        )
+    if status not in IMPORT_STATUSES:
+        raise _invalid("status", _("Unknown invoice status."))
+    closed = status in (Invoice.Status.VOID, Invoice.Status.WRITTEN_OFF)
+    issued_at = datetime.combine(issue_date, datetime.min.time(), tzinfo=ZoneInfo("UTC"))
+    invoice = Invoice(
+        organisation_id=client.organisation_id,
+        number=number,
+        client=client,
+        branch_id=client.branch_id,
+        currency=total.currency,
+        status=status,
+        issue_date=issue_date,
+        due_date=due_date or issue_date,
+        issued_at=issued_at,
+        paid_at=issued_at if status == Invoice.Status.PAID else None,
+        voided_at=issued_at if status == Invoice.Status.VOID else None,
+        written_off_at=issued_at if status == Invoice.Status.WRITTEN_OFF else None,
+        notes=_("Imported"),
+    )
+    invoice.subtotal = total - tax
+    invoice.tax_total = tax
+    invoice.total = total
+    invoice.amount_paid = paid
+    invoice.balance_due = Money.zero(total.currency) if closed else balance
+    invoice.billing_snapshot = _snapshot(invoice)
+    invoice.save()
+    InvoiceLine.objects.create(
+        invoice=invoice,
+        position=0,
+        date=issue_date,
+        description=(description or _("Imported invoice %(number)s") % {"number": number})[:300],
+        currency=total.currency,
+        unit_price=total - tax,
+        net=total - tax,
+        tax_percent=Decimal(0),
+        tax=tax,
+        gross=total,
+    )
+    audit.record_create(invoice)
+    publish(
+        events.InvoiceImported(
+            subject_id=invoice.pk,
+            client_id=str(client.pk),
+            number=number,
+            status=status,
+            total=total.to_dict(),
+        ),
+        branch_id=invoice.branch_id,
+    )
+    return invoice
+
+
+@transaction.atomic
+def discard_imported_invoice(invoice: Invoice) -> Invoice:
+    """An import is rolled back: its historic invoice is voided (never deleted). Imported
+    invoices have no ledger entry, so none is reversed. Invoices paid since are kept."""
+    from tutortrack.payments.models import PaymentAllocation
+
+    if PaymentAllocation.objects.filter(invoice=invoice).exists() or invoice.credit_notes.exists():
+        raise BusinessRuleViolation(_("Money was recorded against it, so it was kept."))
+    if invoice.status == Invoice.Status.VOID:
+        return invoice
+    with audit.track(invoice, action="void"):
+        invoice.status = Invoice.Status.VOID
+        invoice.voided_at = now()
+        invoice.void_reason = _("Import rolled back")
+        invoice.balance_due = Money.zero(invoice.currency)
+        invoice.save()
+    return invoice
+
+
+@transaction.atomic
+def post_opening_balance(client: Client, amount: Money, *, as_of: date, user: Any = None) -> Any:
+    """The client's balance carried over at cutover (E28): positive owes, negative credit."""
+    from .selectors import OPENING_BALANCE
+
+    if amount.is_zero():
+        raise _invalid("balance", _("The opening balance is zero."))
+    entry = ledger.post(
+        client,
+        ClientLedgerEntry.Type.ADJUSTMENT,
+        amount.round_to_minor(),
+        description=_("Opening balance as of %(date)s") % {"date": as_of.isoformat()},
+        user=user,
+        ref_label=OPENING_BALANCE,
+    )
+    audit.record(client, "opening_balance", {"amount": [None, str(amount.amount)]})
+    return entry
+
+
+@transaction.atomic
+def reverse_import_adjustment(client: Client, amount: Money, *, entry_id: str) -> Any:
+    """Reverse a ledger adjustment an import posted (opening balance or package credit)."""
+    from .selectors import OPENING_BALANCE, OPENING_BALANCE_REVERSED
+
+    original = ClientLedgerEntry.objects.filter(pk=entry_id, client=client).first()
+    if original is None:
+        return None
+    label = OPENING_BALANCE_REVERSED if original.ref_type == OPENING_BALANCE else ""
+    entry = ledger.post(
+        client,
+        ClientLedgerEntry.Type.ADJUSTMENT,
+        -amount.round_to_minor(),
+        description=_("Import rolled back: %(what)s") % {"what": original.description[:200]},
+        ref_label=label,
+    )
+    audit.record(client, "ledger_adjustment", {"amount": [None, str(-amount.amount)]})
+    return entry

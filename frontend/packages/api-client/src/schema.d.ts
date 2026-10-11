@@ -2740,6 +2740,87 @@ export interface paths {
     patch: operations["custom_fields_partial_update"];
     trace?: never;
   };
+  "/api/v1/data-exports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Full data exports (owner): a ZIP of every record as CSV and JSON, documents and
+     *     invoice PDFs. Downloading needs the owner's password; the file expires.
+     */
+    get: operations["data_exports_list"];
+    put?: never;
+    /**
+     * @description Full data exports (owner): a ZIP of every record as CSV and JSON, documents and
+     *     invoice PDFs. Downloading needs the owner's password; the file expires.
+     */
+    post: operations["data_exports_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/data-exports/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Full data exports (owner): a ZIP of every record as CSV and JSON, documents and
+     *     invoice PDFs. Downloading needs the owner's password; the file expires.
+     */
+    get: operations["data_exports_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/data-exports/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Full data exports (owner): a ZIP of every record as CSV and JSON, documents and
+     *     invoice PDFs. Downloading needs the owner's password; the file expires.
+     */
+    post: operations["data_exports_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/data-exports/{id}/download": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Confirm your password to get a 5-minute download link. */
+    post: operations["data_exports_download_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/demo-data": {
     parameters: {
       query?: never;
@@ -3834,6 +3915,310 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations["impersonate_stop_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/import-catalogue": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description What can be imported, each kind's fields (with custom fields) and the presets for
+     *     TutorBird, TutorCruncher and Teachworks exports.
+     */
+    get: operations["import_catalogue_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/import-mappings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["import_mappings_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/import-mappings/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["import_mappings_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    delete: operations["import_mappings_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/import-templates/{entity}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description A CSV template for this kind of record: the column names and an example. */
+    get: operations["import_templates_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/imports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Imports: upload → map columns → validate (dry run) → confirm → results → roll back. */
+    get: operations["imports_list"];
+    put?: never;
+    /**
+     * @description Start an import from an uploaded CSV or Excel file (``POST /files/uploads`` first;
+     *     the file must have passed the virus scan). Columns are matched automatically.
+     */
+    post: operations["imports_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/imports/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Imports: upload → map columns → validate (dry run) → confirm → results → roll back. */
+    get: operations["imports_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/imports/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Imports: upload → map columns → validate (dry run) → confirm → results → roll back. */
+    post: operations["imports_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/imports/{id}/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Import the valid rows (rows with errors are left out and reported). */
+    post: operations["imports_confirm_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/imports/{id}/error-report": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description A short-lived link to the CSV of rows that weren't imported, with the reasons. */
+    get: operations["imports_error_report_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/imports/{id}/mapping": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** @description Change the column mapping, value mapping or options (re-validates if checked). */
+    put: operations["imports_mapping_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/imports/{id}/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Headers, the current mapping, sample rows, distinct values of choice columns (for
+     *     value mapping) and the entity's fields.
+     */
+    get: operations["imports_preview_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/imports/{id}/rollback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Undo the import (within the rollback window): records nobody has changed since are
+     *     removed, updated ones get their old values back.
+     */
+    post: operations["imports_rollback_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/imports/{id}/rows": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The rows with their checked values, errors, warnings and outcome. */
+    get: operations["imports_rows_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/imports/{id}/save-mapping": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Imports: upload → map columns → validate (dry run) → confirm → results → roll back. */
+    post: operations["imports_save_mapping_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/imports/{id}/submit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Mapping done: check every row and work out what will happen (the dry run). */
+    post: operations["imports_submit_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/imports/google-sheet": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Start an import from a Google Sheet (needs a connected Google account). */
+    post: operations["imports_google_sheet_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -6174,6 +6559,104 @@ export interface paths {
     get: operations["messages_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/migration-projects": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The cutover assistant: one migration from TutorCruncher, TutorBird, Teachworks or
+     *     spreadsheets, step by step, ending with a reconciliation report.
+     */
+    get: operations["migration_projects_list"];
+    put?: never;
+    /**
+     * @description The cutover assistant: one migration from TutorCruncher, TutorBird, Teachworks or
+     *     spreadsheets, step by step, ending with a reconciliation report.
+     */
+    post: operations["migration_projects_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/migration-projects/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The cutover assistant: one migration from TutorCruncher, TutorBird, Teachworks or
+     *     spreadsheets, step by step, ending with a reconciliation report.
+     */
+    get: operations["migration_projects_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/migration-projects/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description The cutover assistant: one migration from TutorCruncher, TutorBird, Teachworks or
+     *     spreadsheets, step by step, ending with a reconciliation report.
+     */
+    post: operations["migration_projects_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/migration-projects/{id}/invite-tutors": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Send invitations to the tutors this migration created. */
+    post: operations["migration_projects_invite_tutors_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/migration-projects/{id}/steps/{step}/complete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Confirm the current step (or skip it) and move on. */
+    post: operations["migration_projects_steps_complete_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -12302,6 +12785,12 @@ export interface components {
       /** @default false */
       override_balance: boolean;
     };
+    CompleteStepRequest: {
+      /** @default false */
+      skip: boolean;
+      /** @default  */
+      note: string;
+    };
     ComplianceDashboard: {
       requirements: components["schemas"]["RequirementType"][];
       rows: components["schemas"]["DashboardRow"][];
@@ -12653,6 +13142,33 @@ export interface components {
       lessons: string[];
       /** @default  */
       reason: string;
+    };
+    CreateImportRequest: {
+      /** Format: uuid */
+      file: string;
+      entity: string;
+      /** @default  */
+      preset: string;
+      /** @default  */
+      sheet: string;
+      options?: {
+        [key: string]: unknown;
+      };
+      /** Format: uuid */
+      saved_mapping?: string | null;
+      /** Format: uuid */
+      project?: string | null;
+      /** @default  */
+      project_step: string;
+    };
+    CreateMigrationProjectRequest: {
+      /** @default  */
+      name: string;
+      origin: components["schemas"]["MigrationSourceEnum"];
+      /** Format: date */
+      cutover_date: string;
+      /** @default  */
+      api_key: string;
     };
     /**
      * @description * `admin` - Admin
@@ -13061,6 +13577,10 @@ export interface components {
     };
     Download: {
       /** Format: uri */
+      url: string;
+      expires_in: number;
+    };
+    DownloadLink: {
       url: string;
       expires_in: number;
     };
@@ -13486,6 +14006,44 @@ export interface components {
       client?: string | null;
       rebillable?: boolean | null;
     };
+    ExportDownloadRequest: {
+      password: string;
+    };
+    ExportJob: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly kind: components["schemas"]["ExportJobKindEnum"];
+      readonly status: components["schemas"]["ExportJobStatusEnum"];
+      readonly reason: string;
+      readonly requested_by: components["schemas"]["UserRef"] | null;
+      readonly progress: unknown;
+      readonly size_bytes: number;
+      readonly error: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly ready_at: string | null;
+      /** Format: date-time */
+      readonly expires_at: string | null;
+      /** Format: date-time */
+      readonly downloaded_at: string | null;
+      readonly download_count: number;
+    };
+    /**
+     * @description * `full` - Full data export
+     * @enum {string}
+     */
+    ExportJobKindEnum: "full";
+    /**
+     * @description * `requested` - Requested
+     *     * `running` - Preparing
+     *     * `ready` - Ready to download
+     *     * `failed` - Failed
+     *     * `cancelled` - Cancelled
+     *     * `expired` - Expired
+     * @enum {string}
+     */
+    ExportJobStatusEnum: "requested" | "running" | "ready" | "failed" | "cancelled" | "expired";
     ExtendRequest: {
       /** Format: date-time */
       until: string;
@@ -13732,6 +14290,17 @@ export interface components {
       /** @default false */
       concerns: boolean;
     };
+    GoogleSheetImportRequest: {
+      url: string;
+      entity: string;
+      /** @default  */
+      sheet: string;
+      options?: {
+        [key: string]: unknown;
+      };
+      /** Format: uuid */
+      saved_mapping?: string | null;
+    };
     GrantRequestRequest: {
       days: number;
       /** @default false */
@@ -13791,6 +14360,159 @@ export interface components {
       name: string;
       write: boolean;
     };
+    ImportBatch: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly entity: string;
+      readonly origin: components["schemas"]["ImportSourceEnum"];
+      readonly preset: string;
+      readonly filename: string;
+      readonly sheet: string;
+      readonly status: components["schemas"]["ImportBatchStatusEnum"];
+      readonly stats: unknown;
+      readonly error: string;
+      /** Format: uuid */
+      readonly error_file: string | null;
+      /** Format: uuid */
+      readonly project: string | null;
+      readonly project_step: string;
+      readonly requested_by: components["schemas"]["UserRef"] | null;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly validated_at: string | null;
+      /** Format: date-time */
+      readonly confirmed_at: string | null;
+      /** Format: date-time */
+      readonly completed_at: string | null;
+      /** Format: date-time */
+      readonly rollback_until: string | null;
+      /** Format: date-time */
+      readonly rolled_back_at: string | null;
+      /** Format: date-time */
+      readonly finalised_at: string | null;
+      readonly can_rollback: boolean;
+      readonly options: unknown;
+    };
+    /**
+     * @description * `mapping` - Mapping columns
+     *     * `validating` - Validating
+     *     * `validated` - Ready to import
+     *     * `importing` - Importing
+     *     * `completed` - Imported
+     *     * `failed` - Failed
+     *     * `cancelled` - Cancelled
+     *     * `rolling_back` - Rolling back
+     *     * `rolled_back` - Rolled back
+     *     * `finalised` - Finalised
+     * @enum {string}
+     */
+    ImportBatchStatusEnum:
+      | "mapping"
+      | "validating"
+      | "validated"
+      | "importing"
+      | "completed"
+      | "failed"
+      | "cancelled"
+      | "rolling_back"
+      | "rolled_back"
+      | "finalised";
+    ImportCatalogue: {
+      entities: components["schemas"]["ImportEntity"][];
+      presets: {
+        [key: string]: string[];
+      };
+    };
+    ImportEntity: {
+      key: string;
+      label: string;
+      description: string;
+      field_specs: components["schemas"]["ImportField"][];
+      upsert_keys: string[];
+      default_upsert: string;
+      permissions: string[];
+      allowed: boolean;
+    };
+    ImportField: {
+      key: string;
+      label: string;
+      field_type: string;
+      required: boolean;
+      choices: string[];
+      help: string;
+    };
+    ImportPreview: {
+      headers: string[];
+      column_map: {
+        [key: string]: string;
+      };
+      value_map: {
+        [key: string]: {
+          [key: string]: string;
+        };
+      };
+      options: {
+        [key: string]: unknown;
+      };
+      sample: {
+        [key: string]: string;
+      }[];
+      distinct: {
+        [key: string]: string[];
+      };
+      field_specs: components["schemas"]["ImportField"][];
+      upsert_keys: string[];
+      missing_required: string[];
+    };
+    ImportRow: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly row_number: number;
+      readonly raw: unknown;
+      readonly values: unknown;
+      readonly status: components["schemas"]["ImportRowStatusEnum"];
+      readonly action: string;
+      readonly row_errors: components["schemas"]["RowIssue"][];
+      readonly row_warnings: components["schemas"]["RowIssue"][];
+      readonly target_type: string;
+      readonly target_id: string;
+      /** Format: date-time */
+      readonly applied_at: string | null;
+    };
+    /**
+     * @description * `pending` - Not checked
+     *     * `valid` - Valid
+     *     * `invalid` - Invalid
+     *     * `created` - Created
+     *     * `updated` - Updated
+     *     * `skipped` - Skipped
+     *     * `failed` - Failed
+     *     * `rolled_back` - Rolled back
+     *     * `kept` - Kept (changed since import)
+     * @enum {string}
+     */
+    ImportRowStatusEnum:
+      | "pending"
+      | "valid"
+      | "invalid"
+      | "created"
+      | "updated"
+      | "skipped"
+      | "failed"
+      | "rolled_back"
+      | "kept";
+    /**
+     * @description * `csv` - CSV file
+     *     * `xlsx` - Excel file
+     *     * `google_sheets` - Google Sheets
+     *     * `tutorcruncher` - TutorCruncher
+     *     * `tutorbird` - TutorBird
+     *     * `teachworks` - Teachworks
+     * @enum {string}
+     */
+    ImportSourceEnum:
+      "csv" | "xlsx" | "google_sheets" | "tutorcruncher" | "tutorbird" | "teachworks";
     InApp: {
       /** Format: uuid */
       readonly id: string;
@@ -13917,6 +14639,9 @@ export interface components {
       email: string;
       /** Format: date-time */
       expires_at: string;
+    };
+    Invited: {
+      sent: number;
     };
     Invoice: {
       /** Format: uuid */
@@ -15547,6 +16272,40 @@ export interface components {
       | "complained"
       | "failed"
       | "suppressed";
+    MigrationProject: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly name: string;
+      readonly origin: components["schemas"]["ImportSourceEnum"];
+      /** Format: date */
+      readonly cutover_date: string;
+      readonly status: components["schemas"]["MigrationProjectStatusEnum"];
+      readonly current_step: string;
+      readonly steps: unknown;
+      readonly source_totals: unknown;
+      readonly reconciliation: unknown;
+      readonly connection_name: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly completed_at: string | null;
+      readonly batches: components["schemas"]["ImportBatch"][];
+    };
+    /**
+     * @description * `active` - In progress
+     *     * `completed` - Completed
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    MigrationProjectStatusEnum: "active" | "completed" | "cancelled";
+    /**
+     * @description * `tutorcruncher` - TutorCruncher
+     *     * `tutorbird` - TutorBird
+     *     * `teachworks` - Teachworks
+     *     * `csv` - CSV file
+     * @enum {string}
+     */
+    MigrationSourceEnum: "tutorcruncher" | "tutorbird" | "teachworks" | "csv";
     MileageLeg: {
       origin: string;
       destination: string;
@@ -16383,6 +17142,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Expense"][];
     };
+    PaginatedExportJobList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ExportJob"][];
+    };
     PaginatedExternalBusyBlockList: {
       /**
        * Format: uri
@@ -16408,6 +17180,32 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["ExternalRecordLink"][];
+    };
+    PaginatedImportBatchList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ImportBatch"][];
+    };
+    PaginatedImportRowList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ImportRow"][];
     };
     PaginatedInAppList: {
       /**
@@ -16590,6 +17388,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Message"][];
+    };
+    PaginatedMigrationProjectList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["MigrationProject"][];
     };
     PaginatedNoteList: {
       /**
@@ -16811,6 +17622,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Sandbox"][];
+    };
+    PaginatedSavedImportMappingList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["SavedImportMapping"][];
     };
     PaginatedSavedReportList: {
       /**
@@ -19717,6 +20541,10 @@ export interface components {
       subjects?: string[];
       jobs?: string[];
     };
+    RequestExportRequest: {
+      /** @default  */
+      reason: string;
+    };
     RequestReferenceRequest: {
       name: string;
       /** Format: email */
@@ -19804,6 +20632,10 @@ export interface components {
       | "client"
       | "student"
       | "affiliate";
+    RowIssue: {
+      field: string;
+      message: string;
+    };
     RunPreview: {
       clients: number;
       charges: number;
@@ -19835,6 +20667,20 @@ export interface components {
       readonly slug: string;
       readonly records: number;
       readonly url: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    SaveMappingRequest: {
+      name: string;
+    };
+    SavedImportMapping: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly name: string;
+      readonly entity: string;
+      readonly mapping: unknown;
+      readonly value_map: unknown;
+      readonly options: unknown;
       /** Format: date-time */
       readonly created_at: string;
     };
@@ -21566,6 +22412,19 @@ export interface components {
       category: string;
       done: boolean;
     };
+    UpdateMappingRequest: {
+      column_map?: {
+        [key: string]: string;
+      };
+      value_map?: {
+        [key: string]: {
+          [key: string]: string;
+        };
+      };
+      options?: {
+        [key: string]: unknown;
+      };
+    };
     UploadRequestRequest: {
       filename: string;
       content_type: string;
@@ -21597,6 +22456,11 @@ export interface components {
       readonly has_mfa: boolean;
       /** Format: date-time */
       readonly date_joined: string;
+    };
+    UserRef: {
+      /** Format: uuid */
+      id: string;
+      name: string;
     };
     /**
      * @description * `pending` - Waiting for DNS
@@ -27357,6 +28221,150 @@ export interface operations {
       };
     };
   };
+  data_exports_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedExportJobList"];
+        };
+      };
+    };
+  };
+  data_exports_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["RequestExportRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RequestExportRequest"];
+        "multipart/form-data": components["schemas"]["RequestExportRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ExportJob"];
+        };
+      };
+    };
+  };
+  data_exports_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this export job. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ExportJob"];
+        };
+      };
+    };
+  };
+  data_exports_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this export job. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ExportJob"];
+        };
+      };
+    };
+  };
+  data_exports_download_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this export job. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExportDownloadRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ExportDownloadRequest"];
+        "multipart/form-data": components["schemas"]["ExportDownloadRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DownloadLink"];
+        };
+      };
+      /** @description Wrong password */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   demo_data_create: {
     parameters: {
       query?: never;
@@ -29259,6 +30267,462 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  import_catalogue_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ImportCatalogue"];
+        };
+      };
+    };
+  };
+  import_mappings_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        entity?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedSavedImportMappingList"];
+        };
+      };
+    };
+  };
+  import_mappings_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this saved import mapping. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SavedImportMapping"];
+        };
+      };
+    };
+  };
+  import_mappings_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this saved import mapping. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  import_templates_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        entity: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv": string;
+        };
+      };
+    };
+  };
+  imports_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        entity?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        project?: string;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedImportBatchList"];
+        };
+      };
+    };
+  };
+  imports_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateImportRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CreateImportRequest"];
+        "multipart/form-data": components["schemas"]["CreateImportRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ImportBatch"];
+        };
+      };
+    };
+  };
+  imports_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this import batch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ImportBatch"];
+        };
+      };
+    };
+  };
+  imports_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this import batch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ImportBatch"];
+        };
+      };
+    };
+  };
+  imports_confirm_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this import batch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ImportBatch"];
+        };
+      };
+    };
+  };
+  imports_error_report_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this import batch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DownloadLink"];
+        };
+      };
+    };
+  };
+  imports_mapping_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this import batch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["UpdateMappingRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["UpdateMappingRequest"];
+        "multipart/form-data": components["schemas"]["UpdateMappingRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ImportPreview"];
+        };
+      };
+    };
+  };
+  imports_preview_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this import batch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ImportPreview"];
+        };
+      };
+    };
+  };
+  imports_rollback_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this import batch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ImportBatch"];
+        };
+      };
+    };
+  };
+  imports_rows_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        problems?: boolean;
+        status?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this import batch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedImportRowList"];
+        };
+      };
+    };
+  };
+  imports_save_mapping_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this import batch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SaveMappingRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SaveMappingRequest"];
+        "multipart/form-data": components["schemas"]["SaveMappingRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SavedImportMapping"];
+        };
+      };
+    };
+  };
+  imports_submit_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this import batch. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ImportBatch"];
+        };
+      };
+    };
+  };
+  imports_google_sheet_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GoogleSheetImportRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["GoogleSheetImportRequest"];
+        "multipart/form-data": components["schemas"]["GoogleSheetImportRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ImportBatch"];
+        };
       };
     };
   };
@@ -33587,6 +35051,169 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Message"];
+        };
+      };
+    };
+  };
+  migration_projects_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedMigrationProjectList"];
+        };
+      };
+    };
+  };
+  migration_projects_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateMigrationProjectRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CreateMigrationProjectRequest"];
+        "multipart/form-data": components["schemas"]["CreateMigrationProjectRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MigrationProject"];
+        };
+      };
+    };
+  };
+  migration_projects_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this migration project. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MigrationProject"];
+        };
+      };
+    };
+  };
+  migration_projects_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this migration project. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MigrationProject"];
+        };
+      };
+    };
+  };
+  migration_projects_invite_tutors_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this migration project. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Invited"];
+        };
+      };
+    };
+  };
+  migration_projects_steps_complete_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this migration project. */
+        id: string;
+        step: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["CompleteStepRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CompleteStepRequest"];
+        "multipart/form-data": components["schemas"]["CompleteStepRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MigrationProject"];
         };
       };
     };

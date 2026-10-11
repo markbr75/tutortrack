@@ -15,6 +15,8 @@ import { AvailabilityPage } from "./calendar/AvailabilityPage";
 import { CalendarPage } from "./calendar/CalendarPage";
 import { CataloguePage } from "./catalogue/CataloguePage";
 import { AccountingPage } from "./accounting/AccountingPage";
+import { DataPage } from "./data/DataPage";
+import { ImportPage } from "./data/ImportPage";
 import { IntegrationsPage } from "./integrations/IntegrationsPage";
 import { NotificationSettingsPage } from "./comms/NotificationSettingsPage";
 import { AnnouncementsPage } from "./portal/AnnouncementsPage";
@@ -280,6 +282,15 @@ const developerDocsRoute = appPage("/developer/docs", DeveloperDocsPage);
 const marketplaceRoute = appPage("/settings/marketplace", MarketplacePage);
 const oauthConsentRoute = appPage("/oauth/authorize", OAuthConsentPage);
 const accountingRoute = appPage("/settings/accounting", AccountingPage);
+const dataRoute = appPage("/data", () => <DataPage />);
+const dataExportRoute = appPage("/data/export", () => <DataPage initialTab="export" />);
+const importRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/data/imports/$batchId",
+  component: function ImportRoute() {
+    return <ImportPage batchId={importRoute.useParams().batchId} />;
+  },
+});
 const payRunsRoute = appPage("/payroll", PayRunsPage);
 const payExpensesRoute = appPage("/payroll/expenses", ExpensesPage);
 const payItemsRoute = appPage("/payroll/items", PayItemsPage);
@@ -404,6 +415,9 @@ const routeTree = rootRoute.addChildren([
     marketplaceRoute,
     oauthConsentRoute,
     accountingRoute,
+    dataRoute,
+    dataExportRoute,
+    importRoute,
     payRunsRoute,
     payExpensesRoute,
     payItemsRoute,

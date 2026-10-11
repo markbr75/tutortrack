@@ -55,6 +55,18 @@ def _update(instance: models.Model, changes: dict[str, Any]) -> list[str]:
     return changed
 
 
+@transaction.atomic
+def discard_imported_service(service: Service) -> None:
+    """Delete a service an import created when the import is rolled back (E28); services
+    already used by jobs or lessons are protected and kept."""
+    audit.record(service, "delete", {"reason": [None, "import rolled back"]})
+    try:
+        with transaction.atomic():
+            service.delete()
+    except (models.ProtectedError, models.RestrictedError) as exc:
+        raise BusinessRuleViolation(_("It is in use, so it was kept.")) from exc
+
+
 # --- starter data -------------------------------------------------------------------------------
 
 

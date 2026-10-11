@@ -19,8 +19,8 @@ def _id(event: EventEnvelope) -> str:
 
 @subscribe("lesson.scheduled")
 def lesson_booked(event: EventEnvelope) -> None:
-    if event.data.get("series_id"):
-        return  # the series gets one summary message instead
+    if event.data.get("series_id") or not event.data.get("notify", True):
+        return  # the series gets one summary message instead; imports stay quiet
     lesson = catalogue.load_lesson(_id(event))
     if lesson is not None:
         notify("lesson_booked", lesson, key=str(event.id))
@@ -46,6 +46,8 @@ def lesson_cancelled(event: EventEnvelope) -> None:
 
 @subscribe("lesson_series.created")
 def series_created(event: EventEnvelope) -> None:
+    if not event.data.get("notify", True):
+        return  # imported series (E28)
     series = catalogue.load_series(_id(event))
     if series is not None:
         notify("series_created", series, key=_id(event))

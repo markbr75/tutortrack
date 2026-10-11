@@ -337,3 +337,10 @@ def start_bulk_job(
         lambda: run_bulk_job.delay(job_id=str(job.pk), organisation_id=str(job.organisation_id))
     )
     return job
+
+
+@transaction.atomic
+def delete_note(note: Note) -> None:
+    """Remove a note (an import being rolled back, E28)."""
+    audit.record(note, "delete", {"target": [None, f"{note.target_type}:{note.target_id}"]})
+    note.delete()

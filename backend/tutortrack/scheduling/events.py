@@ -18,6 +18,7 @@ class LessonScheduled(DomainEvent):
     series_id: str | None = None
     tutor_ids: list[str] = field(default_factory=list)
     student_ids: list[str] = field(default_factory=list)
+    notify: bool = True  # False for imported lessons (E28)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -106,6 +107,7 @@ class SeriesCreated(DomainEvent):
     subject_type: ClassVar[str] = "lesson_series"
     job_id: str | None = None
     lessons_created: int = 0
+    notify: bool = True  # False for imported series (E28)
 
 
 @dataclass(frozen=True, kw_only=True)

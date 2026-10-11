@@ -37,7 +37,8 @@
     "developer": "Developer",
     "marketplace": "Integrations",
     "accounting": "Accounting",
-    "website": "Website & branding"
+    "website": "Website & branding",
+    "data": "Import and export"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -3118,6 +3119,275 @@
       "reason": "What should they change?",
       "reject": "Reject",
       "hide": "Hide from the directory"
+    }
+  },
+  "dataTransfer": {
+    "title": "Import and export",
+    "intro": "Bring your data in from spreadsheets or your old system, and take a full copy out whenever you like.",
+    "back": "Back to import and export",
+    "tabs": {
+      "imports": "Imports",
+      "migrations": "Move from another system",
+      "export": "Export all data"
+    },
+    "newImport": "New import",
+    "noImportRights": "You can't import any kind of record.",
+    "entity": "What are you importing?",
+    "preset": "File from",
+    "presets": {
+      "none": "Any spreadsheet",
+      "tutorbird": "TutorBird export",
+      "tutorcruncher": "TutorCruncher export",
+      "teachworks": "Teachworks export"
+    },
+    "from": "Import from",
+    "fromFile": "A CSV or Excel file",
+    "fromSheet": "A Google Sheet",
+    "file": "File (CSV or .xlsx)",
+    "template": "Download a template with the columns we understand",
+    "sheetUrl": "Google Sheet link",
+    "sheetHint": "Connect Google under Integrations first. We only read the sheet.",
+    "upload": "Upload and match columns",
+    "uploading": "Uploading and checking the file…",
+    "noImports": "No imports yet.",
+    "history": "Import history",
+    "columns": {
+      "file": "File",
+      "entity": "Records",
+      "status": "Status",
+      "rows": "Rows",
+      "when": "Started"
+    },
+    "importOf": "Import of {{what}}",
+    "entities": {
+      "clients": "clients and contacts",
+      "students": "students",
+      "tutors": "tutors",
+      "services": "services and rates",
+      "jobs": "jobs",
+      "lessons": "lessons",
+      "invoices": "invoices",
+      "payments": "payments",
+      "opening_balances": "opening balances",
+      "packages": "package balances",
+      "availability": "tutor availability",
+      "enquiries": "enquiries",
+      "tags": "tags",
+      "notes": "notes"
+    },
+    "status": {
+      "mapping": "Match the columns",
+      "validating": "Checking every row…",
+      "validated": "Checked: ready to import",
+      "importing": "Importing…",
+      "completed": "Imported",
+      "failed": "Failed",
+      "cancelled": "Cancelled",
+      "rolling_back": "Rolling back…",
+      "rolled_back": "Rolled back",
+      "finalised": "Imported (can no longer be rolled back)"
+    },
+    "rowStatus": {
+      "pending": "Not checked",
+      "valid": "Ready",
+      "invalid": "Has errors",
+      "created": "Created",
+      "updated": "Updated",
+      "skipped": "Skipped",
+      "failed": "Failed",
+      "rolled_back": "Rolled back",
+      "kept": "Kept (changed since)"
+    },
+    "actions": {
+      "create": "will create",
+      "update": "will update",
+      "skip": "will skip"
+    },
+    "mapping": {
+      "columns": "Match your columns",
+      "help": "We matched what we could. Choose a field for each column you want to bring in, or ignore it.",
+      "column": "Your column",
+      "example": "Example values",
+      "field": "Our field",
+      "fieldFor": "Field for “{{column}}”",
+      "ignore": "Don't import",
+      "missing": "Still needed: {{fields}}",
+      "values": "Match the values",
+      "asIs": "Use as it is",
+      "upsert": "Records that already exist",
+      "upsertDefault": "Recommended",
+      "dateOrder": "Dates are written as",
+      "dateDefault": "Our usual order",
+      "cutover": "Cutover date",
+      "cutoverHint": "Lessons before this date are kept as history, without charges.",
+      "check": "Check the rows"
+    },
+    "upsert": {
+      "external_id": "Match by their ID and update",
+      "email": "Match by email and update",
+      "name": "Match by name and update",
+      "number": "Skip numbers we already have",
+      "none": "Always add new"
+    },
+    "dates": {
+      "DMY": "Day/month/year",
+      "MDY": "Month/day/year",
+      "YMD": "Year-month-day"
+    },
+    "choices": {
+      "active": "Active",
+      "finished": "Finished",
+      "waiting": "Waiting list",
+      "lead": "Lead",
+      "trial": "Trial",
+      "paused": "Paused",
+      "planned": "Planned",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "missed": "Missed"
+    },
+    "dryRun": {
+      "title": "What will happen",
+      "rows": "{{valid}} rows are ready, {{invalid}} have errors and will be left out, {{warnings}} have warnings.",
+      "create": "Create {{count}} {{what}}",
+      "update": "Update {{count}} {{what}}"
+    },
+    "targets": {
+      "people.client": "clients",
+      "people.contact": "contacts",
+      "people.student": "students",
+      "people.tutor": "tutors",
+      "catalogue.service": "services",
+      "jobs.job": "jobs",
+      "scheduling.lesson": "lessons",
+      "scheduling.lessonseries": "weekly lesson series",
+      "scheduling.availability": "availability windows",
+      "billing.invoice": "invoices",
+      "billing.opening_balance": "opening balances",
+      "billing.package_credit": "package credits",
+      "payments.payment": "payments",
+      "leads.enquiry": "enquiries",
+      "crm.tag": "tags",
+      "crm.note": "notes"
+    },
+    "preview": {
+      "title": "Rows",
+      "caption": "Rows of the file with their checks",
+      "onlyProblems": "Only rows with errors or warnings",
+      "none": "No rows to show.",
+      "row": "Row",
+      "status": "Result",
+      "values": "Values",
+      "problems": "Errors and warnings"
+    },
+    "confirm": "Import {{count}} rows",
+    "changeMapping": "Change the matching",
+    "cancel": "Cancel import",
+    "results": {
+      "title": "Results",
+      "created": "Created",
+      "updated": "Updated",
+      "skipped": "Skipped",
+      "failed": "Failed",
+      "invalid": "Had errors",
+      "errorReport": "Download the rows that weren't imported",
+      "rollback": "Roll back (until {{date}})",
+      "rolledBack": "{{reverted}} rows were undone; {{kept}} were kept because they changed since."
+    },
+    "sources": {
+      "tutorcruncher": "TutorCruncher",
+      "tutorbird": "TutorBird",
+      "teachworks": "Teachworks",
+      "csv": "Spreadsheets",
+      "xlsx": "Excel",
+      "google_sheets": "Google Sheets"
+    },
+    "migration": {
+      "intro": "Move step by step: people, services, schedules, balances, then invite everyone and switch reminders on.",
+      "start": "Start moving to TutorTrack",
+      "origin": "Moving from",
+      "cutover": "Cutover date",
+      "cutoverHint": "The day TutorTrack takes over. Balances are as of this date.",
+      "apiKey": "API key from your current system",
+      "begin": "Start",
+      "summary": "From {{source}}, cutover {{date}}: {{status}}",
+      "status": {
+        "active": "in progress",
+        "completed": "completed",
+        "cancelled": "cancelled"
+      },
+      "done": "This step is done",
+      "skip": "Skip this step",
+      "invite": "Send invitations to the imported tutors",
+      "invited_one": "{{count}} invitation sent.",
+      "invited_other": "{{count}} invitations sent.",
+      "reconciliation": "Reconciliation",
+      "reconciled": "Everything matches your old system.",
+      "differences": "Some totals differ from your old system. Check the rows below.",
+      "metric": "Measure",
+      "source": "Old system",
+      "imported": "TutorTrack",
+      "difference": "Difference"
+    },
+    "steps": {
+      "people": {
+        "title": "People",
+        "help": "Families and contacts, students and tutors."
+      },
+      "services": {
+        "title": "Services and rates",
+        "help": "What you teach and what it costs."
+      },
+      "jobs": {
+        "title": "Jobs and future schedule",
+        "help": "Active jobs, lessons (weekly patterns become series) and availability."
+      },
+      "balances": {
+        "title": "Opening balances",
+        "help": "What each client owes or has in credit at the cutover date, plus invoice history."
+      },
+      "payment_methods": {
+        "title": "Payment methods",
+        "help": "Cards can't be copied: clients re-authorise them from the setup link. Direct debit mandates may move with GoCardless."
+      },
+      "invite_users": {
+        "title": "Invite users",
+        "help": "Imported tutors get their invitation now."
+      },
+      "reminders": {
+        "title": "Switch reminders on",
+        "help": "Imports don't message anyone. Check Notifications, then switch on the messages you want."
+      }
+    },
+    "stepStatus": {
+      "pending": "Not started",
+      "in_progress": "In progress",
+      "done": "Done",
+      "skipped": "Skipped"
+    },
+    "metrics": {
+      "clients": "Clients",
+      "students": "Students",
+      "tutors": "Tutors",
+      "jobs": "Jobs",
+      "invoices": "Invoices",
+      "balances_sum": "Total of balances",
+      "future_lessons": "Future lessons"
+    },
+    "export": {
+      "intro": "A ZIP with every record as CSV and JSON, how they link, your documents and invoice PDFs. We email you when it's ready; the link works for 7 days.",
+      "request": "Export all data",
+      "password": "Confirm your password",
+      "download": "Download",
+      "expires": "available until {{date}}",
+      "status": {
+        "requested": "Requested",
+        "running": "Preparing…",
+        "ready": "Ready to download",
+        "failed": "Failed",
+        "cancelled": "Cancelled",
+        "expired": "Expired"
+      }
     }
   }
 }

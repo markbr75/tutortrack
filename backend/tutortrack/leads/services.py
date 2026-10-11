@@ -994,3 +994,13 @@ def funnel(pipeline: Pipeline, start: datetime, end: datetime) -> dict[str, Any]
         ),
         "won_value": {c: str(v) for c, v in value.items()},
     }
+
+
+@transaction.atomic
+def discard_imported_enquiry(enquiry: Enquiry) -> None:
+    """Delete an enquiry an import created when the import is rolled back (E28)."""
+    if enquiry.source != Enquiry.Source.IMPORT:
+        raise BusinessRuleViolation(_("Only imported enquiries can be removed."))
+    audit.record(enquiry, "delete", {"reason": [None, "import rolled back"]})
+    EnquiryStageHistory.objects.filter(enquiry=enquiry).delete()
+    enquiry.delete()

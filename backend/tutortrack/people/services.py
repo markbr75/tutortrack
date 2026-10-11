@@ -540,3 +540,20 @@ def invite_to_portal(record: Contact | Student, *, email: str = "") -> Any:
         target_type="people.contact" if is_contact else "people.student",
         target_id=str(record.pk),
     )
+
+
+# --- import rollback (E28) ----------------------------------------------------------------------
+
+
+@transaction.atomic
+def discard_imported(record: Client | Contact | Student | TutorProfile) -> None:
+    """Delete a record an import created, when that import is rolled back (E28). Only while
+    nothing refers to it any more (lessons, invoices... protect it)."""
+    from django.db.models import ProtectedError, RestrictedError
+
+    audit.record(record, "delete", {"reason": [None, "import rolled back"]})
+    try:
+        with transaction.atomic():
+            record.delete()
+    except (ProtectedError, RestrictedError) as exc:
+        raise BusinessRuleViolation(_("It is in use, so it was kept.")) from exc

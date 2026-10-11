@@ -136,3 +136,13 @@ class ClientBalanceLow(DomainEvent):
     event_type: ClassVar[str] = "client.balance_low"
     subject_type: ClassVar[str] = "client"
     available: dict[str, str]
+
+
+@dataclass(frozen=True, kw_only=True)
+class InvoiceImported(_InvoiceEvent):
+    """A historic invoice brought over by an import (E28): no ledger entry, no dunning."""
+
+    event_type: ClassVar[str] = "invoice.imported"
+    number: str
+    status: str
+    total: dict[str, str]

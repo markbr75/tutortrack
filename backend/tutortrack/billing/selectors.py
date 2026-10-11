@@ -131,3 +131,15 @@ def balance_due(client_id: Any) -> Decimal:
         status__in=[Invoice.Status.ISSUED, Invoice.Status.PARTIALLY_PAID],
     ).aggregate(total=Sum("balance_due_amount"))["total"]
     return Decimal(total or 0)
+
+
+OPENING_BALANCE = "opening_balance"
+OPENING_BALANCE_REVERSED = "opening_balance_reversed"
+
+
+def has_opening_balance(client: Any) -> bool:
+    """Whether an (unreversed) opening balance was posted for the client (E28)."""
+    entries = ClientLedgerEntry.objects.filter(client=client)
+    posted = entries.filter(ref_type=OPENING_BALANCE).count()
+    reversed_ = entries.filter(ref_type=OPENING_BALANCE_REVERSED).count()
+    return posted > reversed_

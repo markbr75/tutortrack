@@ -46,5 +46,29 @@
     "site": {
       "educational": "Educational organization"
     }
+  },
+  "dataTransfer": {
+    "status": {
+      "cancelled": "Canceled",
+      "finalised": "Imported (can no longer be rolled back)"
+    },
+    "choices": {
+      "cancelled": "Canceled"
+    },
+    "steps": {
+      "payment_methods": {
+        "help": "Cards can't be copied: clients re-authorize them from the setup link. Direct debit mandates may move with GoCardless."
+      }
+    },
+    "migration": {
+      "status": {
+        "cancelled": "canceled"
+      }
+    },
+    "export": {
+      "status": {
+        "cancelled": "Canceled"
+      }
+    }
   }
 }

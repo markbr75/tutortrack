@@ -261,6 +261,7 @@ def create_lesson(
             job_id=str(job.pk) if job else None,
             tutor_ids=[str(r["tutor"].pk) for r in tutor_rows],
             student_ids=[str(s.pk) for s in students],
+            notify=notify,
         ),
         branch_id=lesson.branch_id,
     )
@@ -1019,6 +1020,7 @@ def create_series(
     notes_for_tutor: str = "",
     conflict_mode: str = "skip",
     branch: Any = None,
+    notify: bool = True,
 ) -> SeriesResult:
     """A recurring lesson (FR-08-2). ``conflict_mode``: ``skip`` occurrences where a tutor
     is busy, ``create`` them anyway (needs override permission), or ``fail``."""
@@ -1065,6 +1067,7 @@ def create_series(
             subject_id=series.pk,
             job_id=str(job.pk) if job else None,
             lessons_created=len(result.created),
+            notify=notify,
         )
     )
     return result
@@ -1396,3 +1399,145 @@ def revoke_feed(feed: ICalFeedToken) -> None:
     with audit.track(feed, action="revoke"):
         feed.revoked_at = now()
         feed.save(update_fields=["revoked_at", "updated_at"])
+
+
+# --- imports (E28) ------------------------------------------------------------------------------
+
+
+def is_imported_history(lesson: Lesson) -> bool:
+    """A past lesson brought over by an import: settled history that never creates charges
+    or pay (billing and payroll check this)."""
+    return lesson.created_via == Lesson.CreatedVia.IMPORT and lesson.lock_state == Lesson.Lock.PAID
+
+
+@transaction.atomic
+def import_lesson(
+    *,
+    start: datetime,
+    end: datetime,
+    service: Service,
+    job: Any = None,
+    timezone: str | None = None,
+    attendees: Iterable[dict[str, Any]] | None = None,
+    tutors: Iterable[dict[str, Any]] | None = None,
+    status: str = Lesson.Status.PLANNED,
+    historic: bool = False,
+    **fields: Any,
+) -> Lesson:
+    """A lesson from an import (E28). Nobody is notified and conflicts aren't enforced (the
+    source system already had them). ``historic`` lessons keep their outcome, are locked
+    as settled and never create charges or pay: balances come over as opening balances."""
+    if status not in Lesson.Status.values:
+        raise _invalid("status", _("Unknown status."))
+    if not historic and status != Lesson.Status.PLANNED:
+        raise _invalid("status", _("Only past lessons can be imported as delivered."))
+    result = create_lesson(
+        start=start,
+        end=end,
+        service=service,
+        job=job if job is None or job.status not in {"completed", "cancelled"} else None,
+        timezone=timezone,
+        attendees=attendees,
+        tutors=tutors,
+        created_via=Lesson.CreatedVia.IMPORT,
+        check_conflicts=False,
+        notify=False,
+        **fields,
+    )
+    lesson = result.lesson
+    if job is not None and lesson.job_id is None:
+        lesson.job = job  # a closed job's history
+        lesson.save(update_fields=["job", "updated_at"])
+    if historic:
+        outcomes: dict[str, str] = {
+            Lesson.Status.COMPLETED: LessonAttendee.Outcome.PRESENT,
+            Lesson.Status.CANCELLED: LessonAttendee.Outcome.CANCELLED_ADMIN,
+            Lesson.Status.MISSED: "",
+        }
+        outcome = outcomes.get(status, "")
+        lesson.status = status
+        lesson.status_changed_at = end
+        lesson.lock_state = Lesson.Lock.PAID
+        lesson.save(update_fields=["status", "status_changed_at", "lock_state", "updated_at"])
+        if outcome:
+            lesson.attendees.update(outcome=outcome, recorded_at=end)
+    return lesson
+
+
+@transaction.atomic
+def discard_imported_lesson(lesson: Lesson) -> None:
+    """An import is rolled back: its lesson is removed (planned ones like ``delete_lesson``;
+    imported history too, which never created charges or pay)."""
+    if lesson.created_via != Lesson.CreatedVia.IMPORT and lesson.series_id is None:
+        raise BusinessRuleViolation(_("Only imported lessons can be removed this way."))
+    if not is_imported_history(lesson) and (
+        lesson.status != Lesson.Status.PLANNED or lesson.is_locked
+    ):
+        raise BusinessRuleViolation(_("The lesson was delivered or billed, so it was kept."))
+    audit.record(lesson, "delete", {"reason": [None, "import rolled back"]})
+    lesson.delete()
+
+
+@transaction.atomic
+def discard_imported_series(series: LessonSeries) -> bool:
+    """An import is rolled back: the series and its untouched future lessons go. Lessons
+    already delivered, billed or changed keep the series (it is ended instead)."""
+    kept = 0
+    for lesson in series.lessons.all():
+        if (
+            lesson.status == Lesson.Status.PLANNED
+            and not lesson.is_locked
+            and not lesson.is_exception
+        ):
+            audit.record(lesson, "delete", {"reason": [None, "import rolled back"]})
+            lesson.delete()
+        else:
+            kept += 1
+    if kept:  # some lessons were delivered or changed: end the series instead
+        end_series(series, reason=_("Import rolled back"))
+        return False
+    audit.record(series, "delete", {"reason": [None, "import rolled back"]})
+    series.delete()
+    return True
+
+
+def _windows(tutor: TutorProfile) -> tuple[list[dict[str, Any]], str]:
+    from .availability import template_for
+
+    template = template_for(tutor.pk, now().date())
+    if template is None:
+        return [], ""
+    return [
+        {"weekday": w.weekday, "start_time": w.start_time, "end_time": w.end_time, "mode": w.mode}
+        for w in template.windows.all()
+    ], template.timezone
+
+
+@transaction.atomic
+def add_availability_window(tutor: TutorProfile, window: dict[str, Any], *, timezone: str) -> bool:
+    """Add one weekly window to the tutor's current availability (imports, E28). False when
+    the same window is already there."""
+    windows, tz = _windows(tutor)
+    key = (int(window["weekday"]), window["start_time"], window["end_time"])
+    if any((w["weekday"], w["start_time"], w["end_time"]) == key for w in windows):
+        return False
+    set_availability(
+        tutor, windows=[*windows, window], effective_from=now().date(), timezone=tz or timezone
+    )
+    return True
+
+
+@transaction.atomic
+def remove_availability_window(
+    tutor: TutorProfile, weekday: int, start_time: time, end_time: time
+) -> bool:
+    windows, tz = _windows(tutor)
+    remaining = [
+        w
+        for w in windows
+        if (w["weekday"], w["start_time"], w["end_time"]) != (weekday, start_time, end_time)
+    ]
+    if len(remaining) == len(windows):
+        return False
+    set_availability(tutor, windows=remaining, effective_from=now().date(), timezone=tz or "UTC")
+    return True

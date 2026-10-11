@@ -64,8 +64,10 @@ def post(
     description: str = "",
     occurred_at: datetime | None = None,
     user: Any = None,
+    ref_label: str = "",
 ) -> ClientLedgerEntry:
-    """Append an entry. ``amount`` is signed; its sign must match the entry type."""
+    """Append an entry. ``amount`` is signed; its sign must match the entry type.
+    ``ref_label`` marks entries without a document (``opening_balance``, E28)."""
     if not connection.in_atomic_block:
         raise LedgerError("Ledger posts must run inside the transaction that causes them.")
     if (type in INCREASES and amount.is_negative()) or (type in DECREASES and amount.is_positive()):
@@ -80,7 +82,7 @@ def post(
         currency=amount.currency,
         amount=amount,
         balance_after=current + amount,
-        ref_type=type_of(ref),
+        ref_type=type_of(ref) or ref_label[:30],
         ref_id=str(ref.pk) if ref is not None else "",
         description=description[:300],
         occurred_at=occurred_at or now(),

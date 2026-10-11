@@ -11692,6 +11692,288 @@
                 ]
             }
         },
+        "/api/v1/data-exports": {
+            "get": {
+                "operationId": "data_exports_list",
+                "description": "Full data exports (owner): a ZIP of every record as CSV and JSON, documents and\ninvoice PDFs. Downloading needs the owner's password; the file expires.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "data-exports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedExportJobList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "data_exports_create",
+                "description": "Full data exports (owner): a ZIP of every record as CSV and JSON, documents and\ninvoice PDFs. Downloading needs the owner's password; the file expires.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "data-exports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RequestExportRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RequestExportRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RequestExportRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExportJob"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/data-exports/{id}": {
+            "get": {
+                "operationId": "data_exports_retrieve",
+                "description": "Full data exports (owner): a ZIP of every record as CSV and JSON, documents and\ninvoice PDFs. Downloading needs the owner's password; the file expires.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this export job.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "data-exports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExportJob"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/data-exports/{id}/cancel": {
+            "post": {
+                "operationId": "data_exports_cancel_create",
+                "description": "Full data exports (owner): a ZIP of every record as CSV and JSON, documents and\ninvoice PDFs. Downloading needs the owner's password; the file expires.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this export job.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "data-exports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExportJob"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/data-exports/{id}/download": {
+            "post": {
+                "operationId": "data_exports_download_create",
+                "description": "Confirm your password to get a 5-minute download link.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this export job.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "data-exports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExportDownloadRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExportDownloadRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExportDownloadRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DownloadLink"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "403": {
+                        "description": "Wrong password"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/demo-data": {
             "post": {
                 "operationId": "demo_data_create",
@@ -15449,6 +15731,931 @@
                 "responses": {
                     "204": {
                         "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/import-catalogue": {
+            "get": {
+                "operationId": "import_catalogue_retrieve",
+                "description": "What can be imported, each kind's fields (with custom fields) and the presets for\nTutorBird, TutorCruncher and Teachworks exports.",
+                "tags": [
+                    "import-catalogue"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ImportCatalogue"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/import-mappings": {
+            "get": {
+                "operationId": "import_mappings_list",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "import-mappings"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedSavedImportMappingList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/import-mappings/{id}": {
+            "get": {
+                "operationId": "import_mappings_retrieve",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this saved import mapping.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "import-mappings"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SavedImportMapping"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "delete": {
+                "operationId": "import_mappings_destroy",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this saved import mapping.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "import-mappings"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/import-templates/{entity}": {
+            "get": {
+                "operationId": "import_templates_retrieve",
+                "description": "A CSV template for this kind of record: the column names and an example.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "entity",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "import-templates"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "text/csv": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/imports": {
+            "get": {
+                "operationId": "imports_list",
+                "description": "Imports: upload → map columns → validate (dry run) → confirm → results → roll back.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "project",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "imports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedImportBatchList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "imports_create",
+                "description": "Start an import from an uploaded CSV or Excel file (``POST /files/uploads`` first;\nthe file must have passed the virus scan). Columns are matched automatically.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "imports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateImportRequest"
+                            },
+                            "examples": {
+                                "StudentsFromATutorBirdExport": {
+                                    "value": {
+                                        "file": "0192f0c4-0000-7000-8000-000000000001",
+                                        "entity": "students",
+                                        "preset": "tutorbird",
+                                        "options": {
+                                            "date_format": "MDY"
+                                        }
+                                    },
+                                    "summary": "Students from a TutorBird export"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateImportRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateImportRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ImportBatch"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/imports/{id}": {
+            "get": {
+                "operationId": "imports_retrieve",
+                "description": "Imports: upload → map columns → validate (dry run) → confirm → results → roll back.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this import batch.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "imports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ImportBatch"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/imports/{id}/cancel": {
+            "post": {
+                "operationId": "imports_cancel_create",
+                "description": "Imports: upload → map columns → validate (dry run) → confirm → results → roll back.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this import batch.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "imports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ImportBatch"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/imports/{id}/confirm": {
+            "post": {
+                "operationId": "imports_confirm_create",
+                "description": "Import the valid rows (rows with errors are left out and reported).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this import batch.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "imports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ImportBatch"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/imports/{id}/error-report": {
+            "get": {
+                "operationId": "imports_error_report_retrieve",
+                "description": "A short-lived link to the CSV of rows that weren't imported, with the reasons.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this import batch.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "imports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DownloadLink"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/imports/{id}/mapping": {
+            "put": {
+                "operationId": "imports_mapping_update",
+                "description": "Change the column mapping, value mapping or options (re-validates if checked).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this import batch.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "imports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateMappingRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateMappingRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateMappingRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ImportPreview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/imports/{id}/preview": {
+            "get": {
+                "operationId": "imports_preview_retrieve",
+                "description": "Headers, the current mapping, sample rows, distinct values of choice columns (for\nvalue mapping) and the entity's fields.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this import batch.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "imports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ImportPreview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/imports/{id}/rollback": {
+            "post": {
+                "operationId": "imports_rollback_create",
+                "description": "Undo the import (within the rollback window): records nobody has changed since are\nremoved, updated ones get their old values back.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this import batch.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "imports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ImportBatch"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/imports/{id}/rows": {
+            "get": {
+                "operationId": "imports_rows_list",
+                "description": "The rows with their checked values, errors, warnings and outcome.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this import batch.",
+                        "required": true
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "problems",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "imports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedImportRowList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/imports/{id}/save-mapping": {
+            "post": {
+                "operationId": "imports_save_mapping_create",
+                "description": "Imports: upload → map columns → validate (dry run) → confirm → results → roll back.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this import batch.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "imports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SaveMappingRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SaveMappingRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SaveMappingRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SavedImportMapping"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/imports/{id}/submit": {
+            "post": {
+                "operationId": "imports_submit_create",
+                "description": "Mapping done: check every row and work out what will happen (the dry run).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this import batch.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "imports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ImportBatch"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/imports/google-sheet": {
+            "post": {
+                "operationId": "imports_google_sheet_create",
+                "description": "Start an import from a Google Sheet (needs a connected Google account).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "imports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GoogleSheetImportRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GoogleSheetImportRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GoogleSheetImportRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ImportBatch"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 },
                 "x-visibility": "internal"
@@ -24691,6 +25898,351 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/migration-projects": {
+            "get": {
+                "operationId": "migration_projects_list",
+                "description": "The cutover assistant: one migration from TutorCruncher, TutorBird, Teachworks or\nspreadsheets, step by step, ending with a reconciliation report.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "migration-projects"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedMigrationProjectList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "migration_projects_create",
+                "description": "The cutover assistant: one migration from TutorCruncher, TutorBird, Teachworks or\nspreadsheets, step by step, ending with a reconciliation report.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "migration-projects"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateMigrationProjectRequest"
+                            },
+                            "examples": {
+                                "FromTutorCruncher": {
+                                    "value": {
+                                        "origin": "tutorcruncher",
+                                        "cutover_date": "2026-11-01",
+                                        "api_key": "abc123..."
+                                    },
+                                    "summary": "From TutorCruncher"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateMigrationProjectRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateMigrationProjectRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MigrationProject"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/migration-projects/{id}": {
+            "get": {
+                "operationId": "migration_projects_retrieve",
+                "description": "The cutover assistant: one migration from TutorCruncher, TutorBird, Teachworks or\nspreadsheets, step by step, ending with a reconciliation report.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this migration project.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "migration-projects"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MigrationProject"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/migration-projects/{id}/cancel": {
+            "post": {
+                "operationId": "migration_projects_cancel_create",
+                "description": "The cutover assistant: one migration from TutorCruncher, TutorBird, Teachworks or\nspreadsheets, step by step, ending with a reconciliation report.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this migration project.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "migration-projects"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MigrationProject"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/migration-projects/{id}/invite-tutors": {
+            "post": {
+                "operationId": "migration_projects_invite_tutors_create",
+                "description": "Send invitations to the tutors this migration created.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this migration project.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "migration-projects"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Invited"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/migration-projects/{id}/steps/{step}/complete": {
+            "post": {
+                "operationId": "migration_projects_steps_complete_create",
+                "description": "Confirm the current step (or skip it) and move on.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this migration project.",
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "step",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[a-z_]+$"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "migration-projects"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteStepRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteStepRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteStepRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MigrationProject"
                                 }
                             }
                         },
@@ -46212,6 +47764,20 @@
                     }
                 }
             },
+            "CompleteStepRequest": {
+                "type": "object",
+                "properties": {
+                    "skip": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "note": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 500
+                    }
+                }
+            },
             "ComplianceDashboard": {
                 "type": "object",
                 "properties": {
@@ -47383,6 +48949,79 @@
                 },
                 "required": [
                     "lessons"
+                ]
+            },
+            "CreateImportRequest": {
+                "type": "object",
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "entity": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 30
+                    },
+                    "preset": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 40
+                    },
+                    "sheet": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 100
+                    },
+                    "options": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "saved_mapping": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "project": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "project_step": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 30
+                    }
+                },
+                "required": [
+                    "entity",
+                    "file"
+                ]
+            },
+            "CreateMigrationProjectRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 120
+                    },
+                    "origin": {
+                        "$ref": "#/components/schemas/MigrationSourceEnum"
+                    },
+                    "cutover_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "api_key": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 500
+                    }
+                },
+                "required": [
+                    "cutover_date",
+                    "origin"
                 ]
             },
             "CreatedViaEnum": {
@@ -48590,6 +50229,21 @@
                     "url": {
                         "type": "string",
                         "format": "uri"
+                    },
+                    "expires_in": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "expires_in",
+                    "url"
+                ]
+            },
+            "DownloadLink": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string"
                     },
                     "expires_in": {
                         "type": "integer"
@@ -49891,6 +51545,130 @@
                     "description"
                 ]
             },
+            "ExportDownloadRequest": {
+                "type": "object",
+                "properties": {
+                    "password": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    }
+                },
+                "required": [
+                    "password"
+                ]
+            },
+            "ExportJob": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "kind": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ExportJobKindEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ExportJobStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "requested_by": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/UserRef"
+                            }
+                        ],
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "progress": {
+                        "readOnly": true
+                    },
+                    "size_bytes": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "ready_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "downloaded_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "download_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "download_count",
+                    "downloaded_at",
+                    "error",
+                    "expires_at",
+                    "id",
+                    "kind",
+                    "progress",
+                    "ready_at",
+                    "reason",
+                    "requested_by",
+                    "size_bytes",
+                    "status"
+                ]
+            },
+            "ExportJobKindEnum": {
+                "enum": [
+                    "full"
+                ],
+                "type": "string",
+                "description": "* `full` - Full data export"
+            },
+            "ExportJobStatusEnum": {
+                "enum": [
+                    "requested",
+                    "running",
+                    "ready",
+                    "failed",
+                    "cancelled",
+                    "expired"
+                ],
+                "type": "string",
+                "description": "* `requested` - Requested\n* `running` - Preparing\n* `ready` - Ready to download\n* `failed` - Failed\n* `cancelled` - Cancelled\n* `expired` - Expired"
+            },
             "ExtendRequest": {
                 "type": "object",
                 "properties": {
@@ -50703,6 +52481,39 @@
                     "responses"
                 ]
             },
+            "GoogleSheetImportRequest": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                    },
+                    "entity": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 30
+                    },
+                    "sheet": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 100
+                    },
+                    "options": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "saved_mapping": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "entity",
+                    "url"
+                ]
+            },
             "GrantRequestRequest": {
                 "type": "object",
                 "properties": {
@@ -50844,6 +52655,451 @@
                     "name",
                     "write"
                 ]
+            },
+            "ImportBatch": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "entity": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "origin": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ImportSourceEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "preset": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "filename": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "sheet": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ImportBatchStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "stats": {
+                        "readOnly": true
+                    },
+                    "error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "error_file": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "project": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "project_step": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "requested_by": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/UserRef"
+                            }
+                        ],
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "validated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "confirmed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "rollback_until": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "rolled_back_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "finalised_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "can_rollback": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "options": {
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "can_rollback",
+                    "completed_at",
+                    "confirmed_at",
+                    "created_at",
+                    "entity",
+                    "error",
+                    "error_file",
+                    "filename",
+                    "finalised_at",
+                    "id",
+                    "options",
+                    "origin",
+                    "preset",
+                    "project",
+                    "project_step",
+                    "requested_by",
+                    "rollback_until",
+                    "rolled_back_at",
+                    "sheet",
+                    "stats",
+                    "status",
+                    "validated_at"
+                ]
+            },
+            "ImportBatchStatusEnum": {
+                "enum": [
+                    "mapping",
+                    "validating",
+                    "validated",
+                    "importing",
+                    "completed",
+                    "failed",
+                    "cancelled",
+                    "rolling_back",
+                    "rolled_back",
+                    "finalised"
+                ],
+                "type": "string",
+                "description": "* `mapping` - Mapping columns\n* `validating` - Validating\n* `validated` - Ready to import\n* `importing` - Importing\n* `completed` - Imported\n* `failed` - Failed\n* `cancelled` - Cancelled\n* `rolling_back` - Rolling back\n* `rolled_back` - Rolled back\n* `finalised` - Finalised"
+            },
+            "ImportCatalogue": {
+                "type": "object",
+                "properties": {
+                    "entities": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ImportEntity"
+                        }
+                    },
+                    "presets": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "entities",
+                    "presets"
+                ]
+            },
+            "ImportEntity": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "field_specs": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ImportField"
+                        }
+                    },
+                    "upsert_keys": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "default_upsert": {
+                        "type": "string"
+                    },
+                    "permissions": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "allowed": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "allowed",
+                    "default_upsert",
+                    "description",
+                    "field_specs",
+                    "key",
+                    "label",
+                    "permissions",
+                    "upsert_keys"
+                ]
+            },
+            "ImportField": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "field_type": {
+                        "type": "string"
+                    },
+                    "required": {
+                        "type": "boolean"
+                    },
+                    "choices": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "help": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "choices",
+                    "field_type",
+                    "help",
+                    "key",
+                    "label",
+                    "required"
+                ]
+            },
+            "ImportPreview": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "column_map": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "value_map": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "options": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "sample": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "distinct": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "field_specs": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ImportField"
+                        }
+                    },
+                    "upsert_keys": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "missing_required": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "column_map",
+                    "distinct",
+                    "field_specs",
+                    "headers",
+                    "missing_required",
+                    "options",
+                    "sample",
+                    "upsert_keys",
+                    "value_map"
+                ]
+            },
+            "ImportRow": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "row_number": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "raw": {
+                        "readOnly": true
+                    },
+                    "values": {
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ImportRowStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "action": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "row_errors": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RowIssue"
+                        },
+                        "readOnly": true
+                    },
+                    "row_warnings": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RowIssue"
+                        },
+                        "readOnly": true
+                    },
+                    "target_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "target_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "applied_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "action",
+                    "applied_at",
+                    "id",
+                    "raw",
+                    "row_errors",
+                    "row_number",
+                    "row_warnings",
+                    "status",
+                    "target_id",
+                    "target_type",
+                    "values"
+                ]
+            },
+            "ImportRowStatusEnum": {
+                "enum": [
+                    "pending",
+                    "valid",
+                    "invalid",
+                    "created",
+                    "updated",
+                    "skipped",
+                    "failed",
+                    "rolled_back",
+                    "kept"
+                ],
+                "type": "string",
+                "description": "* `pending` - Not checked\n* `valid` - Valid\n* `invalid` - Invalid\n* `created` - Created\n* `updated` - Updated\n* `skipped` - Skipped\n* `failed` - Failed\n* `rolled_back` - Rolled back\n* `kept` - Kept (changed since import)"
+            },
+            "ImportSourceEnum": {
+                "enum": [
+                    "csv",
+                    "xlsx",
+                    "google_sheets",
+                    "tutorcruncher",
+                    "tutorbird",
+                    "teachworks"
+                ],
+                "type": "string",
+                "description": "* `csv` - CSV file\n* `xlsx` - Excel file\n* `google_sheets` - Google Sheets\n* `tutorcruncher` - TutorCruncher\n* `tutorbird` - TutorBird\n* `teachworks` - Teachworks"
             },
             "InApp": {
                 "type": "object",
@@ -51258,6 +53514,17 @@
                 "required": [
                     "email",
                     "expires_at"
+                ]
+            },
+            "Invited": {
+                "type": "object",
+                "properties": {
+                    "sent": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "sent"
                 ]
             },
             "Invoice": {
@@ -56201,6 +58468,110 @@
                 "type": "string",
                 "description": "* `queued` - Queued\n* `sent` - Sent\n* `delivered` - Delivered\n* `opened` - Opened\n* `clicked` - Clicked\n* `bounced` - Bounced\n* `complained` - Marked as spam\n* `failed` - Failed\n* `suppressed` - Not sent (suppressed)"
             },
+            "MigrationProject": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "origin": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ImportSourceEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "cutover_date": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MigrationProjectStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "current_step": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "steps": {
+                        "readOnly": true
+                    },
+                    "source_totals": {
+                        "readOnly": true
+                    },
+                    "reconciliation": {
+                        "readOnly": true
+                    },
+                    "connection_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "batches": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ImportBatch"
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "batches",
+                    "completed_at",
+                    "connection_name",
+                    "created_at",
+                    "current_step",
+                    "cutover_date",
+                    "id",
+                    "name",
+                    "origin",
+                    "reconciliation",
+                    "source_totals",
+                    "status",
+                    "steps"
+                ]
+            },
+            "MigrationProjectStatusEnum": {
+                "enum": [
+                    "active",
+                    "completed",
+                    "cancelled"
+                ],
+                "type": "string",
+                "description": "* `active` - In progress\n* `completed` - Completed\n* `cancelled` - Cancelled"
+            },
+            "MigrationSourceEnum": {
+                "enum": [
+                    "tutorcruncher",
+                    "tutorbird",
+                    "teachworks",
+                    "csv"
+                ],
+                "type": "string",
+                "description": "* `tutorcruncher` - TutorCruncher\n* `tutorbird` - TutorBird\n* `teachworks` - Teachworks\n* `csv` - CSV file"
+            },
             "MileageLeg": {
                 "type": "object",
                 "properties": {
@@ -58644,6 +61015,32 @@
                     }
                 }
             },
+            "PaginatedExportJobList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ExportJob"
+                        }
+                    }
+                }
+            },
             "PaginatedExternalBusyBlockList": {
                 "type": "object",
                 "required": [
@@ -58692,6 +61089,58 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/ExternalRecordLink"
+                        }
+                    }
+                }
+            },
+            "PaginatedImportBatchList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ImportBatch"
+                        }
+                    }
+                }
+            },
+            "PaginatedImportRowList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ImportRow"
                         }
                     }
                 }
@@ -59056,6 +61505,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Message"
+                        }
+                    }
+                }
+            },
+            "PaginatedMigrationProjectList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MigrationProject"
                         }
                     }
                 }
@@ -59498,6 +61973,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Sandbox"
+                        }
+                    }
+                }
+            },
+            "PaginatedSavedImportMappingList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SavedImportMapping"
                         }
                     }
                 }
@@ -68519,6 +71020,16 @@
                     "name"
                 ]
             },
+            "RequestExportRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 200
+                    }
+                }
+            },
             "RequestReferenceRequest": {
                 "type": "object",
                 "properties": {
@@ -68766,6 +71277,21 @@
                 "type": "string",
                 "description": "* `owner` - Owner\n* `admin` - Admin\n* `branch_manager` - Branch Manager\n* `coordinator` - Coordinator\n* `finance` - Finance\n* `tutor` - Tutor\n* `client` - Client\n* `student` - Student\n* `affiliate` - Affiliate"
             },
+            "RowIssue": {
+                "type": "object",
+                "properties": {
+                    "field": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "field",
+                    "message"
+                ]
+            },
             "RunPreview": {
                 "type": "object",
                 "properties": {
@@ -68883,6 +71409,60 @@
                     "sandbox_organisation_id",
                     "slug",
                     "url"
+                ]
+            },
+            "SaveMappingRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            },
+            "SavedImportMapping": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "entity": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "mapping": {
+                        "readOnly": true
+                    },
+                    "value_map": {
+                        "readOnly": true
+                    },
+                    "options": {
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "entity",
+                    "id",
+                    "mapping",
+                    "name",
+                    "options",
+                    "value_map"
                 ]
             },
             "SavedReport": {
@@ -74415,6 +76995,30 @@
                     "done"
                 ]
             },
+            "UpdateMappingRequest": {
+                "type": "object",
+                "properties": {
+                    "column_map": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "value_map": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "options": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                }
+            },
             "UploadRequestRequest": {
                 "type": "object",
                 "properties": {
@@ -74547,6 +77151,22 @@
                     "email_verified",
                     "has_mfa",
                     "id"
+                ]
+            },
+            "UserRef": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
                 ]
             },
             "VerificationStatusEnum": {

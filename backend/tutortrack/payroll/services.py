@@ -307,6 +307,10 @@ def sync_lesson_pay(lesson_id: Any) -> list[PayItem]:
     lesson = Lesson.objects.filter(pk=lesson_id).first()
     if lesson is None:
         return []
+    from tutortrack.scheduling.services import is_imported_history
+
+    if is_imported_history(lesson):
+        return []  # imported history was paid in the old system (E28)
     created = []
     for link in lesson.tutors.select_related("tutor"):
         item = _sync_link(lesson, link)

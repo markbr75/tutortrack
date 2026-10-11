@@ -575,3 +575,17 @@ def quick_setup(
         default_duration_minutes=default_duration_minutes,
         **fields,
     )
+
+
+@transaction.atomic
+def discard_imported_job(job: Job) -> None:
+    """Delete a job an import created when the import is rolled back (E28). Jobs with
+    lessons are protected and kept."""
+    from django.db.models import ProtectedError, RestrictedError
+
+    audit.record(job, "delete", {"reason": [None, "import rolled back"]})
+    try:
+        with transaction.atomic():
+            job.delete()
+    except (ProtectedError, RestrictedError) as exc:
+        raise BusinessRuleViolation(_("It is in use, so it was kept.")) from exc

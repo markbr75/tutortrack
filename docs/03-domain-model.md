@@ -139,4 +139,5 @@ Naming: `<aggregate>.<past_tense_verb>`. Each epic lists its events; this table 
 | `enrolment.created/cancelled`, `waitlist.place_offered`, `class.full` | E20 |
 | `homework.assigned/submitted/graded`, `goal.achieved` | E21 |
 | `review.submitted`, `referral.converted`, `commission.earned` | E25 |
+| `import.submitted/validated/completed/failed/rolled_back/finalised`, `migration_project.started/step_completed/completed`, `export.requested/ready/downloaded/expired`, `invoice.imported` (billing, for imported history) | E28 |
 | `consent.granted`, `consent.withdrawn`, `security.alert` | E29 |

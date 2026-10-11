@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 from django.db.models import Sum
 
@@ -24,3 +25,14 @@ def processed_totals(start: datetime, end: datetime) -> dict[str, Decimal]:
         .annotate(total=Sum("amount_amount"))
     )
     return {r["currency"]: r["total"] or Decimal(0) for r in rows}
+
+
+def similar_payment_exists(client: Any, amount: Decimal, day: Any, reference: str) -> bool:
+    """A succeeded payment for the client with this amount on this day (and reference):
+    imports skip it so a file can be imported again safely (E28)."""
+    qs = Payment.objects.filter(client=client, amount_amount=amount, received_at__date=day).exclude(
+        status=Payment.Status.FAILED
+    )
+    if reference:
+        qs = qs.filter(reference=reference[:120])
+    return qs.exists()
