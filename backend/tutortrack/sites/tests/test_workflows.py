@@ -8,6 +8,7 @@ import json
 import os
 import time as clock
 from collections.abc import Callable
+from datetime import timedelta
 from pathlib import Path
 
 import pytest
@@ -124,6 +125,8 @@ def test_certificate_polls_and_retries_through_provider_errors(org, temporal_env
     # 30-second polls only skip while awaiting the result; "check now" wakes the poll.
     check_now(org, domain)
     # The provider error fails the activity; Temporal retries it, which then sees "issuing".
+    wait_for(lambda: FakeCertificates.script[host] == ["issuing", "active"], 30)
+    temporal_env.skip(timedelta(seconds=10))  # through the activity's retry backoff
     wait_for(lambda: FakeCertificates.script[host] == ["active"], 30)
     check_now(org, domain)
     wait_for(lambda: fresh(domain).ssl_status == "active")
