@@ -1,0 +1,8 @@
+{% load i18n %}{% if d.testimonials %}<section aria-labelledby="{{ block.id }}-h"><div class="wrap">
+  <h2 id="{{ block.id }}-h">{{ p.heading|default:_("What families say") }}</h2>
+  <ul class="grid">{% for t in d.testimonials %}<li><figure class="card">
+    {% if t.rating %}<p><span aria-hidden="true">{{ t.stars }}</span><span class="sr">{% blocktrans with n=t.rating %}{{ n }} out of 5 stars{% endblocktrans %}</span></p>{% endif %}
+    <blockquote><p>“{{ t.quote }}”</p></blockquote>
+    <figcaption class="muted">{{ t.author }}{% if t.role %}, {{ t.role }}{% endif %}</figcaption>
+  </figure></li>{% endfor %}</ul>
+</div></section>{% endif %}

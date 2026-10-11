@@ -8,6 +8,7 @@ from tutortrack.core.api.health import healthz, readyz
 from tutortrack.leads.api.views import inbound_email
 from tutortrack.payments.api.views import stripe_webhook
 from tutortrack.scheduling.api.views import ical_feed
+from tutortrack.sites.internal import tls_ask
 from tutortrack.subscriptions.api.views import stripe_billing_webhook
 from tutortrack.workflows.api.views import codec
 
@@ -38,6 +39,7 @@ api_v1: list[URLPattern | URLResolver] = [
     path("", include("tutortrack.comms.api.urls")),
     path("", include("tutortrack.portal.api.urls")),
     path("", include("tutortrack.subscriptions.api.urls")),
+    path("", include("tutortrack.sites.api.urls")),
     path("", include("tutortrack.platform_admin.api.urls")),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger"),
@@ -58,6 +60,8 @@ urlpatterns = [
     path("webhooks/twilio/inbound", twilio_inbound, name="twilio-inbound"),
     path("webhooks/google-calendar", google_calendar, name="google-calendar-webhook"),
     path("webhooks/microsoft-graph", microsoft_graph, name="microsoft-graph-webhook"),
+    # Caddy on-demand TLS "ask" endpoint for custom domains (E24).
+    path("internal/tls/ask", tls_ask, name="tls-ask"),
     # Temporal Web UI codec server (staff-only, E32 FR-32-9).
     path("temporal-codec/<slug:operation>", codec, name="temporal-codec"),
 ]

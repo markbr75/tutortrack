@@ -6,7 +6,9 @@ import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { api, problemStatus, usePortalMe } from "./api";
+import { BrandMark, PoweredBy } from "./branding";
 import { StatusBanner } from "./StatusBanner";
+import { usePortalBranding } from "./useBranding";
 import { TutorShell } from "./tutor/TutorShell";
 
 export function SignIn() {
@@ -53,6 +55,7 @@ export function Shell() {
     queryKey: ["identity", "me"],
     queryFn: async () => unwrap(await api.GET("/api/v1/me")),
   });
+  usePortalBranding();
   if (who.isPending) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
   if (problemStatus(who.error) === 401) return <SignIn />;
   return (
@@ -99,16 +102,7 @@ function FamilyShell() {
   return (
     <div className="mx-auto min-h-screen max-w-3xl">
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border p-4">
-        <span
-          className="font-semibold"
-          style={
-            me.data.organisation.primary_colour
-              ? { color: me.data.organisation.primary_colour }
-              : undefined
-          }
-        >
-          {me.data.organisation.name}
-        </span>
+        <BrandMark fallback={me.data.organisation.name} />
         <nav aria-label={t("portal.menu")} className="flex flex-wrap gap-1 text-sm">
           {nav.map((item) => (
             <Link
@@ -139,6 +133,7 @@ function FamilyShell() {
           {me.data.terms_url ? <a href={me.data.terms_url}>{t("portal.terms")}</a> : null}
         </footer>
       ) : null}
+      <PoweredBy />
     </div>
   );
 }

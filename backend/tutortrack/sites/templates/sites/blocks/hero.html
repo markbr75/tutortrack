@@ -1,0 +1,8 @@
+{% load sites_tags %}<section class="hero" aria-labelledby="{{ block.id }}-h"><div class="wrap">
+  <div>
+    <h1 id="{{ block.id }}-h">{{ p.heading }}</h1>
+    {% if p.subheading %}<p>{{ p.subheading }}</p>{% endif %}
+    {% if p.cta_label and p.cta_href %}<p><a class="btn" href="{{ p.cta_href }}">{{ p.cta_label }}</a></p>{% endif %}
+  </div>
+  {% if p.image %}<img src="{% asset p.image %}" alt="{{ p.image_alt }}">{% endif %}
+</div></section>

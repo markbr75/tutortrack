@@ -144,10 +144,34 @@ class Organisation(TimeStampedModel):
 
     @property
     def base_url(self) -> str:
-        """Where the organisation's admin app lives, e.g. https://acme.tutortrack.app."""
+        """Where the organisation's apps live, e.g. https://acme.tutortrack.app, or its
+        custom app domain once verified with an active certificate (E24 FR-24-2), so emails
+        and links use it."""
+        custom = self.app_domain
+        if custom:
+            return f"https://{custom}"
         return str(settings.TENANT_URL_TEMPLATE).format(
             slug=self.slug, domain=settings.TENANT_BASE_DOMAIN
         )
+
+    @property
+    def app_domain(self) -> str:
+        """The live custom hostname for the apps, or ``""``."""
+        if not self.pk:
+            return ""
+        row = (
+            OrganisationDomain.objects.filter(
+                organisation_id=self.pk,
+                type=OrganisationDomain.Type.CUSTOM,
+                purpose=OrganisationDomain.Purpose.APP,
+                verified_at__isnull=False,
+                ssl_status=OrganisationDomain.SSLStatus.ACTIVE,
+            )
+            .order_by("created_at")
+            .values_list("hostname", flat=True)
+            .first()
+        )
+        return row or ""
 
 
 class OrganisationDomain(TimeStampedModel):
@@ -155,15 +179,28 @@ class OrganisationDomain(TimeStampedModel):
 
     * ``subdomain`` rows with ``redirect_until`` are former slugs: requests are redirected
       to the current slug for 90 days after a rename (FR-02-1).
-    * ``custom`` rows are tenant custom domains (verification and TLS arrive in E24).
+    * ``custom`` rows are tenant custom domains (E24 FR-24-2): ``purpose`` says whether the
+      hostname serves the apps (admin and portals) or the hosted website. Written only by
+      ``tenancy.custom_domains``; ``CustomDomainWorkflow`` (sites app) drives verification
+      (TXT or HTTP), the TLS certificate and monitoring.
     """
 
     class Type(models.TextChoices):
         SUBDOMAIN = "subdomain", _("Subdomain")
         CUSTOM = "custom", _("Custom domain")
 
+    class Purpose(models.TextChoices):
+        APP = "app", _("Apps and portals")
+        SITE = "site", _("Website")
+
+    class VerificationStatus(models.TextChoices):
+        PENDING = "pending", _("Waiting for DNS")
+        VERIFIED = "verified", _("Verified")
+        FAILED = "failed", _("Verification failed")
+
     class SSLStatus(models.TextChoices):
         PENDING = "pending", _("Pending")
+        ISSUING = "issuing", _("Issuing")
         ACTIVE = "active", _("Active")
         FAILED = "failed", _("Failed")
 
@@ -171,10 +208,18 @@ class OrganisationDomain(TimeStampedModel):
     organisation = models.ForeignKey(Organisation, on_delete=models.CASCADE, related_name="domains")
     hostname = models.CharField(max_length=253, unique=True)
     type = models.CharField(max_length=10, choices=Type.choices)
+    purpose = models.CharField(max_length=10, choices=Purpose.choices, default=Purpose.APP)
+    verification_token = models.CharField(max_length=64, blank=True, default="")
+    verification_status = models.CharField(
+        max_length=10, choices=VerificationStatus.choices, default=VerificationStatus.PENDING
+    )
     verified_at = models.DateTimeField(null=True, blank=True)
     ssl_status = models.CharField(
         max_length=10, choices=SSLStatus.choices, default=SSLStatus.PENDING
     )
+    cert_expires_at = models.DateTimeField(null=True, blank=True)
+    last_checked_at = models.DateTimeField(null=True, blank=True)
+    status_detail = models.CharField(max_length=500, blank=True, default="")
     redirect_until = models.DateTimeField(null=True, blank=True)
 
     class Meta:

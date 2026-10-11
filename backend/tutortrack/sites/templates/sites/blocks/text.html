@@ -1,0 +1,4 @@
+<section{% if p.heading %} aria-labelledby="{{ block.id }}-h"{% endif %}><div class="wrap">
+  {% if p.heading %}<h2 id="{{ block.id }}-h">{{ p.heading }}</h2>{% endif %}
+  {% for para in d.paragraphs %}<p>{{ para|linebreaksbr }}</p>{% endfor %}
+</div></section>

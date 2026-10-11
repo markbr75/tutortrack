@@ -3,6 +3,7 @@
 <head><meta charset="utf-8"><title>{% trans "Statement" %}</title>
 {% include "billing/_style.html" %}</head>
 <body>
+  {% include "billing/_brand.html" %}
   <div class="row">
     <div><h1>{% trans "Statement" %}</h1><div><strong>{{ org.name }}</strong></div></div>
     <div class="muted">{{ client.display_name }}<br>{{ statement.start|date:"j M Y" }} – {{ statement.end|date:"j M Y" }}</div>
@@ -18,5 +19,6 @@
   <table class="totals">
     {% for label, value in ageing %}<tr><td>{{ label }}</td><td class="num">{{ value }}</td></tr>{% endfor %}
   </table>
+  {% include "billing/_brand_footer.html" %}
 </body>
 </html>

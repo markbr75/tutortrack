@@ -5,6 +5,7 @@ import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import { api } from "../api";
+import { PoweredBy } from "../branding";
 import { useTutorMe } from "./useTutorMe";
 
 /** The tutor's phone-first shell (E16-T01). */
@@ -63,6 +64,7 @@ export function TutorShell() {
       <main className="p-4">
         <Outlet />
       </main>
+      <PoweredBy />
     </div>
   );
 }

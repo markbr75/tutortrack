@@ -24,7 +24,14 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SECURE = True
 X_FRAME_OPTIONS = "DENY"
-# Tenant custom domains are added to CSRF_TRUSTED_ORIGINS dynamically in E24.
+# Tenant custom domains (E24): requests are same-origin on the custom host, so CSRF needs no
+# trusted origins. Set DJANGO_ALLOWED_HOSTS=* with CUSTOM_DOMAINS_STRICT_HOSTS=true so
+# sites.middleware refuses hosts that are neither platform hosts nor connected domains.
+CUSTOM_DOMAINS = {
+    **CUSTOM_DOMAINS,
+    "DNS_RESOLVER": env("CUSTOM_DOMAINS_DNS_RESOLVER", default="doh"),
+    "STRICT_HOSTS": env.bool("CUSTOM_DOMAINS_STRICT_HOSTS", default=False),
+}
 
 
 # Django must not re-apply LOGGING over the structlog configuration.

@@ -11,6 +11,7 @@ from django.utils import translation
 def receipt_pdf(payment: Any) -> bytes:
     from weasyprint import HTML
 
+    from tutortrack.core import branding
     from tutortrack.tenancy.models import Organisation
 
     org = Organisation.objects.get(pk=payment.organisation_id)
@@ -28,6 +29,7 @@ def receipt_pdf(payment: Any) -> bytes:
                 "payment": payment,
                 "amount": payment.amount.format(locale),
                 "rows": rows,
+                "brand": branding.for_documents(org.pk),
             },
         )
     return bytes(HTML(string=html).write_pdf())

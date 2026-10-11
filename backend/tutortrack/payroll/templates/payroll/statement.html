@@ -3,6 +3,7 @@
 <head><meta charset="utf-8"><title>{{ statement.number }}</title>
 {% include "billing/_style.html" %}</head>
 <body>
+  {% include "billing/_brand.html" %}
   <div class="row">
     <div>
       {% if statement.kind == "self_billing" %}
@@ -51,5 +52,6 @@
   {% if statement.kind == "self_billing" %}
   <p class="muted">{% blocktrans with org=statement.snapshot.organisation.name version=statement.snapshot.tutor.agreement %}This is a self-billing invoice raised by {{ org }} on behalf of the supplier under the self-billing agreement ({{ version }}). The supplier agrees not to issue their own invoices for these supplies and to tell us if their VAT registration changes.{% endblocktrans %}</p>
   {% endif %}
+  {% include "billing/_brand_footer.html" %}
 </body>
 </html>

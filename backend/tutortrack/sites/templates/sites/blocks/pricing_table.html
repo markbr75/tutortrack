@@ -1,0 +1,11 @@
+{% load i18n %}<section aria-labelledby="{{ block.id }}-h"><div class="wrap">
+  <h2 id="{{ block.id }}-h">{{ p.heading|default:_("Prices") }}</h2>
+  <table>
+    <thead><tr><th scope="col">{% trans "Service" %}</th><th scope="col">{% trans "Price" %}</th></tr></thead>
+    <tbody>{% for s in d.services %}<tr>
+      <th scope="row">{{ s.name }}{% if s.description %}<div class="muted" style="font-weight:normal">{{ s.description }}</div>{% endif %}</th>
+      <td>{% if s.price %}{{ s.price }} <span class="muted">{{ s.pricing_unit_label|lower }}</span>{% else %}{% trans "Ask us" %}{% endif %}</td>
+    </tr>{% endfor %}</tbody>
+  </table>
+  {% if p.note %}<p class="muted">{{ p.note }}</p>{% endif %}
+</div></section>

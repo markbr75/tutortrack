@@ -3,6 +3,7 @@
 <head><meta charset="utf-8"><title>{% trans "Invoice" %} {{ invoice.number }}</title>
 {% include "billing/_style.html" %}</head>
 <body>
+  {% include "billing/_brand.html" %}
   <div class="row">
     <div>
       <h1>{% trans "Invoice" %}</h1>
@@ -60,5 +61,6 @@
   {% if snapshot.payment_instructions %}<div class="footer"><strong>{% trans "How to pay" %}</strong><div>{{ snapshot.payment_instructions|linebreaksbr }}</div></div>{% endif %}
   {% if invoice.notes %}<div class="footer">{{ invoice.notes|linebreaksbr }}</div>{% endif %}
   {% if snapshot.footer %}<div class="footer muted">{{ snapshot.footer|linebreaksbr }}</div>{% endif %}
+  {% include "billing/_brand_footer.html" %}
 </body>
 </html>

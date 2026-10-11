@@ -20,7 +20,7 @@ from django.core import signing
 from django.db import IntegrityError, transaction
 from django.utils.translation import gettext as _
 
-from tutortrack.core import audit
+from tutortrack.core import audit, branding
 from tutortrack.core.context import require_organisation_id
 from tutortrack.core.exceptions import BusinessRuleViolation
 from tutortrack.core.time import now
@@ -473,7 +473,12 @@ def _send_email(message: Message) -> None:
             to=message.to,
             subject=message.subject,
             text=message.body,
-            html=render.to_html(message.body, organisation=name, footer=footer),
+            html=render.to_html(
+                message.body,
+                organisation=name,
+                footer=footer,
+                brand=branding.for_email(message.organisation_id),
+            ),
             from_name=name,
             reply_to=str(get_setting("comms.reply_to")),
             headers=headers,

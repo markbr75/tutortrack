@@ -1,0 +1,4 @@
+{% load i18n %}<section aria-labelledby="{{ block.id }}-h"><div class="wrap">
+  <h2 id="{{ block.id }}-h">{{ p.heading|default:_("Questions and answers") }}</h2>
+  {% for item in p.items %}<details><summary>{{ item.question }}</summary><p>{{ item.answer|linebreaksbr }}</p></details>{% endfor %}
+</div></section>

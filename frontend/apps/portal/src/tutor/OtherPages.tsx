@@ -6,6 +6,7 @@ import { useId, useState } from "react";
 
 import { api } from "../api";
 import { PayDetailsSection } from "./PayPages";
+import { PublicProfileSection } from "./PublicProfile";
 import { useTutorMe } from "./useTutorMe";
 
 /** Students on my active jobs, with their next lesson (E16-T04). */
@@ -285,6 +286,7 @@ export function TutorProfilePage() {
           {t("portal.save")}
         </Button>
       </form>
+      <PublicProfileSection />
       <PayDetailsSection />
     </div>
   );

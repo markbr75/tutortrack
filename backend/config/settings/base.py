@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "tutortrack.portal",
     "tutortrack.subscriptions",
     "tutortrack.platform_admin",
+    "tutortrack.sites",
     # Last: subscribes webhooks to the event types every other app registers (E27).
     "tutortrack.developer",
 ]
@@ -69,6 +70,8 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "tutortrack.core.security.SecurityHeadersMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    # Custom domains (E24): host-only auth cookies, unknown hosts refused in strict mode.
+    "tutortrack.sites.middleware.CustomDomainMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -80,6 +83,8 @@ MIDDLEWARE = [
     "tutortrack.core.middleware.UserContextMiddleware",
     "tutortrack.tenancy.middleware.TenantMiddleware",
     "tutortrack.tenancy.middleware.OrganisationStatusMiddleware",
+    # Hosted websites (E24): site hostnames get the site URLconf.
+    "tutortrack.sites.middleware.SiteHostMiddleware",
     "tutortrack.identity.middleware.MFAEnforcementMiddleware",
     "tutortrack.core.idempotency.IdempotencyMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -285,6 +290,8 @@ REST_FRAMEWORK = {
         "password_reset": "10/hour",
         "mfa": "20/minute",
         "public_form": env("THROTTLE_PUBLIC_FORM", default="20/hour"),
+        # Read-only public widget/website data (E24), per client IP.
+        "public_widget": env("THROTTLE_PUBLIC_WIDGET", default="600/hour"),
     },
     "COERCE_DECIMAL_TO_STRING": True,
 }
@@ -533,6 +540,29 @@ INTEGRATIONS = {
     "QUICKBOOKS_CLIENT_SECRET": env("QUICKBOOKS_CLIENT_SECRET", default=""),
     "QUICKBOOKS_SANDBOX": env.bool("QUICKBOOKS_SANDBOX", default=False),
 }
+
+# --- Websites, widgets and custom domains (E24) ---------------------------------------------
+CUSTOM_DOMAINS = {
+    # Tenants point their hostnames here with a CNAME.
+    "CNAME_TARGET": env("CUSTOM_DOMAINS_CNAME_TARGET", default="custom.tutortrack.app"),
+    # Hosted websites live at <slug>.<SITE_BASE_DOMAIN> until a custom domain is connected.
+    "SITE_BASE_DOMAIN": env("SITE_BASE_DOMAIN", default="tutortrack.site"),
+    # "doh" (DNS over HTTPS, no credentials) or "fake" (development and tests).
+    "DNS_RESOLVER": env("CUSTOM_DOMAINS_DNS_RESOLVER", default="fake"),
+    "DOH_URL": env("CUSTOM_DOMAINS_DOH_URL", default="https://cloudflare-dns.com/dns-query"),
+    # "cloudflare" (Cloudflare for SaaS custom hostnames), "caddy" (on-demand TLS asking
+    # /internal/tls/ask) or "fake". Empty: cloudflare when its token is set, else fake.
+    "CERT_PROVIDER": env("CUSTOM_DOMAINS_CERT_PROVIDER", default=""),
+    "CLOUDFLARE_API_TOKEN": env("CLOUDFLARE_API_TOKEN", default=""),
+    "CLOUDFLARE_ZONE_ID": env("CLOUDFLARE_ZONE_ID", default=""),
+    # The fake DNS resolver accepts every hostname (handy locally; off in tests).
+    "FAKE_AUTO_VERIFY": env.bool("CUSTOM_DOMAINS_FAKE_AUTO_VERIFY", default=False),
+    # Refuse requests for hosts that are neither platform hosts nor connected domains.
+    "STRICT_HOSTS": env.bool("CUSTOM_DOMAINS_STRICT_HOSTS", default=False),
+    "PLATFORM_HOSTS": env.list("CUSTOM_DOMAINS_PLATFORM_HOSTS", default=[]),
+}
+# Where the embeddable widget script is served from (shown in embed codes).
+WIDGETS_SCRIPT_URL = env("WIDGETS_SCRIPT_URL", default="https://cdn.tutortrack.app/widgets.js")
 
 # --- Observability ----------------------------------------------------------------------------
 LOG_LEVEL = env("LOG_LEVEL", default="INFO")

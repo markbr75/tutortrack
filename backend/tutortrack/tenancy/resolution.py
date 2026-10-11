@@ -1,6 +1,7 @@
 """Tenant resolution (FR-02-3).
 
-Order: (1) verified custom domain (E24) → (2) ``<slug>.<TENANT_BASE_DOMAIN>`` (former slugs
+Order: (1) verified custom domain (E24) → hosted website ``<slug>.<SITE_BASE_DOMAIN>``
+(E24) → (2) ``<slug>.<TENANT_BASE_DOMAIN>`` (former slugs
 redirect for 90 days) → (3) ``X-Organisation`` header, for members only → (4) the user's
 last active organisation (on the root/app host).
 
@@ -41,6 +42,15 @@ def _host(request: HttpRequest) -> str:
 def _subdomain_label(host: str) -> str | None:
     base = settings.TENANT_BASE_DOMAIN.lower()
     if not host.endswith(f".{base}"):
+        return None
+    label = host[: -(len(base) + 1)]
+    return label if label and "." not in label else None
+
+
+def site_subdomain_label(host: str) -> str | None:
+    """``acme`` for ``acme.tutortrack.site`` (hosted websites, E24)."""
+    base = str(getattr(settings, "CUSTOM_DOMAINS", {}).get("SITE_BASE_DOMAIN", "")).lower()
+    if not base or not host.endswith(f".{base}"):
         return None
     label = host[: -(len(base) + 1)]
     return label if label and "." not in label else None
@@ -105,6 +115,12 @@ def resolve(request: HttpRequest) -> Resolution:
     )
     if custom is not None:
         return Resolution(custom.organisation, via="custom_domain")
+
+    site_label = site_subdomain_label(host)
+    if site_label is not None:
+        # Hosted website at <slug>.<SITE_BASE_DOMAIN> (E24 FR-24-4).
+        org = Organisation.objects.filter(slug=site_label).first()
+        return Resolution(org, via="site") if org is not None else Resolution(unknown=True)
 
     label = _subdomain_label(host)
     if label is not None and not is_reserved(label):

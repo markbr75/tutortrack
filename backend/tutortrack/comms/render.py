@@ -106,17 +106,50 @@ def render(
         raise TemplateInvalid(str(exc)) from exc
 
 
-def to_html(text: str, *, organisation: str, footer: str = "") -> str:
-    """A simple branded HTML version of a plain-text email body."""
+def to_html(
+    text: str, *, organisation: str, footer: str = "", brand: dict[str, Any] | None = None
+) -> str:
+    """A simple branded HTML version of a plain-text email body.
+
+    ``brand`` comes from ``core.branding.for_email()`` (E24): logo, brand colour (an
+    AA-safe shade for text), header and footer text, and the "Powered by" line unless the
+    organisation is white-labelled."""
+    b = brand or {}
+    colour = escape(str(b.get("link_colour") or b.get("primary_colour") or "#111827"))
+    accent = escape(str(b.get("primary_colour") or "#2563eb"))
     paragraphs = "".join(
         f"<p>{escape(block).replace(chr(10), '<br>')}</p>" for block in text.split("\n\n") if block
+    )
+    logo = b.get("logo_url")
+    heading = (
+        f'<img src="{escape(str(logo))}" alt="{escape(organisation)}" style="max-height:48px">'
+        if logo
+        else f'<p style="font-weight:bold;font-size:17px;color:{colour}">{escape(organisation)}</p>'
+    )
+    header = (
+        f'<p style="color:#4b5563;font-size:13px">{escape(str(b["header"]))}</p>'
+        if b.get("header")
+        else ""
+    )
+    brand_footer = (
+        f'<p style="color:#4b5563;font-size:12px">'
+        f"{escape(str(b['footer'])).replace(chr(10), '<br>')}</p>"
+        if b.get("footer")
+        else ""
+    )
+    from django.utils.translation import gettext as _
+
+    powered = (
+        f'<p style="color:#6b7280;font-size:11px">{escape(_("Powered by TutorTrack"))}</p>'
+        if b.get("show_powered_by")
+        else ""
     )
     foot = f'<p style="color:#6b7280;font-size:12px">{footer}</p>' if footer else ""
     return (
         '<div style="font-family:Arial,sans-serif;font-size:15px;color:#111827;'
         'max-width:600px;margin:0 auto">'
-        f'<p style="font-weight:bold;font-size:17px">{escape(organisation)}</p>'
-        f"{paragraphs}{foot}</div>"
+        f'<div style="border-top:4px solid {accent};padding-top:12px">{heading}{header}</div>'
+        f"{paragraphs}{brand_footer}{foot}{powered}</div>"
     )
 
 

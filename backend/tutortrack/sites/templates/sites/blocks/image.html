@@ -1,0 +1,4 @@
+{% load sites_tags %}<section><div class="wrap"><figure>
+  <img src="{% asset p.image %}" alt="{{ p.alt }}" style="max-width:100%;border-radius:var(--tt-radius)">
+  {% if p.caption %}<figcaption class="muted">{{ p.caption }}</figcaption>{% endif %}
+</figure></div></section>

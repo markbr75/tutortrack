@@ -49,3 +49,6 @@ TEMPORAL = {**TEMPORAL, "SEARCH_ATTRIBUTES": False, "ADDRESS": "127.0.0.1:1"}
 
 # E22: CalDAV/Lessonspace use their fakes in tests (no network).
 INTEGRATIONS = {**INTEGRATIONS, "CREDENTIAL_PROVIDERS_LIVE": False}
+
+# E24: hosted websites resolve at <slug>.tutortrack-site.test.
+CUSTOM_DOMAINS = {**CUSTOM_DOMAINS, "SITE_BASE_DOMAIN": "tutortrack-site.test"}

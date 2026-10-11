@@ -1,0 +1,14 @@
+{% load i18n %}<section aria-labelledby="{{ block.id }}-h"><div class="wrap">
+  <h2 id="{{ block.id }}-h">{{ p.heading|default:_("Our tutors") }}</h2>
+  {% if d.tutors %}
+  <ul class="grid">{% for t in d.tutors %}
+    <li><article class="card">
+      {% if t.photo_url %}<img src="{{ t.photo_url }}" alt="">{% endif %}
+      <h3><a href="/tutors/{{ t.slug }}">{{ t.display_name }}</a></h3>
+      {% if t.headline %}<p class="muted">{{ t.headline }}</p>{% endif %}
+      {% if t.subjects %}<ul class="tags" aria-label="{% trans 'Subjects' %}">{% for s in t.subjects|slice:":4" %}<li>{{ s.subject }}{% if s.level %} ({{ s.level }}){% endif %}</li>{% endfor %}</ul>{% endif %}
+      <p class="muted">{% if t.online %}{% trans "Online" %}{% endif %}{% if t.online and t.in_person %} · {% endif %}{% if t.in_person %}{% trans "In person" %}{% endif %}{% if t.location %} · {{ t.location }}{% endif %}</p>
+    </article></li>
+  {% endfor %}</ul>
+  {% else %}<p class="muted">{% trans "Tutor profiles are coming soon." %}</p>{% endif %}
+</div></section>

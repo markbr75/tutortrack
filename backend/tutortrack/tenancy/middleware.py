@@ -56,11 +56,12 @@ class TenantMiddleware:
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
         if request.path in ("/healthz", "/readyz") or request.path.startswith(
-            ("/webhooks/", "/api/v1/platform/")
+            ("/webhooks/", "/api/v1/platform/", "/internal/")
         ):
             # Provider webhooks arrive on the platform host; they find their organisation
             # from the connected account (payments.AccountRoute). The platform console (E30)
-            # works across organisations and picks one explicitly per action.
+            # works across organisations and picks one explicitly per action. ``/internal/``
+            # serves the edge (E24: the TLS on-demand "ask" endpoint).
             request.organisation = None  # type: ignore[attr-defined]
             request.membership = None  # type: ignore[attr-defined]
             return self.get_response(request)

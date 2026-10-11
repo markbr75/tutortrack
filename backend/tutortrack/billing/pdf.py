@@ -12,6 +12,7 @@ from django.template.loader import render_to_string
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
+from tutortrack.core import branding
 from tutortrack.core.money import Money
 
 AGEING_LABELS = {
@@ -39,7 +40,8 @@ def _render(template: str, context: dict[str, Any], org: Any) -> bytes:
 
     locale = _locale(org)
     with translation.override(locale.replace("_", "-")):
-        html = render_to_string(template, {**context, "org": org, "locale": locale})
+        brand = branding.for_documents(org.pk)
+        html = render_to_string(template, {**context, "org": org, "locale": locale, "brand": brand})
     return bytes(HTML(string=html).write_pdf())
 
 

@@ -27,6 +27,14 @@ INTEGRATIONS = {
     "CREDENTIAL_PROVIDERS_LIVE": env.bool("INTEGRATIONS_CREDENTIAL_PROVIDERS_LIVE", default=False),
 }
 
+# E24: hosted websites at http://<slug>.site.localhost:8010; fake DNS verifies any domain.
+CUSTOM_DOMAINS = {
+    **CUSTOM_DOMAINS,
+    "SITE_BASE_DOMAIN": env("SITE_BASE_DOMAIN", default="site.localhost"),
+    "FAKE_AUTO_VERIFY": env.bool("CUSTOM_DOMAINS_FAKE_AUTO_VERIFY", default=True),
+}
+WIDGETS_SCRIPT_URL = env("WIDGETS_SCRIPT_URL", default="http://localhost:5175/src/index.ts")
+
 # Browsable API is handy locally.
 REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = [
     "rest_framework.renderers.JSONRenderer",

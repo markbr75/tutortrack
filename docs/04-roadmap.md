@@ -93,11 +93,11 @@ All ─► E26, E27, E28, E31
 | E21 | ☐ | |
 | E22 | ✅ Done (2026-10-10) | T01–T09 + TW1: integration framework (OAuth+PKCE, encrypted tokens, health), Google/Microsoft/CalDAV two-way calendar sync with busy blocks in conflicts, Zoom/Teams/Meet/Lessonspace/built-in rooms, timed join links (T10 is Phase 3). See Implementation notes |
 | E23 | ✅ Done (2026-10-10) | T01–T08 + TW1: Xero and QuickBooks Online built on the E22 framework. Mappings are validated. Contacts, invoices, credit notes, payments, refunds, payouts with fees and tutor bills sync. Errors are readable, with retry and skip; lock dates are respected. Also: summary journals, backfill, a daily reconciliation check and digest, and GL exports for Sage 50, MYOB and IIF. T09 is Phase 2b; T10 is Phase 3. See Implementation notes |
-| E24 | ⏭ Next | |
+| E24 | ✅ Done (2026-10-10) | T01–T08 + custom-domain workflow on Temporal: brand kit with AA contrast handling across portals, emails and PDFs; custom domains (TXT/CNAME verification, Cloudflare/Caddy/fake TLS, routing, host-only cookies); Lit widgets (directory, enquiry, services, reviews, login, vacancies) with CORS/rate limits; WordPress plugin; website builder with themes, blocks, versions and SEO; moderated tutor profiles. Booking and class-catalogue widgets arrive with E08 Phase 2 and E20. See Implementation notes |
 | E25 | ☐ | |
 | E26 | ✅ Done (2026-10-10) | T01–T07 + scheduled-report workflow (T08 custom builder is Phase 2b, T09 warehouse export Enterprise). See Implementation notes |
 | E27 | ✅ Done (2026-10-10) | T01–T09 + webhook delivery workflow (TW1). Zapier/Make ship as served manifests; sandboxes skip provider connections. See Implementation notes |
-| E28 | ☐ | |
+| E28 | ⏭ Next | |
 | E29 | 🟡 Part 1 done (2026-10-09) | T01–T04 (security baseline, KMS encryption, audit search, consent). Part 2 (T05–T12, TW1) in Phase 3 |
 | E30 | ◐ Part 1 done (2026-10-10) | Console, tenant actions, flags, ops/dead letters, support access, alarms, backups, runbooks. Part 2 (help, analytics, SaaS metrics) later. See Implementation notes |
 | E31 | ☐ | |

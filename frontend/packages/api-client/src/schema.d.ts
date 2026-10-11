@@ -1243,6 +1243,59 @@ export interface paths {
     patch: operations["branches_partial_update"];
     trace?: never;
   };
+  "/api/v1/brand-kits": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The organisation's brand kit (``branch`` null) and per-branch overrides. */
+    get: operations["brand_kits_list"];
+    put?: never;
+    /** @description Create or update the kit for ``branch`` (null: the organisation kit). */
+    post: operations["brand_kits_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/brand-kits/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The organisation's brand kit (``branch`` null) and per-branch overrides. */
+    get: operations["brand_kits_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description The organisation's brand kit (``branch`` null) and per-branch overrides. */
+    delete: operations["brand_kits_destroy"];
+    options?: never;
+    head?: never;
+    /** @description The organisation's brand kit (``branch`` null) and per-branch overrides. */
+    patch: operations["brand_kits_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/branding/options": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["branding_options_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/bulk-jobs": {
     parameters: {
       query?: never;
@@ -3071,6 +3124,59 @@ export interface paths {
      *     Download through ``/files/{id}/download``.
      */
     delete: operations["documents_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/domains": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Custom domains: add, see DNS records and status, check now, remove (FR-24-2). */
+    get: operations["domains_list"];
+    put?: never;
+    /** @description Custom domains: add, see DNS records and status, check now, remove (FR-24-2). */
+    post: operations["domains_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/domains/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Custom domains: add, see DNS records and status, check now, remove (FR-24-2). */
+    get: operations["domains_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description Custom domains: add, see DNS records and status, check now, remove (FR-24-2). */
+    delete: operations["domains_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/domains/{id}/verify": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Check the DNS now (also retries a failed verification). */
+    post: operations["domains_verify_create"];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -8090,6 +8196,148 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/public-profiles": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Tutors' public profiles and moderation (FR-24-5). ``?status=pending`` for the queue. */
+    get: operations["public_profiles_list"];
+    put?: never;
+    /** @description Tutors' public profiles and moderation (FR-24-5). ``?status=pending`` for the queue. */
+    post: operations["public_profiles_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public-profiles/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Tutors' public profiles and moderation (FR-24-5). ``?status=pending`` for the queue. */
+    get: operations["public_profiles_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Staff edits publish at once. */
+    patch: operations["public_profiles_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/public-profiles/{id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Tutors' public profiles and moderation (FR-24-5). ``?status=pending`` for the queue. */
+    post: operations["public_profiles_approve_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public-profiles/{id}/hide": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Tutors' public profiles and moderation (FR-24-5). ``?status=pending`` for the queue. */
+    post: operations["public_profiles_hide_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public-profiles/{id}/reject": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Tutors' public profiles and moderation (FR-24-5). ``?status=pending`` for the queue. */
+    post: operations["public_profiles_reject_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public-profiles/mine": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The signed-in tutor's own public profile (portal). */
+    get: operations["public_profiles_mine_retrieve"];
+    /** @description The signed-in tutor's own public profile (portal). */
+    put: operations["public_profiles_mine_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/assets/{file_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Redirects to a short-lived URL for a published image (logo, tutor photo, page
+     *     image); anything else is 404.
+     */
+    get: operations["public_assets_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/branding": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The organisation's effective brand for portals, widgets and public pages. */
+    get: operations["public_branding_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/public/enquiries": {
     parameters: {
       query?: never;
@@ -8173,6 +8421,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/public/manifest": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description PWA manifest for the portal with the tenant's app name, icon and colour. */
+    get: operations["public_manifest_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/public/offers/{token}": {
     parameters: {
       query?: never;
@@ -8201,6 +8466,92 @@ export interface paths {
     get: operations["public_references_retrieve"];
     put?: never;
     post: operations["public_references_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/reviews": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["public_reviews_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/services": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Services the organisation publishes (``?widget=`` applies that widget's choice). */
+    get: operations["public_services_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/tutors": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Searchable public tutor profiles (FR-24-3): ``q``, ``subject``, ``level``,
+     *     ``online`` (true: online; false: in person) and ``location`` (town).
+     */
+    get: operations["public_tutors_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/tutors/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["public_tutors_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/widgets/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description A widget's settings, theme and the brand (``<tt-* widget="key">``). */
+    get: operations["public_widgets_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -8773,6 +9124,250 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/sites": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The hosted website (one per organisation). ``published`` needs ``sites.site.publish``. */
+    get: operations["sites_list"];
+    put?: never;
+    /** @description The hosted website (one per organisation). ``published`` needs ``sites.site.publish``. */
+    post: operations["sites_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sites/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The hosted website (one per organisation). ``published`` needs ``sites.site.publish``. */
+    get: operations["sites_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description The hosted website (one per organisation). ``published`` needs ``sites.site.publish``. */
+    patch: operations["sites_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/sites/blocks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["sites_blocks_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sites/pages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["sites_pages_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["sites_pages_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sites/pages/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["sites_pages_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    delete: operations["sites_pages_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["sites_pages_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/sites/pages/{id}/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The draft rendered as HTML for the editor's preview frame. */
+    get: operations["sites_pages_preview_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sites/pages/{id}/publish": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["sites_pages_publish_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sites/pages/{id}/restore": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["sites_pages_restore_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sites/pages/{id}/unpublish": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["sites_pages_unpublish_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sites/pages/{id}/versions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["sites_pages_versions_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sites/themes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["sites_themes_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/status": {
     parameters: {
       query?: never;
@@ -9233,6 +9828,73 @@ export interface paths {
     head?: never;
     /** @description Tasks (FR-05-8). ``?mine=true`` is "My tasks"; ``?overdue=true`` the overdue badge. */
     patch: operations["tasks_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/testimonials": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["testimonials_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["testimonials_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/testimonials/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["testimonials_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    delete: operations["testimonials_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["testimonials_partial_update"];
     trace?: never;
   };
   "/api/v1/time-off": {
@@ -9882,6 +10544,96 @@ export interface paths {
      *     and Make use it to show sample data).
      */
     get: operations["webhook_event_types_sample_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/widgets": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["widgets_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["widgets_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/widgets/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["widgets_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    delete: operations["widgets_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["widgets_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/widgets/kinds": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["widgets_kinds_list"];
     put?: never;
     post?: never;
     delete?: never;
@@ -10812,6 +11564,17 @@ export interface components {
     };
     /** @enum {unknown} */
     BlankEnum: "";
+    BlockField: {
+      name: string;
+      kind: string;
+      is_required: boolean;
+      max_length: number | null;
+    };
+    BlockType: {
+      key: string;
+      title: string;
+      fields: components["schemas"]["BlockField"][];
+    };
     BoardColumn: {
       stage: components["schemas"]["Stage"];
       enquiries: components["schemas"]["Enquiry"][];
@@ -10858,6 +11621,69 @@ export interface components {
      * @enum {string}
      */
     BranchScopeEnum: "all" | "selected";
+    BrandKit: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly branch: string | null;
+      /** @default  */
+      readonly branch_name: string;
+      /** Format: uuid */
+      readonly logo: string | null;
+      /** Format: uuid */
+      readonly logo_dark: string | null;
+      /** Format: uuid */
+      readonly favicon: string | null;
+      /** Format: uuid */
+      readonly app_icon: string | null;
+      readonly primary_colour: string;
+      readonly secondary_colour: string;
+      readonly font: string;
+      readonly email_header: string;
+      readonly email_footer: string;
+      readonly document_footer: string;
+      readonly app_name: string;
+      readonly social_links: {
+        [key: string]: string;
+      };
+      readonly hide_powered_by: boolean;
+      readonly contrast: components["schemas"]["Contrast"];
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    BrandKitWriteRequest: {
+      /** Format: uuid */
+      branch?: string | null;
+      /** Format: uuid */
+      logo?: string | null;
+      /** Format: uuid */
+      logo_dark?: string | null;
+      /** Format: uuid */
+      favicon?: string | null;
+      /** Format: uuid */
+      app_icon?: string | null;
+      primary_colour?: string;
+      secondary_colour?: string;
+      font?: string;
+      email_header?: string;
+      email_footer?: string;
+      document_footer?: string;
+      app_name?: string;
+      social_links?: {
+        [key: string]: string;
+      };
+      hide_powered_by?: boolean;
+    };
+    BrandingOptions: {
+      fonts: string[];
+      social_networks: string[];
+      white_label: boolean;
+      custom_domain: boolean;
+      cname_target: string;
+      site_base_domain: string;
+      widgets_script_url: string;
+      site_url: string;
+    };
     Breakdown: {
       key: string;
       total: number;
@@ -11742,6 +12568,19 @@ export interface components {
       language?: string;
       custom_fields?: unknown;
     };
+    Contrast: {
+      /** Format: double */
+      primary_on_white: number;
+      /** Format: double */
+      text_on_primary: number;
+      on_primary: string;
+      link_colour: string;
+      /** Format: double */
+      secondary_on_white?: number;
+      on_secondary?: string;
+      warnings: string[];
+      passes_aa: boolean;
+    };
     ConvertJobRequest: {
       /** Format: uuid */
       service: string;
@@ -12153,6 +12992,12 @@ export interface components {
      * @enum {string}
      */
     DistanceUnitEnum: "km" | "mi";
+    DnsRecord: {
+      record_type: string;
+      name: string;
+      value: string;
+      purpose: string;
+    };
     Document: {
       /** Format: uuid */
       readonly id: string;
@@ -12190,6 +13035,29 @@ export interface components {
       visibility?: components["schemas"]["NoteVisibilityEnum"];
       /** Format: date */
       expires_on?: string | null;
+    };
+    Domain: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly hostname: string;
+      readonly purpose: components["schemas"]["PurposeEnum"];
+      readonly verification_status: components["schemas"]["VerificationStatusEnum"];
+      readonly ssl_status: components["schemas"]["SslStatusEnum"];
+      /** Format: date-time */
+      readonly verified_at: string | null;
+      /** Format: date-time */
+      readonly cert_expires_at: string | null;
+      /** Format: date-time */
+      readonly last_checked_at: string | null;
+      readonly status_detail: string;
+      readonly dns_records: components["schemas"]["DnsRecord"][];
+      readonly url: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    DomainCreateRequest: {
+      hostname: string;
+      purpose: components["schemas"]["PurposeEnum"];
     };
     Download: {
       /** Format: uri */
@@ -14315,6 +15183,22 @@ export interface components {
       on_tutor_cancellation: boolean;
       valid_days: number;
     };
+    Manifest: {
+      name: string;
+      short_name: string;
+      start_url: string;
+      scope: string;
+      display: string;
+      theme_color: string;
+      background_color: string;
+      icons: components["schemas"]["ManifestIcon"][];
+    };
+    ManifestIcon: {
+      src: string;
+      sizes: string;
+      type: string;
+      purpose: string;
+    };
     /**
      * @description * `bonus` - bonus
      *     * `referral` - referral
@@ -15168,6 +16052,12 @@ export interface components {
       auto_renew?: boolean;
       active?: boolean;
     };
+    PagePreview: {
+      html: string;
+    };
+    PageRestoreRequest: {
+      version: number;
+    };
     PaginatedAccountingConnectionList: {
       /**
        * Format: uri
@@ -15870,6 +16760,32 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Product"][];
     };
+    PaginatedPublicProfileList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PublicProfile"][];
+    };
+    PaginatedPublicTutorList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PublicTutor"][];
+    };
     PaginatedReportRunList: {
       /**
        * Format: uri
@@ -15935,6 +16851,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Service"][];
     };
+    PaginatedSitePageList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["SitePage"][];
+    };
     PaginatedStudentList: {
       /**
        * Format: uri
@@ -15973,6 +16902,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["TenantRow"][];
+    };
+    PaginatedTestimonialList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Testimonial"][];
     };
     PaginatedTutorList: {
       /**
@@ -16038,6 +16980,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["WebhookEndpoint"][];
+    };
+    PaginatedWidgetList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Widget"][];
     };
     PasswordChangeRequest: {
       current_password: string;
@@ -16115,6 +17070,29 @@ export interface components {
       email_sender_name?: string;
       email_sender_address?: string;
       invoice_prefix?: string;
+    };
+    PatchedBrandKitWriteRequest: {
+      /** Format: uuid */
+      branch?: string | null;
+      /** Format: uuid */
+      logo?: string | null;
+      /** Format: uuid */
+      logo_dark?: string | null;
+      /** Format: uuid */
+      favicon?: string | null;
+      /** Format: uuid */
+      app_icon?: string | null;
+      primary_colour?: string;
+      secondary_colour?: string;
+      font?: string;
+      email_header?: string;
+      email_footer?: string;
+      document_footer?: string;
+      app_name?: string;
+      social_links?: {
+        [key: string]: string;
+      };
+      hide_powered_by?: boolean;
     };
     PatchedCalendarEventRequest: {
       type?: components["schemas"]["CalendarEventTypeEnum"];
@@ -16532,6 +17510,16 @@ export interface components {
       tutor_share_percent?: string;
       active?: boolean;
     };
+    PatchedPublicProfileWriteRequest: {
+      display_name?: string;
+      headline?: string;
+      bio?: string;
+      show?: components["schemas"]["ShowEnum"][];
+      /** Format: uuid */
+      photo?: string | null;
+      listed?: boolean;
+      slug?: string;
+    };
     PatchedReportTemplateRequest: {
       name?: string;
       description?: string;
@@ -16651,6 +17639,31 @@ export interface components {
         [key: string]: unknown;
       };
     };
+    PatchedSitePageRequest: {
+      path?: string;
+      title?: string;
+      nav_label?: string;
+      show_in_nav?: boolean;
+      position?: number;
+      seo_title?: string;
+      meta_description?: string;
+      blocks?: {
+        [key: string]: unknown;
+      }[];
+    };
+    PatchedSiteRequest: {
+      name?: string;
+      theme?: string;
+      seo_title?: string;
+      meta_description?: string;
+      /** Format: uuid */
+      og_image?: string | null;
+      business_type?: string;
+      analytics_id?: string;
+      tag_manager_id?: string;
+      cookie_banner?: boolean;
+      published?: boolean;
+    };
     PatchedStudentRateRequest: {
       charge_rate_override?: {
         /**
@@ -16719,6 +17732,16 @@ export interface components {
       is_default?: boolean;
       exempt_reason?: string;
       active?: boolean;
+    };
+    PatchedTestimonialRequest: {
+      quote?: string;
+      author?: string;
+      role?: string;
+      rating?: number | null;
+      /** Format: uuid */
+      tutor?: string | null;
+      published?: boolean;
+      position?: number;
     };
     PatchedTutorRateRequest: {
       pay_rate_override?: {
@@ -16791,6 +17814,18 @@ export interface components {
       /** Format: uuid */
       branch?: string | null;
       status?: components["schemas"]["WebhookEndpointToggleEnum"];
+    };
+    PatchedWidgetUpdateRequest: {
+      kind?: string;
+      name?: string;
+      options?: {
+        [key: string]: unknown;
+      };
+      theme?: {
+        [key: string]: string;
+      };
+      allowed_origins?: string[];
+      active?: boolean;
     };
     PayIntent: {
       publishable_key: string;
@@ -17820,6 +18855,15 @@ export interface components {
      * @enum {string}
      */
     ProficiencyEnum: "good" | "strong" | "expert";
+    ProfileContent: {
+      display_name?: string;
+      headline?: string;
+      bio?: string;
+      show?: components["schemas"]["ShowEnum"][];
+    };
+    ProfileRejectRequest: {
+      reason: string;
+    };
     ProposeInterviewRequest: {
       options: string[];
       /** @default 30 */
@@ -17880,6 +18924,27 @@ export interface components {
       captcha_token: string;
       /** @default  */
       website: string;
+    };
+    PublicBranding: {
+      name: string;
+      logo_url: string;
+      logo_dark_url: string;
+      favicon_url: string;
+      app_icon_url: string;
+      app_name: string;
+      primary_colour: string;
+      on_primary: string;
+      link_colour: string;
+      secondary_colour: string;
+      font: string;
+      font_family: string;
+      font_css_url: string;
+      social_links: {
+        [key: string]: string;
+      };
+      show_powered_by: boolean;
+      portal_url: string;
+      login_url: string;
     };
     /** @description ``POST /public/enquiries`` (TutorCruncher-style API). */
     PublicEnquiryRequest: {
@@ -17960,11 +19025,81 @@ export interface components {
       turnstile_site_key: string;
       organisation: string;
     };
+    PublicProfile: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      readonly slug: string;
+      readonly status: components["schemas"]["PublicProfileStatusEnum"];
+      readonly listed: boolean;
+      readonly draft: components["schemas"]["ProfileContent"];
+      readonly published: components["schemas"]["ProfileContent"];
+      /** Format: uuid */
+      readonly photo: string | null;
+      /** Format: uuid */
+      readonly draft_photo: string | null;
+      /** Format: date-time */
+      readonly submitted_at: string | null;
+      /** Format: date-time */
+      readonly approved_at: string | null;
+      readonly approved_by_name: string;
+      readonly rejection_reason: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    PublicProfileCreateRequest: {
+      /** Format: uuid */
+      tutor: string;
+    };
+    /**
+     * @description * `draft` - Draft
+     *     * `pending` - Waiting for approval
+     *     * `approved` - Published
+     *     * `rejected` - Changes rejected
+     *     * `hidden` - Hidden
+     * @enum {string}
+     */
+    PublicProfileStatusEnum: "draft" | "pending" | "approved" | "rejected" | "hidden";
+    PublicProfileWriteRequest: {
+      display_name?: string;
+      headline?: string;
+      bio?: string;
+      show?: components["schemas"]["ShowEnum"][];
+      /** Format: uuid */
+      photo?: string | null;
+      listed?: boolean;
+      slug?: string;
+    };
     PublicReference: {
       applicant: string;
       status: string;
       questions: string[];
       organisation: string;
+    };
+    PublicReview: {
+      id: string;
+      quote: string;
+      author: string;
+      role: string;
+      rating: number | null;
+      stars: string;
+    };
+    PublicService: {
+      id: string;
+      name: string;
+      description: string;
+      subject: string;
+      level: string;
+      format: string;
+      delivery_mode: string;
+      duration_minutes: number;
+      price: string;
+      price_amount: string | null;
+      currency: string;
+      pricing_unit: string;
+      pricing_unit_label: string;
     };
     PublicSubmitRequest: {
       data: {
@@ -17985,6 +19120,42 @@ export interface components {
       ok: boolean;
       pay_url: string;
     };
+    PublicTutor: {
+      slug: string;
+      display_name: string;
+      headline: string;
+      photo_url: string;
+      subjects: components["schemas"]["SubjectLevel"][];
+      online: boolean;
+      in_person: boolean;
+      location: string;
+    };
+    PublicTutorDetail: {
+      slug: string;
+      display_name: string;
+      headline: string;
+      photo_url: string;
+      subjects: components["schemas"]["SubjectLevel"][];
+      online: boolean;
+      in_person: boolean;
+      location: string;
+      bio: string;
+      qualifications: components["schemas"]["Qualification"][];
+      languages: string[];
+      years_experience: number | null;
+    };
+    PublicWidget: {
+      key: string;
+      kind: string;
+      element: string;
+      options: {
+        [key: string]: unknown;
+      };
+      theme: {
+        [key: string]: string;
+      };
+      branding: components["schemas"]["PublicBranding"];
+    };
     PublishPostingRequest: {
       /** Format: uuid */
       job: string;
@@ -17997,6 +19168,17 @@ export interface components {
       min_score: string;
       /** Format: date */
       closes_on?: string | null;
+    };
+    /**
+     * @description * `app` - Apps and portals
+     *     * `site` - Website
+     * @enum {string}
+     */
+    PurposeEnum: "app" | "site";
+    Qualification: {
+      title: string;
+      institution: string;
+      year: number | null;
     };
     /**
      * @description * `hours` - Hours
@@ -19169,6 +20351,14 @@ export interface components {
       tutor: string;
       note?: string;
     };
+    /**
+     * @description * `qualifications` - qualifications
+     *     * `languages` - languages
+     *     * `experience` - experience
+     *     * `location` - location
+     * @enum {string}
+     */
+    ShowEnum: "qualifications" | "languages" | "experience" | "location";
     SignupConfig: {
       turnstile_site_key: string;
     };
@@ -19205,6 +20395,88 @@ export interface components {
       /** Format: email */
       email: string;
       email_verified: boolean;
+    };
+    Site: {
+      /** Format: uuid */
+      readonly id: string;
+      name?: string;
+      theme?: string;
+      seo_title?: string;
+      meta_description?: string;
+      /** Format: uuid */
+      og_image?: string | null;
+      business_type?: string;
+      analytics_id?: string;
+      tag_manager_id?: string;
+      cookie_banner?: boolean;
+      published?: boolean;
+      /** Format: date-time */
+      readonly published_at: string | null;
+      readonly url: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    SitePage: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly site: string;
+      path?: string;
+      title: string;
+      nav_label?: string;
+      show_in_nav?: boolean;
+      position?: number;
+      seo_title?: string;
+      meta_description?: string;
+      blocks?: {
+        [key: string]: unknown;
+      }[];
+      readonly status: components["schemas"]["SitePageStatusEnum"];
+      readonly version: number;
+      readonly live_version_number: number;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    SitePageRequest: {
+      path?: string;
+      title: string;
+      nav_label?: string;
+      show_in_nav?: boolean;
+      position?: number;
+      seo_title?: string;
+      meta_description?: string;
+      blocks?: {
+        [key: string]: unknown;
+      }[];
+    };
+    /**
+     * @description * `draft` - Draft
+     *     * `published` - Published
+     *     * `changed` - Unpublished changes
+     * @enum {string}
+     */
+    SitePageStatusEnum: "draft" | "published" | "changed";
+    SitePageVersion: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly number: number;
+      readonly title: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly published_by_name: string;
+    };
+    SiteRequest: {
+      name?: string;
+      theme?: string;
+      seo_title?: string;
+      meta_description?: string;
+      /** Format: uuid */
+      og_image?: string | null;
+      business_type?: string;
+      analytics_id?: string;
+      tag_manager_id?: string;
+      cookie_banner?: boolean;
+      published?: boolean;
     };
     /**
      * @description * `s` - s
@@ -19243,6 +20515,14 @@ export interface components {
       reason: string | null;
       suggestion: string | null;
     };
+    /**
+     * @description * `pending` - Pending
+     *     * `issuing` - Issuing
+     *     * `active` - Active
+     *     * `failed` - Failed
+     * @enum {string}
+     */
+    SslStatusEnum: "pending" | "issuing" | "active" | "failed";
     StaffMember: {
       /** Format: uuid */
       id: string;
@@ -19492,6 +20772,10 @@ export interface components {
       subject_id?: string;
       /** Format: uuid */
       level_id?: string;
+    };
+    SubjectLevel: {
+      subject: string;
+      level: string;
     };
     SubjectRequest: {
       name: string;
@@ -19841,6 +21125,37 @@ export interface components {
       stripe_customer_id: string;
       stripe_subscription_id: string;
       seats: number;
+    };
+    Testimonial: {
+      /** Format: uuid */
+      readonly id: string;
+      quote: string;
+      author: string;
+      role?: string;
+      rating?: number | null;
+      /** Format: uuid */
+      tutor?: string | null;
+      /** @default  */
+      readonly tutor_name: string;
+      published?: boolean;
+      position?: number;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    TestimonialRequest: {
+      quote: string;
+      author: string;
+      role?: string;
+      rating?: number | null;
+      /** Format: uuid */
+      tutor?: string | null;
+      published?: boolean;
+      position?: number;
+    };
+    Theme: {
+      key: string;
+      title: string;
+      description: string;
     };
     /**
      * @description * `locale` - Locale default
@@ -20284,6 +21599,13 @@ export interface components {
       readonly date_joined: string;
     };
     /**
+     * @description * `pending` - Waiting for DNS
+     *     * `verified` - Verified
+     *     * `failed` - Verification failed
+     * @enum {string}
+     */
+    VerificationStatusEnum: "pending" | "verified" | "failed";
+    /**
      * @description * `none` - none
      *     * `builtin` - builtin
      *     * `zoom` - zoom
@@ -20499,6 +21821,26 @@ export interface components {
      * @enum {integer}
      */
     WeekStartDayEnum: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+    Widget: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly key: string;
+      readonly kind: string;
+      readonly name: string;
+      readonly options: {
+        [key: string]: unknown;
+      };
+      readonly theme: {
+        [key: string]: string;
+      };
+      readonly allowed_origins: string[];
+      readonly active: boolean;
+      readonly element: string;
+      readonly embed_code: string;
+      readonly wordpress_shortcode: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
     WidgetData: {
       widget: components["schemas"]["WidgetInfo"];
       unit: components["schemas"]["UnitEnum"];
@@ -20530,6 +21872,13 @@ export interface components {
      * @enum {string}
      */
     WidgetInfoKindEnum: "kpi" | "chart" | "list";
+    WidgetKind: {
+      key: string;
+      title: string;
+      element: string;
+      description: string;
+      available: boolean;
+    };
     WidgetPoint: {
       x: string;
       currency: string;
@@ -20547,6 +21896,18 @@ export interface components {
       currency: string;
       value: string;
       previous: string | null;
+    };
+    WidgetWriteRequest: {
+      kind: string;
+      name?: string;
+      options?: {
+        [key: string]: unknown;
+      };
+      theme?: {
+        [key: string]: string;
+      };
+      allowed_origins?: string[];
+      active?: boolean;
     };
     Window: {
       weekday: number;
@@ -22719,6 +24080,146 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Branch"];
+        };
+      };
+    };
+  };
+  brand_kits_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BrandKit"][];
+        };
+      };
+    };
+  };
+  brand_kits_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["BrandKitWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BrandKitWriteRequest"];
+        "multipart/form-data": components["schemas"]["BrandKitWriteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BrandKit"];
+        };
+      };
+    };
+  };
+  brand_kits_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this brand kit. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BrandKit"];
+        };
+      };
+    };
+  };
+  brand_kits_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this brand kit. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  brand_kits_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this brand kit. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedBrandKitWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedBrandKitWriteRequest"];
+        "multipart/form-data": components["schemas"]["PatchedBrandKitWriteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BrandKit"];
+        };
+      };
+    };
+  };
+  branding_options_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BrandingOptions"];
         };
       };
     };
@@ -26554,6 +28055,124 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  domains_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Domain"][];
+        };
+      };
+    };
+  };
+  domains_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DomainCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["DomainCreateRequest"];
+        "multipart/form-data": components["schemas"]["DomainCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Domain"];
+        };
+      };
+    };
+  };
+  domains_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this organisation domain. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Domain"];
+        };
+      };
+    };
+  };
+  domains_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this organisation domain. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  domains_verify_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this organisation domain. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Domain"];
+        };
       };
     };
   };
@@ -35220,6 +36839,270 @@ export interface operations {
       };
     };
   };
+  public_profiles_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPublicProfileList"];
+        };
+      };
+    };
+  };
+  public_profiles_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublicProfileCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PublicProfileCreateRequest"];
+        "multipart/form-data": components["schemas"]["PublicProfileCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicProfile"];
+        };
+      };
+    };
+  };
+  public_profiles_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicProfile"];
+        };
+      };
+    };
+  };
+  public_profiles_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedPublicProfileWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedPublicProfileWriteRequest"];
+        "multipart/form-data": components["schemas"]["PatchedPublicProfileWriteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicProfile"];
+        };
+      };
+    };
+  };
+  public_profiles_approve_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicProfile"];
+        };
+      };
+    };
+  };
+  public_profiles_hide_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicProfile"];
+        };
+      };
+    };
+  };
+  public_profiles_reject_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProfileRejectRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ProfileRejectRequest"];
+        "multipart/form-data": components["schemas"]["ProfileRejectRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicProfile"];
+        };
+      };
+    };
+  };
+  public_profiles_mine_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicProfile"];
+        };
+      };
+    };
+  };
+  public_profiles_mine_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PublicProfileWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PublicProfileWriteRequest"];
+        "multipart/form-data": components["schemas"]["PublicProfileWriteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicProfile"];
+        };
+      };
+    };
+  };
+  public_assets_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        file_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  public_branding_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicBranding"];
+        };
+      };
+    };
+  };
   public_enquiries_create: {
     parameters: {
       query?: never;
@@ -35419,6 +37302,25 @@ export interface operations {
       };
     };
   };
+  public_manifest_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Manifest"];
+        };
+      };
+    };
+  };
   public_offers_retrieve: {
     parameters: {
       query?: never;
@@ -35517,6 +37419,117 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PublicReference"];
+        };
+      };
+    };
+  };
+  public_reviews_list: {
+    parameters: {
+      query?: {
+        limit?: number;
+        min_rating?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicReview"][];
+        };
+      };
+    };
+  };
+  public_services_list: {
+    parameters: {
+      query?: {
+        widget?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicService"][];
+        };
+      };
+    };
+  };
+  public_tutors_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPublicTutorList"];
+        };
+      };
+    };
+  };
+  public_tutors_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicTutorDetail"];
+        };
+      };
+    };
+  };
+  public_widgets_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicWidget"];
         };
       };
     };
@@ -36701,6 +38714,387 @@ export interface operations {
       };
     };
   };
+  sites_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Site"][];
+        };
+      };
+    };
+  };
+  sites_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["SiteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SiteRequest"];
+        "multipart/form-data": components["schemas"]["SiteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Site"];
+        };
+      };
+    };
+  };
+  sites_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Site"];
+        };
+      };
+    };
+  };
+  sites_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedSiteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedSiteRequest"];
+        "multipart/form-data": components["schemas"]["PatchedSiteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Site"];
+        };
+      };
+    };
+  };
+  sites_blocks_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BlockType"][];
+        };
+      };
+    };
+  };
+  sites_pages_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedSitePageList"];
+        };
+      };
+    };
+  };
+  sites_pages_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SitePageRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SitePageRequest"];
+        "multipart/form-data": components["schemas"]["SitePageRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SitePage"];
+        };
+      };
+    };
+  };
+  sites_pages_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SitePage"];
+        };
+      };
+    };
+  };
+  sites_pages_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  sites_pages_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedSitePageRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedSitePageRequest"];
+        "multipart/form-data": components["schemas"]["PatchedSitePageRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SitePage"];
+        };
+      };
+    };
+  };
+  sites_pages_preview_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PagePreview"];
+        };
+      };
+    };
+  };
+  sites_pages_publish_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SitePage"];
+        };
+      };
+    };
+  };
+  sites_pages_restore_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PageRestoreRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PageRestoreRequest"];
+        "multipart/form-data": components["schemas"]["PageRestoreRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SitePage"];
+        };
+      };
+    };
+  };
+  sites_pages_unpublish_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SitePage"];
+        };
+      };
+    };
+  };
+  sites_pages_versions_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SitePageVersion"][];
+        };
+      };
+    };
+  };
+  sites_themes_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Theme"][];
+        };
+      };
+    };
+  };
   status_retrieve: {
     parameters: {
       query?: never;
@@ -37638,6 +40032,131 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Task"];
+        };
+      };
+    };
+  };
+  testimonials_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedTestimonialList"];
+        };
+      };
+    };
+  };
+  testimonials_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TestimonialRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TestimonialRequest"];
+        "multipart/form-data": components["schemas"]["TestimonialRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Testimonial"];
+        };
+      };
+    };
+  };
+  testimonials_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this testimonial. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Testimonial"];
+        };
+      };
+    };
+  };
+  testimonials_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this testimonial. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  testimonials_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this testimonial. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedTestimonialRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedTestimonialRequest"];
+        "multipart/form-data": components["schemas"]["PatchedTestimonialRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Testimonial"];
         };
       };
     };
@@ -38875,6 +41394,153 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["EventSample"];
+        };
+      };
+    };
+  };
+  widgets_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedWidgetList"];
+        };
+      };
+    };
+  };
+  widgets_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WidgetWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["WidgetWriteRequest"];
+        "multipart/form-data": components["schemas"]["WidgetWriteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Widget"];
+        };
+      };
+    };
+  };
+  widgets_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this widget config. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Widget"];
+        };
+      };
+    };
+  };
+  widgets_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this widget config. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  widgets_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this widget config. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedWidgetUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedWidgetUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedWidgetUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Widget"];
+        };
+      };
+    };
+  };
+  widgets_kinds_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WidgetKind"][];
         };
       };
     };

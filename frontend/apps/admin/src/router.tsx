@@ -69,6 +69,7 @@ import { ReportsLibraryPage, ReportViewPage, SavedReportsPage } from "./reportin
 import { VerifyEmailPage } from "./routes/VerifyEmailPage";
 import { DeveloperPage } from "./developer/DeveloperPages";
 import { DeveloperDocsPage, MarketplacePage, OAuthConsentPage } from "./developer/DocsPages";
+import { WebsitePage } from "./website/WebsitePage";
 
 interface RouterContext {
   queryClient: QueryClient;
@@ -274,6 +275,7 @@ const notificationSettingsRoute = appPage("/settings/notifications", Notificatio
 const planRoute = appPage("/settings/plan", PlanPage);
 const integrationsRoute = appPage("/settings/integrations", IntegrationsPage);
 const developerRoute = appPage("/developer", DeveloperPage);
+const websiteRoute = appPage("/website", WebsitePage);
 const developerDocsRoute = appPage("/developer/docs", DeveloperDocsPage);
 const marketplaceRoute = appPage("/settings/marketplace", MarketplacePage);
 const oauthConsentRoute = appPage("/oauth/authorize", OAuthConsentPage);
@@ -397,6 +399,7 @@ const routeTree = rootRoute.addChildren([
     planRoute,
     integrationsRoute,
     developerRoute,
+    websiteRoute,
     developerDocsRoute,
     marketplaceRoute,
     oauthConsentRoute,

@@ -7,5 +7,7 @@ export default defineConfig({
     lib: { entry: "src/index.ts", formats: ["es"], fileName: () => "widgets.js" },
     target: "es2020",
   },
+  // Local playground and the dev WIDGETS_SCRIPT_URL (http://localhost:5175/src/index.ts).
+  server: { port: 5175, cors: true },
   test: { environment: "jsdom" },
 });

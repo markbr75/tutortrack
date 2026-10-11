@@ -1,0 +1,18 @@
+{% extends "sites/page.html" %}{% load i18n %}
+{% block content %}
+<section aria-labelledby="tutor-h"><div class="wrap">
+  <p><a href="/tutors">{% trans "All tutors" %}</a></p>
+  <article class="card" style="max-width:820px">
+    {% if tutor.photo_url %}<img src="{{ tutor.photo_url }}" alt="" style="width:140px;height:140px">{% endif %}
+    <h1 id="tutor-h">{{ tutor.display_name }}</h1>
+    {% if tutor.headline %}<p class="muted">{{ tutor.headline }}</p>{% endif %}
+    <p class="muted">{% if tutor.online %}{% trans "Online" %}{% endif %}{% if tutor.online and tutor.in_person %} · {% endif %}{% if tutor.in_person %}{% trans "In person" %}{% endif %}{% if tutor.location %} · {{ tutor.location }}{% endif %}</p>
+    {% if tutor.subjects %}<h2>{% trans "Subjects" %}</h2><ul class="tags">{% for s in tutor.subjects %}<li>{{ s.subject }}{% if s.level %} ({{ s.level }}){% endif %}</li>{% endfor %}</ul>{% endif %}
+    {% if tutor.bio %}<h2>{% trans "About me" %}</h2>{{ tutor.bio|linebreaks }}{% endif %}
+    {% if tutor.qualifications %}<h2>{% trans "Qualifications" %}</h2><ul>{% for q in tutor.qualifications %}<li>{{ q.title }}{% if q.institution %}, {{ q.institution }}{% endif %}{% if q.year %} ({{ q.year }}){% endif %}</li>{% endfor %}</ul>{% endif %}
+    {% if tutor.years_experience %}<p>{% blocktrans count n=tutor.years_experience %}{{ n }} year of experience{% plural %}{{ n }} years of experience{% endblocktrans %}</p>{% endif %}
+    {% if tutor.languages %}<p>{% trans "Languages" %}: {{ tutor.languages|join:", " }}</p>{% endif %}
+    {% if contact_href %}<p><a class="btn" href="{{ contact_href }}">{% blocktrans with name=tutor.display_name %}Enquire about {{ name }}{% endblocktrans %}</a></p>{% endif %}
+  </article>
+</div></section>
+{% endblock %}

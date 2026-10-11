@@ -1,0 +1,5 @@
+{% load i18n %}<section{% if p.heading %} aria-labelledby="{{ block.id }}-h"{% endif %}><div class="wrap">
+  {% if p.heading %}<h2 id="{{ block.id }}-h">{{ p.heading }}</h2>{% endif %}
+  {% if p.address %}<p>{{ p.address }}</p>{% endif %}
+  <iframe class="map" src="{{ d.map_src }}" title="{% trans 'Map' %}{% if p.address %}: {{ p.address }}{% endif %}" loading="lazy"></iframe>
+</div></section>

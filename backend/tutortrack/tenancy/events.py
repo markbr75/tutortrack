@@ -89,3 +89,66 @@ class BranchArchived(DomainEvent):
 
 def changed_fields(changes: dict[str, Any]) -> list[str]:
     return sorted(changes)
+
+
+# --- custom domains (E24 FR-24-2) ----------------------------------------------------------------
+
+
+@dataclass(frozen=True, kw_only=True)
+class CustomDomainAdded(DomainEvent):
+    """Starts ``CustomDomainWorkflow`` (sites app)."""
+
+    event_type: ClassVar[str] = "custom_domain.added"
+    subject_type: ClassVar[str] = "custom_domain"
+
+    hostname: str
+    purpose: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class CustomDomainCheckRequested(DomainEvent):
+    """ "Check now": cuts the workflow's current wait short."""
+
+    event_type: ClassVar[str] = "custom_domain.check_requested"
+    subject_type: ClassVar[str] = "custom_domain"
+
+    hostname: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class CustomDomainVerified(DomainEvent):
+    event_type: ClassVar[str] = "custom_domain.verified"
+    subject_type: ClassVar[str] = "custom_domain"
+
+    hostname: str
+    method: str  # txt | http
+
+
+@dataclass(frozen=True, kw_only=True)
+class CustomDomainActivated(DomainEvent):
+    """Verified and serving HTTPS with a valid certificate."""
+
+    event_type: ClassVar[str] = "custom_domain.activated"
+    subject_type: ClassVar[str] = "custom_domain"
+
+    hostname: str
+    purpose: str
+    cert_expires_at: str | None
+
+
+@dataclass(frozen=True, kw_only=True)
+class CustomDomainFailed(DomainEvent):
+    event_type: ClassVar[str] = "custom_domain.failed"
+    subject_type: ClassVar[str] = "custom_domain"
+
+    hostname: str
+    stage: str  # verification | certificate | monitoring
+    reason: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class CustomDomainRemoved(DomainEvent):
+    event_type: ClassVar[str] = "custom_domain.removed"
+    subject_type: ClassVar[str] = "custom_domain"
+
+    hostname: str

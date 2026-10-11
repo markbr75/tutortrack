@@ -1153,10 +1153,13 @@ def statement_pdf(statement: PayStatement) -> bytes:
     from django.template.loader import render_to_string
     from weasyprint import HTML
 
+    from tutortrack.core import branding
+
     items = list(statement.payout.items.order_by("date"))
     html = render_to_string(
         "payroll/statement.html", {"statement": statement, "items": items,
-                                   "settings": settings},
+                                   "settings": settings,
+                                   "brand": branding.for_documents(statement.organisation_id)},
     )  # fmt: skip
     return bytes(HTML(string=html).write_pdf())
 

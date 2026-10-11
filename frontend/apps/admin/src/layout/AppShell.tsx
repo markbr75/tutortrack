@@ -1,7 +1,7 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner } from "@tutortrack/ui";
-import { useMutation } from "@tanstack/react-query";
+import { Alert, applyBrandTheme, Button, Spinner } from "@tutortrack/ui";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, Outlet } from "@tanstack/react-router";
 import { useEffect } from "react";
 
@@ -54,6 +54,7 @@ const NAV = [
   },
   { to: "/settings/plan", key: "nav.plan", permission: "subscription.view" },
   { to: "/settings/marketplace", key: "nav.marketplace", permission: "org.settings.view" },
+  { to: "/website", key: "nav.website", permission: "sites.view" },
   { to: "/developer", key: "nav.developer", permission: "developer.webhook.view" },
   { to: "/settings", key: "nav.settings", permission: "org.settings.view" },
   { to: "/account", key: "nav.account", permission: null },
@@ -151,10 +152,24 @@ function SignOut() {
   );
 }
 
+/** The admin app takes the brand colour subtly (buttons and accents only, E24 FR-24-1). */
+function useSubtleBranding(enabled: boolean) {
+  const brand = useQuery({
+    queryKey: ["public-branding"],
+    queryFn: async () => unwrap(await api.GET("/api/v1/public/branding")),
+    enabled,
+    staleTime: 10 * 60_000,
+  });
+  useEffect(() => {
+    if (brand.data) applyBrandTheme(brand.data);
+  }, [brand.data]);
+}
+
 export function AppShell() {
   const { t } = useTranslation();
   const session = useMe();
   const permissions = session.data?.permissions ?? {};
+  useSubtleBranding(Boolean(session.data));
 
   if (session.isPending) {
     return (

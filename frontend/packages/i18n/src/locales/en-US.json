@@ -30,5 +30,21 @@
     "sandboxes": {
       "intro": "A sandbox is a separate organization with a copy of your settings and sample data, for testing integrations safely. Payment, calendar and accounting connections are not copied."
     }
+  },
+  "website": {
+    "branding": {
+      "colours": "Colors and font",
+      "primary": "Main color",
+      "secondary": "Second color"
+    },
+    "contrast": {
+      "title": "Color contrast",
+      "tooLight": "Your main color is too light for text on white ({{ratio}}:1; AA needs 4.5:1). We'll use a darker shade for links and headings.",
+      "noText": "No text color reaches 4.5:1 on your main color (best {{ratio}}:1). Choose a darker or lighter color for buttons.",
+      "textOnColour": "Text on your color: {{ratio}}:1"
+    },
+    "site": {
+      "educational": "Educational organization"
+    }
   }
 }
