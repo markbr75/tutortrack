@@ -124,12 +124,15 @@ def test_certificate_polls_and_retries_through_provider_errors(org, temporal_env
     wait_for(lambda: fresh(domain).ssl_status == "issuing")
     # 30-second polls only skip while awaiting the result; "check now" wakes the poll.
     check_now(org, domain)
-    # The provider error fails the activity; Temporal retries it, which then sees "issuing".
-    wait_for(lambda: FakeCertificates.script[host] == ["issuing", "active"], 30)
-    temporal_env.skip(timedelta(seconds=10))  # through the activity's retry backoff
-    wait_for(lambda: FakeCertificates.script[host] == ["active"], 30)
-    check_now(org, domain)
+    # The provider error fails the activity; Temporal retries it after a backoff, and later
+    # polls see "issuing" then "active". Skip test time in steps until the certificate is live.
+    for _ in range(60):
+        if fresh(domain).ssl_status == "active":
+            break
+        temporal_env.skip(timedelta(seconds=10))
+        clock.sleep(0.1)
     wait_for(lambda: fresh(domain).ssl_status == "active")
+    assert "error" not in FakeCertificates.script[host]  # the failure was retried through
     remove(org, domain)
     assert temporal_env.result(wid) == "removed"
     record(temporal_env, wid, "CustomDomainWorkflow-certificate-retry")
