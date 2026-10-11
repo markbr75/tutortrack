@@ -72,13 +72,20 @@ def _invalid(field: str, message: str) -> BusinessRuleViolation:
     return BusinessRuleViolation(message, extra={"errors": {field: [message]}})
 
 
-def bump_site_revision() -> None:
+def bump_site_revision(organisation_id: Any = None) -> None:
     """Invalidate cached website pages (CDN keys include the revision)."""
-    key = f"sites:rev:{require_organisation_id()}"
+    key = f"sites:rev:{organisation_id or require_organisation_id()}"
     try:
         cache.incr(key)
     except ValueError:
         cache.set(key, 2, None)
+
+
+def _bump_after_commit() -> None:
+    """Bump once the transaction commits. The organisation is captured now: the commit can
+    happen after the tenant context has closed (e.g. seeding in one outer transaction)."""
+    organisation_id = require_organisation_id()
+    transaction.on_commit(lambda: bump_site_revision(organisation_id))
 
 
 def site_revision(organisation_id: Any) -> int:
@@ -152,7 +159,7 @@ def save_brand_kit(*, branch: Any = None, **changes: Any) -> BrandKit:
         ),
         branch_id=branch.pk if branch is not None else None,
     )
-    transaction.on_commit(bump_site_revision)
+    _bump_after_commit()
     return kit
 
 
@@ -164,7 +171,7 @@ def delete_brand_kit(kit: BrandKit) -> None:
         )
     audit.record(kit, "delete", {"branch": [str(kit.branch_id), None]})
     kit.delete()
-    transaction.on_commit(bump_site_revision)
+    _bump_after_commit()
 
 
 # --- widgets -------------------------------------------------------------------------------------
@@ -293,7 +300,7 @@ def save_testimonial(testimonial: Testimonial | None = None, **changes: Any) -> 
                 setattr(obj, field, changes[field])
         obj.full_clean(exclude=["organisation", "created_by", "updated_by"])
         obj.save()
-    transaction.on_commit(bump_site_revision)
+    _bump_after_commit()
     return obj
 
 
@@ -301,7 +308,7 @@ def save_testimonial(testimonial: Testimonial | None = None, **changes: Any) -> 
 def delete_testimonial(testimonial: Testimonial) -> None:
     audit.record(testimonial, "delete", {"author": [testimonial.author, None]})
     testimonial.delete()
-    transaction.on_commit(bump_site_revision)
+    _bump_after_commit()
 
 
 # --- public tutor profiles (FR-24-3/5) -----------------------------------------------------------
@@ -425,7 +432,7 @@ def approve_profile(profile: PublicProfile, user: Any) -> PublicProfile:
             subject_id=profile.pk, tutor_id=str(profile.tutor_id), slug=profile.slug
         )
     )
-    transaction.on_commit(bump_site_revision)
+    _bump_after_commit()
     return profile
 
 
@@ -456,7 +463,7 @@ def hide_profile(profile: PublicProfile) -> PublicProfile:
         profile.save()
     _set_listing(profile.tutor, False)
     publish(events.PublicProfileHidden(subject_id=profile.pk, tutor_id=str(profile.tutor_id)))
-    transaction.on_commit(bump_site_revision)
+    _bump_after_commit()
     return profile
 
 
@@ -587,7 +594,7 @@ def update_site(site: Site, **changes: Any) -> Site:
             site.published_at = now() if site.published else None
             publish(events.SitePublished(subject_id=site.pk, published=site.published))
         site.save()
-    transaction.on_commit(bump_site_revision)
+    _bump_after_commit()
     return site
 
 
@@ -642,7 +649,7 @@ def update_page(page: SitePage, **changes: Any) -> SitePage:
             page.status = SitePage.Status.CHANGED
         page.save()
     if "path" in changes or "show_in_nav" in changes or "position" in changes:
-        transaction.on_commit(bump_site_revision)
+        _bump_after_commit()
     return page
 
 
@@ -652,7 +659,7 @@ def delete_page(page: SitePage) -> None:
         raise BusinessRuleViolation(_("The home page can't be deleted."))
     audit.record(page, "delete", {"path": [page.path, None]})
     page.delete()
-    transaction.on_commit(bump_site_revision)
+    _bump_after_commit()
 
 
 @transaction.atomic
@@ -677,7 +684,7 @@ def publish_page(page: SitePage, user: Any) -> SitePageVersion:
         page.status = SitePage.Status.PUBLISHED
         page.save()
     publish(events.SitePagePublished(subject_id=page.pk, path=page.path, number=number))
-    transaction.on_commit(bump_site_revision)
+    _bump_after_commit()
     return version
 
 
@@ -689,7 +696,7 @@ def unpublish_page(page: SitePage) -> SitePage:
         page.live_version = None
         page.status = SitePage.Status.DRAFT
         page.save()
-    transaction.on_commit(bump_site_revision)
+    _bump_after_commit()
     return page
 
 

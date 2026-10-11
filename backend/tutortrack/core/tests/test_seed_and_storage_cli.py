@@ -13,10 +13,12 @@ from tutortrack.tenancy.models import Organisation
 
 
 @pytest.mark.django_db
-def test_seed_demo_is_idempotent(settings):
+def test_seed_demo_is_idempotent(settings, django_capture_on_commit_callbacks):
     settings.DEBUG = True
     for _ in range(2):
-        call_command("seed_demo", stdout=StringIO())
+        # Run the commit hooks too: they fire after the seeding's tenant contexts have closed.
+        with django_capture_on_commit_callbacks(execute=True):
+            call_command("seed_demo", stdout=StringIO())
     assert User.objects.filter(email="admin@tutortrack.localhost", is_superuser=True).count() == 1
     assert Organisation.objects.get(slug="brightminds").name == "Bright Minds Tutoring"
     assert FeatureFlag.objects.filter(key="courses").exists()
