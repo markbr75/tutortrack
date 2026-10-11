@@ -14,6 +14,7 @@ import { PaymentsSettingsPage } from "./payments/PaymentsPages";
 import { AvailabilityPage } from "./calendar/AvailabilityPage";
 import { CalendarPage } from "./calendar/CalendarPage";
 import { CataloguePage } from "./catalogue/CataloguePage";
+import { AccountingPage } from "./accounting/AccountingPage";
 import { IntegrationsPage } from "./integrations/IntegrationsPage";
 import { NotificationSettingsPage } from "./comms/NotificationSettingsPage";
 import { AnnouncementsPage } from "./portal/AnnouncementsPage";
@@ -276,6 +277,7 @@ const developerRoute = appPage("/developer", DeveloperPage);
 const developerDocsRoute = appPage("/developer/docs", DeveloperDocsPage);
 const marketplaceRoute = appPage("/settings/marketplace", MarketplacePage);
 const oauthConsentRoute = appPage("/oauth/authorize", OAuthConsentPage);
+const accountingRoute = appPage("/settings/accounting", AccountingPage);
 const payRunsRoute = appPage("/payroll", PayRunsPage);
 const payExpensesRoute = appPage("/payroll/expenses", ExpensesPage);
 const payItemsRoute = appPage("/payroll/items", PayItemsPage);
@@ -398,6 +400,7 @@ const routeTree = rootRoute.addChildren([
     developerDocsRoute,
     marketplaceRoute,
     oauthConsentRoute,
+    accountingRoute,
     payRunsRoute,
     payExpensesRoute,
     payItemsRoute,

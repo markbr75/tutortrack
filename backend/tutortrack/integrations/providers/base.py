@@ -42,6 +42,13 @@ class NotFound(ProviderError):
     retryable = False
 
 
+class Rejected(ProviderError):
+    """The provider refused the request as invalid (400/409/422): resending it unchanged
+    won't help. The message is the provider's own explanation."""
+
+    retryable = False
+
+
 class SyncTokenExpired(ProviderError):
     """The incremental sync token is no longer valid: do a full sync."""
 
@@ -62,6 +69,9 @@ class ProviderSpec:
     credential_fields: tuple[str, ...] = ()  # for auth == "credentials"
     video_key: str = ""  # the video provider this account powers (google -> google_meet)
     poll_minutes: int = 5  # calendar polling fallback
+    # Who may connect/disconnect it at organisation level besides ``integrations.manage``
+    # (e.g. finance for accounting: ``integrations.accounting.manage``).
+    manage_permission: str = ""
 
 
 @dataclass(frozen=True)

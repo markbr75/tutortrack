@@ -6,6 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api, usePermission } from "../api";
+import { RecordSyncBadge } from "../accounting/SyncBadge";
 import { ErrorList } from "../calendar/ErrorList";
 
 type Invoice = components["schemas"]["InvoiceDetail"];
@@ -150,6 +151,7 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
           <h1 className="text-2xl font-semibold">
             {inv.number || t("billing.draftInvoice")}{" "}
             <StatusBadge status={inv.status} overdue={inv.is_overdue} />
+            {inv.status !== "draft" ? <RecordSyncBadge objectType="invoice" id={inv.id} /> : null}
           </h1>
           <p className="text-sm text-muted-foreground">
             <Link

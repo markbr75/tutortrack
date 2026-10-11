@@ -24,7 +24,7 @@ from typing import Any
 
 import structlog
 
-from .base import AuthError, NotFound, ProviderError, RateLimited, SyncTokenExpired
+from .base import AuthError, NotFound, ProviderError, RateLimited, Rejected, SyncTokenExpired
 
 logger = structlog.get_logger(__name__)
 RETRIES = 3
@@ -113,6 +113,8 @@ def request(
                 raise ProviderError(f"The provider had an error ({status}).") from exc
             if 300 <= status < 400:
                 return Response(status, exc.headers, payload)
+            if status in (400, 409, 422):
+                raise Rejected(_message(payload, f"The provider refused ({status}).")) from exc
             raise ProviderError(_message(payload, f"The provider refused ({status}).")) from exc
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
             if attempt <= retries:
@@ -129,11 +131,31 @@ def _retry_after(headers: Any, attempt: int) -> float:
         return min(2 ** (attempt - 1), 30)
 
 
+def _validation_messages(data: dict[str, Any]) -> str:
+    """Xero ``Elements[].ValidationErrors[].Message`` and QuickBooks
+    ``Fault.Error[].Detail``: the explanations users can act on."""
+    found: list[str] = []
+    for element in data.get("Elements") or []:
+        for error in (element or {}).get("ValidationErrors") or []:
+            found.append(str(error.get("Message", "")))
+    fault = data.get("Fault")
+    if isinstance(fault, dict):
+        for error in fault.get("Error") or []:
+            found.append(str(error.get("Detail") or error.get("Message") or ""))
+    return "; ".join(m for m in found if m)
+
+
 def _message(payload: bytes, default: str) -> str:
     try:
         data = json.loads(payload)
     except (ValueError, TypeError):
         return default
+    if isinstance(data, dict):
+        detailed = _validation_messages(data)
+        if detailed:
+            return detailed[:300]
+        if isinstance(data.get("Message"), str) and "error" not in data:
+            return str(data["Message"])[:300]
     error = data.get("error") if isinstance(data, dict) else None
     if isinstance(error, dict):
         return str(error.get("message") or default)[:300]

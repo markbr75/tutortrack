@@ -35,7 +35,8 @@
     "analytics": "Reports and dashboards",
     "integrations": "Integrations",
     "developer": "Developer",
-    "marketplace": "Integrations"
+    "marketplace": "Integrations",
+    "accounting": "Accounting"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -2730,5 +2731,98 @@
     "allow": "Allow",
     "deny": "Deny",
     "invalidTitle": "This connection request isn't valid"
+  },
+  "accounting": {
+    "title": "Accounting",
+    "help": "Keep your books up to date without double entry: invoices, credit notes, payments, refunds, payouts and tutor bills go to Xero or QuickBooks Online.",
+    "simulated": "No Xero or QuickBooks keys are set up, so a simulated ledger stands in for the real one.",
+    "connected": "Connected. Choose your accounts below, then switch sync on.",
+    "notConnected": "No accounting package is connected yet.",
+    "connect": "Connect {{provider}}",
+    "providers": {
+      "xero": "Xero",
+      "quickbooks": "QuickBooks Online",
+      "export": "Export codes"
+    },
+    "refresh": "Refresh accounts",
+    "lockDate": "Locked up to {{date}}",
+    "options": "What syncs",
+    "mode": "Sales",
+    "modes": {
+      "individual": "Each invoice, payment and credit note",
+      "summary": "A daily summary journal"
+    },
+    "startDate": "Sync from",
+    "startDateHelp": "Nothing dated earlier is sent unless you run a backfill.",
+    "syncBills": "Send tutor bills and payouts",
+    "attachPdf": "Attach our invoice PDF",
+    "lockBehaviour": "When a period is locked",
+    "lock": {
+      "post_to_open": "Post on the first open date, with a note",
+      "hold": "Hold it until the period is unlocked"
+    },
+    "saved": "Saved.",
+    "mappings": "Mappings",
+    "mappingsFor": "{{provider}} mappings",
+    "problems": "Before sync can start:",
+    "mappingsComplete": "All required accounts and tax codes are mapped.",
+    "accounts": "Accounts",
+    "notMapped": "Not mapped",
+    "noTracking": "No tracking",
+    "purchaseTax": "Tax code for VAT on tutor self-billing invoices",
+    "specific": "Different accounts by service, product or payment method",
+    "revenueFor": "Sales: {{name}}",
+    "clearingFor": "Received by {{name}}",
+    "expenseFor": "Expense: {{name}}",
+    "taxes": "Tax codes",
+    "noTax": "No tax",
+    "tracking": "Branches (tracking categories or classes)",
+    "saveMappings": "Save mappings",
+    "sync": "Sync",
+    "syncOn": "Sync is on for records from {{date}}.",
+    "syncOff": "Sync is off.",
+    "backfillFrom": "Also send history from (optional)",
+    "backfillHelp": "Sent in small batches; you can keep working.",
+    "enable": "Switch sync on",
+    "disable": "Switch sync off",
+    "cancelBackfill": "Stop",
+    "backfill": {
+      "running": "Sending history: {{synced}} sent, {{failed}} with errors so far.",
+      "done": "History sent: {{synced}} records, {{failed}} with errors.",
+      "cancelled": "History sending stopped after {{synced}} records."
+    },
+    "dashboard": "Sync status",
+    "status": {
+      "synced": "Synced",
+      "pending": "Waiting",
+      "error": "Errors",
+      "skipped": "Skipped"
+    },
+    "errors": "Needs attention",
+    "noErrors": "Nothing needs attention.",
+    "retry": "Retry",
+    "skip": "Skip",
+    "retryAll": "Retry all",
+    "recent": "Recent activity",
+    "badge": {
+      "synced": "In {{provider}}",
+      "pending": "Syncing to {{provider}}",
+      "error": "{{provider}} sync error",
+      "skipped": "Not sent to {{provider}}"
+    },
+    "export": "General ledger export",
+    "exportHelp": "For Sage 50, MYOB, QuickBooks Desktop or any package that imports journals.",
+    "from": "From",
+    "to": "To",
+    "format": "Format",
+    "formats": {
+      "generic": "Generic GL journal (CSV)",
+      "sage50": "Sage 50 (CSV)",
+      "myob": "MYOB (CSV)",
+      "iif": "QuickBooks Desktop (IIF)"
+    },
+    "mappingSet": "Account codes",
+    "exportCodes": "Account codes for exports",
+    "download": "Download export"
   }
 }

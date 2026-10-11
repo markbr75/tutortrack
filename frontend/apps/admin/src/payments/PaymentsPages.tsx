@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, usePermission } from "../api";
+import { SyncBadge } from "../accounting/SyncBadge";
+import { useSyncStatuses } from "../accounting/useSyncStatuses";
 import { ErrorList } from "../calendar/ErrorList";
 import { useCursorList } from "../lists";
 
@@ -155,6 +157,10 @@ export function PaymentsList({ clientId }: { clientId?: string }) {
       }),
     ),
   );
+  const synced = useSyncStatuses(
+    "payment",
+    list.rows.map((p) => p.id),
+  );
   if (list.query.isPending) return <Spinner className="size-5" label={t("grid.loading")} />;
   if (!list.rows.length) return <p className="text-sm text-muted-foreground">{t("grid.empty")}</p>;
   return (
@@ -171,6 +177,7 @@ export function PaymentsList({ clientId }: { clientId?: string }) {
             <span className="flex items-center gap-2">
               <strong>{formatMoney(p.amount, i18n.language)}</strong>
               <span className="text-muted-foreground">{t(`payments.status.${p.status}`)}</span>
+              <SyncBadge record={synced.data?.[p.id]} />
               {canRefund && (p.status === "succeeded" || p.status === "partially_refunded") ? (
                 <Button size="sm" variant="ghost" onClick={() => setRefunding(p.id)}>
                   {t("payments.refund")}

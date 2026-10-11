@@ -79,6 +79,1121 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/accounting/connections": {
+            "get": {
+                "operationId": "accounting_connections_list",
+                "description": "Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping\nproblems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``\n(individual records or a daily summary journal), ``start_date`` (nothing earlier\nsyncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAccountingConnectionList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "accounting_connections_create",
+                "description": "Set up the accounting side of a just-connected Xero/QuickBooks account\n(idempotent; the ``integration.connected`` event does the same).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdoptConnectionRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdoptConnectionRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdoptConnectionRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountingConnection"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/connections/{id}": {
+            "get": {
+                "operationId": "accounting_connections_retrieve",
+                "description": "Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping\nproblems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``\n(individual records or a daily summary journal), ``start_date`` (nothing earlier\nsyncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this accounting connection.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountingConnection"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "patch": {
+                "operationId": "accounting_connections_partial_update",
+                "description": "Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping\nproblems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``\n(individual records or a daily summary journal), ``start_date`` (nothing earlier\nsyncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this accounting connection.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAccountingConnectionRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAccountingConnectionRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAccountingConnectionRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountingConnection"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/connections/{id}/backfill": {
+            "post": {
+                "operationId": "accounting_connections_backfill_create",
+                "description": "Sync history from ``since`` (resumable; records already synced are skipped).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this accounting connection.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BackfillRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BackfillRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BackfillRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountingConnection"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/connections/{id}/cancel-backfill": {
+            "post": {
+                "operationId": "accounting_connections_cancel_backfill_create",
+                "description": "Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping\nproblems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``\n(individual records or a daily summary journal), ``start_date`` (nothing earlier\nsyncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this accounting connection.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountingConnection"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/connections/{id}/chart": {
+            "get": {
+                "operationId": "accounting_connections_chart_retrieve",
+                "description": "The ledger's accounts, tax codes and tracking categories as last fetched.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this accounting connection.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Chart"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/connections/{id}/disable": {
+            "post": {
+                "operationId": "accounting_connections_disable_create",
+                "description": "Switch sync off. Nothing already in the ledger changes.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this accounting connection.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountingConnection"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/connections/{id}/disconnect": {
+            "post": {
+                "operationId": "accounting_connections_disconnect_create",
+                "description": "Revoke our access at the provider; sync stops. The ledger keeps its records.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this accounting connection.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountingConnection"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/connections/{id}/enable": {
+            "post": {
+                "operationId": "accounting_connections_enable_create",
+                "description": "Switch sync on (the mappings must be complete). ``backfill_from`` also syncs\nhistory from that date, in paced batches.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this accounting connection.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EnableRequest"
+                            },
+                            "examples": {
+                                "WithHistory": {
+                                    "value": {
+                                        "backfill_from": "2026-04-01"
+                                    },
+                                    "summary": "With history"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EnableRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EnableRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountingConnection"
+                                },
+                                "examples": {
+                                    "WithHistory": {
+                                        "value": {
+                                            "backfill_from": "2026-04-01"
+                                        },
+                                        "summary": "With history"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/connections/{id}/refresh": {
+            "post": {
+                "operationId": "accounting_connections_refresh_create",
+                "description": "Fetch the chart of accounts, tax codes, tracking categories and lock date.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this accounting connection.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountingConnection"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/export": {
+            "get": {
+                "operationId": "accounting_export_retrieve",
+                "description": "A general ledger export for the period: generic CSV journal, Sage 50, MYOB or\nQuickBooks Desktop (IIF). Audited as an export.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "end",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "file_format",
+                        "schema": {
+                            "enum": [
+                                "generic",
+                                "sage50",
+                                "myob",
+                                "iif"
+                            ],
+                            "type": "string",
+                            "default": "generic",
+                            "minLength": 1
+                        },
+                        "description": "* `generic` - Generic GL journal (CSV)\n* `sage50` - Sage 50 (CSV)\n* `myob` - MYOB (CSV)\n* `iif` - QuickBooks Desktop (IIF)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "mapping_set",
+                        "schema": {
+                            "enum": [
+                                "export",
+                                "xero",
+                                "quickbooks"
+                            ],
+                            "type": "string",
+                            "default": "export",
+                            "minLength": 1
+                        },
+                        "description": "* `export` - export\n* `xero` - xero\n* `quickbooks` - quickbooks"
+                    },
+                    {
+                        "in": "query",
+                        "name": "start",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/mappings/{provider}": {
+            "get": {
+                "operationId": "accounting_mappings_retrieve",
+                "description": "A mapping set (a provider's, or ``export`` for GL files) and what is missing.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "provider",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "export",
+                                "quickbooks",
+                                "xero"
+                            ]
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MappingSet"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "put": {
+                "operationId": "accounting_mappings_update",
+                "description": "Replace the mapping set (accounts per kind and key, tax codes per tax rate,\ntracking options per branch).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "provider",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "export",
+                                "quickbooks",
+                                "xero"
+                            ]
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MappingSetRequest"
+                            },
+                            "examples": {
+                                "Xero": {
+                                    "value": {
+                                        "accounts": [
+                                            {
+                                                "kind": "revenue",
+                                                "key": "default",
+                                                "external_id": "acc-200"
+                                            },
+                                            {
+                                                "kind": "clearing",
+                                                "key": "provider:stripe",
+                                                "external_id": "acc-091"
+                                            }
+                                        ],
+                                        "taxes": [
+                                            {
+                                                "tax_rate": null,
+                                                "external_id": "NONE"
+                                            }
+                                        ],
+                                        "tracking": []
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MappingSetRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MappingSetRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MappingSet"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/records": {
+            "get": {
+                "operationId": "accounting_records_list",
+                "description": "The sync dashboard: each record's status in the ledger (``pending``, ``synced``,\n``error`` with a readable reason, ``skipped``). Filter with ``status``,\n``object_type`` and ``object_id`` (comma-separated, for sync badges).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "connection",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "object_id",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated"
+                    },
+                    {
+                        "in": "query",
+                        "name": "object_type",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "bill",
+                                "bill_payment",
+                                "contact",
+                                "credit_note",
+                                "invoice",
+                                "journal",
+                                "pay_run",
+                                "pay_statement",
+                                "payment",
+                                "provider_payout",
+                                "refund",
+                                "supplier",
+                                "write_off"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "error",
+                                "pending",
+                                "skipped",
+                                "synced"
+                            ]
+                        }
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedExternalRecordLinkList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/records/{id}": {
+            "get": {
+                "operationId": "accounting_records_retrieve",
+                "description": "The sync dashboard: each record's status in the ledger (``pending``, ``synced``,\n``error`` with a readable reason, ``skipped``). Filter with ``status``,\n``object_type`` and ``object_id`` (comma-separated, for sync badges).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this external record link.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExternalRecordDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/records/{id}/retry": {
+            "post": {
+                "operationId": "accounting_records_retry_create",
+                "description": "Try again, e.g. after fixing a mapping (\"re-map and retry\") or reconnecting.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this external record link.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExternalRecordLink"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/records/{id}/skip": {
+            "post": {
+                "operationId": "accounting_records_skip_create",
+                "description": "Leave this record out of the ledger (e.g. it was entered there by hand).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this external record link.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SkipRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SkipRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SkipRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExternalRecordLink"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/records/retry-failed": {
+            "post": {
+                "operationId": "accounting_records_retry_failed_create",
+                "description": "Retry every record in error (up to 200).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RetryResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/announcements": {
             "get": {
                 "operationId": "announcements_list",
@@ -13892,6 +15007,7 @@
                         "schema": {
                             "type": "string",
                             "enum": [
+                                "accounting",
                                 "calendar",
                                 "video"
                             ]
@@ -14184,6 +15300,13 @@
                     {
                         "in": "query",
                         "name": "error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "realmId",
                         "schema": {
                             "type": "string"
                         }
@@ -37577,6 +38700,60 @@
                     "name"
                 ]
             },
+            "AccountMappingRow": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "type": "string"
+                    },
+                    "key": {
+                        "type": "string",
+                        "default": "default",
+                        "maxLength": 80
+                    },
+                    "external_id": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "code": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "code",
+                    "external_id",
+                    "kind",
+                    "name"
+                ]
+            },
+            "AccountMappingRowRequest": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "key": {
+                        "type": "string",
+                        "minLength": 1,
+                        "default": "default",
+                        "maxLength": 80
+                    },
+                    "external_id": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "external_id",
+                    "kind"
+                ]
+            },
             "AccountTypeEnum": {
                 "enum": [
                     "checking",
@@ -37584,6 +38761,189 @@
                 ],
                 "type": "string",
                 "description": "* `checking` - checking\n* `savings` - savings"
+            },
+            "AccountingConnection": {
+                "type": "object",
+                "description": "A ledger connection with its sync options, health and dashboard counts.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "connection": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "provider": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "provider_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "account_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "connection_error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "company_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "base_currency": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "lock_date": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "enabled_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "mode": {
+                        "$ref": "#/components/schemas/AccountingModeEnum"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "sync_bills": {
+                        "type": "boolean"
+                    },
+                    "attach_pdf": {
+                        "type": "boolean"
+                    },
+                    "lock_behaviour": {
+                        "$ref": "#/components/schemas/LockBehaviourEnum"
+                    },
+                    "chart_fetched_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_sync_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "simulated": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "stats": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AccountingStats"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "problems": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MappingProblem"
+                        },
+                        "readOnly": true
+                    },
+                    "backfill_progress": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/BackfillProgress"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "account_name",
+                    "backfill_progress",
+                    "base_currency",
+                    "chart_fetched_at",
+                    "company_name",
+                    "connection",
+                    "connection_error",
+                    "created_at",
+                    "enabled",
+                    "enabled_at",
+                    "id",
+                    "last_sync_at",
+                    "lock_date",
+                    "problems",
+                    "provider",
+                    "provider_name",
+                    "simulated",
+                    "stats",
+                    "status"
+                ]
+            },
+            "AccountingModeEnum": {
+                "enum": [
+                    "individual",
+                    "summary"
+                ],
+                "type": "string",
+                "description": "* `individual` - Each invoice, payment and credit note\n* `summary` - A daily summary journal"
+            },
+            "AccountingRecordStatusEnum": {
+                "enum": [
+                    "pending",
+                    "synced",
+                    "error",
+                    "skipped"
+                ],
+                "type": "string",
+                "description": "* `pending` - Waiting to sync\n* `synced` - Synced\n* `error` - Error\n* `skipped` - Skipped"
+            },
+            "AccountingStats": {
+                "type": "object",
+                "properties": {
+                    "pending": {
+                        "type": "integer"
+                    },
+                    "synced": {
+                        "type": "integer"
+                    },
+                    "error": {
+                        "type": "integer"
+                    },
+                    "skipped": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "error",
+                    "pending",
+                    "skipped",
+                    "synced"
+                ]
             },
             "AdHocChargeRequest": {
                 "type": "object",
@@ -37917,6 +39277,19 @@
                     "amount",
                     "description",
                     "tutor"
+                ]
+            },
+            "AdoptConnectionRequest": {
+                "type": "object",
+                "properties": {
+                    "connection": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The integration connection (Xero/QuickBooks)."
+                    }
+                },
+                "required": [
+                    "connection"
                 ]
             },
             "AffectedLesson": {
@@ -39751,6 +41124,47 @@
                     "windows"
                 ]
             },
+            "BackfillProgress": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string"
+                    },
+                    "since": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "synced": {
+                        "type": "integer"
+                    },
+                    "failed": {
+                        "type": "integer"
+                    },
+                    "skipped": {
+                        "type": "integer"
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "finished_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "BackfillRequest": {
+                "type": "object",
+                "properties": {
+                    "since": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                },
+                "required": [
+                    "since"
+                ]
+            },
             "Balances": {
                 "type": "object",
                 "properties": {
@@ -41448,6 +42862,109 @@
                 ],
                 "type": "string",
                 "description": "* `uninvoiced` - Not invoiced\n* `invoiced` - Invoiced\n* `void` - Void"
+            },
+            "Chart": {
+                "type": "object",
+                "properties": {
+                    "accounts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ChartAccount"
+                        }
+                    },
+                    "tax_codes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ChartTaxCode"
+                        }
+                    },
+                    "tracking": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ChartTracking"
+                        }
+                    }
+                },
+                "required": [
+                    "accounts",
+                    "tax_codes",
+                    "tracking"
+                ]
+            },
+            "ChartAccount": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "active",
+                    "code",
+                    "id",
+                    "name",
+                    "type"
+                ]
+            },
+            "ChartTaxCode": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "rate": {
+                        "type": "string"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "active",
+                    "id",
+                    "name",
+                    "rate"
+                ]
+            },
+            "ChartTracking": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "options"
+                ]
             },
             "ChecklistItem": {
                 "type": "object",
@@ -44487,6 +46004,17 @@
                     "subject"
                 ]
             },
+            "EnableRequest": {
+                "type": "object",
+                "properties": {
+                    "backfill_from": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true,
+                        "description": "Also sync history from this date."
+                    }
+                }
+            },
             "EndRequest": {
                 "type": "object",
                 "properties": {
@@ -45567,6 +47095,216 @@
                     "source",
                     "start",
                     "user"
+                ]
+            },
+            "ExternalRecordDetail": {
+                "type": "object",
+                "description": "One record's sync status in the ledger.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "connection": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "provider": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "object_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "object_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "label": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "external_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "external_number": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AccountingRecordStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "error_code": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "attempts": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "last_attempt_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "synced_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "posted_date": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "log": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SyncLogEntry"
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "attempts",
+                    "connection",
+                    "error",
+                    "error_code",
+                    "external_id",
+                    "external_number",
+                    "id",
+                    "label",
+                    "last_attempt_at",
+                    "log",
+                    "object_id",
+                    "object_type",
+                    "posted_date",
+                    "provider",
+                    "status",
+                    "synced_at",
+                    "updated_at"
+                ]
+            },
+            "ExternalRecordLink": {
+                "type": "object",
+                "description": "One record's sync status in the ledger.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "connection": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "provider": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "object_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "object_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "label": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "external_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "external_number": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AccountingRecordStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "error_code": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "attempts": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "last_attempt_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "synced_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "posted_date": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "attempts",
+                    "connection",
+                    "error",
+                    "error_code",
+                    "external_id",
+                    "external_number",
+                    "id",
+                    "label",
+                    "last_attempt_at",
+                    "object_id",
+                    "object_type",
+                    "posted_date",
+                    "provider",
+                    "status",
+                    "synced_at",
+                    "updated_at"
                 ]
             },
             "Factor": {
@@ -50095,6 +51833,14 @@
                 "type": "string",
                 "description": "* `centre` - Centre\n* `client_home` - Client's home\n* `tutor_home` - Tutor's home\n* `school` - School\n* `online` - Online\n* `other` - Other"
             },
+            "LockBehaviourEnum": {
+                "enum": [
+                    "post_to_open",
+                    "hold"
+                ],
+                "type": "string",
+                "description": "* `post_to_open` - Post on the first open date, with a note\n* `hold` - Hold it until the period is unlocked"
+            },
             "LockStateEnum": {
                 "enum": [
                     "unlocked",
@@ -50431,6 +52177,237 @@
                 },
                 "required": [
                     "subject_ids"
+                ]
+            },
+            "MappingKey": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "key",
+                    "name"
+                ]
+            },
+            "MappingKeyRequest": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "key",
+                    "name"
+                ]
+            },
+            "MappingKind": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "is_required": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "is_required",
+                    "kind",
+                    "name"
+                ]
+            },
+            "MappingKindRequest": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "is_required": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "is_required",
+                    "kind",
+                    "name"
+                ]
+            },
+            "MappingProblem": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "type": "string"
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "key",
+                    "kind",
+                    "message"
+                ]
+            },
+            "MappingProblemRequest": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "key",
+                    "kind",
+                    "message"
+                ]
+            },
+            "MappingSet": {
+                "type": "object",
+                "description": "A mapping set: accounts per kind and key, tax codes per tax rate, tracking per\nbranch; plus what is still missing and the keys that can be mapped.",
+                "properties": {
+                    "provider": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "accounts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AccountMappingRow"
+                        }
+                    },
+                    "taxes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TaxMappingRow"
+                        }
+                    },
+                    "tracking": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TrackingMappingRow"
+                        }
+                    },
+                    "kinds": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MappingKind"
+                        },
+                        "readOnly": true
+                    },
+                    "revenue_keys": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MappingKey"
+                        },
+                        "readOnly": true
+                    },
+                    "clearing_keys": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MappingKey"
+                        },
+                        "readOnly": true
+                    },
+                    "expense_keys": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MappingKey"
+                        },
+                        "readOnly": true
+                    },
+                    "tax_rates": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MappingKey"
+                        },
+                        "readOnly": true
+                    },
+                    "branches": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MappingKey"
+                        },
+                        "readOnly": true
+                    },
+                    "problems": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MappingProblem"
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "accounts",
+                    "branches",
+                    "clearing_keys",
+                    "expense_keys",
+                    "kinds",
+                    "problems",
+                    "provider",
+                    "revenue_keys",
+                    "tax_rates",
+                    "taxes",
+                    "tracking"
+                ]
+            },
+            "MappingSetRequest": {
+                "type": "object",
+                "description": "A mapping set: accounts per kind and key, tax codes per tax rate, tracking per\nbranch; plus what is still missing and the keys that can be mapped.",
+                "properties": {
+                    "accounts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AccountMappingRowRequest"
+                        }
+                    },
+                    "taxes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TaxMappingRowRequest"
+                        }
+                    },
+                    "tracking": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TrackingMappingRowRequest"
+                        }
+                    }
+                },
+                "required": [
+                    "accounts",
+                    "taxes",
+                    "tracking"
                 ]
             },
             "MarkPaidRequest": {
@@ -52063,6 +54040,11 @@
                         "type": "string",
                         "minLength": 1,
                         "maxLength": 4000
+                    },
+                    "account_id": {
+                        "type": "string",
+                        "description": "The account the provider named on the redirect (QuickBooks realmId).",
+                        "maxLength": 255
                     }
                 },
                 "required": [
@@ -53058,6 +55040,32 @@
                     "quantity_type"
                 ]
             },
+            "PaginatedAccountingConnectionList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AccountingConnection"
+                        }
+                    }
+                }
+            },
             "PaginatedAnnouncementList": {
                 "type": "object",
                 "required": [
@@ -53704,6 +55712,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/ExternalBusyBlock"
+                        }
+                    }
+                }
+            },
+            "PaginatedExternalRecordLinkList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ExternalRecordLink"
                         }
                     }
                 }
@@ -54802,6 +56836,29 @@
                     "token",
                     "uid"
                 ]
+            },
+            "PatchedAccountingConnectionRequest": {
+                "type": "object",
+                "description": "A ledger connection with its sync options, health and dashboard counts.",
+                "properties": {
+                    "mode": {
+                        "$ref": "#/components/schemas/AccountingModeEnum"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "sync_bills": {
+                        "type": "boolean"
+                    },
+                    "attach_pdf": {
+                        "type": "boolean"
+                    },
+                    "lock_behaviour": {
+                        "$ref": "#/components/schemas/LockBehaviourEnum"
+                    }
+                }
             },
             "PatchedApiKeyUpdateRequest": {
                 "type": "object",
@@ -62718,6 +64775,17 @@
                     "accept"
                 ]
             },
+            "RetryResult": {
+                "type": "object",
+                "properties": {
+                    "retried": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "retried"
+                ]
+            },
             "RevokeRequestRequest": {
                 "type": "object",
                 "properties": {
@@ -64695,6 +66763,16 @@
                 "type": "string",
                 "description": "* `s` - s\n* `m` - m\n* `l` - l"
             },
+            "SkipRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 300
+                    }
+                }
+            },
             "Skipped": {
                 "type": "object",
                 "properties": {
@@ -65894,6 +67972,52 @@
                     "reason"
                 ]
             },
+            "SyncLogEntry": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "outcome": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SyncOutcomeEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "message",
+                    "outcome"
+                ]
+            },
+            "SyncOutcomeEnum": {
+                "enum": [
+                    "created",
+                    "updated",
+                    "unchanged",
+                    "voided",
+                    "error",
+                    "retrying",
+                    "skipped"
+                ],
+                "type": "string",
+                "description": "* `created` - Created\n* `updated` - Updated\n* `unchanged` - Already up to date\n* `voided` - Voided\n* `error` - Error\n* `retrying` - Will retry\n* `skipped` - Skipped"
+            },
             "TOTPConfirmRequest": {
                 "type": "object",
                 "properties": {
@@ -66107,6 +68231,48 @@
                 ],
                 "type": "string",
                 "description": "* `open` - Open\n* `done` - Done\n* `cancelled` - Cancelled"
+            },
+            "TaxMappingRow": {
+                "type": "object",
+                "properties": {
+                    "tax_rate": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "external_id": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 200
+                    }
+                },
+                "required": [
+                    "external_id"
+                ]
+            },
+            "TaxMappingRowRequest": {
+                "type": "object",
+                "properties": {
+                    "tax_rate": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "external_id": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 200
+                    }
+                },
+                "required": [
+                    "external_id"
+                ]
             },
             "TaxRate": {
                 "type": "object",
@@ -66810,6 +68976,58 @@
                 ],
                 "type": "string",
                 "description": "* `paid` - paid\n* `redirect` - redirect"
+            },
+            "TrackingMappingRow": {
+                "type": "object",
+                "properties": {
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "category_id": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "option_id": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 200
+                    }
+                },
+                "required": [
+                    "branch",
+                    "category_id",
+                    "option_id"
+                ]
+            },
+            "TrackingMappingRowRequest": {
+                "type": "object",
+                "properties": {
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "category_id": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "option_id": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 200
+                    }
+                },
+                "required": [
+                    "branch",
+                    "category_id",
+                    "option_id"
+                ]
             },
             "TrialOutcomeEnum": {
                 "enum": [

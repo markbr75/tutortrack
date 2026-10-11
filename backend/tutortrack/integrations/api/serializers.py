@@ -91,6 +91,12 @@ class OAuthStartResultSerializer(serializers.Serializer):
 class OAuthCompleteSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=4000)
     state = serializers.CharField(max_length=4000)
+    account_id = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=255,
+        help_text="The account the provider named on the redirect (QuickBooks realmId).",
+    )
 
 
 class CredentialConnectSerializer(serializers.Serializer):

@@ -47,6 +47,11 @@ const NAV = [
     key: "nav.integrations",
     permission: "integrations.personal",
   },
+  {
+    to: "/settings/accounting",
+    key: "nav.accounting",
+    permission: "integrations.accounting.view",
+  },
   { to: "/settings/plan", key: "nav.plan", permission: "subscription.view" },
   { to: "/settings/marketplace", key: "nav.marketplace", permission: "org.settings.view" },
   { to: "/developer", key: "nav.developer", permission: "developer.webhook.view" },

@@ -25,9 +25,12 @@ from . import serializers as s
 AUTH = [IsAuthenticated, HasOrganisation]
 
 
-def _may_connect(user: Any, level: str) -> None:
-    codename = "integrations.manage" if level == "organisation" else "integrations.personal"
-    if not (has_perm(user, codename) or has_perm(user, "integrations.manage")):
+def _may_connect(user: Any, level: str, provider: str = "") -> None:
+    if level == "organisation":
+        if not selectors.may_manage_provider(user, provider):
+            raise PermissionDenied("You can't connect integrations.")
+        return
+    if not (has_perm(user, "integrations.personal") or has_perm(user, "integrations.manage")):
         raise PermissionDenied("You can't connect integrations.")
 
 
@@ -80,7 +83,9 @@ class IntegrationConnectionViewSet(
     @extend_schema(
         parameters=[
             OpenApiParameter("mine", bool, required=False),
-            OpenApiParameter("capability", str, required=False, enum=["calendar", "video"]),
+            OpenApiParameter(
+                "capability", str, required=False, enum=["calendar", "video", "accounting"]
+            ),
         ]
     )
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -107,7 +112,7 @@ class IntegrationConnectionViewSet(
         payload = s.CredentialConnectSerializer(data=request.data)
         payload.is_valid(raise_exception=True)
         data = payload.validated_data
-        _may_connect(request.user, data["level"])
+        _may_connect(request.user, data["level"], data["provider"])
         connection = services.connect_with_credentials(request.user, **data)
         return Response(
             s.IntegrationConnectionSerializer(connection).data, status=status.HTTP_201_CREATED
@@ -154,7 +159,7 @@ class OAuthStartView(APIView):
         payload = s.OAuthStartSerializer(data=request.data)
         payload.is_valid(raise_exception=True)
         data = payload.validated_data
-        _may_connect(request.user, data["level"])
+        _may_connect(request.user, data["level"], data["provider"])
         url = services.start_oauth(
             request.user, provider=data["provider"], level=data["level"], next_path=data["next"]
         )
@@ -173,6 +178,7 @@ class OAuthCallbackView(APIView):
             OpenApiParameter("code", str),
             OpenApiParameter("state", str),
             OpenApiParameter("error", str, required=False),
+            OpenApiParameter("realmId", str, required=False),
         ],
         responses={302: None},
     )
@@ -193,6 +199,9 @@ class OAuthCallbackView(APIView):
             if request.query_params.get("error") or not request.query_params.get("code")
             else {"code": request.query_params["code"], "state": token}
         )
+        # Providers that name the connected account only on the redirect (QuickBooks).
+        if "code" in params and request.query_params.get("realmId"):
+            params["account_id"] = request.query_params["realmId"][:100]
         separator = "&" if "?" in state.next_path else "?"
         return HttpResponseRedirect(
             f"{base}{state.next_path}{separator}{urllib.parse.urlencode(params)}"

@@ -21,6 +21,321 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/accounting/connections": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping
+     *     problems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
+     *     (individual records or a daily summary journal), ``start_date`` (nothing earlier
+     *     syncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.
+     */
+    get: operations["accounting_connections_list"];
+    put?: never;
+    /**
+     * @description Set up the accounting side of a just-connected Xero/QuickBooks account
+     *     (idempotent; the ``integration.connected`` event does the same).
+     */
+    post: operations["accounting_connections_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/connections/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping
+     *     problems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
+     *     (individual records or a daily summary journal), ``start_date`` (nothing earlier
+     *     syncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.
+     */
+    get: operations["accounting_connections_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping
+     *     problems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
+     *     (individual records or a daily summary journal), ``start_date`` (nothing earlier
+     *     syncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.
+     */
+    patch: operations["accounting_connections_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/accounting/connections/{id}/backfill": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Sync history from ``since`` (resumable; records already synced are skipped). */
+    post: operations["accounting_connections_backfill_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/connections/{id}/cancel-backfill": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping
+     *     problems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
+     *     (individual records or a daily summary journal), ``start_date`` (nothing earlier
+     *     syncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.
+     */
+    post: operations["accounting_connections_cancel_backfill_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/connections/{id}/chart": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The ledger's accounts, tax codes and tracking categories as last fetched. */
+    get: operations["accounting_connections_chart_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/connections/{id}/disable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Switch sync off. Nothing already in the ledger changes. */
+    post: operations["accounting_connections_disable_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/connections/{id}/disconnect": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Revoke our access at the provider; sync stops. The ledger keeps its records. */
+    post: operations["accounting_connections_disconnect_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/connections/{id}/enable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Switch sync on (the mappings must be complete). ``backfill_from`` also syncs
+     *     history from that date, in paced batches.
+     */
+    post: operations["accounting_connections_enable_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/connections/{id}/refresh": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Fetch the chart of accounts, tax codes, tracking categories and lock date. */
+    post: operations["accounting_connections_refresh_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description A general ledger export for the period: generic CSV journal, Sage 50, MYOB or
+     *     QuickBooks Desktop (IIF). Audited as an export.
+     */
+    get: operations["accounting_export_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/mappings/{provider}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description A mapping set (a provider's, or ``export`` for GL files) and what is missing. */
+    get: operations["accounting_mappings_retrieve"];
+    /**
+     * @description Replace the mapping set (accounts per kind and key, tax codes per tax rate,
+     *     tracking options per branch).
+     */
+    put: operations["accounting_mappings_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/records": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The sync dashboard: each record's status in the ledger (``pending``, ``synced``,
+     *     ``error`` with a readable reason, ``skipped``). Filter with ``status``,
+     *     ``object_type`` and ``object_id`` (comma-separated, for sync badges).
+     */
+    get: operations["accounting_records_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/records/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The sync dashboard: each record's status in the ledger (``pending``, ``synced``,
+     *     ``error`` with a readable reason, ``skipped``). Filter with ``status``,
+     *     ``object_type`` and ``object_id`` (comma-separated, for sync badges).
+     */
+    get: operations["accounting_records_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/records/{id}/retry": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Try again, e.g. after fixing a mapping ("re-map and retry") or reconnecting. */
+    post: operations["accounting_records_retry_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/records/{id}/skip": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Leave this record out of the ledger (e.g. it was entered there by hand). */
+    post: operations["accounting_records_skip_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/records/retry-failed": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Retry every record in error (up to 200). */
+    post: operations["accounting_records_retry_failed_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/announcements": {
     parameters: {
       query?: never;
@@ -9597,12 +9912,81 @@ export interface components {
       balances: components["schemas"]["BalancesOut"];
       auto_pay: boolean;
     };
+    AccountMappingRow: {
+      kind: string;
+      /** @default default */
+      key: string;
+      external_id: string;
+      readonly code: string;
+      readonly name: string;
+    };
+    AccountMappingRowRequest: {
+      kind: string;
+      /** @default default */
+      key: string;
+      external_id: string;
+    };
     /**
      * @description * `checking` - checking
      *     * `savings` - savings
      * @enum {string}
      */
     AccountTypeEnum: "checking" | "savings";
+    /** @description A ledger connection with its sync options, health and dashboard counts. */
+    AccountingConnection: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly connection: string;
+      readonly provider: string;
+      readonly provider_name: string;
+      readonly status: string;
+      readonly account_name: string;
+      readonly connection_error: string;
+      readonly company_name: string;
+      readonly base_currency: string;
+      /** Format: date */
+      readonly lock_date: string | null;
+      readonly enabled: boolean;
+      /** Format: date-time */
+      readonly enabled_at: string | null;
+      mode?: components["schemas"]["AccountingModeEnum"];
+      /** Format: date */
+      start_date?: string | null;
+      sync_bills?: boolean;
+      attach_pdf?: boolean;
+      lock_behaviour?: components["schemas"]["LockBehaviourEnum"];
+      /** Format: date-time */
+      readonly chart_fetched_at: string | null;
+      /** Format: date-time */
+      readonly last_sync_at: string | null;
+      readonly simulated: boolean;
+      readonly stats: components["schemas"]["AccountingStats"];
+      readonly problems: components["schemas"]["MappingProblem"][];
+      readonly backfill_progress: components["schemas"]["BackfillProgress"];
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `individual` - Each invoice, payment and credit note
+     *     * `summary` - A daily summary journal
+     * @enum {string}
+     */
+    AccountingModeEnum: "individual" | "summary";
+    /**
+     * @description * `pending` - Waiting to sync
+     *     * `synced` - Synced
+     *     * `error` - Error
+     *     * `skipped` - Skipped
+     * @enum {string}
+     */
+    AccountingRecordStatusEnum: "pending" | "synced" | "error" | "skipped";
+    AccountingStats: {
+      pending: number;
+      synced: number;
+      error: number;
+      skipped: number;
+    };
     AdHocChargeRequest: {
       /** Format: uuid */
       client: string;
@@ -9718,6 +10102,13 @@ export interface components {
         /** @example GBP */
         currency: string;
       };
+    };
+    AdoptConnectionRequest: {
+      /**
+       * Format: uuid
+       * @description The integration connection (Xero/QuickBooks).
+       */
+      connection: string;
     };
     AffectedLesson: {
       id: string;
@@ -10335,6 +10726,22 @@ export interface components {
       timezone: string;
       windows: components["schemas"]["WindowRequest"][];
     };
+    BackfillProgress: {
+      status?: string;
+      /** Format: date */
+      since?: string;
+      synced?: number;
+      failed?: number;
+      skipped?: number;
+      /** Format: date-time */
+      started_at?: string;
+      /** Format: date-time */
+      finished_at?: string;
+    };
+    BackfillRequest: {
+      /** Format: date */
+      since: string;
+    };
     Balances: {
       currency: string;
       ledger: components["schemas"]["MoneyOut"];
@@ -10881,6 +11288,29 @@ export interface components {
      * @enum {string}
      */
     ChargeStatusEnum: "uninvoiced" | "invoiced" | "void";
+    Chart: {
+      accounts: components["schemas"]["ChartAccount"][];
+      tax_codes: components["schemas"]["ChartTaxCode"][];
+      tracking: components["schemas"]["ChartTracking"][];
+    };
+    ChartAccount: {
+      id: string;
+      code: string;
+      name: string;
+      type: string;
+      active: boolean;
+    };
+    ChartTaxCode: {
+      id: string;
+      name: string;
+      rate: string;
+      active: boolean;
+    };
+    ChartTracking: {
+      id: string;
+      name: string;
+      options: string[][];
+    };
     ChecklistItem: {
       key: string;
       label: string;
@@ -11857,6 +12287,13 @@ export interface components {
       subject: string;
       searches: number;
     };
+    EnableRequest: {
+      /**
+       * Format: date
+       * @description Also sync history from this date.
+       */
+      backfill_from?: string | null;
+    };
     EndRequest: {
       /** Format: date */
       end_date?: string;
@@ -12200,6 +12637,57 @@ export interface components {
       /** Format: date-time */
       readonly end: string;
       readonly all_day: boolean;
+    };
+    /** @description One record's sync status in the ledger. */
+    ExternalRecordDetail: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly connection: string;
+      readonly provider: string;
+      readonly object_type: string;
+      readonly object_id: string;
+      readonly label: string;
+      readonly external_id: string;
+      readonly external_number: string;
+      readonly status: components["schemas"]["AccountingRecordStatusEnum"];
+      readonly error: string;
+      readonly error_code: string;
+      readonly attempts: number;
+      /** Format: date-time */
+      readonly last_attempt_at: string | null;
+      /** Format: date-time */
+      readonly synced_at: string | null;
+      /** Format: date */
+      readonly posted_date: string | null;
+      /** Format: date-time */
+      readonly updated_at: string;
+      readonly log: components["schemas"]["SyncLogEntry"][];
+    };
+    /** @description One record's sync status in the ledger. */
+    ExternalRecordLink: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly connection: string;
+      readonly provider: string;
+      readonly object_type: string;
+      readonly object_id: string;
+      readonly label: string;
+      readonly external_id: string;
+      readonly external_number: string;
+      readonly status: components["schemas"]["AccountingRecordStatusEnum"];
+      readonly error: string;
+      readonly error_code: string;
+      readonly attempts: number;
+      /** Format: date-time */
+      readonly last_attempt_at: string | null;
+      /** Format: date-time */
+      readonly synced_at: string | null;
+      /** Format: date */
+      readonly posted_date: string | null;
+      /** Format: date-time */
+      readonly updated_at: string;
     };
     Factor: {
       /** Format: double */
@@ -13742,6 +14230,12 @@ export interface components {
      */
     LocationTypeEnum: "centre" | "client_home" | "tutor_home" | "school" | "online" | "other";
     /**
+     * @description * `post_to_open` - Post on the first open date, with a note
+     *     * `hold` - Hold it until the period is unlocked
+     * @enum {string}
+     */
+    LockBehaviourEnum: "post_to_open" | "hold";
+    /**
      * @description * `unlocked` - Unlocked
      *     * `invoiced` - Invoiced
      *     * `paid` - Paid
@@ -13849,6 +14343,60 @@ export interface components {
     };
     ManualRunRequest: {
       subject_ids: string[];
+    };
+    MappingKey: {
+      key: string;
+      name: string;
+    };
+    MappingKeyRequest: {
+      key: string;
+      name: string;
+    };
+    MappingKind: {
+      kind: string;
+      name: string;
+      is_required: boolean;
+    };
+    MappingKindRequest: {
+      kind: string;
+      name: string;
+      is_required: boolean;
+    };
+    MappingProblem: {
+      kind: string;
+      key: string;
+      message: string;
+    };
+    MappingProblemRequest: {
+      kind: string;
+      key: string;
+      message: string;
+    };
+    /**
+     * @description A mapping set: accounts per kind and key, tax codes per tax rate, tracking per
+     *     branch; plus what is still missing and the keys that can be mapped.
+     */
+    MappingSet: {
+      readonly provider: string;
+      accounts: components["schemas"]["AccountMappingRow"][];
+      taxes: components["schemas"]["TaxMappingRow"][];
+      tracking: components["schemas"]["TrackingMappingRow"][];
+      readonly kinds: components["schemas"]["MappingKind"][];
+      readonly revenue_keys: components["schemas"]["MappingKey"][];
+      readonly clearing_keys: components["schemas"]["MappingKey"][];
+      readonly expense_keys: components["schemas"]["MappingKey"][];
+      readonly tax_rates: components["schemas"]["MappingKey"][];
+      readonly branches: components["schemas"]["MappingKey"][];
+      readonly problems: components["schemas"]["MappingProblem"][];
+    };
+    /**
+     * @description A mapping set: accounts per kind and key, tax codes per tax rate, tracking per
+     *     branch; plus what is still missing and the keys that can be mapped.
+     */
+    MappingSetRequest: {
+      accounts: components["schemas"]["AccountMappingRowRequest"][];
+      taxes: components["schemas"]["TaxMappingRowRequest"][];
+      tracking: components["schemas"]["TrackingMappingRowRequest"][];
     };
     MarkPaidRequest: {
       payouts?: string[];
@@ -14317,6 +14865,8 @@ export interface components {
     OAuthCompleteRequest: {
       code: string;
       state: string;
+      /** @description The account the provider named on the redirect (QuickBooks realmId). */
+      account_id?: string;
     };
     OAuthRedirect: {
       redirect_to: string;
@@ -14617,6 +15167,19 @@ export interface components {
       bookable_online?: boolean;
       auto_renew?: boolean;
       active?: boolean;
+    };
+    PaginatedAccountingConnectionList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["AccountingConnection"][];
     };
     PaginatedAnnouncementList: {
       /**
@@ -14942,6 +15505,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["ExternalBusyBlock"][];
+    };
+    PaginatedExternalRecordLinkList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ExternalRecordLink"][];
     };
     PaginatedInAppList: {
       /**
@@ -15474,6 +16050,15 @@ export interface components {
       uid: string;
       token: string;
       new_password: string;
+    };
+    /** @description A ledger connection with its sync options, health and dashboard counts. */
+    PatchedAccountingConnectionRequest: {
+      mode?: components["schemas"]["AccountingModeEnum"];
+      /** Format: date */
+      start_date?: string | null;
+      sync_bills?: boolean;
+      attach_pdf?: boolean;
+      lock_behaviour?: components["schemas"]["LockBehaviourEnum"];
     };
     PatchedApiKeyUpdateRequest: {
       name?: string;
@@ -17997,6 +18582,9 @@ export interface components {
     RespondRequest: {
       accept: boolean;
     };
+    RetryResult: {
+      retried: number;
+    };
     RevokeRequestRequest: {
       token: string;
       client_id: string;
@@ -18625,6 +19213,10 @@ export interface components {
      * @enum {string}
      */
     SizeEnum: "s" | "m" | "l";
+    SkipRequest: {
+      /** @default  */
+      reason: string;
+    };
     Skipped: {
       /** Format: date */
       date: string;
@@ -18994,6 +19586,26 @@ export interface components {
       /** @default false */
       write: boolean;
     };
+    SyncLogEntry: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly outcome: components["schemas"]["SyncOutcomeEnum"];
+      readonly message: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `created` - Created
+     *     * `updated` - Updated
+     *     * `unchanged` - Already up to date
+     *     * `voided` - Voided
+     *     * `error` - Error
+     *     * `retrying` - Will retry
+     *     * `skipped` - Skipped
+     * @enum {string}
+     */
+    SyncOutcomeEnum:
+      "created" | "updated" | "unchanged" | "voided" | "error" | "retrying" | "skipped";
     TOTPConfirmRequest: {
       /** Format: uuid */
       device_id: string;
@@ -19063,6 +19675,18 @@ export interface components {
      * @enum {string}
      */
     TaskStatusEnum: "open" | "done" | "cancelled";
+    TaxMappingRow: {
+      /** Format: uuid */
+      tax_rate?: string | null;
+      external_id: string;
+      name?: string;
+    };
+    TaxMappingRowRequest: {
+      /** Format: uuid */
+      tax_rate?: string | null;
+      external_id: string;
+      name?: string;
+    };
     TaxRate: {
       /** Format: uuid */
       readonly id: string;
@@ -19288,6 +19912,20 @@ export interface components {
      * @enum {string}
      */
     TopUpResultStatusEnum: "paid" | "redirect";
+    TrackingMappingRow: {
+      /** Format: uuid */
+      branch: string;
+      category_id: string;
+      option_id: string;
+      name?: string;
+    };
+    TrackingMappingRowRequest: {
+      /** Format: uuid */
+      branch: string;
+      category_id: string;
+      option_id: string;
+      name?: string;
+    };
     /**
      * @description * `continuing` - Continuing
      *     * `not_continuing` - Not continuing
@@ -19969,6 +20607,531 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["InviteResult"];
+        };
+      };
+    };
+  };
+  accounting_connections_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAccountingConnectionList"];
+        };
+      };
+    };
+  };
+  accounting_connections_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AdoptConnectionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AdoptConnectionRequest"];
+        "multipart/form-data": components["schemas"]["AdoptConnectionRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountingConnection"];
+        };
+      };
+    };
+  };
+  accounting_connections_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this accounting connection. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountingConnection"];
+        };
+      };
+    };
+  };
+  accounting_connections_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this accounting connection. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedAccountingConnectionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedAccountingConnectionRequest"];
+        "multipart/form-data": components["schemas"]["PatchedAccountingConnectionRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountingConnection"];
+        };
+      };
+    };
+  };
+  accounting_connections_backfill_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this accounting connection. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BackfillRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BackfillRequest"];
+        "multipart/form-data": components["schemas"]["BackfillRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountingConnection"];
+        };
+      };
+    };
+  };
+  accounting_connections_cancel_backfill_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this accounting connection. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountingConnection"];
+        };
+      };
+    };
+  };
+  accounting_connections_chart_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this accounting connection. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Chart"];
+        };
+      };
+    };
+  };
+  accounting_connections_disable_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this accounting connection. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountingConnection"];
+        };
+      };
+    };
+  };
+  accounting_connections_disconnect_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this accounting connection. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountingConnection"];
+        };
+      };
+    };
+  };
+  accounting_connections_enable_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this accounting connection. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["EnableRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["EnableRequest"];
+        "multipart/form-data": components["schemas"]["EnableRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountingConnection"];
+        };
+      };
+    };
+  };
+  accounting_connections_refresh_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this accounting connection. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountingConnection"];
+        };
+      };
+    };
+  };
+  accounting_export_retrieve: {
+    parameters: {
+      query: {
+        end: string;
+        /**
+         * @description * `generic` - Generic GL journal (CSV)
+         *     * `sage50` - Sage 50 (CSV)
+         *     * `myob` - MYOB (CSV)
+         *     * `iif` - QuickBooks Desktop (IIF)
+         */
+        file_format?: "generic" | "sage50" | "myob" | "iif";
+        /**
+         * @description * `export` - export
+         *     * `xero` - xero
+         *     * `quickbooks` - quickbooks
+         */
+        mapping_set?: "export" | "xero" | "quickbooks";
+        start: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/octet-stream": string;
+        };
+      };
+    };
+  };
+  accounting_mappings_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        provider: "export" | "quickbooks" | "xero";
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MappingSet"];
+        };
+      };
+    };
+  };
+  accounting_mappings_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        provider: "export" | "quickbooks" | "xero";
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MappingSetRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["MappingSetRequest"];
+        "multipart/form-data": components["schemas"]["MappingSetRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MappingSet"];
+        };
+      };
+    };
+  };
+  accounting_records_list: {
+    parameters: {
+      query?: {
+        connection?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Comma-separated */
+        object_id?: string;
+        object_type?:
+          | "bill"
+          | "bill_payment"
+          | "contact"
+          | "credit_note"
+          | "invoice"
+          | "journal"
+          | "pay_run"
+          | "pay_statement"
+          | "payment"
+          | "provider_payout"
+          | "refund"
+          | "supplier"
+          | "write_off";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: "error" | "pending" | "skipped" | "synced";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedExternalRecordLinkList"];
+        };
+      };
+    };
+  };
+  accounting_records_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this external record link. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ExternalRecordDetail"];
+        };
+      };
+    };
+  };
+  accounting_records_retry_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this external record link. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ExternalRecordLink"];
+        };
+      };
+    };
+  };
+  accounting_records_skip_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this external record link. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["SkipRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SkipRequest"];
+        "multipart/form-data": components["schemas"]["SkipRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ExternalRecordLink"];
+        };
+      };
+    };
+  };
+  accounting_records_retry_failed_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RetryResult"];
         };
       };
     };
@@ -26483,7 +27646,7 @@ export interface operations {
   integrations_connections_list: {
     parameters: {
       query?: {
-        capability?: "calendar" | "video";
+        capability?: "accounting" | "calendar" | "video";
         /** @description The pagination cursor value. */
         cursor?: string;
         /** @description Comma-separated fields to return (sparse). */
@@ -26618,6 +27781,7 @@ export interface operations {
       query?: {
         code?: string;
         error?: string;
+        realmId?: string;
         state?: string;
       };
       header?: never;

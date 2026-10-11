@@ -28,7 +28,21 @@ def visible_connections(user: Any, *, include_disconnected: bool = False) -> Que
 def can_manage(user: Any, connection: IntegrationConnection) -> bool:
     if connection.user_id is not None and connection.user_id == user.pk:
         return has_perm(user, "integrations.personal") or has_perm(user, "integrations.manage")
+    if connection.user_id is None:
+        return may_manage_provider(user, connection.provider)
     return has_perm(user, "integrations.manage")
+
+
+def may_manage_provider(user: Any, provider: str) -> bool:
+    """Organisation-level connections: ``integrations.manage`` or the provider's own
+    permission (``ProviderSpec.manage_permission``)."""
+    if has_perm(user, "integrations.manage"):
+        return True
+    try:
+        extra = providers.get_spec(provider).manage_permission
+    except providers.ProviderError:
+        return False
+    return bool(extra) and has_perm(user, extra)
 
 
 def live(qs: QuerySet[Any]) -> QuerySet[Any]:

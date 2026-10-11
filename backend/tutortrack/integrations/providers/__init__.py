@@ -8,7 +8,7 @@ factories; nothing else in the framework is provider specific.
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from django.conf import settings
@@ -34,6 +34,7 @@ from .base import (
     ProviderSpec,
     PushedEvent,
     RateLimited,
+    Rejected,
     SyncTokenExpired,
     TokenSet,
 )
@@ -55,12 +56,15 @@ __all__ = [
     "ProviderSpec",
     "PushedEvent",
     "RateLimited",
+    "Rejected",
     "SyncTokenExpired",
     "TokenSet",
     "all_specs",
     "calendar_client",
+    "client",
     "credential_client",
     "get_spec",
+    "health_check",
     "is_fake",
     "meeting_client",
     "oauth_client",
@@ -78,6 +82,11 @@ class Provider:
     credentials: Callable[[], Any] | None = None
     calendar: Callable[[], Any] | None = None
     meetings: Callable[[], Any] | None = None
+    # Further client kinds an app adds (E23 ``accounting``), each with its fake twin.
+    clients: dict[str, Callable[[], Any]] = field(default_factory=dict)
+    fake_clients: dict[str, Callable[[], Any]] = field(default_factory=dict)
+    # A light call proving the credentials work (used by ``services.check``).
+    health: Callable[[Credentials], Any] | None = None
 
 
 _providers: dict[str, Provider] = {}
@@ -125,6 +134,8 @@ def scopes(key: str) -> tuple[str, ...]:
 
 def _client(key: str, kind: str) -> Any:
     provider = _get(key)
+    if kind in provider.clients:
+        return client(key, kind)
     factory = getattr(provider, kind)
     if factory is None:
         raise ConfigurationError(f"{provider.spec.label} can't do that.")
@@ -138,6 +149,26 @@ def _client(key: str, kind: str) -> Any:
             "meetings": lambda: fake.FakeMeetings(provider.spec.video_key or key),
         }[kind]()
     return factory()
+
+
+def client(key: str, kind: str) -> Any:
+    """A client of an app-defined kind (e.g. ``accounting``); the fake twin when the
+    provider's platform keys are empty."""
+    provider = _get(key)
+    if kind not in provider.clients:
+        raise ConfigurationError(f"{provider.spec.label} can't do that.")
+    if not provider.live():
+        return provider.fake_clients[kind]()
+    return provider.clients[kind]()
+
+
+def health_check(key: str, creds: Credentials) -> bool:
+    """Run the provider's health call; False if it has none."""
+    provider = _get(key)
+    if provider.health is None:
+        return False
+    provider.health(creds)
+    return True
 
 
 def oauth_client(key: str) -> OAuthClient:

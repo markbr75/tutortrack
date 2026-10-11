@@ -81,7 +81,11 @@ def start_oauth(user: Any, *, provider: str, level: str, next_path: str = "/") -
     )
 
 
-def complete_oauth(user: Any, *, code: str, state: str) -> IntegrationConnection:
+def complete_oauth(
+    user: Any, *, code: str, state: str, account_id: str = ""
+) -> IntegrationConnection:
+    """``account_id``: an account the provider names only on the redirect (QuickBooks
+    ``realmId``), used when the token response doesn't identify the account."""
     try:
         parsed = oauth.read_state(state)
     except oauth.OAuthStateError as exc:
@@ -98,6 +102,8 @@ def complete_oauth(user: Any, *, code: str, state: str) -> IntegrationConnection
         )
     except ProviderError as exc:
         raise _invalid("code", str(exc)) from exc
+    if account_id and not tokens.account_id:
+        tokens = TokenSet(**{**tokens.__dict__, "account_id": account_id[:255]})
     return _save(
         user if parsed.level == IntegrationConnection.Level.USER else None,
         parsed.provider,
@@ -299,6 +305,8 @@ def check(connection: IntegrationConnection) -> IntegrationConnection:
         creds = credentials(connection)
         if "calendar" in spec.capabilities:
             providers.calendar_client(connection.provider).list_calendars(creds)
+        elif providers.health_check(connection.provider, creds):
+            pass
         elif spec.auth == "credentials":
             providers.credential_client(connection.provider).verify(creds)
     except ProviderError as exc:

@@ -26,7 +26,11 @@ function useOAuthCompletion(onDone: () => void) {
     mutationFn: async () =>
       unwrap(
         await api.POST("/api/v1/integrations/oauth/complete", {
-          body: { code: code ?? "", state: state ?? "" },
+          body: {
+            code: code ?? "",
+            state: state ?? "",
+            account_id: params.get("account_id") ?? "",
+          },
         }),
       ),
     onSettled: () => {

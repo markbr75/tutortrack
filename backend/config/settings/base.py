@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "tutortrack.reporting",
     "tutortrack.integrations",
     "tutortrack.calendar_sync",
+    "tutortrack.accounting",
     "tutortrack.comms",
     "tutortrack.portal",
     "tutortrack.subscriptions",
@@ -306,6 +307,10 @@ SPECTACULAR_SETTINGS = {
         "ApiScopeEnum": "tutortrack.developer.scopes.ALL_SCOPES",
         "ProcessStatusEnum": "tutortrack.core.models.workflows.WorkflowLink.Status",
         "IntegrationLevelEnum": "tutortrack.integrations.models.IntegrationConnection.Level",
+        "AccountingRecordStatusEnum": "tutortrack.accounting.models.ExternalRecordLink.Status",
+        "AccountingModeEnum": "tutortrack.accounting.models.AccountingConnection.Mode",
+        "LockBehaviourEnum": "tutortrack.accounting.models.AccountingConnection.LockBehaviour",
+        "SyncOutcomeEnum": "tutortrack.accounting.models.SyncLogEntry.Outcome",
         "VideoProviderEnum": "tutortrack.calendar_sync.api.serializers.VIDEO_CHOICES",
         "ProviderEnum": "tutortrack.payments.models.Provider",
         "ClientStatusEnum": "tutortrack.people.models.Client.Status",
@@ -521,6 +526,12 @@ INTEGRATIONS = {
     "CREDENTIAL_PROVIDERS_LIVE": env.bool("INTEGRATIONS_CREDENTIAL_PROVIDERS_LIVE", default=True),
     # Public base URL that Google/Microsoft push notifications reach (the API host).
     "WEBHOOK_BASE_URL": env("INTEGRATIONS_WEBHOOK_BASE_URL", default=PLATFORM_BASE_URL),
+    # Accounting (E23). Empty = the in-memory fake ledger.
+    "XERO_CLIENT_ID": env("XERO_CLIENT_ID", default=""),
+    "XERO_CLIENT_SECRET": env("XERO_CLIENT_SECRET", default=""),
+    "QUICKBOOKS_CLIENT_ID": env("QUICKBOOKS_CLIENT_ID", default=""),
+    "QUICKBOOKS_CLIENT_SECRET": env("QUICKBOOKS_CLIENT_SECRET", default=""),
+    "QUICKBOOKS_SANDBOX": env.bool("QUICKBOOKS_SANDBOX", default=False),
 }
 
 # --- Observability ----------------------------------------------------------------------------

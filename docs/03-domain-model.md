@@ -134,6 +134,7 @@ Naming: `<aggregate>.<past_tense_verb>`. Each epic lists its events; this table 
 | `api_key.created/revoked`, `oauth_app.connected/disconnected`, `webhook_endpoint.created/disabled`, `webhook_delivery.failed`, `sandbox.created` (never offered as webhook event types) | E27 |
 | `job_offer.sent/accepted/declined`, `job_posting.application_received` | E19 |
 | `integration.connected/disconnected/error`, `calendar.busy_updated/settings_changed/reschedule_proposed`, `online_meeting.created/updated/deleted/failed` (`online_meeting.participant_joined/left`, `recording.available`: Phase 3) | E22 |
+| `accounting.sync_succeeded/sync_failed`, `accounting.connection_error` | E23 |
 | `enrolment.created/cancelled`, `waitlist.place_offered`, `class.full` | E20 |
 | `homework.assigned/submitted/graded`, `goal.achieved` | E21 |
 | `review.submitted`, `referral.converted`, `commission.earned` | E25 |

@@ -92,8 +92,8 @@ All ─► E26, E27, E28, E31
 | E20 | ☐ | |
 | E21 | ☐ | |
 | E22 | ✅ Done (2026-10-10) | T01–T09 + TW1: integration framework (OAuth+PKCE, encrypted tokens, health), Google/Microsoft/CalDAV two-way calendar sync with busy blocks in conflicts, Zoom/Teams/Meet/Lessonspace/built-in rooms, timed join links (T10 is Phase 3). See Implementation notes |
-| E23 | ⏭ Next | |
-| E24 | ☐ | |
+| E23 | ✅ Done (2026-10-10) | T01–T08 + TW1: Xero and QuickBooks Online built on the E22 framework. Mappings are validated. Contacts, invoices, credit notes, payments, refunds, payouts with fees and tutor bills sync. Errors are readable, with retry and skip; lock dates are respected. Also: summary journals, backfill, a daily reconciliation check and digest, and GL exports for Sage 50, MYOB and IIF. T09 is Phase 2b; T10 is Phase 3. See Implementation notes |
+| E24 | ⏭ Next | |
 | E25 | ☐ | |
 | E26 | ✅ Done (2026-10-10) | T01–T07 + scheduled-report workflow (T08 custom builder is Phase 2b, T09 warehouse export Enterprise). See Implementation notes |
 | E27 | ✅ Done (2026-10-10) | T01–T09 + webhook delivery workflow (TW1). Zapier/Make ship as served manifests; sandboxes skip provider connections. See Implementation notes |
