@@ -245,6 +245,9 @@ class WaitlistEntry(BranchScopedModel):
         "catalogue.Service", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
     notes = models.TextField(blank=True, default="")
+    # E20: waiting for a place in this group class (``courses.GroupClass``); the class
+    # offers places itself when one comes free.
+    group_class_id = models.UUIDField(null=True, blank=True, db_index=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.WAITING)
     offer_details = models.CharField(max_length=500, blank=True, default="")
     offer_token_hash = models.CharField(max_length=64, blank=True, default="", db_index=True)

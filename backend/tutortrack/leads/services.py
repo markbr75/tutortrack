@@ -809,7 +809,17 @@ def add_to_waitlist(
     tutor: Any = None,
     service: Any = None,
     notes: str = "",
+    group_class_id: Any = None,
 ) -> WaitlistEntry:
+    if (
+        group_class_id is not None
+        and WaitlistEntry.objects.filter(
+            student=student,
+            group_class_id=group_class_id,
+            status__in=[WaitlistEntry.Status.WAITING, WaitlistEntry.Status.OFFERED],
+        ).exists()
+    ):
+        raise BusinessRuleViolation(_("This student is already on the waitlist for this class."))
     entry = WaitlistEntry.objects.create(
         student=student,
         subject=subject[:100],
@@ -818,6 +828,7 @@ def add_to_waitlist(
         service=service,
         notes=notes,
         branch_id=student.branch_id,
+        group_class_id=group_class_id,
     )
     if student.status in (Student.Status.LEAD, Student.Status.PAUSED, Student.Status.FINISHED):
         from tutortrack.people.services import change_student_status
@@ -827,14 +838,18 @@ def add_to_waitlist(
     return entry
 
 
+def _same_queue(entry: WaitlistEntry) -> Any:
+    """Entries waiting for the same thing: the same class (E20), or the same subject."""
+    waiting = WaitlistEntry.objects.filter(status=WaitlistEntry.Status.WAITING)
+    if entry.group_class_id:
+        return waiting.filter(group_class_id=entry.group_class_id)
+    return waiting.filter(
+        subject=entry.subject, branch_id=entry.branch_id, group_class_id__isnull=True
+    )
+
+
 def position(entry: WaitlistEntry) -> int:
-    ahead = WaitlistEntry.objects.filter(
-        status=WaitlistEntry.Status.WAITING,
-        subject=entry.subject,
-        branch_id=entry.branch_id,
-        created_at__lt=entry.created_at,
-    ).count()
-    return ahead + 1
+    return _same_queue(entry).filter(created_at__lt=entry.created_at).count() + 1
 
 
 @transaction.atomic
@@ -857,6 +872,7 @@ def offer_place(entry: WaitlistEntry, *, details: str, hours: int | None = None)
             subject_id=entry.pk,
             student_id=str(entry.student_id),
             expires_at=entry.offer_expires_at.isoformat(),
+            group_class_id=_class_id(entry),
         ),
         branch_id=entry.branch_id,
     )
@@ -868,6 +884,10 @@ def offer_place(entry: WaitlistEntry, *, details: str, hours: int | None = None)
         )
     )
     return token
+
+
+def _class_id(entry: WaitlistEntry) -> str | None:
+    return str(entry.group_class_id) if entry.group_class_id else None
 
 
 def offer_for_token(token: str) -> WaitlistEntry:
@@ -893,7 +913,12 @@ def respond(token: str, *, accept: bool) -> WaitlistEntry:
         entry.responded_at = now()
         entry.save()
     event = events.WaitlistPlaceAccepted if accept else events.WaitlistPlaceDeclined
-    publish(event(subject_id=entry.pk, student_id=str(entry.student_id)), branch_id=entry.branch_id)
+    publish(
+        event(
+            subject_id=entry.pk, student_id=str(entry.student_id), group_class_id=_class_id(entry)
+        ),
+        branch_id=entry.branch_id,
+    )
     return entry
 
 
@@ -906,23 +931,18 @@ def expire_offer(entry_id: Any) -> str:
     entry.status = WaitlistEntry.Status.EXPIRED
     entry.save(update_fields=["status", "updated_at"])
     publish(
-        events.WaitlistOfferExpired(subject_id=entry.pk, student_id=str(entry.student_id)),
+        events.WaitlistOfferExpired(
+            subject_id=entry.pk, student_id=str(entry.student_id), group_class_id=_class_id(entry)
+        ),
         branch_id=entry.branch_id,
     )
-    if not get_setting("leads.waitlist_auto_cascade"):
-        return ""
+    if entry.group_class_id or not get_setting("leads.waitlist_auto_cascade"):
+        return ""  # class waitlists: the class offers the place again (E20)
     return cascade(entry)
 
 
 def cascade(entry: WaitlistEntry) -> str:
-    following = (
-        WaitlistEntry.objects.filter(
-            status=WaitlistEntry.Status.WAITING, subject=entry.subject, branch_id=entry.branch_id
-        )
-        .exclude(pk=entry.pk)
-        .order_by("created_at")
-        .first()
-    )
+    following = _same_queue(entry).exclude(pk=entry.pk).order_by("created_at").first()
     if following is None:
         return ""
     offer_place(following, details=entry.offer_details)

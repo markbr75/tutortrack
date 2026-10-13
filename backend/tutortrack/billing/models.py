@@ -75,6 +75,7 @@ class Charge(BranchScopedModel):
         PACKAGE = "package", _("Package")
         PLAN = "plan", _("Recurring fee")
         LATE_FEE = "late_fee", _("Late payment fee")
+        COURSE = "course", _("Course fee")
 
     class Status(models.TextChoices):
         UNINVOICED = "uninvoiced", _("Not invoiced")
@@ -480,7 +481,7 @@ class BillingPlan(BranchScopedModel):
     class Interval(models.TextChoices):
         WEEKLY = "weekly", _("Weekly")
         MONTHLY = "monthly", _("Monthly")
-        TERMLY = "termly", _("Termly (every four months)")
+        TERMLY = "termly", _("Termly")
 
     class Status(models.TextChoices):
         ACTIVE = "active", _("Active")

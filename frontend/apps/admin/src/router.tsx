@@ -18,6 +18,7 @@ import { RequestsPage } from "./calendar/RequestsPage";
 import { RolesPage } from "./routes/RolesPage";
 import { SsoSettingsPage } from "./routes/SsoSettingsPage";
 import { CataloguePage } from "./catalogue/CataloguePage";
+import { ClassPage, CoursesPage, ReEnrolPage, RegisterPage } from "./courses/CoursesPages";
 import { AccountingPage } from "./accounting/AccountingPage";
 import { DataPage } from "./data/DataPage";
 import { ImportPage } from "./data/ImportPage";
@@ -133,6 +134,13 @@ const publicFormRoute = createRoute({
   path: "/f/$slug",
   component: function PublicFormRoute() {
     return <PublicFormPage slug={publicFormRoute.useParams().slug} />;
+  },
+});
+const reEnrolRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/re-enrol/$token",
+  component: function ReEnrolRoute() {
+    return <ReEnrolPage token={reEnrolRoute.useParams().token} />;
   },
 });
 const offerRoute = createRoute({
@@ -253,6 +261,21 @@ const tutorRoute = createRoute({
 });
 const tasksRoute = appPage("/tasks", TasksPage);
 const catalogueRoute = appPage("/catalogue", CataloguePage);
+const coursesRoute = appPage("/courses", CoursesPage);
+const classRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/classes/$classId",
+  component: function ClassRoute() {
+    return <ClassPage classId={classRoute.useParams().classId} />;
+  },
+});
+const registerRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/class-sessions/$sessionId/register",
+  component: function RegisterRoute() {
+    return <RegisterPage sessionId={registerRoute.useParams().sessionId} />;
+  },
+});
 const jobsRoute = appPage("/jobs", JobsPage);
 const calendarRoute = appPage("/calendar", CalendarPage);
 const availabilityRoute = appPage("/availability", AvailabilityPage);
@@ -379,6 +402,7 @@ const routeTree = rootRoute.addChildren([
   vacancyRoute,
   interviewRoute,
   referenceRoute,
+  reEnrolRoute,
   platformRoute.addChildren([
     platformTenantsRoute,
     platformTenantRoute,
@@ -396,6 +420,9 @@ const routeTree = rootRoute.addChildren([
     tutorRoute,
     tasksRoute,
     catalogueRoute,
+    coursesRoute,
+    classRoute,
+    registerRoute,
     jobsRoute,
     jobRoute,
     jobMatchRoute,

@@ -72,6 +72,7 @@ class TrialLessonCompleted(DomainEvent):
 class _WaitlistEvent(DomainEvent):
     subject_type: ClassVar[str] = "waitlist_entry"
     student_id: str
+    group_class_id: str | None = None  # E20 class waitlists
 
 
 @dataclass(frozen=True, kw_only=True)

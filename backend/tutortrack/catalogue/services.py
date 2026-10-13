@@ -751,6 +751,8 @@ def save_discount(rule: DiscountRule | None, **data: Any) -> DiscountRule:
             raise _invalid("client", _("Choose the client."))
         if rule.kind == kind.SCHOLARSHIP and rule.client_id is None and rule.student_id is None:
             raise _invalid("student", _("Choose the student or client."))
+        if rule.kind == kind.MULTI_CLASS and (rule.min_classes or 0) < 2:
+            raise _invalid("min_classes", _("Say from how many classes in a term it applies."))
         if rule.kind == kind.SIBLING and rule.sibling_from < 2:
             raise _invalid("sibling_from", _("Siblings start from the second student."))
         rule.save()

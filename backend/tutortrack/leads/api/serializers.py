@@ -283,8 +283,10 @@ class WaitlistEntrySerializer(BaseModelSerializer):
             "responded_at",
             "created_at",
             "position",
+            "group_class_id",
         ]
         read_only_fields = [
+            "group_class_id",
             "status",
             "offer_details",
             "offered_at",

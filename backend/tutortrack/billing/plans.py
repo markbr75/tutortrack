@@ -1,7 +1,8 @@
 """Recurring fixed fees (E10-T13, FR-10-8): billing plans, their periods and proration.
 
 Periods run from the anchor date: every week, every calendar month on the anchor's day
-(clamped to short months) or every four months ("termly"). A plan starting or ending part
+(clamped to short months) or termly: each of the branch's terms (E20 term dates), or
+every four months when the branch has no terms. A plan starting or ending part
 way through a period is charged for the share of days it covers (``prorate``), rounded
 half-up to the minor unit. ``BillingPlanWorkflow`` charges each period when it starts;
 charges are idempotent per plan and period (``plan:{plan}:{start}``).
@@ -10,7 +11,7 @@ charges are idempotent per plan and period (``plan:{plan}:{start}``).
 from __future__ import annotations
 
 import calendar
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
@@ -116,8 +117,58 @@ def amount_for(amount: Money, segment: Segment, *, prorate: bool) -> Money:
     return (amount * segment.fraction).round_to_minor()
 
 
+TermCalendar = Callable[[Any], list[tuple[date, date]]]
+_term_calendar: list[TermCalendar] = []
+
+
+def register_term_calendar(provider: TermCalendar) -> TermCalendar:
+    """E20 provides each branch's term dates; termly plans then follow them."""
+    _term_calendar[:] = [provider]
+    return provider
+
+
+def term_dates(branch_id: Any) -> list[tuple[date, date]]:
+    """The branch's terms as ``(first day, last day)``, oldest first ([] without E20 terms)."""
+    return sorted(_term_calendar[0](branch_id)) if _term_calendar else []
+
+
+def term_segments(
+    terms: list[tuple[date, date]], start: date, end: date | None = None
+) -> Iterator[Segment]:
+    """Termly periods from real term dates (E20): each term is one period and the days
+    between terms (the holidays) are not billed. A plan starting or ending inside a term
+    is charged for its share of that term's days."""
+    for term_start, term_end in sorted(terms):
+        seg_start = max(term_start, start)
+        seg_end = term_end if end is None else min(term_end, end)
+        if seg_start > seg_end:
+            continue
+        yield Segment(seg_start, seg_end, term_start, term_end)
+
+
+def _uses_terms(plan: BillingPlan) -> list[tuple[date, date]]:
+    if plan.interval != BillingPlan.Interval.TERMLY:
+        return []
+    return term_dates(plan.branch_id)
+
+
 def plan_segments(plan: BillingPlan) -> Iterator[Segment]:
+    terms = _uses_terms(plan)
+    if terms:
+        return term_segments(terms, plan.start_date, plan.end_date)
     return segments(plan.interval, plan.anchor_date, plan.start_date, plan.end_date)
+
+
+def term_dates_changed(branch_id: Any) -> int:
+    """Terms were added or moved (E20): re-plan the branch's open termly plans."""
+    plans = BillingPlan.objects.filter(
+        branch_id=branch_id, interval=BillingPlan.Interval.TERMLY
+    ).exclude(status=BillingPlan.Status.ENDED)
+    count = 0
+    for plan in plans:
+        _changed(plan)
+        count += 1
+    return count
 
 
 def source_key(plan: BillingPlan, segment: Segment) -> str:
@@ -288,6 +339,10 @@ def next_period(plan_id: Any, after: str) -> dict[str, Any]:
             "charge_at": moment.astimezone(ZoneInfo("UTC")).isoformat(),
             "today": today,
         }
+    if plan.end_date is None and _uses_terms(plan):
+        # An open-ended termly plan past the last term we know: wait for the next term's
+        # dates (``term_dates_changed`` signals the workflow) instead of ending.
+        return {"status": "paused", "today": today}
     return {"status": "ended"}
 
 

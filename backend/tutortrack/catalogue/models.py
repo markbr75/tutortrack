@@ -507,6 +507,7 @@ class DiscountRule(AdjustmentRule):
         CLIENT = "client", _("Client discount")
         SCHOLARSHIP = "scholarship", _("Scholarship / bursary")
         PROMO = "promo", _("Promo code")
+        MULTI_CLASS = "multi_class", _("Several classes in a term")
 
     kind = models.CharField(max_length=12, choices=Kind.choices)
     percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
@@ -515,6 +516,7 @@ class DiscountRule(AdjustmentRule):
     fixed_price = RateField(null=True, blank=True)  # the lesson costs this (trial price)
     sibling_from = models.PositiveIntegerField(default=2)  # 2 = second child onwards
     volume_min_lessons = models.PositiveIntegerField(null=True, blank=True)  # per month
+    min_classes = models.PositiveIntegerField(null=True, blank=True)  # multi_class: per term
     client = models.ForeignKey(
         "people.Client", null=True, blank=True, on_delete=models.CASCADE, related_name="+"
     )

@@ -89,7 +89,7 @@ All ─► E26, E27, E28, E31
 | E17 | ✅ Done (2026-10-10) | T01–T08, T10 + TW1 (proposals T09 are Phase 2b). See Implementation notes |
 | E18 | ✅ Done (2026-10-10) | T01–T10 + TW1 (provider integrations T11 are Phase 3). See Implementation notes |
 | E19 | ✅ Done (2026-10-10) | T01–T07, T09 + TW1 (client shortlist sharing T08 is Phase 2b). See Implementation notes |
-| E20 | ☐ | |
+| E20 | ✅ Done (2026-10-13) | T01–T10 + TW1: terms with breaks (skip class sessions; E10 termly plans follow term dates), courses and classes on E08 lesson series with roster-driven attendees, enrolment with class locks, eligibility and mid-term proration, per-term/monthly/per-session/instalment billing with sibling and multi-class discounts, transfers and withdrawals with credit notes, class waitlists on E17 offers, registers and makeups, term rollover and online enrolment with payment on Temporal, public catalogue widget and block, portal classes. See Implementation notes |
 | E21 | ☐ | |
 | E22 | ✅ Done (2026-10-10) | T01–T09 + TW1: integration framework (OAuth+PKCE, encrypted tokens, health), Google/Microsoft/CalDAV two-way calendar sync with busy blocks in conflicts, Zoom/Teams/Meet/Lessonspace/built-in rooms, timed join links (T10 is Phase 3). See Implementation notes |
 | E23 | ✅ Done (2026-10-10) | T01–T08 + TW1: Xero and QuickBooks Online built on the E22 framework. Mappings are validated. Contacts, invoices, credit notes, payments, refunds, payouts with fees and tutor bills sync. Errors are readable, with retry and skip; lock dates are respected. Also: summary journals, backfill, a daily reconciliation check and digest, and GL exports for Sage 50, MYOB and IIF. T09 is Phase 2b; T10 is Phase 3. See Implementation notes |

@@ -96,6 +96,7 @@ function FamilyShell() {
     { to: "/", label: t("portal.nav.home") },
     { to: "/schedule", label: t("portal.nav.schedule") },
     ...(f.booking ? [{ to: "/book", label: t("portalBooking.nav") }] : []),
+    ...(f.classes ? [{ to: "/classes", label: t("portalCourses.nav") }] : []),
     ...(f.reports ? [{ to: "/reports", label: t("portal.nav.reports") }] : []),
     ...(f.invoices ? [{ to: "/billing", label: t("portal.nav.billing") }] : []),
     ...(f.profile ? [{ to: "/profile", label: t("portal.nav.profile") }] : []),

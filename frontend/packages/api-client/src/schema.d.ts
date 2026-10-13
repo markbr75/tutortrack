@@ -21,6 +21,73 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/academic-years": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["academic_years_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["academic_years_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/academic-years/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["academic_years_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    delete: operations["academic_years_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["academic_years_partial_update"];
+    trace?: never;
+  };
   "/api/v1/accounting/connections": {
     parameters: {
       query?: never;
@@ -3215,6 +3282,250 @@ export interface paths {
     patch: operations["checklist_templates_partial_update"];
     trace?: never;
   };
+  "/api/v1/class-makeups/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["class_makeups_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/class-makeups/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["class_makeups_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/class-sessions/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Class sessions: the register and makeup bookings (FR-20-6). */
+    get: operations["class_sessions_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/class-sessions/{id}/makeups": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Book a makeup in this session for a student of another class of the course. */
+    post: operations["class_sessions_makeups_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/class-sessions/{id}/register": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The class register: GET the students (makeups marked); POST everyone's outcome
+     *     at once (completes the session, or corrects attendance after completion).
+     */
+    get: operations["class_sessions_register_retrieve"];
+    put?: never;
+    /**
+     * @description The class register: GET the students (makeups marked); POST everyone's outcome
+     *     at once (completes the session, or corrects attendance after completion).
+     */
+    post: operations["class_sessions_register_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/classes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Classes: scheduled cohorts of a course in a term. Each runs on an E08 lesson series;
+     *     its roster (enrolments and makeups) decides every future session's attendees.
+     */
+    get: operations["classes_list"];
+    put?: never;
+    /**
+     * @description Create a class and its sessions. ``skipped_dates`` lists sessions not created
+     *     because a teacher or the room was busy (``conflict_mode=skip``).
+     */
+    post: operations["classes_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/classes/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Classes: scheduled cohorts of a course in a term. Each runs on an E08 lesson series;
+     *     its roster (enrolments and makeups) decides every future session's attendees.
+     */
+    get: operations["classes_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Classes: scheduled cohorts of a course in a term. Each runs on an E08 lesson series;
+     *     its roster (enrolments and makeups) decides every future session's attendees.
+     */
+    patch: operations["classes_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/classes/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Cancel the class: future sessions are cancelled and students withdrawn with
+     *     unused sessions credited.
+     */
+    post: operations["classes_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/classes/{id}/open": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Open a draft class for enrolment (portal and website). */
+    post: operations["classes_open_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/classes/{id}/roster": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Current and past students of the class. */
+    get: operations["classes_roster_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/classes/{id}/sessions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Classes: scheduled cohorts of a course in a term. Each runs on an E08 lesson series;
+     *     its roster (enrolments and makeups) decides every future session's attendees.
+     */
+    get: operations["classes_sessions_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/classes/{id}/waitlist": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The class waitlist in order (positions for those waiting); POST adds a student. */
+    get: operations["classes_waitlist_list"];
+    put?: never;
+    /** @description The class waitlist in order (positions for those waiting); POST adds a student. */
+    post: operations["classes_waitlist_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/clients": {
     parameters: {
       query?: never;
@@ -3711,6 +4022,89 @@ export interface paths {
     head?: never;
     /** @description All contacts (search, edit, archive). Create through ``/clients/{id}/contacts``. */
     patch: operations["contacts_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/courses": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["courses_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["courses_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/courses/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["courses_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["courses_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/courses/{id}/archive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["courses_archive_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/cover-requests": {
@@ -4664,6 +5058,253 @@ export interface paths {
     };
     /** @description Open enquiries by stage for the Kanban board (FR-17-2). */
     get: operations["enquiries_board_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enrolments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Enrolments (FR-20-4): a student's place in a class. POST accepts an
+     *     ``Idempotency-Key`` (it bills fees).
+     */
+    get: operations["enrolments_list"];
+    put?: never;
+    /**
+     * @description Enrol a student. Mid-term joiners are added to future sessions only and their
+     *     fee is prorated (setting); ``override_capacity``/``skip_eligibility`` for staff.
+     */
+    post: operations["enrolments_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enrolments/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Enrolments (FR-20-4): a student's place in a class. POST accepts an
+     *     ``Idempotency-Key`` (it bills fees).
+     */
+    get: operations["enrolments_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enrolments/{id}/cancel-pending": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Enrolments (FR-20-4): a student's place in a class. POST accepts an
+     *     ``Idempotency-Key`` (it bills fees).
+     */
+    post: operations["enrolments_cancel_pending_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enrolments/{id}/convert-trial": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Enrolments (FR-20-4): a student's place in a class. POST accepts an
+     *     ``Idempotency-Key`` (it bills fees).
+     */
+    post: operations["enrolments_convert_trial_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enrolments/{id}/transfer": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Move to another class: the old fee is cut to the sessions attended (credited),
+     *     the new class charges its prorated fee.
+     */
+    post: operations["enrolments_transfer_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enrolments/{id}/withdraw": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Withdraw from ``effective_date`` (their first day away). Unused sessions are
+     *     credited by the refund setting (``refund`` overrides it).
+     */
+    post: operations["enrolments_withdraw_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enrolments/quote": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description What a place costs now: discounts, proration and what is due at enrolment. */
+    post: operations["enrolments_quote_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enrolments/rollover": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Re-enrolment for next term (``TermRolloverWorkflow``): families confirm or opt out
+     *     by a deadline; then continuing students are enrolled and billed, other places go to
+     *     the waitlists.
+     */
+    get: operations["enrolments_rollover_list"];
+    put?: never;
+    /**
+     * @description Re-enrolment for next term (``TermRolloverWorkflow``): families confirm or opt out
+     *     by a deadline; then continuing students are enrolled and billed, other places go to
+     *     the waitlists.
+     */
+    post: operations["enrolments_rollover_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enrolments/rollover/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Re-enrolment for next term (``TermRolloverWorkflow``): families confirm or opt out
+     *     by a deadline; then continuing students are enrolled and billed, other places go to
+     *     the waitlists.
+     */
+    get: operations["enrolments_rollover_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enrolments/rollover/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Re-enrolment for next term (``TermRolloverWorkflow``): families confirm or opt out
+     *     by a deadline; then continuing students are enrolled and billed, other places go to
+     *     the waitlists.
+     */
+    post: operations["enrolments_rollover_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enrolments/rollover/{id}/finalise": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Finish now instead of waiting for the deadline. */
+    post: operations["enrolments_rollover_finalise_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/enrolments/rollover/{id}/offers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Re-enrolment for next term (``TermRolloverWorkflow``): families confirm or opt out
+     *     by a deadline; then continuing students are enrolled and billed, other places go to
+     *     the waitlists.
+     */
+    get: operations["enrolments_rollover_offers_list"];
     put?: never;
     post?: never;
     delete?: never;
@@ -9946,6 +10587,43 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/portal/classes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Classes the household can enrol in (the public catalogue). */
+    get: operations["portal_classes_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/courses": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The household's classes, waitlist places (with positions) and re-enrolment
+     *     questions for next term.
+     */
+    get: operations["portal_courses_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/portal/dashboard": {
     parameters: {
       query?: never;
@@ -9956,6 +10634,43 @@ export interface paths {
     get: operations["portal_dashboard_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/enrol": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Enrol one of the household's students (or join the waitlist when full). With
+     *     payment at enrolment the place is held until ``pay_url`` is paid.
+     */
+    post: operations["portal_enrol_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/enrolments/{enrolment_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Give up a place that is still waiting for payment. */
+    post: operations["portal_enrolments_cancel_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -10211,6 +10926,23 @@ export interface paths {
     put?: never;
     /** @description Answer a tutor's request to move a lesson (pick one of the times, or decline). */
     post: operations["portal_reschedule_requests_decide_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/rollover-offers/{offer_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Keep (or give up) a place next term. */
+    post: operations["portal_rollover_offers_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -10578,6 +11310,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/public/catalogue": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Open classes of public courses with places left (FR-20-8). */
+    get: operations["public_catalogue_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/public/enquiries": {
     parameters: {
       query?: never;
@@ -10589,6 +11338,43 @@ export interface paths {
     put?: never;
     /** @description ``POST /public/enquiries``: website or partner integrations (FR-17-1). */
     post: operations["public_enquiries_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/enrol": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Enrol a new family's child in a class (or join its waitlist when it is full).
+     *     Keep ``token``: it opens the enrolment's status. When payment is due at enrolment
+     *     the place is held until ``pay_url`` is paid.
+     */
+    post: operations["public_enrol_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/enrolments/{enrolment_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["public_enrolments_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -10690,6 +11476,23 @@ export interface paths {
     put?: never;
     /** @description ``/public/offers/{token}``: the family sees and answers a waitlist offer. */
     post: operations["public_offers_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/re-enrol/{token}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Next term's place offered to a family (from the rollover email link). */
+    get: operations["public_re_enrol_retrieve"];
+    put?: never;
+    post: operations["public_re_enrol_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -12168,6 +12971,58 @@ export interface paths {
     patch: operations["tasks_partial_update"];
     trace?: never;
   };
+  "/api/v1/terms": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Terms with their breaks (half term). Breaks are skipped by class sessions and left
+     *     out of proration; termly billing plans follow term dates.
+     */
+    get: operations["terms_list"];
+    put?: never;
+    /**
+     * @description Terms with their breaks (half term). Breaks are skipped by class sessions and left
+     *     out of proration; termly billing plans follow term dates.
+     */
+    post: operations["terms_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/terms/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Terms with their breaks (half term). Breaks are skipped by class sessions and left
+     *     out of proration; termly billing plans follow term dates.
+     */
+    get: operations["terms_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Terms with their breaks (half term). Breaks are skipped by class sessions and left
+     *     out of proration; termly billing plans follow term dates.
+     */
+    delete: operations["terms_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Terms with their breaks (half term). Breaks are skipped by class sessions and left
+     *     out of proration; termly billing plans follow term dates.
+     */
+    patch: operations["terms_partial_update"];
+    trace?: never;
+  };
   "/api/v1/testimonials": {
     parameters: {
       query?: never;
@@ -13007,6 +13862,28 @@ export interface components {
       /** @default  */
       note: string;
     };
+    AcademicYear: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      branch?: string;
+      name: string;
+      /** Format: date */
+      start_date: string;
+      /** Format: date */
+      end_date: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    AcademicYearRequest: {
+      /** Format: uuid */
+      branch?: string;
+      name: string;
+      /** Format: date */
+      start_date: string;
+      /** Format: date */
+      end_date: string;
+    };
     AcceptInvitationRequest: {
       token: string;
       first_name?: string;
@@ -13577,6 +14454,9 @@ export interface components {
       /** @default self_employed */
       employment_type: components["schemas"]["ApproveEmploymentTypeEnum"];
     };
+    ArchiveRequest: {
+      archived: boolean;
+    };
     AssessSubjectRequest: {
       status: components["schemas"]["AssessSubjectStatusEnum"];
       /** @default  */
@@ -14080,7 +14960,7 @@ export interface components {
     /**
      * @description * `weekly` - Weekly
      *     * `monthly` - Monthly
-     *     * `termly` - Termly (every four months)
+     *     * `termly` - Termly
      * @enum {string}
      */
     BillingPlanIntervalEnum: "weekly" | "monthly" | "termly";
@@ -14267,7 +15147,7 @@ export interface components {
       slot_interval_minutes?: number;
       buffer_minutes?: number;
       approval_required?: boolean;
-      payment?: components["schemas"]["PaymentEnum"];
+      payment?: components["schemas"]["BookingSettingsPaymentEnum"];
       hold_minutes?: number;
       cancellation_window_hours?: number;
       tutors?: string[];
@@ -14275,6 +15155,12 @@ export interface components {
       location?: string | null;
       terms?: string;
     };
+    /**
+     * @description * `none` - Pay later (invoice as usual)
+     *     * `at_booking` - Pay when booking
+     * @enum {string}
+     */
+    BookingSettingsPaymentEnum: "none" | "at_booking";
     BookingSettingsRequest: {
       enabled?: boolean;
       allow_new_clients?: boolean;
@@ -14283,7 +15169,7 @@ export interface components {
       slot_interval_minutes?: number;
       buffer_minutes?: number;
       approval_required?: boolean;
-      payment?: components["schemas"]["PaymentEnum"];
+      payment?: components["schemas"]["BookingSettingsPaymentEnum"];
       hold_minutes?: number;
       cancellation_window_hours?: number;
       tutors?: string[];
@@ -14829,6 +15715,7 @@ export interface components {
      *     * `package` - Package
      *     * `plan` - Recurring fee
      *     * `late_fee` - Late payment fee
+     *     * `course` - Course fee
      * @enum {string}
      */
     ChargeKindEnum:
@@ -14839,7 +15726,8 @@ export interface components {
       | "ad_hoc"
       | "package"
       | "plan"
-      | "late_fee";
+      | "late_fee"
+      | "course";
     ChargeLine: {
       student_id: string;
       client_id: string | null;
@@ -14908,6 +15796,54 @@ export interface components {
       items?: unknown;
       is_default?: boolean;
     };
+    ClassCancelRequest: {
+      /** @default  */
+      reason: string;
+    };
+    ClassCreated: {
+      group_class: components["schemas"]["GroupClass"];
+      skipped_dates: string[];
+    };
+    ClassSession: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly group_class: string;
+      readonly class_name: string;
+      readonly course_name: string;
+      /** Format: uuid */
+      readonly lesson: string;
+      readonly number: number;
+      /** Format: date */
+      readonly date: string;
+      /** Format: date-time */
+      readonly start: string;
+      /** Format: date-time */
+      readonly end: string;
+      readonly lesson_status: string;
+      readonly attendees: number;
+    };
+    ClassTeacher: {
+      /** Format: uuid */
+      tutor: string;
+      readonly tutor_name: string;
+      role?: components["schemas"]["ClassTeacherRoleEnum"];
+      pay_per_session?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
+    /**
+     * @description * `lead` - Teacher
+     *     * `assistant` - Assistant
+     * @enum {string}
+     */
+    ClassTeacherRoleEnum: "lead" | "assistant";
     Client: {
       /** Format: uuid */
       readonly id: string;
@@ -15411,6 +16347,150 @@ export interface components {
     CountResult: {
       count: number;
     };
+    Course: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      description?: string;
+      public_description?: string;
+      /** Format: uuid */
+      service: string;
+      readonly service_name: string;
+      /** Format: uuid */
+      subject?: string | null;
+      readonly subject_name: string;
+      /** Format: uuid */
+      level?: string | null;
+      min_age?: number | null;
+      max_age?: number | null;
+      year_groups?: string[];
+      prerequisites?: string;
+      duration_weeks?: number | null;
+      duration_sessions?: number | null;
+      delivery_mode?: components["schemas"]["DeliveryModeEnum"];
+      default_capacity?: number;
+      pricing_model?: components["schemas"]["CoursePricingModelEnum"];
+      readonly currency: string;
+      price: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      instalments?: number;
+      deposit?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      registration_fee?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      materials_fee?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: uuid */
+      tax_rate?: string | null;
+      /** Format: uuid */
+      image?: string | null;
+      is_public?: boolean;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+      readonly classes_count: number;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `per_term` - Per term
+     *     * `per_month` - Per month
+     *     * `per_session` - Per session (pay as you go)
+     *     * `full_course` - Whole course up front
+     *     * `instalments` - Whole course in instalments
+     * @enum {string}
+     */
+    CoursePricingModelEnum:
+      "per_term" | "per_month" | "per_session" | "full_course" | "instalments";
+    CourseRequest: {
+      name: string;
+      description?: string;
+      public_description?: string;
+      /** Format: uuid */
+      service: string;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      min_age?: number | null;
+      max_age?: number | null;
+      year_groups?: string[];
+      prerequisites?: string;
+      duration_weeks?: number | null;
+      duration_sessions?: number | null;
+      delivery_mode?: components["schemas"]["DeliveryModeEnum"];
+      default_capacity?: number;
+      pricing_model?: components["schemas"]["CoursePricingModelEnum"];
+      price: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      instalments?: number;
+      deposit?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      registration_fee?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      materials_fee?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: uuid */
+      tax_rate?: string | null;
+      /** Format: uuid */
+      image?: string | null;
+      is_public?: boolean;
+    };
     CoverLesson: {
       /** Format: uuid */
       id: string;
@@ -15846,6 +16926,10 @@ export interface components {
      * @enum {string}
      */
     DirectionEnum: "upgrade" | "downgrade" | "same";
+    DiscountLine: {
+      name: string;
+      amount: components["schemas"]["MoneyOut"];
+    };
     DiscountRule: {
       /** Format: uuid */
       readonly id: string;
@@ -15882,6 +16966,7 @@ export interface components {
       } | null;
       sibling_from?: number;
       volume_min_lessons?: number | null;
+      min_classes?: number | null;
       /** Format: uuid */
       client?: string | null;
       /** Format: uuid */
@@ -15894,10 +16979,11 @@ export interface components {
      *     * `client` - Client discount
      *     * `scholarship` - Scholarship / bursary
      *     * `promo` - Promo code
+     *     * `multi_class` - Several classes in a term
      * @enum {string}
      */
     DiscountRuleKindEnum:
-      "sibling" | "volume" | "first_lesson" | "client" | "scholarship" | "promo";
+      "sibling" | "volume" | "first_lesson" | "client" | "scholarship" | "promo" | "multi_class";
     DiscountRuleRequest: {
       name: string;
       active?: boolean;
@@ -15931,6 +17017,7 @@ export interface components {
       } | null;
       sibling_from?: number;
       volume_min_lessons?: number | null;
+      min_classes?: number | null;
       /** Format: uuid */
       client?: string | null;
       /** Format: uuid */
@@ -16272,6 +17359,149 @@ export interface components {
       subject: string;
       /** @default  */
       level: string;
+    };
+    Enrolment: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly group_class: string;
+      readonly class_name: string;
+      readonly course_name: string;
+      /** Format: uuid */
+      readonly student: string;
+      readonly student_name: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      /** @default enrolled */
+      readonly status: components["schemas"]["EnrolmentStatusEnum"];
+      readonly source: components["schemas"]["EnrolmentSourceEnum"];
+      /** Format: date */
+      readonly start_date: string;
+      /** Format: date */
+      readonly end_date: string | null;
+      readonly fee: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly price_snapshot: unknown;
+      /** Format: uuid */
+      readonly billing_plan_id: string | null;
+      readonly payment: components["schemas"]["EnrolmentPaymentEnum"];
+      /** Format: uuid */
+      readonly payment_request_id: string | null;
+      /** Format: date-time */
+      readonly hold_expires_at: string | null;
+      /** Format: date-time */
+      readonly withdrawn_at: string | null;
+      readonly withdrawal_reason: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    EnrolmentCreateRequest: {
+      /** Format: uuid */
+      group_class: string;
+      /** Format: uuid */
+      student: string;
+      /** Format: date */
+      start_date?: string | null;
+      /** @default false */
+      trial: boolean;
+      /** @default false */
+      override_capacity: boolean;
+      /** @default false */
+      skip_eligibility: boolean;
+    };
+    EnrolmentCreated: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly group_class: string;
+      readonly class_name: string;
+      readonly course_name: string;
+      /** Format: uuid */
+      readonly student: string;
+      readonly student_name: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      /** @default enrolled */
+      readonly status: components["schemas"]["EnrolmentStatusEnum"];
+      readonly source: components["schemas"]["EnrolmentSourceEnum"];
+      /** Format: date */
+      readonly start_date: string;
+      /** Format: date */
+      readonly end_date: string | null;
+      readonly fee: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly price_snapshot: unknown;
+      /** Format: uuid */
+      readonly billing_plan_id: string | null;
+      readonly payment: components["schemas"]["EnrolmentPaymentEnum"];
+      /** Format: uuid */
+      readonly payment_request_id: string | null;
+      /** Format: date-time */
+      readonly hold_expires_at: string | null;
+      /** Format: date-time */
+      readonly withdrawn_at: string | null;
+      readonly withdrawal_reason: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly pay_url: string;
+    };
+    /**
+     * @description * `none` - Invoice as usual
+     *     * `full` - Pay in full now
+     *     * `deposit` - Pay a deposit now
+     * @enum {string}
+     */
+    EnrolmentPaymentEnum: "none" | "full" | "deposit";
+    /**
+     * @description * `staff` - Staff
+     *     * `portal` - Client portal
+     *     * `public` - Website
+     *     * `waitlist` - Waitlist offer
+     *     * `rollover` - Term rollover
+     *     * `transfer` - Transfer
+     * @enum {string}
+     */
+    EnrolmentSourceEnum: "staff" | "portal" | "public" | "waitlist" | "rollover" | "transfer";
+    /**
+     * @description * `pending_payment` - Waiting for payment
+     *     * `enrolled` - Enrolled
+     *     * `trial` - Trial
+     *     * `withdrawn` - Withdrawn
+     *     * `completed` - Completed
+     *     * `transferred` - Transferred
+     * @enum {string}
+     */
+    EnrolmentStatusEnum:
+      "pending_payment" | "enrolled" | "trial" | "withdrawn" | "completed" | "transferred";
+    EnrolmentTransfer: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly from_enrolment: string;
+      /** Format: uuid */
+      readonly to_enrolment: string;
+      /** Format: date */
+      readonly effective_date: string;
+      readonly reason: string;
+      readonly adjustment: unknown;
+      /** Format: date-time */
+      readonly created_at: string;
     };
     EnterUrl: {
       url: string;
@@ -16803,6 +18033,109 @@ export interface components {
      * @enum {string}
      */
     GroupChargeEnum: "per_student" | "split";
+    GroupClass: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly branch: string;
+      /** Format: uuid */
+      readonly course: string;
+      readonly course_name: string;
+      /** Format: uuid */
+      readonly term: string;
+      readonly term_name: string;
+      readonly name: string;
+      readonly rrule: string;
+      readonly weekdays: number[];
+      /** Format: date */
+      readonly start_date: string;
+      /** Format: date */
+      readonly end_date: string;
+      /** Format: time */
+      readonly start_time: string;
+      readonly duration_minutes: number;
+      readonly timezone: string;
+      /** Format: uuid */
+      readonly location: string | null;
+      readonly location_name: string;
+      /** Format: uuid */
+      readonly room: string | null;
+      readonly room_name: string;
+      readonly online: boolean;
+      readonly capacity: number;
+      readonly min_size: number;
+      readonly status: components["schemas"]["GroupClassStatusEnum"];
+      readonly waitlist_enabled: boolean;
+      readonly min_age: number | null;
+      readonly max_age: number | null;
+      readonly year_groups: string[];
+      readonly teacher_pay_mode: components["schemas"]["TeacherPayModeEnum"];
+      readonly teacher_pay: unknown;
+      readonly is_public: boolean;
+      /** Format: uuid */
+      readonly next_class: string | null;
+      readonly teachers: components["schemas"]["ClassTeacher"][];
+      readonly enrolled: number;
+      readonly places_left: number;
+      readonly waiting: number;
+      /** Format: date-time */
+      readonly cancelled_at: string | null;
+      readonly cancel_reason: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    GroupClassCreateRequest: {
+      name: string;
+      capacity?: number;
+      min_size?: number;
+      /** Format: uuid */
+      location?: string | null;
+      /** Format: uuid */
+      room?: string | null;
+      online?: boolean;
+      waitlist_enabled?: boolean;
+      min_age?: number | null;
+      max_age?: number | null;
+      year_groups?: string[];
+      teacher_pay_mode?: components["schemas"]["TeacherPayModeEnum"];
+      teacher_pay?: components["schemas"]["TeacherPayRequest"];
+      is_public?: boolean;
+      /** Format: uuid */
+      next_class?: string | null;
+      teachers?: components["schemas"]["TeacherInputRequest"][];
+      /** Format: time */
+      start_time: string;
+      duration_minutes: number;
+      rrule?: string;
+      /** Format: uuid */
+      course: string;
+      /** Format: uuid */
+      term: string;
+      /** Format: date */
+      start_date?: string;
+      /** Format: date */
+      end_date?: string;
+      /** @default draft */
+      status: components["schemas"]["GroupClassCreateStatusEnum"];
+      /** @default skip */
+      conflict_mode: components["schemas"]["ConflictModeEnum"];
+    };
+    /**
+     * @description * `draft` - draft
+     *     * `open` - open
+     * @enum {string}
+     */
+    GroupClassCreateStatusEnum: "draft" | "open";
+    /**
+     * @description * `draft` - Draft
+     *     * `open` - Open for enrolment
+     *     * `full` - Full
+     *     * `running` - Running
+     *     * `completed` - Completed
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    GroupClassStatusEnum: "draft" | "open" | "full" | "running" | "completed" | "cancelled";
     HoldNoteRequest: {
       note: string;
     };
@@ -17921,6 +19254,12 @@ export interface components {
      * @enum {string}
      */
     JoinLinkRoleEnum: "host" | "participant";
+    JoinWaitlistRequest: {
+      /** Format: uuid */
+      student: string;
+      /** @default  */
+      notes: string;
+    };
     /**
      * @description * `accounting_integrations` - accounting_integrations
      *     * `advanced_reports` - advanced_reports
@@ -18494,6 +19833,37 @@ export interface components {
       note?: string;
       /** @default false */
       nurture: boolean;
+    };
+    MakeupBooking: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly session: string;
+      /** Format: uuid */
+      readonly student: string;
+      readonly student_name: string;
+      /** Format: uuid */
+      readonly from_session: string | null;
+      /** Format: uuid */
+      readonly makeup_credit_id: string | null;
+      /** @default booked */
+      readonly status: components["schemas"]["MakeupBookingStatusEnum"];
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `booked` - Booked
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    MakeupBookingStatusEnum: "booked" | "cancelled";
+    MakeupCreateRequest: {
+      /** Format: uuid */
+      student: string;
+      /** Format: uuid */
+      from_session?: string | null;
+      /** Format: uuid */
+      makeup_credit?: string | null;
     };
     MakeupCredit: {
       /** Format: uuid */
@@ -19659,6 +21029,19 @@ export interface components {
     PageRestoreRequest: {
       version: number;
     };
+    PaginatedAcademicYearList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["AcademicYear"][];
+    };
     PaginatedAccountingConnectionList: {
       /**
        * Format: uri
@@ -19945,6 +21328,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Contact"][];
     };
+    PaginatedCourseList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Course"][];
+    };
     PaginatedCoverRequestList: {
       /**
        * Format: uri
@@ -20036,6 +21432,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Enquiry"][];
     };
+    PaginatedEnrolmentList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Enrolment"][];
+    };
     PaginatedExceptionList: {
       /**
        * Format: uri
@@ -20100,6 +21509,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["ExternalRecordLink"][];
+    };
+    PaginatedGroupClassList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["GroupClass"][];
     };
     PaginatedImportBatchList: {
       /**
@@ -20738,6 +22160,32 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["TenantRow"][];
     };
+    PaginatedTermList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Term"][];
+    };
+    PaginatedTermRolloverList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["TermRollover"][];
+    };
     PaginatedTestimonialList: {
       /**
        * Format: uri
@@ -20889,6 +22337,15 @@ export interface components {
       uid: string;
       token: string;
       new_password: string;
+    };
+    PatchedAcademicYearRequest: {
+      /** Format: uuid */
+      branch?: string;
+      name?: string;
+      /** Format: date */
+      start_date?: string;
+      /** Format: date */
+      end_date?: string;
     };
     /** @description A ledger connection with its sync options, health and dashboard counts. */
     PatchedAccountingConnectionRequest: {
@@ -21081,6 +22538,68 @@ export interface components {
       language?: string;
       custom_fields?: unknown;
     };
+    PatchedCourseRequest: {
+      name?: string;
+      description?: string;
+      public_description?: string;
+      /** Format: uuid */
+      service?: string;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      min_age?: number | null;
+      max_age?: number | null;
+      year_groups?: string[];
+      prerequisites?: string;
+      duration_weeks?: number | null;
+      duration_sessions?: number | null;
+      delivery_mode?: components["schemas"]["DeliveryModeEnum"];
+      default_capacity?: number;
+      pricing_model?: components["schemas"]["CoursePricingModelEnum"];
+      price?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      instalments?: number;
+      deposit?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      registration_fee?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      materials_fee?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: uuid */
+      tax_rate?: string | null;
+      /** Format: uuid */
+      image?: string | null;
+      is_public?: boolean;
+    };
     PatchedCreditSettingsRequest: {
       auto_top_up?: boolean;
       top_up_pack?: number;
@@ -21145,6 +22664,7 @@ export interface components {
       } | null;
       sibling_from?: number;
       volume_min_lessons?: number | null;
+      min_classes?: number | null;
       /** Format: uuid */
       client?: string | null;
       /** Format: uuid */
@@ -21196,6 +22716,30 @@ export interface components {
       published?: boolean;
       /** Format: uuid */
       branch?: string | null;
+    };
+    PatchedGroupClassUpdateRequest: {
+      name?: string;
+      capacity?: number;
+      min_size?: number;
+      /** Format: uuid */
+      location?: string | null;
+      /** Format: uuid */
+      room?: string | null;
+      online?: boolean;
+      waitlist_enabled?: boolean;
+      min_age?: number | null;
+      max_age?: number | null;
+      year_groups?: string[];
+      teacher_pay_mode?: components["schemas"]["TeacherPayModeEnum"];
+      teacher_pay?: components["schemas"]["TeacherPayRequest"];
+      is_public?: boolean;
+      /** Format: uuid */
+      next_class?: string | null;
+      teachers?: components["schemas"]["TeacherInputRequest"][];
+      /** Format: time */
+      start_time?: string;
+      duration_minutes?: number;
+      rrule?: string;
     };
     PatchedHolidayCalendarRequest: {
       name?: string;
@@ -21801,6 +23345,20 @@ export interface components {
       exempt_reason?: string;
       active?: boolean;
     };
+    PatchedTermRequest: {
+      /** Format: uuid */
+      academic_year?: string;
+      name?: string;
+      /** Format: date */
+      start_date?: string;
+      /** Format: date */
+      end_date?: string;
+      /** Format: date */
+      enrolment_opens?: string | null;
+      /** Format: date */
+      enrolment_closes?: string | null;
+      breaks?: components["schemas"]["TermBreakRequest"][];
+    };
     PatchedTestimonialRequest: {
       quote?: string;
       author?: string;
@@ -22258,12 +23816,6 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
-    /**
-     * @description * `none` - Pay later (invoice as usual)
-     *     * `at_booking` - Pay when booking
-     * @enum {string}
-     */
-    PaymentEnum: "none" | "at_booking";
     PaymentGroup: {
       /** Format: uuid */
       readonly id: string;
@@ -22658,6 +24210,11 @@ export interface components {
       receives_reports?: boolean;
       receives_marketing?: boolean;
     };
+    PortalCourses: {
+      enrolments: components["schemas"]["PortalEnrolment"][];
+      waitlist: components["schemas"]["PortalWaitlist"][];
+      rollover_offers: components["schemas"]["PortalRolloverOffer"][];
+    };
     PortalCreditNote: {
       id: string;
       number: string;
@@ -22665,6 +24222,38 @@ export interface components {
       total: components["schemas"]["MoneyOut"];
       /** Format: date-time */
       issued_at: string;
+    };
+    PortalEnrolRequest: {
+      /** Format: uuid */
+      group_class: string;
+      /** Format: uuid */
+      student: string;
+      /** @default false */
+      accept_terms: boolean;
+      /** @default false */
+      join_waitlist: boolean;
+    };
+    PortalEnrolment: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      group_class: string;
+      class_name: string;
+      course_name: string;
+      term: string;
+      /** Format: uuid */
+      student: string;
+      student_name: string;
+      status: string;
+      /** Format: date */
+      start_date: string;
+      /** Format: date */
+      end_date: string | null;
+      weekdays: number[];
+      start_time: string;
+      pay_url: string;
+      /** Format: date-time */
+      hold_expires_at: string | null;
     };
     PortalFeatures: {
       cancellations: boolean;
@@ -22674,6 +24263,7 @@ export interface components {
       profile: boolean;
       booking: boolean;
       reschedule: boolean;
+      classes: boolean;
     };
     PortalInvoice: {
       id: string;
@@ -22804,6 +24394,18 @@ export interface components {
       amount: components["schemas"]["MoneyOut"];
       pay_token: string;
     };
+    PortalRolloverOffer: {
+      /** Format: uuid */
+      id: string;
+      student_name: string;
+      course_name: string;
+      class_name: string;
+      term: string;
+      status: string;
+      /** Format: date-time */
+      deadline: string;
+      mode: string;
+    };
     PortalSetup: {
       url: string;
     };
@@ -22821,6 +24423,19 @@ export interface components {
       name: string;
       email: string;
       phone: string;
+    };
+    PortalWaitlist: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      group_class: string;
+      class_name: string;
+      course_name: string;
+      student_name: string;
+      status: string;
+      position: number | null;
+      /** Format: date-time */
+      offer_expires_at: string | null;
     };
     PostingApplication: {
       /** Format: uuid */
@@ -23341,6 +24956,58 @@ export interface components {
       portal_url: string;
       login_url: string;
     };
+    PublicCatalogue: {
+      classes: components["schemas"]["PublicClass"][];
+      terms: string;
+      payment: string;
+    };
+    PublicClass: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      course: components["schemas"]["PublicCourse"];
+      term: string;
+      /** Format: date */
+      start_date: string;
+      /** Format: date */
+      end_date: string;
+      weekdays: number[];
+      start_time: string;
+      duration_minutes: number;
+      location: string;
+      online: boolean;
+      min_age: number | null;
+      max_age: number | null;
+      year_groups: string[];
+      pricing_model: string;
+      pricing_label: string;
+      price: string;
+      price_amount: string;
+      currency: string;
+      places_left: number;
+      capacity: number;
+      full: boolean;
+      waitlist: boolean;
+    };
+    PublicContactRequest: {
+      first_name: string;
+      last_name: string;
+      /** Format: email */
+      email: string;
+      /** @default  */
+      phone: string;
+    };
+    PublicCourse: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      description: string;
+      subject: string;
+      level: string;
+      image_url: string;
+      prerequisites: string;
+      delivery_mode: string;
+    };
     /** @description ``POST /public/enquiries`` (TutorCruncher-style API). */
     PublicEnquiryRequest: {
       first_name: string;
@@ -23358,6 +25025,32 @@ export interface components {
       captcha_token: string;
       /** @default  */
       website: string;
+    };
+    PublicEnrolRequest: {
+      /** Format: uuid */
+      group_class: string;
+      contact: components["schemas"]["PublicContactRequest"];
+      student: components["schemas"]["PublicStudentRequest"];
+      /** @default false */
+      accept_terms: boolean;
+      /** @default false */
+      join_waitlist: boolean;
+      captcha?: string;
+    };
+    PublicEnrolment: {
+      /** Format: uuid */
+      id: string | null;
+      status: string;
+      class_name: string;
+      course_name: string;
+      student: string;
+      /** Format: date */
+      start_date: string | null;
+      pay_url: string;
+      /** Format: date-time */
+      hold_expires_at: string | null;
+      token?: string;
+      waitlist_position?: number | null;
     };
     PublicForm: {
       name: string;
@@ -23518,6 +25211,13 @@ export interface components {
       pricing_unit: string;
       pricing_unit_label: string;
     };
+    PublicStudentRequest: {
+      first_name: string;
+      last_name?: string;
+      /** Format: date */
+      date_of_birth?: string | null;
+      year_group?: string;
+    };
     PublicSubmitRequest: {
       data: {
         [key: string]: unknown;
@@ -23657,6 +25357,32 @@ export interface components {
       /** Format: date */
       start_date?: string;
       default_duration_minutes?: number;
+    };
+    Quote: {
+      list_price: components["schemas"]["MoneyOut"];
+      price: components["schemas"]["MoneyOut"];
+      discounts: components["schemas"]["DiscountLine"][];
+      pricing_model: string;
+      /** Format: date */
+      start_date: string;
+      fee_due: components["schemas"]["MoneyOut"];
+      units: components["schemas"]["Units"];
+      instalments: number;
+      registration_fee: components["schemas"]["MoneyOut"];
+      materials_fee: components["schemas"]["MoneyOut"];
+      due_now: components["schemas"]["MoneyOut"];
+      deposit: components["schemas"]["MoneyOut"] | null;
+      problems?: string[];
+    };
+    QuoteInputRequest: {
+      /** Format: uuid */
+      group_class: string;
+      /** Format: uuid */
+      student?: string | null;
+      /** Format: date */
+      start_date?: string | null;
+      /** @default false */
+      trial: boolean;
     };
     QuoteRequestRequest: {
       /** Format: uuid */
@@ -23934,6 +25660,49 @@ export interface components {
      * @enum {string}
      */
     RegionEnum: "uk" | "eu" | "us" | "au";
+    Register: {
+      /** Format: uuid */
+      readonly session: string;
+      readonly lesson_status: string;
+      rows: components["schemas"]["RegisterRow"][];
+    };
+    RegisterInputRequest: {
+      rows: components["schemas"]["RegisterRowRequest"][];
+    };
+    RegisterRow: {
+      /** Format: uuid */
+      student: string;
+      readonly student_name: string;
+      outcome: components["schemas"]["RegisterRowOutcomeEnum"];
+      late_minutes?: number | null;
+      absence_reason?: string;
+      readonly makeup: boolean;
+    };
+    /**
+     * @description * `present` - present
+     *     * `late` - late
+     *     * `absent_notified` - absent_notified
+     *     * `no_show` - no_show
+     *     * `cancelled_client` - cancelled_client
+     *     * `cancelled_tutor` - cancelled_tutor
+     *     * `cancelled_admin` - cancelled_admin
+     * @enum {string}
+     */
+    RegisterRowOutcomeEnum:
+      | "present"
+      | "late"
+      | "absent_notified"
+      | "no_show"
+      | "cancelled_client"
+      | "cancelled_tutor"
+      | "cancelled_admin";
+    RegisterRowRequest: {
+      /** Format: uuid */
+      student: string;
+      outcome: components["schemas"]["RegisterRowOutcomeEnum"];
+      late_minutes?: number | null;
+      absence_reason?: string;
+    };
     RejectRecordRequest: {
       reason: string;
     };
@@ -24285,6 +26054,66 @@ export interface components {
       | "client"
       | "student"
       | "affiliate";
+    RolloverAnswerRequest: {
+      confirm: boolean;
+    };
+    RolloverOffer: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly student: string;
+      readonly student_name: string;
+      /** Format: uuid */
+      readonly enrolment: string;
+      readonly from_class_name: string;
+      /** Format: uuid */
+      readonly to_class: string;
+      readonly to_class_name: string;
+      readonly course_name: string;
+      readonly status: components["schemas"]["RolloverOfferStatusEnum"];
+      /** Format: date-time */
+      readonly responded_at: string | null;
+      /** Format: date-time */
+      readonly reminded_at: string | null;
+      /** Format: uuid */
+      readonly new_enrolment: string | null;
+      readonly note: string;
+    };
+    /**
+     * @description * `pending` - Waiting for the family
+     *     * `confirmed` - Confirmed
+     *     * `declined` - Not continuing
+     *     * `enrolled` - Enrolled
+     *     * `released` - Place released
+     *     * `failed` - Couldn't enrol
+     * @enum {string}
+     */
+    RolloverOfferStatusEnum:
+      "pending" | "confirmed" | "declined" | "enrolled" | "released" | "failed";
+    RolloverPage: {
+      student: string;
+      course_name: string;
+      class_name: string;
+      term: string;
+      /** Format: date */
+      starts: string;
+      start_time: string;
+      status: string;
+      /** Format: date-time */
+      deadline: string;
+      mode: string;
+      open: boolean;
+    };
+    RolloverStartRequest: {
+      /** Format: uuid */
+      from_term: string;
+      /** Format: uuid */
+      to_term: string;
+      /** @default confirm */
+      mode: components["schemas"]["TermRolloverModeEnum"];
+      /** Format: date-time */
+      deadline: string;
+    };
     Room: {
       /** Format: uuid */
       readonly id: string;
@@ -24330,6 +26159,22 @@ export interface components {
       capacity: number | null;
       colour: string;
       lessons: components["schemas"]["CalendarItem"][];
+    };
+    RosterRow: {
+      /** Format: uuid */
+      enrolment: string;
+      /** Format: uuid */
+      student: string;
+      student_name: string;
+      /** Format: uuid */
+      client: string;
+      client_name: string;
+      status: string;
+      /** Format: date */
+      start_date: string;
+      /** Format: date */
+      end_date: string | null;
+      joined_via: string;
     };
     RowIssue: {
       field: string;
@@ -25608,6 +27453,39 @@ export interface components {
       exempt_reason?: string;
       active?: boolean;
     };
+    TeacherInputRequest: {
+      /** Format: uuid */
+      tutor: string;
+      /** @default lead */
+      role: components["schemas"]["ClassTeacherRoleEnum"];
+      pay_per_session?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
+    /**
+     * @description * `service` - Usual tutor rates for the service
+     *     * `per_session` - A fixed amount per session
+     *     * `headcount` - By number of students
+     *     * `fixed` - A fixed amount for the whole class
+     * @enum {string}
+     */
+    TeacherPayModeEnum: "service" | "per_session" | "headcount" | "fixed";
+    TeacherPayRequest: {
+      /** Format: decimal */
+      amount?: string | null;
+      tiers?: components["schemas"]["TeacherPayTierRequest"][];
+    };
+    TeacherPayTierRequest: {
+      from_students: number;
+      /** Format: decimal */
+      amount: string;
+    };
     Template: {
       type_key: string;
       channel: components["schemas"]["MessageChannelEnum"];
@@ -25741,6 +27619,94 @@ export interface components {
       stripe_subscription_id: string;
       seats: number;
     };
+    Term: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly branch: string;
+      /** Format: uuid */
+      academic_year: string;
+      readonly academic_year_name: string;
+      name: string;
+      /** Format: date */
+      start_date: string;
+      /** Format: date */
+      end_date: string;
+      /** Format: date */
+      enrolment_opens?: string | null;
+      /** Format: date */
+      enrolment_closes?: string | null;
+      breaks?: components["schemas"]["TermBreak"][];
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    TermBreak: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      /** Format: date */
+      start_date: string;
+      /** Format: date */
+      end_date: string;
+    };
+    TermBreakRequest: {
+      name: string;
+      /** Format: date */
+      start_date: string;
+      /** Format: date */
+      end_date: string;
+    };
+    TermRequest: {
+      /** Format: uuid */
+      academic_year: string;
+      name: string;
+      /** Format: date */
+      start_date: string;
+      /** Format: date */
+      end_date: string;
+      /** Format: date */
+      enrolment_opens?: string | null;
+      /** Format: date */
+      enrolment_closes?: string | null;
+      breaks?: components["schemas"]["TermBreakRequest"][];
+    };
+    TermRollover: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly from_term: string;
+      readonly from_term_name: string;
+      /** Format: uuid */
+      readonly to_term: string;
+      readonly to_term_name: string;
+      readonly mode: components["schemas"]["TermRolloverModeEnum"];
+      /** Format: date-time */
+      readonly deadline: string;
+      /** @default running */
+      readonly status: components["schemas"]["TermRolloverStatusEnum"];
+      readonly stats: unknown;
+      readonly counts: {
+        [key: string]: number;
+      };
+      readonly workflow_id: string;
+      /** Format: date-time */
+      readonly finalised_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `confirm` - Families confirm to keep their place
+     *     * `opt_out` - Places roll over unless families opt out
+     * @enum {string}
+     */
+    TermRolloverModeEnum: "confirm" | "opt_out";
+    /**
+     * @description * `running` - Waiting for families
+     *     * `finalised` - Finished
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    TermRolloverStatusEnum: "running" | "finalised" | "cancelled";
     Testimonial: {
       /** Format: uuid */
       readonly id: string;
@@ -25958,6 +27924,16 @@ export interface components {
       category_id: string;
       option_id: string;
       name?: string;
+    };
+    TransferRequest: {
+      /** Format: uuid */
+      to_class: string;
+      /** Format: date */
+      effective_date?: string | null;
+      /** @default  */
+      reason: string;
+      /** @default false */
+      override_capacity: boolean;
     };
     /**
      * @description * `continuing` - Continuing
@@ -26305,6 +28281,11 @@ export interface components {
      * @enum {string}
      */
     UnitEnum: "count" | "money" | "percent" | "hours";
+    Units: {
+      basis: string;
+      total: number;
+      remaining: number;
+    };
     UnmatchedDemand: {
       subject: string;
       area: string;
@@ -26413,6 +28394,8 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
       readonly position: number | null;
+      /** Format: uuid */
+      readonly group_class_id: string | null;
     };
     WaitlistEntryRequest: {
       /** Format: uuid */
@@ -26424,6 +28407,19 @@ export interface components {
       /** Format: uuid */
       service?: string | null;
       notes?: string;
+    };
+    WaitlistRow: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      student: string;
+      student_name: string;
+      status: string;
+      position: number | null;
+      /** Format: date-time */
+      offer_expires_at: string | null;
+      /** Format: date-time */
+      created_at: string;
     };
     /**
      * @description * `waiting` - Waiting
@@ -26705,6 +28701,13 @@ export interface components {
       end_time: string;
       mode?: components["schemas"]["WindowModeEnum"];
     };
+    WithdrawRequest: {
+      /** Format: date */
+      effective_date?: string | null;
+      /** @default  */
+      reason: string;
+      refund?: boolean | null;
+    };
   };
   responses: never;
   parameters: never;
@@ -26741,6 +28744,136 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["InviteResult"];
+        };
+      };
+    };
+  };
+  academic_years_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAcademicYearList"];
+        };
+      };
+    };
+  };
+  academic_years_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AcademicYearRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AcademicYearRequest"];
+        "multipart/form-data": components["schemas"]["AcademicYearRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AcademicYear"];
+        };
+      };
+    };
+  };
+  academic_years_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this academic year. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AcademicYear"];
+        };
+      };
+    };
+  };
+  academic_years_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this academic year. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  academic_years_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this academic year. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedAcademicYearRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedAcademicYearRequest"];
+        "multipart/form-data": components["schemas"]["PatchedAcademicYearRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AcademicYear"];
         };
       };
     };
@@ -30572,8 +32705,16 @@ export interface operations {
          *     * `client` - Client discount
          *     * `scholarship` - Scholarship / bursary
          *     * `promo` - Promo code
+         *     * `multi_class` - Several classes in a term
          */
-        kind?: "client" | "first_lesson" | "promo" | "scholarship" | "sibling" | "volume";
+        kind?:
+          | "client"
+          | "first_lesson"
+          | "multi_class"
+          | "promo"
+          | "scholarship"
+          | "sibling"
+          | "volume";
         /** @description Which field to use when ordering the results. */
         ordering?: string;
         /** @description Number of results to return per page. */
@@ -32725,10 +34866,12 @@ export interface operations {
          *     * `package` - Package
          *     * `plan` - Recurring fee
          *     * `late_fee` - Late payment fee
+         *     * `course` - Course fee
          */
         kind?: (
           | "ad_hoc"
           | "advance"
+          | "course"
           | "late_cancellation"
           | "late_fee"
           | "lesson"
@@ -33018,6 +35161,494 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ChecklistTemplate"];
+        };
+      };
+    };
+  };
+  class_makeups_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this makeup booking. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MakeupBooking"];
+        };
+      };
+    };
+  };
+  class_makeups_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this makeup booking. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MakeupBooking"];
+        };
+      };
+    };
+  };
+  class_sessions_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this class session. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ClassSession"];
+        };
+      };
+    };
+  };
+  class_sessions_makeups_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this class session. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MakeupCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["MakeupCreateRequest"];
+        "multipart/form-data": components["schemas"]["MakeupCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MakeupBooking"];
+        };
+      };
+    };
+  };
+  class_sessions_register_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this class session. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Register"];
+        };
+      };
+    };
+  };
+  class_sessions_register_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this class session. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterInputRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RegisterInputRequest"];
+        "multipart/form-data": components["schemas"]["RegisterInputRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Register"];
+        };
+      };
+    };
+  };
+  classes_list: {
+    parameters: {
+      query?: {
+        course?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `draft` - Draft
+         *     * `open` - Open for enrolment
+         *     * `full` - Full
+         *     * `running` - Running
+         *     * `completed` - Completed
+         *     * `cancelled` - Cancelled
+         */
+        status?: ("cancelled" | "completed" | "draft" | "full" | "open" | "running")[];
+        term?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedGroupClassList"];
+        };
+      };
+    };
+  };
+  classes_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GroupClassCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["GroupClassCreateRequest"];
+        "multipart/form-data": components["schemas"]["GroupClassCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ClassCreated"];
+        };
+      };
+    };
+  };
+  classes_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this class. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GroupClass"];
+        };
+      };
+    };
+  };
+  classes_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this class. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedGroupClassUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedGroupClassUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedGroupClassUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GroupClass"];
+        };
+      };
+    };
+  };
+  classes_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this class. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ClassCancelRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ClassCancelRequest"];
+        "multipart/form-data": components["schemas"]["ClassCancelRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GroupClass"];
+        };
+      };
+    };
+  };
+  classes_open_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this class. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GroupClass"];
+        };
+      };
+    };
+  };
+  classes_roster_list: {
+    parameters: {
+      query?: {
+        course?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /**
+         * @description * `draft` - Draft
+         *     * `open` - Open for enrolment
+         *     * `full` - Full
+         *     * `running` - Running
+         *     * `completed` - Completed
+         *     * `cancelled` - Cancelled
+         */
+        status?: ("cancelled" | "completed" | "draft" | "full" | "open" | "running")[];
+        term?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this class. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RosterRow"][];
+        };
+      };
+    };
+  };
+  classes_sessions_list: {
+    parameters: {
+      query?: {
+        course?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /**
+         * @description * `draft` - Draft
+         *     * `open` - Open for enrolment
+         *     * `full` - Full
+         *     * `running` - Running
+         *     * `completed` - Completed
+         *     * `cancelled` - Cancelled
+         */
+        status?: ("cancelled" | "completed" | "draft" | "full" | "open" | "running")[];
+        term?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this class. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ClassSession"][];
+        };
+      };
+    };
+  };
+  classes_waitlist_list: {
+    parameters: {
+      query?: {
+        course?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /**
+         * @description * `draft` - Draft
+         *     * `open` - Open for enrolment
+         *     * `full` - Full
+         *     * `running` - Running
+         *     * `completed` - Completed
+         *     * `cancelled` - Cancelled
+         */
+        status?: ("cancelled" | "completed" | "draft" | "full" | "open" | "running")[];
+        term?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this class. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WaitlistRow"][];
+        };
+      };
+    };
+  };
+  classes_waitlist_create: {
+    parameters: {
+      query?: {
+        course?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /**
+         * @description * `draft` - Draft
+         *     * `open` - Open for enrolment
+         *     * `full` - Full
+         *     * `running` - Running
+         *     * `completed` - Completed
+         *     * `cancelled` - Cancelled
+         */
+        status?: ("cancelled" | "completed" | "draft" | "full" | "open" | "running")[];
+        term?: string;
+      };
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this class. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["JoinWaitlistRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["JoinWaitlistRequest"];
+        "multipart/form-data": components["schemas"]["JoinWaitlistRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WaitlistRow"][];
         };
       };
     };
@@ -34100,6 +36731,156 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Contact"];
+        };
+      };
+    };
+  };
+  courses_list: {
+    parameters: {
+      query?: {
+        archived?: boolean;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        is_public?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `per_term` - Per term
+         *     * `per_month` - Per month
+         *     * `per_session` - Per session (pay as you go)
+         *     * `full_course` - Whole course up front
+         *     * `instalments` - Whole course in instalments
+         */
+        pricing_model?: "full_course" | "instalments" | "per_month" | "per_session" | "per_term";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedCourseList"];
+        };
+      };
+    };
+  };
+  courses_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CourseRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CourseRequest"];
+        "multipart/form-data": components["schemas"]["CourseRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Course"];
+        };
+      };
+    };
+  };
+  courses_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this course. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Course"];
+        };
+      };
+    };
+  };
+  courses_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this course. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedCourseRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedCourseRequest"];
+        "multipart/form-data": components["schemas"]["PatchedCourseRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Course"];
+        };
+      };
+    };
+  };
+  courses_archive_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this course. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ArchiveRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ArchiveRequest"];
+        "multipart/form-data": components["schemas"]["ArchiveRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Course"];
         };
       };
     };
@@ -35828,6 +38609,398 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["BoardColumn"][];
+        };
+      };
+    };
+  };
+  enrolments_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        group_class?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `pending_payment` - Waiting for payment
+         *     * `enrolled` - Enrolled
+         *     * `trial` - Trial
+         *     * `withdrawn` - Withdrawn
+         *     * `completed` - Completed
+         *     * `transferred` - Transferred
+         */
+        status?: (
+          "completed" | "enrolled" | "pending_payment" | "transferred" | "trial" | "withdrawn"
+        )[];
+        student?: string;
+        term?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedEnrolmentList"];
+        };
+      };
+    };
+  };
+  enrolments_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EnrolmentCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["EnrolmentCreateRequest"];
+        "multipart/form-data": components["schemas"]["EnrolmentCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EnrolmentCreated"];
+        };
+      };
+    };
+  };
+  enrolments_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this enrolment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Enrolment"];
+        };
+      };
+    };
+  };
+  enrolments_cancel_pending_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this enrolment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Enrolment"];
+        };
+      };
+    };
+  };
+  enrolments_convert_trial_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this enrolment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Enrolment"];
+        };
+      };
+    };
+  };
+  enrolments_transfer_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this enrolment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TransferRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TransferRequest"];
+        "multipart/form-data": components["schemas"]["TransferRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EnrolmentTransfer"];
+        };
+      };
+    };
+  };
+  enrolments_withdraw_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this enrolment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["WithdrawRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["WithdrawRequest"];
+        "multipart/form-data": components["schemas"]["WithdrawRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Enrolment"];
+        };
+      };
+    };
+  };
+  enrolments_quote_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuoteInputRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["QuoteInputRequest"];
+        "multipart/form-data": components["schemas"]["QuoteInputRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Quote"];
+        };
+      };
+    };
+  };
+  enrolments_rollover_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedTermRolloverList"];
+        };
+      };
+    };
+  };
+  enrolments_rollover_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RolloverStartRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RolloverStartRequest"];
+        "multipart/form-data": components["schemas"]["RolloverStartRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TermRollover"];
+        };
+      };
+    };
+  };
+  enrolments_rollover_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this term rollover. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TermRollover"];
+        };
+      };
+    };
+  };
+  enrolments_rollover_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this term rollover. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TermRollover"];
+        };
+      };
+    };
+  };
+  enrolments_rollover_finalise_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this term rollover. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TermRollover"];
+        };
+      };
+    };
+  };
+  enrolments_rollover_offers_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this term rollover. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RolloverOffer"][];
         };
       };
     };
@@ -44932,6 +48105,44 @@ export interface operations {
       };
     };
   };
+  portal_classes_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicCatalogue"];
+        };
+      };
+    };
+  };
+  portal_courses_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalCourses"];
+        };
+      };
+    };
+  };
   portal_dashboard_retrieve: {
     parameters: {
       query?: never;
@@ -44947,6 +48158,58 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Dashboard"];
+        };
+      };
+    };
+  };
+  portal_enrol_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PortalEnrolRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PortalEnrolRequest"];
+        "multipart/form-data": components["schemas"]["PortalEnrolRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalEnrolment"];
+        };
+      };
+    };
+  };
+  portal_enrolments_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        enrolment_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalEnrolment"];
         };
       };
     };
@@ -45352,6 +48615,36 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["LessonChangeRequest"];
+        };
+      };
+    };
+  };
+  portal_rollover_offers_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        offer_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RolloverAnswerRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RolloverAnswerRequest"];
+        "multipart/form-data": components["schemas"]["RolloverAnswerRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalRolloverOffer"];
         };
       };
     };
@@ -45959,6 +49252,33 @@ export interface operations {
       };
     };
   };
+  public_catalogue_retrieve: {
+    parameters: {
+      query?: {
+        age?: number;
+        course?: string;
+        location?: string;
+        /** @description Subject name or id */
+        subject?: string;
+        /** @description Monday = 0 */
+        weekday?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicCatalogue"];
+        };
+      };
+    };
+  };
   public_enquiries_create: {
     parameters: {
       query?: never;
@@ -45983,6 +49303,57 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PublicSubmitResult"];
+        };
+      };
+    };
+  };
+  public_enrol_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublicEnrolRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PublicEnrolRequest"];
+        "multipart/form-data": components["schemas"]["PublicEnrolRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicEnrolment"];
+        };
+      };
+    };
+  };
+  public_enrolments_retrieve: {
+    parameters: {
+      query: {
+        token: string;
+      };
+      header?: never;
+      path: {
+        enrolment_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicEnrolment"];
         };
       };
     };
@@ -46224,6 +49595,57 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PublicOffer"];
+        };
+      };
+    };
+  };
+  public_re_enrol_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RolloverPage"];
+        };
+      };
+    };
+  };
+  public_re_enrol_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RolloverAnswerRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RolloverAnswerRequest"];
+        "multipart/form-data": components["schemas"]["RolloverAnswerRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RolloverPage"];
         };
       };
     };
@@ -49043,6 +52465,138 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Task"];
+        };
+      };
+    };
+  };
+  terms_list: {
+    parameters: {
+      query?: {
+        academic_year?: string;
+        branch?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedTermList"];
+        };
+      };
+    };
+  };
+  terms_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TermRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TermRequest"];
+        "multipart/form-data": components["schemas"]["TermRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Term"];
+        };
+      };
+    };
+  };
+  terms_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this term. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Term"];
+        };
+      };
+    };
+  };
+  terms_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this term. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  terms_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this term. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedTermRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedTermRequest"];
+        "multipart/form-data": components["schemas"]["PatchedTermRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Term"];
         };
       };
     };
