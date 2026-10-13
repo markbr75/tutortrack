@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime, time, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
 from zoneinfo import ZoneInfo
 
@@ -467,8 +467,12 @@ def test_job_board_publish_apply_select(org, maths):
 
 
 def _lesson_for(org, job, tutor, days=3):
+    """A one-hour lesson at 10:00 local time ``days`` from now (a fixed time of day, so the
+    lesson stays inside same-day availability windows whenever the suite runs)."""
     with tenant_context(org):
-        start = (now() + timedelta(days=days)).replace(minute=0, second=0, microsecond=0)
+        zone = ZoneInfo(org.timezone)
+        day = (now() + timedelta(days=days)).astimezone(zone).date()
+        start = datetime.combine(day, time(10), tzinfo=zone).astimezone(UTC)
         return scheduling.create_lesson(
             job=job, start=start, end=start + timedelta(hours=1), tutors=[{"tutor": tutor}]
         ).lesson
