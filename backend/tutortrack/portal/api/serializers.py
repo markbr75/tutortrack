@@ -3,6 +3,7 @@ from __future__ import annotations
 from rest_framework import serializers
 
 from tutortrack.core.api.serializers import BaseModelSerializer, MoneyOut, TenantRelatedField
+from tutortrack.delivery.api.serializers import TemplateFieldSerializer
 from tutortrack.people.models import Contact, Student
 from tutortrack.tenancy.models import Branch
 
@@ -341,3 +342,36 @@ class TutorEarningsSerializer(serializers.Serializer):
     end = serializers.DateField()
     lessons = EarningLineSerializer(many=True)
     total = MoneyOut()
+
+
+# --- tutor offline pack (E16-T08) -----------------------------------------------------------
+
+
+class OfflineAttendeeSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+    outcome = serializers.CharField(allow_blank=True)
+
+
+class OfflineReportSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    status = serializers.CharField()
+    answers = serializers.DictField()
+    etag = serializers.CharField(help_text="Send as If-Match when saving, to detect conflicts.")
+
+
+class OfflineLessonSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    title = serializers.CharField()
+    start = serializers.DateTimeField()
+    end = serializers.DateTimeField()
+    status = serializers.CharField()
+    attendees = OfflineAttendeeSerializer(many=True)
+    report = OfflineReportSerializer(allow_null=True)
+    report_fields = TemplateFieldSerializer(many=True)
+
+
+class TutorOfflinePackSerializer(serializers.Serializer):
+    generated_at = serializers.DateTimeField()
+    days = serializers.IntegerField()
+    lessons = OfflineLessonSerializer(many=True)

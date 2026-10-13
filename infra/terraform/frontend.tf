@@ -124,6 +124,19 @@ resource "aws_cloudfront_distribution" "app" {
     compress                   = true
   }
 
+  # The portal's service worker (E16-T08, ADR 0023) must never be cached at the edge, or
+  # phones keep an old worker after a deploy.
+  ordered_cache_behavior {
+    path_pattern               = "/portal/sw.js"
+    target_origin_id           = "spa"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    cache_policy_id            = data.aws_cloudfront_cache_policy.disabled.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.spa.id
+    compress                   = true
+  }
+
   ordered_cache_behavior {
     path_pattern               = "/portal*"
     target_origin_id           = "spa"

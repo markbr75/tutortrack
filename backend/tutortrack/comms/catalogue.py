@@ -1268,6 +1268,40 @@ for _row in _MATCHING_TYPES:
     )  # fmt: skip
 
 
+# --- payroll (E12) → tutors (E16-T09) -----------------------------------------------------------
+
+
+def load_payout(pk: str) -> Any:
+    from tutortrack.payroll.models import Payout
+
+    return Payout.objects.select_related("tutor__membership").filter(pk=pk).first()
+
+
+def _payout_paid(payout: Any) -> list[Delivery]:
+    r = tutor_recipient(payout.tutor)
+    amount = {"amount": str(payout.amount.amount), "currency": payout.amount.currency}
+    return [Delivery(r, _base(r, payout={"amount": amount, "reference": payout.reference}))]
+
+
+register(
+    NotificationType(
+        key="payout_paid",
+        label=str(_("Pay sent (to the tutor)")),
+        category="billing",
+        audience="tutor",
+        channels=("email", "in_app"),
+        default_channels=("in_app",),
+        resolve=_payout_paid,
+        load=load_payout,
+        related_type="payroll.payout",
+        variables=("payout.amount", "payout.reference"),
+        sample={**SAMPLE_BASE, "payout": {"amount": {"amount": "240.00", "currency": "GBP"},
+                                          "reference": "PAY-0042"}},
+        link=lambda payout: "/portal/tutor/earnings",
+    )
+)  # fmt: skip
+
+
 # --- automations (E14) --------------------------------------------------------------------------
 
 

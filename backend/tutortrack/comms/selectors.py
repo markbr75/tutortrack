@@ -8,7 +8,7 @@ from django.db.models import QuerySet
 
 from tutortrack.core.permissions import has_perm
 
-from .models import InAppNotification, Message
+from .models import InAppNotification, Message, PushSubscription
 
 
 def messages(user: Any) -> QuerySet[Message]:
@@ -37,3 +37,8 @@ def message_timeline(user: Any, target_type: str, target_id: str, limit: int) ->
 
 def notifications_for(user: Any) -> QuerySet[InAppNotification]:
     return InAppNotification.objects.filter(user=user)
+
+
+def push_subscriptions_for(user: Any) -> QuerySet[PushSubscription]:
+    """Your own devices only (E16-T09): nobody else can see or push to them."""
+    return PushSubscription.objects.filter(user=user)

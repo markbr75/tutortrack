@@ -10,6 +10,10 @@ a task (texts deferred out of quiet hours).
 
 from __future__ import annotations
 
+import base64
+import binascii
+import hashlib
+import json
 from dataclasses import dataclass
 from datetime import datetime, time, timedelta
 from typing import Any
@@ -22,11 +26,12 @@ from django.utils.translation import gettext as _
 
 from tutortrack.core import audit, branding
 from tutortrack.core.context import require_organisation_id
+from tutortrack.core.events import publish
 from tutortrack.core.exceptions import BusinessRuleViolation
 from tutortrack.core.time import now
 from tutortrack.tenancy.settings_service import get_setting
 
-from . import channels, defaults, registry, render
+from . import channels, defaults, events, registry, render
 from .models import (
     Channel,
     CommunicationPreference,
@@ -35,6 +40,7 @@ from .models import (
     MessageEvent,
     MessageTemplate,
     OrgNotificationSetting,
+    PushSubscription,
     SmsOptOut,
     Suppression,
 )
@@ -285,7 +291,7 @@ def _address(recipient: registry.Recipient, channel: str) -> str:
 
         org = Organisation.objects.get(pk=require_organisation_id())
         return channels.normalise_phone(recipient.phone, org.country)
-    return recipient.user_id or ""
+    return recipient.user_id or ""  # in-app and push go to the signed-in user
 
 
 def notify(
@@ -354,7 +360,9 @@ def _create(
     status = Message.Status.QUEUED
     if not address:
         return None
-    if channel != Channel.IN_APP and suppressed(channel, address):
+    if channel == Channel.PUSH and not PushSubscription.objects.filter(user_id=address).exists():
+        return None  # no device has push switched on
+    if channel not in {Channel.IN_APP, Channel.PUSH} and suppressed(channel, address):
         status = Message.Status.SUPPRESSED
     scheduled = None
     if channel == Channel.SMS and status == Message.Status.QUEUED:
@@ -430,6 +438,8 @@ def send_now(message: Message) -> Message:
             _send_email(message)
         elif message.channel == Channel.SMS:
             _send_sms(message)
+        elif message.channel == Channel.PUSH:
+            _send_push(message)
     except channels.ChannelError as exc:
         Message.objects.filter(pk=message.pk).update(
             status=Message.Status.FAILED, error=str(exc)[:500]
@@ -519,6 +529,233 @@ def _after_send(message: Message) -> None:
         if invoice is not None:
             with transaction.atomic():
                 billing.mark_sent(invoice, to=[message.to])
+
+
+# --- Web Push (E16-T09) -------------------------------------------------------------------------
+
+MAX_PUSH_FAILURES = 5
+PUSH_URGENT_CATEGORIES = {"scheduling"}
+# Where a tutor's push opens in the portal, by the notification's subject record.
+TUTOR_PUSH_LINKS = {
+    "scheduling.lesson": "/portal/tutor/lessons/{id}",
+    "delivery.lessonreport": "/portal/tutor/reports/{id}",
+}
+
+
+def endpoint_hash(endpoint: str) -> str:
+    return hashlib.sha256(endpoint.strip().encode()).hexdigest()
+
+
+def _b64url(value: str) -> bytes:
+    try:
+        return base64.urlsafe_b64decode(value + "=" * (-len(value) % 4))
+    except (binascii.Error, ValueError):
+        return b""
+
+
+@transaction.atomic
+def subscribe_push(
+    user: Any, *, endpoint: str, p256dh: str, auth: str, device: str = ""
+) -> PushSubscription:
+    """Register (or refresh) this browser's push subscription for ``user``. A browser
+    shared by two people pushes to whoever subscribed last."""
+    try:
+        host = channels.push_host(endpoint)
+    except ValueError:
+        raise _invalid(
+            "endpoint", _("Push notifications from this browser aren't supported.")
+        ) from None
+    key = _b64url(p256dh)
+    if len(key) != 65 or key[0] != 4:
+        raise _invalid("p256dh", _("The browser sent an invalid push key."))
+    if len(_b64url(auth)) != 16:
+        raise _invalid("auth", _("The browser sent an invalid push key."))
+    digest = endpoint_hash(endpoint)
+    row = PushSubscription.objects.filter(endpoint_hash=digest).first()
+    if row is not None:
+        moved = row.user_id != user.pk
+        with audit.track(row, action="update"):
+            row.user = user
+            row.p256dh, row.auth = p256dh, auth
+            row.device = device[:120] or row.device
+            row.failures = 0
+            row.save()
+        if moved:
+            publish(events.PushSubscriptionAdded(subject_id=row.pk, user_id=str(user.pk),
+                                                 push_service=row.push_service))  # fmt: skip
+        return row
+    row = PushSubscription.objects.create(
+        user=user, endpoint=endpoint.strip(), endpoint_hash=digest, p256dh=p256dh, auth=auth,
+        device=device[:120], push_service=host,
+    )  # fmt: skip
+    audit.record_create(row)
+    publish(
+        events.PushSubscriptionAdded(subject_id=row.pk, user_id=str(user.pk), push_service=host)
+    )
+    return row
+
+
+@transaction.atomic
+def remove_push_subscription(row: PushSubscription, *, reason: str = "removed") -> None:
+    audit.record(row, "delete")
+    publish(
+        events.PushSubscriptionRemoved(
+            subject_id=row.pk, user_id=str(row.user_id), push_service=row.push_service,
+            reason=reason,
+        )
+    )  # fmt: skip
+    row.delete()
+
+
+def _push_to(
+    subscriptions: list[PushSubscription], payload: dict[str, Any], *, urgency: str, topic: str
+) -> tuple[int, int]:
+    """Push to each device; forget expired ones. Returns (delivered, removed)."""
+    provider = channels.push_provider()
+    body = json.dumps(payload).encode()
+    ttl = int(settings.WEB_PUSH["TTL_SECONDS"])
+    delivered = removed = 0
+    for sub in subscriptions:
+        target = channels.PushTarget(sub.endpoint, sub.p256dh, sub.auth)
+        try:
+            result = provider.send(target, body, ttl=ttl, urgency=urgency, topic=topic)
+        except channels.ChannelError:
+            result = channels.PushResult(0)
+        if result.gone:
+            remove_push_subscription(sub, reason="expired")
+            removed += 1
+        elif result.ok:
+            PushSubscription.objects.filter(pk=sub.pk).update(last_sent_at=now(), failures=0)
+            delivered += 1
+        elif sub.failures + 1 >= MAX_PUSH_FAILURES:
+            remove_push_subscription(sub, reason="failing")
+            removed += 1
+        else:
+            PushSubscription.objects.filter(pk=sub.pk).update(failures=sub.failures + 1)
+    return delivered, removed
+
+
+def _push_url(message: Message) -> str:
+    t = registry.get(message.type_key)
+    if message.recipient_type == "tutor":
+        pattern = TUTOR_PUSH_LINKS.get(t.related_type)
+        if pattern and message.related_id:
+            return pattern.format(id=message.related_id)
+    subject = t.load(message.related_id) if message.related_id else None
+    link = ""
+    if t.link is not None and (subject is not None or not message.related_id):
+        try:
+            link = t.link(subject)
+        except AttributeError:
+            link = ""
+    if message.recipient_type == "tutor" and not link.startswith("/portal/"):
+        return "/portal/tutor"
+    return link or "/"
+
+
+def _send_push(message: Message) -> None:
+    subscriptions = list(PushSubscription.objects.filter(user_id=message.to))
+    if not subscriptions:
+        raise channels.ChannelError("No device has push notifications switched on.")
+    t = registry.get(message.type_key)
+    tag = f"{message.type_key}:{message.related_id}"[:64]
+    payload = {
+        "title": (message.subject or _organisation_name())[:120],
+        "body": " ".join(message.body.split())[:240],
+        "url": _push_url(message),
+        "tag": tag,
+    }
+    urgency = "high" if t.category in PUSH_URGENT_CATEGORIES else "normal"
+    topic = hashlib.sha256(tag.encode()).hexdigest()[:32]  # a newer push replaces it
+    delivered, removed = _push_to(subscriptions, payload, urgency=urgency, topic=topic)
+    if not delivered:
+        raise channels.ChannelError(
+            f"No device accepted the notification ({len(subscriptions)} tried, {removed} removed)."
+        )
+    Message.objects.filter(pk=message.pk).update(
+        status=Message.Status.SENT, sent_at=now(), provider_ref=f"{delivered} device(s)"
+    )
+    _event(message, "sent", {"devices": delivered, "removed": removed})
+
+
+def send_test_push(user: Any) -> int:
+    """A test notification to each of ``user``'s devices; returns how many accepted it."""
+    subscriptions = list(PushSubscription.objects.filter(user=user))
+    if not subscriptions:
+        raise BusinessRuleViolation(_("Turn on push notifications on this device first."))
+    payload = {
+        "title": _("Notifications are on"),
+        "body": _("This is how %(name)s will let you know about changes.")
+        % {"name": _organisation_name()},
+        "url": "/portal/tutor/notifications",
+        "tag": "test",
+    }
+    delivered, _removed = _push_to(subscriptions, payload, urgency="normal", topic="")
+    return delivered
+
+
+# --- my notification preferences (E16-T09, FR-16-9) ---------------------------------------------
+
+
+def person_for(user: Any) -> tuple[str, str]:
+    """The recipient a signed-in user is in notifications: their tutor profile, else the
+    user (staff)."""
+    from tutortrack.people.models import TutorProfile
+
+    tutor = TutorProfile.objects.filter(membership__user=user).only("pk").first()
+    return ("tutor", str(tutor.pk)) if tutor is not None else ("user", str(user.pk))
+
+
+def my_preferences(user: Any) -> list[dict[str, Any]]:
+    """Per category: the channels the user's notifications can use and the ones chosen."""
+    person_type, person_id = person_for(user)
+    audience = "tutor" if person_type == "tutor" else "staff"
+    rows = {
+        r.category: set(r.channels)
+        for r in CommunicationPreference.objects.filter(
+            person_type=person_type, person_id=person_id
+        )
+    }
+    out = []
+    for category in registry.CATEGORIES:
+        available: set[str] = set()
+        for t in registry.all_types():
+            if t.category == category and t.audience == audience:
+                available.update(t.channels)
+        if not available:
+            continue
+        order = [c for c in Channel.values if c in available]
+        chosen = rows.get(category)
+        out.append(
+            {
+                "category": category,
+                "available": order,
+                "channels": order if chosen is None else [c for c in order if c in chosen],
+            }
+        )
+    return out
+
+
+@transaction.atomic
+def set_my_preferences(user: Any, choices: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    person_type, person_id = person_for(user)
+    current = {row["category"]: row for row in my_preferences(user)}
+    for choice in choices:
+        row = current.get(choice["category"])
+        if row is None:
+            raise _invalid("category", _("Unknown category."))
+        unknown = set(choice["channels"]) - set(row["available"])
+        if unknown:
+            raise _invalid("channels", _("That channel isn't available here."))
+        # Keep channels this screen doesn't offer (e.g. text) as they were.
+        others = set(Channel.values) - set(row["available"])
+        existing = CommunicationPreference.objects.filter(
+            person_type=person_type, person_id=person_id, category=choice["category"]
+        ).first()
+        kept = others & (set(existing.channels) if existing else others)
+        set_preference(person_type, person_id, choice["category"],
+                       sorted(kept | set(choice["channels"])))  # fmt: skip
+    return my_preferences(user)
 
 
 # --- delivery events (T03/T04) ------------------------------------------------------------------

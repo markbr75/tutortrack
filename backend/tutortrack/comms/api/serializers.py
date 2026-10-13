@@ -4,7 +4,8 @@ from rest_framework import serializers
 
 from tutortrack.core.api.serializers import BaseModelSerializer
 
-from ..models import Channel, InAppNotification, Message, MessageEvent
+from ..models import Channel, InAppNotification, Message, MessageEvent, PushSubscription
+from ..registry import CATEGORIES
 
 CHANNELS = Channel.choices
 
@@ -125,3 +126,49 @@ class PreferencesSerializer(serializers.Serializer):
 class UnsubscribeSerializer(serializers.Serializer):
     category = serializers.CharField()
     done = serializers.BooleanField()
+
+
+# --- Web Push and my preferences (E16-T09) ------------------------------------------------------
+
+
+class PushConfigSerializer(serializers.Serializer):
+    enabled = serializers.BooleanField()
+    vapid_public_key = serializers.CharField(allow_blank=True)
+
+
+class PushSubscriptionSerializer(BaseModelSerializer):
+    """A device with push switched on. The endpoint and keys are write-only secrets."""
+
+    class Meta:
+        model = PushSubscription
+        fields = ["id", "device", "push_service", "last_sent_at", "created_at"]
+        read_only_fields = fields
+
+
+class PushKeysSerializer(serializers.Serializer):
+    p256dh = serializers.CharField(max_length=200)
+    auth = serializers.CharField(max_length=100)
+
+
+class PushSubscribeSerializer(serializers.Serializer):
+    """``PushSubscription.toJSON()`` from the browser, plus a device name."""
+
+    endpoint = serializers.URLField(max_length=2000)
+    keys = PushKeysSerializer()
+    device = serializers.CharField(max_length=120, required=False, allow_blank=True, default="")
+
+
+class PushTestSerializer(serializers.Serializer):
+    delivered = serializers.IntegerField()
+
+
+class MyPreferenceSerializer(serializers.Serializer):
+    category = serializers.ChoiceField(choices=[(c, c) for c in CATEGORIES])
+    channels = serializers.ListField(child=serializers.ChoiceField(choices=CHANNELS))
+    available = serializers.ListField(
+        child=serializers.ChoiceField(choices=CHANNELS), read_only=True
+    )
+
+
+class MyPreferencesSerializer(serializers.Serializer):
+    preferences = MyPreferenceSerializer(many=True)

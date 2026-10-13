@@ -4,7 +4,7 @@ organisations choose per type whether it is sent, on which channels and (reminde
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 CATEGORIES = ("scheduling", "reports", "billing", "account", "staff")
@@ -28,7 +28,7 @@ class Recipient:
         if self.phone:
             out.add("sms")
         if self.user_id:
-            out.add("in_app")
+            out.update({"in_app", "push"})  # push needs a subscribed device (checked later)
         return out
 
 
@@ -64,7 +64,29 @@ class NotificationType:
 _types: dict[str, NotificationType] = {}
 
 
+# Web Push (E16-T09) goes wherever an in-app notification can: it reaches the same signed-in
+# user on their phone. These types (FR-16-9: lesson changes, job offers, report reminders,
+# pay) push by default; organisations switch push on or off per type like any channel.
+PUSH_BY_DEFAULT = frozenset(
+    {
+        "lesson_changed",
+        "lesson_cancelled",
+        "job_offer",
+        "cover_request",
+        "report_due",
+        "report_overdue",
+        "report_comment",
+        "payout_paid",
+    }
+)
+
+
 def register(t: NotificationType) -> NotificationType:
+    if "in_app" in t.channels and "push" not in t.channels:
+        defaults = t.default_channels
+        if t.key in PUSH_BY_DEFAULT:
+            defaults = (*defaults, "push")
+        t = replace(t, channels=(*t.channels, "push"), default_channels=defaults)
     _types[t.key] = t
     return t
 

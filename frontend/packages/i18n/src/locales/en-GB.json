@@ -1313,7 +1313,8 @@
     "channel": {
       "email": "Email",
       "sms": "Text",
-      "in_app": "In the app"
+      "in_app": "In the app",
+      "push": "Push"
     },
     "hoursBefore": "Hours before",
     "hoursHint": "Up to three, e.g. 24, 2",
@@ -1469,7 +1470,8 @@
       "onboarding": "Getting started",
       "compliance": "Checks",
       "jobs": "Jobs",
-      "calendar": "Calendar and video"
+      "calendar": "Calendar and video",
+      "notifications": "Notifications"
     },
     "today": "Today",
     "reportsDue": "Reports to write",
@@ -3557,5 +3559,60 @@
     "forAccount": "For",
     "buyNow": "Buy",
     "failed": "The package couldn't be bought. Please try again."
+  },
+  "pwa": {
+    "syncStatus": "Sync status",
+    "offline": "You're offline.",
+    "offlineTutor": "Your lessons for the next week are on this phone. Registers and reports you save will sync when you're back online.",
+    "offlineFamily": "Reconnect to see the latest lessons, reports and invoices.",
+    "waiting_one": "{{count}} change is waiting to sync.",
+    "waiting_other": "{{count}} changes are waiting to sync.",
+    "signInToSync_one": "Sign in again to sync {{count}} change.",
+    "signInToSync_other": "Sign in again to sync {{count}} changes.",
+    "signIn": "Sign in",
+    "syncNow": "Sync now",
+    "needsReview_one": "Your changes need review",
+    "needsReview_other": "{{count}} changes need review",
+    "kind": {
+      "complete": "Register for {{title}}",
+      "report": "Report for {{title}}"
+    },
+    "because": "wasn't saved: {{reason}}",
+    "openLesson": "Open the lesson",
+    "tryAgain": "Try again",
+    "discard": "Discard",
+    "completedOffline": "Completed on this phone. It will sync when you're back online.",
+    "reportQueued": "Saved on this phone. It syncs as soon as you're online.",
+    "reportQueuedSubmit": "Ready to submit. It's sent as soon as you're online.",
+    "reportOnPhone": "You're writing this report on this phone. It's sent when you're online.",
+    "notOnPhone": "This lesson isn't saved on this phone.",
+    "backToLesson": "Back to the lesson",
+    "notifications": "Notifications",
+    "thisDevice": "Push notifications on this device",
+    "unsupported": "This browser can't show push notifications.",
+    "iosTitle": "Add the app to your Home Screen first",
+    "iosSteps": "On iPhone and iPad (iOS 16.4 or later), tap Share, then Add to Home Screen. Open the app from your Home Screen and come back here to turn on notifications.",
+    "notConfigured": "Push notifications aren't available here yet.",
+    "blocked": "Notifications are blocked for this site. Allow them in your browser's site settings, then reload the page.",
+    "onHere": "Push notifications are on for this device.",
+    "offHere": "Get lesson changes, job offers, report reminders and pay updates on this device.",
+    "turnOn": "Turn on notifications",
+    "turnOff": "Turn off on this device",
+    "sendTest": "Send a test notification",
+    "testSent_one": "Sent to {{count}} device.",
+    "testSent_other": "Sent to {{count}} devices.",
+    "devices": "Devices with notifications on",
+    "since": "since {{date}}",
+    "removeDevice": "Remove",
+    "whatYouHear": "What you hear about, and how",
+    "whatYouHearHelp": "Choose the channels for each kind of message. Important messages still come by email if you turn everything off.",
+    "category": {
+      "scheduling": "Lessons and jobs",
+      "reports": "Lesson reports",
+      "billing": "Pay",
+      "account": "Your account",
+      "staff": "Team"
+    },
+    "saved": "Saved."
   }
 }

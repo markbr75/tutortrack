@@ -517,8 +517,18 @@ class ManifestIconSerializer(serializers.Serializer):
     purpose = serializers.CharField()
 
 
-class ManifestSerializer(serializers.Serializer):
+class ManifestShortcutSerializer(serializers.Serializer):
     name = serializers.CharField()
+    url = serializers.CharField()
+
+
+class ManifestSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+    description = serializers.CharField()
+    lang = serializers.CharField()
+    categories = serializers.ListField(child=serializers.CharField())
+    shortcuts = ManifestShortcutSerializer(many=True)
     short_name = serializers.CharField()
     start_url = serializers.CharField()
     scope = serializers.CharField()

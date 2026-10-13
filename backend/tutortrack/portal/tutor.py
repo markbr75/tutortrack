@@ -162,3 +162,69 @@ def students(tutor: TutorProfile) -> list[dict[str, Any]]:
         )
         row["next_lesson"] = upcoming.start if upcoming else None
     return sorted(seen.values(), key=lambda r: r["name"])
+
+
+OFFLINE_DAYS = 7
+
+
+def offline_pack(tutor: TutorProfile, user: Any) -> dict[str, Any]:
+    """What the tutor PWA keeps on the phone (E16-T08, FR-16-3): yesterday's and the next
+    7 days' lessons, each with the tutor's report (answers and ``etag`` for conflict checks)
+    or, when none is open yet, the fields of the template it will use, so the register and
+    the report can be filled in offline and synced later."""
+    from tutortrack.core.api.mixins import etag_for
+    from tutortrack.delivery import templates
+    from tutortrack.delivery.models import LessonReport
+    from tutortrack.delivery.services import resolve_template
+    from tutortrack.scheduling.models import Lesson
+
+    moment = now()
+    lessons = list(
+        Lesson.objects.filter(
+            tutors__tutor=tutor,
+            start__gte=moment - timedelta(days=1),
+            start__lt=moment + timedelta(days=OFFLINE_DAYS),
+        )
+        .exclude(status=Lesson.Status.CANCELLED)
+        .select_related("service", "location")
+        .prefetch_related("attendees__student")
+        .order_by("start")
+    )
+    reports = {
+        r.lesson_id: r
+        for r in LessonReport.objects.filter(
+            tutor=tutor, lesson__in=[lesson.pk for lesson in lessons]
+        ).select_related("template_version")
+    }
+    staff = templates.AUDIENCE_FIELDS["staff"]
+    out = []
+    for lesson in lessons:
+        report = reports.get(lesson.pk)
+        if report is not None:
+            fields = report.template_version.fields
+            report_out: dict[str, Any] | None = {
+                "id": str(report.pk),
+                "status": report.status,
+                "answers": templates.visible_answers(fields, report.answers or {}, "staff"),
+                "etag": etag_for(report),
+            }
+        else:
+            version = resolve_template(lesson).current_version
+            fields = version.fields if version is not None else []
+            report_out = None
+        out.append(
+            {
+                "id": str(lesson.pk),
+                "title": lesson.title,
+                "start": lesson.start,
+                "end": lesson.end,
+                "status": lesson.status,
+                "attendees": [
+                    {"id": str(a.pk), "name": a.student.full_name, "outcome": a.outcome or ""}
+                    for a in lesson.attendees.all()
+                ],
+                "report": report_out,
+                "report_fields": [f for f in fields if f.get("visibility") in staff],
+            }
+        )
+    return {"generated_at": moment, "days": OFFLINE_DAYS, "lessons": out}

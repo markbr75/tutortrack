@@ -2,14 +2,15 @@ import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
 import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { api } from "../api";
+import { isNetworkError, isOffline, queueChange } from "../offline/client";
 
 type Field = components["schemas"]["TemplateField"];
-type Answers = Record<string, unknown>;
+export type Answers = Record<string, unknown>;
 
-function Input({
+export function ReportFieldInput({
   field,
   value,
   onChange,
@@ -107,34 +108,65 @@ function Input({
   );
 }
 
-/** Write and submit a lesson report on a phone (E16-T03). */
+/** Write and submit a lesson report on a phone (E16-T03). Without a signal the save is
+ * kept on the phone and synced later, checked against the version it started from
+ * (E16-T08). */
 export function TutorReportPage({ reportId }: { reportId: string }) {
   const { t } = useTranslation();
   const path = { params: { path: { id: reportId } } };
+  const etag = useRef<string | null>(null);
   const report = useQuery({
     queryKey: ["tutor", "report", reportId],
-    queryFn: async () => unwrap(await api.GET("/api/v1/lesson-reports/{id}", path)),
+    queryFn: async () => {
+      const result = await api.GET("/api/v1/lesson-reports/{id}", path);
+      etag.current = result.response.headers.get("ETag");
+      return unwrap(result);
+    },
   });
   const [answers, setAnswers] = useState<Answers | null>(null);
   useEffect(() => {
     if (report.data && answers === null) setAnswers(report.data.answers as Answers);
   }, [report.data, answers]);
   const save = useMutation({
-    mutationFn: async (kind: "draft" | "submit") =>
-      kind === "draft"
-        ? unwrap(
-            await api.PUT("/api/v1/lesson-reports/{id}", {
-              ...path,
-              body: { answers: answers ?? {} },
-            }),
-          )
-        : unwrap(
+    mutationFn: async (kind: "draft" | "submit"): Promise<"saved" | "queued"> => {
+      const body = { answers: answers ?? {} };
+      const queue = async (key?: string) => {
+        await queueChange(
+          {
+            kind: "report.save",
+            label: report.data?.lesson_title ?? "",
+            lessonId: report.data?.lesson ?? "",
+            reportId,
+            body: { ...body, submit: kind === "submit" },
+            etag: etag.current,
+          },
+          key,
+        );
+        return "queued" as const;
+      };
+      if (isOffline()) return queue();
+      const key = crypto.randomUUID();
+      try {
+        if (kind === "draft") {
+          unwrap(await api.PUT("/api/v1/lesson-reports/{id}", { ...path, body }));
+        } else {
+          unwrap(
             await api.POST("/api/v1/lesson-reports/{id}/submit", {
               ...path,
-              body: { answers: answers ?? {} },
+              body,
+              headers: { "Idempotency-Key": `${key}:submit` },
             }),
-          ),
-    onSuccess: () => void report.refetch(),
+          );
+        }
+        return "saved";
+      } catch (error) {
+        if (isNetworkError(error)) return queue(key);
+        throw error;
+      }
+    },
+    onSuccess: (outcome) => {
+      if (outcome === "saved") void report.refetch();
+    },
   });
   if (report.isPending || answers === null)
     return <Spinner className="size-6" label={t("grid.loading")} />;
@@ -153,7 +185,7 @@ export function TutorReportPage({ reportId }: { reportId: string }) {
       <h1 className="text-xl font-semibold">{t("tutor.reportFor", { title: r.lesson_title })}</h1>
       {r.returned_note ? <Alert tone="warning">{r.returned_note}</Alert> : null}
       {r.template_fields.map((field) => (
-        <Input
+        <ReportFieldInput
           key={field.key}
           field={field}
           value={answers[field.key]}
@@ -173,6 +205,7 @@ export function TutorReportPage({ reportId }: { reportId: string }) {
           </Button>
         </div>
       )}
+      {save.data === "queued" ? <Alert>{t("pwa.reportQueued")}</Alert> : null}
       {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
     </form>
   );

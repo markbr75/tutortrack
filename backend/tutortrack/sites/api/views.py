@@ -20,6 +20,7 @@ from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics, mixins, status, viewsets
@@ -601,15 +602,31 @@ class PublicManifestView(PublicView):
                 {"src": src, "sizes": "192x192", "type": "image/png", "purpose": "any"},
                 {"src": src, "sizes": "512x512", "type": "image/png", "purpose": "any"},
             ]
+        # The portal's own icons (E16-T08) keep it installable without a brand kit and give
+        # Android a maskable icon.
+        icons += [
+            {"src": "/portal/icons/icon-192.png", "sizes": "192x192", "type": "image/png",
+             "purpose": "any"},
+            {"src": "/portal/icons/icon-512.png", "sizes": "512x512", "type": "image/png",
+             "purpose": "any"},
+            {"src": "/portal/icons/icon-maskable-512.png", "sizes": "512x512",
+             "type": "image/png", "purpose": "maskable"},
+        ]  # fmt: skip
+        description = _("Lessons, reports and messages from %(name)s") % {"name": b["name"]}
         return Response(
             {
+                "id": "/portal/",
                 "name": b["app_name"],
                 "short_name": b["app_name"][:12],
+                "description": description,
+                "lang": "en-GB",
                 "start_url": "/portal/",
                 "scope": "/portal/",
                 "display": "standalone",
                 "theme_color": b["primary_colour"],
                 "background_color": "#ffffff",
+                "categories": ["education", "productivity"],
+                "shortcuts": [{"name": _("Today"), "url": "/portal/tutor"}],
                 "icons": icons,
             }
         )

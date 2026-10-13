@@ -85,7 +85,7 @@ All ─► E26, E27, E28, E31
 | E13 | ✅ Done (2026-10-09) | MVP scope (broadcasts, inbox, WhatsApp, custom domains are Phase 2). See Implementation notes |
 | E14 | ✅ Done (2026-10-10) | T01–T09 + TW1. See Implementation notes |
 | E15 | ✅ Done (2026-10-10) | MVP scope (booking, reschedule, packages and messaging are Phase 2). See Implementation notes |
-| E16 | ✅ Done (2026-10-10) | Responsive tutor shell in the portal app (PWA/offline/push are Phase 2; expenses with E12, compliance with E18). See Implementation notes |
+| E16 | ✅ Done (2026-10-10); Phase 2 ✅ Done (2026-10-13) | Responsive tutor shell in the portal app (expenses with E12, compliance with E18). Phase 2: installable PWA with a service worker, offline pack, idempotent outbox with background sync and conflict review, Web Push as an E13 channel (ADR 0023). T11 native shells are Phase 3 |
 | E17 | ✅ Done (2026-10-10) | T01–T08, T10 + TW1 (proposals T09 are Phase 2b). See Implementation notes |
 | E18 | ✅ Done (2026-10-10) | T01–T10 + TW1 (provider integrations T11 are Phase 3). See Implementation notes |
 | E19 | ✅ Done (2026-10-10) | T01–T07, T09 + TW1 (client shortlist sharing T08 is Phase 2b). See Implementation notes |

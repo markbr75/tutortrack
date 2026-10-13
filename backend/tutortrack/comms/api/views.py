@@ -24,7 +24,7 @@ from tutortrack.core.context import tenant_context
 from tutortrack.core.permissions import HasMethodPermission, HasOrganisation
 
 from .. import registry, render, selectors, services
-from ..models import CommunicationPreference, InAppNotification, Message
+from ..models import CommunicationPreference, InAppNotification, Message, PushSubscription
 from . import serializers as s
 
 AUTH = [IsAuthenticated, HasOrganisation]
@@ -160,7 +160,9 @@ class MessageFilter(filters.FilterSet):
     target_id = filters.CharFilter()
     related_type = filters.CharFilter()
     related_id = filters.CharFilter()
-    channel = filters.ChoiceFilter(choices=[("email", "Email"), ("sms", "Text message")])
+    channel = filters.ChoiceFilter(
+        choices=[("email", "Email"), ("sms", "Text message"), ("push", "Push notification")]
+    )
     status = filters.MultipleChoiceFilter(choices=Message.Status.choices)
 
     class Meta:
@@ -241,6 +243,73 @@ class PreferencesView(APIView):
                 data["person_type"], data["person_id"], row["category"], row["channels"]
             )
         return Response(data)
+
+
+class PushSubscriptionViewSet(
+    TenantScopedViewMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Your devices with push notifications switched on (E16-T09). ``POST`` registers the
+    browser's ``PushSubscription`` (again: it refreshes the keys); ``DELETE`` stops pushes to
+    a device. Endpoints and keys are stored encrypted and never returned."""
+
+    model = PushSubscription
+    serializer_class = s.PushSubscriptionSerializer
+    permission_classes = AUTH
+
+    def get_tenant_queryset(self) -> QuerySet[PushSubscription]:
+        return selectors.push_subscriptions_for(self.request.user)
+
+    @extend_schema(request=s.PushSubscribeSerializer, responses={201: s.PushSubscriptionSerializer})
+    def create(self, request: Request) -> Response:
+        payload = s.PushSubscribeSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+        row = services.subscribe_push(
+            request.user,
+            endpoint=data["endpoint"],
+            p256dh=data["keys"]["p256dh"],
+            auth=data["keys"]["auth"],
+            device=data["device"],
+        )
+        return Response(s.PushSubscriptionSerializer(row).data, status=201)
+
+    def perform_destroy(self, instance: PushSubscription) -> None:
+        services.remove_push_subscription(instance)
+
+    @extend_schema(responses=s.PushConfigSerializer)
+    @action(detail=False, methods=["get"], url_path="config", pagination_class=None)
+    def config(self, request: Request) -> Response:
+        """The VAPID public key the browser subscribes with (push is off without one)."""
+        key = settings.WEB_PUSH["VAPID_PUBLIC_KEY"]
+        return Response({"enabled": bool(key), "vapid_public_key": key})
+
+    @extend_schema(request=None, responses=s.PushTestSerializer)
+    @action(detail=False, methods=["post"], url_path="test")
+    def test(self, request: Request) -> Response:
+        """Send a test notification to each of your devices."""
+        return Response({"delivered": services.send_test_push(request.user)})
+
+
+class MyPreferencesView(APIView):
+    """Your own notification channels per category (FR-16-9): e.g. lesson changes by push
+    and email, pay by push only. Legally required messages still arrive by email."""
+
+    permission_classes = AUTH
+
+    @extend_schema(responses=s.MyPreferencesSerializer)
+    def get(self, request: Request) -> Response:
+        return Response({"preferences": services.my_preferences(request.user)})
+
+    @extend_schema(request=s.MyPreferencesSerializer, responses=s.MyPreferencesSerializer)
+    def put(self, request: Request) -> Response:
+        payload = s.MyPreferencesSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        rows = services.set_my_preferences(request.user, payload.validated_data["preferences"])
+        return Response({"preferences": rows})
 
 
 class UnsubscribeView(APIView):

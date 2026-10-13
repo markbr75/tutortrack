@@ -17,6 +17,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from tutortrack.core.api.mixins import PreconditionFailed, etag_for
 from tutortrack.core.api.viewsets import TenantScopedViewMixin
 from tutortrack.core.exceptions import PermissionDenied
 from tutortrack.core.permissions import (
@@ -181,7 +182,11 @@ class LessonReportViewSet(
     viewsets.GenericViewSet,
 ):
     """Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
-    their own. ``PUT`` saves a draft (autosave)."""
+    their own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and
+    ``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor
+    PWA's offline drafts, E16-T08)."""
+
+    supports_if_match = True
 
     model = LessonReport
     serializer_class = s.LessonReportSerializer
@@ -209,11 +214,22 @@ class LessonReportViewSet(
 
     def _out(self, report: LessonReport) -> Response:
         report = self.get_tenant_queryset().get(pk=report.pk)
-        return Response(self.get_serializer(report).data)
+        response = Response(self.get_serializer(report).data)
+        response["ETag"] = etag_for(report)
+        return response
+
+    def _check_if_match(self, request: Request, report: LessonReport) -> None:
+        if_match = request.headers.get("If-Match")
+        if if_match is not None and if_match.strip() not in {etag_for(report), "*"}:
+            raise PreconditionFailed()
+
+    def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._out(self.get_object())
 
     @extend_schema(request=s.ReportAnswersSerializer, responses=s.LessonReportSerializer)
     def update(self, request: Request, pk: Any = None) -> Response:
         report = self._writable(self.get_object())
+        self._check_if_match(request, report)
         payload = s.ReportAnswersSerializer(data=request.data)
         payload.is_valid(raise_exception=True)
         services.save_draft(
@@ -224,10 +240,23 @@ class LessonReportViewSet(
         )
         return self._out(report)
 
-    @extend_schema(request=s.ReportSubmitSerializer, responses=s.LessonReportSerializer)
+    @extend_schema(
+        request=s.ReportSubmitSerializer,
+        responses=s.LessonReportSerializer,
+        parameters=[
+            OpenApiParameter(
+                "If-Match",
+                str,
+                location=OpenApiParameter.HEADER,
+                required=False,
+                description="The report's ETag: 412 if it changed since (offline drafts).",
+            )
+        ],
+    )
     @action(detail=True, methods=["post"])
     def submit(self, request: Request, pk: Any = None) -> Response:
         report = self._writable(self.get_object())
+        self._check_if_match(request, report)
         payload = s.ReportSubmitSerializer(data=request.data)
         payload.is_valid(raise_exception=True)
         services.submit_report(

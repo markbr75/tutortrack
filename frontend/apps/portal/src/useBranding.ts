@@ -18,6 +18,9 @@ export function usePortalBranding() {
     if (!brand.data) return;
     applyBrandTheme(brand.data, { full: true });
     document.title = brand.data.app_name || brand.data.name;
+    document
+      .querySelector("meta[name=theme-color]")
+      ?.setAttribute("content", brand.data.primary_colour);
     if (!document.querySelector("link[rel=manifest]")) {
       const link = document.createElement("link");
       link.rel = "manifest";
