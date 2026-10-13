@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
+from . import booking_views as bv
 from . import tutor_views, views
 
 router = SimpleRouter(trailing_slash=False)
@@ -20,6 +21,43 @@ urlpatterns = [
         "portal/lessons/<uuid:lesson_id>/absence",
         views.AbsenceView.as_view(),
         name="portal-absence",
+    ),
+    path(
+        "portal/lessons/<uuid:lesson_id>/reschedule",
+        bv.PortalLessonRescheduleView.as_view(),
+        name="portal-reschedule",
+    ),
+    path(
+        "portal/reschedule-requests",
+        bv.PortalRescheduleRequestsView.as_view(),
+        name="portal-reschedule-requests",
+    ),
+    path(
+        "portal/reschedule-requests/<uuid:request_id>/decide",
+        bv.PortalRescheduleDecideView.as_view(),
+        name="portal-reschedule-decide",
+    ),
+    path(
+        "portal/reschedule-requests/<uuid:request_id>/cancel",
+        bv.PortalRescheduleCancelView.as_view(),
+        name="portal-reschedule-cancel",
+    ),
+    path(
+        "portal/booking/services",
+        bv.PortalBookingServicesView.as_view(),
+        name="portal-booking-services",
+    ),
+    path("portal/booking/slots", bv.PortalBookingSlotsView.as_view(), name="portal-booking-slots"),
+    path("portal/booking/holds", bv.PortalBookingHoldsView.as_view(), name="portal-booking-holds"),
+    path(
+        "portal/booking/holds/<uuid:hold_id>/submit",
+        bv.PortalBookingSubmitView.as_view(),
+        name="portal-booking-submit",
+    ),
+    path(
+        "portal/booking/holds/<uuid:hold_id>/cancel",
+        bv.PortalBookingCancelView.as_view(),
+        name="portal-booking-cancel",
     ),
     path("portal/reports", views.ReportsView.as_view(), name="portal-reports"),
     path(

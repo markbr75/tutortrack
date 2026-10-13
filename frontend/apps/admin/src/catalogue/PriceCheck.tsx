@@ -58,6 +58,7 @@ export function PriceCheck() {
             students: students.map((id) => ({ student: id })),
             tutors: tutor ? [{ tutor }] : [],
             job_charge_rate: jobRate ? { amount: jobRate, currency } : null,
+            online: false,
           },
         }),
       ),

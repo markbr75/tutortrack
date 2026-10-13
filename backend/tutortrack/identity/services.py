@@ -419,3 +419,189 @@ def update_profile(user: User, **changes: Any) -> User:
         setattr(user, field, value)
     user.save(update_fields=[*changes])
     return user
+
+
+# --- custom roles (E03-T11) ----------------------------------------------------------------------
+
+
+def builtin_matrix(key: str) -> dict[str, str]:
+    """``{codename: scope}`` a built-in role grants (patterns expanded, denies applied)."""
+    from tutortrack.core.permission_registry import all_permissions, matches
+
+    from .roles import ROLES, SCOPE_RANK
+
+    role = ROLES[key]
+    out: dict[str, str] = {}
+    for codename in all_permissions():
+        if any(matches(d, codename) for d in role.denies):
+            continue
+        for grant in role.grants:
+            if matches(grant.pattern, codename) and (
+                codename not in out or SCOPE_RANK[grant.scope] > SCOPE_RANK[out[codename]]
+            ):
+                out[codename] = grant.scope
+    return out
+
+
+def role_matrix(role: Any) -> dict[str, str]:
+    from .roles import Grant
+
+    return {g.pattern: g.scope for g in (Grant.parse(raw) for raw in role.grants or [])}
+
+
+def _clean_matrix(matrix: dict[str, Any]) -> list[str]:
+    from tutortrack.core.permission_registry import all_permissions
+
+    from .roles import OWNER_ONLY, SCOPES
+
+    known = all_permissions()
+    grants = []
+    for codename, scope in sorted(matrix.items()):
+        if scope in (None, "", "none"):
+            continue
+        if codename not in known:
+            raise BusinessRuleViolation(
+                f"Unknown permission {codename!r}.", extra={"errors": {"grants": [codename]}}
+            )
+        if scope not in SCOPES:
+            raise BusinessRuleViolation(
+                f"Unknown scope {scope!r}.", extra={"errors": {"grants": [codename]}}
+            )
+        if codename in OWNER_ONLY:
+            raise BusinessRuleViolation(
+                f"{codename} is only for owners.", extra={"errors": {"grants": [codename]}}
+            )
+        grants.append(f"{codename}:{scope}")
+    return grants
+
+
+@transaction.atomic
+def create_custom_role(
+    *,
+    name: str,
+    description: str = "",
+    clone_from: str = "",
+    grants: dict[str, Any] | None = None,
+) -> Any:
+    """A new custom role, cloned from a built-in staff role (key) or another custom role
+    (id), then optionally edited with ``grants`` (``{codename: scope or None}``)."""
+    from tutortrack.core.events import publish
+
+    from .events import CustomRoleChanged
+    from .models import Role
+
+    base, matrix = "coordinator", {}
+    if clone_from in Role.STAFF_BASES:
+        base, matrix = clone_from, builtin_matrix(clone_from)
+    elif clone_from:
+        source = Role.objects.filter(pk=clone_from).first()
+        if source is None:
+            raise BusinessRuleViolation(
+                "Clone a staff role.", extra={"errors": {"clone_from": ["Unknown role."]}}
+            )
+        base, matrix = source.base_role, role_matrix(source)
+    matrix.update(grants or {})
+    name = name.strip()
+    if Role.objects.filter(name__iexact=name).exists():
+        raise BusinessRuleViolation(
+            "There is already a role with that name.", extra={"errors": {"name": ["Taken."]}}
+        )
+    role = Role.objects.create(
+        name=name[:100],
+        description=description[:300],
+        base_role=base,
+        grants=_clean_matrix(matrix),
+    )
+    audit.record_create(role)
+    publish(CustomRoleChanged(subject_id=role.pk, action="created"))
+    return role
+
+
+@transaction.atomic
+def update_custom_role(
+    role: Any,
+    *,
+    name: str | None = None,
+    description: str | None = None,
+    grants: dict[str, Any] | None = None,
+) -> Any:
+    """Rename or edit the matrix; ``grants`` changes only the codenames it lists."""
+    from tutortrack.core.events import publish
+
+    from .events import CustomRoleChanged
+    from .models import Role
+
+    if role.archived_at is not None:
+        raise BusinessRuleViolation("This role is archived.")
+    with audit.track(role):
+        if name is not None:
+            name = name.strip()
+            if Role.objects.filter(name__iexact=name).exclude(pk=role.pk).exists():
+                raise BusinessRuleViolation(
+                    "There is already a role with that name.",
+                    extra={"errors": {"name": ["Taken."]}},
+                )
+            role.name = name[:100]
+        if description is not None:
+            role.description = description[:300]
+        if grants is not None:
+            matrix = role_matrix(role)
+            matrix.update(grants)
+            role.grants = _clean_matrix(matrix)
+        role.save()
+    publish(CustomRoleChanged(subject_id=role.pk, action="updated"))
+    return role
+
+
+@transaction.atomic
+def archive_custom_role(role: Any) -> Any:
+    """Archive a role; members who had it go back to their built-in role."""
+    from tutortrack.core.events import publish
+
+    from .events import CustomRoleChanged
+
+    with audit.track(role, action="archive"):
+        role.archived_at = now()
+        role.save()
+    role.membership_links.all().delete()
+    publish(CustomRoleChanged(subject_id=role.pk, action="archived"))
+    return role
+
+
+@transaction.atomic
+def set_custom_roles(membership: Membership, roles: Iterable[Any]) -> Membership:
+    """Give a staff member custom roles (union of permissions); an empty list goes back to
+    the built-in role. Owners keep everything; portal users can't have staff roles."""
+    from tutortrack.core.events import publish
+
+    from .events import MembershipRoleChanged
+    from .models import MembershipRole
+    from .roles import ROLES
+
+    roles = list(roles)
+    actor = _actor()
+    if actor is not None and actor.pk == membership.user_id:
+        raise BusinessRuleViolation("You can't change your own role.")
+    if roles and membership.role == Membership.Role.OWNER:
+        raise BusinessRuleViolation("Owners always have every permission.")
+    if roles and not ROLES[membership.role].is_staff:
+        raise BusinessRuleViolation("Custom roles are for staff and tutors.")
+    if any(r.archived_at is not None for r in roles):
+        raise BusinessRuleViolation("This role is archived.")
+    before = sorted(str(i) for i in membership.custom_role_links.values_list("role_id", flat=True))
+    membership.custom_role_links.exclude(role__in=roles).delete()
+    for role in roles:
+        MembershipRole.objects.get_or_create(membership=membership, role=role)
+    after = sorted(str(r.pk) for r in roles)
+    if before != after:
+        audit.record(membership, "update", {"custom_roles": [before, after]})
+        publish(
+            MembershipRoleChanged(
+                subject_id=membership.pk,
+                user_id=str(membership.user_id),
+                old_role=membership.role,
+                new_role=membership.role,
+                custom_roles=after,
+            )
+        )
+    return membership

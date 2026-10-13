@@ -217,15 +217,39 @@ class Location(TenantModel):
 
 
 class Room(TenantModel):
-    """Stub for Phase 2 (E06-T10): rooms inside a location."""
+    """A bookable room inside a location (FR-06-10, E06-T10). E08 prevents room clashes
+    with a database exclusion constraint on lessons."""
 
     location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="rooms")
     name = models.CharField(max_length=100)
+    description = models.CharField(max_length=300, blank=True, default="")
     capacity = models.PositiveIntegerField(null=True, blank=True)
+    bookable = models.BooleanField(default=True)  # offered to online booking (E08-T14)
+    colour = models.CharField(max_length=7, blank=True, default="")
     active = models.BooleanField(default=True)
 
     class Meta(TenantModel.Meta):
         ordering = ["location", "name"]
+        constraints = [
+            models.UniqueConstraint(fields=["location", "name"], name="room_name_unique")
+        ]
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class RoomResource(TenantModel):
+    """Equipment in a room (whiteboard, piano, 6 laptops)."""
+
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="resources")
+    name = models.CharField(max_length=100)
+    quantity = models.PositiveIntegerField(default=1)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(fields=["room", "name"], name="room_resource_unique")
+        ]
 
     def __str__(self) -> str:
         return self.name
@@ -304,3 +328,288 @@ class PackageTemplate(TenantModel):
 
     def __str__(self) -> str:
         return self.name
+
+
+# --- pay tiers and tutor rates (FR-06-5, E06-T07) ------------------------------------------------
+
+
+class PayTier(TenantModel):
+    """A wage tier (Associate, Senior, Expert). Higher ``order`` = more senior."""
+
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=300, blank=True, default="")
+    order = models.PositiveIntegerField(default=0)
+    archived_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["order", "name"]
+        constraints = [
+            models.UniqueConstraint(fields=["organisation", "name"], name="pay_tier_name_unique")
+        ]
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class ServiceTierRate(TenantModel):
+    """A service's pay rate (and optionally charge rate) for one tier, in the service's
+    currency."""
+
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="tier_rates")
+    tier = models.ForeignKey(PayTier, on_delete=models.CASCADE, related_name="service_rates")
+    currency = CurrencyField()
+    pay_rate = RateField(null=True, blank=True)
+    charge_rate = RateField(null=True, blank=True)
+
+    class Meta(TenantModel.Meta):
+        constraints = [
+            models.UniqueConstraint(fields=["service", "tier"], name="service_tier_rate_unique"),
+            models.CheckConstraint(
+                condition=models.Q(pay_rate_amount__isnull=False)
+                | models.Q(charge_rate_amount__isnull=False),
+                name="service_tier_rate_has_rate",
+            ),
+        ]
+
+
+class TutorPayTierAssignment(TenantModel):
+    """A tutor's tier from ``effective_from`` (until their next assignment)."""
+
+    tutor = models.ForeignKey(
+        "people.TutorProfile", on_delete=models.CASCADE, related_name="pay_tier_assignments"
+    )
+    tier = models.ForeignKey(PayTier, on_delete=models.PROTECT, related_name="assignments")
+    effective_from = models.DateField()
+    note = models.CharField(max_length=300, blank=True, default="")
+
+    class Meta(TenantModel.Meta):
+        ordering = ["tutor", "-effective_from"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tutor", "effective_from"], name="tutor_tier_effective_unique"
+            )
+        ]
+
+
+class TutorServiceRate(TenantModel):
+    """A tutor's personal pay rate for a service (beats their tier's rate)."""
+
+    tutor = models.ForeignKey(
+        "people.TutorProfile", on_delete=models.CASCADE, related_name="service_rates"
+    )
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="tutor_rates")
+    currency = CurrencyField()
+    pay_rate = RateField()
+
+    class Meta(TenantModel.Meta):
+        constraints = [
+            models.UniqueConstraint(fields=["tutor", "service"], name="tutor_service_rate_unique")
+        ]
+
+
+# --- holidays and premiums (FR-06-6, E06-T08) ----------------------------------------------------
+
+
+class HolidayCalendar(TenantModel):
+    """Public holidays for the organisation (``branch`` empty) or one branch. Used by
+    premium rules and by lesson series that skip holidays (E08)."""
+
+    name = models.CharField(max_length=100)
+    country = models.CharField(max_length=2, blank=True, default="")
+    region = models.CharField(max_length=50, blank=True, default="")
+    branch = models.ForeignKey(
+        "tenancy.Branch", null=True, blank=True, on_delete=models.CASCADE, related_name="+"
+    )
+    skip_lessons = models.BooleanField(default=True)  # series that skip holidays skip these
+    active = models.BooleanField(default=True)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Holiday(TenantModel):
+    calendar = models.ForeignKey(HolidayCalendar, on_delete=models.CASCADE, related_name="holidays")
+    date = models.DateField()
+    name = models.CharField(max_length=100)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["date"]
+        constraints = [
+            models.UniqueConstraint(fields=["calendar", "date"], name="holiday_date_unique")
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.name} {self.date}"
+
+
+class AdjustmentRule(TenantModel):
+    """Shared fields of premium and discount rules. Matching rules are taken in
+    ``priority`` order (highest first): a non-stackable rule that comes first applies
+    alone, otherwise every matching stackable rule applies."""
+
+    name = models.CharField(max_length=150)
+    active = models.BooleanField(default=True)
+    priority = models.IntegerField(default=0)
+    stackable = models.BooleanField(default=True)
+    services = models.JSONField(default=list, blank=True)  # service ids; [] = all
+    valid_from = models.DateField(null=True, blank=True)
+    valid_to = models.DateField(null=True, blank=True)
+
+    class Meta(TenantModel.Meta):
+        abstract = True
+        ordering = ["-priority", "name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class PremiumRule(AdjustmentRule):
+    """A surcharge (weekend, evening, holiday, short notice, travel, group...) on the
+    charge and/or the pay (FR-06-6)."""
+
+    class Delivery(models.TextChoices):
+        ANY = "any", _("In person or online")
+        IN_PERSON = "in_person", _("In person")
+        ONLINE = "online", _("Online")
+
+    weekdays = models.JSONField(default=list, blank=True)  # Monday = 0; [] = every day
+    time_from = models.TimeField(null=True, blank=True)  # local start-time window
+    time_to = models.TimeField(null=True, blank=True)
+    public_holidays = models.BooleanField(default=False)  # only on holiday dates
+    short_notice_hours = models.PositiveIntegerField(null=True, blank=True)
+    location_types = models.JSONField(default=list, blank=True)  # Location.Type values
+    delivery = models.CharField(max_length=10, choices=Delivery.choices, default=Delivery.ANY)
+    subjects = models.JSONField(default=list, blank=True)  # subject ids
+    levels = models.JSONField(default=list, blank=True)  # level ids
+    min_students = models.PositiveIntegerField(null=True, blank=True)
+    max_students = models.PositiveIntegerField(null=True, blank=True)
+    currency = CurrencyField(blank=True, default="")  # of the fixed amounts
+    charge_percent = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    charge_fixed = RateField(null=True, blank=True)
+    pay_percent = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    pay_fixed = RateField(null=True, blank=True)
+
+    class Meta(AdjustmentRule.Meta):
+        pass
+
+
+# --- discounts, promo codes and price lists (FR-06-7, FR-06-11, E06-T09) -------------------------
+
+
+class DiscountRule(AdjustmentRule):
+    class Kind(models.TextChoices):
+        SIBLING = "sibling", _("Sibling")
+        VOLUME = "volume", _("Volume")
+        FIRST_LESSON = "first_lesson", _("First lesson / trial")
+        CLIENT = "client", _("Client discount")
+        SCHOLARSHIP = "scholarship", _("Scholarship / bursary")
+        PROMO = "promo", _("Promo code")
+
+    kind = models.CharField(max_length=12, choices=Kind.choices)
+    percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    currency = CurrencyField(blank=True, default="")
+    fixed_amount = RateField(null=True, blank=True)  # off each lesson
+    fixed_price = RateField(null=True, blank=True)  # the lesson costs this (trial price)
+    sibling_from = models.PositiveIntegerField(default=2)  # 2 = second child onwards
+    volume_min_lessons = models.PositiveIntegerField(null=True, blank=True)  # per month
+    client = models.ForeignKey(
+        "people.Client", null=True, blank=True, on_delete=models.CASCADE, related_name="+"
+    )
+    student = models.ForeignKey(
+        "people.Student", null=True, blank=True, on_delete=models.CASCADE, related_name="+"
+    )
+
+    class Meta(AdjustmentRule.Meta):
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(percent__isnull=False)
+                | models.Q(fixed_amount_amount__isnull=False)
+                | models.Q(fixed_price_amount__isnull=False),
+                name="discount_has_effect",
+            )
+        ]
+
+
+class PromoCode(TenantModel):
+    """A code entered at online booking (E08-T14) that applies a promo discount."""
+
+    code = models.CharField(max_length=40)
+    discount = models.ForeignKey(DiscountRule, on_delete=models.CASCADE, related_name="promo_codes")
+    max_uses = models.PositiveIntegerField(null=True, blank=True)
+    max_uses_per_client = models.PositiveIntegerField(null=True, blank=True)
+    uses = models.PositiveIntegerField(default=0)
+    valid_from = models.DateField(null=True, blank=True)
+    valid_to = models.DateField(null=True, blank=True)
+    new_clients_only = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["code"]
+        constraints = [
+            models.UniqueConstraint(fields=["organisation", "code"], name="promo_code_unique")
+        ]
+
+    def __str__(self) -> str:
+        return self.code
+
+
+class PromoRedemption(TenantModel):
+    promo_code = models.ForeignKey(PromoCode, on_delete=models.CASCADE, related_name="redemptions")
+    client = models.ForeignKey(
+        "people.Client", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    reference = models.CharField(max_length=100, blank=True, default="")  # e.g. a booking id
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["promo_code", "reference"], name="promo_redemption_unique"
+            )
+        ]
+
+
+class PriceList(TenantModel):
+    """Contract prices for specific clients (a school or local authority), FR-06-11."""
+
+    name = models.CharField(max_length=150)
+    currency = CurrencyField()
+    valid_from = models.DateField(null=True, blank=True)
+    valid_to = models.DateField(null=True, blank=True)
+    active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True, default="")
+
+    class Meta(TenantModel.Meta):
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class PriceListItem(TenantModel):
+    price_list = models.ForeignKey(PriceList, on_delete=models.CASCADE, related_name="items")
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="+")
+    currency = CurrencyField()
+    charge_rate = RateField()
+
+    class Meta(TenantModel.Meta):
+        constraints = [
+            models.UniqueConstraint(fields=["price_list", "service"], name="price_list_item_unique")
+        ]
+
+
+class PriceListClient(TenantModel):
+    """A client on a price list."""
+
+    price_list = models.ForeignKey(PriceList, on_delete=models.CASCADE, related_name="clients")
+    client = models.ForeignKey("people.Client", on_delete=models.CASCADE, related_name="+")
+
+    class Meta(TenantModel.Meta):
+        constraints = [
+            models.UniqueConstraint(
+                fields=["price_list", "client"], name="price_list_client_unique"
+            )
+        ]

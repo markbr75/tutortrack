@@ -95,11 +95,11 @@ Global user identities, memberships in organisations, authentication (password, 
 - [x] **E03-T05** Field-level permission serializer mixin; charge/pay rate visibility tests.
 - [x] **E03-T06** TOTP 2FA, recovery codes, enforce-2FA org setting.
 - [x] **E03-T07** Google/Microsoft/Apple SSO via allauth.
-- [ ] **E03-T08** WebAuthn/passkeys. *(Phase 2: not in the roadmap's Phase 1 scope for E03.)*
+- [x] **E03-T08** WebAuthn/passkeys. *(Phase 2, built 2026-10-12.)*
 - [x] **E03-T09** Tutor access toggles (settings → permissions mapping).
 - [x] **E03-T10** Impersonation with banner and audit.
-- [ ] **E03-T11** (Phase 2) Custom roles UI and permission matrix.
-- [ ] **E03-T12** (Phase 2/Enterprise) SAML/OIDC per org.
+- [x] **E03-T11** (Phase 2) Custom roles UI and permission matrix.
+- [x] **E03-T12** (Phase 2/Enterprise) SAML/OIDC per org.
 - [x] **E03-T13** Frontend: login, MFA, account settings, team and invitations pages.
 
 ## 8. Implementation notes (as built, 2026-10-09)
@@ -141,3 +141,19 @@ these as the source of truth. Decisions: [ADR 0004](../adr/0004-identity-roles-a
 - **E30:** platform-staff impersonation with reason capture.
 - **Phase 2:** passkeys (T08), custom roles (T11), SAML (T12), Apple sign-in.
 - Not built: Playwright E2E for login/onboarding (CI's e2e job only runs on `main` pushes; add with the next e2e pass).
+
+## Phase 2 implementation notes (as built 2026-10-12)
+
+Decisions: [ADR 0021](../adr/0021-phase-2-roles-pricing-rules-and-booking.md).
+
+| Area | As built | Why |
+|---|---|---|
+| Custom roles (T11) | `Role` (org-owned: name, `base_role`, explicit `grants` list of `"codename:scope"`) and `MembershipRole`, both with RLS. A role is cloned from a built-in staff role (its patterns expanded to registered codenames, denies applied) or another custom role, then edited in a matrix (`{codename: none/own/branch/all}`). A membership with custom roles holds the **union** of their grants **instead of** its built-in role's; `Membership.role` stays (it still decides portal vs staff, 2FA-for-staff and tutor toggles). Owners and portal users can't get custom roles; nobody changes their own; owner-only codenames can't be granted. Archiving a role removes it from members | Union of explicit lists is predictable and has no denies; keeping `Membership.role` avoids touching every `role ==` check |
+| Roles API | `/api/v1/custom-roles` (list, detail, create with `clone_from`, PATCH `grants`, `archive`) with `team.roles.manage`; `/api/v1/roles` now lists built-in and custom roles; `PATCH /memberships/{id}` takes `custom_roles`; `MembershipSerializer.custom_roles`. `membership.role_changed` carries `custom_roles`; new event `role.changed` | |
+| Matrix grants are codenames, not patterns | A cloned role does **not** gain permissions that later apps register (built-ins do, through patterns). Admins add new codenames in the matrix | Explicit lists are what the matrix edits |
+| Passkeys (T08) | `py_webauthn` (new dependency `webauthn`). `WebAuthnCredential` (global, like `User`). Register: `POST /me/passkeys/options` + `/me/passkeys/register` (attestation `none`; the first passkey issues recovery codes and publishes `user.mfa_enabled` with `method=webauthn`). Sign-in: `POST /auth/passkey/options` + `/auth/passkey/verify`: as the **second factor** when a password/magic-link sign-in is pending, otherwise **passkey-only** (discoverable credential, user verification required, counts as MFA). Sign counts are stored; challenges are single-use (session). `User.has_mfa` includes passkeys; disabling 2FA removes them | |
+| Relying party | `WEBAUTHN_RP_ID` (default `TENANT_BASE_DOMAIN`), so one passkey works on every organisation subdomain and the root host. **Custom domains (E24) can't use passkeys** (browsers bind them to the registrable domain): password, magic link or SSO there | |
+| Enterprise SSO (T12) | `OrganisationSSO` (one per org, RLS): OIDC (issuer discovery, client id, client secret in `EncryptedField`) or **SAML 2.0** (IdP entity id, SSO URL, signing certificate). Built on PyJWT (as T07) and `signxml` (new dependency; `lxml`). Flow on the organisation's own host: `/auth/org-sso/start` → IdP → `/auth/org-sso/callback` (OIDC: PKCE, nonce, JWKS signature, issuer, audience) or `/auth/org-sso/acs` (SAML HTTP-POST: signature with the configured certificate, reading only the signed element; issuer, audience, recipient, validity, `InResponseTo`). Discovery, token and JWKS fetches go through `core.net.safe_urlopen`. People match by subject (`SocialAccount` provider `org_sso`), then by an email in `email_domains`; `auto_provision` creates a membership with `default_role`. `enforce` turns off passwords and magic links for those domains on that organisation's host (`sso-required` problem). Settings at `/api/v1/security/sso` (`security.sso.manage`), enabling needs the `sso_saml` entitlement; SP metadata at `/auth/org-sso/metadata` | allauth SAML needs `xmlsec1` binaries and its own account flows |
+| SSO limits | Not supported: encrypted assertions, IdP-initiated SAML (no `InResponseTo`), single logout, SCIM. The SAML state cookie is `SameSite=None` on HTTPS (the ACS POST is cross-site) | |
+| Frontend | Team → **Roles** page (`/team/roles`): clone, matrix grouped by category, member assignment. Account → **Passkeys** (add, list, remove). Login: "Sign in with a passkey", "Use a passkey instead" on the 2FA step, and the organisation's SSO button. Settings → **Single sign-on** (`/settings/sso`) | |
+| Not built | Apple sign-in (still Phase 2 in T07); SCIM provisioning | Out of the tickets' scope |

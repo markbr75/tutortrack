@@ -8,8 +8,8 @@
   or a full time-range listing for CalDAV) of the chosen calendars into
   ``ExternalBusyBlock`` rows: times only, never titles.
 * **Two-way edits** (T03, opt-in): a TutorTrack event moved outside is applied when the
-  calendar's owner may edit the lesson, otherwise it becomes a reschedule request (a CRM
-  task for the job's account manager) and the event is put back. An event deleted outside
+  calendar's owner may edit the lesson, otherwise it becomes an E08 reschedule request
+  (``requester="calendar"``) and the event is put back. An event deleted outside
   never cancels the lesson: it is re-created and the tutor is warned.
 * **Channels**: ``prepare`` creates the "TutorTrack" calendar and renews push channels
   (Google watch, Graph subscriptions) before they expire.
@@ -615,6 +615,24 @@ def _restore(
     )
 
 
+def _move_task(lesson: Lesson, user: Any, start: datetime, provider: str) -> None:
+    from tutortrack.crm import services as crm
+
+    when = start.strftime("%Y-%m-%d %H:%M %Z")
+    crm.create_task(
+        title=_("Reschedule request: %(lesson)s") % {"lesson": lesson.title[:150]},
+        description=_(
+            "%(user)s moved this lesson to %(when)s in %(provider)s. Reschedule it in "
+            "TutorTrack if that works for everyone."
+        )
+        % {"user": user.get_full_name() if user else "", "when": when, "provider": provider},
+        target_type="scheduling.lesson",
+        target_id=str(lesson.pk),
+        assignee=lesson.job.account_manager if lesson.job_id and lesson.job else None,
+        due_at=lesson.start,
+    )
+
+
 def _propose_move(
     connection: IntegrationConnection,
     sync: CalendarSyncSettings,
@@ -623,8 +641,9 @@ def _propose_move(
     start: datetime,
     end: datetime,
 ) -> None:
-    """Apply the move if the calendar's owner may edit the lesson; otherwise create a
-    reschedule request for the coordinator and put the event back."""
+    """Apply the move if the calendar's owner may edit the lesson; otherwise create an
+    E08 reschedule request (staff approve it, or it is declined at its deadline) and put
+    the event back. Before E08-T13 this was a CRM task, still the fallback."""
     from tutortrack.core.permissions import has_perm
     from tutortrack.integrations.notifications import notify_calendar
     from tutortrack.scheduling import services as scheduling
@@ -643,21 +662,24 @@ def _propose_move(
             return
         except BusinessRuleViolation as exc:
             logger.info("calendar_sync.move_rejected", lesson=str(lesson.pk), reason=str(exc))
-    from tutortrack.crm import services as crm
-
-    when = start.strftime("%Y-%m-%d %H:%M %Z")
-    crm.create_task(
-        title=_("Reschedule request: %(lesson)s") % {"lesson": lesson.title[:150]},
-        description=_(
-            "%(user)s moved this lesson to %(when)s in %(provider)s. Reschedule it in "
-            "TutorTrack if that works for everyone."
-        )
-        % {"user": user.get_full_name() if user else "", "when": when, "provider": provider},
-        target_type="scheduling.lesson",
-        target_id=str(lesson.pk),
-        assignee=lesson.job.account_manager if lesson.job_id and lesson.job else None,
-        due_at=lesson.start,
-    )
+    reason = _("%(user)s moved this lesson in %(provider)s.") % {
+        "user": user.get_full_name() if user else "",
+        "provider": provider,
+    }
+    try:
+        with transaction.atomic():
+            scheduling.request_reschedule(
+                lesson,
+                options=[(start, end)],
+                requester="calendar",
+                reason=reason,
+                user=user,
+            )
+    except BusinessRuleViolation as exc:
+        # E08-T13 can't take it (a request is already pending, the time isn't on the
+        # lesson grid, the lesson has started...): fall back to a task for the office.
+        logger.info("calendar_sync.request_rejected", lesson=str(lesson.pk), reason=str(exc))
+        _move_task(lesson, user, start, provider)
     link.proposed_start = start
     link.save(update_fields=["proposed_start", "updated_at"])
     push(connection, sync, lesson, link, force=True)  # the calendar shows the real time again

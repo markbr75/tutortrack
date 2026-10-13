@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import secrets
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -14,9 +15,10 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from tutortrack.core.api.viewsets import TenantScopedViewMixin
@@ -25,6 +27,7 @@ from tutortrack.core.permissions import (
     HasMethodPermission,
     HasOrganisation,
     has_perm,
+    permission_scope,
     scope_queryset,
 )
 from tutortrack.core.time import now
@@ -34,10 +37,12 @@ from .. import availability, ical, selectors, services
 from ..models import (
     AvailabilityException,
     AvailabilityTemplate,
+    BookingHold,
     CalendarEvent,
     ICalFeedToken,
     Lesson,
     LessonSeries,
+    RescheduleRequest,
 )
 from . import serializers as s
 
@@ -512,6 +517,7 @@ class ConflictCheckView(APIView):
             location=data.get("location"),
             online=data["online"],
             job=data.get("job"),
+            room=data.get("room"),
         )
         return Response([c.as_dict() for c in found])
 
@@ -536,6 +542,7 @@ class CalendarView(APIView):
                     "location",
                     "branch",
                     "status",
+                    "room",
                 )
             ],
             OpenApiParameter("include_events", bool),
@@ -544,7 +551,9 @@ class CalendarView(APIView):
     )
     def get(self, request: Request) -> Response:
         start, end = _range(request)
-        keys = ("tutor", "student", "client", "service", "job", "location", "branch", "status")
+        keys = (
+            "tutor", "student", "client", "service", "job", "location", "branch", "status", "room",
+        )  # fmt: skip
         filters_ = {
             k: request.query_params.getlist(k) for k in keys if request.query_params.getlist(k)
         }
@@ -706,7 +715,9 @@ class SlotsView(APIView):
         )
 
 
-@extend_schema_view(list=extend_schema(parameters=[OpenApiParameter("tutor", str)]))
+@extend_schema_view(
+    list=extend_schema(parameters=[OpenApiParameter("tutor", str), OpenApiParameter("status", str)])
+)
 class TimeOffViewSet(
     TenantScopedViewMixin,
     mixins.ListModelMixin,
@@ -724,16 +735,32 @@ class TimeOffViewSet(
     def get_tenant_queryset(self) -> QuerySet[AvailabilityException]:
         qs = scope_queryset(
             self.request.user, AvailabilityException.objects.all(), "scheduling.availability.view"
-        )
+        ).select_related("tutor")
         tutor = self.request.query_params.get("tutor")
+        wanted = self.request.query_params.get("status")
+        if wanted:
+            qs = qs.filter(status=wanted)
         return qs.filter(tutor_id=tutor) if tutor else qs
 
     def create(self, request: Request) -> Response:
+        """Tutors asking for their own time off wait for approval when
+        ``scheduling.time_off_approval`` is on (E08-T15); staff entering it approve it."""
+        from tutortrack.tenancy.settings_service import get_setting
+
         payload = s.ExceptionSerializer(data=request.data)
         payload.is_valid(raise_exception=True)
         data = dict(payload.validated_data)
         tutor = _tutor_for(request, data.pop("tutor").pk, edit=True)
-        exception, clashes = services.add_exception(tutor, **data)
+        own = tutor.membership is not None and tutor.membership.user_id == request.user.pk
+        needs_approval = (
+            own
+            and bool(get_setting("scheduling.time_off_approval"))
+            and permission_scope(request.user, "scheduling.availability.manage_others")
+            not in ("all", "branch")
+        )
+        exception, clashes = services.add_exception(
+            tutor, needs_approval=needs_approval, user=request.user, **data
+        )
         body = s.ExceptionSerializer(exception).data
         body["clashes"] = [str(lesson.pk) for lesson in clashes]
         return Response(body, status=status.HTTP_201_CREATED)
@@ -741,6 +768,27 @@ class TimeOffViewSet(
     def perform_destroy(self, instance: AvailabilityException) -> None:
         _tutor_for(self.request, instance.tutor_id, edit=True)
         services.delete_exception(instance)
+
+    @extend_schema(request=s.ApprovalDecisionSerializer, responses=s.ExceptionSerializer)
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=perms({"POST": "scheduling.availability.manage_others"}),
+    )
+    def decide(self, request: Request, pk: Any = None) -> Response:
+        """Approve or decline requested time off (E08-T15)."""
+        payload = s.ApprovalDecisionSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        exception = self.get_object()
+        if exception.tutor.membership and exception.tutor.membership.user_id == request.user.pk:
+            raise PermissionDenied("You can't approve your own time off.")
+        exception = services.decide_time_off(
+            exception,
+            approve=payload.validated_data["approve"],
+            note=payload.validated_data["note"],
+            user=request.user,
+        )
+        return Response(s.ExceptionSerializer(exception).data)
 
 
 class FeedViewSet(
@@ -798,3 +846,375 @@ def ical_feed(request: HttpRequest, token: str) -> HttpResponse:
     response = HttpResponse(body, content_type="text/calendar; charset=utf-8")
     response["Cache-Control"] = "private, max-age=300"
     return response
+
+
+# --- Phase 2: rooms (T12) and re-pricing ----------------------------------------------------------
+
+
+class RoomScheduleView(APIView):
+    """The room resource view: each room with its lessons in ``[start, end)`` (E08-T12)."""
+
+    permission_classes = perms({"GET": "scheduling.lesson.view"})
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("start", str, required=True),
+            OpenApiParameter("end", str),
+            OpenApiParameter("location", str),
+        ],
+        responses=s.RoomScheduleSerializer(many=True),
+    )
+    def get(self, request: Request) -> Response:
+        from tutortrack.catalogue.models import Location
+
+        start, end = _range(request)
+        location = None
+        if request.query_params.get("location"):
+            location = get_object_or_404(Location, pk=request.query_params["location"])
+        rows = selectors.room_schedule(request.user, start, end, location)
+        return Response(s.RoomScheduleSerializer(rows, many=True).data)
+
+
+class RepriceView(APIView):
+    """Re-price unlocked lessons with the current rates and rules (FR-06-4 "apply to future
+    lessons? (N affected)", E06-T07 retroactive tool). ``dry_run`` (default) only counts."""
+
+    permission_classes = perms({"POST": "rates.manage"})
+
+    @extend_schema(request=s.RepriceRequestSerializer, responses=s.RepriceResultSerializer)
+    def post(self, request: Request) -> Response:
+        payload = s.RepriceRequestSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = dict(payload.validated_data)
+        dry_run = data.pop("dry_run")
+        filters_ = {
+            "start": data.get("start"),
+            "end": data.get("end"),
+            "tutor_id": data.get("tutor"),
+            "service_id": data.get("service"),
+            "include_past": data["include_past"],
+        }
+        count = services.reprice_lessons(dry_run=dry_run, **filters_)
+        return Response({"lessons": count, "dry_run": dry_run})
+
+
+# --- reschedule requests (T13) -------------------------------------------------------------------
+
+
+def _tutor_on(lesson: Lesson, user: Any) -> bool:
+    return lesson.tutors.filter(tutor__membership__user=user).exists()
+
+
+class LessonRescheduleRequestView(APIView):
+    """Ask to move a lesson (its tutor, or staff): the other side or an admin approves."""
+
+    permission_classes = perms({"POST": "scheduling.lesson.view"})
+
+    @extend_schema(request=s.LessonChangeProposal, responses={201: s.LessonChangeRequestSerializer})
+    def post(self, request: Request, lesson_id: Any) -> Response:
+        visible = scope_queryset(request.user, Lesson.objects.all(), "scheduling.lesson.view")
+        lesson = get_object_or_404(visible, pk=lesson_id)
+        if _tutor_on(lesson, request.user):
+            requester = RescheduleRequest.Party.TUTOR
+        elif has_perm(request.user, "scheduling.lesson.edit", lesson):
+            requester = RescheduleRequest.Party.STAFF
+        else:
+            raise PermissionDenied()
+        payload = s.LessonChangeProposal(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+        created = services.request_reschedule(
+            lesson,
+            options=[(o["start"], o["end"]) for o in data["options"]],
+            requester=requester,
+            reason=data["reason"],
+            user=request.user,
+        )
+        return Response(s.LessonChangeRequestSerializer(created).data, status=201)
+
+
+class RescheduleRequestViewSet(
+    TenantScopedViewMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    """Requests to move lessons (FR-08-8). Staff answer any; a tutor answers a family's
+    request for their lesson. Undecided requests are declined at ``deadline``."""
+
+    model = RescheduleRequest
+    serializer_class = s.LessonChangeRequestSerializer
+    permission_classes = perms({"GET": "scheduling.lesson.view", "POST": "scheduling.lesson.view"})
+
+    def get_tenant_queryset(self) -> QuerySet[RescheduleRequest]:
+        visible = scope_queryset(self.request.user, Lesson.objects.all(), "scheduling.lesson.view")
+        qs = RescheduleRequest.objects.filter(lesson__in=visible.values("pk")).select_related(
+            "lesson"
+        )
+        for key in ("status", "lesson"):
+            if self.request.query_params.get(key):
+                qs = qs.filter(**{key: self.request.query_params[key]})
+        return qs
+
+    @extend_schema(parameters=[OpenApiParameter("status", str), OpenApiParameter("lesson", str)])
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        request=s.LessonChangeDecisionSerializer, responses=s.LessonChangeRequestSerializer
+    )
+    @action(detail=True, methods=["post"])
+    def decide(self, request: Request, pk: Any = None) -> Response:
+        item = self.get_object()
+        staff = has_perm(request.user, "scheduling.lesson.edit", item.lesson)
+        counterpart = item.requester == RescheduleRequest.Party.CLIENT and _tutor_on(
+            item.lesson, request.user
+        )
+        if not (staff or counterpart) or item.requested_by_id == request.user.pk:
+            raise PermissionDenied()
+        payload = s.LessonChangeDecisionSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+        item = services.decide_reschedule(
+            item,
+            approve=data["approve"],
+            choice=data["choice"],
+            note=data["note"],
+            user=request.user,
+            override_conflicts=_override(request, data["override_conflicts"]),
+        )
+        return Response(s.LessonChangeRequestSerializer(item).data)
+
+    @extend_schema(request=None, responses=s.LessonChangeRequestSerializer)
+    @action(detail=True, methods=["post"])
+    def cancel(self, request: Request, pk: Any = None) -> Response:
+        item = self.get_object()
+        if item.requested_by_id != request.user.pk and not has_perm(
+            request.user, "scheduling.lesson.edit", item.lesson
+        ):
+            raise PermissionDenied()
+        return Response(s.LessonChangeRequestSerializer(services.cancel_reschedule(item)).data)
+
+
+# --- online booking (T14) ------------------------------------------------------------------------
+
+
+class BookingSettingsView(APIView):
+    """Online booking settings (FR-08-9)."""
+
+    permission_classes = perms(
+        {"GET": "scheduling.booking.settings", "PUT": "scheduling.booking.settings"}
+    )
+
+    @extend_schema(responses=s.BookingSettingsSerializer)
+    def get(self, request: Request) -> Response:
+        return Response(s.BookingSettingsSerializer(services.booking_settings()).data)
+
+    @extend_schema(request=s.BookingSettingsSerializer, responses=s.BookingSettingsSerializer)
+    def put(self, request: Request) -> Response:
+        payload = s.BookingSettingsSerializer(data=request.data, partial=True)
+        payload.is_valid(raise_exception=True)
+        updated = services.save_booking_settings(**payload.validated_data)
+        return Response(s.BookingSettingsSerializer(updated).data)
+
+
+class BookingHoldViewSet(
+    TenantScopedViewMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    """Online bookings: staff approve or decline those waiting (FR-08-9)."""
+
+    model = BookingHold
+    serializer_class = s.BookingHoldSerializer
+    permission_classes = perms(
+        {"GET": "scheduling.lesson.view", "POST": "scheduling.lesson.create"}
+    )
+
+    def get_tenant_queryset(self) -> QuerySet[BookingHold]:
+        if not has_perm(self.request.user, "scheduling.lesson.create"):
+            return BookingHold.objects.none()
+        qs = BookingHold.objects.select_related("service", "tutor", "student")
+        wanted = self.request.query_params.get("status")
+        return qs.filter(status=wanted) if wanted else qs
+
+    @extend_schema(parameters=[OpenApiParameter("status", str)])
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(request=s.ApprovalDecisionSerializer, responses=s.BookingHoldSerializer)
+    @action(detail=True, methods=["post"])
+    def decide(self, request: Request, pk: Any = None) -> Response:
+        payload = s.ApprovalDecisionSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        hold = services.decide_booking(
+            self.get_object(),
+            approve=payload.validated_data["approve"],
+            note=payload.validated_data["note"],
+            user=request.user,
+        )
+        hold.refresh_from_db()
+        return Response(s.BookingHoldSerializer(hold).data)
+
+    @extend_schema(request=None, responses=s.BookingHoldSerializer)
+    @action(detail=True, methods=["post"])
+    def cancel(self, request: Request, pk: Any = None) -> Response:
+        hold = services.cancel_hold(self.get_object(), user=request.user)
+        hold.refresh_from_db()
+        return Response(s.BookingHoldSerializer(hold).data)
+
+
+def public_name(tutor: TutorProfile) -> str:
+    """First name and last initial: what families see before booking."""
+    initial = f" {tutor.last_name[:1]}." if tutor.last_name else ""
+    return f"{tutor.first_name}{initial}".strip()
+
+
+def booking_services_payload(*, show_prices: bool = True) -> list[dict[str, Any]]:
+    """Bookable services with their tutors (shared by the portal and the public widget)."""
+    if not services.booking_settings().enabled:
+        return []
+    out = []
+    for service in services.bookable_services():
+        tutors = services.bookable_tutors(service)
+        out.append(
+            {
+                "id": str(service.pk),
+                "name": service.name,
+                "description": service.public_description,
+                "duration_minutes": service.default_duration_minutes,
+                "delivery_mode": service.delivery_mode,
+                "price": service.charge_rate.round_to_minor().to_dict() if show_prices else None,
+                "tutors": [{"id": str(t.pk), "name": public_name(t)} for t in tutors],
+            }
+        )
+    return out
+
+
+def booking_slots_payload(request: Request) -> list[dict[str, Any]]:
+    from tutortrack.catalogue.models import Service
+
+    service = Service.objects.filter(
+        pk=request.query_params.get("service") or None, active=True, bookable_online=True
+    ).first()
+    if service is None:
+        raise NotFound()
+    tutor = None
+    if request.query_params.get("tutor"):
+        tutor = get_object_or_404(TutorProfile, pk=request.query_params["tutor"])
+    start = parse_date(request.query_params.get("from", "") or "") or now().date()
+    end = parse_date(request.query_params.get("to", "") or "") or start + timedelta(days=7)
+    if end < start or (end - start).days > 31:
+        raise ValidationError({"to": ["Ask for at most 31 days."]})
+    slots = services.booking_slots(service, start=start, end=end, tutor=tutor)
+    names = {str(t.pk): public_name(t) for t in services.bookable_tutors(service)}
+    return [
+        {"tutor": x.tutor_id, "tutor_name": names.get(x.tutor_id, ""), "start": x.start,
+         "end": x.end}
+        for x in slots
+    ]  # fmt: skip
+
+
+SLOT_PARAMS = [
+    OpenApiParameter("service", str, required=True),
+    OpenApiParameter("tutor", str),
+    OpenApiParameter("from", str, description="First local date (YYYY-MM-DD)."),
+    OpenApiParameter("to", str, description="Last local date (at most 31 days on)."),
+]
+
+
+class PublicBookingView(APIView):
+    """Public, token-scoped booking for the website widget (FR-08-9, E24)."""
+
+    permission_classes = [AllowAny]
+    authentication_classes: list[Any] = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "public_widget"
+
+    def hold(self, request: Request, hold_id: Any) -> BookingHold:
+        body = request.data if isinstance(request.data, dict) else {}
+        token = request.query_params.get("token") or body.get("token") or ""
+        hold = BookingHold.objects.filter(pk=hold_id).first()
+        if (
+            hold is None
+            or not hold.token_hash
+            or not secrets.compare_digest(hold.token_hash, services.hash_token(str(token)))
+        ):
+            raise NotFound()
+        return hold
+
+
+@extend_schema(tags=["public"])
+class PublicBookingServicesView(PublicBookingView):
+    @extend_schema(responses=s.BookingServiceSerializer(many=True))
+    def get(self, request: Request) -> Response:
+        return Response(s.BookingServiceSerializer(booking_services_payload(), many=True).data)
+
+
+@extend_schema(tags=["public"])
+class PublicBookingSlotsView(PublicBookingView):
+    @extend_schema(parameters=SLOT_PARAMS, responses=s.BookingSlotSerializer(many=True))
+    def get(self, request: Request) -> Response:
+        return Response(s.BookingSlotSerializer(booking_slots_payload(request), many=True).data)
+
+
+@extend_schema(tags=["public"])
+class PublicBookingHoldsView(PublicBookingView):
+    @extend_schema(request=s.BookingHoldInput, responses={201: s.BookingHoldCreatedSerializer})
+    def post(self, request: Request) -> Response:
+        """Hold a slot for a new family. Keep ``token``: it opens the booking."""
+        from tutortrack.catalogue.models import Service
+
+        payload = s.BookingHoldInput(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+        if not data.get("contact"):
+            raise ValidationError({"contact": ["Tell us who you are."]})
+        service = Service.objects.filter(
+            pk=data["service"], active=True, bookable_online=True
+        ).first()
+        if service is None:
+            raise NotFound()
+        tutor = TutorProfile.objects.filter(pk=data["tutor"]).first() if data.get("tutor") else None
+        hold, token = services.hold_slot(
+            service=service,
+            start=data["start"],
+            tutor=tutor,
+            contact=dict(data["contact"]),
+            promo_code=data["promo_code"],
+            source=BookingHold.Source.WIDGET,
+        )
+        body = s.BookingHoldSerializer(hold).data
+        body["token"] = token
+        return Response(body, status=status.HTTP_201_CREATED)
+
+
+@extend_schema(tags=["public"])
+class PublicBookingHoldView(PublicBookingView):
+    @extend_schema(
+        parameters=[OpenApiParameter("token", str, required=True)],
+        responses=s.BookingHoldSerializer,
+    )
+    def get(self, request: Request, hold_id: Any) -> Response:
+        return Response(s.BookingHoldSerializer(self.hold(request, hold_id)).data)
+
+
+@extend_schema(tags=["public"])
+class PublicBookingSubmitView(PublicBookingView):
+    @extend_schema(
+        parameters=[OpenApiParameter("token", str, required=True)],
+        request=None,
+        responses=s.BookingSubmitResultSerializer,
+    )
+    def post(self, request: Request, hold_id: Any) -> Response:
+        hold, pay_link = services.submit_hold(self.hold(request, hold_id))
+        hold.refresh_from_db()
+        return Response({"booking": s.BookingHoldSerializer(hold).data, "pay_url": pay_link})
+
+
+@extend_schema(tags=["public"])
+class PublicBookingCancelView(PublicBookingView):
+    @extend_schema(
+        parameters=[OpenApiParameter("token", str, required=True)],
+        request=None,
+        responses=s.BookingHoldSerializer,
+    )
+    def post(self, request: Request, hold_id: Any) -> Response:
+        hold = services.cancel_hold(self.hold(request, hold_id))
+        hold.refresh_from_db()
+        return Response(s.BookingHoldSerializer(hold).data)

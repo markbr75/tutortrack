@@ -99,10 +99,10 @@ CRUD for each; `POST /api/v1/rates/quote` (dry-run resolution for UI previews: g
 - [x] **E06-T04** Rate resolution engine v1 (overrides + service defaults + duration/pricing units + group modes) with trace and quote API.
 - [x] **E06-T05** Products/fees catalogue.
 - [x] **E06-T06** Package templates.
-- [ ] **E06-T07** (Phase 2) Pay tiers, tutor service rates, bulk edit/CSV.
-- [ ] **E06-T08** (Phase 2) Premium rules and holiday calendars.
-- [ ] **E06-T09** (Phase 2) Discounts and promo codes; price lists.
-- [ ] **E06-T10** (Phase 2) Rooms and resources.
+- [x] **E06-T07** (Phase 2) Pay tiers, tutor service rates, bulk edit/CSV.
+- [x] **E06-T08** (Phase 2) Premium rules and holiday calendars.
+- [x] **E06-T09** (Phase 2) Discounts and promo codes; price lists.
+- [x] **E06-T10** (Phase 2) Rooms and resources.
 - [x] **E06-T11** Frontend settings pages for catalogue, rates grid and quote preview.
 
 ## Implementation notes (as built 2026-10-09)
@@ -119,3 +119,20 @@ CRUD for each; `POST /api/v1/rates/quote` (dry-run resolution for UI previews: g
 - **OpenAPI fix:** money `amount` is now documented as a decimal string, which is what the API sends and accepts.
 - **Frontend:** a Catalogue page with tabs for services (rates editable with `rates.manage`), subjects/levels, tax rates, locations, fees and products, packages, and a price check. The price check runs the quote API and shows charge and pay lines with their trace. There is a new shared accessible `Tabs` component in the ui package.
 
+## Phase 2 implementation notes (as built 2026-10-12)
+
+Decisions: [ADR 0021](../adr/0021-phase-2-roles-pricing-rules-and-booking.md).
+
+- **Engine stays pure.** `rates.resolve_rates` takes an optional `RateContext.rules` (`PricingRules`): price lists, tier rates, tutor rates, premiums, discounts, the lesson's facts (local start, holiday, notice, place) and each student's facts (sibling position, lessons this month, first lesson). `catalogue.pricing_rules.load_rules(...)` builds it from the database; E08 calls it for every lesson (with the students' history), and the quote API for previews (`starts_at`, `timezone`, `location`, `online`, `booked_at`, `promo_code`). Without rules the engine behaves exactly like v1.
+- **Precedence** (as the spec): charge = lesson override → job student → job rate → **client price list** → **tier charge rate** (only with `pricing.tier_affects_charge`; the lesson's first tutor) → service. Pay = lesson override → job tutor → **tutor's own rate** → **tier pay rate** → service rate or %. Percentage pay uses the charge before or after discounts (`pricing.pay_percent_basis`, default gross as before).
+- **Modifiers:** premiums (charge and pay, % or fixed in the rule's currency), then discounts (charge only). Rules are taken by `priority` (highest first): if the first match is not stackable it applies alone, otherwise every stackable match applies. Percentages are added on the line's base amount; discounts apply after premiums; a fixed premium on a *split* group charge is split between the students so lines still add up to the lesson total; amounts never go below zero. **Lesson-level manual overrides are final**: no premium or discount touches them. Every step is in the trace (e.g. `["job rate £40.00/h", "60 minutes", "weekend premium +10%", "sibling discount -5%"]`).
+- **Snapshot interface for billing (E10):** charge lines now carry `premiums`, `discounts` (negative amounts), `undiscounted_amount`; `amount` stays the net price. The `pricing.discount_display` setting (`netted`/`separate`) is registered here for E10 to read when it builds invoice lines; E10's invoice code was not changed (another agent owns it). Pay lines carry `premiums`.
+- **Pay tiers (T07):** `PayTier`, `ServiceTierRate` (pay and/or charge, service currency), `TutorPayTierAssignment` (effective dates; the tier on the lesson's local date applies), `TutorServiceRate`. Grid `GET/POST /catalogue/tier-rates`, CSV `GET/POST /catalogue/tier-rates/csv` (all rows checked first, nothing saved on any error, `dry_run`). Assigning a tier with `recalculate` publishes `tutor.tier_assigned`; E08 re-prices that tutor's unlocked lessons (including delivered, un-invoiced ones) from the date. The generic tool is `POST /api/v1/lessons/reprice` (dry run by default, `rates.manage`) for "apply to future lessons? (N affected)".
+- **Premiums and holidays (T08):** `PremiumRule` conditions: weekdays, local start-time window (overnight windows work), public holidays, short notice (hours between booking and start, from the lesson's `created_at`), location types, delivery, subjects, levels, services, student count, validity dates. `HolidayCalendar`/`Holiday` per organisation or branch; `import` adds GB (England and Wales) or US federal holidays for a year (`catalogue/holidays.py`); other countries are entered by hand. Calendars marked `skip_lessons` also feed E08 series that skip holidays (with the existing closure events).
+- **Discounts, promo codes, price lists (T09):** `DiscountRule` kinds sibling (student's position among the client's students by record age, from `sibling_from`), volume (the client's non-cancelled lessons in the lesson's month, this one included; earlier lessons are not re-priced when the threshold is reached), first lesson / trial (fixed price, or % / amount), client, scholarship (student or client) and promo. `PromoCode` (normalised upper-case, max uses, per client, new clients only, validity) with idempotent `PromoRedemption`; used by E08 bookings and the quote API. `PriceList` + items + client links (validity dates, currency).
+- **Rooms (T10):** `Room` gained description, bookable, colour and a unique name per location; `RoomResource` rows (name, quantity). `/catalogue/rooms` with `?resource=` filter; online locations have no rooms.
+- **Series pricing:** when any date-dependent rule exists (premium, non-promo discount, tier assignment or price list), every occurrence of a new series is priced on its own; otherwise the v1 fast path (price once, copy) is kept, so the one-year performance test is unchanged without rules.
+- **Settings:** `pricing.tier_affects_charge`, `pricing.pay_percent_basis`, `pricing.discount_display`.
+- **Events:** `pricing.changed` (kind: tier_rate, tutor_rate, premium, discount, price_list, holiday) and `tutor.tier_assigned`. Existing lessons keep their prices until re-priced.
+- **Frontend:** catalogue tabs Rooms, Pay tiers (editable grid, CSV export/import), Premiums and holidays, Discounts (with promo codes) and Price lists; the price check sends `online`.
+- **Tests:** table-driven precedence and modifier tests, Hypothesis properties (rounded, non-negative, split totals with premiums, discounts never raise a line), DB tests for loading, lessons, APIs and tenant isolation of every new endpoint.

@@ -7,8 +7,20 @@ from zoneinfo import ZoneInfo
 
 from tutortrack.core.events import EventEnvelope, subscribe
 from tutortrack.core.time import now
+from tutortrack.core.workflows import bridge
 
 from .models import Lesson, LessonSeries, LessonTutor
+from .processes import (
+    BookingHoldWorkflow,
+    HoldInput,
+    RescheduleInput,
+    RescheduleRequestWorkflow,
+    TimeOffApprovalWorkflow,
+    TimeOffInput,
+    hold_workflow_id,
+    reschedule_workflow_id,
+    time_off_workflow_id,
+)
 
 
 @subscribe("job.created")
@@ -122,3 +134,99 @@ def follow_job_status(event: EventEnvelope) -> None:
     if event.data["to_status"] in {"completed", "cancelled"}:
         for series in LessonSeries.objects.filter(job=job, status=LessonSeries.Status.ACTIVE):
             services.end_series(series, reason=reason)
+
+
+@subscribe("tutor.tier_assigned")
+def recalculate_after_tier_change(event: EventEnvelope) -> None:
+    """E06-T07 retroactive tool: re-price the tutor's unlocked lessons from the date."""
+    from . import services
+
+    if not event.data.get("recalculate"):
+        return
+    services.reprice_lessons(
+        tutor_id=event.data["tutor_id"],
+        start=date.fromisoformat(event.data["effective_from"]),
+        include_past=True,
+    )
+
+
+# --- Temporal bridge (E08-TW1) -------------------------------------------------------------------
+
+
+def _running(workflow_id: str) -> bool:
+    from tutortrack.core.models import WorkflowLink
+
+    return WorkflowLink.objects.filter(workflow_id=workflow_id, status="running").exists()
+
+
+def _hold_for_request(event: EventEnvelope) -> str | None:
+    from .models import BookingHold
+
+    hold = BookingHold.objects.filter(payment_request_id=event.subject["id"]).first()
+    return str(hold.pk) if hold is not None else None
+
+
+bridge.on(
+    "booking.held",
+    start=BookingHoldWorkflow,
+    id=lambda e: hold_workflow_id(e.organisation_id, e.subject["id"]),
+    input=lambda e: HoldInput(organisation_id=str(e.organisation_id), hold_id=e.subject["id"]),
+)
+bridge.on(
+    "booking.submitted",
+    signal="submitted",
+    id=lambda e: hold_workflow_id(e.organisation_id, e.subject["id"]),
+    when=lambda e: _running(hold_workflow_id(e.organisation_id, e.subject["id"])),
+)
+bridge.on(
+    "payment_request.paid",
+    signal="paid",
+    id=lambda e: hold_workflow_id(e.organisation_id, _hold_for_request(e)),
+    when=lambda e: (
+        _hold_for_request(e) is not None
+        and _running(hold_workflow_id(e.organisation_id, _hold_for_request(e)))
+    ),
+)
+for _event, _signal in (
+    ("booking.confirmed", "decided"),
+    ("booking.declined", "cancelled"),
+):
+    bridge.on(
+        _event,
+        signal=_signal,
+        id=lambda e: hold_workflow_id(e.organisation_id, e.subject["id"]),
+        when=lambda e: _running(hold_workflow_id(e.organisation_id, e.subject["id"])),
+    )
+bridge.on(
+    "reschedule.requested",
+    start=RescheduleRequestWorkflow,
+    id=lambda e: reschedule_workflow_id(e.organisation_id, e.subject["id"]),
+    input=lambda e: RescheduleInput(
+        organisation_id=str(e.organisation_id), request_id=e.subject["id"]
+    ),
+)
+for _answer in ("reschedule.approved", "reschedule.declined"):
+    bridge.on(
+        _answer,
+        signal="answered",
+        id=lambda e: reschedule_workflow_id(e.organisation_id, e.subject["id"]),
+        when=lambda e: _running(reschedule_workflow_id(e.organisation_id, e.subject["id"])),
+    )
+bridge.on(
+    "time_off.requested",
+    start=TimeOffApprovalWorkflow,
+    id=lambda e: time_off_workflow_id(e.organisation_id, e.subject["id"]),
+    input=lambda e: TimeOffInput(
+        organisation_id=str(e.organisation_id), exception_id=e.subject["id"]
+    ),
+)
+for _decision in ("time_off.approved", "time_off.declined"):
+    bridge.on(
+        _decision,
+        signal="decided",
+        id=lambda e: time_off_workflow_id(e.organisation_id, e.subject["id"]),
+        when=lambda e: (
+            not e.data.get("automatic")
+            and _running(time_off_workflow_id(e.organisation_id, e.subject["id"]))
+        ),
+    )

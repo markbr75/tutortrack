@@ -48,6 +48,26 @@ const enGB = {
   apply: "Apply for {title}",
   noVacancies: "No vacancies right now.",
   closes: "Closes {date}",
+  bookingService: "What would you like to book?",
+  bookingChoose: "Choose a lesson",
+  bookingTimes: "Choose a time",
+  bookingNoTimes: "No free times in the next few days. Please try again later or contact us.",
+  bookingFirstName: "Your first name",
+  bookingLastName: "Your last name",
+  bookingEmail: "Email",
+  bookingPhone: "Phone (optional)",
+  bookingStudent: "Student's first name",
+  bookingPromo: "Promo code (optional)",
+  bookingContinue: "Continue",
+  bookingHeld: "We're holding this time for you until {time}.",
+  bookingBook: "Book now",
+  bookingConfirmed: "You're booked. We've sent you the details.",
+  bookingRequested: "Thanks! We'll confirm your booking soon.",
+  bookingPay: "Please pay to confirm your booking.",
+  bookingPayNow: "Pay now",
+  bookingTaken:
+    "Sorry, that time has just been taken, or the code isn't valid. Please check and try again.",
+  bookingExpired: "The time we held has run out. Please choose again.",
 };
 
 export type MessageKey = keyof typeof enGB;

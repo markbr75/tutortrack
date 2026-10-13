@@ -26,14 +26,14 @@ def lessons_in_range(
         qs = qs.filter(attendees__student__in=filters["student"])
     if filters.get("client"):
         qs = qs.filter(attendees__client__in=filters["client"])
-    for key in ("service", "job", "location", "branch"):
+    for key in ("service", "job", "location", "branch", "room"):
         if filters.get(key):
             qs = qs.filter(**{f"{key}__in": filters[key]})
     if filters.get("status"):
         qs = qs.filter(status__in=filters["status"])
     return (
         qs.distinct()
-        .select_related("service", "location")
+        .select_related("service", "location", "room")
         .prefetch_related(
             Prefetch("tutors", queryset=LessonTutor.objects.select_related("tutor")),
             Prefetch("attendees", queryset=LessonAttendee.objects.select_related("student")),
@@ -70,6 +70,8 @@ def project_lesson(lesson: Lesson) -> dict[str, Any]:
         "job": str(lesson.job_id) if lesson.job_id else None,
         "series": str(lesson.series_id) if lesson.series_id else None,
         "location": lesson.location.name if lesson.location else "",
+        "room": str(lesson.room_id) if lesson.room_id else None,
+        "room_name": lesson.room.name if lesson.room_id and lesson.room else "",
         "online": lesson.online,
         "tutors": [{"id": str(t.tutor_id), "name": t.tutor.full_name} for t in lesson.tutors.all()],
         "students": [
@@ -93,6 +95,8 @@ def project_event(event: CalendarEvent) -> dict[str, Any]:
         "job": None,
         "series": None,
         "location": "",
+        "room": None,
+        "room_name": "",
         "online": False,
         "tutors": [{"id": str(p.tutor_id), "name": ""} for p in event.participants.all()],
         "students": [],
@@ -129,3 +133,55 @@ def completed_in_subject(tutor_ids: list[str], subject_id: object | None) -> dic
     if subject_id is not None:
         qs = qs.filter(lesson__job__subject_id=subject_id)
     return {str(r["tutor_id"]): r["n"] for r in qs.values("tutor_id").annotate(n=Count("id"))}
+
+
+# --- Phase 2 reads (E06 promo codes, E08-T12..T15) ----------------------------------------------
+
+
+def client_has_lessons(client: Any) -> bool:
+    """Whether the client already has (non-cancelled) lessons: promo codes for new
+    clients only (E06-T09)."""
+    return (
+        LessonAttendee.objects.filter(client=client)
+        .exclude(lesson__status=Lesson.Status.CANCELLED)
+        .exists()
+    )
+
+
+def room_schedule(
+    user: Any, start: datetime, end: datetime, location: Any = None
+) -> list[dict[str, Any]]:
+    """Rooms (optionally at one location) with the lessons booked in them: the calendar's
+    room resource view (E08-T12)."""
+    from tutortrack.catalogue.models import Room
+
+    rooms = Room.objects.filter(active=True).select_related("location")
+    if location is not None:
+        rooms = rooms.filter(location=location)
+    lessons = lessons_in_range(user, start, end).filter(room__in=rooms)
+    by_room: dict[Any, list[dict[str, Any]]] = {}
+    for lesson in lessons:
+        by_room.setdefault(lesson.room_id, []).append(project_lesson(lesson))
+    return [
+        {
+            "id": str(room.pk),
+            "name": room.name,
+            "location": str(room.location_id),
+            "location_name": room.location.name,
+            "capacity": room.capacity,
+            "colour": room.colour,
+            "lessons": by_room.get(room.pk, []),
+        }
+        for room in rooms.order_by("location__name", "name")
+    ]
+
+
+def pending_reschedule_requests(user: Any) -> QuerySet[Any]:
+    from .models import RescheduleRequest
+
+    visible = scope_queryset(user, Lesson.objects.all(), "scheduling.lesson.edit")
+    return (
+        RescheduleRequest.objects.filter(lesson__in=visible.values("pk"))
+        .select_related("lesson")
+        .order_by("deadline")
+    )

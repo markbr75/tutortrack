@@ -159,6 +159,7 @@ describe("catalogue", () => {
       students: [{ student: "s1" }],
       tutors: [{ tutor: "t1" }],
       job_charge_rate: null,
+      online: false,
     });
   });
 });

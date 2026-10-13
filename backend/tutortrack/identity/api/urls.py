@@ -1,12 +1,14 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
+from . import phase2_views as p2
 from . import support_views, views
 
 router = SimpleRouter(trailing_slash=False)
 router.register("me/sessions", views.SessionViewSet, basename="me-sessions")
 router.register("memberships", views.MembershipViewSet, basename="memberships")
 router.register("invitations", views.InvitationViewSet, basename="invitations")
+router.register("custom-roles", p2.CustomRoleViewSet, basename="custom-roles")
 
 urlpatterns = [
     path("auth/login", views.LoginView.as_view(), name="auth-login"),
@@ -29,6 +31,20 @@ urlpatterns = [
         views.SSOCallbackView.as_view(),
         name="auth-sso-callback",
     ),
+    path("auth/passkey/options", p2.PasskeyAuthOptionsView.as_view(), name="auth-passkey-options"),
+    path("auth/passkey/verify", p2.PasskeyVerifyView.as_view(), name="auth-passkey-verify"),
+    path("auth/org-sso", p2.OrgSSOInfoView.as_view(), name="auth-org-sso"),
+    path("auth/org-sso/start", p2.OrgSSOStartView.as_view(), name="auth-org-sso-start"),
+    path("auth/org-sso/callback", p2.OrgSSOCallbackView.as_view(), name="auth-org-sso-callback"),
+    path("auth/org-sso/acs", p2.OrgSSOAcsView.as_view(), name="auth-org-sso-acs"),
+    path("auth/org-sso/metadata", p2.OrgSSOMetadataView.as_view(), name="auth-org-sso-metadata"),
+    path("security/sso", p2.OrganisationSSOView.as_view(), name="security-sso"),
+    path("me/passkeys", p2.PasskeyListView.as_view(), name="me-passkeys"),
+    path(
+        "me/passkeys/options", p2.PasskeyRegisterOptionsView.as_view(), name="me-passkeys-options"
+    ),
+    path("me/passkeys/register", p2.PasskeyRegisterView.as_view(), name="me-passkeys-register"),
+    path("me/passkeys/<uuid:pk>", p2.PasskeyDetailView.as_view(), name="me-passkey"),
     path("me", views.MeView.as_view(), name="me"),
     path("me/password", views.PasswordChangeView.as_view(), name="me-password"),
     path("me/logins", views.MyLoginsView.as_view(), name="me-logins"),

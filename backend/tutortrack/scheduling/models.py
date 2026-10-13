@@ -6,13 +6,20 @@ from decimal import Decimal
 from typing import Any
 
 from django.conf import settings
+from django.contrib.postgres.constraints import ExclusionConstraint
+from django.contrib.postgres.fields import DateTimeRangeField, RangeOperators
 from django.db import models
-from django.db.models import Q
+from django.db.models import Func, Q, Value
 from django.utils.translation import gettext_lazy as _
 
 from tutortrack.core.fields import CurrencyField, MoneyField, RateField
 from tutortrack.core.models import BranchScopedModel, TenantModel
 from tutortrack.people.models import CustomisableModel
+
+
+class TsTzRange(Func):
+    function = "TSTZRANGE"
+    output_field = DateTimeRangeField()
 
 
 class LessonSeries(TenantModel):
@@ -88,6 +95,10 @@ class Lesson(BranchScopedModel, CustomisableModel):
     location = models.ForeignKey(
         "catalogue.Location", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
     )
+    # E08-T12: a room can't hold two lessons at once (exclusion constraint below).
+    room = models.ForeignKey(
+        "catalogue.Room", null=True, blank=True, on_delete=models.PROTECT, related_name="lessons"
+    )
     online = models.BooleanField(default=False)
     meeting_url = models.URLField(blank=True, default="")
     meeting_provider = models.CharField(max_length=20, blank=True, default="")
@@ -110,6 +121,8 @@ class Lesson(BranchScopedModel, CustomisableModel):
     cancelled_by = models.CharField(max_length=7, blank=True, default="")  # client/tutor/...
     auto_completed = models.BooleanField(default=False)
     unconfirmed_at = models.DateTimeField(null=True, blank=True)  # flagged as not confirmed
+    # E08-T15: the tutor's approved time off clashes; cover is being found (E19).
+    cover_flagged_at = models.DateTimeField(null=True, blank=True)
 
     class Meta(BranchScopedModel.Meta):
         ordering = ["start"]
@@ -121,6 +134,14 @@ class Lesson(BranchScopedModel, CustomisableModel):
                 fields=["series", "occurrence_date"],
                 condition=Q(series__isnull=False),
                 name="lesson_series_occurrence_unique",
+            ),
+            ExclusionConstraint(
+                name="lesson_room_no_overlap",
+                expressions=[
+                    ("room", RangeOperators.EQUAL),
+                    (TsTzRange("start", "end", Value("[)")), RangeOperators.OVERLAPS),
+                ],
+                condition=Q(room__isnull=False) & ~Q(status="cancelled"),
             ),
         ]
         indexes = [
@@ -191,6 +212,10 @@ class LessonAttendee(TenantModel):
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
     recorded_at = models.DateTimeField(null=True, blank=True)
+    # E06-T09: the promo code used when this student booked (kept for re-pricing).
+    promo_code = models.ForeignKey(
+        "catalogue.PromoCode", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
 
     class Meta(TenantModel.Meta):
         constraints = [
@@ -313,6 +338,16 @@ class AvailabilityException(TenantModel):
     end = models.DateTimeField()
     reason = models.CharField(max_length=300, blank=True, default="")
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.APPROVED)
+    # E08-T15 approval workflow.
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decision_note = models.CharField(max_length=300, blank=True, default="")
+    cover_request_id = models.UUIDField(null=True, blank=True)  # E19 cover for the clashes
 
     class Meta(TenantModel.Meta):
         ordering = ["start"]
@@ -325,6 +360,149 @@ class AvailabilityException(TenantModel):
     @classmethod
     def own_scope_q(cls, user: Any) -> Q:
         return Q(tutor__membership__user=user)
+
+
+class RescheduleRequest(TenantModel):
+    """A client or tutor asks to move a lesson (FR-08-8, E08-T13). The other side or an
+    admin picks one of the proposed times (the lesson moves) or declines; undecided
+    requests are declined automatically at ``deadline`` (``RescheduleRequestWorkflow``)."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Waiting for a decision")
+        APPROVED = "approved", _("Approved")
+        DECLINED = "declined", _("Declined")
+        CANCELLED = "cancelled", _("Withdrawn")
+        EXPIRED = "expired", _("Not answered in time")
+
+    class Party(models.TextChoices):
+        CLIENT = "client", _("Client")
+        TUTOR = "tutor", _("Tutor")
+        STAFF = "staff", _("Staff")
+        CALENDAR = "calendar", _("Tutor's calendar")
+
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="reschedule_requests")
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    requester = models.CharField(max_length=8, choices=Party.choices)
+    proposed = models.JSONField(default=list)  # [{"start": iso, "end": iso}]
+    reason = models.CharField(max_length=300, blank=True, default="")
+    status = models.CharField(max_length=9, choices=Status.choices, default=Status.PENDING)
+    deadline = models.DateTimeField()
+    original_start = models.DateTimeField()
+    original_end = models.DateTimeField()
+    chosen = models.PositiveSmallIntegerField(null=True, blank=True)  # index into proposed
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decision_note = models.CharField(max_length=300, blank=True, default="")
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["lesson"],
+                condition=Q(status="pending"),
+                name="reschedule_one_pending_per_lesson",
+            )
+        ]
+
+    @classmethod
+    def own_scope_q(cls, user: Any) -> Q:
+        return Q(lesson__in=Lesson.objects.filter(Lesson.own_scope_q(user)).values("pk"))
+
+
+class BookingSettings(TenantModel):
+    """Online self-booking (FR-08-9, E08-T14): one row per organisation."""
+
+    class Payment(models.TextChoices):
+        NONE = "none", _("Pay later (invoice as usual)")
+        AT_BOOKING = "at_booking", _("Pay when booking")
+
+    enabled = models.BooleanField(default=False)
+    allow_new_clients = models.BooleanField(default=True)  # public widget, no account yet
+    min_notice_hours = models.PositiveIntegerField(default=24)
+    max_advance_days = models.PositiveIntegerField(default=60)
+    slot_interval_minutes = models.PositiveIntegerField(default=30)
+    buffer_minutes = models.PositiveIntegerField(default=0)
+    approval_required = models.BooleanField(default=False)
+    payment = models.CharField(max_length=10, choices=Payment.choices, default=Payment.NONE)
+    hold_minutes = models.PositiveIntegerField(default=10)
+    cancellation_window_hours = models.PositiveIntegerField(default=24)
+    tutors = models.JSONField(default=list, blank=True)  # tutor ids; [] = every active tutor
+    location = models.ForeignKey(
+        "catalogue.Location", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    terms = models.TextField(blank=True, default="")
+
+    class Meta(TenantModel.Meta):
+        constraints = [
+            models.UniqueConstraint(fields=["organisation"], name="booking_settings_one_per_org")
+        ]
+
+
+class BookingHold(TenantModel):
+    """A slot held while someone books it (FR-08-9). ``BookingHoldWorkflow`` releases it
+    when the hold expires unpaid, or confirms it (creating the lesson)."""
+
+    class Status(models.TextChoices):
+        HELD = "held", _("Held")
+        AWAITING_PAYMENT = "awaiting_payment", _("Waiting for payment")
+        AWAITING_APPROVAL = "awaiting_approval", _("Waiting for approval")
+        CONFIRMED = "confirmed", _("Confirmed")
+        DECLINED = "declined", _("Declined")
+        EXPIRED = "expired", _("Expired")
+        CANCELLED = "cancelled", _("Cancelled")
+
+    ACTIVE = ("held", "awaiting_payment", "awaiting_approval")
+
+    class Source(models.TextChoices):
+        PORTAL = "portal", _("Client portal")
+        WIDGET = "widget", _("Website widget")
+
+    service = models.ForeignKey("catalogue.Service", on_delete=models.PROTECT, related_name="+")
+    tutor = models.ForeignKey("people.TutorProfile", on_delete=models.PROTECT, related_name="+")
+    branch = models.ForeignKey("tenancy.Branch", on_delete=models.PROTECT, related_name="+")
+    location = models.ForeignKey(
+        "catalogue.Location", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    online = models.BooleanField(default=False)
+    start = models.DateTimeField()
+    end = models.DateTimeField()
+    timezone = models.CharField(max_length=64)
+    client = models.ForeignKey(
+        "people.Client", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    student = models.ForeignKey(
+        "people.Student", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    contact = models.JSONField(default=dict, blank=True)  # new clients: name, email, phone...
+    promo_code = models.ForeignKey(
+        "catalogue.PromoCode", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    trial = models.BooleanField(default=False)
+    quote = models.JSONField(default=dict, blank=True)  # the price shown when booking
+    status = models.CharField(max_length=17, choices=Status.choices, default=Status.HELD)
+    source = models.CharField(max_length=6, choices=Source.choices, default=Source.PORTAL)
+    expires_at = models.DateTimeField()
+    payment_request_id = models.UUIDField(null=True, blank=True)  # billing.PaymentRequest
+    lesson = models.ForeignKey(
+        Lesson, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    token_hash = models.CharField(max_length=64, blank=True, default="")  # public status link
+    created_by_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    decision_note = models.CharField(max_length=300, blank=True, default="")
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["organisation", "start"], name="booking_hold_start_idx")]
+
+    @classmethod
+    def own_scope_q(cls, user: Any) -> Q:
+        return Q(created_by_user=user)
 
 
 class ICalFeedToken(TenantModel):

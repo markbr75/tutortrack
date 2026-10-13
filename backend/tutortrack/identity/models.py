@@ -87,7 +87,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def has_mfa(self) -> bool:
-        return self.mfa_devices.filter(confirmed_at__isnull=False).exists()
+        return (
+            self.mfa_devices.filter(confirmed_at__isnull=False).exists()
+            or self.webauthn_credentials.exists()
+        )
 
 
 class Membership(TenantModel):
@@ -376,3 +379,106 @@ class SupportSession(TenantModel):
 
     def __str__(self) -> str:
         return f"Support session by {self.staff_name}"
+
+
+# --- Phase 2: custom roles (E03-T11) ------------------------------------------------------------
+
+
+class Role(TenantModel):
+    """A custom staff role: an explicit ``"codename:scope"`` grant list, usually cloned from
+    a built-in role and edited in the permission matrix. A membership with custom roles
+    holds the union of their grants instead of its built-in role's."""
+
+    STAFF_BASES = ("admin", "branch_manager", "coordinator", "finance", "tutor")
+
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=300, blank=True, default="")
+    base_role = models.CharField(max_length=20, default="coordinator")  # kind + 2FA rule
+    grants = models.JSONField(default=list, blank=True)  # ["people.client.view:all", ...]
+    archived_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(fields=["organisation", "name"], name="custom_role_name_unique")
+        ]
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class MembershipRole(TenantModel):
+    membership = models.ForeignKey(
+        Membership, on_delete=models.CASCADE, related_name="custom_role_links"
+    )
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name="membership_links")
+
+    class Meta(TenantModel.Meta):
+        constraints = [
+            models.UniqueConstraint(fields=["membership", "role"], name="membership_role_unique")
+        ]
+
+
+# --- Phase 2: passkeys (E03-T08) ----------------------------------------------------------------
+
+
+class WebAuthnCredential(models.Model):
+    """A passkey or security key (FR-03-2). Global like the user; the public key is not a
+    secret. Discoverable credentials allow passkey-only sign-in."""
+
+    id = models.UUIDField(primary_key=True, default=new_id, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="webauthn_credentials")
+    name = models.CharField(max_length=100, default="Passkey")
+    credential_id = models.CharField(max_length=1400, unique=True)  # base64url
+    public_key = models.BinaryField()  # COSE
+    sign_count = models.BigIntegerField(default=0)
+    transports = models.JSONField(default=list, blank=True)
+    aaguid = models.CharField(max_length=36, blank=True, default="")
+    backed_up = models.BooleanField(default=False)  # synced passkey
+    created_at = models.DateTimeField(default=dj_timezone.now)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.name} for {self.user_id}"
+
+
+# --- Phase 2: enterprise SSO per organisation (E03-T12) -----------------------------------------
+
+
+class OrganisationSSO(TenantModel):
+    """The organisation's own identity provider (OIDC or SAML 2.0). Sign-in starts and
+    ends on the organisation's address; people are matched by the IdP subject, then by an
+    email in one of ``email_domains``."""
+
+    class Protocol(models.TextChoices):
+        OIDC = "oidc", "OpenID Connect"
+        SAML = "saml", "SAML 2.0"
+
+    protocol = models.CharField(max_length=4, choices=Protocol.choices, default=Protocol.OIDC)
+    enabled = models.BooleanField(default=False)
+    name = models.CharField(max_length=60, default="Company sign-in")  # button label
+    email_domains = models.JSONField(default=list, blank=True)  # ["school.org"]
+    enforce = models.BooleanField(default=False)  # these domains can't use passwords here
+    auto_provision = models.BooleanField(default=False)
+    default_role = models.CharField(max_length=20, default="tutor")
+    # OIDC
+    issuer = models.URLField(blank=True, default="")
+    client_id = models.CharField(max_length=255, blank=True, default="")
+    client_secret = EncryptedField(blank=True, default="")
+    # SAML
+    idp_entity_id = models.CharField(max_length=500, blank=True, default="")
+    idp_sso_url = models.URLField(blank=True, default="")
+    idp_certificate = models.TextField(blank=True, default="")  # PEM, signing cert
+
+    audit_sensitive_fields = frozenset({"client_secret"})
+
+    class Meta(TenantModel.Meta):
+        constraints = [
+            models.UniqueConstraint(fields=["organisation"], name="organisation_sso_one_per_org")
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.protocol} SSO"

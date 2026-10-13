@@ -6,6 +6,22 @@ import { useState, type FormEvent } from "react";
 
 import { api, safeNext } from "../api";
 import { PublicLayout } from "../layout/PublicLayout";
+import { getPasskey, passkeysSupported } from "./webauthn";
+
+/** Sign in with a passkey (E03-T08): passkey-only, or as the second factor while a
+ * password or magic-link sign-in waits for it. */
+function usePasskeySignIn(onDone: () => void) {
+  return useMutation({
+    mutationFn: async () => {
+      const options = unwrap(await api.POST("/api/v1/auth/passkey/options"));
+      const credential = await getPasskey(options as Record<string, unknown>);
+      return unwrap(
+        await api.POST("/api/v1/auth/passkey/verify", { body: { credential, remember: false } }),
+      );
+    },
+    onSuccess: onDone,
+  });
+}
 
 function params() {
   return new URLSearchParams(window.location.search);
@@ -19,6 +35,7 @@ export function MFAStep({ onDone }: { onDone: () => void }) {
     mutationFn: async () => unwrap(await api.POST("/api/v1/auth/mfa/verify", { body: { code } })),
     onSuccess: onDone,
   });
+  const passkey = usePasskeySignIn(onDone);
   return (
     <form
       className="flex flex-col gap-4"
@@ -41,6 +58,12 @@ export function MFAStep({ onDone }: { onDone: () => void }) {
       <Button type="submit" loading={verify.isPending}>
         {t("auth.mfaSubmit")}
       </Button>
+      {passkeysSupported() ? (
+        <Button variant="secondary" loading={passkey.isPending} onClick={() => passkey.mutate()}>
+          {t("passkeys.useInstead")}
+        </Button>
+      ) : null}
+      {passkey.isError ? <Alert tone="danger">{t("passkeys.failed")}</Alert> : null}
     </form>
   );
 }
@@ -71,6 +94,11 @@ export function LoginPage() {
   const magic = useMutation({
     mutationFn: async () =>
       unwrap(await api.POST("/api/v1/auth/magic-link", { body: { email, next } })),
+  });
+  const passkey = usePasskeySignIn(finish);
+  const orgSso = useQuery({
+    queryKey: ["org-sso"],
+    queryFn: async () => unwrap(await api.GET("/api/v1/auth/org-sso")),
   });
 
   if (mfa) {
@@ -128,6 +156,20 @@ export function LoginPage() {
         >
           {t("auth.magicLink")}
         </Button>
+        {passkeysSupported() ? (
+          <Button variant="secondary" loading={passkey.isPending} onClick={() => passkey.mutate()}>
+            {t("passkeys.signIn")}
+          </Button>
+        ) : null}
+        {passkey.isError ? <Alert tone="danger">{t("passkeys.failed")}</Alert> : null}
+        {orgSso.data?.enabled ? (
+          <a
+            className="flex h-10 items-center justify-center rounded-md border border-border text-sm hover:bg-muted"
+            href={`${orgSso.data.start_url}?next=${encodeURIComponent(next)}`}
+          >
+            {t("auth.continueWith", { provider: orgSso.data.name })}
+          </a>
+        ) : null}
         {providers.data?.length ? (
           <>
             <p className="text-center text-sm text-muted-foreground">{t("auth.or")}</p>

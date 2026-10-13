@@ -27,7 +27,12 @@ from tutortrack.integrations.providers.fake import FakeCalendar
 from tutortrack.jobs import services as jobs
 from tutortrack.scheduling import availability, conflicts
 from tutortrack.scheduling import services as scheduling
-from tutortrack.scheduling.models import AvailabilityTemplate, AvailabilityWindow, Lesson
+from tutortrack.scheduling.models import (
+    AvailabilityTemplate,
+    AvailabilityWindow,
+    Lesson,
+    RescheduleRequest,
+)
 from tutortrack.scheduling.services import ConflictError
 
 from .conftest import LONDON, connect, make_lesson, settle, slot
@@ -414,16 +419,18 @@ def test_moving_a_lesson_in_google_proposes_a_reschedule(org, people, two_way):
     with tenant_context(org):
         lesson.refresh_from_db()
         assert lesson.start != moved  # a tutor can't reschedule: proposed instead
-        task = Task.objects.get(target_type="scheduling.lesson", target_id=str(lesson.pk))
-        assert task.assignee == manager
-        assert "Reschedule" in task.title
+        request = RescheduleRequest.objects.get(lesson=lesson)
+        assert (request.requester, request.status) == ("calendar", "pending")
+        assert request.proposed[0]["start"] == moved.isoformat()
+        assert manager is not None
         assert ExternalEventLink.objects.get(lesson=lesson).proposed_start == moved
         assert ExternalEventLink.objects.filter(lesson=lesson).exists()
     assert datetime.fromisoformat(store.find_lesson(str(lesson.pk))[2]["start"]) == lesson.start
     assert OutboxEvent.objects.filter(event_type="calendar.reschedule_proposed").exists()
     sync(org, two_way)
     with tenant_context(org):
-        assert Task.objects.filter(target_id=str(lesson.pk)).count() == 1  # not proposed twice
+        assert RescheduleRequest.objects.filter(lesson=lesson).count() == 1  # not twice
+        assert not Task.objects.filter(target_id=str(lesson.pk)).exists()
 
 
 def test_moves_apply_directly_when_the_owner_may_edit_lessons(org, people):

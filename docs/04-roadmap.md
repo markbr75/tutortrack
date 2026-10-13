@@ -72,12 +72,12 @@ All ─► E26, E27, E28, E31
 |---|---|---|
 | E01 | ✅ Done (2026-10-08) | See Implementation notes in the epic; follow-ups carried into E02, E03, E29, E30 |
 | E02 | ✅ Done (2026-10-09) | Incl. E02-TW1 (closure workflow, built with E32). Follow-ups in E04, E05, E06, E11, E24 |
-| E03 | ✅ Done (2026-10-09) | Phase 1 scope (T08/T11/T12 are Phase 2). See Implementation notes |
+| E03 | ✅ Done (2026-10-09; Phase 2 done 2026-10-12) | Phase 2: passkeys (T08), custom roles and permission matrix (T11), SAML/OIDC per organisation (T12). See Implementation notes and Phase 2 notes |
 | E04 | ✅ Done (2026-10-10) | Incl. E04-TW1 (trial and dunning workflows). API under `/subscription`; console for overrides with E30. See Implementation notes |
 | E05 | ✅ Done (2026-10-09) | Phase 1 scope (merge tool and map view are Phase 2). See Implementation notes |
-| E06 | ✅ Done (2026-10-09) | MVP scope (T07–T10 pay tiers, premiums, discounts, rooms are Phase 2). See Implementation notes |
+| E06 | ✅ Done (2026-10-09; Phase 2 done 2026-10-12) | Phase 2: pay tiers, tutor rates and CSV (T07), premiums and holiday calendars (T08), discounts, promo codes and price lists (T09), rooms and resources (T10). See Implementation notes and Phase 2 notes |
 | E07 | ✅ Done (2026-10-09) | Lesson-dependent parts (replace preview, hours used, delivered totals) wired by E08-T10. See Implementation notes |
-| E08 | ✅ Done (2026-10-09) | MVP scope (rooms, reschedule requests, self-booking, time-off approval + TW1 are Phase 2). See Implementation notes |
+| E08 | ✅ Done (2026-10-09; Phase 2 done 2026-10-12) | Phase 2: rooms with exclusion constraint (T12), reschedule requests (T13), self-booking with holds and payment (T14), time-off approval and cover (T15), TW1 workflows on Temporal. See Implementation notes and Phase 2 notes |
 | E09 | ✅ Done (2026-10-09) | MVP scope (T09 feedback surveys are Phase 2). See Implementation notes and ADR 0006 |
 | E10 | ✅ Done (2026-10-09); Phase 2 ✅ Done (2026-10-12) | Phase 1 per ADR 0007. Phase 2: packages with PackageExpiryWorkflow, recurring fixed fees with proration, late fees and collections blocks, split billing (ADR 0022) |
 | E11 | ✅ Done (2026-10-09); Phase 2 ✅ Done (2026-10-12) | Phase 1 per ADR 0008. Phase 2: GoCardless, PayPal, bank statement import and Open Banking with a matching queue, split payments, ProviderMigrationWorkflow (ADR 0022) |

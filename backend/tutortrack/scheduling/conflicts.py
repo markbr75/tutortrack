@@ -47,12 +47,17 @@ def check(
     location: Any = None,
     online: bool = False,
     job: Any = None,
+    room: Any = None,
+    student_count: int | None = None,
+    exclude_hold_ids: Iterable[Any] = (),
 ) -> list[Conflict]:
     from tutortrack.tenancy.settings_service import get_setting
 
     from . import availability, external
+    from .models import BookingHold
 
     tutors = list(tutors)
+    students = list(students)
     outside = external.external_busy([t.pk for t in tutors], start, end)
     excluded = [str(i) for i in exclude_lesson_ids]
     found: list[Conflict] = []
@@ -88,6 +93,16 @@ def check(
         )
         if time_off.exists():
             add("tutor_time_off", HARD, _("%(tutor)s is on time off.") % name, tutor_id=tutor.pk)
+        held = (
+            BookingHold.objects.filter(
+                tutor=tutor, status__in=BookingHold.ACTIVE, start__lt=end, end__gt=start
+            )
+            .exclude(pk__in=[str(i) for i in exclude_hold_ids])
+            .exists()
+        )
+        if held:
+            message = _("%(tutor)s's time is being booked online.") % name
+            add("slot_held", HARD, message, tutor_id=tutor.pk)
         if availability.has_template(tutor.pk) and not availability.within_availability(
             tutor.pk, start, end, tz
         ):
@@ -108,6 +123,12 @@ def check(
                     "max": tutor.max_weekly_hours,
                 }
                 add("max_weekly_hours", SOFT, message, tutor_id=tutor.pk)
+    from tutortrack.billing.selectors import booking_block
+
+    for client_id in {s.client_id for s in students}:
+        if booking_block(client_id) != "none":
+            message = _("The family's account is in collections.")
+            add("client_in_collections", SOFT, message)
     for student in students:
         clash = overlapping.filter(attendees__student=student).first()
         if clash:
@@ -116,6 +137,20 @@ def check(
                 "lesson": clash.title,
             }
             add("student_double_booked", SOFT, message, lesson_id=clash.pk, student_id=student.pk)
+    if room is not None:
+        clash = overlapping.filter(room=room).first()
+        if clash:
+            message = _("%(room)s is booked for %(lesson)s then.") % {
+                "room": room.name,
+                "lesson": clash.title,
+            }
+            add("room_double_booked", HARD, message, lesson_id=clash.pk)
+        count = student_count if student_count is not None else len(students)
+        if room.capacity is not None and count > room.capacity:
+            message = _("%(room)s holds %(n)s students.") % {"room": room.name, "n": room.capacity}
+            add("room_capacity", SOFT, message)
+        if not room.active:
+            add("room_inactive", SOFT, _("%(room)s is not in use.") % {"room": room.name})
     closure = CalendarEvent.objects.filter(
         org_wide=True, type=CalendarEvent.Type.HOLIDAY, start__lt=end, end__gt=start
     ).first()
@@ -191,3 +226,8 @@ def _within_opening_hours(location: Any, start: datetime, end: datetime, tz: str
 
 def hard(conflicts: list[Conflict]) -> list[Conflict]:
     return [c for c in conflicts if c.severity == HARD]
+
+
+# Room clashes are enforced by the database (exclusion constraint), so no one can override
+# them; the other hard conflicts can be overridden with ``scheduling.override_conflicts``.
+UNOVERRIDABLE = {"room_double_booked", "slot_held"}

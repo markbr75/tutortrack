@@ -6,9 +6,10 @@
  *
  * Each widget is a Lit custom element with Shadow DOM isolation, themed by the organisation's
  * brand and CSS custom properties (`--tt-brand-color`, `--tt-font`, `--tt-radius`...), and
- * emits `tt:*` analytics events on window. Self-booking (`<tt-booking>`, E08) and the course
- * catalogue (`<tt-class-catalogue>`, E20) register here when those epics land.
+ * emits `tt:*` analytics events on window. Self-booking is `<tt-booking>` (E08-T14); the course
+ * catalogue (`<tt-class-catalogue>`, E20) registers here when that epic lands.
  */
+export { TtBooking } from "./booking";
 export { TtCookieConsent } from "./cookie-consent";
 export { TtEnquiryForm } from "./enquiry-form";
 export { TtJobOpenings } from "./job-openings";

@@ -12,7 +12,11 @@ import { InvoicePage } from "./billing/InvoicePage";
 import { PayPage, SetupPage } from "./payments/PayPage";
 import { PaymentsSettingsPage } from "./payments/PaymentsPages";
 import { AvailabilityPage } from "./calendar/AvailabilityPage";
+import { BookingSettingsPage } from "./calendar/BookingSettingsPage";
 import { CalendarPage } from "./calendar/CalendarPage";
+import { RequestsPage } from "./calendar/RequestsPage";
+import { RolesPage } from "./routes/RolesPage";
+import { SsoSettingsPage } from "./routes/SsoSettingsPage";
 import { CataloguePage } from "./catalogue/CataloguePage";
 import { AccountingPage } from "./accounting/AccountingPage";
 import { DataPage } from "./data/DataPage";
@@ -252,6 +256,10 @@ const catalogueRoute = appPage("/catalogue", CataloguePage);
 const jobsRoute = appPage("/jobs", JobsPage);
 const calendarRoute = appPage("/calendar", CalendarPage);
 const availabilityRoute = appPage("/availability", AvailabilityPage);
+const requestsRoute = appPage("/requests", RequestsPage);
+const bookingSettingsRoute = appPage("/settings/booking", BookingSettingsPage);
+const rolesRoute = appPage("/team/roles", RolesPage);
+const ssoRoute = appPage("/settings/sso", SsoSettingsPage);
 const reportsRoute = appPage("/reports", ReportsPage);
 const reportRoute = createRoute({
   getParentRoute: () => appRoute,
@@ -396,6 +404,10 @@ const routeTree = rootRoute.addChildren([
     automationRoute,
     calendarRoute,
     availabilityRoute,
+    requestsRoute,
+    bookingSettingsRoute,
+    rolesRoute,
+    ssoRoute,
     reportsRoute,
     reportRoute,
     analyticsRoute,

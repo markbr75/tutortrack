@@ -23,3 +23,28 @@ class ServiceUpdated(DomainEvent):
     subject_type: ClassVar[str] = "service"
     fields: list[str] = field(default_factory=list)
     rate_changed: bool = False
+
+
+@dataclass(frozen=True, kw_only=True)
+class PricingChanged(DomainEvent):
+    """A Phase 2 pricing input changed (tier or tutor rate, premium, discount, price list,
+    holiday). Existing lessons keep their prices; admins re-price unlocked future lessons
+    with ``POST /lessons/reprice`` (E08)."""
+
+    event_type: ClassVar[str] = "pricing.changed"
+    subject_type: ClassVar[str] = "pricing_rule"
+    kind: str
+    service_ids: list[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True, kw_only=True)
+class TutorTierAssigned(DomainEvent):
+    """A tutor moved to a pay tier from ``effective_from``. With ``recalculate``, E08
+    re-prices the tutor's unlocked lessons from that date."""
+
+    event_type: ClassVar[str] = "tutor.tier_assigned"
+    subject_type: ClassVar[str] = "tutor_tier_assignment"
+    tutor_id: str
+    tier_id: str
+    effective_from: str
+    recalculate: bool = False

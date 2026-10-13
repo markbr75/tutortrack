@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 
 import { api, fieldErrors, useMe } from "../api";
+import { createPasskey, passkeysSupported } from "./webauthn";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -308,6 +309,92 @@ function LoginHistorySection() {
   );
 }
 
+/** Passkeys and security keys (E03-T08). The first one turns on two-step sign-in. */
+function PasskeysSection() {
+  const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
+  const [name, setName] = useState("");
+  const [codes, setCodes] = useState<string[]>([]);
+  const keys = useQuery({
+    queryKey: ["me", "passkeys"],
+    queryFn: async () => unwrap(await api.GET("/api/v1/me/passkeys")),
+  });
+  const add = useMutation({
+    mutationFn: async () => {
+      const options = unwrap(await api.POST("/api/v1/me/passkeys/options"));
+      const credential = await createPasskey(options as Record<string, unknown>);
+      return unwrap(await api.POST("/api/v1/me/passkeys/register", { body: { credential, name } }));
+    },
+    onSuccess: (data) => {
+      setName("");
+      setCodes(data.recovery_codes);
+      void queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+  const remove = useMutation({
+    mutationFn: async (id: string) =>
+      unwrap(await api.DELETE("/api/v1/me/passkeys/{id}", { params: { path: { id } } })),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["me"] }),
+  });
+  return (
+    <Section title={t("passkeys.title")}>
+      <p className="mt-1 text-sm text-muted-foreground">{t("passkeys.intro")}</p>
+      <ul className="mt-3 space-y-2">
+        {(keys.data ?? []).map((key) => (
+          <li key={key.id} className="flex items-center justify-between gap-2 text-sm">
+            <span>
+              {key.name}
+              <span className="block text-muted-foreground">
+                {key.last_used_at
+                  ? t("passkeys.lastUsed", {
+                      when: formatDateTime(key.last_used_at, i18n.language),
+                    })
+                  : t("passkeys.neverUsed")}
+              </span>
+            </span>
+            <Button
+              size="sm"
+              variant="secondary"
+              aria-label={t("passkeys.removeNamed", { name: key.name })}
+              onClick={() => remove.mutate(key.id)}
+            >
+              {t("passkeys.remove")}
+            </Button>
+          </li>
+        ))}
+      </ul>
+      {passkeysSupported() ? (
+        <form
+          className="mt-4 flex flex-wrap items-end gap-3"
+          onSubmit={(e: FormEvent) => {
+            e.preventDefault();
+            add.mutate();
+          }}
+        >
+          <TextField
+            label={t("passkeys.name")}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <Button type="submit" loading={add.isPending}>
+            {t("passkeys.add")}
+          </Button>
+        </form>
+      ) : (
+        <Alert tone="info" className="mt-3">
+          {t("passkeys.unsupported")}
+        </Alert>
+      )}
+      {add.isError ? (
+        <Alert tone="danger" className="mt-3">
+          {t("passkeys.failed")}
+        </Alert>
+      ) : null}
+      {codes.length ? <RecoveryCodes codes={codes} /> : null}
+    </Section>
+  );
+}
+
 export function AccountPage() {
   const { t } = useTranslation();
   return (
@@ -316,6 +403,7 @@ export function AccountPage() {
       <ProfileSection />
       <PasswordSection />
       <MFASection />
+      <PasskeysSection />
       <SessionsSection />
       <LoginHistorySection />
     </div>

@@ -10,7 +10,7 @@ class SchedulingConfig(AppConfig):
         from tutortrack.crm import targets
         from tutortrack.jobs import lessons as job_lessons
 
-        from . import handlers, org_settings  # noqa: F401
+        from . import handlers, notifications, org_settings, widgets  # noqa: F401
         from .job_provider import SchedulingLessonsProvider
         from .models import Lesson
 

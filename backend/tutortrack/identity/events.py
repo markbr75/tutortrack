@@ -50,6 +50,7 @@ class MembershipRoleChanged(DomainEvent):
     user_id: str
     old_role: str
     new_role: str
+    custom_roles: list[str] = field(default_factory=list)  # E03-T11 role ids
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -79,3 +80,12 @@ class ImpersonationEnded(DomainEvent):
     impersonator_id: str
     target_user_id: str
     extra: dict[str, str] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, kw_only=True)
+class CustomRoleChanged(DomainEvent):
+    """A custom role was created, edited or archived (E03-T11)."""
+
+    event_type: ClassVar[str] = "role.changed"
+    subject_type: ClassVar[str] = "role"
+    action: str  # created | updated | archived

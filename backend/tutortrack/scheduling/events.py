@@ -138,3 +138,120 @@ class AbsenceNotified(DomainEvent):
     subject_type: ClassVar[str] = "lesson"
     student_id: str
     note: str = ""
+
+
+# --- Phase 2: time off (T15), reschedule requests (T13), self-booking (T14) ---------------------
+
+
+@dataclass(frozen=True, kw_only=True)
+class TimeOffRequested(DomainEvent):
+    """Starts ``TimeOffApprovalWorkflow``."""
+
+    event_type: ClassVar[str] = "time_off.requested"
+    subject_type: ClassVar[str] = "time_off"
+    tutor_id: str
+    start: str
+    end: str
+    clashes: int = 0
+
+
+@dataclass(frozen=True, kw_only=True)
+class TimeOffApproved(DomainEvent):
+    event_type: ClassVar[str] = "time_off.approved"
+    subject_type: ClassVar[str] = "time_off"
+    tutor_id: str
+    automatic: bool = False  # approved when created (no approval needed)
+
+
+@dataclass(frozen=True, kw_only=True)
+class TimeOffDeclined(DomainEvent):
+    event_type: ClassVar[str] = "time_off.declined"
+    subject_type: ClassVar[str] = "time_off"
+    tutor_id: str
+    expired: bool = False  # nobody decided before it started
+
+
+@dataclass(frozen=True, kw_only=True)
+class CoverFlagged(DomainEvent):
+    """Approved time off clashes with these lessons; ``cover_request_id`` is E19's request."""
+
+    event_type: ClassVar[str] = "time_off.cover_flagged"
+    subject_type: ClassVar[str] = "time_off"
+    tutor_id: str
+    lesson_ids: list[str] = field(default_factory=list)
+    cover_request_id: str | None = None
+
+
+@dataclass(frozen=True, kw_only=True)
+class RescheduleRequested(DomainEvent):
+    """Starts ``RescheduleRequestWorkflow``."""
+
+    event_type: ClassVar[str] = "reschedule.requested"
+    subject_type: ClassVar[str] = "reschedule_request"
+    lesson_id: str
+    requester: str
+    deadline: str
+    options: int = 1
+
+
+@dataclass(frozen=True, kw_only=True)
+class RescheduleApproved(DomainEvent):
+    event_type: ClassVar[str] = "reschedule.approved"
+    subject_type: ClassVar[str] = "reschedule_request"
+    lesson_id: str
+    new_start: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class RescheduleDeclined(DomainEvent):
+    event_type: ClassVar[str] = "reschedule.declined"
+    subject_type: ClassVar[str] = "reschedule_request"
+    lesson_id: str
+    reason: str = "declined"  # declined | expired | cancelled
+
+
+@dataclass(frozen=True, kw_only=True)
+class BookingHeld(DomainEvent):
+    """A slot is held for an online booking; starts ``BookingHoldWorkflow``."""
+
+    event_type: ClassVar[str] = "booking.held"
+    subject_type: ClassVar[str] = "booking"
+    tutor_id: str
+    start: str
+    expires_at: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class BookingSubmitted(DomainEvent):
+    """The person pressed Book: ``status`` is awaiting_payment, awaiting_approval or
+    confirmed."""
+
+    event_type: ClassVar[str] = "booking.submitted"
+    subject_type: ClassVar[str] = "booking"
+    status: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class BookingRequested(DomainEvent):
+    """An online booking waits for staff approval (FR-08-9)."""
+
+    event_type: ClassVar[str] = "booking.requested"
+    subject_type: ClassVar[str] = "booking"
+    tutor_id: str
+    start: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class BookingConfirmed(DomainEvent):
+    event_type: ClassVar[str] = "booking.confirmed"
+    subject_type: ClassVar[str] = "booking"
+    lesson_id: str
+    client_id: str
+    new_client: bool = False
+
+
+@dataclass(frozen=True, kw_only=True)
+class BookingDeclined(DomainEvent):
+    event_type: ClassVar[str] = "booking.declined"
+    subject_type: ClassVar[str] = "booking"
+    reason: str = "declined"  # declined | expired | cancelled

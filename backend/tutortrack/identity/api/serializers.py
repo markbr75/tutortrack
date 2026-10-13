@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from tutortrack.core.api.serializers import BaseModelSerializer
@@ -152,12 +153,13 @@ class MemberUserSerializer(serializers.Serializer):
 class MembershipSerializer(BaseModelSerializer):
     user = MemberUserSerializer(read_only=True)
     branches = serializers.SerializerMethodField()
+    custom_roles = serializers.SerializerMethodField()
 
     class Meta:
         model = Membership
         fields = [
-            "id", "user", "role", "status", "branch_scope", "branches", "title", "joined_at",
-            "last_active_at",
+            "id", "user", "role", "custom_roles", "status", "branch_scope", "branches", "title",
+            "joined_at", "last_active_at",
         ]  # fmt: skip
         read_only_fields = ["id", "user", "joined_at", "last_active_at"]
 
@@ -166,6 +168,10 @@ class MembershipSerializer(BaseModelSerializer):
 
         ids = branch_ids_for(obj)
         return sorted(str(i) for i in ids) if ids is not None else []
+
+    @extend_schema_field(serializers.ListField(child=serializers.UUIDField()))
+    def get_custom_roles(self, obj: Membership) -> list[str]:
+        return sorted(str(i) for i in obj.custom_role_links.values_list("role_id", flat=True))
 
 
 class MembershipUpdateSerializer(serializers.Serializer):
@@ -176,6 +182,11 @@ class MembershipUpdateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=100, required=False, allow_blank=True)
     branch_scope = serializers.ChoiceField(choices=Membership.BranchScope.choices, required=False)
     branches = serializers.ListField(child=serializers.UUIDField(), required=False)
+    custom_roles = serializers.ListField(
+        child=serializers.UUIDField(),
+        required=False,
+        help_text="Custom roles (union of permissions); empty = the built-in role.",
+    )
 
 
 class InvitationSerializer(BaseModelSerializer):
@@ -219,6 +230,7 @@ class AcceptInvitationSerializer(serializers.Serializer):
 
 
 class RoleSerializer(serializers.Serializer):
+    id = serializers.CharField(allow_null=True)
     key = serializers.CharField()
     name = serializers.CharField()
     description = serializers.CharField()
@@ -226,6 +238,7 @@ class RoleSerializer(serializers.Serializer):
     is_staff = serializers.BooleanField()
     grants = serializers.ListField(child=serializers.CharField())
     denies = serializers.ListField(child=serializers.CharField())
+    base_role = serializers.CharField(allow_blank=True)
 
 
 class PermissionSerializer(serializers.Serializer):

@@ -65,6 +65,25 @@ class MFANotPending(DomainError):
     title = "Sign in again"
 
 
+class SSORequired(DomainError):
+    status_code = 400
+    problem_type = "sso-required"
+    title = "Use your organisation's sign-in"
+
+
+def _check_sso_required(request: HttpRequest, email: str) -> None:
+    """E03-T12: an organisation enforcing SSO for an email domain turns off passwords and
+    magic links for it on that organisation's address."""
+    from .org_sso import config, password_blocked
+
+    if password_blocked(request, email):
+        cfg = config()
+        raise SSORequired(
+            _("Sign in with %(name)s.") % {"name": cfg.name if cfg else "SSO"},
+            extra={"sso": True},
+        )
+
+
 @dataclass(frozen=True)
 class LoginResult:
     user: User
@@ -197,6 +216,7 @@ def login_with_password(
 ) -> LoginResult:
     email = email.strip().lower()
     _check_lockout(email)
+    _check_sso_required(request, email)
     user = User.objects.filter(email=email).first()
     if user is None or not user.is_active or not user.check_password(password):
         if user is None:
@@ -213,6 +233,7 @@ def login_with_password(
 def request_magic_link(request: HttpRequest, email: str, *, next_path: str = "/") -> None:
     """Email a 15-minute single-use sign-in link. Silent if the address is unknown."""
     email = email.strip().lower()
+    _check_sso_required(request, email)
     user = User.objects.filter(email=email, is_active=True).first()
     if user is None:
         return
@@ -343,7 +364,9 @@ def regenerate_recovery_codes(user: User) -> list[str]:
 
 
 def disable_mfa(user: User) -> None:
+    """Turn off every second factor (authenticator apps and passkeys)."""
     MFADevice.objects.filter(user=user).delete()
+    user.webauthn_credentials.all().delete()
     RecoveryCode.objects.filter(user=user).delete()
 
 

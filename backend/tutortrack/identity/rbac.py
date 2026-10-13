@@ -28,11 +28,36 @@ from .roles import ROLES, SCOPE_RANK, Grant
 _CACHE_ATTR = "_tt_rbac"
 
 
+def custom_grants(membership: Membership) -> list[Grant] | None:
+    """The union of the membership's custom roles' grants (E03-T11), or None without any.
+    Custom roles are explicit ``codename:scope`` lists, so they carry no denies."""
+    from .models import MembershipRole
+
+    rows = list(
+        MembershipRole.all_tenants.filter(
+            organisation_id=membership.organisation_id,
+            membership_id=membership.pk,
+            role__archived_at__isnull=True,
+        ).values_list("role__grants", flat=True)
+    )
+    if not rows:
+        return None
+    return [Grant.parse(raw) for grants in rows for raw in grants or []]
+
+
 def grants_for(membership: Membership) -> tuple[list[Grant], tuple[str, ...]]:
-    """(grants, denies) for a membership: its role plus org-configured tutor toggles."""
+    """(grants, denies) for a membership: its custom roles (union) or its built-in role,
+    plus org-configured tutor toggles."""
     role = ROLES.get(membership.role)
     if role is None:
         return [], ()
+    custom = custom_grants(membership) if membership.role != "owner" else None
+    if custom is not None:
+        if membership.role == Membership.Role.TUTOR:
+            from .tutor_access import toggle_grants
+
+            custom.extend(toggle_grants())
+        return custom, ()
     grants = list(role.grants)
     if membership.role == Membership.Role.TUTOR:
         from .tutor_access import toggle_grants

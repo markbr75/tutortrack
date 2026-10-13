@@ -34,6 +34,7 @@ from tutortrack.core.permissions import (
     HasMethodPermission,
     HasOrganisation,
     HasPermission,
+    has_perm,
     scope_queryset,
 )
 
@@ -526,7 +527,19 @@ class MembershipViewSet(
     @extend_schema(request=MembershipUpdateSerializer, responses=MembershipSerializer)
     def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         data = _validated(MembershipUpdateSerializer, request)
+        custom = data.pop("custom_roles", None)
         membership = services.update_membership(self.get_object(), **data)
+        if custom is not None:
+            from ..models import Role
+
+            if not has_perm(request.user, "team.roles.manage") and custom:
+                raise PermissionDenied()
+            roles = list(Role.objects.filter(pk__in=custom))
+            if len(roles) != len(set(custom)):
+                raise BusinessRuleViolation(
+                    "Unknown role.", extra={"errors": {"custom_roles": ["Unknown role."]}}
+                )
+            services.set_custom_roles(membership, roles)
         return Response(MembershipSerializer(membership, context={"request": request}).data)
 
     def perform_destroy(self, instance: Membership) -> None:
@@ -678,20 +691,37 @@ class RolesView(APIView):
 
     @extend_schema(responses=RoleSerializer(many=True))
     def get(self, request: Request) -> Response:
-        return Response(
-            [
-                {
-                    "key": r.key,
-                    "name": r.name,
-                    "description": r.description,
-                    "is_builtin": True,
-                    "is_staff": r.is_staff,
-                    "grants": [f"{g.pattern}:{g.scope}" for g in r.grants],
-                    "denies": list(r.denies),
-                }
-                for r in ROLES.values()
-            ]
-        )
+        from ..models import Role
+
+        builtin = [
+            {
+                "id": None,
+                "key": r.key,
+                "name": r.name,
+                "description": r.description,
+                "is_builtin": True,
+                "is_staff": r.is_staff,
+                "grants": [f"{g.pattern}:{g.scope}" for g in r.grants],
+                "denies": list(r.denies),
+                "base_role": "",
+            }
+            for r in ROLES.values()
+        ]
+        custom = [
+            {
+                "id": str(r.pk),
+                "key": str(r.pk),
+                "name": r.name,
+                "description": r.description,
+                "is_builtin": False,
+                "is_staff": True,
+                "grants": list(r.grants),
+                "denies": [],
+                "base_role": r.base_role,
+            }
+            for r in Role.objects.filter(archived_at__isnull=True)
+        ]
+        return Response(builtin + custom)
 
 
 class PermissionsView(APIView):

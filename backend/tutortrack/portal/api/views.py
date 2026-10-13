@@ -98,12 +98,20 @@ class MeView(PortalView):
                     "invoices": setting("portal.show_invoices") and household.is_client,
                     "reports": setting("portal.show_reports"),
                     "profile": setting("portal.allow_profile_edits") and household.is_client,
+                    **_phase2_features(request, household),
                 },
                 "welcome_text": str(get_setting("portal.welcome_text")),
                 "help_url": str(get_setting("portal.help_url")),
                 "terms_url": str(get_setting("portal.terms_url")),
             }
         )
+
+
+def _phase2_features(request: Request, household: Household) -> dict[str, bool]:
+    from .booking_views import portal_features
+
+    found = portal_features(request)
+    return {k: v and household.is_client for k, v in found.items()}
 
 
 class DashboardView(PortalView):

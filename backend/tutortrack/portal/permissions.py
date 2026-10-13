@@ -9,6 +9,8 @@ PERMISSIONS = {
     "portal.client.cancel": "Client portal: cancel lessons and report absences",
     "portal.client.pay": "Client portal: pay and manage payment methods",
     "portal.client.profile": "Client portal: edit the household's details",
+    "portal.client.book": "Client portal: book lessons online (E08 self-booking)",
+    "portal.client.reschedule": "Client portal: ask to move lessons",
     "portal.student.view": "Student portal: see own lessons and reports",
     "comms.announcement.manage": "Post news for clients and tutors",
 }

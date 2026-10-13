@@ -61,11 +61,11 @@ export function viewerTimeZone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 
-export type View = "day" | "week" | "month" | "agenda" | "tutors";
+export type View = "day" | "week" | "month" | "agenda" | "tutors" | "rooms";
 
 /** The visible range [start, end) for a view around ``anchor``. */
 export function rangeFor(view: View, anchor: Date): { start: Date; end: Date; days: Date[] } {
-  if (view === "day" || view === "tutors") {
+  if (view === "day" || view === "tutors" || view === "rooms") {
     const start = startOfDay(anchor);
     return { start, end: addDays(start, 1), days: [start] };
   }

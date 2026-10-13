@@ -21,7 +21,8 @@ export function LessonCard({
   const { t, i18n } = useTranslation();
   const me = usePortalMe();
   const queryClient = useQueryClient();
-  const [mode, setMode] = useState<"none" | "cancel" | "absence">("none");
+  const [mode, setMode] = useState<"none" | "cancel" | "absence" | "move">("none");
+  const [newStart, setNewStart] = useState("");
   const [reason, setReason] = useState("");
   const [student, setStudent] = useState(lesson.students[0]?.id ?? "");
   const path = { params: { path: { lesson_id: lesson.id } } };
@@ -54,6 +55,28 @@ export function LessonCard({
           body: { student, note: reason },
         })
         .then(unwrap),
+    onSuccess: done,
+  });
+
+  const move = useMutation({
+    mutationFn: async () => {
+      const begin = new Date(newStart);
+      const length = new Date(lesson.end).getTime() - new Date(lesson.start).getTime();
+      return unwrap(
+        await api.POST("/api/v1/portal/lessons/{lesson_id}/reschedule", {
+          ...path,
+          body: {
+            options: [
+              {
+                start: begin.toISOString(),
+                end: new Date(begin.getTime() + length).toISOString(),
+              },
+            ],
+            reason,
+          },
+        }),
+      );
+    },
     onSuccess: done,
   });
 
@@ -108,6 +131,11 @@ export function LessonCard({
             }}
           >
             {t("portal.cancel")}
+          </Button>
+        ) : null}
+        {actions && future && features?.reschedule && mode === "none" ? (
+          <Button size="sm" variant="secondary" onClick={() => setMode("move")}>
+            {t("portalBooking.askToMove")}
           </Button>
         ) : null}
         {actions && future && features?.absence && mode === "none" ? (
@@ -171,8 +199,40 @@ export function LessonCard({
           </Button>
         </form>
       ) : null}
-      {cancel.error || absence.error ? (
-        <Alert tone="danger">{(cancel.error ?? absence.error)?.message}</Alert>
+      {mode === "move" ? (
+        <form
+          className="space-y-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            move.mutate();
+          }}
+        >
+          <TextField
+            label={t("portalBooking.newTime")}
+            type="datetime-local"
+            required
+            value={newStart}
+            onChange={(e) => setNewStart(e.target.value)}
+          />
+          <TextField
+            label={t("portal.reason")}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">{t("portalBooking.moveHelp")}</p>
+          <div className="flex gap-2">
+            <Button type="submit" size="sm" disabled={move.isPending || !newStart}>
+              {t("portalBooking.sendRequest")}
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setMode("none")}>
+              {t("portal.keep")}
+            </Button>
+          </div>
+        </form>
+      ) : null}
+      {move.isSuccess ? <Alert tone="success">{t("portalBooking.requestSent")}</Alert> : null}
+      {cancel.error || absence.error || move.error ? (
+        <Alert tone="danger">{(cancel.error ?? absence.error ?? move.error)?.message}</Alert>
       ) : null}
     </article>
   );

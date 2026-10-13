@@ -25,6 +25,8 @@ class PortalFeaturesSerializer(serializers.Serializer):
     invoices = serializers.BooleanField()
     reports = serializers.BooleanField()
     profile = serializers.BooleanField()
+    booking = serializers.BooleanField()
+    reschedule = serializers.BooleanField()
 
 
 class PortalMeSerializer(serializers.Serializer):

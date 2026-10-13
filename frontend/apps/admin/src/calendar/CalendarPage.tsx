@@ -13,10 +13,10 @@ import { QuickView } from "./QuickView";
 import { TimeGrid, type GridColumn } from "./TimeGrid";
 import type { CalendarItem } from "./types";
 
-const VIEWS: View[] = ["day", "week", "month", "agenda", "tutors"];
+const VIEWS: View[] = ["day", "week", "month", "agenda", "tutors", "rooms"];
 type ColourBy = "service" | "tutor" | "status" | "location";
 
-/** The calendar (FR-08-7): day, week, month, agenda and a tutors resource view, with
+/** The calendar (FR-08-7): day, week, month, agenda and tutors/rooms resource views, with
  * filters, colour modes, drag-to-reschedule and click-to-create. */
 export function CalendarPage() {
   const { t, i18n } = useTranslation();
@@ -41,6 +41,16 @@ export function CalendarPage() {
   const calendar = useQuery({
     queryKey: ["calendar", query],
     queryFn: async () => unwrap(await api.GET("/api/v1/calendar", { params: { query } })),
+  });
+  const rooms = useQuery({
+    queryKey: ["calendar", "rooms", range.start.toISOString()],
+    enabled: view === "rooms",
+    queryFn: async () =>
+      unwrap(
+        await api.GET("/api/v1/calendar/rooms", {
+          params: { query: { start: range.start.toISOString(), end: range.end.toISOString() } },
+        }),
+      ),
   });
   const tutors = useQuery({
     queryKey: ["tutors", "active"],
@@ -88,7 +98,7 @@ export function CalendarPage() {
   const title =
     view === "month"
       ? anchor.toLocaleDateString(i18n.language, { month: "long", year: "numeric" })
-      : view === "day" || view === "tutors"
+      : view === "day" || view === "tutors" || view === "rooms"
         ? anchor.toLocaleDateString(i18n.language, {
             weekday: "long",
             day: "numeric",
@@ -103,6 +113,15 @@ export function CalendarPage() {
       day,
       label: day.toLocaleDateString(i18n.language, { weekday: "short", day: "numeric" }),
       items: items.filter((i) => sameDay(new Date(i.start), day)),
+    }));
+  } else if (view === "rooms") {
+    // E08-T12: rooms as columns (each lesson booked in it).
+    const day = range.days[0] ?? anchor;
+    columns = (rooms.data ?? []).map((room) => ({
+      key: room.id,
+      day,
+      label: `${room.name} · ${room.location_name}`,
+      items: room.lessons as CalendarItem[],
     }));
   } else if (view === "tutors") {
     const day = range.days[0] ?? anchor;
@@ -243,7 +262,9 @@ export function CalendarPage() {
           colour={colour}
           onSelect={setSelected}
           onMove={
-            canEdit && view !== "tutors" ? (item, start) => move.mutate({ item, start }) : undefined
+            canEdit && view !== "tutors" && view !== "rooms"
+              ? (item, start) => move.mutate({ item, start })
+              : undefined
           }
           onCreate={
             canCreate

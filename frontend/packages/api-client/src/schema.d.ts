@@ -849,6 +849,127 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/auth/org-sso": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Whether this organisation offers its own sign-in (for the login page). */
+    get: operations["auth_org_sso_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/org-sso/acs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description SAML assertion consumer service (HTTP-POST binding). */
+    post: operations["auth_org_sso_acs_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/org-sso/callback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description OIDC redirect back from the organisation's identity provider. */
+    get: operations["auth_org_sso_callback_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/org-sso/metadata": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description SAML service provider metadata to give to the IdP administrator. */
+    get: operations["auth_org_sso_metadata_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/org-sso/start": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["auth_org_sso_start_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/passkey/options": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Options for a passkey: as the second factor while sign-in waits for it, otherwise
+     *     for passkey-only sign-in (any discoverable credential).
+     */
+    post: operations["auth_passkey_options_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/passkey/verify": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Finish sign-in with a passkey (second factor or passkey-only). */
+    post: operations["auth_passkey_verify_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/auth/password/reset": {
     parameters: {
       query?: never;
@@ -1576,6 +1697,92 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/booking/holds": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Online bookings: staff approve or decline those waiting (FR-08-9). */
+    get: operations["booking_holds_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/booking/holds/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Online bookings: staff approve or decline those waiting (FR-08-9). */
+    get: operations["booking_holds_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/booking/holds/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Online bookings: staff approve or decline those waiting (FR-08-9). */
+    post: operations["booking_holds_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/booking/holds/{id}/decide": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Online bookings: staff approve or decline those waiting (FR-08-9). */
+    post: operations["booking_holds_decide_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/booking/settings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Online booking settings (FR-08-9). */
+    get: operations["booking_settings_retrieve"];
+    /** @description Online booking settings (FR-08-9). */
+    put: operations["booking_settings_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/branches": {
     parameters: {
       query?: never;
@@ -1821,6 +2028,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/calendar/rooms": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The room resource view: each room with its lessons in ``[start, end)`` (E08-T12). */
+    get: operations["calendar_rooms_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/cancellation-policies": {
     parameters: {
       query?: never;
@@ -1938,6 +2162,162 @@ export interface paths {
     /** @description Optional grouping of subjects and services (FR-06-1). */
     post: operations["catalogue_categories_restore_create"];
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/discounts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Discounts (FR-06-7): sibling, volume, first lesson / trial, client, scholarship and
+     *     promo-code discounts.
+     */
+    get: operations["catalogue_discounts_list"];
+    put?: never;
+    /**
+     * @description Discounts (FR-06-7): sibling, volume, first lesson / trial, client, scholarship and
+     *     promo-code discounts.
+     */
+    post: operations["catalogue_discounts_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/discounts/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Discounts (FR-06-7): sibling, volume, first lesson / trial, client, scholarship and
+     *     promo-code discounts.
+     */
+    get: operations["catalogue_discounts_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Discounts (FR-06-7): sibling, volume, first lesson / trial, client, scholarship and
+     *     promo-code discounts.
+     */
+    patch: operations["catalogue_discounts_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/catalogue/holiday-calendars": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Holiday calendars (FR-06-6): premium rules and lesson series that skip holidays use
+     *     them.
+     */
+    get: operations["catalogue_holiday_calendars_list"];
+    put?: never;
+    /**
+     * @description Holiday calendars (FR-06-6): premium rules and lesson series that skip holidays use
+     *     them.
+     */
+    post: operations["catalogue_holiday_calendars_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/holiday-calendars/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Holiday calendars (FR-06-6): premium rules and lesson series that skip holidays use
+     *     them.
+     */
+    get: operations["catalogue_holiday_calendars_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Holiday calendars (FR-06-6): premium rules and lesson series that skip holidays use
+     *     them.
+     */
+    patch: operations["catalogue_holiday_calendars_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/catalogue/holiday-calendars/{id}/holidays": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Holiday calendars (FR-06-6): premium rules and lesson series that skip holidays use
+     *     them.
+     */
+    post: operations["catalogue_holiday_calendars_holidays_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/holiday-calendars/{id}/import": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Add the country's public holidays for a year (GB and US). */
+    post: operations["catalogue_holiday_calendars_import_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/holidays/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    delete: operations["catalogue_holidays_destroy"];
     options?: never;
     head?: never;
     patch?: never;
@@ -2119,6 +2499,148 @@ export interface paths {
     patch: operations["catalogue_packages_partial_update"];
     trace?: never;
   };
+  "/api/v1/catalogue/pay-tiers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Wage tiers (FR-06-5). */
+    get: operations["catalogue_pay_tiers_list"];
+    put?: never;
+    /** @description Wage tiers (FR-06-5). */
+    post: operations["catalogue_pay_tiers_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/pay-tiers/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Wage tiers (FR-06-5). */
+    get: operations["catalogue_pay_tiers_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Wage tiers (FR-06-5). */
+    patch: operations["catalogue_pay_tiers_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/catalogue/pay-tiers/{id}/archive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Wage tiers (FR-06-5). */
+    post: operations["catalogue_pay_tiers_archive_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/pay-tiers/{id}/restore": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Wage tiers (FR-06-5). */
+    post: operations["catalogue_pay_tiers_restore_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/premiums": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Premiums and surcharges (FR-06-6). */
+    get: operations["catalogue_premiums_list"];
+    put?: never;
+    /** @description Premiums and surcharges (FR-06-6). */
+    post: operations["catalogue_premiums_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/premiums/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Premiums and surcharges (FR-06-6). */
+    get: operations["catalogue_premiums_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Premiums and surcharges (FR-06-6). */
+    patch: operations["catalogue_premiums_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/catalogue/price-lists": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Contract price lists for specific clients (FR-06-11). */
+    get: operations["catalogue_price_lists_list"];
+    put?: never;
+    /** @description Contract price lists for specific clients (FR-06-11). */
+    post: operations["catalogue_price_lists_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/price-lists/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Contract price lists for specific clients (FR-06-11). */
+    get: operations["catalogue_price_lists_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Contract price lists for specific clients (FR-06-11). */
+    patch: operations["catalogue_price_lists_partial_update"];
+    trace?: never;
+  };
   "/api/v1/catalogue/products": {
     parameters: {
       query?: never;
@@ -2153,6 +2675,90 @@ export interface paths {
     head?: never;
     /** @description Fees and products for ad hoc charges (FR-06-9). */
     patch: operations["catalogue_products_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/catalogue/promo-codes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Create and edit through ``save``; nothing is deleted (archive or deactivate). */
+    get: operations["catalogue_promo_codes_list"];
+    put?: never;
+    /** @description Create and edit through ``save``; nothing is deleted (archive or deactivate). */
+    post: operations["catalogue_promo_codes_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/promo-codes/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Create and edit through ``save``; nothing is deleted (archive or deactivate). */
+    get: operations["catalogue_promo_codes_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Create and edit through ``save``; nothing is deleted (archive or deactivate). */
+    patch: operations["catalogue_promo_codes_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/catalogue/rooms": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Rooms inside locations, with their resources (FR-06-10). Lessons can't double-book a
+     *     room (E08).
+     */
+    get: operations["catalogue_rooms_list"];
+    put?: never;
+    /**
+     * @description Rooms inside locations, with their resources (FR-06-10). Lessons can't double-book a
+     *     room (E08).
+     */
+    post: operations["catalogue_rooms_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/rooms/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Rooms inside locations, with their resources (FR-06-10). Lessons can't double-book a
+     *     room (E08).
+     */
+    get: operations["catalogue_rooms_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Rooms inside locations, with their resources (FR-06-10). Lessons can't double-book a
+     *     room (E08).
+     */
+    patch: operations["catalogue_rooms_partial_update"];
     trace?: never;
   };
   "/api/v1/catalogue/services": {
@@ -2324,6 +2930,134 @@ export interface paths {
     head?: never;
     /** @description Tax rates (FR-06-3). One is the default for new services and products. */
     patch: operations["catalogue_tax_rates_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/catalogue/tier-assignments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Tutors' tiers with effective dates. ``recalculate`` re-prices the tutor's unlocked
+     *     lessons from that date (FR-06-5).
+     */
+    get: operations["catalogue_tier_assignments_list"];
+    put?: never;
+    /**
+     * @description Tutors' tiers with effective dates. ``recalculate`` re-prices the tutor's unlocked
+     *     lessons from that date (FR-06-5).
+     */
+    post: operations["catalogue_tier_assignments_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/tier-assignments/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Tutors' tiers with effective dates. ``recalculate`` re-prices the tutor's unlocked
+     *     lessons from that date (FR-06-5).
+     */
+    get: operations["catalogue_tier_assignments_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Tutors' tiers with effective dates. ``recalculate`` re-prices the tutor's unlocked
+     *     lessons from that date (FR-06-5).
+     */
+    delete: operations["catalogue_tier_assignments_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/tier-rates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The services by tiers grid (GET) and bulk edits of it (POST), FR-06-5. */
+    get: operations["catalogue_tier_rates_retrieve"];
+    put?: never;
+    /** @description The services by tiers grid (GET) and bulk edits of it (POST), FR-06-5. */
+    post: operations["catalogue_tier_rates_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/tier-rates/csv": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description CSV export (GET) and import (POST, multipart ``file``) of the tier grid. */
+    get: operations["catalogue_tier_rates_csv_retrieve"];
+    put?: never;
+    /** @description CSV export (GET) and import (POST, multipart ``file``) of the tier grid. */
+    post: operations["catalogue_tier_rates_csv_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/tutor-rates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Tutors' personal pay rates per service; ``POST`` sets one (``pay_rate: null``
+     *     removes it).
+     */
+    get: operations["catalogue_tutor_rates_list"];
+    put?: never;
+    /**
+     * @description Tutors' personal pay rates per service; ``POST`` sets one (``pay_rate: null``
+     *     removes it).
+     */
+    post: operations["catalogue_tutor_rates_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalogue/tutor-rates/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Tutors' personal pay rates per service; ``POST`` sets one (``pay_rate: null``
+     *     removes it).
+     */
+    get: operations["catalogue_tutor_rates_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/charges": {
@@ -3145,6 +3879,59 @@ export interface paths {
     head?: never;
     /** @description Custom field definitions per record type (FR-05-5). Deactivate instead of deleting. */
     patch: operations["custom_fields_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/custom-roles": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Custom roles: clone a staff role and edit its permission matrix (FR-03-5). */
+    get: operations["custom_roles_list"];
+    put?: never;
+    /** @description Custom roles: clone a staff role and edit its permission matrix (FR-03-5). */
+    post: operations["custom_roles_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/custom-roles/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Custom roles: clone a staff role and edit its permission matrix (FR-03-5). */
+    get: operations["custom_roles_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Custom roles: clone a staff role and edit its permission matrix (FR-03-5). */
+    patch: operations["custom_roles_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/custom-roles/{id}/archive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Custom roles: clone a staff role and edit its permission matrix (FR-03-5). */
+    post: operations["custom_roles_archive_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/data-exports": {
@@ -6011,6 +6798,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/lessons/{lesson_id}/reschedule-requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Ask to move a lesson (its tutor, or staff): the other side or an admin approves. */
+    post: operations["lessons_reschedule_requests_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/lessons/{id}": {
     parameters: {
       query?: never;
@@ -6210,6 +7014,26 @@ export interface paths {
     put?: never;
     /** @description Bulk actions on up to 200 lessons; each lesson succeeds or fails on its own. */
     post: operations["lessons_bulk_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lessons/reprice": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Re-price unlocked lessons with the current rates and rules (FR-06-4 "apply to future
+     *     lessons? (N affected)", E06-T07 retroactive tool). ``dry_run`` (default) only counts.
+     */
+    post: operations["lessons_reprice_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -6699,6 +7523,70 @@ export interface paths {
     get: operations["me_organisations_list"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/passkeys": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["me_passkeys_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/passkeys/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations["me_passkeys_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/passkeys/options": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["me_passkeys_options_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/passkeys/register": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["me_passkeys_register_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -8977,6 +9865,87 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/portal/booking/holds": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_booking_holds_list"];
+    put?: never;
+    /** @description Hold a slot for one of the household's students. */
+    post: operations["portal_booking_holds_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/booking/holds/{hold_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["portal_booking_holds_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/booking/holds/{hold_id}/submit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["portal_booking_holds_submit_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/booking/services": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_booking_services_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/booking/slots": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_booking_slots_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/portal/dashboard": {
     parameters: {
       query?: never;
@@ -9040,6 +10009,23 @@ export interface paths {
     get: operations["portal_lessons_ics_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/lessons/{lesson_id}/reschedule": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Ask to move a household lesson to one of up to three new times. */
+    post: operations["portal_lessons_reschedule_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -9176,6 +10162,55 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations["portal_reports_comments_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/reschedule-requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_reschedule_requests_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/reschedule-requests/{request_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["portal_reschedule_requests_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/reschedule-requests/{request_id}/decide": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Answer a tutor's request to move a lesson (pick one of the times, or decline). */
+    post: operations["portal_reschedule_requests_decide_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -9416,6 +10451,108 @@ export interface paths {
      *     image); anything else is 404.
      */
     get: operations["public_assets_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/booking/holds": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Hold a slot for a new family. Keep ``token``: it opens the booking. */
+    post: operations["public_booking_holds_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/booking/holds/{hold_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Public, token-scoped booking for the website widget (FR-08-9, E24). */
+    get: operations["public_booking_holds_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/booking/holds/{hold_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Public, token-scoped booking for the website widget (FR-08-9, E24). */
+    post: operations["public_booking_holds_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/booking/holds/{hold_id}/submit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Public, token-scoped booking for the website widget (FR-08-9, E24). */
+    post: operations["public_booking_holds_submit_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/booking/services": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Public, token-scoped booking for the website widget (FR-08-9, E24). */
+    get: operations["public_booking_services_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/booking/slots": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Public, token-scoped booking for the website widget (FR-08-9, E24). */
+    get: operations["public_booking_slots_list"];
     put?: never;
     post?: never;
     delete?: never;
@@ -9911,6 +11048,86 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/reschedule-requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Requests to move lessons (FR-08-8). Staff answer any; a tutor answers a family's
+     *     request for their lesson. Undecided requests are declined at ``deadline``.
+     */
+    get: operations["reschedule_requests_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reschedule-requests/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Requests to move lessons (FR-08-8). Staff answer any; a tutor answers a family's
+     *     request for their lesson. Undecided requests are declined at ``deadline``.
+     */
+    get: operations["reschedule_requests_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reschedule-requests/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Requests to move lessons (FR-08-8). Staff answer any; a tutor answers a family's
+     *     request for their lesson. Undecided requests are declined at ``deadline``.
+     */
+    post: operations["reschedule_requests_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reschedule-requests/{id}/decide": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Requests to move lessons (FR-08-8). Staff answer any; a tutor answers a family's
+     *     request for their lesson. Undecided requests are declined at ``deadline``.
+     */
+    post: operations["reschedule_requests_decide_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/roles": {
     parameters: {
       query?: never;
@@ -10065,6 +11282,24 @@ export interface paths {
     /** @description Global search (⌘K) across people; results respect your permissions. */
     get: operations["search_list"];
     put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/security/sso": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The organisation's identity provider settings (Enterprise). */
+    get: operations["security_sso_retrieve"];
+    /** @description The organisation's identity provider settings (Enterprise). */
+    put: operations["security_sso_update"];
     post?: never;
     delete?: never;
     options?: never;
@@ -11014,8 +12249,8 @@ export interface paths {
     get: operations["time_off_list"];
     put?: never;
     /**
-     * @description Time off and extra availability (FR-08-5). Creating time off returns the planned
-     *     lessons that now need cover in ``clashes``.
+     * @description Tutors asking for their own time off wait for approval when
+     *     ``scheduling.time_off_approval`` is on (E08-T15); staff entering it approve it.
      */
     post: operations["time_off_create"];
     delete?: never;
@@ -11039,6 +12274,23 @@ export interface paths {
      *     lessons that now need cover in ``clashes``.
      */
     delete: operations["time_off_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/time-off/{id}/decide": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Approve or decline requested time off (E08-T15). */
+    post: operations["time_off_decide_create"];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -11944,6 +13196,10 @@ export interface components {
       postcode?: string;
       country?: string;
     };
+    AdjustmentOut: {
+      name: string;
+      amount: components["schemas"]["MoneyOut"];
+    };
     AdjustmentRequest: {
       /** Format: uuid */
       tutor: string;
@@ -12304,6 +13560,11 @@ export interface components {
     };
     ApplyTagResult: {
       changed: number;
+    };
+    ApprovalDecisionRequest: {
+      approve: boolean;
+      /** @default  */
+      note: string;
     };
     /**
      * @description * `self_employed` - self_employed
@@ -12874,6 +14135,180 @@ export interface components {
     BookInterviewRequest: {
       start: string;
     };
+    BookingContactRequest: {
+      first_name: string;
+      last_name: string;
+      /** Format: email */
+      email: string;
+      /** @default  */
+      phone: string;
+      student_first_name: string;
+    };
+    BookingHold: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly service: string;
+      readonly service_name: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      /** Format: date-time */
+      readonly start: string;
+      /** Format: date-time */
+      readonly end: string;
+      readonly timezone: string;
+      /** Format: uuid */
+      readonly client: string | null;
+      /** Format: uuid */
+      readonly student: string | null;
+      readonly student_name: string;
+      readonly online: boolean;
+      readonly status: components["schemas"]["BookingHoldStatusEnum"];
+      readonly source: components["schemas"]["BookingSourceEnum"];
+      /** Format: date-time */
+      readonly expires_at: string;
+      readonly quote: components["schemas"]["BookingQuote"] | null;
+      /** Format: uuid */
+      readonly lesson: string | null;
+      readonly trial: boolean;
+      readonly decision_note: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    BookingHoldCreated: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly service: string;
+      readonly service_name: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      /** Format: date-time */
+      readonly start: string;
+      /** Format: date-time */
+      readonly end: string;
+      readonly timezone: string;
+      /** Format: uuid */
+      readonly client: string | null;
+      /** Format: uuid */
+      readonly student: string | null;
+      readonly student_name: string;
+      readonly online: boolean;
+      readonly status: components["schemas"]["BookingHoldStatusEnum"];
+      readonly source: components["schemas"]["BookingSourceEnum"];
+      /** Format: date-time */
+      readonly expires_at: string;
+      readonly quote: components["schemas"]["BookingQuote"] | null;
+      /** Format: uuid */
+      readonly lesson: string | null;
+      readonly trial: boolean;
+      readonly decision_note: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly token: string;
+    };
+    BookingHoldInputRequest: {
+      /** Format: uuid */
+      service: string;
+      /** Format: uuid */
+      tutor?: string | null;
+      /** Format: date-time */
+      start: string;
+      /** Format: uuid */
+      student?: string | null;
+      contact?: components["schemas"]["BookingContactRequest"];
+      /** @default  */
+      promo_code: string;
+    };
+    /**
+     * @description * `held` - Held
+     *     * `awaiting_payment` - Waiting for payment
+     *     * `awaiting_approval` - Waiting for approval
+     *     * `confirmed` - Confirmed
+     *     * `declined` - Declined
+     *     * `expired` - Expired
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    BookingHoldStatusEnum:
+      | "held"
+      | "awaiting_payment"
+      | "awaiting_approval"
+      | "confirmed"
+      | "declined"
+      | "expired"
+      | "cancelled";
+    BookingQuote: {
+      currency: string;
+      amount: components["schemas"]["MoneyOut"];
+      undiscounted_amount: components["schemas"]["MoneyOut"];
+      tax_amount: components["schemas"]["MoneyOut"];
+      trace: string[];
+      discounts: {
+        [key: string]: unknown;
+      }[];
+    };
+    BookingService: {
+      id: string;
+      name: string;
+      description: string;
+      duration_minutes: number;
+      delivery_mode: string;
+      price: components["schemas"]["MoneyOut"] | null;
+      tutors: components["schemas"]["PersonRef"][];
+    };
+    BookingSettings: {
+      enabled?: boolean;
+      allow_new_clients?: boolean;
+      min_notice_hours?: number;
+      max_advance_days?: number;
+      slot_interval_minutes?: number;
+      buffer_minutes?: number;
+      approval_required?: boolean;
+      payment?: components["schemas"]["PaymentEnum"];
+      hold_minutes?: number;
+      cancellation_window_hours?: number;
+      tutors?: string[];
+      /** Format: uuid */
+      location?: string | null;
+      terms?: string;
+    };
+    BookingSettingsRequest: {
+      enabled?: boolean;
+      allow_new_clients?: boolean;
+      min_notice_hours?: number;
+      max_advance_days?: number;
+      slot_interval_minutes?: number;
+      buffer_minutes?: number;
+      approval_required?: boolean;
+      payment?: components["schemas"]["PaymentEnum"];
+      hold_minutes?: number;
+      cancellation_window_hours?: number;
+      tutors?: string[];
+      /** Format: uuid */
+      location?: string | null;
+      terms?: string;
+    };
+    BookingSlot: {
+      tutor: string;
+      tutor_name: string;
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+    };
+    /**
+     * @description * `portal` - Client portal
+     *     * `widget` - Website widget
+     * @enum {string}
+     */
+    BookingSourceEnum: "portal" | "widget";
+    BookingSubmitResult: {
+      booking: components["schemas"]["BookingHold"];
+      pay_url: string;
+    };
     Branch: {
       /** Format: uuid */
       readonly id: string;
@@ -13154,6 +14589,8 @@ export interface components {
       job: string | null;
       series: string | null;
       location: string;
+      room: string | null;
+      room_name: string;
       online: boolean;
       tutors: components["schemas"]["PersonRef"][];
       students: components["schemas"]["PersonRef"][];
@@ -13410,9 +14847,12 @@ export interface components {
       rate: components["schemas"]["MoneyOut"];
       quantity: string;
       amount: components["schemas"]["MoneyOut"];
+      undiscounted_amount: components["schemas"]["MoneyOut"];
       tax_rate_id: string | null;
       tax_percent: string;
       tax_amount: components["schemas"]["MoneyOut"];
+      premiums: components["schemas"]["AdjustmentOut"][];
+      discounts: components["schemas"]["AdjustmentOut"][];
       trace: string[];
     };
     /**
@@ -13736,6 +15176,8 @@ export interface components {
       lesson?: string | null;
       /** Format: uuid */
       location?: string | null;
+      /** Format: uuid */
+      room?: string | null;
       /** @default false */
       online: boolean;
       /** Format: uuid */
@@ -14053,6 +15495,17 @@ export interface components {
      * @enum {string}
      */
     CreatedViaEnum: "admin" | "tutor" | "client_booking" | "api" | "import" | "series";
+    Credential: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly name: string;
+      readonly backed_up: boolean;
+      readonly transports: unknown;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly last_used_at: string | null;
+    };
     CredentialConnectRequest: {
       provider: string;
       /** @default user */
@@ -14263,6 +15716,29 @@ export interface components {
      * @enum {string}
      */
     CustomFieldVisibilityEnum: "staff" | "tutor" | "client_portal" | "public";
+    CustomRole: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly name: string;
+      readonly description: string;
+      readonly base_role: string;
+      readonly grants: {
+        [key: string]: string;
+      };
+      readonly members: number;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+    };
+    CustomRoleInputRequest: {
+      name: string;
+      description?: string;
+      /** @description A staff role key or role id. */
+      clone_from?: string;
+      /** @description {codename: scope}; none or null removes it. */
+      grants?: {
+        [key: string]: "all" | "branch" | "own" | "none" | null;
+      };
+    };
     Dashboard: {
       next_lesson: components["schemas"]["PortalLesson"] | null;
       upcoming: components["schemas"]["PortalLesson"][];
@@ -14326,6 +15802,33 @@ export interface components {
       reason: string;
     };
     /**
+     * @description * `admin` - Admin
+     *     * `branch_manager` - Branch Manager
+     *     * `coordinator` - Coordinator
+     *     * `finance` - Finance
+     *     * `tutor` - Tutor
+     *     * `client` - Client
+     *     * `student` - Student
+     *     * `affiliate` - Affiliate
+     * @enum {string}
+     */
+    DefaultRoleEnum:
+      | "admin"
+      | "branch_manager"
+      | "coordinator"
+      | "finance"
+      | "tutor"
+      | "client"
+      | "student"
+      | "affiliate";
+    /**
+     * @description * `any` - In person or online
+     *     * `in_person` - In person
+     *     * `online` - Online
+     * @enum {string}
+     */
+    DeliveryEnum: "any" | "in_person" | "online";
+    /**
      * @description * `in_person` - In person
      *     * `online` - Online
      *     * `hybrid` - Hybrid
@@ -14343,6 +15846,96 @@ export interface components {
      * @enum {string}
      */
     DirectionEnum: "upgrade" | "downgrade" | "same";
+    DiscountRule: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      active?: boolean;
+      priority?: number;
+      stackable?: boolean;
+      services?: string[];
+      /** Format: date */
+      valid_from?: string | null;
+      /** Format: date */
+      valid_to?: string | null;
+      kind: components["schemas"]["DiscountRuleKindEnum"];
+      /** Format: decimal */
+      percent?: string | null;
+      readonly currency: string;
+      fixed_amount?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      fixed_price?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      sibling_from?: number;
+      volume_min_lessons?: number | null;
+      /** Format: uuid */
+      client?: string | null;
+      /** Format: uuid */
+      student?: string | null;
+    };
+    /**
+     * @description * `sibling` - Sibling
+     *     * `volume` - Volume
+     *     * `first_lesson` - First lesson / trial
+     *     * `client` - Client discount
+     *     * `scholarship` - Scholarship / bursary
+     *     * `promo` - Promo code
+     * @enum {string}
+     */
+    DiscountRuleKindEnum:
+      "sibling" | "volume" | "first_lesson" | "client" | "scholarship" | "promo";
+    DiscountRuleRequest: {
+      name: string;
+      active?: boolean;
+      priority?: number;
+      stackable?: boolean;
+      services?: string[];
+      /** Format: date */
+      valid_from?: string | null;
+      /** Format: date */
+      valid_to?: string | null;
+      kind: components["schemas"]["DiscountRuleKindEnum"];
+      /** Format: decimal */
+      percent?: string | null;
+      fixed_amount?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      fixed_price?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      sibling_from?: number;
+      volume_min_lessons?: number | null;
+      /** Format: uuid */
+      client?: string | null;
+      /** Format: uuid */
+      student?: string | null;
+    };
     Dispute: {
       /** Format: uuid */
       readonly id: string;
@@ -14720,6 +16313,7 @@ export interface components {
       readonly id: string;
       /** Format: uuid */
       tutor: string;
+      readonly tutor_name: string;
       type: components["schemas"]["AvailabilityExceptionTypeEnum"];
       /** Format: date-time */
       start: string;
@@ -14727,6 +16321,11 @@ export interface components {
       end: string;
       reason?: string;
       readonly status: components["schemas"]["ExceptionStatusEnum"];
+      /** Format: date-time */
+      readonly decided_at: string | null;
+      readonly decision_note: string;
+      /** Format: uuid */
+      readonly cover_request_id: string | null;
       /** Format: date-time */
       readonly created_at: string;
     };
@@ -15206,6 +16805,51 @@ export interface components {
     GroupChargeEnum: "per_student" | "split";
     HoldNoteRequest: {
       note: string;
+    };
+    Holiday: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      calendar: string;
+      /** Format: date */
+      date: string;
+      name: string;
+    };
+    HolidayCalendar: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      country?: string;
+      region?: string;
+      /** Format: uuid */
+      branch?: string | null;
+      skip_lessons?: boolean;
+      active?: boolean;
+      readonly holidays: components["schemas"]["Holiday"][];
+    };
+    HolidayCalendarRequest: {
+      name: string;
+      country?: string;
+      region?: string;
+      /** Format: uuid */
+      branch?: string | null;
+      skip_lessons?: boolean;
+      active?: boolean;
+    };
+    HolidayImportRequest: {
+      year: number;
+    };
+    HolidayInputRequest: {
+      /** Format: date */
+      date: string;
+      name: string;
+    };
+    HolidayRequest: {
+      /** Format: uuid */
+      calendar: string;
+      /** Format: date */
+      date: string;
+      name: string;
     };
     /**
      * @description * `week` - Per week
@@ -16475,6 +18119,8 @@ export interface components {
       readonly status: components["schemas"]["LessonStatusEnum"];
       /** Format: uuid */
       readonly location: string | null;
+      /** Format: uuid */
+      readonly room: string | null;
       readonly online: boolean;
       /** Format: uri */
       readonly meeting_url: string;
@@ -16500,6 +18146,8 @@ export interface components {
       readonly auto_completed: boolean;
       /** Format: date-time */
       readonly unconfirmed_at: string | null;
+      /** Format: date-time */
+      readonly cover_flagged_at: string | null;
       readonly tutors: components["schemas"]["LessonTutor"][];
       readonly attendees: components["schemas"]["LessonAttendee"][];
       readonly custom_fields: unknown;
@@ -16562,6 +18210,44 @@ export interface components {
         /** @example GBP */
         currency: string;
       } | null;
+    };
+    LessonChangeDecisionRequest: {
+      approve: boolean;
+      /** @default  */
+      note: string;
+      /** @default 0 */
+      choice: number;
+      /** @default false */
+      override_conflicts: boolean;
+    };
+    LessonChangeProposalRequest: {
+      options: components["schemas"]["TimeSlotInputRequest"][];
+      /** @default  */
+      reason: string;
+    };
+    LessonChangeRequest: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly lesson: string;
+      readonly lesson_title: string;
+      readonly requester: components["schemas"]["RequesterEnum"];
+      readonly proposed: components["schemas"]["TimeSlotInput"][];
+      readonly reason: string;
+      /** @default pending */
+      readonly status: components["schemas"]["RescheduleRequestStatusEnum"];
+      /** Format: date-time */
+      readonly deadline: string;
+      /** Format: date-time */
+      readonly original_start: string;
+      /** Format: date-time */
+      readonly original_end: string;
+      readonly chosen: number | null;
+      /** Format: date-time */
+      readonly decided_at: string | null;
+      readonly decision_note: string;
+      /** Format: date-time */
+      readonly created_at: string;
     };
     LessonReasonRequest: {
       /** @default  */
@@ -16692,6 +18378,8 @@ export interface components {
       title?: string;
       /** Format: uuid */
       location?: string | null;
+      /** Format: uuid */
+      room?: string | null;
       online?: boolean;
       meeting_url?: string;
       notes_internal?: string;
@@ -17156,6 +18844,7 @@ export interface components {
       readonly id: string;
       readonly user: components["schemas"]["MemberUser"];
       role: components["schemas"]["RoleEnum"];
+      readonly custom_roles: string[];
       status?: components["schemas"]["MembershipStatusEnum"];
       branch_scope?: components["schemas"]["BranchScopeEnum"];
       readonly branches: string[];
@@ -17633,6 +19322,12 @@ export interface components {
       value: string;
       label: string;
     };
+    OrgSSOInfo: {
+      enabled: boolean;
+      name: string;
+      start_url: string;
+      enforced_domains: string[];
+    };
     Organisation: {
       /** Format: uuid */
       readonly id: string;
@@ -17671,6 +19366,40 @@ export interface components {
      * @enum {string}
      */
     OrganisationModeEnum: "solo" | "multi";
+    OrganisationSSO: {
+      protocol?: components["schemas"]["ProtocolEnum"];
+      enabled?: boolean;
+      name?: string;
+      email_domains?: string[];
+      enforce?: boolean;
+      auto_provision?: boolean;
+      default_role?: components["schemas"]["DefaultRoleEnum"];
+      issuer?: string;
+      client_id?: string;
+      readonly has_client_secret: boolean;
+      idp_entity_id?: string;
+      idp_sso_url?: string;
+      idp_certificate?: string;
+      readonly sp_entity_id: string;
+      readonly acs_url: string;
+      readonly callback_url: string;
+      readonly complete: boolean;
+    };
+    OrganisationSSORequest: {
+      protocol?: components["schemas"]["ProtocolEnum"];
+      enabled?: boolean;
+      name?: string;
+      email_domains?: string[];
+      enforce?: boolean;
+      auto_provision?: boolean;
+      default_role?: components["schemas"]["DefaultRoleEnum"];
+      issuer?: string;
+      client_id?: string;
+      client_secret?: string;
+      idp_entity_id?: string;
+      idp_sso_url?: string;
+      idp_certificate?: string;
+    };
     /**
      * @description * `trial` - Trial
      *     * `active` - Active
@@ -18047,6 +19776,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["BillingPlan"][];
     };
+    PaginatedBookingHoldList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["BookingHold"][];
+    };
     PaginatedBranchList: {
       /**
        * Format: uri
@@ -18241,6 +19983,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["DeadLetter"][];
+    };
+    PaginatedDiscountRuleList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["DiscountRule"][];
     };
     PaginatedDisputeList: {
       /**
@@ -18462,6 +20217,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["JobPosting"][];
+    };
+    PaginatedLessonChangeRequestList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["LessonChangeRequest"][];
     };
     PaginatedLessonList: {
       /**
@@ -18723,6 +20491,32 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Payout"][];
     };
+    PaginatedPremiumRuleList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PremiumRule"][];
+    };
+    PaginatedPriceListList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PriceList"][];
+    };
     PaginatedProcessList: {
       /**
        * Format: uri
@@ -18748,6 +20542,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Product"][];
+    };
+    PaginatedPromoCodeList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PromoCode"][];
     };
     PaginatedProviderMigrationList: {
       /**
@@ -18800,6 +20607,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["ReportRun"][];
+    };
+    PaginatedRoomList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Room"][];
     };
     PaginatedSandboxList: {
       /**
@@ -18931,6 +20751,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Testimonial"][];
     };
+    PaginatedTierAssignmentList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["TierAssignment"][];
+    };
     PaginatedTutorList: {
       /**
        * Format: uri
@@ -18943,6 +20776,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Tutor"][];
+    };
+    PaginatedTutorRateList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["TutorRate"][];
     };
     PaginatedTutorSubjectList: {
       /**
@@ -19013,6 +20859,24 @@ export interface components {
       state: string;
       /** @description GoCardless ``code``, or PayPal ``merchantIdInPayPal`` */
       code: string;
+    };
+    PasskeyAssertionRequest: {
+      credential: {
+        [key: string]: unknown;
+      };
+      /** @default false */
+      remember: boolean;
+    };
+    PasskeyRegisterRequest: {
+      credential: {
+        [key: string]: unknown;
+      };
+      /** @default  */
+      name: string;
+    };
+    PasskeyRegistered: {
+      credential: components["schemas"]["Credential"];
+      recovery_codes: string[];
     };
     PasswordChangeRequest: {
       current_password: string;
@@ -19238,6 +21102,54 @@ export interface components {
       validation_regex?: string;
       active?: boolean;
     };
+    PatchedCustomRoleUpdateRequest: {
+      name?: string;
+      description?: string;
+      /** @description A staff role key or role id. */
+      clone_from?: string;
+      /** @description {codename: scope}; none or null removes it. */
+      grants?: {
+        [key: string]: "all" | "branch" | "own" | "none" | null;
+      };
+    };
+    PatchedDiscountRuleRequest: {
+      name?: string;
+      active?: boolean;
+      priority?: number;
+      stackable?: boolean;
+      services?: string[];
+      /** Format: date */
+      valid_from?: string | null;
+      /** Format: date */
+      valid_to?: string | null;
+      kind?: components["schemas"]["DiscountRuleKindEnum"];
+      /** Format: decimal */
+      percent?: string | null;
+      fixed_amount?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      fixed_price?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      sibling_from?: number;
+      volume_min_lessons?: number | null;
+      /** Format: uuid */
+      client?: string | null;
+      /** Format: uuid */
+      student?: string | null;
+    };
     PatchedEnquiryUpdateRequest: {
       title?: string;
       /** Format: uuid */
@@ -19284,6 +21196,15 @@ export interface components {
       published?: boolean;
       /** Format: uuid */
       branch?: string | null;
+    };
+    PatchedHolidayCalendarRequest: {
+      name?: string;
+      country?: string;
+      region?: string;
+      /** Format: uuid */
+      branch?: string | null;
+      skip_lessons?: boolean;
+      active?: boolean;
     };
     PatchedInvoiceUpdateRequest: {
       po_number?: string;
@@ -19390,6 +21311,8 @@ export interface components {
       title?: string;
       /** Format: uuid */
       location?: string | null;
+      /** Format: uuid */
+      room?: string | null;
       online?: boolean;
       meeting_url?: string;
       notes_internal?: string;
@@ -19430,6 +21353,8 @@ export interface components {
       title?: string;
       branch_scope?: components["schemas"]["BranchScopeEnum"];
       branches?: string[];
+      /** @description Custom roles (union of permissions); empty = the built-in role. */
+      custom_roles?: string[];
     };
     PatchedNoteRequest: {
       target_type?: string;
@@ -19515,6 +21440,11 @@ export interface components {
       /** Format: decimal */
       hourly_rate?: string | null;
     };
+    PatchedPayTierRequest: {
+      name?: string;
+      description?: string;
+      order?: number;
+    };
     PatchedPlanAdminPriceRequest: {
       /** Format: decimal */
       unit_amount?: string;
@@ -19546,6 +21476,64 @@ export interface components {
       year_group?: string;
       learning_needs?: string;
     };
+    PatchedPremiumRuleRequest: {
+      name?: string;
+      active?: boolean;
+      priority?: number;
+      stackable?: boolean;
+      services?: string[];
+      /** Format: date */
+      valid_from?: string | null;
+      /** Format: date */
+      valid_to?: string | null;
+      weekdays?: number[];
+      /** Format: time */
+      time_from?: string | null;
+      /** Format: time */
+      time_to?: string | null;
+      public_holidays?: boolean;
+      short_notice_hours?: number | null;
+      location_types?: components["schemas"]["LocationTypeEnum"][];
+      delivery?: components["schemas"]["DeliveryEnum"];
+      subjects?: string[];
+      levels?: string[];
+      min_students?: number | null;
+      max_students?: number | null;
+      /** Format: decimal */
+      charge_percent?: string | null;
+      charge_fixed?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: decimal */
+      pay_percent?: string | null;
+      pay_fixed?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
+    PatchedPriceListRequest: {
+      name?: string;
+      currency?: string;
+      /** Format: date */
+      valid_from?: string | null;
+      /** Format: date */
+      valid_to?: string | null;
+      active?: boolean;
+      notes?: string;
+      items_input?: components["schemas"]["PriceListItemRequest"][];
+      client_ids?: string[];
+    };
     PatchedProductRequest: {
       name?: string;
       description?: string;
@@ -19564,6 +21552,19 @@ export interface components {
       account_code?: string;
       /** Format: decimal */
       tutor_share_percent?: string;
+      active?: boolean;
+    };
+    PatchedPromoCodeRequest: {
+      code?: string;
+      /** Format: uuid */
+      discount?: string;
+      max_uses?: number | null;
+      max_uses_per_client?: number | null;
+      /** Format: date */
+      valid_from?: string | null;
+      /** Format: date */
+      valid_to?: string | null;
+      new_clients_only?: boolean;
       active?: boolean;
     };
     PatchedPublicProfileWriteRequest: {
@@ -19596,6 +21597,17 @@ export interface components {
       blocking?: boolean;
       applies_to?: unknown;
       active?: boolean;
+    };
+    PatchedRoomRequest: {
+      /** Format: uuid */
+      location?: string;
+      name?: string;
+      description?: string;
+      capacity?: number | null;
+      bookable?: boolean;
+      colour?: string;
+      active?: boolean;
+      resources_input?: components["schemas"]["RoomResourceRequest"][];
     };
     PatchedSavedReportUpdateRequest: {
       name?: string;
@@ -19982,6 +21994,7 @@ export interface components {
       rate: components["schemas"]["MoneyOut"] | null;
       quantity: string;
       amount: components["schemas"]["MoneyOut"];
+      premiums: components["schemas"]["AdjustmentOut"][];
       trace: string[];
     };
     PayPage: {
@@ -20159,6 +22172,20 @@ export interface components {
      * @enum {string}
      */
     PayStatementKindEnum: "self_billing" | "remittance";
+    PayTier: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      description?: string;
+      order?: number;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+    };
+    PayTierRequest: {
+      name: string;
+      description?: string;
+      order?: number;
+    };
     /**
      * @description * `per_hour` - Per hour
      *     * `per_lesson` - Per lesson
@@ -20231,6 +22258,12 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    /**
+     * @description * `none` - Pay later (invoice as usual)
+     *     * `at_booking` - Pay when booking
+     * @enum {string}
+     */
+    PaymentEnum: "none" | "at_booking";
     PaymentGroup: {
       /** Format: uuid */
       readonly id: string;
@@ -20639,6 +22672,8 @@ export interface components {
       invoices: boolean;
       reports: boolean;
       profile: boolean;
+      booking: boolean;
+      reschedule: boolean;
     };
     PortalInvoice: {
       id: string;
@@ -20849,6 +22884,101 @@ export interface components {
      * @enum {string}
      */
     PreferredContactMethodEnum: "email" | "sms" | "phone";
+    PremiumRule: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      active?: boolean;
+      priority?: number;
+      stackable?: boolean;
+      services?: string[];
+      /** Format: date */
+      valid_from?: string | null;
+      /** Format: date */
+      valid_to?: string | null;
+      weekdays?: number[];
+      /** Format: time */
+      time_from?: string | null;
+      /** Format: time */
+      time_to?: string | null;
+      public_holidays?: boolean;
+      short_notice_hours?: number | null;
+      location_types?: components["schemas"]["LocationTypeEnum"][];
+      delivery?: components["schemas"]["DeliveryEnum"];
+      subjects?: string[];
+      levels?: string[];
+      min_students?: number | null;
+      max_students?: number | null;
+      readonly currency: string;
+      /** Format: decimal */
+      charge_percent?: string | null;
+      charge_fixed?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: decimal */
+      pay_percent?: string | null;
+      pay_fixed?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
+    PremiumRuleRequest: {
+      name: string;
+      active?: boolean;
+      priority?: number;
+      stackable?: boolean;
+      services?: string[];
+      /** Format: date */
+      valid_from?: string | null;
+      /** Format: date */
+      valid_to?: string | null;
+      weekdays?: number[];
+      /** Format: time */
+      time_from?: string | null;
+      /** Format: time */
+      time_to?: string | null;
+      public_holidays?: boolean;
+      short_notice_hours?: number | null;
+      location_types?: components["schemas"]["LocationTypeEnum"][];
+      delivery?: components["schemas"]["DeliveryEnum"];
+      subjects?: string[];
+      levels?: string[];
+      min_students?: number | null;
+      max_students?: number | null;
+      /** Format: decimal */
+      charge_percent?: string | null;
+      charge_fixed?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: decimal */
+      pay_percent?: string | null;
+      pay_fixed?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
     PresignedUpload: {
       /** Format: uri */
       url: string;
@@ -20866,6 +22996,58 @@ export interface components {
     PreviewRequestRequest: {
       subject?: string | null;
       body?: string | null;
+    };
+    PriceList: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      currency: string;
+      /** Format: date */
+      valid_from?: string | null;
+      /** Format: date */
+      valid_to?: string | null;
+      active?: boolean;
+      notes?: string;
+      readonly items: components["schemas"]["PriceListItem"][];
+      readonly clients: string[];
+    };
+    PriceListItem: {
+      /** Format: uuid */
+      service: string;
+      charge_rate: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+    };
+    PriceListItemRequest: {
+      /** Format: uuid */
+      service: string;
+      charge_rate: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+    };
+    PriceListRequest: {
+      name: string;
+      currency: string;
+      /** Format: date */
+      valid_from?: string | null;
+      /** Format: date */
+      valid_to?: string | null;
+      active?: boolean;
+      notes?: string;
+      items_input?: components["schemas"]["PriceListItemRequest"][];
+      client_ids?: string[];
     };
     /**
      * @description * `per_hour` - Per hour
@@ -21004,6 +23186,36 @@ export interface components {
     ProfileRejectRequest: {
       reason: string;
     };
+    PromoCode: {
+      /** Format: uuid */
+      readonly id: string;
+      code: string;
+      /** Format: uuid */
+      discount: string;
+      readonly discount_name: string;
+      max_uses?: number | null;
+      max_uses_per_client?: number | null;
+      readonly uses: number;
+      /** Format: date */
+      valid_from?: string | null;
+      /** Format: date */
+      valid_to?: string | null;
+      new_clients_only?: boolean;
+      active?: boolean;
+    };
+    PromoCodeRequest: {
+      code: string;
+      /** Format: uuid */
+      discount: string;
+      max_uses?: number | null;
+      max_uses_per_client?: number | null;
+      /** Format: date */
+      valid_from?: string | null;
+      /** Format: date */
+      valid_to?: string | null;
+      new_clients_only?: boolean;
+      active?: boolean;
+    };
     ProposeInterviewRequest: {
       options: string[];
       /** @default 30 */
@@ -21018,6 +23230,12 @@ export interface components {
       amount: components["schemas"]["MoneyOut"];
       partial: boolean;
     };
+    /**
+     * @description * `oidc` - OpenID Connect
+     *     * `saml` - SAML 2.0
+     * @enum {string}
+     */
+    ProtocolEnum: "oidc" | "saml";
     Provider: {
       key: string;
       name: string;
@@ -21162,6 +23380,28 @@ export interface components {
       start: string | null;
       meeting_url: string;
       organisation: string;
+    };
+    /** @description ``PublicKeyCredential{Creation,Request}Options`` as JSON (base64url binary). */
+    PublicKeyOptions: {
+      challenge: string;
+      rpId?: string;
+      rp?: {
+        [key: string]: unknown;
+      };
+      user?: {
+        [key: string]: unknown;
+      };
+      timeout?: number;
+      pubKeyCredParams?: {
+        [key: string]: unknown;
+      }[];
+      allowCredentials?: {
+        [key: string]: unknown;
+      }[];
+      excludeCredentials?: {
+        [key: string]: unknown;
+      }[];
+      userVerification?: string;
     };
     PublicOffer: {
       student: string;
@@ -21438,6 +23678,14 @@ export interface components {
       } | null;
       students: components["schemas"]["QuoteStudentInputRequest"][];
       tutors?: components["schemas"]["QuoteTutorInputRequest"][];
+      timezone?: string;
+      /** Format: uuid */
+      location?: string | null;
+      /** @default false */
+      online: boolean;
+      /** Format: date-time */
+      booked_at?: string;
+      promo_code?: string;
     };
     QuoteStudentInputRequest: {
       /** Format: uuid */
@@ -21909,6 +24157,24 @@ export interface components {
       subjects?: string[];
       jobs?: string[];
     };
+    RepriceRequestRequest: {
+      /** Format: uuid */
+      service?: string;
+      /** Format: uuid */
+      tutor?: string;
+      /** Format: date */
+      start?: string;
+      /** Format: date */
+      end?: string;
+      /** @default false */
+      include_past: boolean;
+      /** @default true */
+      dry_run: boolean;
+    };
+    RepriceResult: {
+      lessons: number;
+      dry_run: boolean;
+    };
     RequestExportRequest: {
       /** @default  */
       reason: string;
@@ -21919,6 +24185,14 @@ export interface components {
       email: string;
       relationship?: string;
     };
+    /**
+     * @description * `client` - Client
+     *     * `tutor` - Tutor
+     *     * `staff` - Staff
+     *     * `calendar` - Tutor's calendar
+     * @enum {string}
+     */
+    RequesterEnum: "client" | "tutor" | "staff" | "calendar";
     RequirementType: {
       /** Format: uuid */
       readonly id: string;
@@ -21957,6 +24231,15 @@ export interface components {
       /** @default false */
       override_conflicts: boolean;
     };
+    /**
+     * @description * `pending` - Waiting for a decision
+     *     * `approved` - Approved
+     *     * `declined` - Declined
+     *     * `cancelled` - Withdrawn
+     *     * `expired` - Not answered in time
+     * @enum {string}
+     */
+    RescheduleRequestStatusEnum: "pending" | "approved" | "declined" | "cancelled" | "expired";
     RespondRequest: {
       accept: boolean;
     };
@@ -21970,6 +24253,7 @@ export interface components {
       client_secret: string;
     };
     Role: {
+      id: string | null;
       key: string;
       name: string;
       description: string;
@@ -21977,6 +24261,7 @@ export interface components {
       is_staff: boolean;
       grants: string[];
       denies: string[];
+      base_role: string;
     };
     /**
      * @description * `owner` - Owner
@@ -22000,6 +24285,52 @@ export interface components {
       | "client"
       | "student"
       | "affiliate";
+    Room: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      location: string;
+      readonly location_name: string;
+      name: string;
+      description?: string;
+      capacity?: number | null;
+      bookable?: boolean;
+      colour?: string;
+      active?: boolean;
+      readonly resources: components["schemas"]["RoomResource"][];
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    RoomRequest: {
+      /** Format: uuid */
+      location: string;
+      name: string;
+      description?: string;
+      capacity?: number | null;
+      bookable?: boolean;
+      colour?: string;
+      active?: boolean;
+      resources_input?: components["schemas"]["RoomResourceRequest"][];
+    };
+    RoomResource: {
+      name: string;
+      /** @default 1 */
+      quantity: number;
+    };
+    RoomResourceRequest: {
+      name: string;
+      /** @default 1 */
+      quantity: number;
+    };
+    RoomSchedule: {
+      id: string;
+      name: string;
+      location: string;
+      location_name: string;
+      capacity: number | null;
+      colour: string;
+      lessons: components["schemas"]["CalendarItem"][];
+    };
     RowIssue: {
       field: string;
       message: string;
@@ -22021,6 +24352,10 @@ export interface components {
       error?: string;
       /** Format: date-time */
       readonly updated_at: string;
+    };
+    SAMLResponseRequest: {
+      SAMLResponse: string;
+      RelayState?: string;
     };
     SSOProvider: {
       key: string;
@@ -22304,6 +24639,8 @@ export interface components {
       tutors?: components["schemas"]["LessonTutorInputRequest"][];
       /** Format: uuid */
       location?: string | null;
+      /** Format: uuid */
+      room?: string | null;
       /** @default false */
       online: boolean;
       /** @default  */
@@ -23435,6 +25772,97 @@ export interface components {
       title: string;
       description: string;
     };
+    TierAssignment: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      tutor: string;
+      /** Format: uuid */
+      tier: string;
+      readonly tier_name: string;
+      /** Format: date */
+      effective_from: string;
+      note?: string;
+    };
+    TierAssignmentRequest: {
+      /** Format: uuid */
+      tutor: string;
+      /** Format: uuid */
+      tier: string;
+      /** Format: date */
+      effective_from: string;
+      note?: string;
+      /** @default false */
+      recalculate: boolean;
+    };
+    TierBulkRequest: {
+      cells: components["schemas"]["TierRateCellRequest"][];
+    };
+    TierGrid: {
+      tiers: components["schemas"]["PayTier"][];
+      cells: components["schemas"]["TierRateCell"][];
+    };
+    TierImportRequest: {
+      /** Format: binary */
+      file: string;
+      /** @default false */
+      dry_run: boolean;
+    };
+    TierImportResult: {
+      updated: number;
+      unchanged: number;
+      row_errors: {
+        [key: string]: unknown;
+      }[];
+    };
+    TierRateCell: {
+      /** Format: uuid */
+      service: string;
+      /** Format: uuid */
+      tier: string;
+      pay_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      charge_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
+    TierRateCellRequest: {
+      /** Format: uuid */
+      service: string;
+      /** Format: uuid */
+      tier: string;
+      pay_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      charge_rate?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
     /**
      * @description * `locale` - Locale default
      *     * `24h` - 24-hour
@@ -23442,6 +25870,18 @@ export interface components {
      * @enum {string}
      */
     TimeFormatEnum: "locale" | "24h" | "12h";
+    TimeSlotInput: {
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+    };
+    TimeSlotInputRequest: {
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+    };
     TimeToMatch: {
       jobs: number;
       /** Format: double */
@@ -23745,6 +26185,40 @@ export interface components {
       year?: number | null;
       /** Format: uuid */
       document?: string | null;
+    };
+    TutorRate: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      tutor: string;
+      /** Format: uuid */
+      service: string;
+      readonly service_name: string;
+      readonly currency: string;
+      pay_rate: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+    };
+    TutorRateInputRequest: {
+      /** Format: uuid */
+      tutor: string;
+      /** Format: uuid */
+      service: string;
+      pay_rate: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
     };
     TutorRequest: {
       /** Format: email */
@@ -25612,6 +28086,163 @@ export interface operations {
       };
     };
   };
+  auth_org_sso_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrgSSOInfo"];
+        };
+      };
+    };
+  };
+  auth_org_sso_acs_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/x-www-form-urlencoded": components["schemas"]["SAMLResponseRequest"];
+        "multipart/form-data": components["schemas"]["SAMLResponseRequest"];
+      };
+    };
+    responses: {
+      /** @description No response body */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  auth_org_sso_callback_retrieve: {
+    parameters: {
+      query?: {
+        code?: string;
+        state?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  auth_org_sso_metadata_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/samlmetadata+xml": string;
+        };
+      };
+    };
+  };
+  auth_org_sso_start_retrieve: {
+    parameters: {
+      query?: {
+        next?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  auth_passkey_options_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicKeyOptions"];
+        };
+      };
+    };
+  };
+  auth_passkey_verify_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PasskeyAssertionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PasskeyAssertionRequest"];
+        "multipart/form-data": components["schemas"]["PasskeyAssertionRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+    };
+  };
   auth_password_reset_create: {
     parameters: {
       query?: never;
@@ -26951,6 +29582,160 @@ export interface operations {
       };
     };
   };
+  booking_holds_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedBookingHoldList"];
+        };
+      };
+    };
+  };
+  booking_holds_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this booking hold. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingHold"];
+        };
+      };
+    };
+  };
+  booking_holds_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this booking hold. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingHold"];
+        };
+      };
+    };
+  };
+  booking_holds_decide_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this booking hold. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ApprovalDecisionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ApprovalDecisionRequest"];
+        "multipart/form-data": components["schemas"]["ApprovalDecisionRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingHold"];
+        };
+      };
+    };
+  };
+  booking_settings_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingSettings"];
+        };
+      };
+    };
+  };
+  booking_settings_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["BookingSettingsRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BookingSettingsRequest"];
+        "multipart/form-data": components["schemas"]["BookingSettingsRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingSettings"];
+        };
+      };
+    };
+  };
   branches_list: {
     parameters: {
       query?: {
@@ -27316,6 +30101,7 @@ export interface operations {
         include_events?: boolean;
         job?: string[];
         location?: string[];
+        room?: string[];
         service?: string[];
         start: string;
         status?: string[];
@@ -27462,6 +30248,29 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  calendar_rooms_list: {
+    parameters: {
+      query: {
+        end?: string;
+        location?: string;
+        start: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RoomSchedule"][];
+        };
       };
     };
   };
@@ -27744,6 +30553,314 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Category"];
         };
+      };
+    };
+  };
+  catalogue_discounts_list: {
+    parameters: {
+      query?: {
+        active?: boolean;
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /**
+         * @description * `sibling` - Sibling
+         *     * `volume` - Volume
+         *     * `first_lesson` - First lesson / trial
+         *     * `client` - Client discount
+         *     * `scholarship` - Scholarship / bursary
+         *     * `promo` - Promo code
+         */
+        kind?: "client" | "first_lesson" | "promo" | "scholarship" | "sibling" | "volume";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedDiscountRuleList"];
+        };
+      };
+    };
+  };
+  catalogue_discounts_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DiscountRuleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["DiscountRuleRequest"];
+        "multipart/form-data": components["schemas"]["DiscountRuleRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DiscountRule"];
+        };
+      };
+    };
+  };
+  catalogue_discounts_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this discount rule. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DiscountRule"];
+        };
+      };
+    };
+  };
+  catalogue_discounts_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this discount rule. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedDiscountRuleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedDiscountRuleRequest"];
+        "multipart/form-data": components["schemas"]["PatchedDiscountRuleRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DiscountRule"];
+        };
+      };
+    };
+  };
+  catalogue_holiday_calendars_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HolidayCalendar"][];
+        };
+      };
+    };
+  };
+  catalogue_holiday_calendars_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["HolidayCalendarRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["HolidayCalendarRequest"];
+        "multipart/form-data": components["schemas"]["HolidayCalendarRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HolidayCalendar"];
+        };
+      };
+    };
+  };
+  catalogue_holiday_calendars_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this holiday calendar. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HolidayCalendar"];
+        };
+      };
+    };
+  };
+  catalogue_holiday_calendars_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this holiday calendar. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedHolidayCalendarRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedHolidayCalendarRequest"];
+        "multipart/form-data": components["schemas"]["PatchedHolidayCalendarRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HolidayCalendar"];
+        };
+      };
+    };
+  };
+  catalogue_holiday_calendars_holidays_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this holiday calendar. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["HolidayInputRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["HolidayInputRequest"];
+        "multipart/form-data": components["schemas"]["HolidayInputRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Holiday"];
+        };
+      };
+    };
+  };
+  catalogue_holiday_calendars_import_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this holiday calendar. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["HolidayImportRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["HolidayImportRequest"];
+        "multipart/form-data": components["schemas"]["HolidayImportRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HolidayCalendar"];
+        };
+      };
+    };
+  };
+  catalogue_holidays_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this holiday. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -28175,6 +31292,380 @@ export interface operations {
       };
     };
   };
+  catalogue_pay_tiers_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        include_archived?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayTier"][];
+        };
+      };
+    };
+  };
+  catalogue_pay_tiers_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PayTierRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PayTierRequest"];
+        "multipart/form-data": components["schemas"]["PayTierRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayTier"];
+        };
+      };
+    };
+  };
+  catalogue_pay_tiers_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this pay tier. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayTier"];
+        };
+      };
+    };
+  };
+  catalogue_pay_tiers_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this pay tier. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedPayTierRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedPayTierRequest"];
+        "multipart/form-data": components["schemas"]["PatchedPayTierRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayTier"];
+        };
+      };
+    };
+  };
+  catalogue_pay_tiers_archive_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this pay tier. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayTier"];
+        };
+      };
+    };
+  };
+  catalogue_pay_tiers_restore_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this pay tier. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayTier"];
+        };
+      };
+    };
+  };
+  catalogue_premiums_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPremiumRuleList"];
+        };
+      };
+    };
+  };
+  catalogue_premiums_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PremiumRuleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PremiumRuleRequest"];
+        "multipart/form-data": components["schemas"]["PremiumRuleRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PremiumRule"];
+        };
+      };
+    };
+  };
+  catalogue_premiums_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this premium rule. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PremiumRule"];
+        };
+      };
+    };
+  };
+  catalogue_premiums_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this premium rule. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedPremiumRuleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedPremiumRuleRequest"];
+        "multipart/form-data": components["schemas"]["PatchedPremiumRuleRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PremiumRule"];
+        };
+      };
+    };
+  };
+  catalogue_price_lists_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPriceListList"];
+        };
+      };
+    };
+  };
+  catalogue_price_lists_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PriceListRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PriceListRequest"];
+        "multipart/form-data": components["schemas"]["PriceListRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PriceList"];
+        };
+      };
+    };
+  };
+  catalogue_price_lists_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this price list. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PriceList"];
+        };
+      };
+    };
+  };
+  catalogue_price_lists_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this price list. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedPriceListRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedPriceListRequest"];
+        "multipart/form-data": components["schemas"]["PatchedPriceListRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PriceList"];
+        };
+      };
+    };
+  };
   catalogue_products_list: {
     parameters: {
       query?: {
@@ -28298,6 +31789,228 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Product"];
+        };
+      };
+    };
+  };
+  catalogue_promo_codes_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPromoCodeList"];
+        };
+      };
+    };
+  };
+  catalogue_promo_codes_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromoCodeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PromoCodeRequest"];
+        "multipart/form-data": components["schemas"]["PromoCodeRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PromoCode"];
+        };
+      };
+    };
+  };
+  catalogue_promo_codes_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this promo code. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PromoCode"];
+        };
+      };
+    };
+  };
+  catalogue_promo_codes_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this promo code. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedPromoCodeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedPromoCodeRequest"];
+        "multipart/form-data": components["schemas"]["PatchedPromoCodeRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PromoCode"];
+        };
+      };
+    };
+  };
+  catalogue_rooms_list: {
+    parameters: {
+      query?: {
+        active?: boolean;
+        bookable?: boolean;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        location?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        resource?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedRoomList"];
+        };
+      };
+    };
+  };
+  catalogue_rooms_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RoomRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RoomRequest"];
+        "multipart/form-data": components["schemas"]["RoomRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Room"];
+        };
+      };
+    };
+  };
+  catalogue_rooms_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this room. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Room"];
+        };
+      };
+    };
+  };
+  catalogue_rooms_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this room. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedRoomRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedRoomRequest"];
+        "multipart/form-data": components["schemas"]["PatchedRoomRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Room"];
         };
       };
     };
@@ -28710,6 +32423,286 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TaxRate"];
+        };
+      };
+    };
+  };
+  catalogue_tier_assignments_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        tier?: string;
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedTierAssignmentList"];
+        };
+      };
+    };
+  };
+  catalogue_tier_assignments_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TierAssignmentRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TierAssignmentRequest"];
+        "multipart/form-data": components["schemas"]["TierAssignmentRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TierAssignment"];
+        };
+      };
+    };
+  };
+  catalogue_tier_assignments_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this tutor pay tier assignment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TierAssignment"];
+        };
+      };
+    };
+  };
+  catalogue_tier_assignments_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this tutor pay tier assignment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  catalogue_tier_rates_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TierGrid"];
+        };
+      };
+    };
+  };
+  catalogue_tier_rates_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TierBulkRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TierBulkRequest"];
+        "multipart/form-data": components["schemas"]["TierBulkRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TierGrid"];
+        };
+      };
+    };
+  };
+  catalogue_tier_rates_csv_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv": string;
+        };
+      };
+    };
+  };
+  catalogue_tier_rates_csv_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": components["schemas"]["TierImportRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TierImportRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TierImportResult"];
+        };
+      };
+    };
+  };
+  catalogue_tutor_rates_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        service?: string;
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedTutorRateList"];
+        };
+      };
+    };
+  };
+  catalogue_tutor_rates_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TutorRateInputRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TutorRateInputRequest"];
+        "multipart/form-data": components["schemas"]["TutorRateInputRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorRate"];
+        };
+      };
+    };
+  };
+  catalogue_tutor_rates_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this tutor service rate. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorRate"];
         };
       };
     };
@@ -30424,6 +34417,136 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["CustomField"];
+        };
+      };
+    };
+  };
+  custom_roles_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomRole"][];
+        };
+      };
+    };
+  };
+  custom_roles_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CustomRoleInputRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CustomRoleInputRequest"];
+        "multipart/form-data": components["schemas"]["CustomRoleInputRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomRole"];
+        };
+      };
+    };
+  };
+  custom_roles_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this role. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomRole"];
+        };
+      };
+    };
+  };
+  custom_roles_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this role. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedCustomRoleUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedCustomRoleUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedCustomRoleUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomRole"];
+        };
+      };
+    };
+  };
+  custom_roles_archive_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this role. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomRole"];
         };
       };
     };
@@ -35524,6 +39647,36 @@ export interface operations {
       };
     };
   };
+  lessons_reschedule_requests_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LessonChangeProposalRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LessonChangeProposalRequest"];
+        "multipart/form-data": components["schemas"]["LessonChangeProposalRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonChangeRequest"];
+        };
+      };
+    };
+  };
   lessons_retrieve: {
     parameters: {
       query?: {
@@ -35882,6 +40035,34 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["BulkResult"];
+        };
+      };
+    };
+  };
+  lessons_reprice_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["RepriceRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RepriceRequestRequest"];
+        "multipart/form-data": components["schemas"]["RepriceRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RepriceResult"];
         };
       };
     };
@@ -36680,6 +40861,95 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["MyOrganisation"][];
+        };
+      };
+    };
+  };
+  me_passkeys_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Credential"][];
+        };
+      };
+    };
+  };
+  me_passkeys_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  me_passkeys_options_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicKeyOptions"];
+        };
+      };
+    };
+  };
+  me_passkeys_register_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PasskeyRegisterRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PasskeyRegisterRequest"];
+        "multipart/form-data": components["schemas"]["PasskeyRegisterRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PasskeyRegistered"];
         };
       };
     };
@@ -40522,6 +44792,146 @@ export interface operations {
       };
     };
   };
+  portal_booking_holds_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingHold"][];
+        };
+      };
+    };
+  };
+  portal_booking_holds_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BookingHoldInputRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BookingHoldInputRequest"];
+        "multipart/form-data": components["schemas"]["BookingHoldInputRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingHold"];
+        };
+      };
+    };
+  };
+  portal_booking_holds_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        hold_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingHold"];
+        };
+      };
+    };
+  };
+  portal_booking_holds_submit_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        hold_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingSubmitResult"];
+        };
+      };
+    };
+  };
+  portal_booking_services_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingService"][];
+        };
+      };
+    };
+  };
+  portal_booking_slots_list: {
+    parameters: {
+      query: {
+        /** @description First local date (YYYY-MM-DD). */
+        from?: string;
+        service: string;
+        /** @description Last local date (at most 31 days on). */
+        to?: string;
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingSlot"][];
+        };
+      };
+    };
+  };
   portal_dashboard_retrieve: {
     parameters: {
       query?: never;
@@ -40619,6 +45029,36 @@ export interface operations {
         };
         content: {
           "text/calendar": string;
+        };
+      };
+    };
+  };
+  portal_lessons_reschedule_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LessonChangeProposalRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LessonChangeProposalRequest"];
+        "multipart/form-data": components["schemas"]["LessonChangeProposalRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonChangeRequest"];
         };
       };
     };
@@ -40839,6 +45279,79 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PortalReport"];
+        };
+      };
+    };
+  };
+  portal_reschedule_requests_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonChangeRequest"][];
+        };
+      };
+    };
+  };
+  portal_reschedule_requests_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        request_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonChangeRequest"];
+        };
+      };
+    };
+  };
+  portal_reschedule_requests_decide_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        request_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LessonChangeDecisionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LessonChangeDecisionRequest"];
+        "multipart/form-data": components["schemas"]["LessonChangeDecisionRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonChangeRequest"];
         };
       };
     };
@@ -41276,6 +45789,154 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  public_booking_holds_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BookingHoldInputRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BookingHoldInputRequest"];
+        "multipart/form-data": components["schemas"]["BookingHoldInputRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingHoldCreated"];
+        };
+      };
+    };
+  };
+  public_booking_holds_retrieve: {
+    parameters: {
+      query: {
+        token: string;
+      };
+      header?: never;
+      path: {
+        hold_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingHold"];
+        };
+      };
+    };
+  };
+  public_booking_holds_cancel_create: {
+    parameters: {
+      query: {
+        token: string;
+      };
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        hold_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingHold"];
+        };
+      };
+    };
+  };
+  public_booking_holds_submit_create: {
+    parameters: {
+      query: {
+        token: string;
+      };
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        hold_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingSubmitResult"];
+        };
+      };
+    };
+  };
+  public_booking_services_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingService"][];
+        };
+      };
+    };
+  };
+  public_booking_slots_list: {
+    parameters: {
+      query: {
+        /** @description First local date (YYYY-MM-DD). */
+        from?: string;
+        service: string;
+        /** @description Last local date (at most 31 days on). */
+        to?: string;
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingSlot"][];
+        };
       };
     };
   };
@@ -42201,6 +46862,117 @@ export interface operations {
       };
     };
   };
+  reschedule_requests_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        lesson?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedLessonChangeRequestList"];
+        };
+      };
+    };
+  };
+  reschedule_requests_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this reschedule request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonChangeRequest"];
+        };
+      };
+    };
+  };
+  reschedule_requests_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this reschedule request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonChangeRequest"];
+        };
+      };
+    };
+  };
+  reschedule_requests_decide_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this reschedule request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LessonChangeDecisionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LessonChangeDecisionRequest"];
+        "multipart/form-data": components["schemas"]["LessonChangeDecisionRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonChangeRequest"];
+        };
+      };
+    };
+  };
   roles_list: {
     parameters: {
       query?: never;
@@ -42637,6 +47409,50 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SearchHit"][];
+        };
+      };
+    };
+  };
+  security_sso_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrganisationSSO"];
+        };
+      };
+    };
+  };
+  security_sso_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["OrganisationSSORequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["OrganisationSSORequest"];
+        "multipart/form-data": components["schemas"]["OrganisationSSORequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrganisationSSO"];
         };
       };
     };
@@ -44367,6 +49183,7 @@ export interface operations {
         ordering?: string;
         /** @description Number of results to return per page. */
         page_size?: number;
+        status?: string;
         tutor?: string;
       };
       header?: never;
@@ -44431,6 +49248,37 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  time_off_decide_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this availability exception. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ApprovalDecisionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ApprovalDecisionRequest"];
+        "multipart/form-data": components["schemas"]["ApprovalDecisionRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Exception"];
+        };
       };
     };
   };

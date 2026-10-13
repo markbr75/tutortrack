@@ -4,6 +4,8 @@ PERMISSIONS = {
     "team.view": "View team members and invitations",
     "team.invite": "Invite people and resend or revoke invitations",
     "team.manage": "Change team members' roles, branches and status",
+    "team.roles.manage": "Create and edit custom roles and their permissions",
+    "security.sso.manage": "Set up the organisation's own single sign-on (SAML/OIDC)",
     "membership.transfer_ownership": "Transfer ownership of the organisation",
     "security.manage": "Change security settings (2FA enforcement, session lengths)",
     "impersonation.start": "View the portal as a tutor, client or student",

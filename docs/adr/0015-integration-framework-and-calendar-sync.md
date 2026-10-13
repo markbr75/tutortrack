@@ -54,7 +54,7 @@ twice, or not at all.
 ## Consequences
 - E23 and E27 get connections, OAuth, refresh, health and the admin "Integrations" page without new plumbing; they register providers and react to the events.
 - Everything runs locally and in CI with fakes. Production needs the provider apps (Google and Microsoft redirect URI `$APP_URL/api/v1/integrations/oauth/callback`, with calendar and meeting scopes) and a publicly reachable `INTEGRATIONS_WEBHOOK_BASE_URL` for push.
-- Without a reschedule-request model, proposals are CRM tasks; a proper request flow (E15 or later) can replace them in one place (`_propose_move`).
+- Without a reschedule-request model, proposals are CRM tasks; a proper request flow (E15 or later) can replace them in one place (`_propose_move`). *Update 2026-10-12:* E08-T13 did this; proposals are now reschedule requests, with the CRM task as the fallback (ADR 0021).
 - Disconnecting leaves already-written events in the user's calendar, because the tokens are gone. Reconnecting creates new events.
 - Google Meet uses the Meet REST API (spaces) rather than calendar conference data, so meetings don't depend on calendar write settings.
 - The time-skipping Temporal test server keeps its time lock after a continue-as-new. The continue-as-new test therefore runs on the local dev server.

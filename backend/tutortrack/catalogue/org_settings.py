@@ -17,3 +17,32 @@ register(
     default=False,
     label=_("Registered for VAT/GST/sales tax"),
 )
+
+# --- Phase 2 pricing (E06-T07..T09) ---------------------------------------------------------------
+register(
+    "pricing.tier_affects_charge",
+    type="bool",
+    default=False,
+    label=_("Pay tiers also set the charge rate"),
+    help_text=_("When a tier has a charge rate for a service, clients pay it for that tutor."),
+)
+register(
+    "pricing.pay_percent_basis",
+    type="choice",
+    default="gross",
+    choices=(
+        ("gross", _("The charge before discounts")),
+        ("net", _("The charge after discounts")),
+    ),
+    label=_("Percentage pay is worked out from"),
+)
+register(
+    "pricing.discount_display",
+    type="choice",
+    default="netted",
+    choices=(
+        ("netted", _("Net them into the lesson price")),
+        ("separate", _("Show them as separate negative lines")),
+    ),
+    label=_("Discounts on invoices"),
+)

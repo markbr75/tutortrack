@@ -2,15 +2,52 @@
 
 Snapshots are taken when a lesson is created and refreshed on edit while it is unlocked.
 Locked (invoiced or paid) lessons keep their snapshot; E10/E12 adjust from the event.
+Phase 2 (E06-T07..T09): the lesson's date, place and each student's history feed the
+pricing rules (tiers, price lists, premiums, discounts) through
+``catalogue.pricing_rules.load_rules``.
 """
 
 from __future__ import annotations
 
+from datetime import datetime, time, timedelta
 from typing import Any
+from zoneinfo import ZoneInfo
 
-from tutortrack.catalogue import rates
+from tutortrack.catalogue import pricing_rules, rates
 
 from .models import Lesson, LessonAttendee, LessonTutor
+
+
+def student_history(lesson: Lesson, attendees: list[LessonAttendee]) -> dict[str, tuple[bool, int]]:
+    """``{student: (first lesson?, the client's lessons this month incl. this one)}``."""
+    if not attendees:
+        return {}
+    zone = ZoneInfo(lesson.timezone)
+    local = lesson.start.astimezone(zone)
+    month_start = datetime.combine(local.date().replace(day=1), time.min, tzinfo=zone)
+    month_end = datetime.combine(
+        (month_start + timedelta(days=32)).date().replace(day=1), time.min, tzinfo=zone
+    )
+    live = LessonAttendee.objects.exclude(lesson__status=Lesson.Status.CANCELLED)
+    out: dict[str, tuple[bool, int]] = {}
+    for a in attendees:
+        earlier = (
+            live.filter(student_id=a.student_id, lesson__start__lt=lesson.start)
+            .exclude(lesson_id=lesson.pk)
+            .exists()
+        )
+        in_month = (
+            live.filter(
+                client_id=a.client_id, lesson__start__gte=month_start, lesson__start__lt=month_end
+            )
+            .values("lesson_id")
+            .distinct()
+            .count()
+        )
+        if lesson.pk is None or not live.filter(lesson_id=lesson.pk).exists():
+            in_month += 1
+        out[str(a.student_id)] = (not earlier, in_month)
+    return out
 
 
 def build_context(
@@ -25,34 +62,53 @@ def build_context(
     if job is not None:
         job_students = {link.student_id: link for link in job.students.all()}
         job_tutors = {link.tutor_id: link for link in job.tutors.filter(status="active")}
+    currency = job.currency if job else lesson.service.currency
+    attendee_inputs = [
+        rates.AttendeeInput(
+            student_id=str(a.student_id),
+            client_id=str(a.client_id),
+            rate_override=a.charge_rate_override,
+            job_rate_override=(
+                job_students[a.student_id].charge_rate_override
+                if a.student_id in job_students
+                else None
+            ),
+        )
+        for a in attendees
+    ]
+    tutor_inputs = [
+        rates.TutorInput(
+            tutor_id=str(t.tutor_id),
+            rate_override=t.pay_rate_override,
+            job_rate_override=(
+                job_tutors[t.tutor_id].pay_rate_override if t.tutor_id in job_tutors else None
+            ),
+        )
+        for t in tutors
+    ]
+    promo = next((a.promo_code for a in attendees if a.promo_code_id), None)
+    rules = pricing_rules.load_rules(
+        service=lesson.service,
+        currency=currency,
+        start=lesson.start,
+        timezone=lesson.timezone,
+        branch_id=lesson.branch_id,
+        location=lesson.location,
+        online=lesson.online,
+        attendees=attendee_inputs,
+        tutors=tutor_inputs,
+        booked_at=lesson.created_at,
+        promo_code=promo,
+        history=student_history(lesson, attendees),
+    )
     return rates.RateContext(
         service=lesson.service,
         duration_minutes=minutes or lesson.duration_minutes,
-        currency=job.currency if job else lesson.service.currency,
+        currency=currency,
         job_charge_rate=job.charge_rate if job else None,
-        attendees=[
-            rates.AttendeeInput(
-                student_id=str(a.student_id),
-                client_id=str(a.client_id),
-                rate_override=a.charge_rate_override,
-                job_rate_override=(
-                    job_students[a.student_id].charge_rate_override
-                    if a.student_id in job_students
-                    else None
-                ),
-            )
-            for a in attendees
-        ],
-        tutors=[
-            rates.TutorInput(
-                tutor_id=str(t.tutor_id),
-                rate_override=t.pay_rate_override,
-                job_rate_override=(
-                    job_tutors[t.tutor_id].pay_rate_override if t.tutor_id in job_tutors else None
-                ),
-            )
-            for t in tutors
-        ],
+        attendees=attendee_inputs,
+        tutors=tutor_inputs,
+        rules=rules,
     )
 
 
@@ -63,7 +119,7 @@ def lesson_currency(lesson: Lesson) -> str:
 def price_lesson(lesson: Lesson, *, minutes: int | None = None) -> rates.RateQuote:
     """Resolve and store charge and pay amounts on the lesson's attendees and tutors.
     ``minutes`` prices the actual duration instead of the scheduled one (E09)."""
-    attendees = list(lesson.attendees.all())
+    attendees = list(lesson.attendees.select_related("promo_code__discount"))
     tutors = list(lesson.tutors.all())
     quote = rates.resolve_rates(build_context(lesson, attendees, tutors, minutes))
     snapshot = quote.as_dict()

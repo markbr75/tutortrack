@@ -6,11 +6,11 @@ import hashlib
 import secrets
 from collections.abc import Iterable
 from dataclasses import dataclass, field
-from datetime import date, datetime, time, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
 from typing import Any
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.utils.translation import gettext as _
 
@@ -42,6 +42,7 @@ FINANCIAL_FIELDS = {"start", "end", "service", "attendees", "tutors"}
 SIMPLE_FIELDS = {
     "title",
     "location",
+    "room",
     "online",
     "meeting_url",
     "meeting_provider",
@@ -159,7 +160,9 @@ def _enforce(
     found: list[conflict_engine.Conflict], override: bool
 ) -> list[conflict_engine.Conflict]:
     hard = conflict_engine.hard(found)
-    if hard and not override:
+    if override:
+        hard = [c for c in hard if c.kind in conflict_engine.UNOVERRIDABLE]
+    if hard:
         raise ConflictError(
             hard[0].message,
             extra={
@@ -168,6 +171,35 @@ def _enforce(
             },
         )
     return found
+
+
+def _check_room(fields: dict[str, Any], current_location: Any = None) -> None:
+    """A room belongs to the lesson's location (the location follows the room)."""
+    room = fields.get("room")
+    if room is None:
+        return
+    if not room.active:
+        raise _invalid("room", _("This room is not in use."))
+    location = fields.get("location", current_location)
+    if location is not None and location.pk != room.location_id:
+        raise _invalid("room", _("Choose a room at the lesson's location."))
+    fields["location"] = room.location
+    if fields.get("online"):
+        raise _invalid("room", _("Online lessons don't use a room."))
+
+
+def _room_clash(exc: IntegrityError) -> ConflictError:
+    """The exclusion constraint caught a clash the check missed (a concurrent booking)."""
+    message = _("The room is already booked then.")
+    if "lesson_room_no_overlap" not in str(exc):
+        raise exc
+    return ConflictError(
+        message,
+        extra={
+            "conflicts": [{"kind": "room_double_booked", "severity": "hard", "message": message}],
+            "errors": {"room": [message]},
+        },
+    )
 
 
 def _check_rates(currency: str, rows: Iterable[dict[str, Any]], key: str) -> None:
@@ -201,6 +233,7 @@ def create_lesson(
     override_conflicts: bool = False,
     check_conflicts: bool = True,
     notify: bool = True,
+    exclude_hold_ids: Iterable[Any] = (),
     **fields: Any,
 ) -> LessonResult:
     unknown = set(fields) - SIMPLE_FIELDS
@@ -220,6 +253,7 @@ def create_lesson(
     if fields.get("location") is None and job is not None and "location" not in fields:
         fields["location"] = job.location
         fields.setdefault("online", job.online)
+    _check_room(fields)
     tz = timezone or _default_tz(job, branch)
     found: list[conflict_engine.Conflict] = []
     if check_conflicts:
@@ -233,6 +267,8 @@ def create_lesson(
                 location=fields.get("location"),
                 online=bool(fields.get("online")),
                 job=job,
+                room=fields.get("room"),
+                exclude_hold_ids=exclude_hold_ids,
             ),
             override_conflicts,
         )
@@ -249,7 +285,11 @@ def create_lesson(
         colour=fields.pop("colour", "") or service.colour,
         **fields,
     )
-    lesson.save()
+    try:
+        with transaction.atomic():
+            lesson.save()
+    except IntegrityError as exc:
+        raise _room_clash(exc) from exc
     _set_people(lesson, attendee_rows, tutor_rows, currency)
     pricing.price_lesson(lesson)
     audit.record_create(lesson)
@@ -345,8 +385,18 @@ def update_lesson(
     tz = changes.pop("timezone", lesson.timezone)
     moved = start != lesson.start or end != lesson.end
     people_changed = attendee_rows is not None or tutor_rows is not None
+    if "location" in changes and "room" not in changes and lesson.room_id is not None:
+        location = changes["location"]
+        room = lesson.room
+        if location is None or room is None or location.pk != room.location_id:
+            changes["room"] = None  # the room was at the old location
+    if changes.get("online") and lesson.room_id is not None and "room" not in changes:
+        changes["room"] = None
+    if changes.get("room") is not None:
+        _check_room(changes, lesson.location)
+    place_changed = "location" in changes or "room" in changes
     found: list[conflict_engine.Conflict] = []
-    if moved or people_changed or "location" in changes:
+    if moved or people_changed or place_changed:
         found = _enforce(
             conflict_engine.check(
                 start=start,
@@ -358,6 +408,7 @@ def update_lesson(
                 location=changes.get("location", lesson.location),
                 online=changes.get("online", lesson.online),
                 job=lesson.job,
+                room=changes.get("room", lesson.room),
             ),
             override_conflicts,
         )
@@ -368,13 +419,13 @@ def update_lesson(
         if moved and lesson.status == Lesson.Status.PLANNED:
             lesson.rescheduled_from = lesson.rescheduled_from or old_start
             lesson.reschedule_reason = reason[:300]
-        if (
-            lesson.series_id
-            and not from_series
-            and (moved or people_changed or "location" in changes)
-        ):
+        if lesson.series_id and not from_series and (moved or people_changed or place_changed):
             lesson.is_exception = True
-        lesson.save()
+        try:
+            with transaction.atomic():
+                lesson.save()
+        except IntegrityError as exc:
+            raise _room_clash(exc) from exc
     if people_changed:
         _set_people(lesson, new_attendees, new_tutors, currency)
     if (financial or people_changed) and (not lesson.is_locked or can_edit_locked):
@@ -760,8 +811,11 @@ def _horizon() -> date:
 
 
 def holiday_dates(branch_id: Any, start: date, end: date, tz: str) -> set[date]:
-    """Local dates covered by organisation-wide holiday/closure events."""
+    """Local dates covered by organisation-wide holiday/closure events and by E06 holiday
+    calendars marked to skip lessons."""
     from zoneinfo import ZoneInfo
+
+    from tutortrack.catalogue.pricing_rules import holiday_dates as calendar_dates
 
     zone = ZoneInfo(tz)
     closures = CalendarEvent.objects.filter(
@@ -770,7 +824,7 @@ def holiday_dates(branch_id: Any, start: date, end: date, tz: str) -> set[date]:
         start__lt=datetime.combine(end + timedelta(days=1), time.min, tzinfo=zone),
         end__gt=datetime.combine(start, time.min, tzinfo=zone),
     ).filter(Q(branch__isnull=True) | Q(branch_id=branch_id))
-    days: set[date] = set()
+    days: set[date] = calendar_dates(branch_id, start, end, skipping=True)
     for closure in closures:
         day = closure.start.astimezone(zone).date()
         last = (closure.end - timedelta(microseconds=1)).astimezone(zone).date()
@@ -898,6 +952,18 @@ def _materialise(
     attendees, tutors = _template_people(series)
     busy = _busy_map([r["tutor"].pk for r in tutors], occurrences[0].start, occurrences[-1].end)
     tpl = series.template or {}
+    room_id = tpl.get("room") or None
+    room_busy = (
+        list(
+            Lesson.objects.filter(
+                room_id=room_id, start__lt=occurrences[-1].end, end__gt=occurrences[0].start
+            )
+            .exclude(status=Lesson.Status.CANCELLED)
+            .values_list("start", "end")
+        )
+        if room_id
+        else []
+    )
     job = series.job
     currency = job.currency if job is not None else series.service.currency
     created: list[Lesson] = []
@@ -915,6 +981,16 @@ def _materialise(
                 for b_start, b_end in busy[str(r["tutor"].pk)]
             )
         ]
+        room_taken = any(b_start < occ.end and b_end > occ.start for b_start, b_end in room_busy)
+        if room_taken:
+            hard.append(
+                conflict_engine.Conflict(
+                    "room_double_booked", conflict_engine.HARD, _("The room is booked then.")
+                )
+            )
+        if room_taken and conflict_mode == "create":
+            result.skipped.append((occ.date, hard))  # a room clash can't be created anyway
+            continue
         if hard and conflict_mode == "fail":
             raise ConflictError(
                 _("%(date)s: %(message)s")
@@ -938,6 +1014,7 @@ def _materialise(
                 end=occ.end,
                 timezone=series.timezone,
                 location_id=tpl.get("location") or None,
+                room_id=room_id,
                 online=bool(tpl.get("online")),
                 notes_for_tutor=tpl.get("notes_for_tutor", ""),
                 colour=series.service.colour,
@@ -948,6 +1025,8 @@ def _materialise(
             result.conflicting.append((created[-1], hard))
         for r in tutors:
             busy[str(r["tutor"].pk)].append((occ.start, occ.end))
+        if room_id:
+            room_busy.append((occ.start, occ.end))
     Lesson.objects.bulk_create(created)
     if created:
         first = created[0]
@@ -966,6 +1045,13 @@ def _materialise(
         LessonTutor.objects.bulk_create(
             [_copy_tutor(lesson, t) for lesson in created[1:] for t in template_tutors]
         )
+        from tutortrack.catalogue.pricing_rules import has_date_rules
+
+        if len(created) > 1 and has_date_rules():
+            # Premiums, discounts, tiers and price lists can differ per date (E06 Phase 2):
+            # price each occurrence (the copy above is the fast path without such rules).
+            for lesson in created[1:]:
+                pricing.price_lesson(lesson)
     result.created.extend(created)
     series.horizon_generated_until = max(series.horizon_generated_until or window_end, window_end)
     series.save(update_fields=["horizon_generated_until", "updated_at"])
@@ -1021,6 +1107,7 @@ def create_series(
     conflict_mode: str = "skip",
     branch: Any = None,
     notify: bool = True,
+    room: Any = None,
 ) -> SeriesResult:
     """A recurring lesson (FR-08-2). ``conflict_mode``: ``skip`` occurrences where a tutor
     is busy, ``create`` them anyway (needs override permission), or ``fail``."""
@@ -1038,6 +1125,10 @@ def create_series(
     tz = timezone or _default_tz(job, branch)
     if location is None and job is not None:
         location, online = job.location, online or job.online
+    if room is not None:
+        place = {"room": room, "location": location, "online": online}
+        _check_room(place)
+        location = place["location"]
     series = LessonSeries.objects.create(
         job=job,
         service=service,
@@ -1056,6 +1147,7 @@ def create_series(
             location=location,
             online=online,
             notes_for_tutor=notes_for_tutor,
+            room=room,
         ),
     )
     audit.record_create(series)
@@ -1346,24 +1438,196 @@ def set_availability(
 
 @transaction.atomic
 def add_exception(
-    tutor: TutorProfile, *, type: str, start: datetime, end: datetime, reason: str = ""
+    tutor: TutorProfile,
+    *,
+    type: str,
+    start: datetime,
+    end: datetime,
+    reason: str = "",
+    needs_approval: bool = False,
+    user: Any = None,
 ) -> tuple[AvailabilityException, list[Lesson]]:
-    """Extra availability or time off. Time off returns the lessons that now need cover."""
+    """Extra availability or time off. Time off returns the lessons that now need cover.
+
+    With ``needs_approval`` (a tutor asking, and ``scheduling.time_off_approval`` on), time
+    off waits for an admin (``TimeOffApprovalWorkflow``); otherwise it is approved at once
+    and clashing lessons are flagged for cover (E08-T15)."""
     if end <= start:
         raise _invalid("end", _("The end must be after the start."))
+    is_off = type == AvailabilityException.Type.OFF
+    pending = is_off and needs_approval
     exception = AvailabilityException.objects.create(
-        tutor=tutor, type=type, start=start, end=end, reason=reason[:300]
+        tutor=tutor,
+        type=type,
+        start=start,
+        end=end,
+        reason=reason[:300],
+        status=(
+            AvailabilityException.Status.REQUESTED
+            if pending
+            else AvailabilityException.Status.APPROVED
+        ),
+        requested_by=user if getattr(user, "is_authenticated", False) else None,
     )
     audit.record_create(exception)
     publish(events.AvailabilityUpdated(subject_id=tutor.pk))
-    clashes: list[Lesson] = []
-    if type == AvailabilityException.Type.OFF:
-        clashes = list(
-            Lesson.objects.filter(
-                tutors__tutor=tutor, start__lt=end, end__gt=start, status=Lesson.Status.PLANNED
+    clashes = _time_off_clashes(exception) if is_off else []
+    if pending:
+        publish(
+            events.TimeOffRequested(
+                subject_id=exception.pk,
+                tutor_id=str(tutor.pk),
+                start=start.isoformat(),
+                end=end.isoformat(),
+                clashes=len(clashes),
             )
         )
+        _staff_alert(
+            "staff_time_off_requested",
+            _("%(tutor)s asked for time off") % {"tutor": tutor.full_name},
+            f"{start:%d %b %Y} \N{EN DASH} {end:%d %b %Y}",
+            "/availability?tab=requests",
+            f"time-off-{exception.pk}",
+        )
+    elif is_off:
+        publish(
+            events.TimeOffApproved(subject_id=exception.pk, tutor_id=str(tutor.pk), automatic=True)
+        )
+        flag_cover(exception)
+        exception.refresh_from_db()
     return exception, clashes
+
+
+def _staff_alert(type_key: str, title: str, body: str, link: str, key: str) -> None:
+    from tutortrack.comms import services as comms
+    from tutortrack.core.context import require_organisation_id, tenant_context
+
+    organisation_id = require_organisation_id()  # captured now, not when the hook runs
+
+    def send() -> None:
+        with tenant_context(organisation_id):
+            comms.notify(type_key, (title, body, link), key=key)
+
+    transaction.on_commit(send)
+
+
+def _time_off_clashes(exception: AvailabilityException) -> list[Lesson]:
+    return list(
+        Lesson.objects.filter(
+            tutors__tutor_id=exception.tutor_id,
+            start__lt=exception.end,
+            end__gt=exception.start,
+            status=Lesson.Status.PLANNED,
+        ).order_by("start")
+    )
+
+
+@transaction.atomic
+def decide_time_off(
+    exception: AvailabilityException, *, approve: bool, user: Any = None, note: str = ""
+) -> AvailabilityException:
+    """An admin approves or declines requested time off. Approval flags clashing lessons
+    for cover (done by the workflow's next step, ``flag_cover``)."""
+    exception = AvailabilityException.objects.select_for_update().get(pk=exception.pk)
+    if exception.status != AvailabilityException.Status.REQUESTED:
+        raise BusinessRuleViolation(_("This request has already been decided."))
+    with audit.track(exception, action="approve" if approve else "decline"):
+        exception.status = (
+            AvailabilityException.Status.APPROVED
+            if approve
+            else AvailabilityException.Status.DECLINED
+        )
+        exception.decided_by = user if getattr(user, "is_authenticated", False) else None
+        exception.decided_at = now()
+        exception.decision_note = note[:300]
+        exception.save()
+    tutor_id = str(exception.tutor_id)
+    if approve:
+        publish(events.TimeOffApproved(subject_id=exception.pk, tutor_id=tutor_id))
+    else:
+        publish(events.TimeOffDeclined(subject_id=exception.pk, tutor_id=tutor_id))
+    publish(events.AvailabilityUpdated(subject_id=exception.tutor_id))
+    return exception
+
+
+@transaction.atomic
+def expire_time_off(exception_id: Any) -> bool:
+    """Nobody decided before the time off began: it is declined (activity)."""
+    exception = AvailabilityException.objects.select_for_update().filter(pk=exception_id).first()
+    if exception is None or exception.status != AvailabilityException.Status.REQUESTED:
+        return False
+    with audit.track(exception, action="expire"):
+        exception.status = AvailabilityException.Status.DECLINED
+        exception.decided_at = now()
+        exception.decision_note = _("Not decided before it started.")
+        exception.save()
+    publish(
+        events.TimeOffDeclined(
+            subject_id=exception.pk, tutor_id=str(exception.tutor_id), expired=True
+        )
+    )
+    return True
+
+
+def remind_time_off(exception_id: Any) -> bool:
+    exception = (
+        AvailabilityException.objects.select_related("tutor").filter(pk=exception_id).first()
+    )
+    if exception is None or exception.status != AvailabilityException.Status.REQUESTED:
+        return False
+    _staff_alert(
+        "staff_time_off_requested",
+        _("Reminder: %(tutor)s's time off needs a decision") % {"tutor": exception.tutor.full_name},
+        f"{exception.start:%d %b %Y} \N{EN DASH} {exception.end:%d %b %Y}",
+        "/availability?tab=requests",
+        f"time-off-reminder-{exception.pk}",
+    )
+    return True
+
+
+def time_off_state(exception_id: Any) -> dict[str, str]:
+    exception = AvailabilityException.objects.filter(pk=exception_id).first()
+    if exception is None:
+        return {"status": "missing", "start": ""}
+    return {"status": exception.status, "start": exception.start.isoformat()}
+
+
+@transaction.atomic
+def flag_cover(exception: AvailabilityException) -> list[Lesson]:
+    """Approved time off: mark the tutor's clashing future lessons and ask for cover
+    (E19 ``create_cover`` starts ``CoverRequestWorkflow``). Idempotent."""
+    from tutortrack.tenancy.settings_service import get_setting
+
+    exception = AvailabilityException.objects.select_for_update().get(pk=exception.pk)
+    if exception.status != AvailabilityException.Status.APPROVED or exception.cover_request_id:
+        return []
+    lessons = [lesson for lesson in _time_off_clashes(exception) if lesson.start > now()]
+    if not lessons:
+        return []
+    Lesson.objects.filter(pk__in=[lesson.pk for lesson in lessons]).update(cover_flagged_at=now())
+    request_id: str | None = None
+    if get_setting("scheduling.time_off_cover"):
+        from tutortrack.matching import services as matching
+
+        try:
+            with transaction.atomic():
+                request = matching.create_cover(
+                    lessons, reason=exception.reason or _("Time off"), tutor=exception.tutor
+                )
+            request_id = str(request.pk)
+            exception.cover_request_id = request.pk
+            exception.save(update_fields=["cover_request_id", "updated_at"])
+        except BusinessRuleViolation:
+            request_id = None  # too late, or cover already being found: staff reassign
+    publish(
+        events.CoverFlagged(
+            subject_id=exception.pk,
+            tutor_id=str(exception.tutor_id),
+            lesson_ids=[str(lesson.pk) for lesson in lessons],
+            cover_request_id=request_id,
+        )
+    )
+    return lessons
 
 
 @transaction.atomic
@@ -1541,3 +1805,850 @@ def remove_availability_window(
         return False
     set_availability(tutor, windows=remaining, effective_from=now().date(), timezone=tz or "UTC")
     return True
+
+
+# --- re-pricing (FR-06-4 "apply to future lessons?", E06-T07 retroactive tool) -------------------
+
+
+def repriceable_lessons(
+    *,
+    start: date | None = None,
+    end: date | None = None,
+    tutor_id: Any = None,
+    service_id: Any = None,
+    include_past: bool = False,
+) -> Any:
+    """Unlocked lessons the current pricing rules may re-price: planned future lessons, or
+    with ``include_past`` also delivered ones not yet invoiced or paid."""
+    qs = Lesson.objects.filter(lock_state=Lesson.Lock.UNLOCKED).exclude(
+        status=Lesson.Status.CANCELLED
+    )
+    if not include_past:
+        qs = qs.filter(status=Lesson.Status.PLANNED, start__gte=now())
+    if start is not None:
+        qs = qs.filter(start__gte=datetime.combine(start, time.min, tzinfo=UTC) - timedelta(days=1))
+    if end is not None:
+        qs = qs.filter(start__lt=datetime.combine(end + timedelta(days=1), time.min, tzinfo=UTC))
+    if tutor_id is not None:
+        qs = qs.filter(tutors__tutor_id=tutor_id)
+    if service_id is not None:
+        qs = qs.filter(service_id=service_id)
+    return qs.distinct()
+
+
+@transaction.atomic
+def reprice_lessons(*, dry_run: bool = False, **filters: Any) -> int:
+    """Re-resolve prices of the matching unlocked lessons; returns how many (changed or
+    not). Locked lessons are never touched."""
+    from .recurrence import local_date_of
+
+    lessons = list(repriceable_lessons(**filters).select_related("job", "service"))
+    start = filters.get("start")
+    if start is not None:  # the day boundary is local to each lesson
+        lessons = [x for x in lessons if local_date_of(x.start, x.timezone) >= start]
+    if dry_run:
+        return len(lessons)
+    for lesson in lessons:
+        before = _totals(lesson)
+        pricing.price_lesson(lesson)
+        after = _totals(lesson)
+        if before != after:
+            audit.record(lesson, "reprice", {"charge": [before["charge"], after["charge"]],
+                                             "pay": [before["pay"], after["pay"]]})  # fmt: skip
+    return len(lessons)
+
+
+# --- reschedule requests (FR-08-8, E08-T13) -----------------------------------------------------
+
+
+def _setting(key: str) -> Any:
+    from tutortrack.tenancy.settings_service import get_setting
+
+    return get_setting(key)
+
+
+def _month_requests(lesson: Lesson, requester: str) -> int:
+    from .models import RescheduleRequest
+
+    current = now()
+    month_start = current.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    qs = RescheduleRequest.objects.filter(requester=requester, created_at__gte=month_start).exclude(
+        status=RescheduleRequest.Status.CANCELLED
+    )
+    if requester == RescheduleRequest.Party.TUTOR:
+        tutors = lesson.tutors.values("tutor_id")
+        return qs.filter(lesson__tutors__tutor_id__in=tutors).distinct().count()
+    students = lesson.attendees.values("student_id")
+    return qs.filter(lesson__attendees__student_id__in=students).distinct().count()
+
+
+@transaction.atomic
+def request_reschedule(
+    lesson: Lesson,
+    *,
+    options: list[tuple[datetime, datetime]],
+    requester: str,
+    reason: str = "",
+    user: Any = None,
+) -> Any:
+    """Ask to move ``lesson`` to one of ``options`` (FR-08-8). Policies: requests close
+    ``scheduling.reschedule_min_notice_hours`` before the lesson and are limited per student
+    (or tutor) per month; staff and calendar-sync requests skip the limits."""
+    from .models import RescheduleRequest
+
+    party = RescheduleRequest.Party
+    lesson = Lesson.objects.select_for_update().get(pk=lesson.pk)
+    limited = requester in {party.CLIENT, party.TUTOR}
+    if limited and not _setting("scheduling.reschedule_requests"):
+        raise BusinessRuleViolation(_("Reschedule requests are turned off."))
+    if lesson.status != Lesson.Status.PLANNED or lesson.start <= now():
+        raise BusinessRuleViolation(_("Only upcoming planned lessons can be moved."))
+    if lesson.is_locked:
+        raise BusinessRuleViolation(_("This lesson has been invoiced or paid; ask the office."))
+    notice = timedelta(hours=int(_setting("scheduling.reschedule_min_notice_hours")))
+    if limited and lesson.start - now() < notice:
+        raise BusinessRuleViolation(
+            _("Requests close %(n)s hours before the lesson; please contact us.")
+            % {"n": int(notice.total_seconds() // 3600)}
+        )
+    limit = int(_setting("scheduling.reschedule_max_per_month"))
+    if limited and limit and _month_requests(lesson, requester) >= limit:
+        raise BusinessRuleViolation(
+            _("You've reached the limit of %(n)s reschedule requests this month.") % {"n": limit}
+        )
+    if RescheduleRequest.objects.filter(lesson=lesson, status="pending").exists():
+        raise BusinessRuleViolation(_("There is already a request to move this lesson."))
+    if not options or len(options) > 3:
+        raise _invalid("options", _("Suggest between one and three new times."))
+    clean = []
+    for start, end in options:
+        _check_times(start, end)
+        if start <= now():
+            raise _invalid("options", _("Suggest times in the future."))
+        if (start, end) == (lesson.start, lesson.end):
+            raise _invalid("options", _("That's the lesson's current time."))
+        clean.append({"start": start.isoformat(), "end": end.isoformat()})
+    window = timedelta(hours=int(_setting("scheduling.reschedule_decision_hours")))
+    earliest_option = min(start for start, _end in options)
+    deadline = min(now() + window, lesson.start, earliest_option)
+    request = RescheduleRequest.objects.create(
+        lesson=lesson,
+        requested_by=user if getattr(user, "is_authenticated", False) else None,
+        requester=requester,
+        proposed=clean,
+        reason=reason[:300],
+        deadline=deadline,
+        original_start=lesson.start,
+        original_end=lesson.end,
+    )
+    audit.record_create(request)
+    publish(
+        events.RescheduleRequested(
+            subject_id=request.pk,
+            lesson_id=str(lesson.pk),
+            requester=requester,
+            deadline=deadline.isoformat(),
+            options=len(clean),
+        ),
+        branch_id=lesson.branch_id,
+    )
+    _staff_alert(
+        "staff_reschedule_requested",
+        _("Request to move %(lesson)s") % {"lesson": lesson.title},
+        reason[:200],
+        f"/calendar?lesson={lesson.pk}",
+        f"reschedule-{request.pk}",
+    )
+    return request
+
+
+def _option(request: Any, index: int) -> tuple[datetime, datetime]:
+    try:
+        row = request.proposed[index]
+    except (IndexError, TypeError) as exc:
+        raise _invalid("choice", _("Choose one of the suggested times.")) from exc
+    return datetime.fromisoformat(row["start"]), datetime.fromisoformat(row["end"])
+
+
+@transaction.atomic
+def decide_reschedule(
+    request: Any,
+    *,
+    approve: bool,
+    choice: int = 0,
+    user: Any = None,
+    note: str = "",
+    override_conflicts: bool = False,
+) -> Any:
+    """Approve (the lesson moves to the chosen time, with conflict checks) or decline."""
+    from .models import RescheduleRequest
+
+    request = (
+        RescheduleRequest.objects.select_for_update().select_related("lesson").get(pk=request.pk)
+    )
+    if request.status != RescheduleRequest.Status.PENDING:
+        raise BusinessRuleViolation(_("This request has already been answered."))
+    lesson = request.lesson
+    if approve:
+        start, end = _option(request, choice)
+        if start <= now():
+            raise _invalid("choice", _("That time has passed."))
+        update_lesson(
+            lesson,
+            start=start,
+            end=end,
+            reason=_("Rescheduled on request: %(reason)s") % {"reason": request.reason}
+            if request.reason
+            else _("Rescheduled on request"),
+            override_conflicts=override_conflicts,
+        )
+    with audit.track(request, action="approve" if approve else "decline"):
+        request.status = (
+            RescheduleRequest.Status.APPROVED if approve else RescheduleRequest.Status.DECLINED
+        )
+        request.chosen = choice if approve else None
+        request.decided_by = user if getattr(user, "is_authenticated", False) else None
+        request.decided_at = now()
+        request.decision_note = note[:300]
+        request.save()
+    if approve:
+        publish(
+            events.RescheduleApproved(
+                subject_id=request.pk, lesson_id=str(lesson.pk), new_start=start.isoformat()
+            ),
+            branch_id=lesson.branch_id,
+        )
+    else:
+        publish(
+            events.RescheduleDeclined(subject_id=request.pk, lesson_id=str(lesson.pk)),
+            branch_id=lesson.branch_id,
+        )
+    return request
+
+
+@transaction.atomic
+def cancel_reschedule(request: Any, *, user: Any = None) -> Any:
+    from .models import RescheduleRequest
+
+    request = RescheduleRequest.objects.select_for_update().get(pk=request.pk)
+    if request.status != RescheduleRequest.Status.PENDING:
+        raise BusinessRuleViolation(_("This request has already been answered."))
+    with audit.track(request, action="cancel"):
+        request.status = RescheduleRequest.Status.CANCELLED
+        request.decided_at = now()
+        request.save()
+    publish(
+        events.RescheduleDeclined(
+            subject_id=request.pk, lesson_id=str(request.lesson_id), reason="cancelled"
+        )
+    )
+    return request
+
+
+@transaction.atomic
+def expire_reschedule(request_id: Any) -> bool:
+    """The deadline passed without an answer: declined automatically (activity)."""
+    from .models import RescheduleRequest
+
+    request = RescheduleRequest.objects.select_for_update().filter(pk=request_id).first()
+    if request is None or request.status != RescheduleRequest.Status.PENDING:
+        return False
+    with audit.track(request, action="expire"):
+        request.status = RescheduleRequest.Status.EXPIRED
+        request.decided_at = now()
+        request.save()
+    publish(
+        events.RescheduleDeclined(
+            subject_id=request.pk, lesson_id=str(request.lesson_id), reason="expired"
+        )
+    )
+    return True
+
+
+def remind_reschedule(request_id: Any) -> bool:
+    from .models import RescheduleRequest
+
+    request = RescheduleRequest.objects.select_related("lesson").filter(pk=request_id).first()
+    if request is None or request.status != RescheduleRequest.Status.PENDING:
+        return False
+    _staff_alert(
+        "staff_reschedule_requested",
+        _("Reminder: answer the request to move %(lesson)s") % {"lesson": request.lesson.title},
+        _("It will be declined automatically at %(when)s.")
+        % {"when": f"{request.deadline:%d %b %H:%M} UTC"},
+        f"/calendar?lesson={request.lesson_id}",
+        f"reschedule-reminder-{request.pk}",
+    )
+    return True
+
+
+def reschedule_state(request_id: Any) -> dict[str, str]:
+    from .models import RescheduleRequest
+
+    request = RescheduleRequest.objects.filter(pk=request_id).first()
+    if request is None:
+        return {"status": "missing", "deadline": ""}
+    return {"status": request.status, "deadline": request.deadline.isoformat()}
+
+
+# --- online self-booking (FR-08-9, E08-T14) -----------------------------------------------------
+
+BOOKING_SETTINGS_FIELDS = {
+    "enabled",
+    "allow_new_clients",
+    "min_notice_hours",
+    "max_advance_days",
+    "slot_interval_minutes",
+    "buffer_minutes",
+    "approval_required",
+    "payment",
+    "hold_minutes",
+    "cancellation_window_hours",
+    "tutors",
+    "location",
+    "terms",
+}
+
+
+class BookingUnavailable(BusinessRuleViolation):
+    problem_type = "booking-unavailable"
+    title = "That time can't be booked"
+
+
+def booking_settings() -> Any:
+    from .models import BookingSettings
+
+    found, _created = BookingSettings.objects.get_or_create()
+    return found
+
+
+@transaction.atomic
+def save_booking_settings(**data: Any) -> Any:
+    unknown = set(data) - BOOKING_SETTINGS_FIELDS
+    if unknown:
+        raise BusinessRuleViolation(f"Unknown booking settings: {', '.join(sorted(unknown))}")
+    current = booking_settings()
+    if "tutors" in data:
+        data["tutors"] = sorted({str(t) for t in data["tutors"]})
+    if data.get("slot_interval_minutes") is not None and not (
+        5 <= int(data["slot_interval_minutes"]) <= 240
+    ):
+        raise _invalid("slot_interval_minutes", _("Use 5 to 240 minutes."))
+    if data.get("hold_minutes") is not None and not (2 <= int(data["hold_minutes"]) <= 60):
+        raise _invalid("hold_minutes", _("Hold slots for 2 to 60 minutes."))
+    with audit.track(current):
+        for k, v in data.items():
+            setattr(current, k, v)
+        current.save()
+    return current
+
+
+def bookable_services() -> list[Service]:
+    return list(Service.objects.filter(active=True, bookable_online=True).order_by("name"))
+
+
+def bookable_tutors(service: Service) -> list[TutorProfile]:
+    """Active tutors offered for ``service``: those listed in the settings (or all), and,
+    when the service has a subject, those who teach it."""
+    settings_row = booking_settings()
+    qs = TutorProfile.objects.filter(status="active", archived_at__isnull=True)
+    if settings_row.tutors:
+        qs = qs.filter(pk__in=settings_row.tutors)
+    if service.subject_id:
+        subject = service.subject
+        qs = qs.filter(
+            Q(subjects__catalogue_subject_id=service.subject_id)
+            | Q(subjects__subject__iexact=subject.name if subject else "")
+        )
+    return list(qs.distinct().order_by("first_name", "last_name"))
+
+
+@dataclass(frozen=True)
+class BookingSlot:
+    tutor_id: str
+    start: datetime
+    end: datetime
+
+
+def _held(
+    tutor_ids: list[Any], start: datetime, end: datetime
+) -> dict[str, list[tuple[datetime, datetime]]]:
+    from .models import BookingHold
+
+    out: dict[str, list[tuple[datetime, datetime]]] = {}
+    for tutor_id, s, e in BookingHold.objects.filter(
+        tutor_id__in=tutor_ids, status__in=BookingHold.ACTIVE, start__lt=end, end__gt=start
+    ).values_list("tutor_id", "start", "end"):
+        out.setdefault(str(tutor_id), []).append((s, e))
+    return out
+
+
+def booking_slots(
+    service: Service, *, start: date, end: date, tutor: TutorProfile | None = None
+) -> list[BookingSlot]:
+    """Bookable start times between ``start`` and ``end`` (local dates) for one tutor or
+    any offered tutor, respecting the booking settings (notice, advance window, interval,
+    buffer) and slots already held by other bookings."""
+    from . import availability
+
+    settings_row = booking_settings()
+    if not settings_row.enabled or not service.bookable_online or not service.active:
+        return []
+    last = min(end, now().date() + timedelta(days=settings_row.max_advance_days))
+    if last < start:
+        return []
+    tutors = [tutor] if tutor is not None else bookable_tutors(service)
+    if tutor is not None and tutor.pk not in {t.pk for t in bookable_tutors(service)}:
+        return []
+    duration = service.default_duration_minutes
+    slots: list[BookingSlot] = []
+    window_start = datetime.combine(start - timedelta(days=1), time.min, tzinfo=UTC)
+    window_end = datetime.combine(last + timedelta(days=2), time.min, tzinfo=UTC)
+    held = _held([t.pk for t in tutors], window_start, window_end)
+    for candidate in tutors:
+        for slot in availability.free_slots(
+            candidate.pk,
+            start=start,
+            end=last,
+            duration_minutes=duration,
+            step_minutes=settings_row.slot_interval_minutes,
+            buffer_minutes=settings_row.buffer_minutes,
+            min_notice_hours=settings_row.min_notice_hours,
+        ):
+            if any(s < slot.end and e > slot.start for s, e in held.get(str(candidate.pk), [])):
+                continue
+            slots.append(BookingSlot(str(candidate.pk), slot.start, slot.end))
+    return sorted(slots, key=lambda s: (s.start, s.tutor_id))
+
+
+def _student_history(student: Student | None) -> dict[str, tuple[bool, int]]:
+    if student is None:
+        return {}
+    has_any = (
+        LessonAttendee.objects.filter(student=student)
+        .exclude(lesson__status=Lesson.Status.CANCELLED)
+        .exists()
+    )
+    return {str(student.pk): (not has_any, 1)}
+
+
+def quote_booking(
+    service: Service,
+    tutor: TutorProfile,
+    start: datetime,
+    *,
+    tz: str,
+    student: Student | None = None,
+    promo: Any = None,
+    online: bool = False,
+    location: Any = None,
+) -> dict[str, Any]:
+    """The price shown before booking (charge side only)."""
+    from tutortrack.catalogue import pricing_rules, rates
+
+    end = start + timedelta(minutes=service.default_duration_minutes)
+    student_id = str(student.pk) if student else "new"
+    attendee = rates.AttendeeInput(
+        student_id=student_id, client_id=str(student.client_id) if student else None
+    )
+    tutor_input = rates.TutorInput(tutor_id=str(tutor.pk))
+    rules = pricing_rules.load_rules(
+        service=service,
+        currency=service.currency,
+        start=start,
+        timezone=tz,
+        location=location,
+        online=online,
+        attendees=[attendee],
+        tutors=[tutor_input],
+        booked_at=now(),
+        promo_code=promo,
+        history=_student_history(student) if student else {"new": (True, 1)},
+    )
+    quote = rates.resolve_rates(
+        rates.RateContext(
+            service=service,
+            duration_minutes=int((end - start).total_seconds() // 60),
+            attendees=[attendee],
+            tutors=[tutor_input],
+            rules=rules,
+        )
+    )
+    line = quote.charges[0]
+    return {
+        "currency": quote.currency,
+        "amount": line.amount.to_dict(),
+        "undiscounted_amount": line.undiscounted_amount.to_dict(),
+        "tax_amount": line.tax_amount.to_dict(),
+        "trace": line.trace,
+        "discounts": [d.as_dict() for d in line.discounts],
+    }
+
+
+def _booking_tz(tutor: TutorProfile, branch: Any) -> str:
+    from .models import AvailabilityTemplate
+
+    template = AvailabilityTemplate.objects.filter(tutor=tutor).order_by("-effective_from").first()
+    return template.timezone if template else str(branch.timezone)
+
+
+@transaction.atomic
+def hold_slot(
+    *,
+    service: Service,
+    start: datetime,
+    tutor: TutorProfile | None = None,
+    student: Student | None = None,
+    contact: dict[str, Any] | None = None,
+    promo_code: str = "",
+    source: str = "portal",
+    user: Any = None,
+) -> tuple[Any, str]:
+    """Hold a slot while the person finishes booking (FR-08-9). Returns the hold and, for
+    bookings without an account, the secret token for its status link."""
+    from tutortrack.catalogue import services as catalogue
+    from tutortrack.tenancy.models import Branch
+    from tutortrack.tenancy.selectors import default_branch_id
+
+    from .models import BookingHold
+
+    settings_row = booking_settings()
+    if not settings_row.enabled:
+        raise BookingUnavailable(_("Online booking is turned off."))
+    if student is not None:
+        _check_collections(student.client_id)
+    if student is None and not (settings_row.allow_new_clients and contact):
+        raise _invalid("student", _("Choose who the lesson is for."))
+    if student is None:
+        for name in ("first_name", "last_name", "email", "student_first_name"):
+            if not str((contact or {}).get(name, "")).strip():
+                raise _invalid(name, _("This field is required."))
+    if start.tzinfo is None:
+        raise _invalid("start", _("Give times with a timezone."))
+    end = start + timedelta(minutes=service.default_duration_minutes)
+    tutors = [tutor] if tutor is not None else bookable_tutors(service)
+    # Lock the candidate tutors so two people can't hold the same slot at once.
+    locked = list(
+        TutorProfile.objects.select_for_update()
+        .filter(pk__in=[t.pk for t in tutors])
+        .order_by("pk")
+    )
+    wanted = {str(t.pk) for t in locked}
+    free = [
+        s
+        for s in booking_slots(service, start=start.date() - timedelta(days=1),
+                               end=end.date() + timedelta(days=1), tutor=tutor)
+        if s.start == start and s.tutor_id in wanted
+    ]  # fmt: skip
+    if not free:
+        raise BookingUnavailable(_("Sorry, that time has just been taken. Please pick another."))
+    chosen = next(t for t in locked if str(t.pk) == free[0].tutor_id)
+    client = student.client if student else None
+    promo = None
+    if promo_code:
+        promo = catalogue.check_promo(promo_code, client=client, service=service)
+    branch = (
+        student.branch
+        if student is not None and getattr(student, "branch_id", None)
+        else Branch.objects.get(pk=default_branch_id(require_org()))
+    )
+    tz = _booking_tz(chosen, branch)
+    online = service.delivery_mode == Service.DeliveryMode.ONLINE
+    location = None if online else settings_row.location
+    token = secrets.token_urlsafe(24) if student is None else ""
+    hold = BookingHold.objects.create(
+        service=service,
+        tutor=chosen,
+        branch=branch,
+        location=location,
+        online=online,
+        start=start,
+        end=end,
+        timezone=tz,
+        client=client,
+        student=student,
+        contact={k: str(v)[:200] for k, v in (contact or {}).items()} if student is None else {},
+        promo_code=promo,
+        trial=student is None or _student_history(student)[str(student.pk)][0],
+        quote=quote_booking(
+            service, chosen, start, tz=tz, student=student, promo=promo, online=online,
+            location=location,
+        ),
+        source=source,
+        expires_at=now() + timedelta(minutes=settings_row.hold_minutes),
+        token_hash=hash_token(token) if token else "",
+        created_by_user=user if getattr(user, "is_authenticated", False) else None,
+    )  # fmt: skip
+    audit.record_create(hold)
+    publish(
+        events.BookingHeld(
+            subject_id=hold.pk,
+            tutor_id=str(chosen.pk),
+            start=start.isoformat(),
+            expires_at=hold.expires_at.isoformat(),
+        )
+    )
+    return hold, token
+
+
+def _check_collections(client_id: Any) -> None:
+    """E10 hook: a client in collections with a hard block can't book online."""
+    from tutortrack.billing.selectors import booking_block
+
+    if client_id and booking_block(client_id) == "hard":
+        raise BookingUnavailable(
+            _("Online booking isn't available for your account at the moment. Please contact us.")
+        )
+
+
+def require_org() -> Any:
+    from tutortrack.core.context import require_organisation_id
+
+    return require_organisation_id()
+
+
+def _booking_client(hold: Any) -> tuple[Any, Student, bool]:
+    """The hold's client and student, creating them for a new family."""
+    if hold.student_id:
+        return hold.student.client, hold.student, False
+    from tutortrack.people import services as people
+
+    c = hold.contact or {}
+    client, _contact, students = people.quick_add_family(
+        contact={
+            "first_name": c.get("first_name", ""),
+            "last_name": c.get("last_name", ""),
+            "email": c.get("email", ""),
+            "phone": c.get("phone", ""),
+        },
+        students=[{"first_name": c.get("student_first_name", "")}],
+    )
+    hold.client, hold.student = client, students[0]
+    hold.save(update_fields=["client", "student", "updated_at"])
+    return client, students[0], True
+
+
+def _hold_for_update(hold_id: Any) -> Any:
+    from .models import BookingHold
+
+    return BookingHold.objects.select_for_update().filter(pk=hold_id).first()
+
+
+@transaction.atomic
+def submit_hold(hold: Any, *, user: Any = None) -> tuple[Any, str]:
+    """The person pressed Book. Returns the hold and a pay link when payment is due now."""
+    from tutortrack.payments import services as payments
+
+    from .models import BookingHold, BookingSettings
+
+    hold = _hold_for_update(hold.pk)
+    if hold.status != BookingHold.Status.HELD:
+        raise BookingUnavailable(_("This booking can't be changed now."))
+    if hold.expires_at <= now():
+        raise BookingUnavailable(_("The time we held for you has run out. Please pick again."))
+    _check_collections(hold.client_id)
+    settings_row = booking_settings()
+    amount = Money(hold.quote.get("amount", {}).get("amount", "0"), hold.quote.get("currency"))
+    pay_link = ""
+    if settings_row.payment == BookingSettings.Payment.AT_BOOKING and amount.is_positive():
+        client, _student, _new = _booking_client(hold)
+        # E11 hook: a payment request and the pay page; ``payment_request.paid`` signals
+        # BookingHoldWorkflow when it is paid.
+        payment = payments.request_booking_payment(
+            client=client,
+            amount=amount,
+            description=_("Booking: %(service)s on %(when)s")
+            % {"service": hold.service.name, "when": f"{hold.start:%d %b %Y %H:%M} UTC"},
+            user=user if getattr(user, "is_authenticated", False) else None,
+        )
+        hold.payment_request_id = payment["payment_request_id"]
+        hold.status = BookingHold.Status.AWAITING_PAYMENT
+        hold.expires_at = now() + timedelta(minutes=settings_row.hold_minutes)
+        pay_link = str(payment["pay_url"])
+    elif settings_row.approval_required:
+        hold.status = BookingHold.Status.AWAITING_APPROVAL
+    with audit.track(hold, action="submit"):
+        hold.save()
+    if hold.status == BookingHold.Status.HELD:
+        _book(hold)
+    elif hold.status == BookingHold.Status.AWAITING_APPROVAL:
+        _request_approval(hold)
+    publish(events.BookingSubmitted(subject_id=hold.pk, status=hold.status))
+    return hold, pay_link
+
+
+def _request_approval(hold: Any) -> None:
+    publish(
+        events.BookingRequested(
+            subject_id=hold.pk, tutor_id=str(hold.tutor_id), start=hold.start.isoformat()
+        )
+    )
+    _staff_alert(
+        "staff_booking_requested",
+        _("New online booking for %(service)s") % {"service": hold.service.name},
+        f"{hold.start:%d %b %Y %H:%M} UTC",
+        "/calendar?tab=bookings",
+        f"booking-{hold.pk}",
+    )
+
+
+def _book(hold: Any) -> Lesson:
+    """Create the lesson for a hold and confirm it."""
+    from .models import BookingHold
+
+    client, student, new_client = _booking_client(hold)
+    result = create_lesson(
+        start=hold.start,
+        end=hold.end,
+        service=hold.service,
+        timezone=hold.timezone,
+        branch=hold.branch,
+        attendees=[{"student": student}],
+        tutors=[{"tutor": hold.tutor}],
+        created_via=Lesson.CreatedVia.CLIENT_BOOKING,
+        location=hold.location,
+        online=hold.online,
+        exclude_hold_ids=[hold.pk],
+    )
+    lesson = result.lesson
+    if hold.promo_code_id:
+        from tutortrack.catalogue import services as catalogue
+
+        lesson.attendees.update(promo_code=hold.promo_code_id)
+        pricing.price_lesson(lesson)
+        catalogue.redeem_promo(hold.promo_code, client=client, reference=f"booking:{hold.pk}")
+    with audit.track(hold, action="confirm"):
+        hold.lesson = lesson
+        hold.status = BookingHold.Status.CONFIRMED
+        hold.save()
+    publish(
+        events.BookingConfirmed(
+            subject_id=hold.pk,
+            lesson_id=str(lesson.pk),
+            client_id=str(client.pk),
+            new_client=new_client,
+        )
+    )
+    return lesson
+
+
+@transaction.atomic
+def payment_received(hold_id: Any) -> str:
+    """The booking was paid (activity after ``payment_request.paid``): confirm it, or wait
+    for approval when bookings need it."""
+    from .models import BookingHold
+
+    hold = _hold_for_update(hold_id)
+    if hold is None or hold.status != BookingHold.Status.AWAITING_PAYMENT:
+        return hold.status if hold else "missing"
+    if booking_settings().approval_required:
+        with audit.track(hold, action="paid"):
+            hold.status = BookingHold.Status.AWAITING_APPROVAL
+            hold.save()
+        _request_approval(hold)
+        return hold.status
+    try:
+        with transaction.atomic():
+            _book(hold)
+    except ConflictError:
+        hold.decision_note = _("The time was taken before the payment arrived.")
+        _close_hold(hold, BookingHold.Status.DECLINED, "conflict")
+    return hold.status
+
+
+@transaction.atomic
+def decide_booking(hold: Any, *, approve: bool, user: Any = None, note: str = "") -> Any:
+    from .models import BookingHold
+
+    hold = _hold_for_update(hold.pk)
+    if hold.status != BookingHold.Status.AWAITING_APPROVAL:
+        raise BusinessRuleViolation(_("This booking isn't waiting for approval."))
+    hold.decision_note = note[:300]
+    if approve:
+        _book(hold)
+    else:
+        _close_hold(hold, BookingHold.Status.DECLINED, "declined")
+    return hold
+
+
+def _close_hold(hold: Any, status: str, reason: str) -> None:
+    """Release a hold. An unpaid payment request is cancelled; money already paid stays
+    on the client's account as credit (refunds are a payments decision)."""
+    from tutortrack.billing import services as billing
+    from tutortrack.billing.models import PaymentRequest
+
+    if hold.payment_request_id:
+        request = PaymentRequest.objects.filter(pk=hold.payment_request_id).first()
+        if request is not None and request.status == PaymentRequest.Status.OPEN:
+            try:
+                with transaction.atomic():
+                    billing.cancel_payment_request(request)
+            except BusinessRuleViolation:
+                pass  # part-paid: keep it for the office
+    with audit.track(hold, action=reason):
+        hold.status = status
+        hold.save()
+    publish(events.BookingDeclined(subject_id=hold.pk, reason=reason))
+
+
+@transaction.atomic
+def release_hold(hold_id: Any) -> bool:
+    """The hold ran out before the booking was finished or paid (activity)."""
+    from tutortrack.billing.models import PaymentRequest
+
+    from .models import BookingHold
+
+    hold = _hold_for_update(hold_id)
+    if hold is None or hold.status not in (
+        BookingHold.Status.HELD,
+        BookingHold.Status.AWAITING_PAYMENT,
+    ):
+        return False
+    if (
+        hold.payment_request_id
+        and PaymentRequest.objects.filter(
+            pk=hold.payment_request_id, status=PaymentRequest.Status.PAID
+        ).exists()
+    ):
+        payment_received(hold.pk)  # paid, but the signal was missed
+        return False
+    _close_hold(hold, BookingHold.Status.EXPIRED, "expired")
+    return True
+
+
+@transaction.atomic
+def decline_unanswered_booking(hold_id: Any) -> bool:
+    """Nobody approved the booking before its deadline (activity)."""
+    from .models import BookingHold
+
+    hold = _hold_for_update(hold_id)
+    if hold is None or hold.status != BookingHold.Status.AWAITING_APPROVAL:
+        return False
+    hold.decision_note = _("Not approved in time.")
+    _close_hold(hold, BookingHold.Status.DECLINED, "expired")
+    return True
+
+
+@transaction.atomic
+def cancel_hold(hold: Any, *, user: Any = None) -> Any:
+    from .models import BookingHold
+
+    hold = _hold_for_update(hold.pk)
+    if hold.status not in BookingHold.ACTIVE:
+        raise BusinessRuleViolation(_("This booking can't be cancelled here."))
+    _close_hold(hold, BookingHold.Status.CANCELLED, "cancelled")
+    return hold
+
+
+def hold_state(hold_id: Any) -> dict[str, str]:
+    from .models import BookingHold
+
+    hold = BookingHold.objects.filter(pk=hold_id).first()
+    if hold is None:
+        return {"status": "missing", "expires_at": "", "start": ""}
+    return {
+        "status": hold.status,
+        "expires_at": hold.expires_at.isoformat(),
+        "start": hold.start.isoformat(),
+        "created_at": hold.created_at.isoformat(),
+    }
