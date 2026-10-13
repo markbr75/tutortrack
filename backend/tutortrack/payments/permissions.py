@@ -7,4 +7,5 @@ PERMISSIONS = {
     "payments.payment.allocate": "Allocate payments to invoices",
     "payments.payment.refund": "Refund payments",
     "payments.autopay.manage": "Manage clients' saved payment methods and auto-pay",
+    "payments.reconcile": "Import bank statements and match bank lines to payments",
 }

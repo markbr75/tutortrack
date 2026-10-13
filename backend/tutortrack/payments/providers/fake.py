@@ -46,7 +46,9 @@ class FakeProvider:
     def create_customer(self, account: str, *, name: str, email: str, ref: str) -> str:
         return self._id("cus")
 
-    def create_setup_intent(self, account: str, *, customer: str) -> Intent:
+    def create_setup_intent(
+        self, account: str, *, customer: str, return_url: str = "", currency: str = ""
+    ) -> Intent:
         ref = self._id("seti")
         return Intent(ref=ref, client_secret=f"{ref}_secret")
 

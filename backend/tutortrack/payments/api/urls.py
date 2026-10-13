@@ -8,9 +8,26 @@ router.register("payments/providers", views.ProviderAccountViewSet, basename="pa
 router.register("payments/disputes", views.DisputeViewSet, basename="payment-disputes")
 router.register("payments/payouts", views.PayoutViewSet, basename="payment-payouts")
 router.register("payment-methods", views.PaymentMethodViewSet, basename="payment-methods")
+router.register(
+    "payments/provider-migrations",
+    views.ProviderMigrationViewSet,
+    basename="provider-migrations",
+)
+router.register("bank-reconciliation/imports", views.BankImportViewSet, basename="bank-imports")
+router.register(
+    "bank-reconciliation/transactions",
+    views.BankTransactionViewSet,
+    basename="bank-transactions",
+)
 router.register("payments", views.PaymentViewSet, basename="payments")
 
 urlpatterns = [
+    path("payments/split", views.SplitPaymentView.as_view(), name="payments-split"),
+    path(
+        "clients/<uuid:client_id>/provider-migration",
+        views.ClientMigrationView.as_view(),
+        name="client-provider-migration",
+    ),
     path(
         "clients/<uuid:client_id>/payment-methods",
         views.ClientMethodsView.as_view(),

@@ -9,7 +9,7 @@ from decimal import Decimal
 import pytest
 from django.db import transaction
 
-from tutortrack.billing.models import ClientLedgerEntry, Invoice
+from tutortrack.billing.models import ClientLedgerEntry, Invoice, PackagePurchase
 from tutortrack.core.exceptions import BusinessRuleViolation, Conflict
 from tutortrack.core.time import now
 from tutortrack.identity.models import Invitation
@@ -152,8 +152,12 @@ def test_teachworks_pulls_customers_services_lessons_and_packages(tenant, user, 
     services.start_step(project.pk, "balances")
     finish_step_imports(project, "balances")
     leo = Student.objects.get(first_name="Leo")
-    assert sum(e.amount.amount for e in ClientLedgerEntry.objects.filter(client=leo.client)) == (
-        Decimal("-120.00")
+    assert not ClientLedgerEntry.objects.filter(client=leo.client).exists()
+    package = PackagePurchase.objects.get(client=leo.client)  # E10-T12: a real package
+    assert (package.name, package.units_remaining, package.price.amount) == (
+        "5 lesson bundle",
+        Decimal("2"),
+        Decimal("120.00"),
     )
     assert TutorProfile.objects.get().pay_rate_amount == Decimal("30.00")
 

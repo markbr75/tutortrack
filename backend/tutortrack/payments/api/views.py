@@ -11,9 +11,10 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django_filters import rest_framework as filters
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -30,11 +31,16 @@ from tutortrack.tenancy.settings_service import get_setting
 from .. import pdf, services
 from ..models import (
     AutoPayConsent,
+    BankStatementImport,
+    BankTransaction,
     Dispute,
     Payment,
+    PaymentGroup,
     PaymentMethod,
     ProviderAccount,
+    ProviderMigration,
     ProviderPayout,
+    ReconciliationMatch,
 )
 from ..providers import ProviderError
 from . import serializers as s
@@ -76,6 +82,29 @@ class ProviderAccountViewSet(
         return Response(
             {"account": s.ProviderAccountSerializer(result.account).data, "url": result.url}
         )
+
+    @extend_schema(request=s.ConnectSerializer, responses=s.OnboardingSerializer)
+    @action(detail=False, methods=["post"], url_path=r"(?P<provider>gocardless|paypal)/connect")
+    def connect_partner(self, request: Request, provider: str) -> Response:
+        """Start connecting GoCardless (partner OAuth) or PayPal (partner referral); open
+        the returned ``url``. The provider sends the admin back to Settings → Payments with
+        ``state`` and ``code`` (PayPal: ``merchantIdInPayPal``) for ``complete``."""
+        payload = s.ConnectSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        result = services.connect_partner(
+            provider, branch=payload.validated_data.get("branch"), user=request.user
+        )
+        return Response(
+            {"account": s.ProviderAccountSerializer(result.account).data, "url": result.url}
+        )
+
+    @extend_schema(request=s.PartnerCompleteSerializer, responses=s.ProviderAccountSerializer)
+    @action(detail=False, methods=["post"], url_path=r"(?P<provider>gocardless|paypal)/complete")
+    def complete_partner(self, request: Request, provider: str) -> Response:
+        payload = s.PartnerCompleteSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        account = services.complete_partner(provider, user=request.user, **payload.validated_data)
+        return Response(s.ProviderAccountSerializer(account).data)
 
     @extend_schema(request=None, responses=s.ProviderAccountSerializer)
     @action(detail=True, methods=["post"])
@@ -306,7 +335,7 @@ def _page(target: Invoice | PaymentRequest) -> dict[str, Any]:
     from tutortrack.tenancy.models import Organisation
 
     org = Organisation.objects.get(pk=target.organisation_id)
-    account = services.account_for(target.branch_id)
+    providers = services.pay_providers(target.branch_id)
     invoice = isinstance(target, Invoice)
     if isinstance(target, Invoice):
         lines = [
@@ -327,8 +356,9 @@ def _page(target: Invoice | PaymentRequest) -> dict[str, Any]:
         "amount_due": services.amount_due(target),
         "lines": lines,
         "allow_partial": bool(get_setting("payments.allow_partial")),
-        "can_pay_online": bool(account and account.status == ProviderAccount.Status.ACTIVE),
+        "can_pay_online": bool(providers),
         "has_pdf": invoice,
+        "providers": providers,
     }
 
 
@@ -357,6 +387,7 @@ class PublicPayIntentView(APIView):
             target,
             amount=Money(amount, target.currency) if amount else None,
             save_method=payload.validated_data["save_method"],
+            provider=payload.validated_data["provider"],
         )
         return Response(s.PayIntentSerializer(out).data)
 
@@ -369,7 +400,11 @@ class PublicPayConfirmView(APIView):
     def post(self, request: Request, token: str) -> Response:
         payload = s.ConfirmSerializer(data=request.data)
         payload.is_valid(raise_exception=True)
-        result = services.confirm_pay_intent(_target(token), payload.validated_data["intent"])
+        result = services.confirm_pay_intent(
+            _target(token),
+            payload.validated_data["intent"],
+            provider=payload.validated_data["provider"],
+        )
         return Response({"status": result})
 
 
@@ -402,13 +437,21 @@ class PublicSetupView(APIView):
             raise NotFound()
         return link
 
-    @extend_schema(responses=s.SetupPageSerializer)
+    @extend_schema(
+        responses=s.SetupPageSerializer,
+        parameters=[OpenApiParameter("provider", str, description="stripe or gocardless")],
+    )
     def get(self, request: Request, token: str) -> Response:
         from tutortrack.tenancy.models import Organisation
 
         link = self._link(token)
         org = Organisation.objects.get(pk=link.organisation_id)
-        data = services.start_setup(link.client)
+        provider = link.provider or request.query_params.get("provider", "")
+        data = services.start_setup(
+            link.client,
+            provider=provider,
+            return_url=services.tenant_url(f"/pay/setup/{token}?provider=gocardless"),
+        )
         return Response(
             s.SetupPageSerializer(
                 {"organisation": org.name, "client_name": link.client.display_name, **data}
@@ -424,6 +467,7 @@ class PublicSetupView(APIView):
             link,
             payload.validated_data["intent"],
             autopay=payload.validated_data["autopay"],
+            provider=payload.validated_data["provider"],
             ip_address=_client_ip(request),
             user_agent=request.META.get("HTTP_USER_AGENT", ""),
         )
@@ -446,3 +490,258 @@ def stripe_webhook(request: HttpRequest) -> HttpResponse:
     except ProviderError:
         return HttpResponse(status=400)
     return HttpResponse(status=200)
+
+
+@csrf_exempt
+def gocardless_webhook(request: HttpRequest) -> HttpResponse:
+    """``POST /webhooks/gocardless``: a signed batch of events (HMAC ``Webhook-Signature``),
+    stored and processed async. GoCardless expects 498 for a bad signature."""
+    if request.method != "POST":
+        return HttpResponse(status=405)
+    try:
+        services.ingest_partner_webhooks("gocardless", request.body, dict(request.headers))
+    except ProviderError:
+        return HttpResponse(status=498)
+    return HttpResponse(status=200)
+
+
+@csrf_exempt
+def paypal_webhook(request: HttpRequest) -> HttpResponse:
+    """``POST /webhooks/paypal``: verified with PayPal, stored and processed async."""
+    if request.method != "POST":
+        return HttpResponse(status=405)
+    headers = {k.upper(): v for k, v in request.headers.items()}
+    try:
+        services.ingest_partner_webhooks("paypal", request.body, headers)
+    except ProviderError:
+        return HttpResponse(status=400)
+    return HttpResponse(status=200)
+
+
+# --- Phase 2: split payments, bank reconciliation, provider migration --------------------------
+
+
+class SplitPaymentView(APIView):
+    """Record one receipt split across several clients (FR-11-6), e.g. a school paying for
+    many students. Each share becomes that client's payment."""
+
+    permission_classes = perms({"POST": "payments.payment.record"})
+
+    @extend_schema(request=s.SplitPaymentSerializer, responses={201: s.PaymentGroupSerializer})
+    def post(self, request: Request) -> Response:
+        payload = s.SplitPaymentSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = dict(payload.validated_data)
+        amount = data.pop("amount")
+        parts = [
+            {
+                "client": part["client"],
+                "amount": Money(part["amount"], amount.currency),
+                "allocations": _allocations(part.get("allocations"), amount.currency),
+            }
+            for part in data.pop("parts")
+        ]
+        group = services.record_split_payment(amount=amount, parts=parts, user=request.user, **data)
+        group = PaymentGroup.objects.prefetch_related(
+            "payments__allocations", "payments__refunds", "payments__client"
+        ).get(pk=group.pk)
+        return Response(s.PaymentGroupSerializer(group).data, status=status.HTTP_201_CREATED)
+
+
+class BankImportViewSet(
+    TenantScopedViewMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    """Bank statement imports (FR-11-5): ``POST`` a CSV, OFX or CAMT.053 file; new lines
+    join the reconciliation queue with suggested matches."""
+
+    model = BankStatementImport
+    serializer_class = s.BankImportSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    permission_classes = perms({"GET": "payments.reconcile", "POST": "payments.reconcile"})
+
+    def get_tenant_queryset(self) -> QuerySet[BankStatementImport]:
+        return BankStatementImport.objects.all()
+
+    @extend_schema(
+        request={"multipart/form-data": s.BankUploadSerializer},
+        responses={201: s.BankImportSerializer},
+    )
+    def create(self, request: Request) -> Response:
+        from rest_framework.exceptions import ValidationError
+
+        from .. import bank, statements
+
+        payload = s.BankUploadSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        upload = payload.validated_data["file"]
+        if upload.size > 10 * 1024 * 1024:
+            raise ValidationError({"file": ["Statements can be at most 10 MB."]})
+        content = upload.read()
+        source = payload.validated_data["file_type"] or statements.detect(upload.name, content)
+        try:
+            parsed = statements.parse(
+                source, content, month_first=payload.validated_data["month_first"]
+            )
+        except statements.StatementError as exc:
+            raise ValidationError({"file": [str(exc)]}) from exc
+        statement = bank.import_rows(
+            parsed,
+            source=source,
+            filename=upload.name,
+            currency=payload.validated_data["currency"],
+            user=request.user,
+        )
+        return Response(self.get_serializer(statement).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=None, responses=s.BankSyncResultSerializer)
+    @action(detail=False, methods=["post"])
+    def sync(self, request: Request) -> Response:
+        """Pull new transactions from every connected Open Banking feed now."""
+        from tutortrack.integrations.models import IntegrationConnection
+
+        from .. import bank
+        from ..bank_feeds import PROVIDER
+
+        out = []
+        for connection in IntegrationConnection.objects.filter(
+            provider=PROVIDER, user__isnull=True
+        ).exclude(status="disconnected"):
+            statement = bank.sync_feed(connection.pk, user=request.user)
+            if statement is not None:
+                out.append(statement)
+        return Response({"imports": s.BankImportSerializer(out, many=True).data})
+
+
+class BankTransactionFilter(filters.FilterSet):
+    status = filters.MultipleChoiceFilter(choices=BankTransaction.Status.choices)
+    statement = filters.UUIDFilter()
+
+    class Meta:
+        model = BankTransaction
+        fields: list[str] = []
+
+
+class BankTransactionViewSet(
+    TenantScopedViewMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    """The reconciliation queue: bank lines with suggested matches to confirm or ignore."""
+
+    model = BankTransaction
+    serializer_class = s.BankTransactionSerializer
+    filterset_class = BankTransactionFilter
+    permission_classes = perms({"GET": "payments.reconcile", "POST": "payments.reconcile"})
+
+    def get_tenant_queryset(self) -> QuerySet[BankTransaction]:
+        return BankTransaction.objects.prefetch_related("matches__invoice", "matches__client")
+
+    def _out(self, txn: BankTransaction) -> Response:
+        return Response(self.get_serializer(self.get_tenant_queryset().get(pk=txn.pk)).data)
+
+    @extend_schema(request=s.ConfirmMatchSerializer, responses=s.BankTransactionSerializer)
+    @action(detail=True, methods=["post"])
+    def confirm(self, request: Request, pk: Any = None) -> Response:
+        """Confirm a suggested ``match``, or name the ``client`` (and ``invoice``)."""
+        from .. import bank
+
+        txn = self.get_object()
+        payload = s.ConfirmMatchSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+        match = None
+        if data.get("match"):
+            match = get_object_or_404(ReconciliationMatch.objects.all(), pk=data["match"])
+        txn = bank.confirm(
+            txn, match, client=data.get("client"), invoice=data.get("invoice"), user=request.user
+        )
+        return self._out(txn)
+
+    @extend_schema(request=s.SplitMatchSerializer, responses=s.BankTransactionSerializer)
+    @action(detail=True, methods=["post"])
+    def split(self, request: Request, pk: Any = None) -> Response:
+        """One bank receipt for several clients (a split payment)."""
+        from .. import bank
+
+        txn = self.get_object()
+        payload = s.SplitMatchSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        parts = [
+            {
+                "client": part["client"],
+                "amount": Money(part["amount"], txn.currency),
+                "allocations": _allocations(part.get("allocations"), txn.currency),
+            }
+            for part in payload.validated_data["parts"]
+        ]
+        txn = bank.confirm_split(
+            txn, parts, payer_name=payload.validated_data["payer_name"], user=request.user
+        )
+        return self._out(txn)
+
+    @extend_schema(request=None, responses=s.BankTransactionSerializer)
+    @action(detail=True, methods=["post"])
+    def ignore(self, request: Request, pk: Any = None) -> Response:
+        from .. import bank
+
+        return self._out(bank.ignore(self.get_object(), user=request.user))
+
+    @extend_schema(request=None, responses=s.BankTransactionSerializer)
+    @action(detail=True, methods=["post"])
+    def reopen(self, request: Request, pk: Any = None) -> Response:
+        from .. import bank
+
+        return self._out(bank.reopen(self.get_object(), user=request.user))
+
+
+class ClientMigrationView(APIView):
+    """Move a client to another provider (FR-11-2): they get a setup link; the new method
+    becomes the default and the old one is cancelled once nothing is being collected."""
+
+    permission_classes = perms({"POST": "payments.autopay.manage"})
+
+    @extend_schema(
+        request=s.MigrationRequestSerializer, responses={201: s.ProviderMigrationSerializer}
+    )
+    def post(self, request: Request, client_id: Any) -> Response:
+        from .. import provider_migration
+
+        payload = s.MigrationRequestSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        migration = provider_migration.start_migration(
+            _client(request, client_id),
+            to_provider=payload.validated_data["to_provider"],
+            user=request.user,
+        )
+        return Response(
+            s.ProviderMigrationSerializer(migration).data, status=status.HTTP_201_CREATED
+        )
+
+
+class ProviderMigrationFilter(filters.FilterSet):
+    client = filters.UUIDFilter()
+    status = filters.MultipleChoiceFilter(choices=ProviderMigration.Status.choices)
+
+    class Meta:
+        model = ProviderMigration
+        fields: list[str] = []
+
+
+class ProviderMigrationViewSet(
+    TenantScopedViewMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    """Clients being moved between payment providers."""
+
+    model = ProviderMigration
+    serializer_class = s.ProviderMigrationSerializer
+    filterset_class = ProviderMigrationFilter
+    permission_classes = perms({"GET": "payments.payment.view", "POST": "payments.autopay.manage"})
+
+    def get_tenant_queryset(self) -> QuerySet[ProviderMigration]:
+        return ProviderMigration.objects.select_related("client")
+
+    @extend_schema(request=None, responses=s.ProviderMigrationSerializer)
+    @action(detail=True, methods=["post"])
+    def cancel(self, request: Request, pk: Any = None) -> Response:
+        from .. import provider_migration
+
+        migration = provider_migration.cancel_migration(self.get_object(), user=request.user)
+        return Response(self.get_serializer(migration).data)

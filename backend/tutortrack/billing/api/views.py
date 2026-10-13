@@ -32,8 +32,19 @@ from tutortrack.core.time import now
 from tutortrack.people.models import Client
 from tutortrack.tenancy.models import Organisation
 
-from .. import ledger, pdf, selectors, services
-from ..models import Charge, ClientLedgerEntry, CreditNote, Invoice, InvoiceRun, PaymentRequest
+from .. import dunning, ledger, packages, pdf, plans, selectors, services, splits
+from ..models import (
+    BillingPlan,
+    Charge,
+    ClientLedgerEntry,
+    CollectionsCase,
+    CreditNote,
+    Invoice,
+    InvoiceRun,
+    LateFeeRule,
+    PackagePurchase,
+    PaymentRequest,
+)
 from . import serializers as s
 
 AUTH = [IsAuthenticated, HasOrganisation]
@@ -558,3 +569,315 @@ class AgeingView(APIView):
         return Response(
             s.AgeingRowSerializer(selectors.ageing_report(request.user, currency), many=True).data
         )
+
+
+# --- Phase 2: packages (T12) --------------------------------------------------------------------
+
+
+class PackageFilter(filters.FilterSet):
+    client = filters.UUIDFilter()
+    status = filters.MultipleChoiceFilter(choices=PackagePurchase.Status.choices)
+
+    class Meta:
+        model = PackagePurchase
+        fields: list[str] = []
+
+
+class PackageViewSet(
+    TenantScopedViewMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Packages sold to clients (FR-10-7). ``POST`` sells one: a package charge invoiced at
+    once (setting); the package activates when that invoice is paid (or issued)."""
+
+    model = PackagePurchase
+    serializer_class = s.PackagePurchaseSerializer
+    filterset_class = PackageFilter
+    permission_classes = perms({"GET": "billing.package.view", "POST": "billing.package.sell"})
+
+    def get_tenant_queryset(self) -> QuerySet[PackagePurchase]:
+        qs = selectors.packages(self.request.user).select_related("charge__invoice")
+        if self.action == "retrieve":
+            qs = qs.prefetch_related("consumptions")
+        return qs
+
+    def get_serializer_class(self) -> Any:
+        return (
+            s.PackageDetailSerializer if self.action == "retrieve" else s.PackagePurchaseSerializer
+        )
+
+    def _out(self, purchase: PackagePurchase) -> Response:
+        return Response(
+            s.PackageDetailSerializer(self.get_tenant_queryset().get(pk=purchase.pk)).data
+        )
+
+    @extend_schema(request=s.SellPackageSerializer, responses={201: s.PackageDetailSerializer})
+    def create(self, request: Request) -> Response:
+        payload = s.SellPackageSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        purchase = packages.sell_package(user=request.user, **payload.validated_data)
+        response = self._out(purchase)
+        response.status_code = status.HTTP_201_CREATED
+        return response
+
+    @extend_schema(request=s.ExtendPackageSerializer, responses=s.PackageDetailSerializer)
+    @action(
+        detail=True, methods=["post"], permission_classes=perms({"POST": "billing.package.manage"})
+    )
+    def extend(self, request: Request, pk: Any = None) -> Response:
+        payload = s.ExtendPackageSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        purchase = packages.extend_package(
+            self.get_object(), until=payload.validated_data["until"], user=request.user
+        )
+        return self._out(purchase)
+
+    @extend_schema(request=s.CancelPackageSerializer, responses=s.PackageDetailSerializer)
+    @action(
+        detail=True, methods=["post"], permission_classes=perms({"POST": "billing.package.manage"})
+    )
+    def cancel(self, request: Request, pk: Any = None) -> Response:
+        payload = s.CancelPackageSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        purchase = packages.cancel_package(
+            self.get_object(),
+            reason=payload.validated_data["reason"],
+            refund=payload.validated_data.get("refund"),
+            user=request.user,
+        )
+        return self._out(purchase)
+
+
+# --- Phase 2: recurring fees (T13) --------------------------------------------------------------
+
+
+class PlanFilter(filters.FilterSet):
+    client = filters.UUIDFilter()
+    job = filters.UUIDFilter()
+    status = filters.MultipleChoiceFilter(choices=BillingPlan.Status.choices)
+
+    class Meta:
+        model = BillingPlan
+        fields: list[str] = []
+
+
+class BillingPlanViewSet(
+    TenantScopedViewMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Recurring fixed fees (FR-10-8): each period is charged when it starts, prorated when
+    the plan starts or ends part way through a period."""
+
+    model = BillingPlan
+    serializer_class = s.BillingPlanSerializer
+    filterset_class = PlanFilter
+    http_method_names = ["get", "post", "patch", "head", "options"]
+    permission_classes = perms(
+        {"GET": "billing.plan.view", "POST": "billing.plan.manage", "PATCH": "billing.plan.manage"}
+    )
+
+    def get_tenant_queryset(self) -> QuerySet[BillingPlan]:
+        return selectors.plans(self.request.user)
+
+    @extend_schema(request=s.BillingPlanCreateSerializer, responses={201: s.BillingPlanSerializer})
+    def create(self, request: Request) -> Response:
+        payload = s.BillingPlanCreateSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        plan = plans.create_plan(user=request.user, **payload.validated_data)
+        return Response(self.get_serializer(plan).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=s.BillingPlanUpdateSerializer, responses=s.BillingPlanSerializer)
+    def partial_update(self, request: Request, pk: Any = None) -> Response:
+        payload = s.BillingPlanUpdateSerializer(data=request.data, partial=True)
+        payload.is_valid(raise_exception=True)
+        plan = plans.update_plan(self.get_object(), user=request.user, **payload.validated_data)
+        return Response(self.get_serializer(plan).data)
+
+    @extend_schema(request=s.PlanStatusSerializer, responses=s.BillingPlanSerializer)
+    @action(detail=True, methods=["post"], url_path="status")
+    def set_status(self, request: Request, pk: Any = None) -> Response:
+        """Pause (periods starting while paused aren't charged), resume or end."""
+        payload = s.PlanStatusSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        plan = plans.set_plan_status(
+            self.get_object(), payload.validated_data["status"], user=request.user
+        )
+        return Response(self.get_serializer(plan).data)
+
+    @extend_schema(responses=s.ProrationPreviewSerializer(many=True))
+    @action(detail=True, methods=["get"], pagination_class=None)
+    def periods(self, request: Request, pk: Any = None) -> Response:
+        """The next 12 periods and what each will cost."""
+        plan = self.get_object()
+        rows = []
+        for segment in plans.plan_segments(plan):
+            rows.append(
+                {
+                    "start": segment.start,
+                    "end": segment.end,
+                    "amount": plans.amount_for(
+                        plan.amount, segment, prorate=plan.prorate
+                    ).to_dict(),
+                    "partial": segment.partial and plan.prorate,
+                }
+            )
+            if len(rows) >= 12:
+                break
+        return Response(s.ProrationPreviewSerializer(rows, many=True).data)
+
+
+# --- Phase 2: late fees and collections (T14) ---------------------------------------------------
+
+
+class LateFeeRuleViewSet(
+    TenantScopedViewMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Late fee rules (FR-10-10): one active rule for the organisation and optionally one
+    per branch. Turn one off with ``active: false``."""
+
+    model = LateFeeRule
+    serializer_class = s.LateFeeRuleSerializer
+    pagination_class = None
+    http_method_names = ["get", "post", "patch", "head", "options"]
+    permission_classes = perms(
+        {
+            "GET": "billing.invoice.view",
+            "POST": "billing.late_fee.manage",
+            "PATCH": "billing.late_fee.manage",
+        }
+    )
+
+    def get_tenant_queryset(self) -> QuerySet[LateFeeRule]:
+        return LateFeeRule.objects.all()
+
+    def perform_create(self, serializer: Any) -> None:
+        serializer.instance = dunning.save_rule(None, **serializer.validated_data)
+
+    def perform_update(self, serializer: Any) -> None:
+        serializer.instance = dunning.save_rule(serializer.instance, **serializer.validated_data)
+
+
+class WaiveLateFeeView(APIView):
+    """Waive a late fee: voided if not invoiced yet, otherwise credited."""
+
+    permission_classes = perms({"POST": "billing.late_fee.manage"})
+
+    @extend_schema(request=s.WaiveSerializer, responses=s.ChargeSerializer)
+    def post(self, request: Request, charge_id: Any) -> Response:
+        payload = s.WaiveSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        qs = scope_queryset(request.user, Charge.objects.all(), "billing.charge.view")
+        charge = get_object_or_404(qs, pk=charge_id)
+        charge = dunning.waive_late_fee(
+            charge, reason=payload.validated_data["reason"], user=request.user
+        )
+        charge.refresh_from_db()
+        return Response(s.ChargeSerializer(charge).data)
+
+
+class CaseFilter(filters.FilterSet):
+    client = filters.UUIDFilter()
+    status = filters.MultipleChoiceFilter(choices=CollectionsCase.Status.choices)
+
+    class Meta:
+        model = CollectionsCase
+        fields: list[str] = []
+
+
+class CollectionsCaseViewSet(
+    TenantScopedViewMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    """Clients in collections (FR-10-10)."""
+
+    model = CollectionsCase
+    serializer_class = s.CollectionsCaseSerializer
+    filterset_class = CaseFilter
+    permission_classes = perms(
+        {"GET": "billing.invoice.view", "POST": "billing.collections.manage"}
+    )
+
+    def get_tenant_queryset(self) -> QuerySet[CollectionsCase]:
+        return CollectionsCase.objects.select_related("client", "invoice")
+
+    @extend_schema(request=s.CloseCaseSerializer, responses=s.CollectionsCaseSerializer)
+    @action(detail=True, methods=["post"])
+    def close(self, request: Request, pk: Any = None) -> Response:
+        payload = s.CloseCaseSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        case = dunning.close_case(
+            self.get_object(), reason=payload.validated_data["reason"], user=request.user
+        )
+        return Response(self.get_serializer(case).data)
+
+
+# --- Phase 2: split billing (T15) ---------------------------------------------------------------
+
+
+def _split_out(job: Any, student: Any) -> dict[str, Any]:
+    rows = splits.splits_of(job=job, student=student if job is None else None)
+    return {
+        "job": job.pk if job is not None else None,
+        "student": student.pk if student is not None and job is None else None,
+        "shares": rows,
+    }
+
+
+class BillingSplitView(APIView):
+    """Split a job's or a student's billing between paying clients (FR-10-12). ``GET``
+    with ``?job=`` or ``?student=``; ``POST`` replaces the split (empty ``shares``
+    removes it)."""
+
+    permission_classes = perms({"GET": "billing.invoice.view", "POST": "billing.split.manage"})
+
+    def _target(self, data: Any) -> tuple[Any, Any]:
+        from tutortrack.jobs.models import Job
+        from tutortrack.people.models import Student
+
+        # Finance staff manage splits without job/student permissions: the organisation's
+        # records (tenant manager and RLS) are the scope.
+        job_id, student_id = data.get("job"), data.get("student")
+        job = student = None
+        if job_id:
+            job = get_object_or_404(Job.objects.all(), pk=job_id)
+        elif student_id:
+            student = get_object_or_404(Student.objects.select_related("client"), pk=student_id)
+        else:
+            raise ValidationError({"job": ["Give a job or a student."]})
+        return job, student
+
+    @extend_schema(
+        responses=s.BillingSplitOutSerializer,
+        parameters=[
+            OpenApiParameter("job", OpenApiTypes.UUID),
+            OpenApiParameter("student", OpenApiTypes.UUID),
+        ],
+    )
+    def get(self, request: Request) -> Response:
+        job, student = self._target(request.query_params)
+        return Response(s.BillingSplitOutSerializer(_split_out(job, student)).data)
+
+    @extend_schema(request=s.BillingSplitSerializer, responses=s.BillingSplitOutSerializer)
+    def post(self, request: Request) -> Response:
+        payload = s.BillingSplitSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+        job, student = self._target(
+            {"job": data["job"].pk if data.get("job") else None,
+             "student": data["student"].pk if data.get("student") else None}
+        )  # fmt: skip
+        splits.set_splits(
+            shares=[(row["client"], row["percent"]) for row in data["shares"]],
+            job=job,
+            student=student,
+            user=request.user,
+        )
+        return Response(s.BillingSplitOutSerializer(_split_out(job, student)).data)

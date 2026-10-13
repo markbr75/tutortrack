@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from typing import Any
+
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from tutortrack.billing.models import Invoice, PaymentRequest
@@ -13,12 +16,17 @@ from tutortrack.people.models import Client
 from tutortrack.tenancy.models import Branch
 
 from ..models import (
+    BankStatementImport,
+    BankTransaction,
     Dispute,
     Payment,
     PaymentAllocation,
+    PaymentGroup,
     PaymentMethod,
     ProviderAccount,
+    ProviderMigration,
     ProviderPayout,
+    ReconciliationMatch,
     Refund,
 )
 
@@ -41,6 +49,12 @@ class ProviderAccountSerializer(BaseModelSerializer):
             "connected_at",
         ]
         read_only_fields = fields
+
+
+PAY_PROVIDERS = ["stripe", "gocardless", "paypal"]
+SETUP_PROVIDERS = ["", "stripe", "gocardless"]
+MIGRATION_PROVIDERS = ["stripe", "gocardless"]
+MANUAL_METHODS = [m for m in Payment.Method.choices if m[0] != Payment.Method.CARD]
 
 
 class ConnectSerializer(serializers.Serializer):
@@ -132,6 +146,7 @@ class PaymentSerializer(BaseModelSerializer):
             "failure_message",
             "allocations",
             "refunds",
+            "group",
             "created_at",
         ]
         read_only_fields = fields
@@ -150,9 +165,7 @@ class AllocationInputSerializer(serializers.Serializer):
 class RecordPaymentSerializer(serializers.Serializer):
     client = TenantRelatedField(Client)
     amount = MoneySerializerField()
-    method = serializers.ChoiceField(
-        choices=[m for m in Payment.Method.choices if m[0] != Payment.Method.CARD]
-    )
+    method = serializers.ChoiceField(choices=MANUAL_METHODS)
     received_at = serializers.DateTimeField(required=False, allow_null=True, default=None)
     reference = serializers.CharField(max_length=120, required=False, allow_blank=True, default="")
     notes = serializers.CharField(required=False, allow_blank=True, default="")
@@ -224,6 +237,10 @@ class PayPageSerializer(serializers.Serializer):
     allow_partial = serializers.BooleanField()
     can_pay_online = serializers.BooleanField()
     has_pdf = serializers.BooleanField()
+    providers = serializers.ListField(
+        child=serializers.CharField(),
+        help_text="Online providers offered: stripe, gocardless, paypal",
+    )
 
 
 class PayIntentRequestSerializer(serializers.Serializer):
@@ -231,18 +248,24 @@ class PayIntentRequestSerializer(serializers.Serializer):
         max_digits=14, decimal_places=2, required=False, allow_null=True, min_value=0
     )
     save_method = serializers.BooleanField(default=False)
+    provider = serializers.ChoiceField(choices=PAY_PROVIDERS, default="stripe")
 
 
 class PayIntentSerializer(serializers.Serializer):
+    provider = serializers.CharField(default="stripe")
     publishable_key = serializers.CharField()
     account = serializers.CharField()
     client_secret = serializers.CharField()
     intent = serializers.CharField()
+    redirect_url = serializers.CharField(
+        default="", help_text="GoCardless/PayPal: send the customer here"
+    )
     amount = MoneyOut()
 
 
 class ConfirmSerializer(serializers.Serializer):
     intent = serializers.CharField(max_length=100)
+    provider = serializers.ChoiceField(choices=PAY_PROVIDERS, default="stripe")
 
 
 class ConfirmResultSerializer(serializers.Serializer):
@@ -252,18 +275,138 @@ class ConfirmResultSerializer(serializers.Serializer):
 class SetupPageSerializer(serializers.Serializer):
     organisation = serializers.CharField()
     client_name = serializers.CharField()
+    provider = serializers.CharField()
+    providers = serializers.ListField(child=serializers.CharField())
     publishable_key = serializers.CharField()
     account = serializers.CharField()
     client_secret = serializers.CharField()
     intent = serializers.CharField()
+    redirect_url = serializers.CharField()
     consent_text = serializers.CharField()
 
 
 class SetupCompleteSerializer(serializers.Serializer):
     intent = serializers.CharField(max_length=100)
     autopay = serializers.BooleanField(default=False)
+    provider = serializers.ChoiceField(choices=SETUP_PROVIDERS, required=False, default="")
 
 
 class SetupDoneSerializer(serializers.Serializer):
     method = PaymentMethodSerializer()
     auto_pay = serializers.BooleanField()
+
+
+# --- Phase 2 (E11-T11..T14) ---------------------------------------------------------------------
+
+
+class PartnerCompleteSerializer(serializers.Serializer):
+    state = serializers.CharField(max_length=200)
+    code = serializers.CharField(
+        max_length=300, help_text="GoCardless ``code``, or PayPal ``merchantIdInPayPal``"
+    )
+
+
+class SplitPartSerializer(serializers.Serializer):
+    client = TenantRelatedField(Client)
+    amount = serializers.DecimalField(max_digits=14, decimal_places=2, min_value=0)
+    allocations = AllocationInputSerializer(many=True, required=False, allow_null=True)
+
+
+class SplitPaymentSerializer(serializers.Serializer):
+    payer_name = serializers.CharField(max_length=200)
+    amount = MoneySerializerField()
+    method = serializers.ChoiceField(choices=MANUAL_METHODS)
+    received_at = serializers.DateTimeField(required=False, allow_null=True, default=None)
+    reference = serializers.CharField(max_length=120, required=False, allow_blank=True, default="")
+    notes = serializers.CharField(required=False, allow_blank=True, default="")
+    parts = SplitPartSerializer(many=True)
+
+
+class PaymentGroupSerializer(BaseModelSerializer):
+    payments = PaymentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = PaymentGroup
+        fields = ["id", "payer_name", "currency", "amount", "method", "received_at",
+                  "reference", "notes", "payments", "created_at"]  # fmt: skip
+        read_only_fields = fields
+
+
+class MatchSerializer(BaseModelSerializer):
+    invoice_number = serializers.SerializerMethodField()
+    client_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ReconciliationMatch
+        fields = ["id", "kind", "invoice", "invoice_number", "payment_request", "client",
+                  "client_name", "payment", "payout", "score", "reason", "status"]  # fmt: skip
+        read_only_fields = fields
+
+    def get_invoice_number(self, obj: ReconciliationMatch) -> str:
+        return obj.invoice.number if obj.invoice else ""
+
+    def get_client_name(self, obj: ReconciliationMatch) -> str:
+        return obj.client.display_name if obj.client else ""
+
+
+class BankTransactionSerializer(BaseModelSerializer):
+    matches = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BankTransaction
+        fields = ["id", "statement", "booked_on", "currency", "amount", "description",
+                  "reference", "counterparty", "status", "payment", "payment_group", "payout",
+                  "matched_at", "matches", "created_at"]  # fmt: skip
+        read_only_fields = fields
+
+    @extend_schema_field(MatchSerializer(many=True))
+    def get_matches(self, obj: BankTransaction) -> list[dict[str, Any]]:
+        rows = [m for m in obj.matches.all() if m.status != ReconciliationMatch.Status.REJECTED]
+        return list(MatchSerializer(rows, many=True).data)
+
+
+class BankImportSerializer(BaseModelSerializer):
+    class Meta:
+        model = BankStatementImport
+        fields = ["id", "source", "filename", "account_name", "currency", "connection_id",
+                  "stats", "created_at"]  # fmt: skip
+        read_only_fields = fields
+
+
+class BankUploadSerializer(serializers.Serializer):
+    file = serializers.FileField()
+    file_type = serializers.ChoiceField(
+        choices=["", "csv", "ofx", "camt"], required=False, default="",
+        help_text="Leave empty to detect from the file",
+    )  # fmt: skip
+    currency = serializers.CharField(max_length=3, required=False, allow_blank=True, default="")
+    month_first = serializers.BooleanField(default=False, help_text="US dates (month/day) in CSV")
+
+
+class ConfirmMatchSerializer(serializers.Serializer):
+    match = serializers.UUIDField(required=False, allow_null=True)
+    client = TenantRelatedField(Client, required=False, allow_null=True)
+    invoice = TenantRelatedField(Invoice, required=False, allow_null=True)
+
+
+class SplitMatchSerializer(serializers.Serializer):
+    payer_name = serializers.CharField(max_length=200, required=False, allow_blank=True, default="")
+    parts = SplitPartSerializer(many=True)
+
+
+class BankSyncResultSerializer(serializers.Serializer):
+    imports = BankImportSerializer(many=True)
+
+
+class MigrationRequestSerializer(serializers.Serializer):
+    to_provider = serializers.ChoiceField(choices=MIGRATION_PROVIDERS)
+
+
+class ProviderMigrationSerializer(BaseModelSerializer):
+    client_name = serializers.CharField(source="client.display_name", read_only=True)
+
+    class Meta:
+        model = ProviderMigration
+        fields = ["id", "client", "client_name", "from_method", "to_provider", "new_method",
+                  "status", "completed_at", "created_at"]  # fmt: skip
+        read_only_fields = fields

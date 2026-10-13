@@ -258,6 +258,33 @@ def test_billing_payment_methods_and_statement(org, world):
     assert methods == {"auto_pay": False, "consent_given_at": None, "methods": []}
 
 
+def test_portal_shows_and_sells_packages(org, world):
+    """E10-T12 / FR-15-7: package balances and buying a package sold online."""
+    from tutortrack.catalogue.models import PackageTemplate
+
+    a = world["a"]
+    with tenant_context(org):
+        offer = PackageTemplate.objects.create(
+            name="5 lessons", quantity_type="lessons", quantity=Decimal(5), currency="GBP",
+            price_amount=Decimal("150"), bookable_online=True,
+        )  # fmt: skip
+        PackageTemplate.objects.create(
+            name="Staff only", quantity_type="lessons", quantity=Decimal(5), currency="GBP",
+            price_amount=Decimal("150"),
+        )  # fmt: skip
+    data = a["api"].get("/api/v1/portal/billing").json()
+    assert [o["name"] for o in data["package_offers"]] == ["5 lessons"]
+    bought = a["api"].post(
+        "/api/v1/portal/packages",
+        {"client": str(a["client"].pk), "template": str(offer.pk)},
+        format="json",
+    )
+    assert bought.status_code == 201, bought.content
+    assert bought.json()["pay_token"]
+    data = a["api"].get("/api/v1/portal/billing").json()
+    assert [(p["name"], p["status"]) for p in data["packages"]] == [("5 lessons", "pending")]
+
+
 def test_profile_edits_and_sensitive_alert(org, world):
     a = world["a"]
     profile = a["api"].get("/api/v1/portal/profile").json()

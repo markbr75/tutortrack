@@ -45,13 +45,19 @@ def register(integration: Integration) -> Integration:
     return integration
 
 
-def _stripe_status() -> str:
-    from tutortrack.payments.models import ProviderAccount
+def _provider_status(provider: str) -> Callable[[], str]:
+    def status() -> str:
+        from tutortrack.payments.models import ProviderAccount
 
-    active = ProviderAccount.objects.filter(
-        provider="stripe", status=ProviderAccount.Status.ACTIVE
-    ).exists()
-    return "connected" if active else "available"
+        active = ProviderAccount.objects.filter(
+            provider=provider, status=ProviderAccount.Status.ACTIVE
+        ).exists()
+        return "connected" if active else "available"
+
+    return status
+
+
+_stripe_status = _provider_status("stripe")
 
 
 def _platform_provided() -> str:
@@ -63,7 +69,11 @@ for _integration in (
                 str(_("Card and wallet payments, autopay and payouts.")),
                 settings_path="/settings/payments", status=_stripe_status),
     Integration("gocardless", "GoCardless", "payments",
-                str(_("Direct Debit mandates and collections."))),
+                str(_("Direct Debit mandates and collections.")),
+                settings_path="/settings/payments", status=_provider_status("gocardless")),
+    Integration("paypal", "PayPal", "payments",
+                str(_("Pay invoices with PayPal on the payment page.")),
+                settings_path="/settings/payments", status=_provider_status("paypal")),
     Integration("xero", "Xero", "accounting",
                 str(_("Sync invoices, payments and contacts to Xero."))),
     Integration("quickbooks", "QuickBooks Online", "accounting",

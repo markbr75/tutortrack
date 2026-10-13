@@ -9,8 +9,18 @@ router.register("invoices", views.InvoiceViewSet, basename="invoices")
 router.register("credit-notes", views.CreditNoteViewSet, basename="credit-notes")
 router.register("invoice-runs", views.InvoiceRunViewSet, basename="invoice-runs")
 router.register("payment-requests", views.PaymentRequestViewSet, basename="payment-requests")
+router.register("packages", views.PackageViewSet, basename="package-purchases")
+router.register("billing-plans", views.BillingPlanViewSet, basename="billing-plans")
+router.register("billing/late-fee-rules", views.LateFeeRuleViewSet, basename="late-fee-rules")
+router.register("billing/collections", views.CollectionsCaseViewSet, basename="collections")
 
 urlpatterns = [
+    path(
+        "charges/<uuid:charge_id>/waive",
+        views.WaiveLateFeeView.as_view(),
+        name="charge-waive",
+    ),
+    path("billing/splits", views.BillingSplitView.as_view(), name="billing-splits"),
     path(
         "clients/<uuid:client_id>/balance", views.ClientBalanceView.as_view(), name="client-balance"
     ),

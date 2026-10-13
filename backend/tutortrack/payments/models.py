@@ -8,12 +8,15 @@ from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
+from tutortrack.core.crypto import EncryptedField
 from tutortrack.core.fields import CurrencyField, MoneyField
 from tutortrack.core.models import BranchScopedModel, TenantModel
 
 
 class Provider(models.TextChoices):
     STRIPE = "stripe", _("Stripe")
+    GOCARDLESS = "gocardless", _("GoCardless")
+    PAYPAL = "paypal", _("PayPal")
     MANUAL = "manual", _("Manual")
 
 
@@ -57,6 +60,11 @@ class ProviderAccount(TenantModel):
     default_currency = CurrencyField(blank=True, default="")
     connected_at = models.DateTimeField(null=True, blank=True)
     disconnected_at = models.DateTimeField(null=True, blank=True)
+    # GoCardless partner OAuth token (Stripe and PayPal act with platform credentials).
+    access_token = EncryptedField(blank=True, default="")
+    connect_state = models.CharField(max_length=64, blank=True, default="")  # pending OAuth
+
+    audit_sensitive_fields = frozenset({"access_token"})
 
     class Meta(TenantModel.Meta):
         ordering = ["provider", "created_at"]
@@ -128,6 +136,7 @@ class SetupLink(TenantModel):
 
     client = models.ForeignKey("people.Client", on_delete=models.CASCADE, related_name="+")
     token_hash = models.CharField(max_length=64, unique=True)
+    provider = models.CharField(max_length=10, blank=True, default="")  # "" = any enabled
     expires_at = models.DateTimeField()
     used_at = models.DateTimeField(null=True, blank=True)
     created_by = models.ForeignKey(
@@ -171,6 +180,7 @@ class Payment(BranchScopedModel):
         BANK_TRANSFER = "bank_transfer", _("Bank transfer")
         CASH = "cash", _("Cash")
         CHEQUE = "cheque", _("Cheque")
+        PAYPAL = "paypal", _("PayPal")
         OTHER = "other", _("Other")
 
     class Source(models.TextChoices):
@@ -211,6 +221,9 @@ class Payment(BranchScopedModel):
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
     receipt_sent_at = models.DateTimeField(null=True, blank=True)
+    group = models.ForeignKey(
+        "PaymentGroup", null=True, blank=True, on_delete=models.PROTECT, related_name="payments"
+    )  # one receipt split across clients (E11-T14)
 
     class Meta(BranchScopedModel.Meta):
         ordering = ["-received_at", "-created_at"]
@@ -343,5 +356,175 @@ class ProviderWebhookEvent(TenantModel):
         constraints = [
             models.UniqueConstraint(
                 fields=["provider", "event_id"], name="provider_webhook_event_unique"
+            )
+        ]
+
+
+# --- Phase 2 (E11-T11..T14) ---------------------------------------------------------------------
+
+
+class PaymentGroup(BranchScopedModel):
+    """One receipt split across several clients (FR-11-6 split payments, e.g. a school
+    paying for many students). Each client's share is an ordinary ``Payment`` in the group,
+    so ledgers, allocations, refunds and accounting sync work per client."""
+
+    payer_name = models.CharField(max_length=200)
+    currency = CurrencyField()
+    amount = MoneyField()
+    method = models.CharField(max_length=14, choices=Payment.Method.choices)
+    received_at = models.DateTimeField()
+    reference = models.CharField(max_length=120, blank=True, default="")
+    notes = models.TextField(blank=True, default="")
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta(BranchScopedModel.Meta):
+        ordering = ["-received_at", "-created_at"]
+
+
+class BankStatementImport(TenantModel):
+    """A bank statement file (CSV, OFX, CAMT.053) or an Open Banking feed sync (FR-11-5)."""
+
+    class Source(models.TextChoices):
+        CSV = "csv", _("CSV")
+        OFX = "ofx", _("OFX / QFX")
+        CAMT = "camt", _("CAMT.053 (ISO 20022)")
+        OPEN_BANKING = "open_banking", _("Open Banking feed")
+
+    source = models.CharField(max_length=12, choices=Source.choices)
+    filename = models.CharField(max_length=255, blank=True, default="")
+    account_name = models.CharField(max_length=120, blank=True, default="")
+    currency = CurrencyField()
+    connection_id = models.CharField(max_length=64, blank=True, default="")  # Open Banking
+    stats = models.JSONField(default=dict, blank=True)  # rows, new, duplicates, suggested
+    imported_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-created_at"]
+
+
+class BankTransaction(TenantModel):
+    """A line on the bank statement, waiting to be matched (the reconciliation queue)."""
+
+    class Status(models.TextChoices):
+        UNMATCHED = "unmatched", _("No match found")
+        SUGGESTED = "suggested", _("Suggested match")
+        MATCHED = "matched", _("Matched")
+        IGNORED = "ignored", _("Ignored")
+
+    statement = models.ForeignKey(
+        BankStatementImport, on_delete=models.PROTECT, related_name="transactions"
+    )
+    external_id = models.CharField(max_length=128)  # FITID / entry ref / hash: dedupes imports
+    booked_on = models.DateField()
+    currency = CurrencyField()
+    amount = MoneyField()  # credits positive, debits negative
+    description = models.CharField(max_length=500, blank=True, default="")
+    reference = models.CharField(max_length=200, blank=True, default="")
+    counterparty = models.CharField(max_length=200, blank=True, default="")
+    status = models.CharField(max_length=9, choices=Status.choices, default=Status.UNMATCHED)
+    payment = models.ForeignKey(
+        Payment, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    payment_group = models.ForeignKey(
+        PaymentGroup, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    payout = models.ForeignKey(
+        ProviderPayout, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    matched_at = models.DateTimeField(null=True, blank=True)
+    matched_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-booked_on", "-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "external_id"], name="bank_transaction_unique"
+            )
+        ]
+        indexes = [models.Index(fields=["organisation", "status"], name="bank_txn_status_idx")]
+
+
+class ReconciliationMatch(TenantModel):
+    """A suggested (or confirmed) match for a bank transaction."""
+
+    class Kind(models.TextChoices):
+        INVOICE = "invoice", _("Invoice")
+        PAYMENT_REQUEST = "payment_request", _("Payment request")
+        CLIENT = "client", _("Client account")
+        PAYMENT = "payment", _("Payment already recorded")
+        PAYOUT = "payout", _("Provider payout")
+
+    class Status(models.TextChoices):
+        SUGGESTED = "suggested", _("Suggested")
+        CONFIRMED = "confirmed", _("Confirmed")
+        REJECTED = "rejected", _("Rejected")
+
+    transaction = models.ForeignKey(
+        BankTransaction, on_delete=models.CASCADE, related_name="matches"
+    )
+    kind = models.CharField(max_length=15, choices=Kind.choices)
+    invoice = models.ForeignKey(
+        "billing.Invoice", null=True, blank=True, on_delete=models.CASCADE, related_name="+"
+    )
+    payment_request = models.ForeignKey(
+        "billing.PaymentRequest", null=True, blank=True, on_delete=models.CASCADE, related_name="+"
+    )
+    client = models.ForeignKey(
+        "people.Client", null=True, blank=True, on_delete=models.CASCADE, related_name="+"
+    )
+    payment = models.ForeignKey(
+        Payment, null=True, blank=True, on_delete=models.CASCADE, related_name="+"
+    )
+    payout = models.ForeignKey(
+        ProviderPayout, null=True, blank=True, on_delete=models.CASCADE, related_name="+"
+    )
+    score = models.PositiveSmallIntegerField()
+    reason = models.CharField(max_length=200)
+    status = models.CharField(max_length=9, choices=Status.choices, default=Status.SUGGESTED)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-score", "created_at"]
+
+
+class ProviderMigration(TenantModel):
+    """Moving a client to another provider (FR-11-2): a setup link for the new provider,
+    switch the default when a method is added, then cancel the old mandate once nothing is
+    being collected with it (``ProviderMigrationWorkflow``)."""
+
+    class Status(models.TextChoices):
+        WAITING = "waiting", _("Waiting for the client")
+        SWITCHED = "switched", _("Switched; old method still settling")
+        COMPLETED = "completed", _("Completed")
+        CANCELLED = "cancelled", _("Cancelled")
+        EXPIRED = "expired", _("Client didn't set up the new method")
+
+    client = models.ForeignKey("people.Client", on_delete=models.CASCADE, related_name="+")
+    from_method = models.ForeignKey(
+        PaymentMethod, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    to_provider = models.CharField(max_length=10, choices=Provider.choices)
+    new_method = models.ForeignKey(
+        PaymentMethod, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    status = models.CharField(max_length=9, choices=Status.choices, default=Status.WAITING)
+    workflow_id = models.CharField(max_length=255, blank=True, default="")
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["client"],
+                condition=Q(status__in=["waiting", "switched"]),
+                name="provider_migration_one_open",
             )
         ]

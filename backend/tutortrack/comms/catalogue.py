@@ -764,6 +764,81 @@ register(
     )
 )
 
+
+def _setup_link(payload: Any) -> list[Delivery]:
+    """E11 provider migration: ``(client, url, provider label)``."""
+    client, url, provider = payload
+    return _billing_deliveries(client, {"setup": {"url": url, "provider": provider}})
+
+
+register(
+    NotificationType(
+        key="payment_setup_link",
+        label=str(_("Set up a new payment method")),
+        category="billing",
+        audience="client",
+        channels=("email",),
+        default_channels=("email",),
+        resolve=_setup_link,
+        load=load_client,
+        related_type="people.client",
+        variables=("recipient.first_name", "setup.url", "setup.provider"),
+        sample={
+            **SAMPLE_BASE,
+            "setup": {"url": "https://example.test/pay/setup/x", "provider": "GoCardless"},
+        },
+        transactional=True,
+    )
+)
+
+
+def load_package(pk: str) -> Any:
+    from tutortrack.billing.models import PackagePurchase
+
+    return PackagePurchase.objects.select_related("client").filter(pk=pk).first()
+
+
+def _package(purchase: Any) -> list[Delivery]:
+    return _billing_deliveries(
+        purchase.client,
+        {
+            "package": {
+                "name": purchase.name,
+                "units_remaining": str(purchase.units_remaining.normalize()),
+                "expires_at": purchase.expires_at,
+            }
+        },
+    )
+
+
+register(
+    NotificationType(
+        key="package_expiring",
+        label=str(_("Package about to expire")),
+        category="billing",
+        audience="client",
+        channels=("email",),
+        default_channels=("email",),
+        resolve=_package,
+        load=load_package,
+        related_type="billing.packagepurchase",
+        variables=(
+            "recipient.first_name",
+            "package.name",
+            "package.units_remaining",
+            "package.expires_at",
+        ),
+        sample={
+            **SAMPLE_BASE,
+            "package": {
+                "name": "10 hours",
+                "units_remaining": "3",
+                "expires_at": "2026-12-01T00:00:00Z",
+            },
+        },
+    )
+)
+
 # --- staff alerts (in-app first) ----------------------------------------------------------------
 
 

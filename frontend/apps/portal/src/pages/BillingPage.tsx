@@ -1,7 +1,8 @@
-import { unwrap } from "@tutortrack/api-client";
+import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
 import { Alert, Button, Spinner } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 import { api } from "../api";
 
@@ -90,6 +91,87 @@ function Methods({ clientId }: { clientId: string }) {
 
 /** Balances, invoices to pay, top-up requests, credit notes, statements and payment
  * methods (FR-15-7). Paying opens the hosted pay page. */
+type Billing = components["schemas"]["PortalBilling"];
+
+/** Package balances and packages on sale online (FR-15-7, E10-T12). */
+function Packages({ billing }: { billing: Billing }) {
+  const { t, i18n } = useTranslation();
+  const [client, setClient] = useState(billing.accounts[0]?.client ?? "");
+  const buy = useMutation({
+    mutationFn: async (template: string) =>
+      unwrap(await api.POST("/api/v1/portal/packages", { body: { client, template } })),
+    onSuccess: (result) => {
+      if (result.pay_token) window.location.assign(`/pay/${result.pay_token}`);
+    },
+  });
+  const packages = billing.packages ?? [];
+  const offers = billing.package_offers ?? [];
+  if (!packages.length && !offers.length) return null;
+  return (
+    <section aria-labelledby="packages" className="space-y-3">
+      <h2 id="packages" className="font-semibold">
+        {t("portalPackages.title")}
+      </h2>
+      {packages.length ? (
+        <ul className="space-y-1 text-sm">
+          {packages.map((p) => (
+            <li key={p.id}>
+              <span className="font-medium">{p.name}</span>
+              {p.student_name ? ` · ${p.student_name}` : ""} ·{" "}
+              {t(`portalPackages.left.${p.quantity_type}`, {
+                left: Number(p.units_remaining),
+                total: Number(p.units_total),
+              })}
+              {p.status === "pending" ? ` · ${t("portalPackages.awaitingPayment")}` : ""}
+              {p.expires_at
+                ? ` · ${t("portalPackages.expires", { date: formatDate(p.expires_at, i18n.language) })}`
+                : ""}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-muted-foreground">{t("portalPackages.none")}</p>
+      )}
+      {offers.length ? (
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold">{t("portalPackages.buy")}</h3>
+          {billing.accounts.length > 1 ? (
+            <label className="block text-sm">
+              <span className="block">{t("portalPackages.forAccount")}</span>
+              <select
+                className="rounded-md border border-border px-2 py-1"
+                value={client}
+                onChange={(e) => setClient(e.target.value)}
+              >
+                {billing.accounts.map((a) => (
+                  <option key={a.client} value={a.client}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          <ul className="space-y-2 text-sm">
+            {offers.map((offer) => (
+              <li key={offer.id} className="flex flex-wrap items-center justify-between gap-2">
+                <span>
+                  <span className="font-medium">{offer.name}</span> ·{" "}
+                  {formatMoney(offer.price, i18n.language)}
+                  {offer.description ? ` · ${offer.description}` : ""}
+                </span>
+                <Button size="sm" onClick={() => buy.mutate(offer.id)} disabled={buy.isPending}>
+                  {t("portalPackages.buyNow")}
+                </Button>
+              </li>
+            ))}
+          </ul>
+          {buy.error ? <Alert tone="danger">{t("portalPackages.failed")}</Alert> : null}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 export function BillingPage() {
   const { t, i18n } = useTranslation();
   const data = useQuery({
@@ -135,6 +217,7 @@ export function BillingPage() {
           <Methods clientId={acct.client} />
         </section>
       ))}
+      <Packages billing={b} />
       {b.payment_requests.length ? (
         <section aria-labelledby="requests" className="space-y-2">
           <h2 id="requests" className="font-semibold">

@@ -7,8 +7,10 @@
   ledger entry (``billing.services.import_invoice``). Open ones can still be paid.
 * **Payments** are real money received after the cutover: recorded through
   ``payments.services.record_manual_payment`` (ledger + allocation to the named invoice).
-* **Packages**: package purchases are Phase 2 (E10-T12), so a remaining package balance
-  is carried over as client credit with the package details in its description.
+* **Packages**: each package still being used becomes an active ``PackagePurchase``
+  (E10-T12) holding the hours, lessons or credit left; its price is the remaining value
+  (the money was taken in the old system, so there is no invoice and no ledger entry).
+  Rolling back cancels an imported package nobody has used yet.
 """
 
 from __future__ import annotations
@@ -354,8 +356,10 @@ class PaymentImporter(Importer):
 class PackageBalanceImporter(Importer):
     key = "packages"
     label = _l("Package balances")
-    description = _l("Prepaid packages still being used: the unused value becomes client credit.")
-    permissions = ("billing.ledger.adjust",)
+    description = _l(
+        "Prepaid packages still being used: each becomes an active package with what is left."
+    )
+    permissions = ("billing.package.sell",)
     target_type = "people.client"
     upsert_keys = ("none",)
     default_upsert = "none"
@@ -380,6 +384,20 @@ class PackageBalanceImporter(Importer):
             "decimal",
             synonyms=("remaining hours", "hours left", "remaining lessons", "remaining"),
         ),
+        FieldSpec(
+            "quantity_type",
+            _l("Counted in"),
+            "choice",
+            choices=("hours", "lessons", "credit"),
+            synonyms=("unit", "units", "type", "counted in"),
+            help=_l("Hours, lessons or credit (default: hours when hours are given)."),
+        ),
+        FieldSpec(
+            "total_units",
+            _l("Package size"),
+            "decimal",
+            synonyms=("total hours", "total lessons", "package size", "size"),
+        ),
         FieldSpec("expires_on", _l("Expires on"), "date", synonyms=("expiry", "expires")),
         FieldSpec("student_name", _l("Student"), synonyms=("student",)),
         FieldSpec("currency", _l("Currency"), max_length=3, synonyms=("currency",)),
@@ -400,35 +418,65 @@ class PackageBalanceImporter(Importer):
         if values.get("remaining_value") is not None and values["remaining_value"] <= 0:
             ctx.warn("remaining_value", _("Nothing left on the package; skipped."))
             return Plan(action="skip", target_type="people.client", target_id=str(client.pk))
+        if _kind(values) != "credit" and not values.get("remaining_hours"):
+            ctx.error("remaining_hours", _("Give the hours or lessons left (or count in credit)."))
+            return Plan()
         return Plan(
             action="update",
-            effects=[("billing.package_credit", "create")],
+            effects=[("billing.package", "create")],
             target_type="people.client",
             target_id=str(client.pk),
         )
 
     def apply(self, values: dict[str, Any], ctx: Context) -> Outcome:
-        from tutortrack.billing import services as billing
+        from datetime import datetime, time, timedelta
+        from zoneinfo import ZoneInfo
+
+        from tutortrack.billing import packages
 
         client = _client(values, ctx)
         if values["remaining_value"] <= 0:
             return Outcome(action="skip")
-        amount = money_or_none(-Decimal(values["remaining_value"]), _currency(values, client, ctx))
-        details = [str(values["package"])]
+        kind = _kind(values)
+        value = money_or_none(Decimal(values["remaining_value"]), _currency(values, client, ctx))
+        remaining = (
+            Decimal(values["remaining_value"])
+            if kind == "credit"
+            else Decimal(values["remaining_hours"])
+        )
+        total = Decimal(values.get("total_units") or 0) or remaining
+        student = None
         if values.get("student_name"):
-            details.append(str(values["student_name"]))
-        if values.get("remaining_hours") is not None:
-            details.append(_("%(n)s remaining") % {"n": values["remaining_hours"]})
+            try:
+                student = refs.find_student(ctx, values, client)
+            except RowError:
+                ctx.warn("student_name", _("Student not found; any student can use it."))
+        expires = None
         if values.get("expires_on"):
-            details.append(_("expires %(date)s") % {"date": values["expires_on"].isoformat()})
-        entry = billing.adjust_ledger(
-            client,
-            amount,
-            reason=_("Package carried over: %(details)s") % {"details": ", ".join(details)},
+            from tutortrack.tenancy.models import Organisation
+
+            tz = ZoneInfo(Organisation.objects.get(pk=client.organisation_id).timezone)
+            day = values["expires_on"] + timedelta(days=1)
+            expires = datetime.combine(day, time.min, tzinfo=tz)
+        purchase = packages.import_package(
+            client=client,
+            name=str(values["package"]),
+            quantity_type=kind,
+            units_total=max(total, remaining),
+            units_remaining=remaining,
+            value_remaining=value,
+            expires_at=expires,
+            student=student,
         )
         return Outcome(
             action="update",
             target_type="people.client",
             target_id=str(client.pk),
-            created=[_ledger_ref(entry, client, amount)],
+            created=[{"type": "billing.packagepurchase", "id": str(purchase.pk)}],
         )
+
+
+def _kind(values: dict[str, Any]) -> str:
+    if values.get("quantity_type"):
+        return str(values["quantity_type"])
+    return "hours" if values.get("remaining_hours") else "credit"

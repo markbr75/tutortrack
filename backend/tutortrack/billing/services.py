@@ -106,6 +106,8 @@ def _desired_price(attendee: LessonAttendee, lesson: Lesson, advance: bool) -> M
     zero = Money.zero(attendee.currency)
     if str(attendee.student_id) in makeup_students(lesson):
         return zero
+    if lesson.job_id and lesson.job and lesson.job.billing_method == "recurring_fixed":
+        return zero  # the plan's fixed fee covers the job's lessons (E10-T13)
     if lesson.status in {Lesson.Status.COMPLETED, Lesson.Status.CANCELLED}:
         if not attendee.chargeable:
             return zero
@@ -157,9 +159,21 @@ def sync_attendee_charge(
     locked = [c for c in charges if c not in pending]  # invoiced, or on a draft
     already_advanced = any(c.kind == Charge.Kind.ADVANCE for c in charges)
     desired = _desired_price(attendee, lesson, advance or already_advanced)
+    from .packages import consume_for_attendee
+    from .splits import payers_for
+
+    desired = desired - consume_for_attendee(attendee, lesson, desired)  # E10-T12
     billed = sum_money((_billed_price(c) for c in locked), desired.currency)
     delta = desired - billed
-    if pending and len(pending) == 1 and _billed_price(pending[0]) == delta:
+    payers = payers_for(job=lesson.job, student=attendee.student, client=attendee.client)
+    parts = delta.allocate([p for _c, p in payers]) if len(payers) > 1 else [delta]
+    wanted = sorted(
+        (str(c.pk), part.amount)
+        for (c, _p), part in zip(payers, parts, strict=True)
+        if not part.is_zero()
+    )
+    have = sorted((str(c.client_id), _billed_price(c).amount) for c in pending)
+    if pending and have == wanted:
         return pending[0]
     for charge in pending:
         void_charge(charge, reason="replaced")
@@ -169,27 +183,32 @@ def sync_attendee_charge(
     snapshot = attendee.charge_snapshot or {}
     percent = Decimal(str(snapshot.get("tax_percent", "0")))
     tax_rate_id = snapshot.get("tax_rate_id")
-    client = attendee.client
     tutor = lesson.tutors.select_related("tutor").first()
-    return _create_charge(
-        client=client,
-        student=attendee.student,
-        job=lesson.job,
-        lesson=lesson,
-        lesson_attendee=attendee,
-        kind=kind,
-        source_key=f"attendee:{attendee.pk}:{len(locked)}",
-        description=_describe(kind, lesson, attendee.student),
-        day=lesson.start.astimezone(ZoneInfo(lesson.timezone)).date(),
-        price=delta,
-        quantity=Decimal(1),
-        unit="lesson",
-        tax_percent=percent,
-        tax_rate_id=tax_rate_id,
-        tutor=tutor.tutor if tutor else None,
-        branch_id=lesson.branch_id,
-        user=user,
-    )
+    key = f"attendee:{attendee.pk}:{len(locked)}"
+    created = [
+        _create_charge(
+            client=client,
+            student=attendee.student,
+            job=lesson.job,
+            lesson=lesson,
+            lesson_attendee=attendee,
+            kind=kind,
+            source_key=key if len(payers) == 1 else f"{key}:{index}",
+            description=_describe(kind, lesson, attendee.student),
+            day=lesson.start.astimezone(ZoneInfo(lesson.timezone)).date(),
+            price=part,
+            quantity=Decimal(1),
+            unit="lesson",
+            tax_percent=percent,
+            tax_rate_id=tax_rate_id,
+            tutor=tutor.tutor if tutor else None,
+            branch_id=lesson.branch_id,
+            user=user,
+        )
+        for index, ((client, _p), part) in enumerate(zip(payers, parts, strict=True))
+        if not part.is_zero()
+    ]
+    return created[0] if created else None
 
 
 def _create_charge(
@@ -766,6 +785,9 @@ def void_invoice(invoice: Invoice, *, reason: str, user: Any = None) -> Invoice:
         charge.invoice = None
         charge.save(update_fields=["status", "invoice", "updated_at"])
     InvoiceLine.objects.filter(invoice=invoice).update(charge=None)
+    from .packages import cancel_for_charges
+
+    cancel_for_charges(charges, reason=reason)  # a voided package sale cancels the package
     publish(
         events.InvoiceVoided(
             subject_id=invoice.pk, client_id=str(invoice.client_id), reason=reason

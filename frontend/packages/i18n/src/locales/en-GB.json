@@ -3265,6 +3265,7 @@
       "billing.invoice": "invoices",
       "billing.opening_balance": "opening balances",
       "billing.package_credit": "package credits",
+      "billing.package": "packages",
       "payments.payment": "payments",
       "leads.enquiry": "enquiries",
       "crm.tag": "tags",
@@ -3389,5 +3390,172 @@
         "expired": "Expired"
       }
     }
+  },
+  "payOptions": {
+    "payWith": "Pay with",
+    "saveWith": "Save",
+    "stripe": "Card",
+    "gocardless": "Bank (Direct Debit)",
+    "paypal": "PayPal",
+    "gocardlessHelp": "You'll confirm the payment from your bank account on GoCardless's secure page.",
+    "paypalHelp": "You'll pay on PayPal's secure page and come back here.",
+    "gocardlessSetupHelp": "You'll set up a Direct Debit on GoCardless's secure page and come back here.",
+    "continueToGoCardless": "Continue to GoCardless",
+    "finishing": "Finishing…"
+  },
+  "paymentProviders": {
+    "title": "More ways to get paid",
+    "gocardlessHelp": "Collect Direct Debits: clients set up a mandate once and invoices are collected automatically.",
+    "paypalHelp": "Let clients pay invoices with PayPal on the payment page.",
+    "connect": "Connect {{name}}",
+    "connected": "Connected."
+  },
+  "migration": {
+    "moveTo": "Move to {{provider}}",
+    "inProgress": "Moving to {{provider}}: {{status}}",
+    "status": {
+      "waiting": "waiting for the client to set up their new payment method",
+      "switched": "switched; the old method is cancelled once nothing is being collected",
+      "completed": "completed",
+      "cancelled": "cancelled",
+      "expired": "the client didn't set up the new method"
+    }
+  },
+  "bank": {
+    "title": "Bank",
+    "help": "Import a bank statement (CSV, OFX or CAMT.053) or sync your Open Banking feed, then confirm the suggested matches.",
+    "upload": "Import a bank statement",
+    "file": "Statement file",
+    "monthFirst": "Dates are month first (US)",
+    "import": "Import",
+    "syncFeed": "Sync bank feed",
+    "imported": "{{count}} new lines imported ({{duplicates}} already imported).",
+    "show": "Show",
+    "status": {
+      "suggested": "Suggested match",
+      "unmatched": "No match found",
+      "matched": "Matched",
+      "ignored": "Ignored"
+    },
+    "score": "{{score}}% sure",
+    "confirm": "Confirm",
+    "ignore": "Ignore",
+    "reopen": "Put back in the queue",
+    "split": "Split between clients",
+    "client": "Client {{n}}",
+    "chooseClient": "Choose a client…",
+    "partAmount": "Amount {{n}}",
+    "addPart": "Add another",
+    "recordSplit": "Record split payment"
+  },
+  "packages": {
+    "title": "Packages",
+    "sell": "Sell package",
+    "template": "Package",
+    "chooseTemplate": "Choose a package…",
+    "sold": "Sold. Invoice {{invoice}}; the package can be used once it's paid.",
+    "left": {
+      "hours": "{{left}} of {{total}} hours left",
+      "lessons": "{{left}} of {{total}} lessons left",
+      "credit": "{{left}} of {{total}} credit left"
+    },
+    "status": {
+      "pending": "Awaiting payment",
+      "active": "Active",
+      "depleted": "Used up",
+      "expired": "Expired",
+      "cancelled": "Cancelled"
+    },
+    "expires": "expires {{date}}",
+    "extendTo": "New expiry date",
+    "extend": "Extend",
+    "cancelReason": "Reason for cancelling",
+    "cancel": "Cancel package"
+  },
+  "plans": {
+    "title": "Recurring fees",
+    "help": "A fixed fee charged every week, month or term, prorated when it starts or ends part way through a period.",
+    "new": "New recurring fee",
+    "interval": "Every",
+    "intervals": {
+      "weekly": "week",
+      "monthly": "month",
+      "termly": "term"
+    },
+    "start": "Starts",
+    "prorate": "Prorate part periods",
+    "create": "Create",
+    "from": "from {{date}}",
+    "status": {
+      "active": "Active",
+      "paused": "Paused",
+      "ended": "Ended"
+    },
+    "pause": "Pause",
+    "resume": "Resume",
+    "end": "End"
+  },
+  "lateFees": {
+    "tab": "Late fees",
+    "title": "Late fee",
+    "help": "Charged on overdue invoices: a fixed amount or a percentage of what is owed, once or every month, added to the next invoice or invoiced straight away.",
+    "rule": "Late fee rule",
+    "kind": "Fee",
+    "kinds": {
+      "fixed": "Fixed amount",
+      "percent": "Percentage of what is owed"
+    },
+    "amount": "Amount",
+    "percent": "Percentage",
+    "daysOverdue": "Days overdue",
+    "recurrence": "Charge",
+    "recurrences": {
+      "once": "Once",
+      "monthly": "Every month while unpaid"
+    },
+    "maxApplications": "At most (times)",
+    "mode": "Bill it",
+    "modes": {
+      "next_invoice": "On the next invoice",
+      "immediate": "On its own invoice now"
+    },
+    "active": "Charge late fees",
+    "save": "Save",
+    "saved": "Saved.",
+    "collections": "In collections",
+    "blocks": {
+      "none": "no booking block",
+      "soft": "warn when scheduling",
+      "hard": "online booking blocked"
+    },
+    "closeCase": "Take out of collections",
+    "noneInCollections": "No clients are in collections."
+  },
+  "splits": {
+    "title": "Split billing",
+    "help": "Share a job's charges between paying clients, for example separated parents 50/50.",
+    "job": "Job",
+    "chooseJob": "Choose a job…",
+    "none": "Not split: the job's client pays.",
+    "edit": "Split the job's billing",
+    "percent": "Share {{n}} (%)",
+    "total": "Total: {{total}}%",
+    "save": "Save split",
+    "remove": "Stop splitting"
+  },
+  "portalPackages": {
+    "title": "Packages",
+    "left": {
+      "hours": "{{left}} of {{total}} hours left",
+      "lessons": "{{left}} of {{total}} lessons left",
+      "credit": "{{left}} of {{total}} credit left"
+    },
+    "awaitingPayment": "awaiting payment",
+    "expires": "expires {{date}}",
+    "none": "You have no packages.",
+    "buy": "Buy a package",
+    "forAccount": "For",
+    "buyNow": "Buy",
+    "failed": "The package couldn't be bought. Please try again."
   }
 }

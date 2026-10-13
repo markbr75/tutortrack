@@ -47,6 +47,30 @@ def follow_invoice_schedule(event: EventEnvelope) -> None:
         sync_invoice_schedules()
 
 
+@subscribe("invoice.issued", "invoice.paid")
+def activate_packages(event: EventEnvelope) -> None:
+    """A package can be used once its invoice is paid (or issued, setting) (E10-T12)."""
+    from . import packages
+
+    packages.activate_for_invoice(event.subject["id"])
+
+
+@subscribe("package.depleted")
+def renew_package(event: EventEnvelope) -> None:
+    if event.data.get("auto_renew"):
+        from . import packages
+
+        packages.renew(event.subject["id"])
+
+
+@subscribe("invoice.paid", "invoice.voided", "invoice.written_off")
+def leave_collections(event: EventEnvelope) -> None:
+    """Nothing overdue on the invoice any more: its collections case closes (E10-T14)."""
+    from . import dunning
+
+    dunning.close_collections(event.subject["id"], reason=event.type)
+
+
 bridge.on(
     "invoice.issued",
     start=InvoiceDunningWorkflow,

@@ -41,6 +41,12 @@ register(
     label=_("Turn off auto-pay when every retry has failed"),
 )
 register(
+    "payments.bank_auto_match",
+    type="bool",
+    default=False,
+    label=_("Confirm bank lines automatically when the invoice number and amount both match"),
+)
+register(
     "payments.autopay_consent_text",
     type="str",
     default=(

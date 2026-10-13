@@ -13,6 +13,7 @@ for key, default, label in (
     ("portal.allow_profile_edits", True, _("Families can edit their details")),
     ("portal.show_tutor_contact", False, _("Show tutors' email and phone")),
     ("portal.show_prices", True, _("Show lesson prices")),
+    ("portal.show_package_balances", True, _("Show package balances and sell packages")),
 ):
     register(key, type="bool", default=default, label=label)
 for key, label in (

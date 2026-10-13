@@ -9,7 +9,7 @@ from decimal import Decimal
 
 import pytest
 
-from tutortrack.billing.models import ClientLedgerEntry, Invoice
+from tutortrack.billing.models import ClientLedgerEntry, Invoice, PackagePurchase
 from tutortrack.billing.selectors import has_opening_balance
 from tutortrack.catalogue.models import Service
 from tutortrack.core.models import AuditEntry, OutboxEvent
@@ -415,9 +415,20 @@ def test_opening_balances_invoices_payments_and_packages(s3_tenant):
     )
     assert packages.stats["updated"] == 1
     c2 = ExternalRef.objects.get(external_id="C2").target_id
+    # E10-T12: a real package with the hours left; no ledger credit any more.
     assert sum(e.amount.amount for e in ClientLedgerEntry.objects.filter(client_id=c2)) == Decimal(
-        "-165.00"
+        "-30.00"
     )
+    package = PackagePurchase.objects.get(client_id=c2)
+    assert (package.status, package.quantity_type, package.units_remaining) == (
+        "active",
+        "hours",
+        Decimal("3"),
+    )
+    assert package.price.amount == Decimal("135.00")
+    assert roll_back(packages) == {"reverted": 1, "kept": 0}
+    package.refresh_from_db()
+    assert package.status == "cancelled"
 
     # Rolling back financial imports reverses, never deletes.
     assert roll_back(payments) == {"reverted": 1, "kept": 0}

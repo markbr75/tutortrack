@@ -1189,6 +1189,251 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/bank-reconciliation/imports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Bank statement imports (FR-11-5): ``POST`` a CSV, OFX or CAMT.053 file; new lines
+     *     join the reconciliation queue with suggested matches.
+     */
+    get: operations["bank_reconciliation_imports_list"];
+    put?: never;
+    /**
+     * @description Bank statement imports (FR-11-5): ``POST`` a CSV, OFX or CAMT.053 file; new lines
+     *     join the reconciliation queue with suggested matches.
+     */
+    post: operations["bank_reconciliation_imports_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/bank-reconciliation/imports/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Bank statement imports (FR-11-5): ``POST`` a CSV, OFX or CAMT.053 file; new lines
+     *     join the reconciliation queue with suggested matches.
+     */
+    get: operations["bank_reconciliation_imports_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/bank-reconciliation/imports/sync": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Pull new transactions from every connected Open Banking feed now. */
+    post: operations["bank_reconciliation_imports_sync_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/bank-reconciliation/transactions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The reconciliation queue: bank lines with suggested matches to confirm or ignore. */
+    get: operations["bank_reconciliation_transactions_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/bank-reconciliation/transactions/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The reconciliation queue: bank lines with suggested matches to confirm or ignore. */
+    get: operations["bank_reconciliation_transactions_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/bank-reconciliation/transactions/{id}/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Confirm a suggested ``match``, or name the ``client`` (and ``invoice``). */
+    post: operations["bank_reconciliation_transactions_confirm_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/bank-reconciliation/transactions/{id}/ignore": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description The reconciliation queue: bank lines with suggested matches to confirm or ignore. */
+    post: operations["bank_reconciliation_transactions_ignore_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/bank-reconciliation/transactions/{id}/reopen": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description The reconciliation queue: bank lines with suggested matches to confirm or ignore. */
+    post: operations["bank_reconciliation_transactions_reopen_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/bank-reconciliation/transactions/{id}/split": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description One bank receipt for several clients (a split payment). */
+    post: operations["bank_reconciliation_transactions_split_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/billing-plans": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Recurring fixed fees (FR-10-8): each period is charged when it starts, prorated when
+     *     the plan starts or ends part way through a period.
+     */
+    get: operations["billing_plans_list"];
+    put?: never;
+    /**
+     * @description Recurring fixed fees (FR-10-8): each period is charged when it starts, prorated when
+     *     the plan starts or ends part way through a period.
+     */
+    post: operations["billing_plans_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/billing-plans/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Recurring fixed fees (FR-10-8): each period is charged when it starts, prorated when
+     *     the plan starts or ends part way through a period.
+     */
+    get: operations["billing_plans_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Recurring fixed fees (FR-10-8): each period is charged when it starts, prorated when
+     *     the plan starts or ends part way through a period.
+     */
+    patch: operations["billing_plans_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/billing-plans/{id}/periods": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The next 12 periods and what each will cost. */
+    get: operations["billing_plans_periods_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/billing-plans/{id}/status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Pause (periods starting while paused aren't charged), resume or end. */
+    post: operations["billing_plans_status_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/billing/ageing": {
     parameters: {
       query?: never;
@@ -1200,6 +1445,131 @@ export interface paths {
     get: operations["billing_ageing_list"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/billing/collections": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Clients in collections (FR-10-10). */
+    get: operations["billing_collections_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/billing/collections/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Clients in collections (FR-10-10). */
+    get: operations["billing_collections_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/billing/collections/{id}/close": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Clients in collections (FR-10-10). */
+    post: operations["billing_collections_close_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/billing/late-fee-rules": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Late fee rules (FR-10-10): one active rule for the organisation and optionally one
+     *     per branch. Turn one off with ``active: false``.
+     */
+    get: operations["billing_late_fee_rules_list"];
+    put?: never;
+    /**
+     * @description Late fee rules (FR-10-10): one active rule for the organisation and optionally one
+     *     per branch. Turn one off with ``active: false``.
+     */
+    post: operations["billing_late_fee_rules_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/billing/late-fee-rules/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Late fee rules (FR-10-10): one active rule for the organisation and optionally one
+     *     per branch. Turn one off with ``active: false``.
+     */
+    get: operations["billing_late_fee_rules_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Late fee rules (FR-10-10): one active rule for the organisation and optionally one
+     *     per branch. Turn one off with ``active: false``.
+     */
+    patch: operations["billing_late_fee_rules_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/billing/splits": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Split a job's or a student's billing between paying clients (FR-10-12). ``GET``
+     *     with ``?job=`` or ``?student=``; ``POST`` replaces the split (empty ``shares``
+     *     removes it).
+     */
+    get: operations["billing_splits_retrieve"];
+    put?: never;
+    /**
+     * @description Split a job's or a student's billing between paying clients (FR-10-12). ``GET``
+     *     with ``?job=`` or ``?student=``; ``POST`` replaces the split (empty ``shares``
+     *     removes it).
+     */
+    post: operations["billing_splits_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -1980,6 +2350,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/charges/{charge_id}/waive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Waive a late fee: voided if not invoiced yet, otherwise credited. */
+    post: operations["charges_waive_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/charges/{id}": {
     parameters: {
       query?: never;
@@ -2207,6 +2594,26 @@ export interface paths {
     put?: never;
     /** @description A link the client opens to save a card or mandate (and opt in to auto-pay). */
     post: operations["clients_payment_methods_setup_link_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/clients/{client_id}/provider-migration": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Move a client to another provider (FR-11-2): they get a setup link; the new method
+     *     becomes the default and the old one is cancelled once nothing is being collected.
+     */
+    post: operations["clients_provider_migration_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -6981,6 +7388,90 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/packages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Packages sold to clients (FR-10-7). ``POST`` sells one: a package charge invoiced at
+     *     once (setting); the package activates when that invoice is paid (or issued).
+     */
+    get: operations["packages_list"];
+    put?: never;
+    /**
+     * @description Packages sold to clients (FR-10-7). ``POST`` sells one: a package charge invoiced at
+     *     once (setting); the package activates when that invoice is paid (or issued).
+     */
+    post: operations["packages_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/packages/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Packages sold to clients (FR-10-7). ``POST`` sells one: a package charge invoiced at
+     *     once (setting); the package activates when that invoice is paid (or issued).
+     */
+    get: operations["packages_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/packages/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Packages sold to clients (FR-10-7). ``POST`` sells one: a package charge invoiced at
+     *     once (setting); the package activates when that invoice is paid (or issued).
+     */
+    post: operations["packages_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/packages/{id}/extend": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Packages sold to clients (FR-10-7). ``POST`` sells one: a package charge invoiced at
+     *     once (setting); the package activates when that invoice is paid (or issued).
+     */
+    post: operations["packages_extend_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/pay-items": {
     parameters: {
       query?: never;
@@ -7725,6 +8216,57 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/payments/provider-migrations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Clients being moved between payment providers. */
+    get: operations["payments_provider_migrations_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/provider-migrations/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Clients being moved between payment providers. */
+    get: operations["payments_provider_migrations_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/provider-migrations/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Clients being moved between payment providers. */
+    post: operations["payments_provider_migrations_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/payments/providers": {
     parameters: {
       query?: never;
@@ -7793,6 +8335,44 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/payments/providers/{provider}/complete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Connected payment accounts (Settings → Payments). */
+    post: operations["payments_providers_complete_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/providers/{provider}/connect": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Start connecting GoCardless (partner OAuth) or PayPal (partner referral); open
+     *     the returned ``url``. The provider sends the admin back to Settings → Payments with
+     *     ``state`` and ``code`` (PayPal: ``merchantIdInPayPal``) for ``complete``.
+     */
+    post: operations["payments_providers_connect_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/payments/providers/stripe/connect": {
     parameters: {
       query?: never;
@@ -7804,6 +8384,26 @@ export interface paths {
     put?: never;
     /** @description Start or resume Stripe onboarding; open the returned ``url``. */
     post: operations["payments_providers_stripe_connect_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/split": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Record one receipt split across several clients (FR-11-6), e.g. a school paying for
+     *     many students. Each share becomes that client's payment.
+     */
+    post: operations["payments_split_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -8456,6 +9056,26 @@ export interface paths {
     get: operations["portal_me_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/packages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Buy a package on sale online (FR-15-7): it is invoiced at once and the returned
+     *     ``pay_token`` opens the pay page; the package can be used once that invoice is paid.
+     */
+    post: operations["portal_packages_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -12026,6 +12646,91 @@ export interface components {
     BankFileRequestRequest: {
       format?: components["schemas"]["BankFileFormatEnum"];
     };
+    BankImport: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly source: components["schemas"]["BankStatementSourceEnum"];
+      readonly filename: string;
+      readonly account_name: string;
+      readonly currency: string;
+      readonly connection_id: string;
+      readonly stats: unknown;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `csv` - CSV
+     *     * `ofx` - OFX / QFX
+     *     * `camt` - CAMT.053 (ISO 20022)
+     *     * `open_banking` - Open Banking feed
+     * @enum {string}
+     */
+    BankStatementSourceEnum: "csv" | "ofx" | "camt" | "open_banking";
+    BankSyncResult: {
+      imports: components["schemas"]["BankImport"][];
+    };
+    BankTransaction: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly statement: string;
+      /** Format: date */
+      readonly booked_on: string;
+      readonly currency: string;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly description: string;
+      readonly reference: string;
+      readonly counterparty: string;
+      readonly status: components["schemas"]["BankTransactionStatusEnum"];
+      /** Format: uuid */
+      readonly payment: string | null;
+      /** Format: uuid */
+      readonly payment_group: string | null;
+      /** Format: uuid */
+      readonly payout: string | null;
+      /** Format: date-time */
+      readonly matched_at: string | null;
+      readonly matches: components["schemas"]["Match"][];
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `unmatched` - No match found
+     *     * `suggested` - Suggested match
+     *     * `matched` - Matched
+     *     * `ignored` - Ignored
+     * @enum {string}
+     */
+    BankTransactionStatusEnum: "unmatched" | "suggested" | "matched" | "ignored";
+    BankUploadRequest: {
+      /** Format: binary */
+      file: string;
+      /**
+       * @description Leave empty to detect from the file
+       *
+       *     * `` -
+       *     * `csv` - csv
+       *     * `ofx` - ofx
+       *     * `camt` - camt
+       * @default
+       */
+      file_type: components["schemas"]["FileTypeEnum"] | components["schemas"]["BlankEnum"];
+      /** @default  */
+      currency: string;
+      /**
+       * @description US dates (month/day) in CSV
+       * @default false
+       */
+      month_first: boolean;
+    };
     /**
      * @description * `month` - Monthly
      *     * `year` - Annual
@@ -12042,11 +12747,115 @@ export interface components {
      */
     BillingMethodEnum:
       "pay_as_you_go" | "invoice_in_advance" | "prepaid_credit" | "package" | "recurring_fixed";
+    BillingPlan: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      /** Format: uuid */
+      readonly job: string | null;
+      /** Format: uuid */
+      readonly student: string | null;
+      readonly description: string;
+      readonly currency: string;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /** Format: uuid */
+      readonly tax_rate: string | null;
+      readonly interval: components["schemas"]["BillingPlanIntervalEnum"];
+      /** Format: date */
+      readonly anchor_date: string;
+      /** Format: date */
+      readonly start_date: string;
+      /** Format: date */
+      readonly end_date: string | null;
+      readonly prorate: boolean;
+      readonly attendance_independent: boolean;
+      readonly status: components["schemas"]["BillingPlanStatusEnum"];
+      /** Format: date-time */
+      readonly paused_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    BillingPlanCreateRequest: {
+      /** Format: uuid */
+      client: string;
+      /** Format: uuid */
+      job?: string | null;
+      /** Format: uuid */
+      student?: string | null;
+      /** Format: uuid */
+      tax_rate?: string | null;
+      description: string;
+      amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      interval: components["schemas"]["BillingPlanIntervalEnum"];
+      /** Format: date */
+      start_date: string;
+      /** Format: date */
+      anchor_date?: string | null;
+      /** Format: date */
+      end_date?: string | null;
+      /** @default true */
+      prorate: boolean;
+      /** @default true */
+      attendance_independent: boolean;
+    };
+    /**
+     * @description * `weekly` - Weekly
+     *     * `monthly` - Monthly
+     *     * `termly` - Termly (every four months)
+     * @enum {string}
+     */
+    BillingPlanIntervalEnum: "weekly" | "monthly" | "termly";
+    /**
+     * @description * `active` - Active
+     *     * `paused` - Paused
+     *     * `ended` - Ended
+     * @enum {string}
+     */
+    BillingPlanStatusEnum: "active" | "paused" | "ended";
     BillingReasonRequest: {
       reason: string;
     };
+    BillingSplitOut: {
+      /** Format: uuid */
+      job: string | null;
+      /** Format: uuid */
+      student: string | null;
+      shares: components["schemas"]["SplitShareOut"][];
+    };
+    BillingSplitRequest: {
+      /** Format: uuid */
+      job?: string | null;
+      /** Format: uuid */
+      student?: string | null;
+      shares: components["schemas"]["SplitShareRequest"][];
+    };
     /** @enum {unknown} */
     BlankEnum: "";
+    /**
+     * @description * `none` - No block
+     *     * `soft` - Warn when scheduling
+     *     * `hard` - Block portal booking
+     * @enum {string}
+     */
+    BlockEnum: "none" | "soft" | "hard";
     BlockField: {
       name: string;
       kind: string;
@@ -12406,6 +13215,11 @@ export interface components {
      * @enum {string}
      */
     CancelOutcomeKindEnum: "free" | "late" | "tutor" | "admin";
+    CancelPackageRequest: {
+      reason: string;
+      /** @description Omit to follow the policy */
+      refund?: boolean | null;
+    };
     CancelRequest: {
       /** @default admin */
       cancelled_by: components["schemas"]["CancelledByEnum"];
@@ -12575,9 +13389,20 @@ export interface components {
      *     * `late_cancellation` - Late cancellation fee
      *     * `reconciliation` - Adjustment for a changed lesson
      *     * `ad_hoc` - One-off charge
+     *     * `package` - Package
+     *     * `plan` - Recurring fee
+     *     * `late_fee` - Late payment fee
      * @enum {string}
      */
-    ChargeKindEnum: "lesson" | "advance" | "late_cancellation" | "reconciliation" | "ad_hoc";
+    ChargeKindEnum:
+      | "lesson"
+      | "advance"
+      | "late_cancellation"
+      | "reconciliation"
+      | "ad_hoc"
+      | "package"
+      | "plan"
+      | "late_fee";
     ChargeLine: {
       student_id: string;
       client_id: string | null;
@@ -12759,6 +13584,10 @@ export interface components {
      * @enum {string}
      */
     ClientTypeEnum: "household" | "individual" | "organisation";
+    CloseCaseRequest: {
+      /** @default  */
+      reason: string;
+    };
     CloseOrganisationRequest: {
       password: string;
       /** @description Type the organisation's subdomain. */
@@ -12773,6 +13602,40 @@ export interface components {
     CodeRequest: {
       code: string;
     };
+    CollectionsCase: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      /** Format: uuid */
+      readonly invoice: string;
+      readonly invoice_number: string;
+      readonly balance_due: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /** @default open */
+      readonly status: components["schemas"]["CollectionsCaseStatusEnum"];
+      readonly block: components["schemas"]["BlockEnum"];
+      readonly task_id: string;
+      /** Format: date-time */
+      readonly opened_at: string;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      readonly close_reason: string;
+    };
+    /**
+     * @description * `open` - In collections
+     *     * `closed` - Closed
+     * @enum {string}
+     */
+    CollectionsCaseStatusEnum: "open" | "closed";
     CompleteCheckoutRequest: {
       session_id: string;
     };
@@ -12834,8 +13697,18 @@ export interface components {
      * @enum {string}
      */
     ComponentEnum: "base_fee" | "active_tutor" | "revenue_share" | "branch";
+    ConfirmMatchRequest: {
+      /** Format: uuid */
+      match?: string | null;
+      /** Format: uuid */
+      client?: string | null;
+      /** Format: uuid */
+      invoice?: string | null;
+    };
     ConfirmRequest: {
       intent: string;
+      /** @default stripe */
+      provider: components["schemas"]["PayProviderEnum"];
     };
     ConfirmResult: {
       status: string;
@@ -14044,6 +14917,10 @@ export interface components {
      * @enum {string}
      */
     ExportJobStatusEnum: "requested" | "running" | "ready" | "failed" | "cancelled" | "expired";
+    ExtendPackageRequest: {
+      /** Format: date-time */
+      until: string;
+    };
     ExtendRequest: {
       /** Format: date-time */
       until: string;
@@ -14170,6 +15047,14 @@ export interface components {
       /** Format: uuid */
       subject_id: string;
     };
+    /**
+     * @description * `` -
+     *     * `csv` - csv
+     *     * `ofx` - ofx
+     *     * `camt` - camt
+     * @enum {string}
+     */
+    FileTypeEnum: "csv" | "ofx" | "camt";
     FileUploadCreated: {
       file: components["schemas"]["StoredFile"];
       upload: components["schemas"]["PresignedUpload"];
@@ -15438,6 +16323,60 @@ export interface components {
       | "storage_gb"
       | "webhooks"
       | "white_label";
+    LateFeeRule: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      branch?: string | null;
+      kind?: components["schemas"]["LateFeeRuleKindEnum"];
+      /** Format: decimal */
+      amount?: string;
+      /** Format: decimal */
+      percent?: string;
+      days_overdue?: number;
+      recurrence?: components["schemas"]["RecurrenceEnum"];
+      max_applications?: number;
+      /** Format: decimal */
+      cap?: string | null;
+      /** Format: decimal */
+      minimum_balance?: string;
+      mode?: components["schemas"]["LateFeeRuleModeEnum"];
+      /** Format: uuid */
+      tax_rate?: string | null;
+      active?: boolean;
+    };
+    /**
+     * @description * `fixed` - Fixed amount
+     *     * `percent` - Percentage of what is owed
+     * @enum {string}
+     */
+    LateFeeRuleKindEnum: "fixed" | "percent";
+    /**
+     * @description * `next_invoice` - Add to the next invoice
+     *     * `immediate` - Invoice it straight away
+     * @enum {string}
+     */
+    LateFeeRuleModeEnum: "next_invoice" | "immediate";
+    LateFeeRuleRequest: {
+      /** Format: uuid */
+      branch?: string | null;
+      kind?: components["schemas"]["LateFeeRuleKindEnum"];
+      /** Format: decimal */
+      amount?: string;
+      /** Format: decimal */
+      percent?: string;
+      days_overdue?: number;
+      recurrence?: components["schemas"]["RecurrenceEnum"];
+      max_applications?: number;
+      /** Format: decimal */
+      cap?: string | null;
+      /** Format: decimal */
+      minimum_balance?: string;
+      mode?: components["schemas"]["LateFeeRuleModeEnum"];
+      /** Format: uuid */
+      tax_rate?: string | null;
+      active?: boolean;
+    };
     LayoutItem: {
       widget: string;
       /** @default s */
@@ -16038,6 +16977,35 @@ export interface components {
      * @enum {string}
      */
     MarketplaceStatusEnum: "connected" | "available" | "coming_soon";
+    Match: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly kind: components["schemas"]["MatchKindEnum"];
+      /** Format: uuid */
+      readonly invoice: string | null;
+      readonly invoice_number: string;
+      /** Format: uuid */
+      readonly payment_request: string | null;
+      /** Format: uuid */
+      readonly client: string | null;
+      readonly client_name: string;
+      /** Format: uuid */
+      readonly payment: string | null;
+      /** Format: uuid */
+      readonly payout: string | null;
+      readonly score: number;
+      readonly reason: string;
+      readonly status: components["schemas"]["ReconciliationMatchStatusEnum"];
+    };
+    /**
+     * @description * `invoice` - Invoice
+     *     * `payment_request` - Payment request
+     *     * `client` - Client account
+     *     * `payment` - Payment already recorded
+     *     * `payout` - Provider payout
+     * @enum {string}
+     */
+    MatchKindEnum: "invoice" | "payment_request" | "client" | "payment" | "payout";
     /**
      * @description * `online` - online
      *     * `in_person` - in_person
@@ -16298,6 +17266,9 @@ export interface components {
      * @enum {string}
      */
     MigrationProjectStatusEnum: "active" | "completed" | "cancelled";
+    MigrationRequestRequest: {
+      to_provider: components["schemas"]["SavingProviderEnum"];
+    };
     /**
      * @description * `tutorcruncher` - TutorCruncher
      *     * `tutorbird` - TutorBird
@@ -16752,6 +17723,148 @@ export interface components {
       rate_limit_per_minute: number;
       burst_per_second: number;
     };
+    PackageConsumption: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly kind: components["schemas"]["PackageConsumptionKindEnum"];
+      /** Format: uuid */
+      readonly lesson: string | null;
+      /** Format: decimal */
+      readonly units: string;
+      readonly value: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly note: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `lesson` - Lesson
+     *     * `reversal` - Lesson changed
+     *     * `expiry` - Expired
+     *     * `adjustment` - Adjustment
+     * @enum {string}
+     */
+    PackageConsumptionKindEnum: "lesson" | "reversal" | "expiry" | "adjustment";
+    PackageDetail: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      /** Format: uuid */
+      readonly student: string | null;
+      readonly student_name: string;
+      /** Format: uuid */
+      readonly template: string | null;
+      readonly name: string;
+      readonly quantity_type: string;
+      /** Format: decimal */
+      readonly units_total: string;
+      /** Format: decimal */
+      readonly units_used: string;
+      /** Format: decimal */
+      readonly units_expired: string;
+      /** Format: decimal */
+      readonly units_remaining: string;
+      readonly currency: string;
+      readonly price: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly shareable: boolean;
+      readonly auto_renew: boolean;
+      readonly status: components["schemas"]["PackageStatusEnum"];
+      readonly source: components["schemas"]["PackageSourceEnum"];
+      /** Format: uuid */
+      readonly invoice: string | null;
+      readonly invoice_number: string;
+      /** Format: date-time */
+      readonly activated_at: string | null;
+      /** Format: date-time */
+      readonly expires_at: string | null;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      readonly close_reason: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly consumptions: components["schemas"]["PackageConsumption"][];
+    };
+    PackagePurchase: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      /** Format: uuid */
+      readonly student: string | null;
+      readonly student_name: string;
+      /** Format: uuid */
+      readonly template: string | null;
+      readonly name: string;
+      readonly quantity_type: string;
+      /** Format: decimal */
+      readonly units_total: string;
+      /** Format: decimal */
+      readonly units_used: string;
+      /** Format: decimal */
+      readonly units_expired: string;
+      /** Format: decimal */
+      readonly units_remaining: string;
+      readonly currency: string;
+      readonly price: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly shareable: boolean;
+      readonly auto_renew: boolean;
+      readonly status: components["schemas"]["PackageStatusEnum"];
+      readonly source: components["schemas"]["PackageSourceEnum"];
+      /** Format: uuid */
+      readonly invoice: string | null;
+      readonly invoice_number: string;
+      /** Format: date-time */
+      readonly activated_at: string | null;
+      /** Format: date-time */
+      readonly expires_at: string | null;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      readonly close_reason: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `sale` - Sold
+     *     * `renewal` - Renewed automatically
+     *     * `import` - Imported
+     * @enum {string}
+     */
+    PackageSourceEnum: "sale" | "renewal" | "import";
+    /**
+     * @description * `pending` - Awaiting payment
+     *     * `active` - Active
+     *     * `depleted` - Used up
+     *     * `expired` - Expired
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    PackageStatusEnum: "pending" | "active" | "depleted" | "expired" | "cancelled";
     PackageTemplate: {
       /** Format: uuid */
       readonly id: string;
@@ -16895,6 +18008,45 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["AutomationRun"][];
     };
+    PaginatedBankImportList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["BankImport"][];
+    };
+    PaginatedBankTransactionList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["BankTransaction"][];
+    };
+    PaginatedBillingPlanList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["BillingPlan"][];
+    };
     PaginatedBranchList: {
       /**
        * Format: uri
@@ -16959,6 +18111,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Client"][];
+    };
+    PaginatedCollectionsCaseList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["CollectionsCase"][];
     };
     PaginatedConflictList: {
       /**
@@ -17454,6 +18619,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["OnlineMeeting"][];
     };
+    PaginatedPackagePurchaseList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PackagePurchase"][];
+    };
     PaginatedPackageTemplateList: {
       /**
        * Format: uri
@@ -17570,6 +18748,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Product"][];
+    };
+    PaginatedProviderMigrationList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ProviderMigration"][];
     };
     PaginatedPublicProfileList: {
       /**
@@ -17818,6 +19009,11 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Widget"][];
     };
+    PartnerCompleteRequest: {
+      state: string;
+      /** @description GoCardless ``code``, or PayPal ``merchantIdInPayPal`` */
+      code: string;
+    };
     PasswordChangeRequest: {
       current_password: string;
       new_password: string;
@@ -17881,6 +19077,22 @@ export interface components {
         [key: string]: unknown;
       }[];
       max_runs_per_record?: number;
+    };
+    PatchedBillingPlanUpdateRequest: {
+      description?: string;
+      amount?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /** Format: date */
+      end_date?: string | null;
+      prorate?: boolean;
+      attendance_independent?: boolean;
     };
     PatchedBranchRequest: {
       name?: string;
@@ -18144,6 +19356,26 @@ export interface components {
       hours_cap_period?: components["schemas"]["HoursCapPeriodEnum"];
       policy_overrides?: unknown;
       custom_fields?: unknown;
+    };
+    PatchedLateFeeRuleRequest: {
+      /** Format: uuid */
+      branch?: string | null;
+      kind?: components["schemas"]["LateFeeRuleKindEnum"];
+      /** Format: decimal */
+      amount?: string;
+      /** Format: decimal */
+      percent?: string;
+      days_overdue?: number;
+      recurrence?: components["schemas"]["RecurrenceEnum"];
+      max_applications?: number;
+      /** Format: decimal */
+      cap?: string | null;
+      /** Format: decimal */
+      minimum_balance?: string;
+      mode?: components["schemas"]["LateFeeRuleModeEnum"];
+      /** Format: uuid */
+      tax_rate?: string | null;
+      active?: boolean;
     };
     PatchedLessonUpdateRequest: {
       /** Format: uuid */
@@ -18652,10 +19884,17 @@ export interface components {
       active?: boolean;
     };
     PayIntent: {
+      /** @default stripe */
+      provider: string;
       publishable_key: string;
       account: string;
       client_secret: string;
       intent: string;
+      /**
+       * @description GoCardless/PayPal: send the customer here
+       * @default
+       */
+      redirect_url: string;
       amount: components["schemas"]["MoneyOut"];
     };
     PayIntentRequestRequest: {
@@ -18663,6 +19902,8 @@ export interface components {
       amount?: string | null;
       /** @default false */
       save_method: boolean;
+      /** @default stripe */
+      provider: components["schemas"]["PayProviderEnum"];
     };
     PayItem: {
       /** Format: uuid */
@@ -18757,6 +19998,8 @@ export interface components {
       allow_partial: boolean;
       can_pay_online: boolean;
       has_pdf: boolean;
+      /** @description Online providers offered: stripe, gocardless, paypal */
+      providers: string[];
     };
     /**
      * @description * `invoice` - invoice
@@ -18796,6 +20039,13 @@ export interface components {
        */
       hourly_rate?: string | null;
     };
+    /**
+     * @description * `stripe` - stripe
+     *     * `gocardless` - gocardless
+     *     * `paypal` - paypal
+     * @enum {string}
+     */
+    PayProviderEnum: "stripe" | "gocardless" | "paypal";
     PayRun: {
       /** Format: uuid */
       readonly id: string;
@@ -18976,6 +20226,31 @@ export interface components {
       readonly failure_message: string;
       readonly allocations: components["schemas"]["Allocation"][];
       readonly refunds: components["schemas"]["Refund"][];
+      /** Format: uuid */
+      readonly group: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    PaymentGroup: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly payer_name: string;
+      readonly currency: string;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly method: components["schemas"]["PaymentMethodEnum"];
+      /** Format: date-time */
+      readonly received_at: string;
+      readonly reference: string;
+      readonly notes: string;
+      readonly payments: components["schemas"]["Payment"][];
       /** Format: date-time */
       readonly created_at: string;
     };
@@ -18999,10 +20274,12 @@ export interface components {
      *     * `bank_transfer` - Bank transfer
      *     * `cash` - Cash
      *     * `cheque` - Cheque
+     *     * `paypal` - PayPal
      *     * `other` - Other
      * @enum {string}
      */
-    PaymentMethodEnum: "card" | "direct_debit" | "bank_transfer" | "cash" | "cheque" | "other";
+    PaymentMethodEnum:
+      "card" | "direct_debit" | "bank_transfer" | "cash" | "cheque" | "paypal" | "other";
     /**
      * @description * `active` - Active
      *     * `removed` - Removed
@@ -19206,6 +20483,9 @@ export interface components {
       unit_amount: string;
       included_quantity: number;
     };
+    PlanStatusRequest: {
+      status: components["schemas"]["BillingPlanStatusEnum"];
+    };
     /**
      * @description * `public` - Public
      *     * `legacy` - Legacy (existing subscribers only)
@@ -19300,6 +20580,18 @@ export interface components {
       invoices: components["schemas"]["PortalInvoice"][];
       payment_requests: components["schemas"]["PortalRequest"][];
       credit_notes: components["schemas"]["PortalCreditNote"][];
+      packages: components["schemas"]["PortalPackage"][];
+      package_offers: components["schemas"]["PortalPackageOffer"][];
+    };
+    PortalBought: {
+      package: string;
+      pay_token: string;
+    };
+    PortalBuyPackageRequest: {
+      /** Format: uuid */
+      client: string;
+      /** Format: uuid */
+      template: string;
     };
     PortalCancelRequest: {
       /** @default  */
@@ -19430,6 +20722,30 @@ export interface components {
     PortalOrg: {
       name: string;
       primary_colour: string;
+    };
+    PortalPackage: {
+      id: string;
+      client: string;
+      name: string;
+      status: string;
+      quantity_type: string;
+      /** Format: decimal */
+      units_total: string;
+      /** Format: decimal */
+      units_remaining: string;
+      student_name: string;
+      /** Format: date-time */
+      expires_at: string | null;
+    };
+    PortalPackageOffer: {
+      id: string;
+      name: string;
+      description: string;
+      quantity_type: string;
+      /** Format: decimal */
+      quantity: string;
+      price: components["schemas"]["MoneyOut"];
+      validity_days: number | null;
     };
     PortalProfile: {
       contacts: components["schemas"]["PortalContact"][];
@@ -19694,6 +21010,14 @@ export interface components {
       minutes: number;
       meeting_url?: string;
     };
+    ProrationPreview: {
+      /** Format: date */
+      start: string;
+      /** Format: date */
+      end: string;
+      amount: components["schemas"]["MoneyOut"];
+      partial: boolean;
+    };
     Provider: {
       key: string;
       name: string;
@@ -19729,10 +21053,39 @@ export interface components {
     ProviderAccountStatusEnum: "pending" | "active" | "restricted" | "disconnected";
     /**
      * @description * `stripe` - Stripe
+     *     * `gocardless` - GoCardless
+     *     * `paypal` - PayPal
      *     * `manual` - Manual
      * @enum {string}
      */
-    ProviderEnum: "stripe" | "manual";
+    ProviderEnum: "stripe" | "gocardless" | "paypal" | "manual";
+    ProviderMigration: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      /** Format: uuid */
+      readonly from_method: string | null;
+      readonly to_provider: components["schemas"]["ProviderEnum"];
+      /** Format: uuid */
+      readonly new_method: string | null;
+      /** @default waiting */
+      readonly status: components["schemas"]["ProviderMigrationStatusEnum"];
+      /** Format: date-time */
+      readonly completed_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `waiting` - Waiting for the client
+     *     * `switched` - Switched; old method still settling
+     *     * `completed` - Completed
+     *     * `cancelled` - Cancelled
+     *     * `expired` - Client didn't set up the new method
+     * @enum {string}
+     */
+    ProviderMigrationStatusEnum: "waiting" | "switched" | "completed" | "cancelled" | "expired";
     ProvisionRequest: {
       /** Format: uuid */
       lesson: string;
@@ -20185,6 +21538,13 @@ export interface components {
      */
     RecommendationEnum: "yes" | "maybe" | "no";
     /**
+     * @description * `suggested` - Suggested
+     *     * `confirmed` - Confirmed
+     *     * `rejected` - Rejected
+     * @enum {string}
+     */
+    ReconciliationMatchStatusEnum: "suggested" | "confirmed" | "rejected";
+    /**
      * @description * `staff` - staff
      *     * `form` - form
      *     * `import` - import
@@ -20207,10 +21567,12 @@ export interface components {
      *     * `bank_transfer` - Bank transfer
      *     * `cash` - Cash
      *     * `cheque` - Cheque
+     *     * `paypal` - PayPal
      *     * `other` - Other
      * @enum {string}
      */
-    RecordPaymentMethodEnum: "direct_debit" | "bank_transfer" | "cash" | "cheque" | "other";
+    RecordPaymentMethodEnum:
+      "direct_debit" | "bank_transfer" | "cash" | "cheque" | "paypal" | "other";
     RecordPaymentRequest: {
       /** Format: uuid */
       client: string;
@@ -20239,6 +21601,12 @@ export interface components {
       /** @description Shown once. Each works one time. */
       recovery_codes: string[];
     };
+    /**
+     * @description * `once` - Once
+     *     * `monthly` - Every month while unpaid
+     * @enum {string}
+     */
+    RecurrenceEnum: "once" | "monthly";
     Redirect: {
       url: string;
     };
@@ -20731,6 +22099,12 @@ export interface components {
       ordering?: string;
     };
     /**
+     * @description * `stripe` - stripe
+     *     * `gocardless` - gocardless
+     * @enum {string}
+     */
+    SavingProviderEnum: "stripe" | "gocardless";
+    /**
      * @description * `pending` - Pending
      *     * `clean` - Clean
      *     * `infected` - Infected
@@ -20872,6 +22246,14 @@ export interface components {
     SeatModeEnum: "active" | "delivered";
     Secret: {
       secret: string;
+    };
+    SellPackageRequest: {
+      /** Format: uuid */
+      client: string;
+      /** Format: uuid */
+      template: string;
+      /** Format: uuid */
+      student?: string | null;
     };
     Series: {
       /** Format: uuid */
@@ -21157,6 +22539,8 @@ export interface components {
       intent: string;
       /** @default false */
       autopay: boolean;
+      /** @default  */
+      provider: components["schemas"]["SavingProviderEnum"] | components["schemas"]["BlankEnum"];
     };
     SetupDone: {
       method: components["schemas"]["PaymentMethod"];
@@ -21169,10 +22553,13 @@ export interface components {
     SetupPage: {
       organisation: string;
       client_name: string;
+      provider: string;
+      providers: string[];
       publishable_key: string;
       account: string;
       client_secret: string;
       intent: string;
+      redirect_url: string;
       consent_text: string;
     };
     Shortlist: {
@@ -21360,6 +22747,51 @@ export interface components {
       available: boolean;
       reason: string | null;
       suggestion: string | null;
+    };
+    SplitMatchRequest: {
+      /** @default  */
+      payer_name: string;
+      parts: components["schemas"]["SplitPartRequest"][];
+    };
+    SplitPartRequest: {
+      /** Format: uuid */
+      client: string;
+      /** Format: decimal */
+      amount: string;
+      allocations?: components["schemas"]["AllocationInputRequest"][] | null;
+    };
+    SplitPaymentRequest: {
+      payer_name: string;
+      amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      method: components["schemas"]["RecordPaymentMethodEnum"];
+      /** Format: date-time */
+      received_at?: string | null;
+      /** @default  */
+      reference: string;
+      /** @default  */
+      notes: string;
+      parts: components["schemas"]["SplitPartRequest"][];
+    };
+    SplitShareOut: {
+      /** Format: uuid */
+      client: string;
+      client_name: string;
+      /** Format: decimal */
+      percent: string;
+    };
+    SplitShareRequest: {
+      /** Format: uuid */
+      client: string;
+      /** Format: decimal */
+      percent: string;
     };
     /**
      * @description * `pending` - Pending
@@ -22529,6 +23961,9 @@ export interface components {
      * @enum {string}
      */
     WaitlistStatusEnum: "waiting" | "offered" | "accepted" | "declined" | "expired" | "removed";
+    WaiveRequest: {
+      reason: string;
+    };
     WebhookAttempt: {
       readonly number: number;
       /** Format: date-time */
@@ -24795,6 +26230,461 @@ export interface operations {
       };
     };
   };
+  bank_reconciliation_imports_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedBankImportList"];
+        };
+      };
+    };
+  };
+  bank_reconciliation_imports_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": components["schemas"]["BankUploadRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BankImport"];
+        };
+      };
+    };
+  };
+  bank_reconciliation_imports_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this bank statement import. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BankImport"];
+        };
+      };
+    };
+  };
+  bank_reconciliation_imports_sync_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BankSyncResult"];
+        };
+      };
+    };
+  };
+  bank_reconciliation_transactions_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        statement?: string;
+        /**
+         * @description * `unmatched` - No match found
+         *     * `suggested` - Suggested match
+         *     * `matched` - Matched
+         *     * `ignored` - Ignored
+         */
+        status?: ("ignored" | "matched" | "suggested" | "unmatched")[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedBankTransactionList"];
+        };
+      };
+    };
+  };
+  bank_reconciliation_transactions_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this bank transaction. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BankTransaction"];
+        };
+      };
+    };
+  };
+  bank_reconciliation_transactions_confirm_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this bank transaction. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ConfirmMatchRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ConfirmMatchRequest"];
+        "multipart/form-data": components["schemas"]["ConfirmMatchRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BankTransaction"];
+        };
+      };
+    };
+  };
+  bank_reconciliation_transactions_ignore_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this bank transaction. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BankTransaction"];
+        };
+      };
+    };
+  };
+  bank_reconciliation_transactions_reopen_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this bank transaction. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BankTransaction"];
+        };
+      };
+    };
+  };
+  bank_reconciliation_transactions_split_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this bank transaction. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SplitMatchRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SplitMatchRequest"];
+        "multipart/form-data": components["schemas"]["SplitMatchRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BankTransaction"];
+        };
+      };
+    };
+  };
+  billing_plans_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        job?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `active` - Active
+         *     * `paused` - Paused
+         *     * `ended` - Ended
+         */
+        status?: ("active" | "ended" | "paused")[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedBillingPlanList"];
+        };
+      };
+    };
+  };
+  billing_plans_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BillingPlanCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BillingPlanCreateRequest"];
+        "multipart/form-data": components["schemas"]["BillingPlanCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BillingPlan"];
+        };
+      };
+    };
+  };
+  billing_plans_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this billing plan. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BillingPlan"];
+        };
+      };
+    };
+  };
+  billing_plans_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this billing plan. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedBillingPlanUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedBillingPlanUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedBillingPlanUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BillingPlan"];
+        };
+      };
+    };
+  };
+  billing_plans_periods_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        job?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /**
+         * @description * `active` - Active
+         *     * `paused` - Paused
+         *     * `ended` - Ended
+         */
+        status?: ("active" | "ended" | "paused")[];
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this billing plan. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProrationPreview"][];
+        };
+      };
+    };
+  };
+  billing_plans_status_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this billing plan. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanStatusRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PlanStatusRequest"];
+        "multipart/form-data": components["schemas"]["PlanStatusRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BillingPlan"];
+        };
+      };
+    };
+  };
   billing_ageing_list: {
     parameters: {
       query?: {
@@ -24812,6 +26702,251 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AgeingRow"][];
+        };
+      };
+    };
+  };
+  billing_collections_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `open` - In collections
+         *     * `closed` - Closed
+         */
+        status?: ("closed" | "open")[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedCollectionsCaseList"];
+        };
+      };
+    };
+  };
+  billing_collections_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this collections case. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CollectionsCase"];
+        };
+      };
+    };
+  };
+  billing_collections_close_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this collections case. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["CloseCaseRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CloseCaseRequest"];
+        "multipart/form-data": components["schemas"]["CloseCaseRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CollectionsCase"];
+        };
+      };
+    };
+  };
+  billing_late_fee_rules_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LateFeeRule"][];
+        };
+      };
+    };
+  };
+  billing_late_fee_rules_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["LateFeeRuleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LateFeeRuleRequest"];
+        "multipart/form-data": components["schemas"]["LateFeeRuleRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LateFeeRule"];
+        };
+      };
+    };
+  };
+  billing_late_fee_rules_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this late fee rule. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LateFeeRule"];
+        };
+      };
+    };
+  };
+  billing_late_fee_rules_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this late fee rule. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedLateFeeRuleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedLateFeeRuleRequest"];
+        "multipart/form-data": components["schemas"]["PatchedLateFeeRuleRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LateFeeRule"];
+        };
+      };
+    };
+  };
+  billing_splits_retrieve: {
+    parameters: {
+      query?: {
+        job?: string;
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BillingSplitOut"];
+        };
+      };
+    };
+  };
+  billing_splits_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BillingSplitRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BillingSplitRequest"];
+        "multipart/form-data": components["schemas"]["BillingSplitRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BillingSplitOut"];
         };
       };
     };
@@ -26594,8 +28729,20 @@ export interface operations {
          *     * `late_cancellation` - Late cancellation fee
          *     * `reconciliation` - Adjustment for a changed lesson
          *     * `ad_hoc` - One-off charge
+         *     * `package` - Package
+         *     * `plan` - Recurring fee
+         *     * `late_fee` - Late payment fee
          */
-        kind?: ("ad_hoc" | "advance" | "late_cancellation" | "lesson" | "reconciliation")[];
+        kind?: (
+          | "ad_hoc"
+          | "advance"
+          | "late_cancellation"
+          | "late_fee"
+          | "lesson"
+          | "package"
+          | "plan"
+          | "reconciliation"
+        )[];
         lesson?: string;
         /** @description Which field to use when ordering the results. */
         ordering?: string;
@@ -26644,6 +28791,36 @@ export interface operations {
     };
     responses: {
       201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Charge"];
+        };
+      };
+    };
+  };
+  charges_waive_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        charge_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WaiveRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["WaiveRequest"];
+        "multipart/form-data": components["schemas"]["WaiveRequest"];
+      };
+    };
+    responses: {
+      200: {
         headers: {
           [name: string]: unknown;
         };
@@ -27135,6 +29312,36 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SetupLinkOut"];
+        };
+      };
+    };
+  };
+  clients_provider_migration_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        client_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MigrationRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["MigrationRequestRequest"];
+        "multipart/form-data": components["schemas"]["MigrationRequestRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProviderMigration"];
         };
       };
     };
@@ -35804,6 +38011,158 @@ export interface operations {
       };
     };
   };
+  packages_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `pending` - Awaiting payment
+         *     * `active` - Active
+         *     * `depleted` - Used up
+         *     * `expired` - Expired
+         *     * `cancelled` - Cancelled
+         */
+        status?: ("active" | "cancelled" | "depleted" | "expired" | "pending")[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPackagePurchaseList"];
+        };
+      };
+    };
+  };
+  packages_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SellPackageRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SellPackageRequest"];
+        "multipart/form-data": components["schemas"]["SellPackageRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PackageDetail"];
+        };
+      };
+    };
+  };
+  packages_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this package purchase. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PackageDetail"];
+        };
+      };
+    };
+  };
+  packages_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this package purchase. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CancelPackageRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CancelPackageRequest"];
+        "multipart/form-data": components["schemas"]["CancelPackageRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PackageDetail"];
+        };
+      };
+    };
+  };
+  packages_extend_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this package purchase. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExtendPackageRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ExtendPackageRequest"];
+        "multipart/form-data": components["schemas"]["ExtendPackageRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PackageDetail"];
+        };
+      };
+    };
+  };
   pay_items_list: {
     parameters: {
       query?: {
@@ -36426,7 +38785,10 @@ export interface operations {
   };
   pay_setup_retrieve: {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description stripe or gocardless */
+        provider?: string;
+      };
       header?: never;
       path: {
         token: string;
@@ -36676,9 +39038,12 @@ export interface operations {
          *     * `bank_transfer` - Bank transfer
          *     * `cash` - Cash
          *     * `cheque` - Cheque
+         *     * `paypal` - PayPal
          *     * `other` - Other
          */
-        method?: ("bank_transfer" | "card" | "cash" | "cheque" | "direct_debit" | "other")[];
+        method?: (
+          "bank_transfer" | "card" | "cash" | "cheque" | "direct_debit" | "other" | "paypal"
+        )[];
         /** @description Which field to use when ordering the results. */
         ordering?: string;
         /** @description Number of results to return per page. */
@@ -36904,6 +39269,93 @@ export interface operations {
       };
     };
   };
+  payments_provider_migrations_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `waiting` - Waiting for the client
+         *     * `switched` - Switched; old method still settling
+         *     * `completed` - Completed
+         *     * `cancelled` - Cancelled
+         *     * `expired` - Client didn't set up the new method
+         */
+        status?: ("cancelled" | "completed" | "expired" | "switched" | "waiting")[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedProviderMigrationList"];
+        };
+      };
+    };
+  };
+  payments_provider_migrations_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this provider migration. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProviderMigration"];
+        };
+      };
+    };
+  };
+  payments_provider_migrations_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this provider migration. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProviderMigration"];
+        };
+      };
+    };
+  };
   payments_providers_list: {
     parameters: {
       query?: {
@@ -37003,6 +39455,66 @@ export interface operations {
       };
     };
   };
+  payments_providers_complete_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        provider: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PartnerCompleteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PartnerCompleteRequest"];
+        "multipart/form-data": components["schemas"]["PartnerCompleteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProviderAccount"];
+        };
+      };
+    };
+  };
+  payments_providers_connect_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        provider: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ConnectRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ConnectRequest"];
+        "multipart/form-data": components["schemas"]["ConnectRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Onboarding"];
+        };
+      };
+    };
+  };
   payments_providers_stripe_connect_create: {
     parameters: {
       query?: never;
@@ -37027,6 +39539,34 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Onboarding"];
+        };
+      };
+    };
+  };
+  payments_split_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SplitPaymentRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SplitPaymentRequest"];
+        "multipart/form-data": components["schemas"]["SplitPaymentRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaymentGroup"];
         };
       };
     };
@@ -38098,6 +40638,34 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PortalMe"];
+        };
+      };
+    };
+  };
+  portal_packages_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PortalBuyPackageRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PortalBuyPackageRequest"];
+        "multipart/form-data": components["schemas"]["PortalBuyPackageRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalBought"];
         };
       };
     };

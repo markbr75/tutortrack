@@ -9,6 +9,7 @@ import { SyncBadge } from "../accounting/SyncBadge";
 import { useSyncStatuses } from "../accounting/useSyncStatuses";
 import { ErrorList } from "../calendar/ErrorList";
 import { useCursorList } from "../lists";
+import { PartnerProviders } from "./PartnerProviders";
 
 type Payment = components["schemas"]["Payment"];
 
@@ -84,6 +85,7 @@ export function PaymentsSettingsPage() {
         <p className="text-sm">{t("payments.notConnected")}</p>
       )}
       <ErrorList error={connect.error ?? act.error} />
+      <PartnerProviders />
     </div>
   );
 }

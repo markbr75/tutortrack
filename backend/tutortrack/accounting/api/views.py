@@ -179,9 +179,11 @@ def _keys() -> dict[str, list[dict[str, str]]]:
         {"key": f"product_category:{value}", "name": str(label)}
         for value, label in Product.Category.choices
     ]
-    clearing = [{"key": "provider:stripe", "name": "Stripe"}] + [
-        {"key": f"method:{value}", "name": str(label)} for value, label in Payment.Method.choices
-    ]
+    clearing = [
+        {"key": "provider:stripe", "name": "Stripe"},
+        {"key": "provider:gocardless", "name": "GoCardless"},  # E11 Phase 2
+        {"key": "provider:paypal", "name": "PayPal"},
+    ] + [{"key": f"method:{value}", "name": str(label)} for value, label in Payment.Method.choices]
     expense = [
         {"key": f"expense_category:{c.pk}", "name": c.name}
         for c in ExpenseCategory.objects.filter(active=True)

@@ -79,8 +79,8 @@ All ─► E26, E27, E28, E31
 | E07 | ✅ Done (2026-10-09) | Lesson-dependent parts (replace preview, hours used, delivered totals) wired by E08-T10. See Implementation notes |
 | E08 | ✅ Done (2026-10-09) | MVP scope (rooms, reschedule requests, self-booking, time-off approval + TW1 are Phase 2). See Implementation notes |
 | E09 | ✅ Done (2026-10-09) | MVP scope (T09 feedback surveys are Phase 2). See Implementation notes and ADR 0006 |
-| E10 | ✅ Done (2026-10-09) | Phase 1 scope (packages, fixed fees, late fees and split billing are Phase 2). See Implementation notes and ADR 0007 |
-| E11 | ✅ Done (2026-10-09) | Stripe + manual (GoCardless, PayPal, bank feeds and split payments are Phase 2). See Implementation notes and ADR 0008 |
+| E10 | ✅ Done (2026-10-09); Phase 2 ✅ Done (2026-10-12) | Phase 1 per ADR 0007. Phase 2: packages with PackageExpiryWorkflow, recurring fixed fees with proration, late fees and collections blocks, split billing (ADR 0022) |
+| E11 | ✅ Done (2026-10-09); Phase 2 ✅ Done (2026-10-12) | Phase 1 per ADR 0008. Phase 2: GoCardless, PayPal, bank statement import and Open Banking with a matching queue, split payments, ProviderMigrationWorkflow (ADR 0022) |
 | E12 | ✅ Done (2026-10-10) | T01–T11 + TW1 (Wise/1099/commission are Phase 3). Bank files, self-billing, holds, pay runs on Temporal. See Implementation notes |
 | E13 | ✅ Done (2026-10-09) | MVP scope (broadcasts, inbox, WhatsApp, custom domains are Phase 2). See Implementation notes |
 | E14 | ✅ Done (2026-10-10) | T01–T09 + TW1. See Implementation notes |

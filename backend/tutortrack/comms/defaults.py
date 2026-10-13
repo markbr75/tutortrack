@@ -173,6 +173,17 @@ DEFAULTS: dict[tuple[str, str], tuple[str, str]] = {
         "",
         "{{ organisation.name }}: your credit is low ({{ available|money }}).",
     ),
+    ("payment_setup_link", "email"): (
+        "Please set up your new payment method",
+        "Hello {{ recipient.first_name }},\n\nWe're moving payments to {{ setup.provider }}. "
+        "Please set up your payment method here: {{ setup.url }}" + SIGN,
+    ),
+    ("package_expiring", "email"): (
+        "Your package {{ package.name }} expires soon",
+        "Hello {{ recipient.first_name }},\n\nYou have {{ package.units_remaining }} left on "
+        "{{ package.name }}, which expires on {{ package.expires_at|date }}. Book lessons to "
+        "use them." + SIGN,
+    ),
     ("task_assigned", "in_app"): ("Task assigned to you", "{{ task.title }}"),
     ("task_assigned", "email"): (
         "Task: {{ task.title }}",

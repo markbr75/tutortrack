@@ -165,6 +165,39 @@ def billing(household: Household) -> dict[str, Any]:
             .select_related("invoice")
             .order_by("-issued_at")[:50]
         ],
+        **package_billing(household),
+    }
+
+
+def package_billing(household: Household) -> dict[str, Any]:
+    """E10-T12 in the portal (FR-15-7): package balances and packages on sale online."""
+    from tutortrack.billing.selectors import package_balances
+    from tutortrack.catalogue.models import PackageTemplate
+    from tutortrack.tenancy.settings_service import get_setting
+
+    if not get_setting("portal.show_package_balances"):
+        return {"packages": [], "package_offers": []}
+    currencies = {c.currency for c in household.clients}
+    offers = PackageTemplate.objects.filter(
+        active=True, bookable_online=True, currency__in=currencies
+    ).order_by("name")
+    return {
+        "packages": [
+            {**row, "expires_at": row["expires_at"]}
+            for row in package_balances(list(household.client_ids))
+        ],
+        "package_offers": [
+            {
+                "id": str(t.pk),
+                "name": t.name,
+                "description": t.description,
+                "quantity_type": t.quantity_type,
+                "quantity": t.quantity,
+                "price": t.price.to_dict(),
+                "validity_days": t.validity_days,
+            }
+            for t in offers
+        ],
     }
 
 

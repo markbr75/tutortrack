@@ -46,7 +46,14 @@ from .models import (
     Refund,
     SetupLink,
 )
-from .providers import ChargeResult, MethodDetails, ProviderError, get_provider
+from .providers import (
+    REDIRECT_PROVIDERS,
+    ChargeResult,
+    MethodDetails,
+    ProviderError,
+    get_provider,
+    redirect_provider,
+)
 
 
 def _invalid(field_name: str, message: str) -> BusinessRuleViolation:
@@ -73,10 +80,11 @@ def tenant_url(path: str) -> str:
 # --- provider accounts (T01/T02) ----------------------------------------------------------------
 
 
-def account_for(branch_id: Any = None) -> ProviderAccount | None:
-    """The live Stripe account for a branch (its own, else the organisation default)."""
+def account_for(branch_id: Any = None, provider: str = Provider.STRIPE) -> ProviderAccount | None:
+    """The live account of a provider for a branch (its own, else the organisation
+    default)."""
     live = ProviderAccount.objects.exclude(status=ProviderAccount.Status.DISCONNECTED).filter(
-        provider=Provider.STRIPE
+        provider=provider
     )
     if branch_id:
         own = live.filter(branch_id=branch_id).first()
@@ -85,8 +93,8 @@ def account_for(branch_id: Any = None) -> ProviderAccount | None:
     return live.filter(branch__isnull=True).first()
 
 
-def active_account_for(branch_id: Any = None) -> ProviderAccount:
-    account = account_for(branch_id)
+def active_account_for(branch_id: Any = None, provider: str = Provider.STRIPE) -> ProviderAccount:
+    account = account_for(branch_id, provider)
     if account is None or account.status != ProviderAccount.Status.ACTIVE:
         raise BusinessRuleViolation(
             _("Online payments aren't set up yet."), extra={"code": "payments_not_connected"}
@@ -210,6 +218,69 @@ def disconnect(account: ProviderAccount, *, user: Any = None) -> ProviderAccount
     return account
 
 
+@transaction.atomic
+def connect_partner(provider: str, *, branch: Any = None, user: Any = None) -> Onboarding:
+    """Start connecting the tenant's GoCardless (partner OAuth) or PayPal (partner
+    referral) account; the provider sends the admin back to Settings → Payments, which
+    calls ``complete_partner``."""
+    if provider not in REDIRECT_PROVIDERS:
+        raise _invalid("provider", _("Unknown payment provider."))
+    live = ProviderAccount.objects.exclude(status=ProviderAccount.Status.DISCONNECTED)
+    account = live.filter(provider=provider, branch=branch).first()
+    if account is not None and account.status != ProviderAccount.Status.PENDING:
+        raise BusinessRuleViolation(_("This provider is already connected."))
+    state = secrets.token_urlsafe(24)
+    if account is None:
+        account = ProviderAccount.objects.create(
+            provider=provider, branch=branch, account_ref=f"pending-{state[:20]}"
+        )
+        audit.record_create(account)
+    account.connect_state = hash_token(state)
+    account.save(update_fields=["connect_state", "updated_at"])
+    try:
+        url = redirect_provider(provider).connect_url(
+            state=state, return_url=_connect_return(provider)
+        )
+    except ProviderError as exc:
+        raise _provider_failed(exc) from exc
+    return Onboarding(account, url)
+
+
+def _connect_return(provider: str) -> str:
+    return tenant_url(f"/settings/payments?provider={provider}")
+
+
+@transaction.atomic
+def complete_partner(provider: str, *, state: str, code: str, user: Any = None) -> ProviderAccount:
+    account = (
+        ProviderAccount.objects.select_for_update()
+        .filter(provider=provider, connect_state=hash_token(state or ""))
+        .exclude(connect_state="")
+        .first()
+    )
+    if account is None:
+        raise _invalid("state", _("The connection link expired. Please try again."))
+    try:
+        connected = redirect_provider(provider).complete_connect(
+            code=code, return_url=_connect_return(provider)
+        )
+    except ProviderError as exc:
+        raise _provider_failed(exc) from exc
+    with audit.track(account, action="connect"):
+        account.account_ref = connected.account_ref[:100]
+        account.access_token = connected.access_token
+        account.connect_state = ""
+        if connected.default_currency:
+            account.default_currency = connected.default_currency.upper()
+        account.save()
+    AccountRoute.objects.update_or_create(
+        provider=provider,
+        account_ref=account.account_ref,
+        defaults={"organisation_id": account.organisation_id},
+    )
+    return refresh_account(account)
+
+
 def customer_for(client: Client, account: ProviderAccount) -> str:
     existing = ProviderCustomer.objects.filter(client=client, account=account).first()
     if existing is not None:
@@ -231,14 +302,34 @@ def customer_for(client: Client, account: ProviderAccount) -> str:
 # --- payment methods, setup links and auto-pay consent (T03) ------------------------------------
 
 
+SAVING_PROVIDERS = (Provider.STRIPE, Provider.GOCARDLESS)  # providers that keep a method
+
+
+def setup_providers(branch_id: Any) -> list[str]:
+    """Providers a client of this branch can save a card or mandate with."""
+    return [
+        p
+        for p in SAVING_PROVIDERS
+        if (a := account_for(branch_id, p)) is not None
+        and a.status == ProviderAccount.Status.ACTIVE
+    ]
+
+
 @transaction.atomic
-def create_setup_link(client: Client, *, user: Any = None, days: int = 14) -> str:
-    """A link the client opens to add a card or mandate (staff never type card numbers)."""
-    active_account_for(client.branch_id)
+def create_setup_link(
+    client: Client, *, user: Any = None, days: int = 14, provider: str = ""
+) -> str:
+    """A link the client opens to add a card or mandate (staff never type card numbers).
+    ``provider`` limits it to one provider (e.g. moving the client to GoCardless)."""
+    if provider:
+        active_account_for(client.branch_id, provider)
+    elif not setup_providers(client.branch_id):
+        active_account_for(client.branch_id)  # raises "not set up"
     token = secrets.token_urlsafe(32)
     link = SetupLink.objects.create(
         client=client,
         token_hash=hash_token(token),
+        provider=provider,
         expires_at=now() + timedelta(days=days),
         created_by=user,
     )
@@ -262,20 +353,30 @@ def consent_text() -> str:
     return str(get_setting("payments.autopay_consent_text")).replace("{organisation}", org.name)
 
 
-def start_setup(client: Client) -> dict[str, Any]:
-    account = active_account_for(client.branch_id)
+def start_setup(client: Client, *, provider: str = "", return_url: str = "") -> dict[str, Any]:
+    """Begin saving a method: Stripe returns a client secret for the Payment Element,
+    GoCardless a ``redirect_url`` to its hosted mandate page (back to ``return_url``)."""
+    available = setup_providers(client.branch_id)
+    chosen = provider or (available[0] if available else Provider.STRIPE)
+    account = active_account_for(client.branch_id, chosen)
     customer = customer_for(client, account)
     try:
         intent = get_provider(account.provider).create_setup_intent(
-            account.account_ref, customer=customer
+            account.account_ref,
+            customer=customer,
+            return_url=return_url,
+            currency=client.currency,
         )
     except ProviderError as exc:
         raise _provider_failed(exc) from exc
     return {
+        "provider": account.provider,
+        "providers": available,
         "publishable_key": get_provider(account.provider).publishable_key,
         "account": account.account_ref,
         "client_secret": intent.client_secret,
         "intent": intent.ref,
+        "redirect_url": intent.redirect_url,
         "consent_text": consent_text(),
     }
 
@@ -308,7 +409,10 @@ def save_method(
         audit.record_create(method)
         publish(
             events.PaymentMethodAdded(
-                subject_id=method.pk, client_id=str(client.pk), type=method.type
+                subject_id=method.pk,
+                client_id=str(client.pk),
+                type=method.type,
+                provider=account.provider,
             )
         )
     return method
@@ -322,12 +426,13 @@ def complete_setup(
     autopay: bool = False,
     ip_address: str | None = None,
     user_agent: str = "",
+    provider: str = "",
 ) -> PaymentMethod:
     link = SetupLink.objects.select_for_update().select_related("client").get(pk=link.pk)
     if link.used_at:
         raise BusinessRuleViolation(_("This link has already been used."))
     client = link.client
-    account = active_account_for(client.branch_id)
+    account = active_account_for(client.branch_id, provider or link.provider or Provider.STRIPE)
     try:
         details = get_provider(account.provider).setup_result(account.account_ref, intent_ref)
     except ProviderError as exc:
@@ -619,6 +724,8 @@ def _by_invoice(payment: Payment) -> dict[Any, Money]:
 
 
 def _method_kind(details_type: str) -> str:
+    if details_type == "paypal":
+        return Payment.Method.PAYPAL
     return Payment.Method.CARD if details_type == "card" else Payment.Method.DIRECT_DEBIT
 
 
@@ -1085,8 +1192,23 @@ def _metadata(target: Invoice | PaymentRequest) -> dict[str, str]:
     return {key: str(target.pk), "organisation_id": str(target.organisation_id)}
 
 
+def pay_providers(branch_id: Any) -> list[str]:
+    """Online providers the pay page offers for this branch (FR-11-4)."""
+    return [
+        p
+        for p in (Provider.STRIPE, Provider.GOCARDLESS, Provider.PAYPAL)
+        if (a := account_for(branch_id, p)) is not None
+        and a.status == ProviderAccount.Status.ACTIVE
+    ]
+
+
 def create_pay_intent(
-    target: Invoice | PaymentRequest, *, amount: Money | None = None, save_method: bool = False
+    target: Invoice | PaymentRequest,
+    *,
+    amount: Money | None = None,
+    save_method: bool = False,
+    provider: str = Provider.STRIPE,
+    return_url: str = "",
 ) -> dict[str, Any]:
     due = amount_due(target)
     if not due.is_positive():
@@ -1096,11 +1218,13 @@ def create_pay_intent(
         raise _invalid("amount", _("Pay up to %(due)s.") % {"due": due})
     if pay != due and not get_setting("payments.allow_partial"):
         raise _invalid("amount", _("Pay the full amount."))
+    if provider in REDIRECT_PROVIDERS:
+        return _start_redirect_payment(target, pay, provider, return_url)
     account = active_account_for(target.branch_id)
-    provider = get_provider(account.provider)
+    stripe = get_provider(account.provider)
     customer = customer_for(target.client, account) if save_method else None
     try:
-        intent = provider.create_payment_intent(
+        intent = stripe.create_payment_intent(
             account.account_ref,
             amount=pay,
             customer=customer,
@@ -1111,7 +1235,7 @@ def create_pay_intent(
     except ProviderError as exc:
         raise _provider_failed(exc) from exc
     return {
-        "publishable_key": provider.publishable_key,
+        "publishable_key": stripe.publishable_key,
         "account": account.account_ref,
         "client_secret": intent.client_secret,
         "intent": intent.ref,
@@ -1119,13 +1243,108 @@ def create_pay_intent(
     }
 
 
-def confirm_pay_intent(target: Invoice | PaymentRequest, intent_ref: str) -> str:
+def _start_redirect_payment(
+    target: Invoice | PaymentRequest, pay: Money, provider: str, return_url: str
+) -> dict[str, Any]:
+    """GoCardless (bank payment) or PayPal: send the customer to the provider's page."""
+    account = active_account_for(target.branch_id, provider)
+    back = return_url or tenant_url(f"/pay/{target.pay_token}?provider={provider}")
+    try:
+        intent = redirect_provider(provider).start_payment(
+            account.account_ref,
+            amount=pay,
+            metadata=_metadata(target),
+            return_url=back,
+            idempotency_key=f"pay-{target.pk}-{pay.to_minor()}-{secrets.token_hex(4)}",
+        )
+    except ProviderError as exc:
+        raise _provider_failed(exc) from exc
+    return {
+        "provider": provider,
+        "publishable_key": "",
+        "account": account.account_ref,
+        "client_secret": "",
+        "intent": intent.ref,
+        "redirect_url": intent.redirect_url,
+        "amount": pay,
+    }
+
+
+def _finish_redirect_payment(
+    target: Invoice | PaymentRequest, intent_ref: str, provider: str
+) -> str:
+    account = active_account_for(target.branch_id, provider)
+    try:
+        intent = redirect_provider(provider).finish_payment(
+            account.account_ref, intent_ref, idempotency_key=f"finish-{intent_ref}"
+        )
+    except ProviderError as exc:
+        raise _provider_failed(exc) from exc
+    if intent.metadata != _metadata(target):
+        raise _invalid("intent", _("That payment is for something else."))
+    if intent.amount is None or not intent.payment:
+        return intent.status or "pending"
+    if intent.status == "succeeded":
+        record_intent(account, intent.payment, intent.amount, intent.metadata, method_type=provider)
+        return "succeeded"
+    if intent.status == "processing":
+        record_pending(account, target, intent.payment, intent.amount)
+        return "processing"
+    return intent.status
+
+
+@transaction.atomic
+def record_pending(
+    account: ProviderAccount, target: Invoice | PaymentRequest, payment_ref: str, amount: Money
+) -> Payment:
+    """A bank payment started on the pay page (GoCardless): pending until the provider
+    confirms it by webhook, then it pays the invoice (or request) it was for. Idempotent."""
+    existing = Payment.objects.filter(provider=account.provider, provider_ref=payment_ref).first()
+    if existing is not None:
+        return existing
+    payment = Payment.objects.create(
+        client=target.client,
+        branch_id=target.branch_id,
+        currency=amount.currency,
+        amount=amount,
+        method=Payment.Method.DIRECT_DEBIT,
+        provider=account.provider,
+        account=account,
+        provider_ref=payment_ref,
+        status=Payment.Status.PENDING,
+        source=Payment.Source.PAY_PAGE,
+        reference=payment_ref,
+        payment_request=target if isinstance(target, PaymentRequest) else None,
+    )
+    if isinstance(target, Invoice):
+        PaymentAttempt.objects.create(
+            invoice=target,
+            number=0,
+            idempotency_key=f"paypage-{account.provider}-{payment_ref}",
+            status=PaymentAttempt.Status.PROCESSING,
+            provider_ref=payment_ref,
+            payment=payment,
+        )
+    publish(
+        events.PaymentPending(
+            subject_id=payment.pk, client_id=str(payment.client_id), amount=amount.to_dict()
+        ),
+        branch_id=payment.branch_id,
+    )
+    return payment
+
+
+def confirm_pay_intent(
+    target: Invoice | PaymentRequest, intent_ref: str, *, provider: str = Provider.STRIPE
+) -> str:
     """The page tells us the customer finished; we check with the provider (the webhook
     does the same, whichever comes first records the payment)."""
+    if provider in REDIRECT_PROVIDERS:
+        return _finish_redirect_payment(target, intent_ref, provider)
     account = active_account_for(target.branch_id)
-    provider = get_provider(account.provider)
+    stripe = get_provider(account.provider)
     try:
-        intent = provider.retrieve_intent(account.account_ref, intent_ref)
+        intent = stripe.retrieve_intent(account.account_ref, intent_ref)
     except ProviderError as exc:
         raise _provider_failed(exc) from exc
     if intent.metadata != _metadata(target):
@@ -1143,6 +1362,8 @@ def record_intent(
     amount: Money,
     metadata: dict[str, str],
     method_ref: str = "",
+    *,
+    method_type: str = "",
 ) -> Payment | None:
     """Record a succeeded pay-page payment from its metadata (idempotent)."""
     invoice = request = None
@@ -1174,7 +1395,7 @@ def record_intent(
         client=target.client,
         amount=amount,
         provider_ref=ref,
-        method_type=method.type if method else "card",
+        method_type=method.type if method else (method_type or "card"),
         payment_method=method,
         invoice=invoice,
         payment_request=request,
@@ -1228,6 +1449,11 @@ def _signal(workflow_id: str, name: str) -> None:
 def process_webhook_event(row: ProviderWebhookEvent) -> None:
     """Apply one stored provider event (idempotent: processed rows are skipped)."""
     if row.processed_at:
+        return
+    if row.provider in REDIRECT_PROVIDERS:
+        from . import partner_webhooks
+
+        partner_webhooks.process(row)
         return
     account = ProviderAccount.objects.filter(account_ref=row.account_ref).first()
     data = row.payload["data"]["object"]
@@ -1310,3 +1536,121 @@ def _signal_collection(payment: Payment, name: str) -> None:
     attempt = PaymentAttempt.objects.filter(provider_ref=payment.provider_ref).first()
     if attempt is not None:
         _signal(collect_workflow_id(attempt.organisation_id, attempt.invoice_id), name)
+
+
+def _later(organisation_id: Any, event_id: Any) -> Any:
+    return lambda: _process_later(organisation_id, event_id)
+
+
+def ingest_partner_webhooks(provider: str, payload: bytes, headers: dict[str, str]) -> int:
+    """GoCardless and PayPal: verify the batch, route each event to its organisation by the
+    connected account and store it raw; processing is async and idempotent (event id)."""
+    from tutortrack.core.context import tenant_context
+
+    stored = 0
+    for event in redirect_provider(provider).parse_webhooks(payload, headers):
+        route = AccountRoute.objects.filter(provider=provider, account_ref=event.account).first()
+        if route is None:
+            continue
+        with tenant_context(route.organisation_id), transaction.atomic():
+            row, created = ProviderWebhookEvent.objects.get_or_create(
+                provider=provider,
+                event_id=event.id,
+                defaults={"type": event.type, "account_ref": event.account,
+                          "payload": event.payload},
+            )  # fmt: skip
+            if created:
+                stored += 1
+                # Capture the organisation now, not when the hook runs.
+                transaction.on_commit(_later(route.organisation_id, row.pk))
+    return stored
+
+
+# --- split payments (E11-T14) -------------------------------------------------------------------
+
+
+@transaction.atomic
+def record_split_payment(
+    *,
+    payer_name: str,
+    amount: Money,
+    method: str,
+    parts: list[dict[str, Any]],
+    received_at: datetime | None = None,
+    reference: str = "",
+    notes: str = "",
+    user: Any = None,
+) -> Any:
+    """One receipt split across clients (FR-11-6, e.g. a school paying for several
+    students). ``parts`` = ``[{"client", "amount": Money, "allocations": [(invoice,
+    Money)] | None}]``; the parts must add up to the receipt. Each part is an ordinary
+    manual payment for its client in a ``PaymentGroup``."""
+    from .models import PaymentGroup
+
+    if not amount.is_positive():
+        raise _invalid("amount", _("Record a positive amount."))
+    if len(parts) < 2:
+        raise _invalid("parts", _("Split the payment between at least two clients."))
+    total = sum_money((p["amount"] for p in parts), amount.currency)
+    if total != amount.round_to_minor():
+        raise _invalid("parts", _("The parts must add up to the payment."))
+    clients = [p["client"].pk for p in parts]
+    if len(set(clients)) != len(clients):
+        raise _invalid("parts", _("Each client can appear only once."))
+    first = parts[0]["client"]
+    group = PaymentGroup.objects.create(
+        branch_id=first.branch_id,
+        payer_name=payer_name[:200],
+        currency=amount.currency,
+        amount=amount.round_to_minor(),
+        method=method,
+        received_at=received_at or now(),
+        reference=reference[:120],
+        notes=notes,
+        recorded_by=user,
+    )
+    audit.record_create(group)
+    payments = []
+    for part in parts:
+        payment = record_manual_payment(
+            client=part["client"],
+            amount=part["amount"],
+            method=method,
+            received_at=group.received_at,
+            reference=reference or payer_name,
+            notes=_("Part of a payment from %(payer)s") % {"payer": payer_name},
+            allocations=part.get("allocations"),
+            user=user,
+        )
+        Payment.objects.filter(pk=payment.pk).update(group=group)
+        payments.append(payment)
+    publish(
+        events.SplitPaymentRecorded(
+            subject_id=group.pk,
+            amount=group.amount.to_dict(),
+            payment_ids=[str(p.pk) for p in payments],
+        ),
+        branch_id=group.branch_id,
+    )
+    return group
+
+
+# --- payment at booking (for the E08 self-booking engine) ---------------------------------------
+
+
+@transaction.atomic
+def request_booking_payment(
+    *, client: Client, amount: Money, description: str, user: Any = None
+) -> dict[str, Any]:
+    """Payment at booking (FR-15-5): a payment request for the booking and the pay page
+    link. When it is paid ``payment_request.paid`` fires (the booking can listen for it)
+    and the money becomes credit that the lesson's charge or invoice uses."""
+    request = billing.create_payment_request(
+        client=client, amount=amount, description=description, user=user
+    )
+    return {
+        "payment_request_id": str(request.pk),
+        "pay_url": tenant_url(f"/pay/{request.pay_token}"),
+        "pay_token": request.pay_token,
+        "amount": request.amount,
+    }

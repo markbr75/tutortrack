@@ -15,4 +15,12 @@ PERMISSIONS = {
     "billing.ledger.view": "See client ledgers and statements",
     "billing.ledger.adjust": "Post manual ledger adjustments",
     "billing.settings.manage": "Change billing settings",
+    "billing.package.view": "See clients' packages and their use",
+    "billing.package.sell": "Sell packages to clients",
+    "billing.package.manage": "Extend and cancel packages",
+    "billing.plan.view": "See recurring fee plans",
+    "billing.plan.manage": "Create, change, pause and end recurring fee plans",
+    "billing.late_fee.manage": "Set late fee rules and waive late fees",
+    "billing.collections.manage": "Close collections cases",
+    "billing.split.manage": "Split a job's or student's billing between clients",
 }

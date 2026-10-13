@@ -92,7 +92,9 @@ class StripeProvider:
         )
         return str(customer.id)
 
-    def create_setup_intent(self, account: str, *, customer: str) -> Intent:
+    def create_setup_intent(
+        self, account: str, *, customer: str, return_url: str = "", currency: str = ""
+    ) -> Intent:
         intent = self._call(
             self.client.setup_intents.create,
             params={

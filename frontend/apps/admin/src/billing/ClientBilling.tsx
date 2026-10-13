@@ -8,10 +8,11 @@ import { useState } from "react";
 import { api, usePermission } from "../api";
 import { ErrorList } from "../calendar/ErrorList";
 import { ClientPaymentMethods, RecordPayment } from "../payments/ClientPayments";
+import { PackagesTab } from "./Phase2Tabs";
 import { PaymentsList } from "../payments/PaymentsPages";
 import { InvoiceTable, RequestTable } from "./BillingPage";
 
-type Tab = "invoices" | "payments" | "methods" | "ledger" | "requests" | "charge";
+type Tab = "invoices" | "payments" | "methods" | "ledger" | "requests" | "charge" | "packages";
 
 /** The client's billing tab (FR-10-14): balances, invoices, ledger, payment requests and
  * one-off charges. */
@@ -25,6 +26,7 @@ export function ClientBilling({ clientId, currency }: { clientId: string; curren
   const canRequest = usePermission("billing.payment_request.manage");
   const canPayments = usePermission("payments.payment.view");
   const canRecord = usePermission("payments.payment.record");
+  const canPackages = usePermission("billing.package.view");
   const [tab, setTab] = useState<Tab>("invoices");
   const [charge, setCharge] = useState({ description: "", amount: "" });
   const [request, setRequest] = useState("");
@@ -107,6 +109,7 @@ export function ClientBilling({ clientId, currency }: { clientId: string; curren
       : []),
     ...(canLedger ? [{ key: "ledger" as const, label: t("billing.ledger") }] : []),
     { key: "requests" as const, label: t("billing.tabs.requests") },
+    ...(canPackages ? [{ key: "packages" as const, label: t("packages.title") }] : []),
     ...(canCharge ? [{ key: "charge" as const, label: t("billing.addCharge") }] : []),
   ];
 
@@ -161,6 +164,7 @@ export function ClientBilling({ clientId, currency }: { clientId: string; curren
           </div>
         ) : null}
         {tab === "methods" ? <ClientPaymentMethods clientId={clientId} /> : null}
+        {tab === "packages" ? <PackagesTab clientId={clientId} /> : null}
         {tab === "ledger" ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">

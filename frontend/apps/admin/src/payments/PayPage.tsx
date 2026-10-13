@@ -13,6 +13,19 @@ interface Mounted {
   intent: string;
 }
 
+type Provider = "stripe" | "gocardless" | "paypal";
+
+/** What a provider added to our URL when the customer came back from its pages:
+ * GoCardless ``intent``, PayPal ``token`` or Stripe ``payment_intent``. */
+function returned(): { provider: Provider; intent: string } | null {
+  const params = new URLSearchParams(window.location.search);
+  const provider = params.get("provider");
+  const intent = params.get("intent") ?? params.get("token");
+  if ((provider === "gocardless" || provider === "paypal") && intent) return { provider, intent };
+  const stripe = params.get("payment_intent");
+  return stripe ? { provider: "stripe", intent: stripe } : null;
+}
+
 function problemMessage(error: unknown, fallback: string): string {
   return error instanceof ApiError || error instanceof Error ? error.message : fallback;
 }
@@ -47,11 +60,44 @@ function usePaymentElement(setup: { key: string; account: string; secret: string
   return { ref, mounted, error };
 }
 
-/** The hosted pay page for an invoice or payment request (FR-11-4). Card details are
- * entered in Stripe's own fields. */
+function ProviderChoice({
+  providers,
+  value,
+  onChange,
+  legend,
+}: {
+  providers: string[];
+  value: string;
+  onChange: (provider: Provider) => void;
+  legend: string;
+}) {
+  const { t } = useTranslation();
+  if (providers.length < 2) return null;
+  return (
+    <fieldset className="space-y-1">
+      <legend className="text-sm font-medium">{legend}</legend>
+      {providers.map((p) => (
+        <label key={p} className="flex items-center gap-2 text-sm">
+          <input
+            type="radio"
+            name="provider"
+            className="size-4"
+            checked={value === p}
+            onChange={() => onChange(p as Provider)}
+          />
+          {t(`payOptions.${p}`)}
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
+/** The hosted pay page for an invoice or payment request (FR-11-4): card details in
+ * Stripe's own fields, or a bank payment (GoCardless) or PayPal on their own pages. */
 export function PayPage({ token }: { token: string }) {
   const { t, i18n } = useTranslation();
   const [saveMethod, setSaveMethod] = useState(false);
+  const [chosen, setChosen] = useState<Provider | "">("");
   const [paid, setPaid] = useState(false);
   const [message, setMessage] = useState("");
   const page = useQuery({
@@ -59,29 +105,35 @@ export function PayPage({ token }: { token: string }) {
     queryFn: async () =>
       unwrap(await api.GET("/api/v1/pay/{token}", { params: { path: { token } } })),
   });
+  const providers = (page.data?.providers ?? []) as Provider[];
+  const provider: Provider = chosen || providers[0] || "stripe";
   const intent = useMutation({
     mutationFn: async () =>
       unwrap(
         await api.POST("/api/v1/pay/{token}/intent", {
           params: { path: { token } },
-          body: { save_method: saveMethod },
+          body: { save_method: provider === "stripe" && saveMethod, provider },
         }),
       ),
+    onSuccess: (data) => {
+      if (data.redirect_url) window.location.assign(data.redirect_url);
+    },
   });
-  const setup = intent.data
-    ? {
-        key: intent.data.publishable_key,
-        account: intent.data.account,
-        secret: intent.data.client_secret,
-      }
-    : null;
+  const setup =
+    intent.data && !intent.data.redirect_url
+      ? {
+          key: intent.data.publishable_key,
+          account: intent.data.account,
+          secret: intent.data.client_secret,
+        }
+      : null;
   const element = usePaymentElement(setup);
   const confirm = useMutation({
-    mutationFn: async (intentId: string) =>
+    mutationFn: async ({ id, via }: { id: string; via: Provider }) =>
       unwrap(
         await api.POST("/api/v1/pay/{token}/confirm", {
           params: { path: { token } },
-          body: { intent: intentId },
+          body: { intent: id, provider: via },
         }),
       ),
     onSuccess: (result) => {
@@ -90,10 +142,10 @@ export function PayPage({ token }: { token: string }) {
     },
   });
 
-  // Back from a redirect (some methods leave the page to authenticate).
+  // Back from a provider's page (3-D Secure, GoCardless or PayPal).
   useEffect(() => {
-    const returned = new URLSearchParams(window.location.search).get("payment_intent");
-    if (returned) confirm.mutate(returned);
+    const back = returned();
+    if (back) confirm.mutate({ id: back.intent, via: back.provider });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
   }, []);
 
@@ -106,7 +158,7 @@ export function PayPage({ token }: { token: string }) {
       confirmParams: { return_url: window.location.href },
     });
     if (result.error) setMessage(result.error.message ?? t("pay.failed"));
-    else confirm.mutate(result.paymentIntent?.id ?? intent.data.intent);
+    else confirm.mutate({ id: result.paymentIntent?.id ?? intent.data.intent, via: "stripe" });
   };
 
   if (page.isPending) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
@@ -119,6 +171,7 @@ export function PayPage({ token }: { token: string }) {
   const data = page.data;
   const money = (value: { amount: string; currency: string }) => formatMoney(value, i18n.language);
   const due = Number(data.amount_due.amount);
+  const choosing = !intent.data || Boolean(intent.data.redirect_url);
 
   return (
     <main className="mx-auto max-w-lg space-y-6 p-6">
@@ -164,17 +217,27 @@ export function PayPage({ token }: { token: string }) {
         <Alert>{t("pay.offline")}</Alert>
       ) : (
         <section aria-label={t("pay.payOnline")} className="space-y-3">
-          {!intent.data ? (
+          {choosing ? (
             <>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  className="size-4"
-                  checked={saveMethod}
-                  onChange={(e) => setSaveMethod(e.target.checked)}
-                />
-                {t("pay.saveMethod")}
-              </label>
+              <ProviderChoice
+                providers={providers}
+                value={provider}
+                onChange={setChosen}
+                legend={t("payOptions.payWith")}
+              />
+              {provider === "stripe" ? (
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="size-4"
+                    checked={saveMethod}
+                    onChange={(e) => setSaveMethod(e.target.checked)}
+                  />
+                  {t("pay.saveMethod")}
+                </label>
+              ) : (
+                <p className="text-sm text-muted-foreground">{t(`payOptions.${provider}Help`)}</p>
+              )}
               <Button onClick={() => intent.mutate()} disabled={intent.isPending}>
                 {t("pay.payAmount", { amount: money(data.amount_due) })}
               </Button>
@@ -188,7 +251,7 @@ export function PayPage({ token }: { token: string }) {
             </>
           )}
           {intent.error || element.error || message || confirm.error ? (
-            <Alert tone="danger">
+            <Alert tone={message && !confirm.error ? "info" : "danger"}>
               {message ||
                 element.error ||
                 problemMessage(intent.error ?? confirm.error, t("pay.failed"))}
@@ -200,48 +263,116 @@ export function PayPage({ token }: { token: string }) {
   );
 }
 
-/** Save a card or debit mandate from a setup link, optionally agreeing to auto-pay. */
+/** Save a card or debit mandate from a setup link, optionally agreeing to auto-pay. Stripe
+ * saves in its Payment Element; GoCardless on its own mandate page, then back here. */
 export function SetupPage({ token }: { token: string }) {
   const { t } = useTranslation();
   const [autopay, setAutopay] = useState(false);
+  const [chosen, setChosen] = useState("");
   const [done, setDone] = useState<null | { last4: string; auto_pay: boolean }>(null);
   const [message, setMessage] = useState("");
+  const [back] = useState(returned);
+  const consentKey = `tt-setup-autopay-${token}`;
   const page = useQuery({
-    queryKey: ["pay-setup", token],
+    queryKey: ["pay-setup", token, chosen],
     queryFn: async () =>
-      unwrap(await api.GET("/api/v1/pay/setup/{token}", { params: { path: { token } } })),
+      unwrap(
+        await api.GET("/api/v1/pay/setup/{token}", {
+          params: { path: { token }, query: chosen ? { provider: chosen } : {} },
+        }),
+      ),
     retry: false,
+    enabled: !back,
   });
-  const setup = page.data
-    ? {
-        key: page.data.publishable_key,
-        account: page.data.account,
-        secret: page.data.client_secret,
-      }
-    : null;
+  const setup =
+    page.data && !page.data.redirect_url
+      ? {
+          key: page.data.publishable_key,
+          account: page.data.account,
+          secret: page.data.client_secret,
+        }
+      : null;
   const element = usePaymentElement(setup);
   const complete = useMutation({
-    mutationFn: async (intentId: string) =>
+    mutationFn: async (input: {
+      id: string;
+      via: "" | "stripe" | "gocardless";
+      consent: boolean;
+    }) =>
       unwrap(
         await api.POST("/api/v1/pay/setup/{token}", {
           params: { path: { token } },
-          body: { intent: intentId, autopay },
+          body: { intent: input.id, autopay: input.consent, provider: input.via },
         }),
       ),
     onSuccess: (result) => setDone({ last4: result.method.last4, auto_pay: result.auto_pay }),
   });
 
+  // Back from GoCardless's mandate page: finish with the consent given before leaving.
+  useEffect(() => {
+    if (back?.provider !== "gocardless") return;
+    let consent = false;
+    try {
+      consent = window.sessionStorage.getItem(consentKey) === "1";
+    } catch {
+      consent = false;
+    }
+    complete.mutate({ id: back.intent, via: "gocardless", consent });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
+  }, []);
+
   const save = async () => {
-    if (!element.mounted || !page.data) return;
+    if (!page.data) return;
+    if (page.data.redirect_url) {
+      try {
+        window.sessionStorage.setItem(consentKey, autopay ? "1" : "0");
+      } catch {
+        // no storage: auto-pay can be turned on later
+      }
+      window.location.assign(page.data.redirect_url);
+      return;
+    }
+    if (!element.mounted) return;
     const result = await element.mounted.stripe.confirmSetup({
       elements: element.mounted.elements,
       redirect: "if_required",
       confirmParams: { return_url: window.location.href },
     });
     if (result.error) setMessage(result.error.message ?? t("pay.failed"));
-    else complete.mutate(result.setupIntent?.id ?? page.data.intent);
+    else
+      complete.mutate({
+        id: result.setupIntent?.id ?? page.data.intent,
+        via: "stripe",
+        consent: autopay,
+      });
   };
 
+  const header = (
+    <header>
+      {page.data ? <p className="text-sm text-muted-foreground">{page.data.organisation}</p> : null}
+      <h1 className="text-2xl font-semibold">{t("pay.setupTitle")}</h1>
+      {page.data ? <p className="text-sm text-muted-foreground">{page.data.client_name}</p> : null}
+    </header>
+  );
+  const finished = done ? (
+    <Alert tone="success">
+      {t("pay.setupDone", { last4: done.last4 })}
+      {done.auto_pay ? ` ${t("pay.autopayOn")}` : ""}
+    </Alert>
+  ) : null;
+
+  if (back?.provider === "gocardless")
+    return (
+      <main className="mx-auto max-w-lg space-y-6 p-6">
+        {header}
+        {finished ??
+          (complete.error ? (
+            <Alert tone="danger">{problemMessage(complete.error, t("pay.failed"))}</Alert>
+          ) : (
+            <Spinner className="size-6" label={t("payOptions.finishing")} />
+          ))}
+      </main>
+    );
   if (page.isPending) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
   if (!page.data)
     return (
@@ -249,19 +380,11 @@ export function SetupPage({ token }: { token: string }) {
         <Alert tone="danger">{t("pay.linkExpired")}</Alert>
       </main>
     );
+  const redirecting = Boolean(page.data.redirect_url);
   return (
     <main className="mx-auto max-w-lg space-y-6 p-6">
-      <header>
-        <p className="text-sm text-muted-foreground">{page.data.organisation}</p>
-        <h1 className="text-2xl font-semibold">{t("pay.setupTitle")}</h1>
-        <p className="text-sm text-muted-foreground">{page.data.client_name}</p>
-      </header>
-      {done ? (
-        <Alert tone="success">
-          {t("pay.setupDone", { last4: done.last4 })}
-          {done.auto_pay ? ` ${t("pay.autopayOn")}` : ""}
-        </Alert>
-      ) : (
+      {header}
+      {finished ?? (
         <form
           className="space-y-3"
           onSubmit={(e) => {
@@ -269,7 +392,17 @@ export function SetupPage({ token }: { token: string }) {
             void save();
           }}
         >
-          <div ref={element.ref} />
+          <ProviderChoice
+            providers={page.data.providers ?? []}
+            value={page.data.provider}
+            onChange={setChosen}
+            legend={t("payOptions.saveWith")}
+          />
+          {redirecting ? (
+            <p className="text-sm text-muted-foreground">{t("payOptions.gocardlessSetupHelp")}</p>
+          ) : (
+            <div ref={element.ref} />
+          )}
           <label className="flex items-start gap-2 text-sm">
             <input
               type="checkbox"
@@ -279,8 +412,8 @@ export function SetupPage({ token }: { token: string }) {
             />
             <span>{page.data.consent_text}</span>
           </label>
-          <Button type="submit" disabled={!element.mounted || complete.isPending}>
-            {t("pay.saveDetails")}
+          <Button type="submit" disabled={(!element.mounted && !redirecting) || complete.isPending}>
+            {redirecting ? t("payOptions.continueToGoCardless") : t("pay.saveDetails")}
           </Button>
           {message || element.error || complete.error ? (
             <Alert tone="danger">

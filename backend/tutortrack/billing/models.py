@@ -72,6 +72,9 @@ class Charge(BranchScopedModel):
         LATE_CANCELLATION = "late_cancellation", _("Late cancellation fee")
         RECONCILIATION = "reconciliation", _("Adjustment for a changed lesson")
         AD_HOC = "ad_hoc", _("One-off charge")
+        PACKAGE = "package", _("Package")
+        PLAN = "plan", _("Recurring fee")
+        LATE_FEE = "late_fee", _("Late payment fee")
 
     class Status(models.TextChoices):
         UNINVOICED = "uninvoiced", _("Not invoiced")
@@ -357,4 +360,266 @@ class PaymentRequest(BranchScopedModel):
             models.UniqueConstraint(
                 fields=["organisation", "number"], name="payment_request_number"
             )
+        ]
+
+
+# --- Phase 2 (E10-T12..T15) ---------------------------------------------------------------------
+
+
+class PackagePurchase(BranchScopedModel):
+    """A package sold to a client (FR-10-7): hours, lessons or credit that lessons consume
+    instead of creating charges. The sale itself is an ordinary invoiced charge."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Awaiting payment")
+        ACTIVE = "active", _("Active")
+        DEPLETED = "depleted", _("Used up")
+        EXPIRED = "expired", _("Expired")
+        CANCELLED = "cancelled", _("Cancelled")
+
+    class Source(models.TextChoices):
+        SALE = "sale", _("Sold")
+        RENEWAL = "renewal", _("Renewed automatically")
+        IMPORT = "import", _("Imported")
+
+    client = models.ForeignKey("people.Client", on_delete=models.PROTECT, related_name="packages")
+    student = models.ForeignKey(
+        "people.Student", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
+    )  # empty: any student of the client
+    template = models.ForeignKey(
+        "catalogue.PackageTemplate",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="+",
+    )
+    template_snapshot = models.JSONField(default=dict, blank=True)
+    name = models.CharField(max_length=150)
+    quantity_type = models.CharField(max_length=8)  # hours | lessons | credit
+    units_total = models.DecimalField(max_digits=12, decimal_places=4)
+    units_used = models.DecimalField(max_digits=12, decimal_places=4, default=0)
+    units_expired = models.DecimalField(max_digits=12, decimal_places=4, default=0)
+    currency = CurrencyField()
+    price = MoneyField()
+    services = models.JSONField(default=list, blank=True)  # service ids; [] = any service
+    shareable = models.BooleanField(default=False)  # siblings may use it
+    auto_renew = models.BooleanField(default=False)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    source = models.CharField(max_length=8, choices=Source.choices, default=Source.SALE)
+    charge = models.ForeignKey(
+        Charge, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    activated_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    low_notified_at = models.DateTimeField(null=True, blank=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
+    close_reason = models.CharField(max_length=300, blank=True, default="")
+    workflow_id = models.CharField(max_length=255, blank=True, default="")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta(BranchScopedModel.Meta):
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["client", "status"], name="package_client_idx")]
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def units_remaining(self) -> Any:
+        return self.units_total - self.units_used - self.units_expired
+
+
+class PackageConsumption(TenantModel):
+    """One movement of package units (append-only): lessons use units (positive), changed
+    lessons give them back (negative), expiry writes off what is left."""
+
+    class Kind(models.TextChoices):
+        LESSON = "lesson", _("Lesson")
+        REVERSAL = "reversal", _("Lesson changed")
+        EXPIRY = "expiry", _("Expired")
+        ADJUSTMENT = "adjustment", _("Adjustment")
+
+    purchase = models.ForeignKey(
+        PackagePurchase, on_delete=models.PROTECT, related_name="consumptions"
+    )
+    kind = models.CharField(max_length=10, choices=Kind.choices)
+    lesson = models.ForeignKey(
+        "scheduling.Lesson", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
+    )
+    lesson_attendee = models.ForeignKey(
+        "scheduling.LessonAttendee",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    units = models.DecimalField(max_digits=12, decimal_places=4)
+    currency = CurrencyField()
+    value = MoneyField()  # revenue the units represent (price per unit x units)
+    note = models.CharField(max_length=300, blank=True, default="")
+
+    class Meta(TenantModel.Meta):
+        ordering = ["created_at", "id"]
+        indexes = [models.Index(fields=["lesson_attendee"], name="package_use_attendee_idx")]
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        if not self._state.adding:
+            raise ImmutableRecord("Package movements are never changed; post a reversal.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args: Any, **kwargs: Any) -> Any:
+        raise ImmutableRecord("Package movements are never deleted; post a reversal.")
+
+
+class BillingPlan(BranchScopedModel):
+    """A recurring fixed fee (FR-10-8), e.g. £160 a month for weekly lessons. Each period
+    becomes one charge (``plan:{plan}:{period start}``) when the period starts."""
+
+    class Interval(models.TextChoices):
+        WEEKLY = "weekly", _("Weekly")
+        MONTHLY = "monthly", _("Monthly")
+        TERMLY = "termly", _("Termly (every four months)")
+
+    class Status(models.TextChoices):
+        ACTIVE = "active", _("Active")
+        PAUSED = "paused", _("Paused")
+        ENDED = "ended", _("Ended")
+
+    client = models.ForeignKey(
+        "people.Client", on_delete=models.PROTECT, related_name="billing_plans"
+    )
+    job = models.ForeignKey(
+        "jobs.Job", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
+    )
+    student = models.ForeignKey(
+        "people.Student", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
+    )
+    description = models.CharField(max_length=200)
+    currency = CurrencyField()
+    amount = MoneyField()
+    tax_rate = models.ForeignKey(
+        "catalogue.TaxRate", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
+    )
+    interval = models.CharField(max_length=8, choices=Interval.choices)
+    anchor_date = models.DateField()  # periods start on this date's weekday / day of month
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)  # last day billed
+    prorate = models.BooleanField(default=True)
+    attendance_independent = models.BooleanField(default=True)  # False: skip lesson-less periods
+    status = models.CharField(max_length=7, choices=Status.choices, default=Status.ACTIVE)
+    paused_at = models.DateTimeField(null=True, blank=True)
+    workflow_id = models.CharField(max_length=255, blank=True, default="")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta(BranchScopedModel.Meta):
+        ordering = ["-created_at"]
+
+
+class LateFeeRule(TenantModel):
+    """Late fees (FR-10-10, TutorBird parity). ``branch`` empty = the organisation rule."""
+
+    class Kind(models.TextChoices):
+        FIXED = "fixed", _("Fixed amount")
+        PERCENT = "percent", _("Percentage of what is owed")
+
+    class Recurrence(models.TextChoices):
+        ONCE = "once", _("Once")
+        MONTHLY = "monthly", _("Every month while unpaid")
+
+    class Mode(models.TextChoices):
+        NEXT_INVOICE = "next_invoice", _("Add to the next invoice")
+        IMMEDIATE = "immediate", _("Invoice it straight away")
+
+    branch = models.ForeignKey(
+        "tenancy.Branch", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
+    )
+    kind = models.CharField(max_length=7, choices=Kind.choices, default=Kind.FIXED)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # fixed fee
+    percent = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    days_overdue = models.PositiveSmallIntegerField(default=14)
+    recurrence = models.CharField(max_length=7, choices=Recurrence.choices, default=Recurrence.ONCE)
+    max_applications = models.PositiveSmallIntegerField(default=1)
+    cap = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    minimum_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    mode = models.CharField(max_length=12, choices=Mode.choices, default=Mode.NEXT_INVOICE)
+    tax_rate = models.ForeignKey(
+        "catalogue.TaxRate", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
+    )
+    active = models.BooleanField(default=True)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "branch"],
+                condition=Q(active=True, branch__isnull=False),
+                name="late_fee_rule_branch_unique",
+            ),
+            models.UniqueConstraint(
+                fields=["organisation"],
+                condition=Q(active=True, branch__isnull=True),
+                name="late_fee_rule_default_unique",
+            ),
+        ]
+
+
+class CollectionsCase(TenantModel):
+    """A client in collections (FR-10-10): staff get a task, and lessons are softly or hard
+    blocked (``billing.selectors.booking_block``). Closes when the invoice closes."""
+
+    class Status(models.TextChoices):
+        OPEN = "open", _("In collections")
+        CLOSED = "closed", _("Closed")
+
+    class Block(models.TextChoices):
+        NONE = "none", _("No block")
+        SOFT = "soft", _("Warn when scheduling")
+        HARD = "hard", _("Block portal booking")
+
+    client = models.ForeignKey("people.Client", on_delete=models.PROTECT, related_name="+")
+    invoice = models.ForeignKey(Invoice, on_delete=models.PROTECT, related_name="+")
+    status = models.CharField(max_length=6, choices=Status.choices, default=Status.OPEN)
+    block = models.CharField(max_length=4, choices=Block.choices, default=Block.SOFT)
+    task_id = models.CharField(max_length=64, blank=True, default="")
+    opened_at = models.DateTimeField()
+    closed_at = models.DateTimeField(null=True, blank=True)
+    close_reason = models.CharField(max_length=300, blank=True, default="")
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-opened_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["invoice"], condition=Q(status="open"), name="collections_open_invoice"
+            )
+        ]
+
+
+class BillingSplit(TenantModel):
+    """Split billing (FR-10-12): a job's (or a student's) charges are shared between
+    several paying clients by percentage, e.g. separated parents 50/50."""
+
+    job = models.ForeignKey(
+        "jobs.Job", null=True, blank=True, on_delete=models.CASCADE, related_name="+"
+    )
+    student = models.ForeignKey(
+        "people.Student", null=True, blank=True, on_delete=models.CASCADE, related_name="+"
+    )
+    client = models.ForeignKey("people.Client", on_delete=models.PROTECT, related_name="+")
+    percent = models.DecimalField(max_digits=5, decimal_places=2)
+    position = models.PositiveSmallIntegerField(default=0)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["position", "created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(job__isnull=False) | Q(student__isnull=False),
+                name="billing_split_target",
+            ),
+            models.CheckConstraint(
+                condition=Q(percent__gt=0) & Q(percent__lte=100), name="billing_split_percent"
+            ),
         ]

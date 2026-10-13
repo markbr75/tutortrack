@@ -252,6 +252,40 @@ class BillingView(PortalView):
         return Response(s.PortalBillingSerializer(selectors.billing(household)).data)
 
 
+class BuyPackageView(PortalView):
+    """Buy a package on sale online (FR-15-7): it is invoiced at once and the returned
+    ``pay_token`` opens the pay page; the package can be used once that invoice is paid."""
+
+    @extend_schema(request=s.PortalBuyPackageSerializer, responses={201: s.PortalBoughtSerializer})
+    def post(self, request: Request) -> Response:
+        from django.db import transaction
+
+        from tutortrack.billing import packages
+        from tutortrack.billing.models import Invoice
+        from tutortrack.catalogue.models import PackageTemplate
+
+        household = self.client_household(request, "portal.client.pay")
+        if not setting("portal.show_package_balances"):
+            raise FeatureDisabled("Packages aren't sold in the portal.")
+        payload = s.PortalBuyPackageSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        client = _client_of(household, payload.validated_data["client"])
+        template = PackageTemplate.objects.filter(
+            pk=payload.validated_data["template"], active=True, bookable_online=True
+        ).first()
+        if template is None:
+            raise NotFound()
+        with transaction.atomic():
+            purchase = packages.sell_package(
+                client=client, template=template, user=request.user, invoice_now=True
+            )
+        invoice = Invoice.objects.filter(charges__pk=purchase.charge_id).first()
+        token = invoice.pay_token if invoice is not None and invoice.is_open else ""
+        return Response(
+            {"package": str(purchase.pk), "pay_token": token}, status=status.HTTP_201_CREATED
+        )
+
+
 class StatementView(PortalView):
     @extend_schema(
         responses={(200, "application/pdf"): OpenApiTypes.BINARY},

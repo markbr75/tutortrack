@@ -168,11 +168,45 @@ class PortalCreditNoteSerializer(serializers.Serializer):
     issued_at = serializers.DateTimeField()
 
 
+class PortalPackageSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    client = serializers.CharField()
+    name = serializers.CharField()
+    status = serializers.CharField()
+    quantity_type = serializers.CharField()
+    units_total = serializers.DecimalField(max_digits=12, decimal_places=2)
+    units_remaining = serializers.DecimalField(max_digits=12, decimal_places=2)
+    student_name = serializers.CharField(allow_blank=True)
+    expires_at = serializers.DateTimeField(allow_null=True)
+
+
+class PortalPackageOfferSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+    description = serializers.CharField(allow_blank=True)
+    quantity_type = serializers.CharField()
+    quantity = serializers.DecimalField(max_digits=10, decimal_places=2)
+    price = MoneyOut()
+    validity_days = serializers.IntegerField(allow_null=True)
+
+
+class PortalBuyPackageSerializer(serializers.Serializer):
+    client = serializers.UUIDField()
+    template = serializers.UUIDField()
+
+
+class PortalBoughtSerializer(serializers.Serializer):
+    package = serializers.CharField()
+    pay_token = serializers.CharField(allow_blank=True)
+
+
 class PortalBillingSerializer(serializers.Serializer):
     accounts = AccountSerializer(many=True)
     invoices = PortalInvoiceSerializer(many=True)
     payment_requests = PortalRequestSerializer(many=True)
     credit_notes = PortalCreditNoteSerializer(many=True)
+    packages = PortalPackageSerializer(many=True)
+    package_offers = PortalPackageOfferSerializer(many=True)
 
 
 class PortalMethodSerializer(serializers.Serializer):

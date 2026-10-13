@@ -9,10 +9,23 @@ import { api, usePermission } from "../api";
 import { ErrorList } from "../calendar/ErrorList";
 import { toDateInput } from "../calendar/dates";
 import { useCursorList } from "../lists";
+import { BankReconciliation } from "../payments/BankReconciliation";
 import { PaymentsList } from "../payments/PaymentsPages";
+import { LateFeesTab, PackagesTab, PlansTab, SplitsTab } from "./Phase2Tabs";
 import { StatusBadge } from "./InvoicePage";
 
-type Tab = "invoices" | "payments" | "charges" | "requests" | "runs" | "ageing";
+type Tab =
+  | "invoices"
+  | "payments"
+  | "charges"
+  | "requests"
+  | "runs"
+  | "ageing"
+  | "packages"
+  | "plans"
+  | "lateFees"
+  | "splits"
+  | "bank";
 type InvoiceFilter = "draft" | "open" | "overdue" | "paid" | "all";
 type Money = { amount: string; currency: string };
 
@@ -422,6 +435,10 @@ export function BillingPage() {
   const canCharges = usePermission("billing.charge.view");
   const canRequests = usePermission("billing.payment_request.view");
   const canPayments = usePermission("payments.payment.view");
+  const canPackages = usePermission("billing.package.view");
+  const canPlans = usePermission("billing.plan.view");
+  const canSplits = usePermission("billing.split.manage");
+  const canBank = usePermission("payments.reconcile");
   const tabs = [
     { key: "invoices" as const, label: t("billing.tabs.invoices") },
     ...(canPayments ? [{ key: "payments" as const, label: t("payments.title") }] : []),
@@ -429,6 +446,11 @@ export function BillingPage() {
     ...(canRequests ? [{ key: "requests" as const, label: t("billing.tabs.requests") }] : []),
     { key: "runs" as const, label: t("billing.tabs.runs") },
     { key: "ageing" as const, label: t("billing.tabs.ageing") },
+    ...(canPackages ? [{ key: "packages" as const, label: t("packages.title") }] : []),
+    ...(canPlans ? [{ key: "plans" as const, label: t("plans.title") }] : []),
+    { key: "lateFees" as const, label: t("lateFees.tab") },
+    ...(canSplits ? [{ key: "splits" as const, label: t("splits.title") }] : []),
+    ...(canBank ? [{ key: "bank" as const, label: t("bank.title") }] : []),
   ];
   const [tab, setTab] = useState<Tab>("invoices");
   return (
@@ -441,6 +463,11 @@ export function BillingPage() {
         {tab === "requests" ? <Requests /> : null}
         {tab === "runs" ? <Runs /> : null}
         {tab === "ageing" ? <Ageing /> : null}
+        {tab === "packages" ? <PackagesTab /> : null}
+        {tab === "plans" ? <PlansTab /> : null}
+        {tab === "lateFees" ? <LateFeesTab /> : null}
+        {tab === "splits" ? <SplitsTab /> : null}
+        {tab === "bank" ? <BankReconciliation /> : null}
       </Tabs>
     </div>
   );

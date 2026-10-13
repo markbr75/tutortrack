@@ -91,8 +91,14 @@ describe("payments", () => {
     expect(await screen.findByText(/your payment has been received/)).toBeInTheDocument();
     expect(stripe.confirmPayment).toHaveBeenCalledTimes(1);
     expect(window.Stripe).toHaveBeenCalledWith("pk_test", { stripeAccount: "acct_1" });
-    expect(calls.find((c) => c.path.endsWith("/intent"))?.body).toEqual({ save_method: true });
-    expect(calls.find((c) => c.path.endsWith("/confirm"))?.body).toEqual({ intent: "pi_1" });
+    expect(calls.find((c) => c.path.endsWith("/intent"))?.body).toEqual({
+      save_method: true,
+      provider: "stripe",
+    });
+    expect(calls.find((c) => c.path.endsWith("/confirm"))?.body).toEqual({
+      intent: "pi_1",
+      provider: "stripe",
+    });
   });
 
   it("saves a card and agrees to auto-pay from a setup link", async () => {
@@ -126,6 +132,7 @@ describe("payments", () => {
     expect(calls.find((c) => c.method === "POST")?.body).toEqual({
       intent: "seti_1",
       autopay: true,
+      provider: "stripe",
     });
   });
 

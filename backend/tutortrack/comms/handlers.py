@@ -124,6 +124,13 @@ def balance_low(event: EventEnvelope) -> None:
         notify("balance_low", (client, event.data.get("available")), key=str(event.id))
 
 
+@subscribe("package.expiring")
+def package_expiring(event: EventEnvelope) -> None:
+    purchase = catalogue.load_package(_id(event))
+    if purchase is not None and purchase.status == "active":
+        notify("package_expiring", purchase, key=str(event.id))
+
+
 def _alert(type_key: str, title: str, body: str, link: str, *, key: str) -> None:
     notify(type_key, (title, body, link), key=key)
 

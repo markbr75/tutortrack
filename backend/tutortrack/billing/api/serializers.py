@@ -3,9 +3,10 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from tutortrack.catalogue.models import Product, TaxRate
+from tutortrack.catalogue.models import PackageTemplate, Product, TaxRate
 from tutortrack.core.api.serializers import (
     BaseModelSerializer,
     MoneyOut,
@@ -17,13 +18,18 @@ from tutortrack.people.models import Client, Student, TutorProfile
 from tutortrack.tenancy.models import Branch
 
 from ..models import (
+    BillingPlan,
     Charge,
     ClientLedgerEntry,
+    CollectionsCase,
     CreditNote,
     CreditNoteLine,
     Invoice,
     InvoiceLine,
     InvoiceRun,
+    LateFeeRule,
+    PackageConsumption,
+    PackagePurchase,
     PaymentRequest,
 )
 
@@ -383,3 +389,239 @@ class AgeingRowSerializer(AgeingSerializer):
     client = serializers.UUIDField()
     client_name = serializers.CharField()
     total = MoneyOut()
+
+
+# --- Phase 2: packages (T12) --------------------------------------------------------------------
+
+
+class PackageConsumptionSerializer(BaseModelSerializer):
+    class Meta:
+        model = PackageConsumption
+        fields = ["id", "kind", "lesson", "units", "value", "note", "created_at"]
+        read_only_fields = fields
+
+
+class PackagePurchaseSerializer(BaseModelSerializer):
+    client_name = serializers.CharField(source="client.display_name", read_only=True)
+    student_name = serializers.SerializerMethodField()
+    units_remaining = serializers.DecimalField(max_digits=12, decimal_places=4, read_only=True)
+    invoice = serializers.SerializerMethodField()
+    invoice_number = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PackagePurchase
+        fields = [
+            "id",
+            "client",
+            "client_name",
+            "student",
+            "student_name",
+            "template",
+            "name",
+            "quantity_type",
+            "units_total",
+            "units_used",
+            "units_expired",
+            "units_remaining",
+            "currency",
+            "price",
+            "shareable",
+            "auto_renew",
+            "status",
+            "source",
+            "invoice",
+            "invoice_number",
+            "activated_at",
+            "expires_at",
+            "closed_at",
+            "close_reason",
+            "created_at",
+        ]
+        read_only_fields = fields
+
+    def get_student_name(self, obj: PackagePurchase) -> str:
+        return obj.student.full_name if obj.student else ""
+
+    @extend_schema_field(serializers.UUIDField(allow_null=True))
+    def get_invoice(self, obj: PackagePurchase) -> str | None:
+        charge = obj.charge
+        return str(charge.invoice_id) if charge and charge.invoice_id else None
+
+    def get_invoice_number(self, obj: PackagePurchase) -> str:
+        charge = obj.charge
+        return charge.invoice.number if charge and charge.invoice_id else ""  # type: ignore[union-attr]
+
+
+class PackageDetailSerializer(PackagePurchaseSerializer):
+    consumptions = PackageConsumptionSerializer(many=True, read_only=True)
+
+    class Meta(PackagePurchaseSerializer.Meta):
+        fields = [*PackagePurchaseSerializer.Meta.fields, "consumptions"]
+        read_only_fields = fields
+
+
+class SellPackageSerializer(serializers.Serializer):
+    client = TenantRelatedField(Client)
+    template = TenantRelatedField(PackageTemplate, filter={"active": True})
+    student = TenantRelatedField(Student, required=False, allow_null=True)
+
+
+class ExtendPackageSerializer(serializers.Serializer):
+    until = serializers.DateTimeField()
+
+
+class CancelPackageSerializer(serializers.Serializer):
+    reason = serializers.CharField(max_length=300)
+    refund = serializers.BooleanField(
+        required=False, allow_null=True, default=None, help_text="Omit to follow the policy"
+    )
+
+
+# --- Phase 2: recurring fees (T13) --------------------------------------------------------------
+
+
+class BillingPlanSerializer(BaseModelSerializer):
+    client_name = serializers.CharField(source="client.display_name", read_only=True)
+
+    class Meta:
+        model = BillingPlan
+        fields = [
+            "id",
+            "client",
+            "client_name",
+            "job",
+            "student",
+            "description",
+            "currency",
+            "amount",
+            "tax_rate",
+            "interval",
+            "anchor_date",
+            "start_date",
+            "end_date",
+            "prorate",
+            "attendance_independent",
+            "status",
+            "paused_at",
+            "created_at",
+        ]
+        read_only_fields = fields
+
+
+class BillingPlanCreateSerializer(serializers.Serializer):
+    client = TenantRelatedField(Client)
+    job = TenantRelatedField(Job, required=False, allow_null=True)
+    student = TenantRelatedField(Student, required=False, allow_null=True)
+    tax_rate = TenantRelatedField(TaxRate, required=False, allow_null=True)
+    description = serializers.CharField(max_length=200)
+    amount = MoneySerializerField()
+    interval = serializers.ChoiceField(choices=BillingPlan.Interval.choices)
+    start_date = serializers.DateField()
+    anchor_date = serializers.DateField(required=False, allow_null=True)
+    end_date = serializers.DateField(required=False, allow_null=True)
+    prorate = serializers.BooleanField(default=True)
+    attendance_independent = serializers.BooleanField(default=True)
+
+
+class BillingPlanUpdateSerializer(serializers.Serializer):
+    description = serializers.CharField(max_length=200, required=False)
+    amount = MoneySerializerField(required=False)
+    end_date = serializers.DateField(required=False, allow_null=True)
+    prorate = serializers.BooleanField(required=False)
+    attendance_independent = serializers.BooleanField(required=False)
+
+
+class PlanStatusSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=BillingPlan.Status.choices)
+
+
+class ProrationPreviewSerializer(serializers.Serializer):
+    start = serializers.DateField()
+    end = serializers.DateField()
+    amount = MoneyOut()
+    partial = serializers.BooleanField()  # type: ignore[assignment]
+
+
+# --- Phase 2: late fees and collections (T14) ---------------------------------------------------
+
+
+class LateFeeRuleSerializer(BaseModelSerializer):
+    branch = TenantRelatedField(Branch, required=False, allow_null=True)
+    tax_rate = TenantRelatedField(TaxRate, required=False, allow_null=True)
+
+    class Meta:
+        model = LateFeeRule
+        fields = [
+            "id",
+            "branch",
+            "kind",
+            "amount",
+            "percent",
+            "days_overdue",
+            "recurrence",
+            "max_applications",
+            "cap",
+            "minimum_balance",
+            "mode",
+            "tax_rate",
+            "active",
+        ]
+        read_only_fields = ["id"]
+
+
+class WaiveSerializer(serializers.Serializer):
+    reason = serializers.CharField(max_length=300)
+
+
+class CollectionsCaseSerializer(BaseModelSerializer):
+    client_name = serializers.CharField(source="client.display_name", read_only=True)
+    invoice_number = serializers.CharField(source="invoice.number", read_only=True)
+    balance_due = MoneySerializerField(source="invoice.balance_due", read_only=True)
+
+    class Meta:
+        model = CollectionsCase
+        fields = [
+            "id",
+            "client",
+            "client_name",
+            "invoice",
+            "invoice_number",
+            "balance_due",
+            "status",
+            "block",
+            "task_id",
+            "opened_at",
+            "closed_at",
+            "close_reason",
+        ]
+        read_only_fields = fields
+
+
+class CloseCaseSerializer(serializers.Serializer):
+    reason = serializers.CharField(max_length=300, required=False, allow_blank=True, default="")
+
+
+# --- Phase 2: split billing (T15) ---------------------------------------------------------------
+
+
+class SplitShareSerializer(serializers.Serializer):
+    client = TenantRelatedField(Client)
+    percent = serializers.DecimalField(max_digits=5, decimal_places=2)
+
+
+class SplitShareOutSerializer(serializers.Serializer):
+    client = serializers.UUIDField(source="client_id")
+    client_name = serializers.CharField(source="client.display_name")
+    percent = serializers.DecimalField(max_digits=5, decimal_places=2)
+
+
+class BillingSplitSerializer(serializers.Serializer):
+    job = TenantRelatedField(Job, required=False, allow_null=True)
+    student = TenantRelatedField(Student, required=False, allow_null=True)
+    shares = SplitShareSerializer(many=True)
+
+
+class BillingSplitOutSerializer(serializers.Serializer):
+    job = serializers.UUIDField(allow_null=True)
+    student = serializers.UUIDField(allow_null=True)
+    shares = SplitShareOutSerializer(many=True)

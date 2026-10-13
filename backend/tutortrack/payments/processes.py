@@ -9,8 +9,15 @@
 * ``DisputeWorkflow`` ``dispute:{org}:{dispute}``: started by ``payment.disputed``;
   reminders 3 days and 1 day before the evidence deadline until ``closed``.
 
-Provider migration (moving clients between GoCardless and Stripe) arrives with the
-GoCardless provider in Phase 2; choosing the default method is the switch today.
+Phase 2:
+
+* ``ProviderMigrationWorkflow`` ``provider-migration:{org}:{migration}``: moves a client
+  to another provider (FR-11-2): emails a setup link → waits for ``method_added`` (a
+  reminder link after 7 days, gives up after 21) → makes it the default → waits (daily
+  checks, up to 14 days) until nothing is being collected with the old method → cancels
+  the old mandate or card. ``cancel`` stops it while waiting.
+* ``BankFeedSyncWorkflow``: started daily by a **Temporal Schedule** per Open Banking
+  connection; pulls new bank transactions and suggests matches.
 """
 
 from __future__ import annotations
@@ -44,6 +51,17 @@ def collect_workflow_id(organisation_id: object, invoice_id: object) -> str:
 
 def dispute_workflow_id(organisation_id: object, dispute_id: object) -> str:
     return workflow_id(DISPUTE_PROCESS, organisation_id, dispute_id)
+
+
+MIGRATION_PROCESS = "provider-migration"
+BANK_FEED_PROCESS = "bank-feed"
+LINK_REMINDER = timedelta(days=7)
+LINK_EXPIRY = timedelta(days=21)
+SETTLE_CHECKS = 14
+
+
+def migration_workflow_id(organisation_id: object, migration_id: object) -> str:
+    return workflow_id(MIGRATION_PROCESS, organisation_id, migration_id)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -222,3 +240,157 @@ class DisputeWorkflow:
             await workflow.wait_condition(lambda: self.closed, timeout=timedelta(days=120))
         await report_step(input, "closed" if self.closed else "expired", status="completed")
         return f"reminders:{reminders}"
+
+
+# --- Phase 2: provider migration and bank feeds ------------------------------------------------
+
+
+@dataclass(frozen=True, kw_only=True)
+class MigrationInput(WorkflowInput):
+    migration_id: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class SwitchInput(WorkflowInput):
+    migration_id: str
+    method_id: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class FinishInput(WorkflowInput):
+    migration_id: str
+    status: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class BankFeedInput(WorkflowInput):
+    connection_id: str
+
+
+@tenant_activity
+def send_migration_link(input: MigrationInput) -> bool:
+    from . import provider_migration
+
+    return provider_migration.send_link(input.migration_id, key=idempotency_key())
+
+
+@tenant_activity
+def switch_migration_default(input: SwitchInput) -> bool:
+    from . import provider_migration
+
+    return provider_migration.switch_default(input.migration_id, input.method_id)
+
+
+@tenant_activity
+def migration_in_flight(input: MigrationInput) -> int:
+    from . import provider_migration
+
+    return provider_migration.in_flight(input.migration_id)
+
+
+@tenant_activity
+def finish_migration(input: FinishInput) -> str:
+    from . import provider_migration
+
+    return provider_migration.finish(input.migration_id, input.status)
+
+
+@tenant_activity
+def sync_bank_feed(input: BankFeedInput) -> int:
+    from . import bank
+
+    statement = bank.sync_feed(input.connection_id)
+    return int((statement.stats or {}).get("new", 0)) if statement else 0
+
+
+@register_workflow(
+    process=MIGRATION_PROCESS, task_queue="billing", cancel_permission="payments.autopay.manage"
+)
+@workflow.defn
+class ProviderMigrationWorkflow:
+    def __init__(self) -> None:
+        self.method_id = ""
+        self.cancelled = False
+        self.step = "waiting"
+
+    @workflow.signal(name="method_added")
+    def method_added(self, method_id: str) -> None:
+        self.method_id = method_id
+
+    @workflow.signal(name="cancel")
+    def cancel(self) -> None:
+        self.cancelled = True
+
+    @workflow.query
+    def state(self) -> dict[str, Any]:
+        return {"step": self.step, "method_id": self.method_id}
+
+    def _woken(self) -> bool:
+        return bool(self.method_id) or self.cancelled
+
+    async def _finish(self, input: MigrationInput, status: str) -> str:
+        await workflow.execute_activity(
+            finish_migration,
+            FinishInput(
+                organisation_id=input.organisation_id,
+                migration_id=input.migration_id,
+                status=status,
+            ),
+            start_to_close_timeout=TIMEOUT,
+        )
+        self.step = status
+        await report_step(input, status, status="completed")
+        return status
+
+    @workflow.run
+    async def run(self, input: MigrationInput) -> str:
+        await report_step(input, self.step)
+        await workflow.execute_activity(send_migration_link, input, start_to_close_timeout=TIMEOUT)
+        waited = timedelta(0)
+        for wait in (LINK_REMINDER, LINK_EXPIRY - LINK_REMINDER):
+            with contextlib.suppress(TimeoutError):
+                await workflow.wait_condition(self._woken, timeout=wait)
+            if self._woken():
+                break
+            waited += wait
+            if waited < LINK_EXPIRY:  # remind with a fresh link
+                await workflow.execute_activity(
+                    send_migration_link, input, start_to_close_timeout=TIMEOUT
+                )
+        if self.cancelled:
+            return await self._finish(input, "cancelled")
+        if not self.method_id:
+            return await self._finish(input, "expired")
+        switched = await workflow.execute_activity(
+            switch_migration_default,
+            SwitchInput(
+                organisation_id=input.organisation_id,
+                migration_id=input.migration_id,
+                method_id=self.method_id,
+            ),
+            start_to_close_timeout=TIMEOUT,
+        )
+        if not switched:
+            return await self._finish(input, "cancelled")
+        self.step = "settling"
+        await report_step(input, self.step)
+        for _check in range(SETTLE_CHECKS):
+            busy = await workflow.execute_activity(
+                migration_in_flight, input, start_to_close_timeout=TIMEOUT
+            )
+            if not busy:
+                break
+            await workflow.sleep(timedelta(days=1))
+        return await self._finish(input, "completed")
+
+
+@register_workflow(process=BANK_FEED_PROCESS, task_queue="billing", cancel_permission=None)
+@workflow.defn
+class BankFeedSyncWorkflow:
+    @workflow.run
+    async def run(self, input: BankFeedInput) -> int:
+        new = await workflow.execute_activity(
+            sync_bank_feed, input, start_to_close_timeout=timedelta(minutes=10)
+        )
+        await report_step(input, f"synced:{new}", status="completed")
+        return int(new)

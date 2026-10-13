@@ -143,3 +143,63 @@ def has_opening_balance(client: Any) -> bool:
     posted = entries.filter(ref_type=OPENING_BALANCE).count()
     reversed_ = entries.filter(ref_type=OPENING_BALANCE_REVERSED).count()
     return posted > reversed_
+
+
+# --- Phase 2 (E10-T12..T15) ---------------------------------------------------------------------
+
+
+def packages(user: Any) -> QuerySet[Any]:
+    from .models import PackagePurchase
+
+    return scope_queryset(
+        user, PackagePurchase.objects.all(), "billing.package.view"
+    ).select_related("client", "student")
+
+
+def plans(user: Any) -> QuerySet[Any]:
+    from .models import BillingPlan
+
+    return scope_queryset(user, BillingPlan.objects.all(), "billing.plan.view").select_related(
+        "client", "job", "student"
+    )
+
+
+def package_balances(client_ids: list[Any]) -> list[dict[str, Any]]:
+    """Active packages and what is left (portal, client billing tab)."""
+    from .models import PackagePurchase
+
+    rows = PackagePurchase.objects.filter(
+        client_id__in=client_ids,
+        status__in=[PackagePurchase.Status.ACTIVE, PackagePurchase.Status.PENDING],
+    ).select_related("student")
+    return [
+        {
+            "id": str(p.pk),
+            "client": str(p.client_id),
+            "name": p.name,
+            "status": p.status,
+            "quantity_type": p.quantity_type,
+            "units_total": p.units_total,
+            "units_remaining": p.units_remaining,
+            "student_name": p.student.full_name if p.student else "",
+            "expires_at": p.expires_at,
+        }
+        for p in rows
+    ]
+
+
+def booking_block(client_id: Any) -> str:
+    """``none``, ``soft`` (warn staff when scheduling) or ``hard`` (no portal or self
+    booking) while the client is in collections (FR-10-10). Scheduling and the E08
+    self-booking engine call this."""
+    from .models import CollectionsCase
+
+    blocks = set(
+        CollectionsCase.objects.filter(
+            client_id=client_id, status=CollectionsCase.Status.OPEN
+        ).values_list("block", flat=True)
+    )
+    for level in ("hard", "soft"):
+        if level in blocks:
+            return level
+    return "none"

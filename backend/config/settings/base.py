@@ -323,6 +323,20 @@ SPECTACULAR_SETTINGS = {
         "SyncOutcomeEnum": "tutortrack.accounting.models.SyncLogEntry.Outcome",
         "VideoProviderEnum": "tutortrack.calendar_sync.api.serializers.VIDEO_CHOICES",
         "ProviderEnum": "tutortrack.payments.models.Provider",
+        # E10/E11 Phase 2
+        "PaymentMethodEnum": "tutortrack.payments.models.Payment.Method",
+        "RecordPaymentMethodEnum": "tutortrack.payments.api.serializers.MANUAL_METHODS",
+        "PayProviderEnum": "tutortrack.payments.api.serializers.PAY_PROVIDERS",
+        "SavingProviderEnum": "tutortrack.payments.api.serializers.MIGRATION_PROVIDERS",
+        "ProviderMigrationStatusEnum": "tutortrack.payments.models.ProviderMigration.Status",
+        "BankTransactionStatusEnum": "tutortrack.payments.models.BankTransaction.Status",
+        "ReconciliationMatchStatusEnum": "tutortrack.payments.models.ReconciliationMatch.Status",
+        "BankStatementSourceEnum": "tutortrack.payments.models.BankStatementImport.Source",
+        "PackageStatusEnum": "tutortrack.billing.models.PackagePurchase.Status",
+        "PackageSourceEnum": "tutortrack.billing.models.PackagePurchase.Source",
+        "BillingPlanStatusEnum": "tutortrack.billing.models.BillingPlan.Status",
+        "BillingPlanIntervalEnum": "tutortrack.billing.models.BillingPlan.Interval",
+        "CollectionsCaseStatusEnum": "tutortrack.billing.models.CollectionsCase.Status",
         "ClientStatusEnum": "tutortrack.people.models.Client.Status",
         "ClientTypeEnum": "tutortrack.people.models.Client.Type",
         "StudentStatusEnum": "tutortrack.people.models.Student.Status",
@@ -392,6 +406,23 @@ STRIPE = {
     "PUBLISHABLE_KEY": env("STRIPE_PUBLISHABLE_KEY", default=""),
     "WEBHOOK_SECRET": env("STRIPE_WEBHOOK_SECRET", default=""),
     "APPLICATION_FEE_PERCENT": env("STRIPE_APPLICATION_FEE_PERCENT", default="0"),
+}
+# E11 Phase 2: GoCardless (partner OAuth) and PayPal (partner referrals). Without a client
+# id each uses its fake twin. GoCardless webhooks are HMAC-signed with WEBHOOK_SECRET (the
+# fake signs with "fake-gocardless-secret").
+GOCARDLESS = {
+    "CLIENT_ID": env("GOCARDLESS_CLIENT_ID", default=""),
+    "CLIENT_SECRET": env("GOCARDLESS_CLIENT_SECRET", default=""),
+    "WEBHOOK_SECRET": env("GOCARDLESS_WEBHOOK_SECRET", default=""),
+    "ENVIRONMENT": env("GOCARDLESS_ENVIRONMENT", default="sandbox"),
+    "APP_FEE_PERCENT": env("GOCARDLESS_APP_FEE_PERCENT", default="0"),
+}
+PAYPAL = {
+    "CLIENT_ID": env("PAYPAL_CLIENT_ID", default=""),
+    "CLIENT_SECRET": env("PAYPAL_CLIENT_SECRET", default=""),
+    "PARTNER_MERCHANT_ID": env("PAYPAL_PARTNER_MERCHANT_ID", default=""),
+    "WEBHOOK_ID": env("PAYPAL_WEBHOOK_ID", default=""),
+    "ENVIRONMENT": env("PAYPAL_ENVIRONMENT", default="sandbox"),
 }
 
 # Leads (E17): Postmark inbound webhook secret for enquiries+<subdomain>@ addresses.

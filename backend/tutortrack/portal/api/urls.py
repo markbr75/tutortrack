@@ -29,6 +29,7 @@ urlpatterns = [
     ),
     path("portal/billing", views.BillingView.as_view(), name="portal-billing"),
     path("portal/statement", views.StatementView.as_view(), name="portal-statement"),
+    path("portal/packages", views.BuyPackageView.as_view(), name="portal-buy-package"),
     path("portal/payment-methods", views.PaymentMethodsView.as_view(), name="portal-methods"),
     path("portal/profile", views.ProfileView.as_view(), name="portal-profile"),
     path(

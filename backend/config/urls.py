@@ -6,7 +6,7 @@ from tutortrack.calendar_sync.api.webhooks import google_calendar, microsoft_gra
 from tutortrack.comms.api.views import postmark_webhook, twilio_inbound, twilio_status
 from tutortrack.core.api.health import healthz, readyz
 from tutortrack.leads.api.views import inbound_email
-from tutortrack.payments.api.views import stripe_webhook
+from tutortrack.payments.api.views import gocardless_webhook, paypal_webhook, stripe_webhook
 from tutortrack.scheduling.api.views import ical_feed
 from tutortrack.sites.internal import tls_ask
 from tutortrack.subscriptions.api.views import stripe_billing_webhook
@@ -54,6 +54,8 @@ urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("ical/<str:token>.ics", ical_feed, name="ical-feed"),
     path("webhooks/stripe", stripe_webhook, name="stripe-webhook"),
+    path("webhooks/gocardless", gocardless_webhook, name="gocardless-webhook"),
+    path("webhooks/paypal", paypal_webhook, name="paypal-webhook"),
     path("webhooks/stripe/platform", stripe_billing_webhook, name="stripe-billing-webhook"),
     path("webhooks/postmark", postmark_webhook, name="postmark-webhook"),
     path("webhooks/inbound-email", inbound_email, name="inbound-email"),

@@ -29,6 +29,7 @@ MODELS = {
     "scheduling.lesson": "scheduling.Lesson",
     "scheduling.lessonseries": "scheduling.LessonSeries",
     "billing.invoice": "billing.Invoice",
+    "billing.packagepurchase": "billing.PackagePurchase",
     "payments.payment": "payments.Payment",
     "crm.note": "crm.Note",
     "leads.enquiry": "leads.Enquiry",
@@ -55,6 +56,7 @@ def _untouched(obj: Any, ctx: Context) -> bool:
 
 
 def _discard(kind: str, obj: Any) -> Any:
+    from tutortrack.billing import packages
     from tutortrack.billing import services as billing
     from tutortrack.catalogue import services as catalogue
     from tutortrack.crm import services as crm
@@ -73,6 +75,7 @@ def _discard(kind: str, obj: Any) -> Any:
         "scheduling.lesson": scheduling.discard_imported_lesson,
         "scheduling.lessonseries": scheduling.discard_imported_series,
         "billing.invoice": billing.discard_imported_invoice,
+        "billing.packagepurchase": packages.discard_imported_package,
         "crm.note": crm.delete_note,
         "leads.enquiry": leads.discard_imported_enquiry,
     }

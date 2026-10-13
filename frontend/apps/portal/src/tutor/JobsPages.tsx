@@ -247,7 +247,9 @@ export function JobsPage() {
         <h2 id="offers-heading" className="font-semibold">
           {t("tutorJobs.offers")}
         </h2>
-        {open.length === 0 ? <p className="text-sm text-muted-foreground">{t("tutorJobs.noOffers")}</p> : null}
+        {open.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("tutorJobs.noOffers")}</p>
+        ) : null}
         <ul className="space-y-3">
           {[...open, ...past.slice(0, 5)].map((o) => (
             <OfferCard key={o.id} offer={o} />
@@ -271,7 +273,9 @@ export function JobsPage() {
         <h2 id="cover-heading" className="font-semibold">
           {t("tutorJobs.cover")}
         </h2>
-        {cover.data.length === 0 ? <p className="text-sm text-muted-foreground">{t("tutorJobs.noCover")}</p> : null}
+        {cover.data.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("tutorJobs.noCover")}</p>
+        ) : null}
         <ul className="space-y-3">
           {cover.data.map((c) => (
             <CoverCard key={c.id} cover={c} tutorId={tutorId} />

@@ -272,6 +272,59 @@ export function ClientPaymentMethods({ clientId }: { clientId: string }) {
         </Alert>
       ) : null}
       <ErrorList error={link.error ?? autopay.error ?? change.error} />
+      {canManage ? <MoveProvider clientId={clientId} /> : null}
     </section>
+  );
+}
+
+/** Move a client to another provider (FR-11-2): they get a setup link; the new method
+ * becomes the default and the old one is cancelled once nothing is being collected. */
+function MoveProvider({ clientId }: { clientId: string }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const key = ["client", clientId, "provider-migrations"];
+  const migrations = useQuery({
+    queryKey: key,
+    queryFn: async () =>
+      unwrap(
+        await api.GET("/api/v1/payments/provider-migrations", {
+          params: { query: { client: clientId } },
+        }),
+      ),
+  });
+  const start = useMutation({
+    mutationFn: async (to: "stripe" | "gocardless") =>
+      unwrap(
+        await api.POST("/api/v1/clients/{client_id}/provider-migration", {
+          params: { path: { client_id: clientId } },
+          body: { to_provider: to },
+        }),
+      ),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: key }),
+  });
+  const open = migrations.data?.results.find(
+    (m) => m.status === "waiting" || m.status === "switched",
+  );
+  return (
+    <div className="space-y-2">
+      {open ? (
+        <p className="text-sm">
+          {t("migration.inProgress", {
+            provider: open.to_provider === "gocardless" ? "GoCardless" : "Stripe",
+            status: t(`migration.status.${open.status}`),
+          })}
+        </p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="ghost" onClick={() => start.mutate("gocardless")}>
+            {t("migration.moveTo", { provider: "GoCardless" })}
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => start.mutate("stripe")}>
+            {t("migration.moveTo", { provider: "Stripe" })}
+          </Button>
+        </div>
+      )}
+      <ErrorList error={start.error} />
+    </div>
   );
 }

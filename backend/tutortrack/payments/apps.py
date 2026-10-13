@@ -7,4 +7,4 @@ class PaymentsConfig(AppConfig):
     verbose_name = "Payments"
 
     def ready(self) -> None:
-        from . import handlers, org_settings  # noqa: F401
+        from . import bank_feeds, handlers, org_settings  # noqa: F401

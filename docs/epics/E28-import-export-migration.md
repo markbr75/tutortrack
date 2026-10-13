@@ -126,8 +126,13 @@ balances, package balances, availability, enquiries, tags and notes.
   `ref_type=opening_balance`, so importing the same file twice skips the second time.
 - **Payments** are real money after cutover (`record_manual_payment`), allocated to a named
   open invoice. Repeats are skipped.
-- **Deviation:** package purchases are E10-T12 (Phase 2), so a package's remaining value
-  becomes client credit, with the package, hours left and expiry in the description.
+- **Packages (updated 2026-10-12, with E10-T12):** each package still being used becomes an
+  active `PackagePurchase` holding the hours, lessons or credit left (`billing.packages.
+  import_package`); its price is the remaining value, so consumption values stay right, and
+  there is no invoice or ledger entry (the money was taken in the old system). Optional
+  columns: counted in (hours/lessons/credit), package size, student, expiry. Rolling back
+  cancels an imported package nobody has used yet; a used one is kept. (Before E10-T12 the
+  remaining value became client credit.)
 - **Enquiries** use source `import`, so there is no acknowledgement and no SLA workflow.
   The leads bridge now ignores `enquiry.received` with source `import`.
 - **Rollback** deletes created records newest first through the owning apps' new

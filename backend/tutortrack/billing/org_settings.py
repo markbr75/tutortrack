@@ -124,3 +124,61 @@ register(
 register(
     "billing.topup_amount", type="int", default=200, min_value=1, label=_("Top-up request amount")
 )
+
+# --- Phase 2 (E10-T12..T14) ---------------------------------------------------------------------
+register(
+    "billing.package_invoice_immediately",
+    type="bool",
+    default=True,
+    label=_("Invoice package sales straight away (otherwise on the next invoice run)"),
+)
+register(
+    "billing.package_activation",
+    type="choice",
+    default="payment",
+    choices=(
+        ("payment", _("When the package invoice is paid")),
+        ("issue", _("When the package invoice is issued")),
+    ),
+    label=_("Packages can be used"),
+)
+register(
+    "billing.package_low_units",
+    type="int",
+    default=1,
+    min_value=0,
+    label=_("Tell clients when a package has this many units left (0: off)"),
+)
+register(
+    "billing.package_expiry_reminder_days",
+    type="int",
+    default=14,
+    min_value=0,
+    max_value=180,
+    label=_("Remind clients this many days before unused package units expire (0: off)"),
+)
+register(
+    "billing.plan_invoice_immediately",
+    type="bool",
+    default=True,
+    label=_("Invoice recurring fees as soon as each period starts"),
+)
+register(
+    "billing.collections_after_days",
+    type="int",
+    default=0,
+    min_value=0,
+    max_value=365,
+    label=_("Put clients in collections when an invoice is this many days overdue (0: off)"),
+)
+register(
+    "billing.collections_block",
+    type="choice",
+    default="soft",
+    choices=(
+        ("none", _("Don't block lessons")),
+        ("soft", _("Warn staff when scheduling")),
+        ("hard", _("Warn staff and stop online booking")),
+    ),
+    label=_("While a client is in collections"),
+)
