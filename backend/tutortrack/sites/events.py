@@ -67,6 +67,16 @@ class PublicProfileHidden(DomainEvent):
 
 
 @dataclass(frozen=True, kw_only=True)
+class BlogPostPublished(DomainEvent):
+    """A blog or news post went live on the website (G6)."""
+
+    event_type: ClassVar[str] = "blog_post.published"
+    subject_type: ClassVar[str] = "blog_post"
+
+    slug: str
+
+
+@dataclass(frozen=True, kw_only=True)
 class SitePagePublished(DomainEvent):
     event_type: ClassVar[str] = "site_page.published"
     subject_type: ClassVar[str] = "site_page"

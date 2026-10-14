@@ -23,7 +23,11 @@ export function SuccessLayer() {
   const guidance = useGuidance(Boolean(me.data));
   const tourStatus = useTourStatus();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const [panelOpen, setPanelOpen] = useState(false);
+  // G6: the support reply email links to ``/?support=<id>``, which opens the chat.
+  const [fromSupportLink] = useState(() =>
+    new URLSearchParams(window.location.search).has("support"),
+  );
+  const [panelOpen, setPanelOpen] = useState(fromSupportLink);
   const helpButton = useRef<HTMLButtonElement>(null);
   const [tour, setTour] = useState<TourDefinition | null>(null);
   const [npsOpen, setNpsOpen] = useState(false);
@@ -101,7 +105,7 @@ export function SuccessLayer() {
             helpButton.current?.focus();
           }}
           onStartTour={startTour}
-          initialTab={data?.support_unread ? "support" : "articles"}
+          initialTab={fromSupportLink || data?.support_unread ? "support" : "articles"}
         />
       ) : null}
       {tour ? <Tour key={tour.key} tour={tour} onFinish={finishTour} /> : null}

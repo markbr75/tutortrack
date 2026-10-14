@@ -63,6 +63,17 @@ def subscription_mrr(
     return Money(total, currency).round_to_minor().amount
 
 
+REVENUE_SHARE_DAYS = 30  # G6: revenue-share MRR = share of the last 30 days' payments
+
+
+def revenue_share_mrr(processed: Decimal, percent: Decimal, currency: str) -> Decimal:
+    """The monthly value of a revenue-share plan: ``percent`` of the payments processed in
+    the last ``REVENUE_SHARE_DAYS`` days, rounded half-up to the currency's minor unit."""
+    if processed <= 0 or percent <= 0:
+        return ZERO
+    return Money(processed * percent / Decimal(100), currency).round_to_minor().amount
+
+
 def org_mrr(status: str, mrr: Decimal) -> Decimal:
     return mrr if status in PAYING and mrr > 0 else ZERO
 

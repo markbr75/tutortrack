@@ -690,6 +690,12 @@ class PublicEnrolSerializer(serializers.Serializer):
     contact = PublicContactSerializer()
     student = PublicStudentSerializer()
     accept_terms = serializers.BooleanField(default=False)
+    consents = serializers.ListField(
+        child=serializers.SlugField(max_length=60),
+        required=False,
+        max_length=10,
+        help_text="Other consent types ticked on the form (e.g. marketing-email, photo-video).",
+    )
     join_waitlist = serializers.BooleanField(default=False)
     captcha = serializers.CharField(required=False, allow_blank=True)
 

@@ -60,7 +60,21 @@ TENANT_FILTERS = [
     OpenApiParameter("created_after", str, description="ISO datetime"),
     OpenApiParameter("created_before", str, description="ISO datetime"),
     OpenApiParameter("active_since", str, description="ISO datetime"),
+    OpenApiParameter("mrr_min", str, description="Latest snapshot MRR at least (G6)"),
+    OpenApiParameter("mrr_max", str, description="Latest snapshot MRR at most (G6)"),
+    OpenApiParameter("currency", str, description="Billing currency of the MRR filter"),
 ]
+
+
+def _decimal(value: str | None) -> Any:
+    from decimal import Decimal, InvalidOperation
+
+    if not value:
+        return None
+    try:
+        return Decimal(value)
+    except InvalidOperation:
+        return None
 
 
 class TenantListView(generics.ListAPIView):
@@ -70,7 +84,7 @@ class TenantListView(generics.ListAPIView):
     serializer_class = s.TenantRowSerializer
     pagination_class = TenantPagination
     filter_backends = [filters.OrderingFilter]
-    ordering_fields = ["name", "created_at", "last_activity"]
+    ordering_fields = ["name", "created_at", "last_activity", "latest_mrr"]
 
     def get_queryset(self) -> Any:
         q = self.request.query_params
@@ -79,6 +93,8 @@ class TenantListView(generics.ListAPIView):
             region=q.get("region", ""), created_after=_date(q.get("created_after")),
             created_before=_date(q.get("created_before")),
             active_since=_date(q.get("active_since")),
+            mrr_min=_decimal(q.get("mrr_min")), mrr_max=_decimal(q.get("mrr_max")),
+            currency=q.get("currency", ""),
         )  # fmt: skip
 
     @extend_schema(parameters=TENANT_FILTERS)
@@ -637,3 +653,217 @@ class SupportAssignView(APIView):
     def post(self, request: Request, pk: str) -> Response:
         conversation = services.support_assign(pk, staff=request.user)
         return Response(s.PlatformSupportDetailSerializer(conversation).data)
+
+
+# --- G6: notify customers (FR-29-9) -------------------------------------------------------------
+
+
+class NoticeTemplatesView(APIView):
+    """Templates for customer notices (breach, security, service, legal)."""
+
+    permission_classes = STAFF
+
+    @extend_schema(responses=s.NoticeTemplateSerializer(many=True))
+    def get(self, request: Request) -> Response:
+        from .. import notices
+
+        return Response(s.NoticeTemplateSerializer(notices.templates(), many=True).data)
+
+
+class CustomerNoticesView(APIView):
+    """Customer notices: the history (``GET``) and a new draft (``POST``)."""
+
+    permission_classes = STAFF
+
+    @extend_schema(responses=s.CustomerNoticeSerializer(many=True))
+    def get(self, request: Request) -> Response:
+        from ..models import CustomerNotice
+
+        rows = CustomerNotice.objects.all()[:100]
+        return Response(s.CustomerNoticeSerializer(rows, many=True).data)
+
+    @extend_schema(
+        request=s.CustomerNoticeSerializer,
+        responses={201: s.CustomerNoticeSerializer},
+        examples=[
+            OpenApiExample(
+                "A breach notice to everyone",
+                request_only=True,
+                value={
+                    "template": "breach",
+                    "variables": {
+                        "summary": "A support laptop with an export was stolen.",
+                        "when": "14 October 2026, 09:00 UTC",
+                        "data_affected": "Client names and email addresses",
+                        "actions_taken": "Disk encryption confirmed; device wiped remotely.",
+                        "your_actions": "None needed; you may tell your regulator.",
+                        "contact": "security@tutortrack.app",
+                    },
+                    "organisation_ids": [],
+                },
+            )
+        ],
+    )
+    def post(self, request: Request) -> Response:
+        from .. import notices
+
+        payload = s.CustomerNoticeSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        d = payload.validated_data
+        notice = notices.create_notice(
+            template=d["template"],
+            variables=d.get("variables") or {},
+            organisation_ids=[str(i) for i in d.get("organisation_ids") or []],
+            subject=d.get("subject", ""),
+            body=d.get("body", ""),
+            user=request.user,
+        )
+        return Response(s.CustomerNoticeSerializer(notice).data, status=201)
+
+
+def _notice(pk: str) -> Any:
+    from ..models import CustomerNotice
+
+    notice = CustomerNotice.objects.filter(pk=pk).first()
+    if notice is None:
+        raise NotFound()
+    return notice
+
+
+class CustomerNoticePreviewView(APIView):
+    permission_classes = STAFF
+
+    @extend_schema(responses=s.CustomerNoticePreviewSerializer)
+    def get(self, request: Request, pk: str) -> Response:
+        from .. import notices
+
+        return Response(s.CustomerNoticePreviewSerializer(notices.preview(_notice(pk))).data)
+
+
+class CustomerNoticeSendView(APIView):
+    """Send a draft notice (once) to the chosen organisations' owners and admins."""
+
+    permission_classes = STAFF
+
+    @extend_schema(request=s.PlatformReasonSerializer, responses=s.CustomerNoticeSerializer)
+    def post(self, request: Request, pk: str) -> Response:
+        from .. import notices
+
+        payload = s.PlatformReasonSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        notice = notices.send(
+            _notice(pk), reason=payload.validated_data["reason"], user=request.user
+        )
+        return Response(s.CustomerNoticeSerializer(notice).data)
+
+
+# --- G6: revenue share (FR-30-7) ----------------------------------------------------------------
+
+
+def _month(value: str | None) -> Any:
+    from datetime import date
+
+    if value:
+        try:
+            year, month = (int(p) for p in value.split("-")[:2])
+            return date(year, month, 1)
+        except (TypeError, ValueError):
+            pass
+    from tutortrack.core.time import now
+
+    today = now().date()
+    return today.replace(day=1)
+
+
+class RevenueShareView(APIView):
+    """Revenue-share reconciliation for a month (``?month=YYYY-MM``, default this month):
+    payments processed vs what was reported to the Stripe meter, per organisation."""
+
+    permission_classes = STAFF
+
+    @extend_schema(
+        parameters=[OpenApiParameter("month", str)], responses=s.RevenueShareReportSerializer
+    )
+    def get(self, request: Request) -> Response:
+        from .. import revenue_share
+
+        month = _month(request.query_params.get("month"))
+        return Response(s.RevenueShareReportSerializer(revenue_share.reconcile(month)).data)
+
+
+class RevenueShareFixView(APIView):
+    """Report an organisation's unreported days for a month to the meter (audited)."""
+
+    permission_classes = STAFF
+
+    @extend_schema(request=s.RevenueShareFixSerializer, responses=s.CountSerializer)
+    def post(self, request: Request) -> Response:
+        from .. import revenue_share
+
+        payload = s.RevenueShareFixSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        d = payload.validated_data
+        count = revenue_share.report_missing(str(d["organisation_id"]), _month(d["month"]))
+        return Response({"count": count})
+
+
+# --- G6: failed and stuck workflows (FR-32-10) --------------------------------------------------
+
+
+class WorkflowPagination(CursorPagination):
+    ordering = "-updated_at"
+
+
+class PlatformWorkflowListView(generics.ListAPIView):
+    """Failed and stuck durable processes across organisations, with Temporal UI links.
+    ``?state=failed|stuck``, ``?process=``, ``?organisation=``, ``?search=``."""
+
+    permission_classes = STAFF
+    serializer_class = s.PlatformWorkflowSerializer
+    pagination_class = WorkflowPagination
+
+    def get_queryset(self) -> Any:
+        from .. import workflow_console
+
+        q = self.request.query_params
+        return workflow_console.problems(
+            state=q.get("state", ""),
+            process=q.get("process", ""),
+            organisation_id=q.get("organisation", ""),
+            search=q.get("search", ""),
+        )
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("state", str, enum=["failed", "stuck"]),
+            OpenApiParameter("process", str),
+            OpenApiParameter("organisation", str),
+            OpenApiParameter("search", str),
+        ]
+    )
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().get(request, *args, **kwargs)
+
+
+class PlatformWorkflowActionView(APIView):
+    """Terminate, reset or retry one process (a reason is required; audited in the
+    organisation's log). ``GET`` refreshes its status from Temporal."""
+
+    permission_classes = STAFF
+
+    @extend_schema(responses=s.PlatformWorkflowSerializer)
+    def get(self, request: Request, organisation_id: str, workflow_id: str) -> Response:
+        from .. import workflow_console
+
+        link = workflow_console.refresh(organisation_id, workflow_id)
+        return Response(s.PlatformWorkflowSerializer(link).data)
+
+    @extend_schema(request=s.WorkflowActionSerializer, responses=s.PlatformWorkflowSerializer)
+    def post(self, request: Request, organisation_id: str, workflow_id: str) -> Response:
+        from .. import workflow_console
+
+        payload = s.WorkflowActionSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        d = payload.validated_data
+        link = workflow_console.act(organisation_id, workflow_id, d["action"], reason=d["reason"])
+        return Response(s.PlatformWorkflowSerializer(link).data)

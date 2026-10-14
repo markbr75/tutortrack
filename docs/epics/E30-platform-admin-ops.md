@@ -149,3 +149,27 @@ ADR 0030 records the main decisions. Tenant-facing parts are in a new `success` 
   
   The new i18n namespaces are `help`, `tours`, `setupChecklist`, `nps`, `supportChat`, `productAnalytics`, `tenantHealth`, `saasMetrics`, `productInsights` and `supportInbox`.
 - **Follow-ups:** support reply notifications through comms (email and push), a CMS for help content, translated help articles, an exporter sink for an external analytics tool, revenue-share MRR and reconciliation, and MRR filters on the tenant list.
+
+## Gap backlog (as built 2026-10-14)
+
+Batch G6 of `docs/05-gap-backlog.md`; design in ADR 0034.
+
+
+- **Plans and prices screen (FR-30-1; E30:72):** `/platform/plans` edits name, description,
+  visibility and trial days, and each price's amount, included quantity and Stripe price ID
+  per currency (the API already existed).
+- **Tenant pages (FR-30-1; E30:86, E30:151):** the tenant list filters and sorts by MRR from the
+  latest nightly snapshot (`mrr_min`, `mrr_max`, `currency`, `ordering=-latest_mrr`;
+  `snapshot_mrr` on each row); tenant detail shows integration connections (provider, level,
+  status, count, last sync, failed accounting syncs; no secrets) and active add-ons.
+- **Support reply notifications (FR-30-5; E30:151):** a reply from support notifies the person
+  who opened the conversation by in-app, email and Web Push (`support_reply`, hidden and
+  transactional, deduplicated per message); the link `/?support=<id>` opens the chat.
+- **Revenue-share MRR and reconciliation (FR-30-7; E30:137, E30:151):** snapshots add
+  `revenue_share_mrr` (share × metered payments of the last 30 days, half-up, Hypothesis
+  test) into MRR. `/platform/revenue-share?month=` compares payments processed (recomputed per
+  day) with what was reported to the Stripe meter per organisation, lists unreported and
+  changed days, and `report-missing` reports the unreported days (audited). Deviation:
+  refunds after a day was reported are shown for a manual credit, not sent (meter events
+  can't be negative).
+- **Customer notices** and the **workflow console** are listed under E29 and E32.

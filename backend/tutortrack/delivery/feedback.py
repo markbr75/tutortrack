@@ -204,7 +204,9 @@ def expire_for_lesson(lesson_id: Any) -> int:
 
 
 @transaction.atomic
-def answer(token: str, *, rating: Any, comment: str = "") -> LessonFeedback:
+def answer(
+    token: str, *, rating: Any, comment: str = "", stop_asking: bool = False
+) -> LessonFeedback:
     """The family's answer: 1-5 stars and an optional comment. Answering twice is refused."""
     feedback = LessonFeedback.objects.select_for_update().get(pk=for_token(token).pk)
     if feedback.status == LessonFeedback.Status.ANSWERED:
@@ -239,6 +241,17 @@ def answer(token: str, *, rating: Any, comment: str = "") -> LessonFeedback:
         ),
         branch_id=feedback.branch_id,
     )
+    if stop_asking and feedback.contact_id:
+        # G6 (FR-29-3): "don't ask me again" is an E29 withdrawal, which ``_opted_out`` reads.
+        from tutortrack.privacy.capture import record_ticked
+
+        record_ticked(
+            people={"people.contact": [feedback.contact_id]},
+            keys=[CONSENT_KEY],
+            method="form",
+            source=f"lesson-feedback:{feedback.pk}",
+            granted=False,
+        )
     if low:
         _alert_low_score(feedback)
     elif stars == 5 and get_setting("delivery.feedback_invites_review"):

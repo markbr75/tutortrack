@@ -145,3 +145,4 @@ Naming: `<aggregate>.<past_tense_verb>`. Each epic lists its events; this table 
 | `data_request.received/verified/delivered/closed`, `data_subject.erased`, `legal_hold.placed/released`, `retention.run_completed`, `safeguarding.concern_raised/concern_closed/message_flagged`, `lone_working.checked_in/checked_out/overdue`, `dpa.accepted` (internal: ids only, never webhook event types) | E29 Part 2 |
 | `ai_feature.updated`, `ai_proposal.executed`, `thread.intent_classified` | E31 |
 | `setup_checklist.item_completed/completed`, `survey.answered`, `support_conversation.opened/replied/closed` (internal: ids only, never webhook event types) | E30 Part 2 |
+| `user.account_deleted` (platform-level, ids only, never a webhook event type), `blog_post.published` | Gap batch G6 (E29, E24; ADR 0034) |

@@ -29289,6 +29289,140 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/form-submissions": {
+            "get": {
+                "operationId": "form_submissions_list",
+                "description": "Form submissions, newest first (G6, public API). ``?form=``, ``?spam=true`` and\n``?created_after=`` filter. People who see only some enquiries see only the\nsubmissions behind those.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "created_after",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "form",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "spam",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "tags": [
+                    "form-submissions"
+                ],
+                "security": [
+                    {
+                        "apiToken": [
+                            "enquiries:read"
+                        ]
+                    },
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedFormSubmissionList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "public",
+                "x-scopes": [
+                    "enquiries:read"
+                ]
+            }
+        },
+        "/api/v1/form-submissions/{id}": {
+            "get": {
+                "operationId": "form_submissions_retrieve",
+                "description": "Form submissions, newest first (G6, public API). ``?form=``, ``?spam=true`` and\n``?created_after=`` filter. People who see only some enquiries see only the\nsubmissions behind those.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this form submission.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "form-submissions"
+                ],
+                "security": [
+                    {
+                        "apiToken": [
+                            "enquiries:read"
+                        ]
+                    },
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FormSubmission"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "public",
+                "x-scopes": [
+                    "enquiries:read"
+                ]
+            }
+        },
         "/api/v1/forms": {
             "get": {
                 "operationId": "forms_list",
@@ -45615,6 +45749,96 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/me/account-deletion": {
+            "get": {
+                "operationId": "me_account_deletion_retrieve",
+                "description": "What deleting your account will do (GET), and deleting it (POST). Organisations you\nare the last owner of must be handed over or closed first.",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountDeletionPreview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "me_account_deletion_create",
+                "description": "What deleting your account will do (GET), and deleting it (POST). Organisations you\nare the last owner of must be handed over or closed first.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AccountDeletionRequestRequest"
+                            },
+                            "examples": {
+                                "DeleteMyAccount": {
+                                    "value": {
+                                        "password": "my-current-password",
+                                        "reason": "Not tutoring any more"
+                                    },
+                                    "summary": "Delete my account"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AccountDeletionRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AccountDeletionRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountDeletionResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/me/background-checks": {
             "get": {
                 "operationId": "me_background_checks_list",
@@ -54097,6 +54321,241 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/platform/customer-notices": {
+            "get": {
+                "operationId": "platform_customer_notices_list",
+                "description": "Customer notices: the history (``GET``) and a new draft (``POST``).",
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CustomerNotice"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "platform_customer_notices_create",
+                "description": "Customer notices: the history (``GET``) and a new draft (``POST``).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomerNoticeRequest"
+                            },
+                            "examples": {
+                                "ABreachNoticeToEveryone": {
+                                    "value": {
+                                        "template": "breach",
+                                        "variables": {
+                                            "summary": "A support laptop with an export was stolen.",
+                                            "when": "14 October 2026, 09:00 UTC",
+                                            "data_affected": "Client names and email addresses",
+                                            "actions_taken": "Disk encryption confirmed; device wiped remotely.",
+                                            "your_actions": "None needed; you may tell your regulator.",
+                                            "contact": "security@tutortrack.app"
+                                        },
+                                        "organisation_ids": []
+                                    },
+                                    "summary": "A breach notice to everyone"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomerNoticeRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomerNoticeRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerNotice"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/customer-notices/{id}/preview": {
+            "get": {
+                "operationId": "platform_customer_notices_preview_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerNoticePreview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/customer-notices/{id}/send": {
+            "post": {
+                "operationId": "platform_customer_notices_send_create",
+                "description": "Send a draft notice (once) to the chosen organisations' owners and admins.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformReasonRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformReasonRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformReasonRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerNotice"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/customer-notices/templates": {
+            "get": {
+                "operationId": "platform_customer_notices_templates_list",
+                "description": "Templates for customer notices (breach, security, service, legal).",
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/NoticeTemplate"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/platform/dead-letters": {
             "get": {
                 "operationId": "platform_dead_letters_list",
@@ -54967,6 +55426,99 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/platform/revenue-share": {
+            "get": {
+                "operationId": "platform_revenue_share_retrieve",
+                "description": "Revenue-share reconciliation for a month (``?month=YYYY-MM``, default this month):\npayments processed vs what was reported to the Stripe meter, per organisation.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "month",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RevenueShareReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/revenue-share/report-missing": {
+            "post": {
+                "operationId": "platform_revenue_share_report_missing_create",
+                "description": "Report an organisation's unreported days for a month to the meter (audited).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RevenueShareFixRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RevenueShareFixRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RevenueShareFixRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Count"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/platform/saas-metrics": {
             "get": {
                 "operationId": "platform_saas_metrics_retrieve",
@@ -55391,6 +55943,14 @@
                         "description": "ISO datetime"
                     },
                     {
+                        "in": "query",
+                        "name": "currency",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Billing currency of the MRR filter"
+                    },
+                    {
                         "name": "cursor",
                         "required": false,
                         "in": "query",
@@ -55398,6 +55958,22 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "in": "query",
+                        "name": "mrr_max",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Latest snapshot MRR at most (G6)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "mrr_min",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Latest snapshot MRR at least (G6)"
                     },
                     {
                         "name": "ordering",
@@ -56144,6 +56720,212 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/UsageSummary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/workflows": {
+            "get": {
+                "operationId": "platform_workflows_list",
+                "description": "Failed and stuck durable processes across organisations, with Temporal UI links.\n``?state=failed|stuck``, ``?process=``, ``?organisation=``, ``?search=``.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "organisation",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "process",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "state",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "failed",
+                                "stuck"
+                            ]
+                        }
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedPlatformWorkflowList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/workflows/{organisation_id}/{workflow_id}": {
+            "get": {
+                "operationId": "platform_workflows_retrieve",
+                "description": "Terminate, reset or retry one process (a reason is required; audited in the\norganisation's log). ``GET`` refreshes its status from Temporal.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "organisation_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "workflow_id",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlatformWorkflow"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "platform_workflows_create",
+                "description": "Terminate, reset or retry one process (a reason is required; audited in the\norganisation's log). ``GET`` refreshes its status from Temporal.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "organisation_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "workflow_id",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkflowActionRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkflowActionRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkflowActionRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlatformWorkflow"
                                 }
                             }
                         },
@@ -65493,6 +66275,11 @@
                 ],
                 "security": [
                     {
+                        "apiToken": [
+                            "reviews:read"
+                        ]
+                    },
+                    {
                         "cookieAuth": []
                     }
                 ],
@@ -65508,7 +66295,10 @@
                         "description": ""
                     }
                 },
-                "x-visibility": "internal"
+                "x-visibility": "public",
+                "x-scopes": [
+                    "reviews:read"
+                ]
             },
             "post": {
                 "operationId": "reviews_create",
@@ -65564,6 +66354,11 @@
                 },
                 "security": [
                     {
+                        "apiToken": [
+                            "reviews:write"
+                        ]
+                    },
+                    {
                         "cookieAuth": []
                     }
                 ],
@@ -65579,7 +66374,10 @@
                         "description": ""
                     }
                 },
-                "x-visibility": "internal"
+                "x-visibility": "public",
+                "x-scopes": [
+                    "reviews:write"
+                ]
             }
         },
         "/api/v1/reviews/{id}": {
@@ -65611,6 +66409,11 @@
                 ],
                 "security": [
                     {
+                        "apiToken": [
+                            "reviews:read"
+                        ]
+                    },
+                    {
                         "cookieAuth": []
                     }
                 ],
@@ -65626,7 +66429,10 @@
                         "description": ""
                     }
                 },
-                "x-visibility": "internal"
+                "x-visibility": "public",
+                "x-scopes": [
+                    "reviews:read"
+                ]
             }
         },
         "/api/v1/reviews/{id}/approve": {
@@ -65658,6 +66464,11 @@
                 ],
                 "security": [
                     {
+                        "apiToken": [
+                            "reviews:write"
+                        ]
+                    },
+                    {
                         "cookieAuth": []
                     }
                 ],
@@ -65673,7 +66484,10 @@
                         "description": ""
                     }
                 },
-                "x-visibility": "internal"
+                "x-visibility": "public",
+                "x-scopes": [
+                    "reviews:write"
+                ]
             }
         },
         "/api/v1/reviews/{id}/hide": {
@@ -65705,6 +66519,11 @@
                 ],
                 "security": [
                     {
+                        "apiToken": [
+                            "reviews:write"
+                        ]
+                    },
+                    {
                         "cookieAuth": []
                     }
                 ],
@@ -65720,7 +66539,10 @@
                         "description": ""
                     }
                 },
-                "x-visibility": "internal"
+                "x-visibility": "public",
+                "x-scopes": [
+                    "reviews:write"
+                ]
             }
         },
         "/api/v1/reviews/{id}/publish": {
@@ -65752,6 +66574,11 @@
                 ],
                 "security": [
                     {
+                        "apiToken": [
+                            "reviews:write"
+                        ]
+                    },
+                    {
                         "cookieAuth": []
                     }
                 ],
@@ -65767,7 +66594,10 @@
                         "description": ""
                     }
                 },
-                "x-visibility": "internal"
+                "x-visibility": "public",
+                "x-scopes": [
+                    "reviews:write"
+                ]
             }
         },
         "/api/v1/reviews/{id}/respond": {
@@ -65819,6 +66649,11 @@
                 },
                 "security": [
                     {
+                        "apiToken": [
+                            "reviews:write"
+                        ]
+                    },
+                    {
                         "cookieAuth": []
                     }
                 ],
@@ -65834,7 +66669,10 @@
                         "description": ""
                     }
                 },
-                "x-visibility": "internal"
+                "x-visibility": "public",
+                "x-scopes": [
+                    "reviews:write"
+                ]
             }
         },
         "/api/v1/reviews/{id}/unpublish": {
@@ -65866,6 +66704,11 @@
                 ],
                 "security": [
                     {
+                        "apiToken": [
+                            "reviews:write"
+                        ]
+                    },
+                    {
                         "cookieAuth": []
                     }
                 ],
@@ -65881,7 +66724,10 @@
                         "description": ""
                     }
                 },
-                "x-visibility": "internal"
+                "x-visibility": "public",
+                "x-scopes": [
+                    "reviews:write"
+                ]
             }
         },
         "/api/v1/reviews/summary": {
@@ -65902,6 +66748,11 @@
                 ],
                 "security": [
                     {
+                        "apiToken": [
+                            "reviews:read"
+                        ]
+                    },
+                    {
                         "cookieAuth": []
                     }
                 ],
@@ -65917,7 +66768,10 @@
                         "description": ""
                     }
                 },
-                "x-visibility": "internal"
+                "x-visibility": "public",
+                "x-scopes": [
+                    "reviews:read"
+                ]
             }
         },
         "/api/v1/roles": {
@@ -68843,6 +69697,7 @@
                                         "country": "GB",
                                         "business_type": "sole_trader",
                                         "timezone": "Europe/London",
+                                        "accept_terms": true,
                                         "turnstile_token": "<token from the widget>"
                                     },
                                     "summary": "New tutor"
@@ -69785,6 +70640,361 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/sites/posts": {
+            "get": {
+                "operationId": "sites_posts_list",
+                "description": "Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,\n``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "sites"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedBlogPostList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "sites_posts_create",
+                "description": "Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,\n``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "sites"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BlogPostRequest"
+                            },
+                            "examples": {
+                                "ANewsPost": {
+                                    "value": {
+                                        "title": "Summer exam results",
+                                        "excerpt": "Our students' best year yet.",
+                                        "body": "Congratulations to everyone...\n\nWhat comes next...",
+                                        "author_name": "Priya, Director"
+                                    },
+                                    "summary": "A news post"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BlogPostRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BlogPostRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BlogPost"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/sites/posts/{id}": {
+            "get": {
+                "operationId": "sites_posts_retrieve",
+                "description": "Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,\n``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f-]{36}$"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "sites"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BlogPost"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "patch": {
+                "operationId": "sites_posts_partial_update",
+                "description": "Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,\n``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f-]{36}$"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "sites"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedBlogPostRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedBlogPostRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedBlogPostRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BlogPost"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "delete": {
+                "operationId": "sites_posts_destroy",
+                "description": "Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,\n``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f-]{36}$"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "sites"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/sites/posts/{id}/publish": {
+            "post": {
+                "operationId": "sites_posts_publish_create",
+                "description": "Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,\n``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f-]{36}$"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "sites"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BlogPublishRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BlogPublishRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BlogPublishRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BlogPost"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/sites/posts/{id}/unpublish": {
+            "post": {
+                "operationId": "sites_posts_unpublish_create",
+                "description": "Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,\n``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f-]{36}$"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "sites"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BlogPost"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/sites/themes": {
             "get": {
                 "operationId": "sites_themes_list",
@@ -70507,6 +71717,109 @@
                             }
                         },
                         "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/subscription/addons": {
+            "get": {
+                "operationId": "subscription_addons_list",
+                "description": "Add-ons the organisation can buy in the app (G6, FR-04-1): custom domain,\nwhite-label apps and priority support.",
+                "tags": [
+                    "subscription"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Addon"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/subscription/addons/{key}": {
+            "post": {
+                "operationId": "subscription_addons_create",
+                "description": "Buy (``POST``) or stop (``DELETE``) an add-on: an extra item on the TutorTrack\nsubscription, prorated, that grants the add-on's feature while active.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Repeat the same key to retry safely without buying twice."
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Addon"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "delete": {
+                "operationId": "subscription_addons_destroy",
+                "description": "Buy (``POST``) or stop (``DELETE``) an add-on: an extra item on the TutorTrack\nsubscription, prorated, that grants the add-on's feature while active.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
                     }
                 },
                 "x-visibility": "internal"
@@ -79097,6 +80410,118 @@
                     "name"
                 ]
             },
+            "AccountDeletionBlocker": {
+                "type": "object",
+                "properties": {
+                    "organisation_id": {
+                        "type": "string"
+                    },
+                    "organisation_name": {
+                        "type": "string"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "description": "last_owner | platform_staff"
+                    }
+                },
+                "required": [
+                    "organisation_id",
+                    "organisation_name",
+                    "reason"
+                ]
+            },
+            "AccountDeletionOrganisation": {
+                "type": "object",
+                "properties": {
+                    "organisation_id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "type": "string"
+                    },
+                    "outcome": {
+                        "type": "string",
+                        "description": "erased | request_logged"
+                    },
+                    "reference": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "name",
+                    "organisation_id",
+                    "outcome"
+                ]
+            },
+            "AccountDeletionPreview": {
+                "type": "object",
+                "properties": {
+                    "organisations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AccountDeletionOrganisation"
+                        }
+                    },
+                    "blockers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AccountDeletionBlocker"
+                        }
+                    },
+                    "needs_password": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "blockers",
+                    "needs_password",
+                    "organisations"
+                ]
+            },
+            "AccountDeletionRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "confirm_email": {
+                        "type": "string",
+                        "description": "Without a password: type your email."
+                    },
+                    "reason": {
+                        "type": "string",
+                        "maxLength": 500
+                    }
+                }
+            },
+            "AccountDeletionResult": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "organisations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AccountDeletionOrganisation"
+                        }
+                    }
+                },
+                "required": [
+                    "completed_at",
+                    "id",
+                    "organisations"
+                ]
+            },
             "AccountMappingRow": {
                 "type": "object",
                 "properties": {
@@ -79525,6 +80950,57 @@
                 "required": [
                     "description",
                     "unit_price"
+                ]
+            },
+            "Addon": {
+                "type": "object",
+                "description": "An add-on in the in-app shop (G6, FR-04-1).",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "feature": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MoneyOut"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "interval": {
+                        "type": "string"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "included_in_plan": {
+                        "type": "boolean"
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "active",
+                    "description",
+                    "feature",
+                    "included_in_plan",
+                    "interval",
+                    "key",
+                    "name",
+                    "price",
+                    "started_at"
                 ]
             },
             "Address": {
@@ -80919,12 +82395,14 @@
                     "enquiries:write",
                     "crm:read",
                     "crm:write",
+                    "reviews:read",
+                    "reviews:write",
                     "branches:read",
                     "webhooks:read",
                     "webhooks:write"
                 ],
                 "type": "string",
-                "description": "* `clients:read` - clients:read\n* `clients:write` - clients:write\n* `students:read` - students:read\n* `students:write` - students:write\n* `tutors:read` - tutors:read\n* `tutors:write` - tutors:write\n* `services:read` - services:read\n* `services:write` - services:write\n* `jobs:read` - jobs:read\n* `jobs:write` - jobs:write\n* `lessons:read` - lessons:read\n* `lessons:write` - lessons:write\n* `availability:read` - availability:read\n* `availability:write` - availability:write\n* `invoices:read` - invoices:read\n* `invoices:write` - invoices:write\n* `payments:read` - payments:read\n* `payments:write` - payments:write\n* `payroll:read` - payroll:read\n* `enquiries:read` - enquiries:read\n* `enquiries:write` - enquiries:write\n* `crm:read` - crm:read\n* `crm:write` - crm:write\n* `branches:read` - branches:read\n* `webhooks:read` - webhooks:read\n* `webhooks:write` - webhooks:write"
+                "description": "* `clients:read` - clients:read\n* `clients:write` - clients:write\n* `students:read` - students:read\n* `students:write` - students:write\n* `tutors:read` - tutors:read\n* `tutors:write` - tutors:write\n* `services:read` - services:read\n* `services:write` - services:write\n* `jobs:read` - jobs:read\n* `jobs:write` - jobs:write\n* `lessons:read` - lessons:read\n* `lessons:write` - lessons:write\n* `availability:read` - availability:read\n* `availability:write` - availability:write\n* `invoices:read` - invoices:read\n* `invoices:write` - invoices:write\n* `payments:read` - payments:read\n* `payments:write` - payments:write\n* `payroll:read` - payroll:read\n* `enquiries:read` - enquiries:read\n* `enquiries:write` - enquiries:write\n* `crm:read` - crm:read\n* `crm:write` - crm:write\n* `reviews:read` - reviews:read\n* `reviews:write` - reviews:write\n* `branches:read` - branches:read\n* `webhooks:read` - webhooks:read\n* `webhooks:write` - webhooks:write"
             },
             "Application": {
                 "type": "object",
@@ -83650,6 +85128,165 @@
                     "key",
                     "title"
                 ]
+            },
+            "BlogPost": {
+                "type": "object",
+                "description": "A blog or news post (G6). ``body`` is plain text: paragraphs separated by a blank\nline.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "site": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "slug": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 120,
+                                "pattern": "^[-a-zA-Z0-9_]+$"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "excerpt": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "cover_image": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "author_name": {
+                        "type": "string",
+                        "maxLength": 120
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/BlogPostStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "seo_title": {
+                        "type": "string",
+                        "maxLength": 120
+                    },
+                    "meta_description": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "url": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "id",
+                    "published_at",
+                    "site",
+                    "status",
+                    "title",
+                    "updated_at",
+                    "url"
+                ]
+            },
+            "BlogPostRequest": {
+                "type": "object",
+                "description": "A blog or news post (G6). ``body`` is plain text: paragraphs separated by a blank\nline.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "slug": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 120,
+                                "pattern": "^[-a-zA-Z0-9_]+$"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "excerpt": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "cover_image": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "author_name": {
+                        "type": "string",
+                        "maxLength": 120
+                    },
+                    "seo_title": {
+                        "type": "string",
+                        "maxLength": 120
+                    },
+                    "meta_description": {
+                        "type": "string",
+                        "maxLength": 300
+                    }
+                },
+                "required": [
+                    "title"
+                ]
+            },
+            "BlogPostStatusEnum": {
+                "enum": [
+                    "draft",
+                    "published"
+                ],
+                "type": "string",
+                "description": "* `draft` - Draft\n* `published` - Published"
+            },
+            "BlogPublishRequest": {
+                "type": "object",
+                "properties": {
+                    "published_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true,
+                        "description": "Schedule for later; default now."
+                    }
+                }
             },
             "BoardColumn": {
                 "type": "object",
@@ -91514,6 +93151,136 @@
                     "name"
                 ]
             },
+            "CustomerNotice": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "kind": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "template": {
+                        "type": "string"
+                    },
+                    "subject": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "body": {
+                        "type": "string",
+                        "maxLength": 20000
+                    },
+                    "variables": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "organisation_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Empty: every open organisation."
+                    },
+                    "status": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "sent_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "organisations_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "recipients_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "kind",
+                    "organisations_count",
+                    "reason",
+                    "recipients_count",
+                    "sent_at",
+                    "status",
+                    "template"
+                ]
+            },
+            "CustomerNoticePreview": {
+                "type": "object",
+                "properties": {
+                    "subject": {
+                        "type": "string"
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "organisations": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "body",
+                    "organisations",
+                    "subject"
+                ]
+            },
+            "CustomerNoticeRequest": {
+                "type": "object",
+                "properties": {
+                    "template": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "subject": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "body": {
+                        "type": "string",
+                        "maxLength": 20000
+                    },
+                    "variables": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "organisation_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Empty: every open organisation."
+                    }
+                },
+                "required": [
+                    "template"
+                ]
+            },
             "DPAAcceptance": {
                 "type": "object",
                 "properties": {
@@ -94182,10 +95949,11 @@
             "ErasureReasonEnum": {
                 "enum": [
                     "request",
-                    "retention"
+                    "retention",
+                    "account"
                 ],
                 "type": "string",
-                "description": "* `request` - Data subject request\n* `retention` - Retention policy"
+                "description": "* `request` - Data subject request\n* `retention` - Retention policy\n* `account` - The person deleted their account"
             },
             "ErasureRecord": {
                 "type": "object",
@@ -94312,6 +96080,22 @@
                     "origin"
                 ]
             },
+            "EventPayloadField": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "json_type": {
+                        "type": "string",
+                        "description": "string, integer, boolean, array... (| null)"
+                    }
+                },
+                "required": [
+                    "json_type",
+                    "name"
+                ]
+            },
             "EventSample": {
                 "type": "object",
                 "properties": {
@@ -94346,12 +96130,20 @@
                     },
                     "version": {
                         "type": "integer"
+                    },
+                    "payload_fields": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EventPayloadField"
+                        },
+                        "description": "The fields of ``event_data`` (the event's own payload)."
                     }
                 },
                 "required": [
                     "aggregate",
                     "description",
                     "key",
+                    "payload_fields",
                     "subject_type",
                     "version"
                 ]
@@ -95467,6 +97259,11 @@
                         "type": "string",
                         "default": "",
                         "maxLength": 2000
+                    },
+                    "stop_asking": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "The family ticked 'don't ask me again': withdraws the lesson-feedback consent."
                     }
                 },
                 "required": [
@@ -95936,6 +97733,56 @@
                 "required": [
                     "name",
                     "slug"
+                ]
+            },
+            "FormSubmission": {
+                "type": "object",
+                "description": "A form submission (G6, public API ``enquiries`` scope). The visitor's IP address and\nbrowser stay out of the API.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "form": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "form_name": {
+                        "type": "string",
+                        "readOnly": true,
+                        "default": ""
+                    },
+                    "answers": {
+                        "readOnly": true
+                    },
+                    "utm": {
+                        "readOnly": true
+                    },
+                    "created_records": {
+                        "readOnly": true
+                    },
+                    "spam": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "answers",
+                    "created_at",
+                    "created_records",
+                    "form",
+                    "form_name",
+                    "id",
+                    "spam",
+                    "utm"
                 ]
             },
             "FormTypeEnum": {
@@ -100856,6 +102703,7 @@
                     "multi_branch",
                     "payroll",
                     "pipeline",
+                    "priority_support",
                     "recruitment",
                     "sms_credits_monthly",
                     "sso_saml",
@@ -100865,7 +102713,7 @@
                     "white_label"
                 ],
                 "type": "string",
-                "description": "* `accounting_integrations` - accounting_integrations\n* `advanced_reports` - advanced_reports\n* `ai_assistant` - ai_assistant\n* `ai_credits_monthly` - ai_credits_monthly\n* `api_access` - api_access\n* `automation` - automation\n* `automation_rules` - automation_rules\n* `courses` - courses\n* `custom_domain` - custom_domain\n* `matching` - matching\n* `max_active_students` - max_active_students\n* `max_branches` - max_branches\n* `max_tutors` - max_tutors\n* `multi_branch` - multi_branch\n* `payroll` - payroll\n* `pipeline` - pipeline\n* `recruitment` - recruitment\n* `sms_credits_monthly` - sms_credits_monthly\n* `sso_saml` - sso_saml\n* `storage_gb` - storage_gb\n* `warehouse_export` - warehouse_export\n* `webhooks` - webhooks\n* `white_label` - white_label"
+                "description": "* `accounting_integrations` - accounting_integrations\n* `advanced_reports` - advanced_reports\n* `ai_assistant` - ai_assistant\n* `ai_credits_monthly` - ai_credits_monthly\n* `api_access` - api_access\n* `automation` - automation\n* `automation_rules` - automation_rules\n* `courses` - courses\n* `custom_domain` - custom_domain\n* `matching` - matching\n* `max_active_students` - max_active_students\n* `max_branches` - max_branches\n* `max_tutors` - max_tutors\n* `multi_branch` - multi_branch\n* `payroll` - payroll\n* `pipeline` - pipeline\n* `priority_support` - priority_support\n* `recruitment` - recruitment\n* `sms_credits_monthly` - sms_credits_monthly\n* `sso_saml` - sso_saml\n* `storage_gb` - storage_gb\n* `warehouse_export` - warehouse_export\n* `webhooks` - webhooks\n* `white_label` - white_label"
             },
             "LateFeeRule": {
                 "type": "object",
@@ -103317,9 +105165,14 @@
                     },
                     "user_agent": {
                         "type": "string"
+                    },
+                    "country": {
+                        "type": "string",
+                        "description": "ISO country code of the sign-in, when known."
                     }
                 },
                 "required": [
+                    "country",
                     "created_at",
                     "id",
                     "ip",
@@ -104254,6 +106107,9 @@
                     "status": {
                         "$ref": "#/components/schemas/MarketplaceStatusEnum"
                     },
+                    "detail": {
+                        "type": "string"
+                    },
                     "settings_path": {
                         "type": "string"
                     },
@@ -104271,6 +106127,7 @@
                     "category",
                     "client_id",
                     "description",
+                    "detail",
                     "homepage_url",
                     "key",
                     "kind",
@@ -104290,11 +106147,12 @@
             "MarketplaceStatusEnum": {
                 "enum": [
                     "connected",
+                    "needs_attention",
                     "available",
                     "coming_soon"
                 ],
                 "type": "string",
-                "description": "* `connected` - connected\n* `available` - available\n* `coming_soon` - coming_soon"
+                "description": "* `connected` - connected\n* `needs_attention` - needs_attention\n* `available` - available\n* `coming_soon` - coming_soon"
             },
             "Mastery": {
                 "type": "object",
@@ -106204,6 +108062,40 @@
                 ],
                 "type": "string",
                 "description": "* `info` - Information\n* `warning` - Degraded service\n* `outage` - Outage"
+            },
+            "NoticeTemplate": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "type": "string"
+                    },
+                    "subject": {
+                        "type": "string"
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "variables": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "body",
+                    "key",
+                    "kind",
+                    "subject",
+                    "title",
+                    "variables"
+                ]
             },
             "NotificationCategoryEnum": {
                 "enum": [
@@ -109052,6 +110944,32 @@
                     }
                 }
             },
+            "PaginatedBlogPostList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BlogPost"
+                        }
+                    }
+                }
+            },
             "PaginatedBookingHoldList": {
                 "type": "object",
                 "required": [
@@ -110036,6 +111954,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/ExternalRecordLink"
+                        }
+                    }
+                }
+            },
+            "PaginatedFormSubmissionList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FormSubmission"
                         }
                     }
                 }
@@ -111206,6 +113150,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/PlatformSupportRow"
+                        }
+                    }
+                }
+            },
+            "PaginatedPlatformWorkflowList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PlatformWorkflow"
                         }
                     }
                 }
@@ -113168,6 +115138,54 @@
                     },
                     "attendance_independent": {
                         "type": "boolean"
+                    }
+                }
+            },
+            "PatchedBlogPostRequest": {
+                "type": "object",
+                "description": "A blog or news post (G6). ``body`` is plain text: paragraphs separated by a blank\nline.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "slug": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 120,
+                                "pattern": "^[-a-zA-Z0-9_]+$"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "excerpt": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "cover_image": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "author_name": {
+                        "type": "string",
+                        "maxLength": 120
+                    },
+                    "seo_title": {
+                        "type": "string",
+                        "maxLength": 120
+                    },
+                    "meta_description": {
+                        "type": "string",
+                        "maxLength": 300
                     }
                 }
             },
@@ -119926,6 +121944,79 @@
                     "support_unread"
                 ]
             },
+            "PlatformWorkflow": {
+                "type": "object",
+                "properties": {
+                    "organisation_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "organisation_name": {
+                        "type": "string"
+                    },
+                    "workflow_id": {
+                        "type": "string"
+                    },
+                    "run_id": {
+                        "type": "string"
+                    },
+                    "workflow_type": {
+                        "type": "string"
+                    },
+                    "process": {
+                        "type": "string"
+                    },
+                    "subject_type": {
+                        "type": "string"
+                    },
+                    "subject_id": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "current_step": {
+                        "type": "string"
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "closed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "last_error": {
+                        "type": "string"
+                    },
+                    "temporal_url": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "closed_at",
+                    "current_step",
+                    "last_error",
+                    "organisation_id",
+                    "organisation_name",
+                    "process",
+                    "run_id",
+                    "started_at",
+                    "status",
+                    "subject_id",
+                    "subject_type",
+                    "temporal_url",
+                    "updated_at",
+                    "workflow_id",
+                    "workflow_type"
+                ]
+            },
             "Point": {
                 "type": "object",
                 "properties": {
@@ -124687,6 +126778,17 @@
                     "accept_terms": {
                         "type": "boolean",
                         "default": false
+                    },
+                    "consents": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 60,
+                            "pattern": "^[-a-zA-Z0-9_]+$"
+                        },
+                        "description": "Other consent types ticked on the form (e.g. marketing-email, photo-video).",
+                        "maxItems": 10
                     },
                     "join_waitlist": {
                         "type": "boolean",
@@ -129942,6 +132044,129 @@
                     "retried"
                 ]
             },
+            "RevenueShareFixRequest": {
+                "type": "object",
+                "properties": {
+                    "organisation_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "month": {
+                        "type": "string",
+                        "minLength": 1,
+                        "pattern": "^\\d{4}-\\d{2}$"
+                    }
+                },
+                "required": [
+                    "month",
+                    "organisation_id"
+                ]
+            },
+            "RevenueShareReport": {
+                "type": "object",
+                "properties": {
+                    "month": {
+                        "type": "string"
+                    },
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RevenueShareRow"
+                        }
+                    },
+                    "totals": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/RevenueShareTotals"
+                        }
+                    }
+                },
+                "required": [
+                    "month",
+                    "rows",
+                    "totals"
+                ]
+            },
+            "RevenueShareRow": {
+                "type": "object",
+                "properties": {
+                    "organisation_id": {
+                        "type": "string"
+                    },
+                    "organisation_name": {
+                        "type": "string"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "percent": {
+                        "type": "string"
+                    },
+                    "processed": {
+                        "type": "string"
+                    },
+                    "reported": {
+                        "type": "string"
+                    },
+                    "difference": {
+                        "type": "string"
+                    },
+                    "expected_fee": {
+                        "type": "string"
+                    },
+                    "reported_fee": {
+                        "type": "string"
+                    },
+                    "unreported_days": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "changed_days": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "ok": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "changed_days",
+                    "currency",
+                    "difference",
+                    "expected_fee",
+                    "ok",
+                    "organisation_id",
+                    "organisation_name",
+                    "percent",
+                    "processed",
+                    "reported",
+                    "reported_fee",
+                    "unreported_days"
+                ]
+            },
+            "RevenueShareTotals": {
+                "type": "object",
+                "properties": {
+                    "processed": {
+                        "type": "string"
+                    },
+                    "reported": {
+                        "type": "string"
+                    },
+                    "expected_fee": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "expected_fee",
+                    "processed",
+                    "reported"
+                ]
+            },
             "Review": {
                 "type": "object",
                 "properties": {
@@ -130272,10 +132497,11 @@
                 "enum": [
                     "request",
                     "portal",
-                    "staff"
+                    "staff",
+                    "import"
                 ],
                 "type": "string",
-                "description": "* `request` - Review request\n* `portal` - Portal\n* `staff` - Entered by staff"
+                "description": "* `request` - Review request\n* `portal` - Portal\n* `staff` - Entered by staff\n* `import` - Imported from another system"
             },
             "ReviewStatusEnum": {
                 "enum": [
@@ -133823,9 +136049,21 @@
                 "properties": {
                     "turnstile_site_key": {
                         "type": "string"
+                    },
+                    "terms_version": {
+                        "type": "string"
+                    },
+                    "terms_url": {
+                        "type": "string"
+                    },
+                    "privacy_notice_url": {
+                        "type": "string"
                     }
                 },
                 "required": [
+                    "privacy_notice_url",
+                    "terms_url",
+                    "terms_version",
                     "turnstile_site_key"
                 ]
             },
@@ -133936,6 +136174,11 @@
                     },
                     "turnstile_token": {
                         "type": "string"
+                    },
+                    "accept_terms": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "The person ticked that they accept TutorTrack's Terms of Service and privacy notice (versions from /signup/config). Required."
                     }
                 },
                 "required": [
@@ -137036,6 +139279,18 @@
                         ],
                         "nullable": true
                     },
+                    "integrations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TenantIntegration"
+                        }
+                    },
+                    "addons": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
                     "overrides": {
                         "type": "array",
                         "items": {
@@ -137071,14 +139326,55 @@
                     }
                 },
                 "required": [
+                    "addons",
                     "audit",
                     "dead_letters",
+                    "integrations",
                     "members",
                     "organisation",
                     "overrides",
                     "recent_errors",
                     "subscription",
                     "usage"
+                ]
+            },
+            "TenantIntegration": {
+                "type": "object",
+                "properties": {
+                    "provider": {
+                        "type": "string"
+                    },
+                    "level": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "connections": {
+                        "type": "integer"
+                    },
+                    "last_sync_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "error_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "failed_syncs": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "connections",
+                    "error_at",
+                    "failed_syncs",
+                    "last_sync_at",
+                    "level",
+                    "provider",
+                    "status"
                 ]
             },
             "TenantOrganisation": {
@@ -137203,6 +139499,16 @@
                         ],
                         "nullable": true,
                         "readOnly": true
+                    },
+                    "snapshot_mrr": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MoneyOut"
+                            }
+                        ],
+                        "nullable": true,
+                        "readOnly": true,
+                        "description": "MRR from the latest nightly snapshot (incl. revenue share)."
                     }
                 },
                 "required": [
@@ -137216,6 +139522,7 @@
                     "plan",
                     "region",
                     "slug",
+                    "snapshot_mrr",
                     "status",
                     "subscription_status",
                     "trial_ends_at"
@@ -142261,6 +144568,32 @@
                         "nullable": true
                     }
                 }
+            },
+            "WorkflowActionActionEnum": {
+                "enum": [
+                    "terminate",
+                    "reset",
+                    "retry"
+                ],
+                "type": "string",
+                "description": "* `terminate` - terminate\n* `reset` - reset\n* `retry` - retry"
+            },
+            "WorkflowActionRequest": {
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "$ref": "#/components/schemas/WorkflowActionActionEnum"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                    }
+                },
+                "required": [
+                    "action",
+                    "reason"
+                ]
             },
             "XeroEarningsRate": {
                 "type": "object",

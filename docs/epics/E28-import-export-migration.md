@@ -241,3 +241,26 @@ test imports 600 rows with the same 12 bad ones and no time limit.
   status (polled, `aria-live`), the dry-run summary, an accessible preview table of rows
   with errors and warnings, confirm or cancel, and the results with the error-report
   download and rollback.
+
+## Gap backlog (as built 2026-10-14)
+
+Batch G6 of `docs/05-gap-backlog.md`; design in ADR 0034.
+
+
+- **TutorCruncher and Teachworks (FR-28-3/5; E28:186-188):** new importers `affiliates`
+  (agents → E25 affiliates with a percentage commission rule and the clients they introduced),
+  `reviews` (→ E25 reviews, source `import`; published ones approved, nothing sent),
+  `charges` (ad hoc charges dated on or after the cutover → uninvoiced E10 charges; earlier
+  ones are in the invoice history and opening balance) and `payment_requests` (unpaid
+  proformas → E10 payment requests; paid ones are in the balance). The TutorCruncher connector
+  maps them (`UNSUPPORTED` is now empty) and reconciles `affiliates` and `reviews`. Projects
+  gain a `growth` step after balances; charges and payment requests join the balances step.
+  Teachworks wage tiers become E06 pay tiers: tutors get `pay_tier` (created if new, assigned
+  from the cutover) and services get `tier_pay_rates` (`Tier: rate; …`, each tier's wage).
+  Rollback voids charges, cancels requests and removes unused affiliates, reviews, tiers and
+  assignments.
+- **Consent columns (FR-29-3):** client and student imports accept consent columns (marketing
+  email/SMS, data processing, photos and video, lesson recording); "yes" grants and "no"
+  records a withdrawal as E29 consent records (method `import`, source
+  `import:<system>:<batch>`), skipped when the latest record already says the same; rollback
+  removes them.

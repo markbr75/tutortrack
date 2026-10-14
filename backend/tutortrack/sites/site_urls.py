@@ -15,6 +15,9 @@ urlpatterns = [
     path("robots.txt", site_views.robots, name="site-robots"),
     *_root.urlpatterns,
     path("tutors/<slug:slug>", site_views.tutor_page, name="site-tutor"),
+    path("blog", site_views.blog_index, name="site-blog"),
+    path("blog/rss.xml", site_views.blog_rss, name="site-blog-rss"),
+    path("blog/<slug:slug>", site_views.blog_post, name="site-blog-post"),
     path("", site_views.page, {"path": ""}, name="site-home"),
     path("<slug:path>", site_views.page, name="site-page"),
 ]

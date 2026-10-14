@@ -43,6 +43,7 @@ def sign_up(
     slug: str | None = None,
     business_type: str = Organisation.BusinessType.SOLE_TRADER,
     timezone: str | None = None,
+    accepted_terms: bool = False,
 ) -> SignupResult:
     """Create the organisation (and, for new people, the user).
 
@@ -79,6 +80,11 @@ def sign_up(
         business_type=business_type,
         timezone=timezone,
     )
+    if accepted_terms:
+        # G6 (FR-29-3): who accepted which version of the platform terms, and when.
+        from tutortrack.privacy.compliance import record_terms_acceptance
+
+        record_terms_acceptance(user, organisation=organisation)
     with tenant_context(organisation):
         from .onboarding import start_onboarding
 

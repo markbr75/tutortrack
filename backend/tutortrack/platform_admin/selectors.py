@@ -28,9 +28,14 @@ def tenants(
     created_after: datetime | None = None,
     created_before: datetime | None = None,
     active_since: datetime | None = None,
+    mrr_min: Decimal | None = None,
+    mrr_max: Decimal | None = None,
+    currency: str = "",
 ) -> QuerySet[Organisation]:
     from tutortrack.identity.models import Membership
     from tutortrack.subscriptions.models import Subscription
+
+    from .models import SubscriptionSnapshot
 
     subs = Subscription.all_tenants.using(PLATFORM_DB_ALIAS).filter(organisation=OuterRef("pk"))
     members = Membership.all_tenants.using(PLATFORM_DB_ALIAS).filter(
@@ -54,6 +59,19 @@ def tenants(
             ),
             0,
         ),
+        # G6: MRR from the latest nightly snapshot (E30 Part 2), filterable and sortable.
+        latest_mrr=Subquery(
+            SubscriptionSnapshot.all_tenants.using(PLATFORM_DB_ALIAS)
+            .filter(organisation=OuterRef("pk"))
+            .order_by("-date")
+            .values("mrr")[:1]
+        ),
+        latest_mrr_currency=Subquery(
+            SubscriptionSnapshot.all_tenants.using(PLATFORM_DB_ALIAS)
+            .filter(organisation=OuterRef("pk"))
+            .order_by("-date")
+            .values("currency")[:1]
+        ),
     )
     if search:
         qs = qs.filter(
@@ -72,6 +90,12 @@ def tenants(
         qs = qs.filter(created_at__lt=created_before)
     if active_since:
         qs = qs.filter(last_activity__gte=active_since)
+    if mrr_min is not None:
+        qs = qs.filter(latest_mrr__gte=mrr_min)
+    if mrr_max is not None:
+        qs = qs.filter(Q(latest_mrr__lte=mrr_max) | Q(latest_mrr__isnull=True))
+    if currency:
+        qs = qs.filter(latest_mrr_currency=currency.upper())
     return qs
 
 
@@ -112,6 +136,8 @@ def tenant_detail(organisation: Organisation) -> dict[str, Any]:
         return {
             "organisation": organisation,
             "subscription": subscription,
+            "integrations": integration_status(),
+            "addons": [a.addon for a in _active_addons()],
             "overrides": list(EntitlementOverride.objects.order_by("key")),
             "usage": usage.usage_counts(),
             "members": memberships,
@@ -121,6 +147,53 @@ def tenant_detail(organisation: Organisation) -> dict[str, Any]:
             ).count(),
             "audit": list(AuditEntry.objects.order_by("-created_at")[:25]),
         }
+
+
+def _active_addons() -> list[Any]:
+    from tutortrack.subscriptions.models import SubscriptionAddon
+
+    return list(SubscriptionAddon.objects.filter(status=SubscriptionAddon.Status.ACTIVE))
+
+
+def integration_status() -> list[dict[str, Any]]:
+    """G6 (E30 FR-30-1 with E22/E23): the organisation's connections (in its tenant
+    context), the marketplace's live status and accounting sync health. No secrets."""
+    from django.db.models import Max
+
+    from tutortrack.integrations.models import IntegrationConnection
+
+    rows = (
+        IntegrationConnection.objects.exclude(status=IntegrationConnection.Status.DISCONNECTED)
+        .values("provider", "level", "status")
+        .annotate(
+            count=Count("id"),
+            last_sync_at=Max("last_sync_at"),
+            error_at=Max("error_at"),
+        )
+        .order_by("provider", "level", "status")
+    )
+    out = [
+        {
+            "provider": r["provider"],
+            "level": r["level"],
+            "status": r["status"],
+            "connections": r["count"],
+            "last_sync_at": r["last_sync_at"],
+            "error_at": r["error_at"],
+            "failed_syncs": 0,
+        }
+        for r in rows
+    ]
+    from tutortrack.accounting.models import ExternalRecordLink
+
+    failed = dict(
+        ExternalRecordLink.objects.filter(status=ExternalRecordLink.Status.ERROR)
+        .values_list("provider")
+        .annotate(n=Count("id"))
+    )
+    for row in out:
+        row["failed_syncs"] = int(failed.get(row["provider"], 0))
+    return out
 
 
 def _recent_errors() -> list[dict[str, Any]]:

@@ -1,0 +1,12 @@
+{% extends "sites/page.html" %}{% load i18n %}
+{% block content %}
+<section><div class="wrap">
+  <p><a href="/blog">{% trans "All posts" %}</a></p>
+  <article style="max-width:760px" aria-labelledby="post-h">
+    <h1 id="post-h">{{ post.title }}</h1>
+    <p class="muted"><time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"j F Y" }}</time>{% if post.author %} · {{ post.author }}{% endif %}</p>
+    {% if post.image_url %}<img src="{{ post.image_url }}" alt="" style="max-width:100%;border-radius:var(--tt-radius)">{% endif %}
+    {% for para in paragraphs %}<p>{{ para|linebreaksbr }}</p>{% endfor %}
+  </article>
+</div></section>
+{% endblock %}

@@ -601,6 +601,16 @@ def assign_tier(
 
 
 @transaction.atomic
+def delete_imported_tier(tier: PayTier) -> None:
+    """An E28 import is rolled back (G6): a tier it created goes while nobody is on it."""
+    if tier.assignments.exists():
+        raise _invalid("tier", _("Tutors are on this tier."))
+    audit.record(tier, "delete", {"name": [tier.name, None]})
+    ServiceTierRate.objects.filter(tier=tier).delete()
+    tier.delete()
+
+
+@transaction.atomic
 def remove_tier_assignment(assignment: TutorPayTierAssignment) -> None:
     audit.record(assignment, "delete", {"tier": [str(assignment.tier_id), None]})
     assignment.delete()

@@ -12,6 +12,7 @@ from tutortrack.tenancy.models import OrganisationDomain
 
 from .. import brand
 from ..models import (
+    BlogPost,
     BrandKit,
     PublicProfile,
     Site,
@@ -538,3 +539,30 @@ class ManifestSerializer(serializers.Serializer):
     theme_color = serializers.CharField()
     background_color = serializers.CharField()
     icons = ManifestIconSerializer(many=True)
+
+
+class BlogPostSerializer(serializers.ModelSerializer):
+    """A blog or news post (G6). ``body`` is plain text: paragraphs separated by a blank
+    line."""
+
+    cover_image = serializers.UUIDField(source="cover_image_id", required=False, allow_null=True)
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BlogPost
+        fields = [
+            "id", "site", "title", "slug", "excerpt", "body", "cover_image", "author_name",
+            "status", "published_at", "seo_title", "meta_description", "url", "updated_at",
+        ]  # fmt: skip
+        read_only_fields = ["id", "site", "status", "published_at", "url", "updated_at"]
+        extra_kwargs = {"slug": {"required": False, "allow_blank": True}}
+
+    @extend_schema_field(serializers.CharField())
+    def get_url(self, obj: BlogPost) -> str:
+        return f"/blog/{obj.slug}"
+
+
+class BlogPublishSerializer(serializers.Serializer):
+    published_at = serializers.DateTimeField(
+        required=False, allow_null=True, help_text="Schedule for later; default now."
+    )

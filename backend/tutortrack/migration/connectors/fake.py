@@ -98,6 +98,7 @@ def tutorcruncher_sample() -> dict[str, list[dict[str, Any]]]:
                 "id": 12,
                 "status": "prospect",
                 "balance": "30.00",
+                "agent": {"id": 1},
                 "user": {
                     "first_name": "Omar",
                     "last_name": "Khan",
@@ -174,10 +175,47 @@ def tutorcruncher_sample() -> dict[str, list[dict[str, Any]]]:
                 "status": "unpaid",
             },
         ],
-        "agents": [{"id": 1}],
-        "reviews": [],
-        "proformas": [],
-        "adhoccharges": [],
+        "agents": [
+            {
+                "id": 1,
+                "commission_rate": "10.00",
+                "user": {
+                    "first_name": "Sam",
+                    "last_name": "Agent",
+                    "email": "sam.agent@example.com",
+                },
+            }
+        ],
+        "reviews": [
+            {
+                "id": 801,
+                "client": {"id": 11},
+                "contractor": {"id": 101},
+                "rating": 5,
+                "review": "Alex is brilliant.",
+                "public": True,
+            }
+        ],
+        "proformas": [
+            {"id": 601, "client": {"id": 12}, "gross": "120.00", "status": "unpaid"},
+            {"id": 602, "client": {"id": 11}, "gross": "60.00", "status": "paid"},
+        ],
+        "adhoccharges": [
+            {
+                "id": 701,
+                "client": {"id": 11},
+                "description": "Exam entry fee",
+                "charge_client": "45.00",
+                "date": (today + timedelta(days=3)).date().isoformat(),
+            },
+            {
+                "id": 702,
+                "client": {"id": 11},
+                "description": "Old workbook",
+                "charge_client": "10.00",
+                "date": (today - timedelta(days=30)).date().isoformat(),
+            },
+        ],
     }
 
 

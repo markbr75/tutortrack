@@ -19,6 +19,8 @@ export interface Field {
   options?: string[];
   maps_to?: string;
   show_if?: { field: string; equals: unknown };
+  /** G6: the E29 consent type a ticked ``consent`` field records. */
+  consent_key?: string;
 }
 
 export interface Schema {
@@ -48,6 +50,8 @@ const STARTER: Schema = {
 
 const FIELD_TYPES = ["text", "textarea", "email", "phone", "number", "date", "select",
                      "checkbox", "consent", "postcode", "students"]; // prettier-ignore
+const CONSENT_KEYS = ["", "terms", "privacy-policy", "marketing-email", "marketing-sms",
+                      "photo-video", "lesson-recording"]; // prettier-ignore
 const MAPPINGS = ["", "contact.first_name", "contact.last_name", "contact.email", "contact.phone",
                   "client.postcode", "students", "enquiry.notes", "enquiry.subjects",
                   "enquiry.how_heard"]; // prettier-ignore
@@ -224,6 +228,22 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
                   ))}
                 </select>
               </label>
+              {f.type === "consent" ? (
+                <label className="flex flex-col gap-1">
+                  <span className="font-medium">{t("gapG6.consentKey")}</span>
+                  <select
+                    className="h-10 rounded-md border border-border bg-background px-2"
+                    value={f.consent_key ?? ""}
+                    onChange={(e) => update(s, i, { consent_key: e.target.value || undefined })}
+                  >
+                    {CONSENT_KEYS.map((k) => (
+                      <option key={k} value={k}>
+                        {t(`gapG6.consentKeys.${k || "default"}`)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
               <label className="flex items-center gap-1">
                 <input
                   type="checkbox"

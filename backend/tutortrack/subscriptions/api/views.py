@@ -316,6 +316,56 @@ class TopUpView(APIView):
         )
 
 
+IDEMPOTENCY_HEADER = OpenApiParameter(
+    "Idempotency-Key", str, location=OpenApiParameter.HEADER, required=False,
+    description="Repeat the same key to retry safely without buying twice.",
+)  # fmt: skip
+
+
+class AddonsView(APIView):
+    """Add-ons the organisation can buy in the app (G6, FR-04-1): custom domain,
+    white-label apps and priority support."""
+
+    permission_classes = perms({"GET": VIEW})
+
+    @extend_schema(responses=s.AddonSerializer(many=True))
+    def get(self, request: Request) -> Response:
+        from .. import addons
+
+        return Response(s.AddonSerializer(addons.catalogue(services.current()), many=True).data)
+
+
+class AddonView(APIView):
+    """Buy (``POST``) or stop (``DELETE``) an add-on: an extra item on the TutorTrack
+    subscription, prorated, that grants the add-on's feature while active."""
+
+    permission_classes = perms({"POST": MANAGE, "DELETE": MANAGE})
+
+    def _row(self, key: str) -> dict[str, Any]:
+        from .. import addons
+
+        found = next((a for a in addons.catalogue(services.current()) if a["key"] == key), None)
+        if found is None:
+            raise NotFound()
+        return found
+
+    @extend_schema(
+        request=None, responses={201: s.AddonSerializer}, parameters=[IDEMPOTENCY_HEADER]
+    )
+    def post(self, request: Request, key: str) -> Response:
+        from .. import addons
+
+        addons.purchase(key, user=request.user)
+        return Response(s.AddonSerializer(self._row(key)).data, status=201)
+
+    @extend_schema(request=None, responses=s.AddonSerializer)
+    def delete(self, request: Request, key: str) -> Response:
+        from .. import addons
+
+        addons.cancel(key, user=request.user)
+        return Response(s.AddonSerializer(self._row(key)).data)
+
+
 class EntitlementsView(APIView):
     """What the organisation's plan includes, for ``useEntitlement()`` (FR-04-2)."""
 

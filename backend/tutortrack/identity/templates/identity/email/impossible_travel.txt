@@ -1,0 +1,8 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with name=user.get_short_name %}Hi {{ name }},{% endblocktranslate %}
+
+{% blocktranslate %}Your TutorTrack account was just used to sign in from {{ country }}, shortly after a sign-in from {{ previous_country }}. Nobody can travel that fast, so one of these sign-ins may not have been you.{% endblocktranslate %}
+
+{% blocktranslate %}IP address: {{ ip }}{% endblocktranslate %}
+
+{% translate "If you use a VPN or were travelling, there's nothing to do. If not, change your password now, turn on two-step verification and sign out of all devices from your account settings." %}
+{% endautoescape %}

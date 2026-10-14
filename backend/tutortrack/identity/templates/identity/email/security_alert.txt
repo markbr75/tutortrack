@@ -1,6 +1,6 @@
 {% load i18n %}{% autoescape off %}{% translate "We noticed unusual activity in your organisation:" %}
 
-{% if kind == "mass_export" %}{% blocktranslate %}{{ who }} exported data many times in a short period ({{ detail }}).{% endblocktranslate %}{% else %}{{ kind }}: {{ detail }} ({{ who }}){% endif %}
+{% if kind == "mass_export" %}{% blocktranslate %}{{ who }} exported data many times in a short period ({{ detail }}).{% endblocktranslate %}{% elif kind == "impossible_travel" %}{% blocktranslate %}{{ who }} signed in from two countries too close together to travel between ({{ detail }}). Their password may be known to someone else.{% endblocktranslate %}{% else %}{{ kind }}: {{ detail }} ({{ who }}){% endif %}
 
 {% translate "If this was expected, there's nothing to do. Otherwise review the audit log and the person's access in Team settings." %}
 {% endautoescape %}

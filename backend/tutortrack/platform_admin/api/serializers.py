@@ -34,6 +34,15 @@ class TenantRowSerializer(serializers.Serializer):
     last_activity = serializers.DateTimeField(allow_null=True)
     members = serializers.IntegerField(source="member_count")
     mrr = serializers.SerializerMethodField()
+    snapshot_mrr = serializers.SerializerMethodField(
+        help_text="MRR from the latest nightly snapshot (incl. revenue share)."
+    )
+
+    @extend_schema_field(MoneyOut(allow_null=True))
+    def get_snapshot_mrr(self, obj: Any) -> dict[str, str] | None:
+        if getattr(obj, "latest_mrr", None) is None or not obj.latest_mrr_currency:
+            return None
+        return {"amount": str(obj.latest_mrr), "currency": obj.latest_mrr_currency}
 
     @extend_schema_field(MoneyOut(allow_null=True))
     def get_mrr(self, obj: Any) -> dict[str, str] | None:
@@ -112,9 +121,21 @@ class TenantOrganisationSerializer(serializers.Serializer):
     base_url = serializers.CharField()
 
 
+class TenantIntegrationSerializer(serializers.Serializer):
+    provider = serializers.CharField()
+    level = serializers.CharField()
+    status = serializers.CharField()
+    connections = serializers.IntegerField()
+    last_sync_at = serializers.DateTimeField(allow_null=True)
+    error_at = serializers.DateTimeField(allow_null=True)
+    failed_syncs = serializers.IntegerField()
+
+
 class TenantDetailSerializer(serializers.Serializer):
     organisation = TenantOrganisationSerializer()
     subscription = TenantSubscriptionSerializer(allow_null=True)
+    integrations = TenantIntegrationSerializer(many=True)
+    addons = serializers.ListField(child=serializers.CharField())
     overrides = OverrideSerializer(many=True)
     usage = serializers.DictField(child=serializers.IntegerField())
     members = MemberSerializer(many=True)
@@ -531,3 +552,106 @@ class PlatformSupportDetailSerializer(PlatformSupportRowSerializer):
 
 class PlatformSupportReplySerializer(serializers.Serializer):
     body = serializers.CharField(max_length=5000)
+
+
+# --- G6: notify customers -----------------------------------------------------------------------
+
+
+class NoticeTemplateSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    title = serializers.CharField()
+    kind = serializers.CharField()
+    subject = serializers.CharField()
+    body = serializers.CharField()
+    variables = serializers.ListField(child=serializers.CharField())
+
+
+class CustomerNoticeSerializer(serializers.Serializer):
+    id = serializers.UUIDField(read_only=True)
+    kind = serializers.CharField(read_only=True)
+    template = serializers.CharField()
+    subject = serializers.CharField(required=False, allow_blank=True, max_length=300)
+    body = serializers.CharField(required=False, allow_blank=True, max_length=20000)
+    variables = serializers.DictField(child=serializers.CharField(allow_blank=True), required=False)
+    organisation_ids = serializers.ListField(
+        child=serializers.UUIDField(), required=False, help_text="Empty: every open organisation."
+    )
+    status = serializers.CharField(read_only=True)
+    reason = serializers.CharField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    sent_at = serializers.DateTimeField(read_only=True, allow_null=True)
+    organisations_count = serializers.IntegerField(read_only=True)
+    recipients_count = serializers.IntegerField(read_only=True)
+
+
+class CustomerNoticePreviewSerializer(serializers.Serializer):
+    subject = serializers.CharField()
+    body = serializers.CharField()
+    organisations = serializers.IntegerField()
+
+
+# --- G6: revenue share ------------------------------------------------------------------------
+
+
+class RevenueShareRowSerializer(serializers.Serializer):
+    organisation_id = serializers.CharField()
+    organisation_name = serializers.CharField()
+    currency = serializers.CharField()
+    percent = serializers.CharField()
+    processed = serializers.CharField()
+    reported = serializers.CharField()
+    difference = serializers.CharField()
+    expected_fee = serializers.CharField()
+    reported_fee = serializers.CharField()
+    unreported_days = serializers.ListField(child=serializers.CharField())
+    changed_days = serializers.ListField(child=serializers.CharField())
+    ok = serializers.BooleanField()
+
+
+class RevenueShareTotalsSerializer(serializers.Serializer):
+    processed = serializers.CharField()
+    reported = serializers.CharField()
+    expected_fee = serializers.CharField()
+
+
+class RevenueShareReportSerializer(serializers.Serializer):
+    month = serializers.CharField()
+    rows = RevenueShareRowSerializer(many=True)
+    totals = serializers.DictField(child=RevenueShareTotalsSerializer())
+
+
+class RevenueShareFixSerializer(serializers.Serializer):
+    organisation_id = serializers.UUIDField()
+    month = serializers.RegexField(r"^\d{4}-\d{2}$")
+
+
+# --- G6: failed and stuck workflows -----------------------------------------------------------
+
+
+class PlatformWorkflowSerializer(serializers.Serializer):
+    organisation_id = serializers.UUIDField()
+    organisation_name = serializers.CharField(source="organisation.name")
+    workflow_id = serializers.CharField()
+    run_id = serializers.CharField()
+    workflow_type = serializers.CharField()
+    process = serializers.CharField()
+    subject_type = serializers.CharField()
+    subject_id = serializers.CharField()
+    status = serializers.CharField()
+    current_step = serializers.CharField()
+    started_at = serializers.DateTimeField()
+    updated_at = serializers.DateTimeField()
+    closed_at = serializers.DateTimeField(allow_null=True)
+    last_error = serializers.CharField()
+    temporal_url = serializers.SerializerMethodField()
+
+    @extend_schema_field(serializers.CharField())
+    def get_temporal_url(self, obj: Any) -> str:
+        from ..workflow_console import ui_url
+
+        return ui_url(obj.workflow_id, obj.run_id)
+
+
+class WorkflowActionSerializer(serializers.Serializer):
+    action = serializers.ChoiceField(choices=["terminate", "reset", "retry"])
+    reason = serializers.CharField(max_length=500)

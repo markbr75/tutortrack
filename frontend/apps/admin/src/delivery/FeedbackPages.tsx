@@ -260,6 +260,7 @@ export function PublicFeedbackPage({ token }: { token: string }) {
   const queryClient = useQueryClient();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [stopAsking, setStopAsking] = useState(false);
   const item = useQuery({
     queryKey: ["public-feedback", token],
     queryFn: async () =>
@@ -273,7 +274,7 @@ export function PublicFeedbackPage({ token }: { token: string }) {
       unwrap(
         await api.POST("/api/v1/public/lesson-feedback/{token}", {
           params: { path: { token } },
-          body: { rating, comment },
+          body: { rating, comment, stop_asking: stopAsking },
         }),
       ),
     onSuccess: (data) => queryClient.setQueryData(["public-feedback", token], data),
@@ -348,6 +349,15 @@ export function PublicFeedbackPage({ token }: { token: string }) {
             onChange={(e) => setComment(e.target.value)}
           />
         </div>
+        <label className="flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="mt-1 size-4"
+            checked={stopAsking}
+            onChange={(e) => setStopAsking(e.target.checked)}
+          />
+          <span>{t("gapG6.stopAskingFeedback")}</span>
+        </label>
         {!rating && answer.isIdle ? (
           <p className="text-sm text-muted-foreground">{t("lessonFeedback.chooseStars")}</p>
         ) : null}

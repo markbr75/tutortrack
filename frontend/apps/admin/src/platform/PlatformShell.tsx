@@ -15,6 +15,10 @@ const NAV = [
   { to: "/platform/metrics", key: "saasMetrics.nav" },
   { to: "/platform/feedback", key: "productInsights.nav" },
   { to: "/platform/support", key: "supportInbox.nav" },
+  { to: "/platform/plans", key: "platformPlans.nav" },
+  { to: "/platform/revenue-share", key: "revenueShare.nav" },
+  { to: "/platform/workflows", key: "workflowConsole.nav" },
+  { to: "/platform/customer-notices", key: "customerNotices.nav" },
 ] as const;
 
 /** The TutorTrack staff console (E30): platform staff with 2FA, from allowed networks. */
@@ -52,7 +56,7 @@ export function PlatformShell() {
         className="border-b border-border p-4 md:w-56 md:border-b-0 md:border-r"
       >
         <p className="mb-3 font-semibold">{t("platform.title")}</p>
-        <ul className="flex gap-2 md:flex-col">
+        <ul className="flex flex-wrap gap-2 md:flex-col">
           {NAV.map((item) => (
             <li key={item.to}>
               <Link

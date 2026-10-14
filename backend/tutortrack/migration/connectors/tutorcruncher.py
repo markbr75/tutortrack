@@ -8,8 +8,10 @@ the pulling activity backs off on Temporal.
 Their model → ours (docs/01-competitive-analysis.md): clients → clients and contacts,
 recipients → students, contractors → tutors, services → jobs (rates on the job, one
 catalogue service), appointments → lessons, invoices → historic invoices, client balances
-→ opening balances, labels → tags. Agents, reviews, proformas and ad hoc charges are counted
-in the source totals but have no import yet (E25/E10 Phase 2).
+→ opening balances, labels → tags. G6: agents → E25 affiliates (with the clients they
+introduced), reviews → E25 reviews, unpaid proformas → E10 payment requests and ad hoc
+charges dated on or after the cutover → E10 charges (earlier ones are in the invoices and the
+opening balance).
 """
 
 from __future__ import annotations
@@ -36,8 +38,12 @@ ENTITIES = (
     "invoices",
     "opening_balances",
     "tags",
+    "charges",
+    "payment_requests",
+    "affiliates",
+    "reviews",
 )
-UNSUPPORTED = ("agents", "reviews", "proformas", "adhoccharges")
+UNSUPPORTED: tuple[str, ...] = ()
 CLIENT_STATUS = {"live": "active", "prospect": "prospect", "dormant": "dormant"}
 TUTOR_STATUS = {
     "approved": "active",
@@ -284,6 +290,67 @@ class TutorCruncherSource:
                     }
         elif entity == "tags":
             return
+        elif entity == "affiliates":
+            introduced: dict[Any, list[str]] = {}
+            for c in self._details(credentials, "clients"):
+                agent = c.get("agent")
+                agent_id = agent.get("id") if isinstance(agent, dict) else agent
+                if agent_id:
+                    introduced.setdefault(agent_id, []).append(str(c.get("id")))
+            for a in self._details(credentials, "agents"):
+                user = a.get("user") or {}
+                name = f"{text(user.get('first_name'))} {text(user.get('last_name'))}".strip()
+                yield {
+                    "external_id": a.get("id"),
+                    "name": name or text(a.get("name")),
+                    "email": user.get("email") or "",
+                    "phone": user.get("mobile") or user.get("phone") or "",
+                    "commission_percent": _money(a.get("commission_rate")),
+                    "client_external_ids": joined(introduced.get(a.get("id"), [])),
+                }
+        elif entity == "reviews":
+            for r in self.api.list(credentials, "reviews"):
+                client = r.get("client")
+                contractor = r.get("contractor")
+                yield {
+                    "external_id": r.get("id"),
+                    "client_external_id": client.get("id") if isinstance(client, dict) else client,
+                    "tutor_external_id": (
+                        contractor.get("id") if isinstance(contractor, dict) else contractor
+                    ),
+                    "rating": text(r.get("rating") or r.get("score")),
+                    "text": text(r.get("review") or r.get("comment") or r.get("text")),
+                    "reviewer_name": text(r.get("reviewer_name")),
+                    "published": "yes" if r.get("public") or r.get("published") else "no",
+                    "date": _day(r.get("date") or r.get("dt_created")),
+                }
+        elif entity == "payment_requests":
+            for p in self.api.list(credentials, "proformas"):
+                status = text(p.get("status")).lower()
+                client = p.get("client")
+                yield {
+                    "external_id": p.get("id"),
+                    "client_external_id": client.get("id") if isinstance(client, dict) else client,
+                    "amount": _money(p.get("gross") or p.get("amount")),
+                    "description": text(p.get("display_id") or p.get("description")),
+                    "due_date": _day(p.get("date_due")),
+                    "status": "paid"
+                    if status == "paid"
+                    else ("void" if status == "void" else "unpaid"),
+                }
+        elif entity == "charges":
+            for c in self.api.list(credentials, "adhoccharges"):
+                day = _day(c.get("date") or c.get("dt"))
+                if not day or day < cutover.isoformat():
+                    continue  # in the invoice history and the opening balance
+                client = c.get("client") or c.get("paying_client")
+                yield {
+                    "external_id": c.get("id"),
+                    "client_external_id": client.get("id") if isinstance(client, dict) else client,
+                    "description": text(c.get("description") or c.get("name")),
+                    "amount": _money(c.get("charge_client") or c.get("amount")),
+                    "date": day,
+                }
 
     def totals(self, credentials: Credentials, *, cutover: date) -> dict[str, Any]:
         def count(resource: str) -> int:
@@ -308,6 +375,8 @@ class TutorCruncherSource:
             "invoices": count("invoices"),
             "balances_sum": str(balance),
             "future_lessons": future,
+            "affiliates": count("agents"),
+            "reviews": count("reviews"),
         }
         for resource in UNSUPPORTED:
             try:

@@ -1,6 +1,6 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Spinner, TextField } from "@tutortrack/ui";
+import { SelectField, Spinner, TextField } from "@tutortrack/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -14,12 +14,25 @@ export function TenantsPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>("");
   const [plan, setPlan] = useState("");
+  const [mrrMin, setMrrMin] = useState("");
+  const [mrrMax, setMrrMax] = useState("");
+  const [sort, setSort] = useState("");
   const tenants = useQuery({
-    queryKey: ["platform", "tenants", search, status, plan],
+    queryKey: ["platform", "tenants", search, status, plan, mrrMin, mrrMax, sort],
     queryFn: async () =>
       unwrap(
         await api.GET("/api/v1/platform/tenants", {
-          params: { query: { search, status, plan, page_size: 100 } },
+          params: {
+            query: {
+              search,
+              status,
+              plan,
+              page_size: 100,
+              mrr_min: mrrMin || undefined,
+              mrr_max: mrrMax || undefined,
+              ordering: sort || undefined,
+            },
+          },
         }),
       ),
   });
@@ -51,6 +64,28 @@ export function TenantsPage() {
           value={plan}
           onChange={(e) => setPlan(e.target.value)}
         />
+        <TextField
+          label={t("gapG6.mrrMin")}
+          inputMode="decimal"
+          value={mrrMin}
+          onChange={(e) => setMrrMin(e.target.value)}
+        />
+        <TextField
+          label={t("gapG6.mrrMax")}
+          inputMode="decimal"
+          value={mrrMax}
+          onChange={(e) => setMrrMax(e.target.value)}
+        />
+        <SelectField
+          label={t("gapG6.sort")}
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+          options={[
+            { value: "", label: t("gapG6.sortNewest") },
+            { value: "-latest_mrr", label: t("gapG6.sortMrr") },
+            { value: "name", label: t("gapG6.sortName") },
+          ]}
+        />
       </div>
       {tenants.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
       <div className="overflow-x-auto">
@@ -81,7 +116,13 @@ export function TenantsPage() {
                 </td>
                 <td>{t(`platform.orgStatus.${row.status}`)}</td>
                 <td>{row.plan ?? "–"}</td>
-                <td>{row.mrr ? formatMoney(row.mrr) : "–"}</td>
+                <td>
+                  {row.snapshot_mrr
+                    ? formatMoney(row.snapshot_mrr)
+                    : row.mrr
+                      ? formatMoney(row.mrr)
+                      : "–"}
+                </td>
                 <td>{row.members}</td>
                 <td>{row.last_activity ? formatDate(row.last_activity) : "–"}</td>
                 <td>{formatDate(row.created_at)}</td>

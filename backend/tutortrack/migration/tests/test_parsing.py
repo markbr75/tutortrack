@@ -172,6 +172,10 @@ def test_every_importer_describes_itself():
         "enquiries",
         "tags",
         "notes",
+        "affiliates",
+        "reviews",
+        "charges",
+        "payment_requests",
     }
     for importer in base.all_importers():
         info = importer.describe()

@@ -34,8 +34,36 @@ PUBLIC_AGGREGATES = frozenset(
         "lesson_report", "lesson_series", "makeup_credit", "note", "online_meeting",
         "pay_item", "pay_run", "payment", "payment_request", "payout", "reference", "service",
         "student", "task", "trial_lesson", "tutor", "waitlist",
+        # G6: aggregates added after E27 (E09-E25 phases 2-3).
+        "affiliate_statement", "assessment", "background_check", "billing_plan", "booking",
+        "broadcast", "commission", "goal", "homework", "late_fee", "lesson_feedback", "loan",
+        "mandate", "message", "onboarding", "package", "payment_method", "progress_report",
+        "proposal", "public_profile", "quiz", "recording", "referral", "reschedule", "resource",
+        "review", "self_billing_statement", "shortlist", "term", "thread", "time_off",
+        "topic_mastery",
     }
 )  # fmt: skip
+
+# Never webhook types, whatever aggregate lists say: safeguarding, privacy casework, security,
+# the platform relationship and AI internals (docs/03-domain-model.md §5 notes).
+NEVER_AGGREGATES = frozenset(
+    {
+        "safeguarding", "lone_working", "data_request", "data_subject", "legal_hold",
+        "retention", "dpa", "consent", "setup_checklist", "survey", "support_conversation",
+        "push_subscription", "api_key", "oauth_app", "webhook_endpoint", "webhook_delivery",
+        "sandbox", "user", "impersonation", "membership", "role", "organisation",
+        "subscription", "credits", "automation", "ai_feature", "ai_proposal",
+    }
+)  # fmt: skip
+NEVER_EVENT_TYPES = frozenset({"thread.intent_classified"})
+# Ids-only events: only these fields of the event leave TutorTrack (and no record
+# representation is attached). Background-check results and safeguarding flags never do.
+IDS_ONLY: dict[str, frozenset[str]] = {
+    "background_check": frozenset({"tutor_id", "provider", "status"}),
+    "message": frozenset({"thread_id", "channel", "author_type"}),
+    "thread": frozenset({"assignee_id"}),
+    "recording": frozenset({"provider", "restricted"}),
+}
 
 TEST_EVENT = "webhook.test"
 
@@ -47,6 +75,53 @@ class EventType:
     subject_type: str
     description: str
     version: int
+    payload_fields: tuple[tuple[str, str], ...] = ()  # (name, JSON type) of ``event_data``
+
+
+_JSON_TYPES = {"str": "string", "int": "integer", "bool": "boolean", "float": "number"}
+
+
+def _json_type(annotation: Any) -> str:
+    text = str(getattr(annotation, "__name__", annotation)).replace("typing.", "")
+    nullable = "None" in text
+    base = text.split("|")[0].strip()
+    if base.startswith(("list", "tuple")):
+        kind = "array"
+    elif base.startswith("dict"):
+        kind = "object"
+    else:
+        kind = _JSON_TYPES.get(base, "string")
+    return f"{kind} | null" if nullable else kind
+
+
+def payload_fields(cls: type) -> tuple[tuple[str, str], ...]:
+    """The event's own fields (``event_data``) and their JSON types, minus redactions."""
+    import dataclasses
+
+    aggregate = cls.event_type.split(".", 1)[0]  # type: ignore[attr-defined]
+    allowed = IDS_ONLY.get(aggregate)
+    out = []
+    for f in dataclasses.fields(cls):
+        if f.name == "subject_id" or (allowed is not None and f.name not in allowed):
+            continue
+        out.append((f.name, _json_type(f.type)))
+    return tuple(out)
+
+
+def offered(event_type: str) -> bool:
+    aggregate = event_type.split(".", 1)[0]
+    return (
+        aggregate in PUBLIC_AGGREGATES
+        and aggregate not in NEVER_AGGREGATES
+        and event_type not in NEVER_EVENT_TYPES
+    )
+
+
+def redact(event_type: str, data: dict[str, Any]) -> dict[str, Any]:
+    allowed = IDS_ONLY.get(event_type.split(".", 1)[0])
+    if allowed is None:
+        return data
+    return {k: v for k, v in data.items() if k in allowed}
 
 
 def _description(cls: type) -> str:
@@ -60,8 +135,17 @@ def event_types() -> list[EventType]:
     out = []
     for key, cls in sorted(EVENT_TYPES.items()):
         aggregate = key.split(".", 1)[0]
-        if aggregate in PUBLIC_AGGREGATES:
-            out.append(EventType(key, aggregate, cls.subject_type, _description(cls), cls.version))
+        if offered(key):
+            out.append(
+                EventType(
+                    key,
+                    aggregate,
+                    cls.subject_type,
+                    _description(cls),
+                    cls.version,
+                    payload_fields(cls),
+                )
+            )
     return out
 
 
@@ -122,6 +206,10 @@ REPRESENTATIONS: dict[str, tuple[str, str, tuple[str, ...], tuple[str, ...]]] = 
                   ("group_class__course", "student", "client"), ()),
     "group_class": ("courses.models.GroupClass", "courses.api.serializers.GroupClassSerializer",
                     ("course", "term"), ("teachers__tutor",)),
+    # G6: resources that became public after E27.
+    "review": ("growth.models.Review", "growth.api.serializers.ReviewSerializer", (), ()),
+    "form_submission": ("leads.models.FormSubmission",
+                        "leads.api.serializers.FormSubmissionSerializer", ("form",), ()),
 }  # fmt: skip
 
 
@@ -161,7 +249,10 @@ def build_payload(
     event: EventEnvelope, *, api_version: str, user: Any, cache: dict[str, Any] | None = None
 ) -> dict[str, Any]:
     key = f"{event.subject.get('type')}:{event.subject.get('id')}:{getattr(user, 'pk', '')}"
-    if cache is not None and key in cache:
+    event_data = redact(event.type, dict(event.data))
+    if event.type.split(".", 1)[0] in IDS_ONLY:
+        data = None  # ids only: never the record itself
+    elif cache is not None and key in cache:
         data = cache[key]
     else:
         data = representation(str(event.subject.get("type")), str(event.subject.get("id")), user)
@@ -178,8 +269,8 @@ def build_payload(
             "branch_id": event.branch_id,
             "actor": event.actor,
             "subject": event.subject,
-            "data": data if data is not None else event.data,
-            "event_data": event.data,
+            "data": data if data is not None else event_data,
+            "event_data": event_data,
             "changes": event.changes,
         }
     )
@@ -219,6 +310,7 @@ def sample_payload(event_type: str, organisation_id: Any, api_version: str) -> d
             "version": cls.version,
             "subject": {"type": cls.subject_type, "id": str(uuid.UUID(int=0))},
             "data": {"id": str(uuid.UUID(int=0))},
+            "event_data": {name: None for name, _type in payload_fields(cls)},
         }
     )
     return body

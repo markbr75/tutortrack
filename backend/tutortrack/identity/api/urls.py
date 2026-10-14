@@ -1,8 +1,8 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
+from . import account_views, support_views, views
 from . import phase2_views as p2
-from . import support_views, views
 
 router = SimpleRouter(trailing_slash=False)
 router.register("me/sessions", views.SessionViewSet, basename="me-sessions")
@@ -48,6 +48,11 @@ urlpatterns = [
     path("me", views.MeView.as_view(), name="me"),
     path("me/password", views.PasswordChangeView.as_view(), name="me-password"),
     path("me/logins", views.MyLoginsView.as_view(), name="me-logins"),
+    path(
+        "me/account-deletion",
+        account_views.AccountDeletionView.as_view(),
+        name="me-account-deletion",
+    ),
     path("me/mfa/totp", views.TOTPSetupView.as_view(), name="me-mfa-totp"),
     path("me/mfa/totp/confirm", views.TOTPConfirmView.as_view(), name="me-mfa-totp-confirm"),
     path("me/mfa/disable", views.MFADisableView.as_view(), name="me-mfa-disable"),

@@ -260,3 +260,4 @@ class LoginEventSerializer(serializers.Serializer):
     reason = serializers.CharField()
     ip = serializers.IPAddressField(allow_null=True)
     user_agent = serializers.CharField()
+    country = serializers.CharField(help_text="ISO country code of the sign-in, when known.")

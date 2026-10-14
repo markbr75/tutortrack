@@ -75,20 +75,22 @@ Tick an item when it is built, and record the as-built details in the owning epi
 - [ ] Room utilisation per room; custom-field filters for students and tutors; tutor utilisation net of time off; scheduling custom reports (FR-26-2/4; E26:89-90, E26:114). *S each*
 
 ## Batch G6 — Public API, migration, privacy, platform, subscriptions and sites (E04, E24, E27–E30, E32)
-- [ ] **Consent ticked on public forms, enrolments, referrals and imports is written as E29 consent records** (FR-29-3; E29:106). *S–M*
-- [ ] Record acceptance of the platform Terms of Service at signup (FR-29-3; E29:108). *S*
-- [ ] Global account deletion; retention for login history; retention for dispatched outbox events (FR-03-9, FR-29-4/5; E29:135, E29:155-156). *M*
-- [ ] Platform "notify customers" tool for breach notices (FR-29-9; E29:145). *S*
-- [ ] Impossible-travel alerts from CDN country headers (GeoIP database optional) (FR-29-2; E29:104). *M*
-- [ ] Webhook catalogue offers the event types added after E27 (reviews, referrals, commission, proposals, shortlists, packages, bookings, broadcasts, threads, homework, lesson feedback…) (FR-27-3; E13:138, E25:116). *S*
-- [ ] Reviews and form submissions in the public API (FR-27-1; E27:84). *S*
-- [ ] Integrations marketplace shows live status for Xero, QBO, Google, Outlook, Zoom, Teams, Lessonspace and lists CalDAV, Meet, Mailchimp/Brevo, WhatsApp, Open Banking (FR-27-5; E27:134). *S*
-- [ ] TutorCruncher import of agents, reviews, proformas and ad hoc charges; Teachworks wage tiers → pay tiers (FR-28-3/5; E28:186-188). *M*
-- [ ] Console: plans and prices screen; integration status on tenant detail; MRR filter on the tenant list; support reply notifications by email/push (FR-30-1/5; E30:72, E30:86, E30:151). *S each*
-- [ ] Revenue-share MRR and reconciliation (FR-30-7; E30:137, E30:151). *M*
-- [ ] Console for failed or stuck workflows across tenants (terminate, reset, retry, Temporal UI links) (FR-32-10; E32:161, E32:174). *M*
-- [ ] In-app purchase of add-ons (custom domain, white-label, priority support) (FR-04-1; E04:93, E04:137). *M*
-- [ ] Blog/news pages in the website builder (FR-24-4). *M*
+- [x] **Consent ticked on public forms, enrolments, referrals and imports is written as E29 consent records** (FR-29-3; E29:106). *S–M*
+- [x] Record acceptance of the platform Terms of Service at signup (FR-29-3; E29:108). *S*
+- [x] Global account deletion; retention for login history; retention for dispatched outbox events (FR-03-9, FR-29-4/5; E29:135, E29:155-156). *M*
+- [x] Platform "notify customers" tool for breach notices (FR-29-9; E29:145). *S*
+- [x] Impossible-travel alerts from CDN country headers (GeoIP database optional) (FR-29-2; E29:104). *M*
+- [x] Webhook catalogue offers the event types added after E27 (reviews, referrals, commission, proposals, shortlists, packages, bookings, broadcasts, threads, homework, lesson feedback…) (FR-27-3; E13:138, E25:116). *S*
+- [x] Reviews and form submissions in the public API (FR-27-1; E27:84). *S*
+- [x] Integrations marketplace shows live status for Xero, QBO, Google, Outlook, Zoom, Teams, Lessonspace and lists CalDAV, Meet, Mailchimp/Brevo, WhatsApp, Open Banking (FR-27-5; E27:134). *S*
+- [x] TutorCruncher import of agents, reviews, proformas and ad hoc charges; Teachworks wage tiers → pay tiers (FR-28-3/5; E28:186-188). *M*
+- [x] Console: plans and prices screen; integration status on tenant detail; MRR filter on the tenant list; support reply notifications by email/push (FR-30-1/5; E30:72, E30:86, E30:151). *S each*
+- [x] Revenue-share MRR and reconciliation (FR-30-7; E30:137, E30:151). *M*
+- [x] Console for failed or stuck workflows across tenants (terminate, reset, retry, Temporal UI links) (FR-32-10; E32:161, E32:174). *M*
+- [x] In-app purchase of add-ons (custom domain, white-label, priority support) (FR-04-1; E04:93, E04:137). *M*
+- [x] Blog/news pages in the website builder (FR-24-4). *M*
+
+*G6 built 2026-10-14 (ADR 0034); as-built notes in E04, E24, E27, E28, E29, E30 and E32.*
 
 ## Needs real credentials, accounts or infrastructure (not code gaps)
 - AWS deploy: Terraform not applied or validated; RDS BYPASSRLS role check; regional workspaces and DNS; ClamAV in the stack (E01:161, E02:151, E29:157, E32:163).

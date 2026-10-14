@@ -159,8 +159,15 @@ class TeachworksSource:
                     "phone": text(e.get("mobile_phone") or e.get("home_phone")),
                     "status": _status(EMPLOYEE_STATUS, e.get("status"), "active"),
                     "pay_rate": _money(tier.get("wage") or e.get("wage")),
+                    "pay_tier": text(tier.get("name")),  # G6: an E06 pay tier
                 }
         elif entity == "services":
+            # G6: a wage tier's wage applies to every service (E06 tier pay rates).
+            tier_rates = joined(
+                f"{text(t.get('name'))}: {_money(t.get('wage'))}"
+                for t in self.api.list(credentials, "wage_tiers")
+                if text(t.get("name")) and _money(t.get("wage"))
+            )
             for s in self.api.list(credentials, "services"):
                 yield {
                     "external_id": s.get("id"),
@@ -168,6 +175,7 @@ class TeachworksSource:
                     "charge_rate": _money(s.get("cost") or s.get("cost_per_hour")),
                     "pay_rate": _money(s.get("wage") or s.get("wage_per_hour")),
                     "default_duration_minutes": text(s.get("duration")),
+                    "tier_pay_rates": tier_rates,
                 }
         elif entity == "lessons":
             for lesson in self.api.list(credentials, "lessons"):

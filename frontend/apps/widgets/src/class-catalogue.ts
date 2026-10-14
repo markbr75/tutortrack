@@ -159,6 +159,11 @@ export class TtClassCatalogue extends TtWidget {
           group_class: this.chosen.id,
           join_waitlist: this.chosen.full,
           accept_terms: data.get("accept_terms") === "on",
+          // G6 (FR-29-3): optional consents become E29 consent records.
+          consents: [
+            ...(data.get("photo_consent") === "on" ? ["photo-video"] : []),
+            ...(data.get("news_consent") === "on" ? ["marketing-email"] : []),
+          ],
           contact: {
             first_name: data.get("first_name"),
             last_name: data.get("last_name"),
@@ -294,6 +299,12 @@ export class TtClassCatalogue extends TtWidget {
               >`
           : nothing
       }
+      <label class="check"
+        ><input type="checkbox" name="photo_consent" />${t("classesPhotoConsent")}</label
+      >
+      <label class="check"
+        ><input type="checkbox" name="news_consent" />${t("classesNewsConsent")}</label
+      >
       ${this.message ? html`<p role="alert">${this.message}</p>` : nothing}
       <button type="submit" ?disabled=${this.busy}>
         ${c.full ? t("classesJoinWaitlist") : t("classesEnrol")}

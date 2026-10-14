@@ -110,6 +110,7 @@ def test_signup_on_the_wrong_stack_is_refused_with_the_right_address(monkeypatch
             "first_name": "Ana",
             "email": "ana@example.com",
             "password": "a-long-passphrase-123",
+            "accept_terms": True,
         },
         format="json",
     )

@@ -23,8 +23,10 @@ from .base import (
 from .common import (
     address_fields,
     address_from,
+    apply_consents,
     apply_tags,
     batch_target,
+    consent_fields,
     custom_values,
     ref,
     remember_household,
@@ -154,6 +156,12 @@ class ClientImporter(Importer):
             synonyms=("date of birth", "dob", "birthday"),
         ),
         FieldSpec("student_status", _l("Student status"), "choice", choices=STUDENT_STATUSES),
+        *consent_fields(
+            "consent_marketing_email",
+            "consent_marketing_sms",
+            "consent_data_processing",
+            "consent_photo_video",
+        ),
     ]
     example = {
         "external_id": "C-1001",
@@ -267,6 +275,7 @@ class ClientImporter(Importer):
         else:
             update_tracked(contact, contact_fields, people.update_contact, out.previous)
         out.created += apply_tags("people.client", client, values.get("tags"))
+        student = None
         if values.get("student_first_name"):
             exists = Student.objects.filter(
                 client=client,
@@ -288,6 +297,9 @@ class ClientImporter(Importer):
                     },
                 )
                 out.created.append(ref(student))
+        out.created += apply_consents(
+            ctx, values, {"people.contact": [contact], "people.student": [student]}
+        )
         return out
 
 
@@ -396,6 +408,7 @@ class StudentImporter(Importer):
             synonyms=("parent phone", "guardian phone", "phone", "mobile"),
         ),
         FieldSpec("tags", _l("Tags"), "list", synonyms=("labels", "tags")),
+        *consent_fields("consent_photo_video", "consent_lesson_recording"),
     ]
     example = {
         "external_id": "S-501",
@@ -511,6 +524,7 @@ class StudentImporter(Importer):
                 people.change_student_status(existing, values["status"])
             out.target_id = str(existing.pk)
             out.created += apply_tags("people.student", existing, values.get("tags"))
+            out.created += apply_consents(ctx, values, {"people.student": [existing]})
             return out
         client = batch_target(ctx, values.get("_household", ""), before=ctx.row_number)
         client = client or self._client(values, ctx)
@@ -561,6 +575,7 @@ class StudentImporter(Importer):
         if values.get("external_id"):
             out.created.append(refs.remember(ctx, "people.student", values["external_id"], student))
         out.created += apply_tags("people.student", student, values.get("tags"))
+        out.created += apply_consents(ctx, values, {"people.student": [student]})
         out.target_id = str(student.pk)
         return out
 
@@ -640,6 +655,12 @@ class TutorImporter(Importer):
         FieldSpec("date_of_birth", _l("Date of birth"), "date", synonyms=("dob",)),
         *address_fields(),
         FieldSpec("tags", _l("Tags"), "list", synonyms=("labels", "tags")),
+        FieldSpec(
+            "pay_tier",
+            _l("Pay tier"),
+            synonyms=("pay tier", "wage tier", "tier", "pay band"),
+            help=_l("Created if new; the tutor is put on it from the cutover date (E06)."),
+        ),
     ]
     example = {
         "external_id": "T-77",
@@ -725,6 +746,7 @@ class TutorImporter(Importer):
                 people.change_tutor_status(existing, values["status"])
             self._subjects(existing, values)
             out.created += apply_tags("people.tutor", existing, values.get("tags"))
+            out.created += self._tier(existing, values, ctx)
             return out
         tutor = people.create_tutor(
             email=values["email"],
@@ -742,4 +764,22 @@ class TutorImporter(Importer):
         if values.get("external_id"):
             out.created.append(refs.remember(ctx, "people.tutor", values["external_id"], tutor))
         out.created += apply_tags("people.tutor", tutor, values.get("tags"))
+        out.created += self._tier(tutor, values, ctx)
         return out
+
+    def _tier(self, tutor: Any, values: dict[str, Any], ctx: Context) -> list[dict[str, Any]]:
+        """G6: the old system's wage tier becomes an E06 pay tier the tutor is on."""
+        name = str(values.get("pay_tier") or "").strip()[:100]
+        if not name:
+            return []
+        from tutortrack.catalogue import services as catalogue
+        from tutortrack.catalogue.models import PayTier
+
+        created = []
+        tier = PayTier.objects.filter(name__iexact=name).first()
+        if tier is None:
+            tier = catalogue.save_pay_tier(None, name=name)
+            created.append({"type": "catalogue.paytier", "id": str(tier.pk)})
+        assignment = catalogue.assign_tier(tutor, tier, effective_from=ctx.cutover)
+        created.append({"type": "catalogue.tutorpaytierassignment", "id": str(assignment.pk)})
+        return created

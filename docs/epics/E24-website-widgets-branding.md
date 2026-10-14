@@ -124,3 +124,17 @@ App `tutortrack.sites` (as `docs/02-architecture.md` names it). ADR 0019 records
 
 The portal gets full runtime branding and a public-profile editor on the tutor profile page.
 
+## Gap backlog (as built 2026-10-14)
+
+Batch G6 of `docs/05-gap-backlog.md`; design in ADR 0034.
+
+
+- **Blog and news (FR-24-4):** `BlogPost` (RLS) with title, address, summary, plain-text body
+  (paragraphs, escaped), cover image, author, SEO title/description and draft/published (a
+  future `published_at` schedules it). API `/api/v1/sites/posts` (+ `publish`, `unpublish`;
+  `sites.site.manage` / `sites.site.publish`); event `blog_post.published`. The site serves
+  `/blog` (10 per page), `/blog/<slug>` (`og:type=article`, `BlogPosting` JSON-LD, canonical)
+  and `/blog/rss.xml` (RSS 2.0); pages link the feed, published posts join `sitemap.xml` and
+  their cover images become public assets. New block `blog_list` ("Latest blog posts"); `blog`
+  is a reserved page address. Admin: Website → Blog tab. Deviation: no versions for posts
+  (publishing is a status) and no rich-text editor.

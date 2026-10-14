@@ -2076,6 +2076,7 @@ def public_enrol(
     student: dict[str, Any],
     accept_terms: bool,
     payment: str | None = None,
+    consents: list[str] | None = None,
 ) -> tuple[Enrolment, str]:
     """Enrol from the website catalogue (FR-20-8): eligibility is checked before a new
     family is created; the place is then taken under the class lock and, when payment is
@@ -2091,7 +2092,7 @@ def public_enrol(
     )
     if problems:
         raise NotEligible(problems[0], extra={"code": "not_eligible", "problems": problems})
-    _client, _contact, created = people.quick_add_family(
+    _client, person, created = people.quick_add_family(
         contact={
             "first_name": contact.get("first_name", ""),
             "last_name": contact.get("last_name", ""),
@@ -2128,7 +2129,38 @@ def public_enrol(
         if k in ("first_name", "last_name", "email", "phone")
     }
     enrolment.save(update_fields=["token_hash", "contact", "updated_at"])
+    capture_public_consent(
+        group_class, person, created, accept_terms=accept_terms, consents=consents
+    )
     return enrolment, token
+
+
+def capture_public_consent(
+    group_class: GroupClass,
+    contact: Any,
+    students: list[Any],
+    *,
+    accept_terms: bool,
+    consents: list[str] | None = None,
+) -> None:
+    """G6 (FR-29-3): the enrolment terms and any consents ticked on the public enrolment
+    (or waitlist) form become E29 consent records: ``terms`` for the parent, and each other
+    key for whoever it applies to (photos and video for the child, given by the parent)."""
+    from tutortrack.privacy.capture import record_ticked
+
+    keys = (["terms"] if accept_terms else []) + list(consents or [])
+    if not keys or contact is None:
+        return
+    record_ticked(
+        people={
+            "people.contact": [contact.pk],
+            "people.student": [s.pk for s in students],
+        },
+        keys=keys,
+        method="form",
+        source=f"enrolment:{group_class.pk}",
+        given_by_name=contact.full_name,
+    )
 
 
 def enrolment_for_token(token: str) -> Enrolment:

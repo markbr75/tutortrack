@@ -83,6 +83,8 @@ const enGB = {
   classesYearGroup: "School year",
   classesTerms: "Terms",
   classesAccept: "I accept the terms",
+  classesPhotoConsent: "You may use photos and video of my child",
+  classesNewsConsent: "Send me news and offers by email",
   classesBack: "Back to classes",
   classesEnrolled: "{name} is enrolled. We've sent you the details.",
   classesWaitlisted: "You're on the waitlist (number {n}). We'll email you if a place comes up.",

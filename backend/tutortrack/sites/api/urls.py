@@ -11,6 +11,7 @@ router.register("widgets", v.WidgetViewSet, basename="widgets")
 router.register("testimonials", v.TestimonialViewSet, basename="testimonials")
 router.register("public-profiles", v.PublicProfileViewSet, basename="public-profiles")
 router.register("sites/pages", v.SitePageViewSet, basename="site-pages")
+router.register("sites/posts", v.BlogPostViewSet, basename="site-posts")
 router.register("sites", v.SiteViewSet, basename="sites")
 
 urlpatterns = [

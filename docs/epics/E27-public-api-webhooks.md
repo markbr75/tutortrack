@@ -149,3 +149,31 @@ Open the platform to tenants and partners: a documented, versioned REST API (the
     - OAuth apps and connected apps;
     - sandboxes.
   - Other pages: `/developer/docs`, `/settings/marketplace` and `/oauth/authorize`.
+
+## Gap backlog (as built 2026-10-14)
+
+Batch G6 of `docs/05-gap-backlog.md`; design in ADR 0034.
+
+
+- **Webhook catalogue (FR-27-3; E13:138, E25:116):** the aggregates added after E27 are offered
+  (reviews, referrals, commission, affiliate statements, proposals, shortlists, packages,
+  bookings, broadcasts, threads, messages, homework, lesson feedback, recordings, background
+  checks, reschedules, time off, learning records, terms, billing plans, late fees, mandates,
+  payment methods, onboarding, public profiles, self-billing statements). Each event type now
+  lists `payload_fields` (name, JSON type) and samples show them. `catalogue.NEVER_AGGREGATES`
+  can never be offered (safeguarding, privacy casework, consent, security, platform
+  relationship, AI internals; `thread.intent_classified`), and `catalogue.IDS_ONLY` events
+  (background checks, inbox messages, threads, recordings) carry only listed fields and no
+  record representation: background-check results, safeguarding flags, message text and
+  recording links never leave. API changelog entry added.
+- **Reviews and form submissions (FR-27-1; E27:84):** new scope `reviews` (read/write) makes
+  `ReviewViewSet` public; `GET /api/v1/form-submissions` (read-only, `enquiries` scope,
+  `?form`, `?spam`, `?created_after`; never IP or browser) — people who see only some
+  enquiries see only the submissions behind them. Both have isolation tests; webhook payloads
+  for `review` and `form_submission` subjects use these serializers.
+- **Marketplace live status (FR-27-5; E27:134):** native entries for Xero, QuickBooks, Sage,
+  FreeAgent, Xero Payroll, Wise, Google Calendar, Outlook, CalDAV, Zoom, Google Meet, Teams,
+  Lessonspace, WhatsApp, Mailchimp, Brevo, Open Banking, uCheck and Checkr report
+  `connected` / `needs_attention` / `available` from `IntegrationConnection` (and WhatsApp
+  numbers), with a `detail` line ("3 people connected"). New categories payroll, marketing,
+  banking and screening.

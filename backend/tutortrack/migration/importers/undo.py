@@ -33,6 +33,12 @@ MODELS = {
     "payments.payment": "payments.Payment",
     "crm.note": "crm.Note",
     "leads.enquiry": "leads.Enquiry",
+    "growth.affiliate": "growth.Affiliate",
+    "growth.commissionrule": "growth.CommissionRule",
+    "growth.affiliatereferral": "growth.AffiliateReferral",
+    "growth.review": "growth.Review",
+    "billing.charge": "billing.Charge",
+    "billing.paymentrequest": "billing.PaymentRequest",
 }
 
 
@@ -60,12 +66,19 @@ def _discard(kind: str, obj: Any) -> Any:
     from tutortrack.billing import services as billing
     from tutortrack.catalogue import services as catalogue
     from tutortrack.crm import services as crm
+    from tutortrack.growth import services as growth
     from tutortrack.jobs import services as jobs
     from tutortrack.leads import services as leads
     from tutortrack.people import services as people
     from tutortrack.scheduling import services as scheduling
 
     handlers: dict[str, Callable[[Any], Any]] = {
+        "growth.affiliate": growth.discard_imported,
+        "growth.commissionrule": growth.discard_imported,
+        "growth.affiliatereferral": growth.discard_imported,
+        "growth.review": growth.discard_imported,
+        "billing.charge": billing.discard_imported_charge,
+        "billing.paymentrequest": billing.discard_imported_payment_request,
         "people.client": people.discard_imported,
         "people.contact": people.discard_imported,
         "people.student": people.discard_imported,
@@ -90,6 +103,24 @@ def _undo_ref(item: dict[str, Any], ctx: Context) -> bool:
         from ..models import ExternalRef
 
         ExternalRef.objects.filter(pk=item["id"]).delete()
+        return True
+    if kind == "privacy.consentrecord":
+        from tutortrack.privacy.services import discard_imported_consent
+
+        discard_imported_consent(item["id"])
+        return True
+    if kind in ("catalogue.paytier", "catalogue.tutorpaytierassignment"):
+        from tutortrack.catalogue import services as catalogue
+        from tutortrack.catalogue.models import PayTier, TutorPayTierAssignment
+
+        if kind == "catalogue.tutorpaytierassignment":
+            assignment = TutorPayTierAssignment.objects.filter(pk=item["id"]).first()
+            if assignment is not None:
+                catalogue.remove_tier_assignment(assignment)
+            return True
+        tier = PayTier.objects.filter(pk=item["id"]).first()
+        if tier is not None and not tier.assignments.exists():
+            catalogue.delete_imported_tier(tier)
         return True
     if kind == "crm.tag":
         from tutortrack.crm import services as crm

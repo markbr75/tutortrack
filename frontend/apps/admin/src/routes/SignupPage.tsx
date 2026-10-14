@@ -23,6 +23,7 @@ export function SignupPage() {
     business_type: "sole_trader",
   });
   const [token, setToken] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const config = useQuery({
     queryKey: ["signup-config"],
     queryFn: async () => unwrap(await api.GET("/api/v1/signup/config")),
@@ -48,6 +49,7 @@ export function SignupPage() {
             business_type: form.business_type as (typeof BUSINESS_TYPES)[number],
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             turnstile_token: token,
+            accept_terms: acceptTerms,
           },
         }),
       ),
@@ -135,8 +137,50 @@ export function SignupPage() {
             options={BUSINESS_TYPES.map((b) => ({ value: b, label: t(`businessTypes.${b}`) }))}
           />
         </div>
+        <div className="flex flex-col gap-1">
+          <label className="flex items-start gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="mt-1 size-4"
+              checked={acceptTerms}
+              onChange={(e) => setAcceptTerms(e.target.checked)}
+              aria-invalid={errors.accept_terms ? true : undefined}
+              aria-describedby={errors.accept_terms ? "accept-terms-error" : undefined}
+              required
+            />
+            <span>
+              {t("gapG6.acceptTermsBefore")}{" "}
+              <a
+                className="underline"
+                href={config.data?.terms_url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t("gapG6.termsLink")}
+              </a>{" "}
+              {t("gapG6.acceptTermsAnd")}{" "}
+              <a
+                className="underline"
+                href={config.data?.privacy_notice_url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t("gapG6.privacyLink")}
+              </a>
+            </span>
+          </label>
+          {errors.accept_terms ? (
+            <p id="accept-terms-error" role="alert" className="text-xs text-danger">
+              {errors.accept_terms}
+            </p>
+          ) : null}
+        </div>
         {siteKey ? <Turnstile siteKey={siteKey} onToken={setToken} /> : null}
-        <Button type="submit" loading={signup.isPending} disabled={!!siteKey && !token}>
+        <Button
+          type="submit"
+          loading={signup.isPending}
+          disabled={(!!siteKey && !token) || !acceptTerms}
+        >
           {t("signup.submit")}
         </Button>
       </form>

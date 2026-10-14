@@ -32,6 +32,7 @@ from ..models import (
     AssignmentRule,
     Enquiry,
     Form,
+    FormSubmission,
     Pipeline,
     PipelineStage,
     Proposal,
@@ -348,6 +349,47 @@ class FormViewSet(
 
     def get_tenant_queryset(self) -> Any:
         return Form.objects.all()
+
+
+class FormSubmissionViewSet(
+    TenantScopedViewMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    """Form submissions, newest first (G6, public API). ``?form=``, ``?spam=true`` and
+    ``?created_after=`` filter. People who see only some enquiries see only the
+    submissions behind those."""
+
+    model = FormSubmission
+    serializer_class = s.FormSubmissionSerializer
+    permission_classes = perms({"GET": "leads.enquiry.view"})
+
+    def get_tenant_queryset(self) -> Any:
+        from django.utils.dateparse import parse_datetime
+
+        from tutortrack.core.permissions import permission_scope
+
+        user = self.request.user
+        qs = FormSubmission.objects.select_related("form")
+        if permission_scope(user, "leads.enquiry.view") != "all":
+            visible = scope_queryset(user, Enquiry.objects.all(), "leads.enquiry.view")
+            ids = [str(pk) for pk in visible.values_list("pk", flat=True)]
+            qs = qs.filter(created_records__enquiry__in=ids)
+        q = self.request.query_params
+        qs = qs.filter(spam=q.get("spam") == "true")
+        if q.get("form"):
+            qs = qs.filter(form_id=q["form"])
+        if q.get("created_after") and parse_datetime(q["created_after"]):
+            qs = qs.filter(created_at__gte=parse_datetime(q["created_after"]))
+        return qs
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("form", OpenApiTypes.UUID),
+            OpenApiParameter("spam", OpenApiTypes.BOOL),
+            OpenApiParameter("created_after", OpenApiTypes.DATETIME),
+        ]
+    )
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
 
 
 def _organisation(request: Request | HttpRequest) -> Any:

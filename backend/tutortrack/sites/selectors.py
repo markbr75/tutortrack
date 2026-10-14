@@ -13,6 +13,7 @@ from typing import Any
 from django.db.models import Q, QuerySet
 
 from tutortrack.core.permissions import scope_queryset
+from tutortrack.core.time import now
 from tutortrack.tenancy.settings_service import get_setting
 
 from .models import (
@@ -274,6 +275,13 @@ def public_asset_ids(organisation: Any) -> set[str]:
     site = Site.objects.first()
     if site is not None and site.og_image_id:
         ids.add(str(site.og_image_id))
+    if site is not None:  # G6: published blog posts' cover images
+        ids.update(
+            str(v)
+            for v in live_posts(site)
+            .exclude(cover_image__isnull=True)
+            .values_list("cover_image_id", flat=True)
+        )
     for provider in _asset_providers:
         ids.update(str(v) for v in provider())
     return ids
@@ -287,3 +295,37 @@ def live_pages(site_obj: Site) -> QuerySet[SitePage]:
     return SitePage.objects.filter(site=site_obj, live_version__isnull=False).select_related(
         "live_version"
     )
+
+
+# --- blog (G6, FR-24-4) --------------------------------------------------------------------------
+
+
+def blog_posts(user: Any) -> QuerySet[Any]:
+    from .models import BlogPost
+
+    return scope_queryset(user, BlogPost.objects.select_related("site"), "sites.view")
+
+
+def live_posts(site_obj: Site) -> QuerySet[Any]:
+    from .models import BlogPost
+
+    return BlogPost.objects.filter(
+        site=site_obj, status=BlogPost.Status.PUBLISHED, published_at__lte=now()
+    ).order_by("-published_at")
+
+
+def post_card(post: Any, organisation: Any) -> dict[str, Any]:
+    from . import brand as brand_mod
+
+    return {
+        "title": post.title,
+        "href": f"/blog/{post.slug}",
+        "excerpt": post.excerpt or post.body[:200],
+        "published_at": post.published_at,
+        "author": post.author_name,
+        "image_url": (
+            brand_mod.asset_url(organisation, str(post.cover_image_id), absolute=False)
+            if post.cover_image_id
+            else ""
+        ),
+    }

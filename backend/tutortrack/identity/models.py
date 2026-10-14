@@ -254,6 +254,8 @@ class LoginEvent(models.Model):
     method = models.CharField(max_length=20)
     success = models.BooleanField()
     reason = models.CharField(max_length=50, blank=True, default="")
+    # ISO 3166-1 alpha-2 from the CDN header (or the optional GeoIP lookup); "" unknown (G6).
+    country = models.CharField(max_length=2, blank=True, default="")
     created_at = models.DateTimeField(default=dj_timezone.now, db_index=True)
 
     class Meta:
@@ -262,6 +264,29 @@ class LoginEvent(models.Model):
 
     def __str__(self) -> str:
         return f"{self.method} {'ok' if self.success else 'failed'} {self.email}"
+
+
+class AccountDeletion(models.Model):
+    """A person deleted their whole TutorTrack account (G6, FR-03-9). Kept as evidence of
+    what happened in each organisation; the login itself is anonymised, so the email is
+    kept only as a hash."""
+
+    id = models.UUIDField(primary_key=True, default=new_id, editable=False)
+    user = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    email_hash = models.CharField(max_length=64, db_index=True)
+    reason = models.CharField(max_length=500, blank=True, default="")
+    # [{"organisation_id", "name", "outcome": "erased" | "request_logged", "reference"}]
+    organisations = models.JSONField(default=list, blank=True)
+    requested_at = models.DateTimeField(default=dj_timezone.now)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-requested_at"]
+
+    def __str__(self) -> str:
+        return f"Account deletion {self.id}"
 
 
 class LoginToken(models.Model):

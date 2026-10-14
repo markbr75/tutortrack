@@ -69,6 +69,13 @@ class ServiceImporter(Importer):
             "max_students", _l("Maximum students"), "int", synonyms=("capacity", "max students")
         ),
         FieldSpec("description", _l("Description"), synonyms=("description", "notes")),
+        FieldSpec(
+            "tier_pay_rates",
+            _l("Pay rate per tier"),
+            "list",
+            synonyms=("tier rates", "wage tiers"),
+            help=_l("Tier: rate pairs, e.g. Associate: 20; Senior: 25 (E06 pay tiers)."),
+        ),
     ]
     example = {
         "name": "GCSE Maths 1:1",
@@ -144,6 +151,32 @@ class ServiceImporter(Importer):
             data["pay_rate"] = money_or_none(values["pay_rate"], currency)
         return data
 
+    def _tier_rates(self, service: Any, values: dict[str, Any], ctx: Context, out: Outcome) -> None:
+        """G6: ``Tier: rate; Tier: rate`` sets the service's pay rate per E06 pay tier
+        (Teachworks wage tiers). Unknown tiers are created."""
+        from tutortrack.catalogue import services as catalogue
+        from tutortrack.catalogue.models import PayTier
+
+        from .base import parse_decimal
+
+        for item in values.get("tier_pay_rates") or []:
+            name, _sep, amount = str(item).rpartition(":")
+            name = name.strip()[:100]
+            if not name:
+                continue
+            try:
+                rate = parse_decimal(amount)
+            except ValueError:
+                out.warnings.append(_("Tier rate not understood: %(item)s") % {"item": item})
+                continue
+            tier = PayTier.objects.filter(name__iexact=name).first()
+            if tier is None:
+                tier = catalogue.save_pay_tier(None, name=name)
+                out.created.append({"type": "catalogue.paytier", "id": str(tier.pk)})
+            catalogue.set_tier_rate(
+                service, tier, pay_rate=money_or_none(rate, str(service.currency))
+            )
+
     def apply(self, values: dict[str, Any], ctx: Context) -> Outcome:
         from tutortrack.catalogue import services as catalogue
 
@@ -156,12 +189,14 @@ class ServiceImporter(Importer):
             update_tracked(
                 existing, {"name": values["name"], **data}, catalogue.update_service, out.previous
             )
+            self._tier_rates(existing, values, ctx, out)
             return out
         currency = (values.get("currency") or ctx.currency).upper()
         data.setdefault("charge_rate", money_or_none(Decimal(0), currency))
         service = catalogue.create_service(name=values["name"], **data)
         out = Outcome(action="create", target_type="catalogue.service", target_id=str(service.pk))
         out.created.append(ref(service))
+        self._tier_rates(service, values, ctx, out)
         if values.get("external_id"):
             out.created.append(
                 refs.remember(ctx, "catalogue.service", values["external_id"], service)

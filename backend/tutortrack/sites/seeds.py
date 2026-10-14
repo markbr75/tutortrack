@@ -48,4 +48,14 @@ def website(ctx: SeedContext) -> None:
                 services.publish_page(page, admin)
         if not site.published:
             services.update_site(site, published=True)
-    ctx.log("    website: http://brightminds.site.localhost:8010/")
+        if not site.posts.exists():  # G6: a news post for /blog
+            post = services.create_post(
+                site,
+                title="Summer exam results",
+                excerpt="Our students' best results yet.",
+                body="Congratulations to everyone who sat exams this summer.\n\n"
+                "Enrolment for the new term is open now.",
+                author_name="Bright Minds team",
+            )
+            services.publish_post(post)
+    ctx.log("    website: http://brightminds.site.localhost:8010/ (blog: /blog)")

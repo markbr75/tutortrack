@@ -357,7 +357,12 @@ def submit_form(
         events.FormSubmitted(subject_id=submission.pk, form_id=str(form.pk), form_type=form.type)
     )
     if form.type == Form.Type.REGISTRATION and form.settings.get("create_active", True):
-        return _register(form, submission, mapped)
+        result = _register(form, submission, mapped)
+        records = result.get("records", {})
+        _capture_consent(
+            form, answers, contact_id=records.get("contact"), student_ids=records.get("students")
+        )
+        return result
     notes = "\n\n".join(
         p for p in (str(mapped.enquiry.get("notes", "")), _summary(mapped.extra)) if p
     )
@@ -380,7 +385,35 @@ def submit_form(
     FormSubmission.objects.filter(pk=submission.pk).update(
         created_records={"enquiry": str(enquiry.pk), "client": str(enquiry.client_id)}
     )
+    _capture_consent(
+        form,
+        answers,
+        contact_id=enquiry.contact_id,
+        student_ids=list(enquiry.students.values_list("pk", flat=True)),
+    )
     return {"submission": submission, "enquiry": enquiry, "pay_url": ""}
+
+
+def _capture_consent(
+    form: Form, answers: dict[str, Any], *, contact_id: Any, student_ids: Any
+) -> None:
+    """G6 (FR-29-3): ticked consent fields become E29 consent records for the contact (and,
+    for types that apply to students, the children), method ``form``."""
+    from tutortrack.privacy.capture import form_consent_keys, record_ticked
+
+    keys = form_consent_keys(form.schema, answers)
+    if not keys or not contact_id:
+        return
+    from tutortrack.people.models import Contact
+
+    contact = Contact.objects.filter(pk=contact_id).first()
+    record_ticked(
+        people={"people.contact": [contact_id], "people.student": list(student_ids or [])},
+        keys=keys,
+        method="form",
+        source=f"form:{form.slug}"[:120],
+        given_by_name=contact.full_name if contact else "",
+    )
 
 
 def _register(form: Form, submission: FormSubmission, mapped: forms.Mapped) -> dict[str, Any]:
@@ -424,14 +457,19 @@ def _register(form: Form, submission: FormSubmission, mapped: forms.Mapped) -> d
         pay_url = (
             f"{family.organisation.base_url}/pay/{request.pay_token}" if request.pay_token else ""
         )
-    FormSubmission.objects.filter(pk=submission.pk).update(
-        created_records={
-            "client": str(family.pk),
-            "contact": str(person.pk),
-            "students": [str(s.pk) for s in students],
-        }
-    )
-    return {"submission": submission, "enquiry": None, "pay_url": pay_url, "client": family}
+    records = {
+        "client": str(family.pk),
+        "contact": str(person.pk),
+        "students": [str(s.pk) for s in students],
+    }
+    FormSubmission.objects.filter(pk=submission.pk).update(created_records=records)
+    return {
+        "submission": submission,
+        "enquiry": None,
+        "pay_url": pay_url,
+        "client": family,
+        "records": records,
+    }
 
 
 @transaction.atomic

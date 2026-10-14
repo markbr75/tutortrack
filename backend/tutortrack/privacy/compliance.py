@@ -21,12 +21,17 @@ from tutortrack.core.time import now
 
 from . import notifications
 from .events import DPAAccepted
-from .models import DPAAcceptance, SubprocessorNotice
+from .models import DPAAcceptance, SubprocessorNotice, TermsAcceptance
 
 DPA_VERSION = "2026-10"
 DPA_EFFECTIVE = "2026-10-14"
 DPA_URL = "https://tutortrack.app/legal/dpa/2026-10"
 SUBPROCESSORS_VERSION = "2026-10-14.2"  # Phase 3 integrations (ADR 0032)
+# Platform Terms of Service and privacy notice that new owners accept at signup (G6).
+TERMS_VERSION = "2026-10"
+TERMS_URL = "https://tutortrack.app/legal/terms/2026-10"
+PRIVACY_NOTICE_VERSION = "2026-10"
+PRIVACY_NOTICE_URL = "https://tutortrack.app/legal/privacy/2026-10"
 
 
 @dataclass(frozen=True)
@@ -258,6 +263,40 @@ def accept_dpa(
     audit.record_create(acceptance)
     publish(DPAAccepted(subject_id=acceptance.pk, dpa_version=version))
     return acceptance
+
+
+# --- platform terms of service (G6, FR-29-3) ----------------------------------------------------
+
+
+def terms_info() -> dict[str, str]:
+    return {
+        "version": TERMS_VERSION,
+        "url": TERMS_URL,
+        "privacy_notice_version": PRIVACY_NOTICE_VERSION,
+        "privacy_notice_url": PRIVACY_NOTICE_URL,
+    }
+
+
+def record_terms_acceptance(
+    user: Any, *, organisation: Any = None, context: str = TermsAcceptance.Context.SIGNUP
+) -> TermsAcceptance:
+    """Evidence that ``user`` accepted the current platform terms (who, which version, when,
+    from where). Platform data, so no tenant audit entry; the row itself is the record."""
+    ctx = get_request_context()
+    return TermsAcceptance.objects.create(
+        user=user,
+        version=TERMS_VERSION,
+        privacy_notice_version=PRIVACY_NOTICE_VERSION,
+        context=context,
+        organisation=organisation,
+        accepted_at=now(),
+        ip=ctx.ip,
+        user_agent=(ctx.user_agent or "")[:500],
+    )
+
+
+def accepted_current_terms(user: Any) -> bool:
+    return TermsAcceptance.objects.filter(user=user, version=TERMS_VERSION).exists()
 
 
 # --- sub-processor change notices ---------------------------------------------------------------

@@ -641,6 +641,9 @@ TEMPORAL = {
     # Search attributes must be registered on the namespace (docker-compose does it locally).
     "SEARCH_ATTRIBUTES": env.bool("TEMPORAL_SEARCH_ATTRIBUTES", default=True),
 }
+# The Temporal Web UI, for deep links from the platform console (G6): local dev server or
+# https://cloud.temporal.io. Empty: no links.
+TEMPORAL_UI_URL = env("TEMPORAL_UI_URL", default="http://localhost:8233")
 # Origins allowed to call /temporal-codec (the Temporal Web UI), e.g. https://cloud.temporal.io
 TEMPORAL_CODEC_CORS_ORIGINS = env.list(
     "TEMPORAL_CODEC_CORS_ORIGINS", default=["http://localhost:8233"]
@@ -670,6 +673,17 @@ ALLOW_HTTP_OUTBOUND = False  # SSRF guard (core.net): https only
 # Alert the owners when one person runs this many exports within the window (FR-29-2).
 MASS_EXPORT_ALERT_THRESHOLD = 5
 MASS_EXPORT_WINDOW_MINUTES = 60
+# Impossible travel (G6, FR-29-2): the sign-in's country comes from the CDN's header
+# (Cloudflare "CF-IPCountry", CloudFront "CloudFront-Viewer-Country"); GEOIP_LOOKUP is an
+# optional dotted path to a class with ``country(ip) -> str`` (e.g. a MaxMind reader) used
+# when the header is missing. A successful sign-in from another country within the window
+# alerts the person and the owners.
+GEOIP_COUNTRY_HEADER = env("GEOIP_COUNTRY_HEADER", default="CF-IPCountry")
+GEOIP_LOOKUP = env("GEOIP_LOOKUP", default="")
+IMPOSSIBLE_TRAVEL_HOURS = env.int("IMPOSSIBLE_TRAVEL_HOURS", default=2)
+# Platform retention (G6, FR-29-5): global login history and organisation-less events.
+LOGIN_HISTORY_RETENTION_DAYS = env.int("LOGIN_HISTORY_RETENTION_DAYS", default=400)
+OUTBOX_RETENTION_DAYS = env.int("OUTBOX_RETENTION_DAYS", default=90)
 
 # --- Geocoding (E05 FR-05-15) ------------------------------------------------------------------
 GEOCODER = env("GEOCODER", default="tutortrack.core.geo.NullGeocoder")

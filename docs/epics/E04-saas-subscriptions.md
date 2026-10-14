@@ -135,3 +135,19 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
   
   A banner covers trials ending within 7 days, past due and read-only. Admins and Finance can view; only the Owner manages (`subscription.manage`).
 - **Follow-ups:** the platform console for plans, overrides and trial extension (E30); in-app add-on purchases; usage-based overage invoicing through Stripe instead of one-off charges; AI credit consumption (E31).
+
+## Gap backlog (as built 2026-10-14)
+
+Batch G6 of `docs/05-gap-backlog.md`; design in ADR 0034.
+
+
+- **In-app add-ons (FR-04-1; E04:93, E04:137):** custom domain, white-label apps and priority
+  support (a new `priority_support` feature, included in Enterprise) are bought from Billing &
+  plan (`/api/v1/subscription/addons`, `POST`/`DELETE …/addons/{key}`, owner only,
+  `Idempotency-Key` accepted). Prices per currency in `AddonPrice` (`catalogue.ADDONS`, annual =
+  10 × monthly, synced by migration `0005_g6_addons`). Buying adds a prorated item to the
+  Stripe subscription and an active `SubscriptionAddon` (RLS) that grants the feature in the
+  entitlement snapshot; `items_for` keeps add-ons across plan changes and an add-on removed in
+  Stripe's portal ends when the subscription update arrives. Trials without a card get
+  `checkout_required`. Deviation: add-on prices aren't editable on the platform plans screen
+  (code catalogue + `stripe_price_id` in the database).

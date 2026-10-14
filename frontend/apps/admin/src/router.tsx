@@ -63,15 +63,19 @@ import { NotFoundPage } from "./routes/NotFoundPage";
 import { OnboardingPage } from "./routes/OnboardingPage";
 import { SettingsPage } from "./routes/SettingsPage";
 import { SignupPage } from "./routes/SignupPage";
+import { CustomerNoticesPage } from "./platform/CustomerNoticesPage";
 import { FlagsPage } from "./platform/FlagsPage";
 import { HealthPage } from "./platform/HealthPage";
 import { InsightsPage } from "./platform/InsightsPage";
 import { SaasMetricsPage } from "./platform/SaasMetricsPage";
 import { SupportConversationPage, SupportInboxPage } from "./platform/SupportInboxPage";
 import { OperationsPage } from "./platform/OperationsPage";
+import { PlansPage } from "./platform/PlansPage";
 import { PlatformShell } from "./platform/PlatformShell";
+import { RevenueSharePage } from "./platform/RevenueSharePage";
 import { TenantPage } from "./platform/TenantPage";
 import { TenantsPage } from "./platform/TenantsPage";
+import { WorkflowsPage } from "./platform/WorkflowsPage";
 import { XeroPayrollPage } from "./accounting/XeroPayrollPage";
 import { TaxFormsPage } from "./payroll/PayPhase3";
 import { WarehousePage } from "./reporting/WarehousePage";
@@ -281,6 +285,27 @@ const platformSupportRoute = createRoute({
   getParentRoute: () => platformRoute,
   path: "/support",
   component: SupportInboxPage,
+});
+// G6: plans and prices, revenue share, workflows and customer notices.
+const platformPlansRoute = createRoute({
+  getParentRoute: () => platformRoute,
+  path: "/plans",
+  component: PlansPage,
+});
+const platformRevenueShareRoute = createRoute({
+  getParentRoute: () => platformRoute,
+  path: "/revenue-share",
+  component: RevenueSharePage,
+});
+const platformWorkflowsRoute = createRoute({
+  getParentRoute: () => platformRoute,
+  path: "/workflows",
+  component: WorkflowsPage,
+});
+const platformNoticesRoute = createRoute({
+  getParentRoute: () => platformRoute,
+  path: "/customer-notices",
+  component: CustomerNoticesPage,
 });
 const platformSupportConversationRoute = createRoute({
   getParentRoute: () => platformRoute,
@@ -535,6 +560,10 @@ const routeTree = rootRoute.addChildren([
     platformInsightsRoute,
     platformSupportRoute,
     platformSupportConversationRoute,
+    platformPlansRoute,
+    platformRevenueShareRoute,
+    platformWorkflowsRoute,
+    platformNoticesRoute,
   ]),
   appRoute.addChildren([
     homeRoute,

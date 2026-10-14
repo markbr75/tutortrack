@@ -606,5 +606,6 @@ class PublicLessonFeedbackView(APIView):
             token,
             rating=payload.validated_data["rating"],
             comment=payload.validated_data["comment"],
+            stop_asking=payload.validated_data["stop_asking"],
         )
         return Response(self._body(request, item))
