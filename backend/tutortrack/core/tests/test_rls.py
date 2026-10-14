@@ -170,6 +170,9 @@ ALLOWED_PLATFORM_ALIAS_USERS = (
     "/tests/",
     # Platform operations commands (key rotation spans every tenant).
     "core/management/commands/rotate_encryption_keys.py",
+    # E29 audit-log retention: the only delete of the append-only audit table, limited to
+    # the organisation in context (ADR 0028).
+    "privacy/retention.py",
 )
 
 

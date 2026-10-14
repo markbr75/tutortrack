@@ -4735,6 +4735,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/data-export/{token}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The secure link sent to the requester: redirects to a short-lived download. The link
+     *     is single-purpose, expires (``privacy.dsar_link_days``) and every use is audited.
+     */
+    get: operations["data_export_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/data-exports": {
     parameters: {
       query?: never;
@@ -4810,6 +4830,206 @@ export interface paths {
     put?: never;
     /** @description Confirm your password to get a 5-minute download link. */
     post: operations["data_exports_download_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/data-requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Data subject requests (FR-29-4): intake, identity checks, the statutory deadline,
+     *     export review and redaction, erasure approval. The process runs as
+     *     ``DataSubjectRequestWorkflow``; each decision here signals it.
+     */
+    get: operations["data_requests_list"];
+    put?: never;
+    /**
+     * @description Data subject requests (FR-29-4): intake, identity checks, the statutory deadline,
+     *     export review and redaction, erasure approval. The process runs as
+     *     ``DataSubjectRequestWorkflow``; each decision here signals it.
+     */
+    post: operations["data_requests_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/data-requests/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Data subject requests (FR-29-4): intake, identity checks, the statutory deadline,
+     *     export review and redaction, erasure approval. The process runs as
+     *     ``DataSubjectRequestWorkflow``; each decision here signals it.
+     */
+    get: operations["data_requests_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/data-requests/{id}/approve-erasure": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Approve the erasure (refused while a legal hold applies). */
+    post: operations["data_requests_approve_erasure_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/data-requests/{id}/approve-export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Approve the reviewed export: it is packaged and sent as a secure link. */
+    post: operations["data_requests_approve_export_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/data-requests/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description The requester withdrew the request. */
+    post: operations["data_requests_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/data-requests/{id}/erasure": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description What the erasure did, provider by provider. */
+    get: operations["data_requests_erasure_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/data-requests/{id}/export-preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The compiled export, for review and redaction (logged as a sensitive read). */
+    get: operations["data_requests_export_preview_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/data-requests/{id}/extend": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Extend the deadline of a complex request (two further months at most). */
+    post: operations["data_requests_extend_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/data-requests/{id}/redactions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** @description Replace the redactions (records, fields or files left out of the export). */
+    put: operations["data_requests_redactions_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/data-requests/{id}/reject": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Refuse a request (e.g. identity can't be verified); the requester is told why. */
+    post: operations["data_requests_reject_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/data-requests/{id}/verify": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Tick identity checks; once the required ones are done the request proceeds. */
+    post: operations["data_requests_verify_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -5252,6 +5472,24 @@ export interface paths {
     put?: never;
     /** @description Check the DNS now (also retries a failed verification). */
     post: operations["domains_verify_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/dpa": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The organisation's Data Processing Agreement with TutorTrack (versioned). */
+    get: operations["dpa_retrieve"];
+    put?: never;
+    /** @description The organisation's Data Processing Agreement with TutorTrack (versioned). */
+    post: operations["dpa_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -5729,6 +5967,57 @@ export interface paths {
     };
     /** @description What the organisation's plan includes, for ``useEntitlement()`` (FR-04-2). */
     get: operations["entitlements_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/erasure-preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description What erasing a person would cover and whether a legal hold blocks it. */
+    get: operations["erasure_preview_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/erasures": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Every erasure, from requests and retention policies (the audit trail of FR-29-4). */
+    get: operations["erasures_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/erasures/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Every erasure, from requests and retention policies (the audit trail of FR-29-4). */
+    get: operations["erasures_retrieve"];
     put?: never;
     post?: never;
     delete?: never;
@@ -9148,6 +9437,58 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/legal-holds": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Legal holds: a held person is never erased or purged (FR-29-5). */
+    get: operations["legal_holds_list"];
+    put?: never;
+    /** @description Legal holds: a held person is never erased or purged (FR-29-5). */
+    post: operations["legal_holds_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/legal-holds/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Legal holds: a held person is never erased or purged (FR-29-5). */
+    get: operations["legal_holds_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/legal-holds/{id}/release": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Legal holds: a held person is never erased or purged (FR-29-5). */
+    post: operations["legal_holds_release_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/lesson-reports": {
     parameters: {
       query?: never;
@@ -9658,6 +9999,103 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/lone-working/visits": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Lone-working visits: tutors check in and out of in-person lessons; monitors see every
+     *     visit and resolve overdue ones.
+     */
+    get: operations["lone_working_visits_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lone-working/visits/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Lone-working visits: tutors check in and out of in-person lessons; monitors see every
+     *     visit and resolve overdue ones.
+     */
+    get: operations["lone_working_visits_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lone-working/visits/{id}/resolve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description The tutor is safe (confirmed by phone, for example). */
+    post: operations["lone_working_visits_resolve_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lone-working/visits/check-in": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Lone-working visits: tutors check in and out of in-person lessons; monitors see every
+     *     visit and resolve overdue ones.
+     */
+    post: operations["lone_working_visits_check_in_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lone-working/visits/check-out": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Lone-working visits: tutors check in and out of in-person lessons; monitors see every
+     *     visit and resolve overdue ones.
+     */
+    post: operations["lone_working_visits_check_out_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/makeup-credits": {
     parameters: {
       query?: never;
@@ -9906,6 +10344,24 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations["me_cover_requests_accept_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/data-requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Ask for a copy of your data or for it to be erased (parents can ask for their child). */
+    get: operations["me_data_requests_list"];
+    put?: never;
+    /** @description Ask for a copy of your data or for it to be erased (parents can ask for their child). */
+    post: operations["me_data_requests_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -14524,6 +14980,76 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/retention-policies": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Retention periods per category of data (FR-29-5). */
+    get: operations["retention_policies_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/retention-policies/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Retention periods per category of data (FR-29-5). */
+    get: operations["retention_policies_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Retention periods per category of data (FR-29-5). */
+    patch: operations["retention_policies_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/retention-runs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Purge runs: the nightly schedule's and manual ones (a dry run reports only). */
+    get: operations["retention_runs_list"];
+    put?: never;
+    /** @description Purge runs: the nightly schedule's and manual ones (a dry run reports only). */
+    post: operations["retention_runs_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/retention-runs/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Purge runs: the nightly schedule's and manual ones (a dry run reports only). */
+    get: operations["retention_runs_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/review-requests": {
     parameters: {
       query?: never;
@@ -14754,6 +15280,164 @@ export interface paths {
       cookie?: never;
     };
     get: operations["roles_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/safeguarding/concerns": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Safeguarding cases. Anyone with ``safeguarding.raise`` can raise a concern (and gets
+     *     back only its reference); listing, opening and managing cases is for Designated
+     *     Safeguarding Leads, and every opening is audited.
+     */
+    get: operations["safeguarding_concerns_list"];
+    put?: never;
+    /**
+     * @description Safeguarding cases. Anyone with ``safeguarding.raise`` can raise a concern (and gets
+     *     back only its reference); listing, opening and managing cases is for Designated
+     *     Safeguarding Leads, and every opening is audited.
+     */
+    post: operations["safeguarding_concerns_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/safeguarding/concerns/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Safeguarding cases. Anyone with ``safeguarding.raise`` can raise a concern (and gets
+     *     back only its reference); listing, opening and managing cases is for Designated
+     *     Safeguarding Leads, and every opening is audited.
+     */
+    get: operations["safeguarding_concerns_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Safeguarding cases. Anyone with ``safeguarding.raise`` can raise a concern (and gets
+     *     back only its reference); listing, opening and managing cases is for Designated
+     *     Safeguarding Leads, and every opening is audited.
+     */
+    patch: operations["safeguarding_concerns_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/safeguarding/concerns/{id}/actions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Safeguarding cases. Anyone with ``safeguarding.raise`` can raise a concern (and gets
+     *     back only its reference); listing, opening and managing cases is for Designated
+     *     Safeguarding Leads, and every opening is audited.
+     */
+    post: operations["safeguarding_concerns_actions_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/safeguarding/concerns/{id}/history": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The case's own audit trail, including every time it was opened. */
+    get: operations["safeguarding_concerns_history_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/safeguarding/flags": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Messages the safeguards flagged (contact details, flagged words, blocked messages). */
+    get: operations["safeguarding_flags_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/safeguarding/flags/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Messages the safeguards flagged (contact details, flagged words, blocked messages). */
+    get: operations["safeguarding_flags_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/safeguarding/flags/{id}/review": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Dismiss the flag, or escalate it into a safeguarding concern. */
+    post: operations["safeguarding_flags_review_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/safeguarding/raised": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Concerns I raised: reference and progress only (the case stays with the DSLs). */
+    get: operations["safeguarding_raised_list"];
     put?: never;
     post?: never;
     delete?: never;
@@ -15022,6 +15706,26 @@ export interface paths {
     };
     /** @description Public configuration for the signup form. */
     get: operations["signup_config_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/signup/region": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Which regional stack hosts organisations from a country (E29-T11 data residency).
+     *     When ``serves_here`` is false the signup page sends people to ``signup_url``.
+     */
+    get: operations["signup_region_retrieve"];
     put?: never;
     post?: never;
     delete?: never;
@@ -15411,6 +16115,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/students/{student_id}/privacy": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The age-aware defaults that apply to a student (COPPA / Age Appropriate Design Code). */
+    get: operations["students_privacy_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/students/export": {
     parameters: {
       query?: never;
@@ -15420,6 +16141,23 @@ export interface paths {
     };
     /** @description Students. ``DELETE`` archives; ``status`` changes the lifecycle status. */
     get: operations["students_export_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/subprocessors": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description TutorTrack's sub-processors (public; ``?region=`` filters to one regional stack). */
+    get: operations["subprocessors_retrieve"];
     put?: never;
     post?: never;
     delete?: never;
@@ -16788,6 +17526,12 @@ export interface components {
       /** Format: date */
       end_date: string;
     };
+    AcceptDPARequest: {
+      version: string;
+      signer_name: string;
+      signer_title?: string;
+      company_name: string;
+    };
     AcceptInvitationRequest: {
       token: string;
       first_name?: string;
@@ -16917,6 +17661,10 @@ export interface components {
         /** @example GBP */
         currency: string;
       } | null;
+    };
+    AddActionRequest: {
+      kind: components["schemas"]["SafeguardingActionKindEnum"];
+      note?: string;
     };
     AddLineRequest: {
       description: string;
@@ -18800,6 +19548,12 @@ export interface components {
       exp_month: number | null;
       exp_year: number | null;
     };
+    CaseHistory: {
+      /** Format: date-time */
+      at: string;
+      action: string;
+      actor: string;
+    };
     Category: {
       /** Format: uuid */
       readonly id: string;
@@ -18961,6 +19715,16 @@ export interface components {
       name: string;
       options: string[][];
     };
+    Check: {
+      key: string;
+      title: string;
+      is_required: boolean;
+      done: boolean;
+    };
+    CheckInRequest: {
+      /** Format: uuid */
+      lesson: string;
+    };
     ChecklistItem: {
       key: string;
       label: string;
@@ -18983,6 +19747,13 @@ export interface components {
       employment_type?: string;
       items?: unknown;
       is_default?: boolean;
+    };
+    ChildPrivacy: {
+      age: number | null;
+      is_child: boolean;
+      high_privacy_defaults: boolean;
+      coppa_applies: boolean;
+      parental_consent: boolean;
     };
     Choice: {
       id?: string;
@@ -19372,6 +20143,52 @@ export interface components {
      * @enum {string}
      */
     ComponentEnum: "base_fee" | "active_tutor" | "revenue_share" | "branch";
+    /** @description The full case (DSLs only). */
+    Concern: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly reference: string;
+      /** Format: uuid */
+      readonly student: string | null;
+      readonly student_name: string;
+      /** Format: uuid */
+      readonly lesson: string | null;
+      /** Format: uuid */
+      readonly tutor: string | null;
+      readonly category: components["schemas"]["SafeguardingCategoryEnum"];
+      readonly description: string;
+      readonly immediate_risk: boolean;
+      readonly status: components["schemas"]["SafeguardingStatusEnum"];
+      /** Format: uuid */
+      readonly raised_by: string | null;
+      readonly raised_by_name: string;
+      /** Format: date-time */
+      readonly raised_at: string;
+      /** Format: uuid */
+      readonly assigned_to: string | null;
+      readonly outcome: string;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      readonly attachment_ids: string[];
+      readonly actions: components["schemas"]["SafeguardingAction"][];
+    };
+    ConcernList: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly reference: string;
+      /** Format: uuid */
+      readonly student: string | null;
+      readonly student_name: string;
+      readonly category: components["schemas"]["SafeguardingCategoryEnum"];
+      readonly immediate_risk: boolean;
+      readonly status: components["schemas"]["SafeguardingStatusEnum"];
+      /** Format: date-time */
+      readonly raised_at: string;
+      /** Format: uuid */
+      readonly assigned_to: string | null;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+    };
     ConfirmMatchRequest: {
       /** Format: uuid */
       match?: string | null;
@@ -19532,6 +20349,7 @@ export interface components {
      *     * `lesson_recording` - Lesson recording
      *     * `terms_of_service` - Terms of service
      *     * `privacy_policy` - Privacy policy
+     *     * `parental_consent` - Parental consent for a child's login
      *     * `other` - Other
      * @enum {string}
      */
@@ -19543,6 +20361,7 @@ export interface components {
       | "lesson_recording"
       | "terms_of_service"
       | "privacy_policy"
+      | "parental_consent"
       | "other";
     ConsentTypeRequest: {
       key: string;
@@ -20205,6 +21024,26 @@ export interface components {
         [key: string]: "all" | "branch" | "own" | "none" | null;
       };
     };
+    DPAAcceptance: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly version: string;
+      /** Format: uuid */
+      readonly accepted_by: string | null;
+      readonly signer_name: string;
+      readonly signer_title: string;
+      readonly company_name: string;
+      /** Format: date-time */
+      readonly accepted_at: string;
+    };
+    DPAStatus: {
+      version: string;
+      effective: string;
+      url: string;
+      accepted: boolean;
+      acceptance: components["schemas"]["DPAAcceptance"] | null;
+      history: components["schemas"]["DPAAcceptance"][];
+    };
     Dashboard: {
       next_lesson: components["schemas"]["PortalLesson"] | null;
       upcoming: components["schemas"]["PortalLesson"][];
@@ -20235,6 +21074,117 @@ export interface components {
         [key: string]: components["schemas"]["DashboardCell"];
       };
     };
+    DataRequest: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly reference: string;
+      readonly kind: components["schemas"]["DataRequestKindEnum"];
+      readonly status: components["schemas"]["DataRequestStatusEnum"];
+      readonly channel: components["schemas"]["DataRequestChannelEnum"];
+      readonly subject_type: string;
+      readonly subject_id: string;
+      readonly subject_label: string;
+      readonly requester_name: string;
+      /** Format: email */
+      readonly requester_email: string;
+      readonly relationship: components["schemas"]["DataRequestRelationshipEnum"];
+      readonly details: string;
+      /** Format: date-time */
+      readonly received_at: string;
+      /** Format: date-time */
+      readonly due_at: string;
+      /** Format: date-time */
+      readonly extended_at: string | null;
+      readonly extension_reason: string;
+      readonly checklist: components["schemas"]["Check"][];
+      /** Format: date-time */
+      readonly verified_at: string | null;
+      readonly verification_note: string;
+      readonly summary: unknown;
+      readonly redactions: unknown;
+      /** Format: date-time */
+      readonly redactions_approved_at: string | null;
+      /** Format: date-time */
+      readonly delivered_at: string | null;
+      /** Format: date-time */
+      readonly link_expires_at: string | null;
+      /** Format: date-time */
+      readonly downloaded_at: string | null;
+      readonly download_count: number;
+      /** Format: date-time */
+      readonly erasure_approved_at: string | null;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      readonly close_reason: string;
+      readonly workflow_id: string;
+      readonly has_draft: boolean;
+      readonly has_package: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `portal` - Portal
+     *     * `email` - Email
+     *     * `phone` - Phone
+     *     * `letter` - Letter
+     *     * `in_person` - In person
+     * @enum {string}
+     */
+    DataRequestChannelEnum: "portal" | "email" | "phone" | "letter" | "in_person";
+    DataRequestCreateRequest: {
+      kind: components["schemas"]["DataRequestKindEnum"];
+      subject_type: string;
+      subject_id: string;
+      requester_name: string;
+      requester_email?: string;
+      /** @default self */
+      relationship: components["schemas"]["DataRequestRelationshipEnum"];
+      /** @default email */
+      channel: components["schemas"]["DataRequestChannelEnum"];
+      details?: string;
+      /** Format: date-time */
+      received_at?: string;
+    };
+    DataRequestExtendRequest: {
+      days: number;
+      reason: string;
+    };
+    /**
+     * @description * `access` - Access (a copy of their data)
+     *     * `portability` - Portability (machine-readable copy)
+     *     * `erasure` - Erasure
+     * @enum {string}
+     */
+    DataRequestKindEnum: "access" | "portability" | "erasure";
+    /**
+     * @description * `self` - The person themself
+     *     * `parent` - Parent or guardian
+     *     * `representative` - Authorised representative
+     * @enum {string}
+     */
+    DataRequestRelationshipEnum: "self" | "parent" | "representative";
+    /**
+     * @description * `received` - Awaiting identity verification
+     *     * `in_progress` - In progress
+     *     * `in_review` - Awaiting review
+     *     * `erasing` - Erasing
+     *     * `delivered` - Delivered
+     *     * `completed` - Completed
+     *     * `blocked` - Blocked by a legal hold
+     *     * `rejected` - Rejected
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    DataRequestStatusEnum:
+      | "received"
+      | "in_progress"
+      | "in_review"
+      | "erasing"
+      | "delivered"
+      | "completed"
+      | "blocked"
+      | "rejected"
+      | "cancelled";
     /**
      * @description * `locale` - Locale default
      *     * `dd/MM/yyyy` - 31/12/2026
@@ -20260,6 +21210,12 @@ export interface components {
       /** @default  */
       reason: string;
     };
+    /**
+     * @description * `dismiss` - dismiss
+     *     * `escalate` - escalate
+     * @enum {string}
+     */
+    DecisionEnum: "dismiss" | "escalate";
     DecisionRequest: {
       comment?: string;
     };
@@ -20908,6 +21864,52 @@ export interface components {
         [key: string]: string;
       };
     };
+    ErasurePreview: {
+      subjects: {
+        [key: string]: number;
+      };
+      holds: {
+        [key: string]: unknown;
+      }[];
+      providers: string[];
+      financial_retention_years: number;
+    };
+    /**
+     * @description * `request` - Data subject request
+     *     * `retention` - Retention policy
+     * @enum {string}
+     */
+    ErasureReasonEnum: "request" | "retention";
+    ErasureRecord: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly request: string | null;
+      readonly reason: components["schemas"]["ErasureReasonEnum"];
+      readonly subject_type: string;
+      readonly subject_id: string;
+      readonly status: components["schemas"]["ErasureStatusEnum"];
+      readonly subjects: unknown;
+      readonly labels: unknown;
+      readonly steps_done: unknown;
+      readonly report: unknown;
+      /** Format: date-time */
+      readonly financial_retained_until: string | null;
+      /** Format: date-time */
+      readonly financial_erased_at: string | null;
+      /** Format: date-time */
+      readonly completed_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `planned` - Planned
+     *     * `erasing` - Erasing
+     *     * `completed` - Completed
+     *     * `blocked` - Blocked by a legal hold
+     * @enum {string}
+     */
+    ErasureStatusEnum: "planned" | "erasing" | "completed" | "blocked";
     Error: {
       origin: string;
       kind: string;
@@ -21135,6 +22137,10 @@ export interface components {
      * @enum {string}
      */
     ExportJobStatusEnum: "requested" | "running" | "ready" | "failed" | "cancelled" | "expired";
+    ExportPreview: {
+      sections: components["schemas"]["PreviewSection"][];
+      files: components["schemas"]["PreviewFile"][];
+    };
     ExtendPackageRequest: {
       /** Format: date-time */
       until: string;
@@ -23059,6 +24065,29 @@ export interface components {
       | "adjustment"
       | "write_off"
       | "package_purchase";
+    LegalHold: {
+      /** Format: uuid */
+      readonly id: string;
+      subject_type: string;
+      subject_id: string;
+      readonly subject_label: string;
+      reason: string;
+      /** Format: uuid */
+      readonly placed_by: string | null;
+      /** Format: date-time */
+      readonly placed_at: string;
+      /** Format: date-time */
+      readonly released_at: string | null;
+      /** Format: uuid */
+      readonly released_by: string | null;
+      readonly release_reason: string;
+      readonly active: boolean;
+    };
+    LegalHoldRequest: {
+      subject_type: string;
+      subject_id: string;
+      reason: string;
+    };
     Lesson: {
       /** Format: uuid */
       readonly id: string;
@@ -23587,6 +24616,14 @@ export interface components {
       /** @default false */
       remember: boolean;
     };
+    /**
+     * @description * `checked_in` - Checked in
+     *     * `checked_out` - Checked out
+     *     * `overdue` - Overdue
+     *     * `resolved` - Resolved by staff
+     * @enum {string}
+     */
+    LoneWorkingStatusEnum: "checked_in" | "checked_out" | "overdue" | "resolved";
     LoseRequest: {
       reason: string;
       note?: string;
@@ -24172,6 +25209,33 @@ export interface components {
     MyConsentRequest: {
       consent_type: string;
       granted: boolean;
+    };
+    MyDataRequest: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly reference: string;
+      readonly kind: components["schemas"]["DataRequestKindEnum"];
+      readonly status: components["schemas"]["DataRequestStatusEnum"];
+      /** Format: date-time */
+      readonly received_at: string;
+      /** Format: date-time */
+      readonly due_at: string;
+      /** Format: date-time */
+      readonly delivered_at: string | null;
+      /** Format: date-time */
+      readonly link_expires_at: string | null;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      readonly close_reason: string;
+    };
+    MyDataRequestCreateRequest: {
+      kind: components["schemas"]["DataRequestKindEnum"];
+      details?: string;
+      /**
+       * Format: uuid
+       * @description A parent asking on behalf of their child.
+       */
+      student_id?: string | null;
     };
     MyJobOffer: {
       /** Format: uuid */
@@ -25226,6 +26290,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["CommissionRule"][];
     };
+    PaginatedConcernListList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ConcernList"][];
+    };
     PaginatedConflictList: {
       /**
        * Format: uri
@@ -25369,6 +26446,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["CurriculumNode"][];
     };
+    PaginatedDataRequestList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["DataRequest"][];
+    };
     PaginatedDeadLetterList: {
       /**
        * Format: uri
@@ -25446,6 +26536,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Enrolment"][];
+    };
+    PaginatedErasureRecordList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ErasureRecord"][];
     };
     PaginatedExceptionList: {
       /**
@@ -25667,6 +26770,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["JobPosting"][];
+    };
+    PaginatedLegalHoldList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["LegalHold"][];
     };
     PaginatedLessonChangeRequestList: {
       /**
@@ -26149,6 +27265,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Quiz"][];
     };
+    PaginatedRaisedConcernList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["RaisedConcern"][];
+    };
     PaginatedReferralCodeList: {
       /**
        * Format: uri
@@ -26240,6 +27369,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Result"][];
     };
+    PaginatedRetentionRunList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["RetentionRun"][];
+    };
     PaginatedReviewInviteList: {
       /**
        * Format: uri
@@ -26278,6 +27420,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Room"][];
+    };
+    PaginatedSafeguardingFlagList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["SafeguardingFlag"][];
     };
     PaginatedSandboxList: {
       /**
@@ -26499,6 +27654,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["TutorSubject"][];
+    };
+    PaginatedVisitList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Visit"][];
     };
     PaginatedWaitlistEntryList: {
       /**
@@ -27605,6 +28773,10 @@ export interface components {
       taken_on?: string;
       visible_to_family?: boolean;
     };
+    PatchedRetentionPolicyRequest: {
+      period_days?: number;
+      enabled?: boolean;
+    };
     PatchedRoomRequest: {
       /** Format: uuid */
       location?: string;
@@ -27873,6 +29045,12 @@ export interface components {
       custom_fields?: unknown;
       /** @default true */
       invite: boolean;
+    };
+    PatchedUpdateConcernRequest: {
+      status?: components["schemas"]["SafeguardingStatusEnum"];
+      /** Format: uuid */
+      assigned_to?: string | null;
+      outcome?: string;
     };
     PatchedUserRequest: {
       first_name?: string;
@@ -29278,9 +30456,24 @@ export interface components {
       body: string;
       segments: number;
     };
+    PreviewFile: {
+      id: string;
+      section: string;
+      filename: string;
+      content_type: string;
+      size_bytes: number;
+    };
     PreviewRequestRequest: {
       subject?: string | null;
       body?: string | null;
+    };
+    PreviewSection: {
+      key: string;
+      title: string;
+      provider: string;
+      records: {
+        [key: string]: unknown;
+      }[];
     };
     PriceList: {
       /** Format: uuid */
@@ -29351,6 +30544,9 @@ export interface components {
      * @enum {string}
      */
     PriorityEnum: "low" | "normal" | "high";
+    PrivacyReasonRequest: {
+      reason: string;
+    };
     Process: {
       /** Format: uuid */
       readonly id: string;
@@ -30365,6 +31561,30 @@ export interface components {
         currency: string;
       } | null;
     };
+    RaiseConcernRequest: {
+      category: components["schemas"]["SafeguardingCategoryEnum"];
+      description: string;
+      /** @default false */
+      immediate_risk: boolean;
+      /** Format: uuid */
+      student?: string | null;
+      /** Format: uuid */
+      lesson?: string | null;
+      /** Format: uuid */
+      tutor?: string | null;
+      attachment_ids?: string[];
+    };
+    /** @description What the person who raised a concern sees: the reference and progress, not the case. */
+    RaisedConcern: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly reference: string;
+      readonly category: components["schemas"]["SafeguardingCategoryEnum"];
+      readonly immediate_risk: boolean;
+      readonly status: components["schemas"]["SafeguardingStatusEnum"];
+      /** Format: date-time */
+      readonly raised_at: string;
+    };
     RateQuote: {
       currency: string;
       duration_minutes: number;
@@ -30497,6 +31717,16 @@ export interface components {
      * @enum {string}
      */
     RecurrenceEnum: "once" | "monthly";
+    RedactionRequest: {
+      section?: string;
+      record_id?: string;
+      record_field?: string;
+      file_id?: string;
+      reason?: string;
+    };
+    RedactionsRequest: {
+      redactions: components["schemas"]["RedactionRequest"][];
+    };
     Redirect: {
       url: string;
     };
@@ -31069,6 +32299,9 @@ export interface components {
      * @enum {string}
      */
     RescheduleRequestStatusEnum: "pending" | "approved" | "declined" | "cancelled" | "expired";
+    ResolveVisitRequest: {
+      note: string;
+    };
     Resource: {
       /** Format: uuid */
       readonly id: string;
@@ -31238,6 +32471,42 @@ export interface components {
       taken_on?: string;
       visible_to_family?: boolean;
     };
+    RetentionPolicy: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly category: string;
+      readonly category_label: string;
+      period_days: number;
+      enabled?: boolean;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    RetentionRun: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly dry_run: boolean;
+      readonly status: components["schemas"]["RetentionRunStatusEnum"];
+      readonly trigger: string;
+      readonly report: unknown;
+      /** Format: date-time */
+      readonly started_at: string;
+      /** Format: date-time */
+      readonly finished_at: string | null;
+      /** Format: uuid */
+      readonly requested_by: string | null;
+      readonly workflow_id: string;
+    };
+    RetentionRunCreateRequest: {
+      /** @default true */
+      dry_run: boolean;
+    };
+    /**
+     * @description * `running` - Running
+     *     * `completed` - Completed
+     *     * `failed` - Failed
+     * @enum {string}
+     */
+    RetentionRunStatusEnum: "running" | "completed" | "failed";
     RetryResult: {
       retried: number;
     };
@@ -31333,6 +32602,10 @@ export interface components {
       text?: string;
       reviewer_name: string;
       publish_consent?: boolean;
+    };
+    ReviewSafeguardingFlagRequest: {
+      decision: components["schemas"]["DecisionEnum"];
+      note?: string;
     };
     /**
      * @description * `request` - Review request
@@ -31547,6 +32820,98 @@ export interface components {
       key: string;
       start_url: string;
     };
+    SafeguardingAction: {
+      /** Format: uuid */
+      readonly id: string;
+      kind: components["schemas"]["SafeguardingActionKindEnum"];
+      note?: string;
+      /** Format: uuid */
+      readonly actor: string | null;
+      readonly actor_name: string;
+      /** Format: date-time */
+      readonly occurred_at: string;
+    };
+    /**
+     * @description * `note` - Note
+     *     * `contacted_family` - Contacted the family
+     *     * `referred_social_care` - Referred to children's social care
+     *     * `referred_lado` - Referred to the LADO
+     *     * `referred_police` - Referred to the police
+     *     * `status_changed` - Status changed
+     *     * `assigned` - Assigned
+     * @enum {string}
+     */
+    SafeguardingActionKindEnum:
+      | "note"
+      | "contacted_family"
+      | "referred_social_care"
+      | "referred_lado"
+      | "referred_police"
+      | "status_changed"
+      | "assigned";
+    /**
+     * @description * `physical` - Physical abuse
+     *     * `emotional` - Emotional abuse
+     *     * `sexual` - Sexual abuse or exploitation
+     *     * `neglect` - Neglect
+     *     * `online` - Online safety
+     *     * `self_harm` - Self-harm or mental health
+     *     * `bullying` - Bullying
+     *     * `radicalisation` - Radicalisation
+     *     * `allegation` - Allegation about an adult
+     *     * `conduct` - Messaging or conduct concern
+     *     * `other` - Other
+     * @enum {string}
+     */
+    SafeguardingCategoryEnum:
+      | "physical"
+      | "emotional"
+      | "sexual"
+      | "neglect"
+      | "online"
+      | "self_harm"
+      | "bullying"
+      | "radicalisation"
+      | "allegation"
+      | "conduct"
+      | "other";
+    SafeguardingFlag: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly source_type: string;
+      readonly source_id: string;
+      /** Format: uuid */
+      readonly sender: string | null;
+      readonly sender_name: string;
+      readonly reasons: unknown;
+      readonly keywords: unknown;
+      readonly excerpt: string;
+      readonly blocked: boolean;
+      readonly status: components["schemas"]["SafeguardingFlagStatusEnum"];
+      /** Format: uuid */
+      readonly reviewed_by: string | null;
+      /** Format: date-time */
+      readonly reviewed_at: string | null;
+      /** Format: uuid */
+      readonly concern: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `open` - To review
+     *     * `dismissed` - Dismissed
+     *     * `escalated` - Escalated to a concern
+     * @enum {string}
+     */
+    SafeguardingFlagStatusEnum: "open" | "dismissed" | "escalated";
+    /**
+     * @description * `open` - Open
+     *     * `in_review` - In review
+     *     * `referred` - Referred externally
+     *     * `closed` - Closed
+     * @enum {string}
+     */
+    SafeguardingStatusEnum: "open" | "in_review" | "referred" | "closed";
     Sandbox: {
       /** Format: uuid */
       readonly id: string;
@@ -32140,6 +33505,13 @@ export interface components {
       slug: string;
       url: string;
     };
+    SignupRegion: {
+      country: string;
+      region: string;
+      region_name: string;
+      serves_here: boolean;
+      signup_url: string;
+    };
     SignupRequestRequest: {
       business_name: string;
       /** @description ISO 3166-1 alpha-2 */
@@ -32632,6 +34004,18 @@ export interface components {
       files?: string[];
       /** @default  */
       notes: string;
+    };
+    Subprocessor: {
+      name: string;
+      purpose: string;
+      data_categories: string;
+      location: string;
+      regions: string[];
+      optional: boolean;
+    };
+    SubprocessorList: {
+      version: string;
+      subprocessors: components["schemas"]["Subprocessor"][];
     };
     Subscription: {
       plan: string;
@@ -33871,6 +35255,12 @@ export interface components {
      * @enum {string}
      */
     VerificationStatusEnum: "pending" | "verified" | "failed";
+    VerifyRequest: {
+      checks: {
+        [key: string]: boolean;
+      };
+      note?: string;
+    };
     /**
      * @description * `none` - none
      *     * `builtin` - builtin
@@ -33881,6 +35271,30 @@ export interface components {
      * @enum {string}
      */
     VideoProviderEnum: "none" | "builtin" | "zoom" | "teams" | "google_meet" | "lessonspace";
+    Visit: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly lesson: string;
+      readonly lesson_title: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      readonly status: components["schemas"]["LoneWorkingStatusEnum"];
+      /** Format: date-time */
+      readonly checked_in_at: string;
+      /** Format: date-time */
+      readonly expected_end: string;
+      /** Format: date-time */
+      readonly checked_out_at: string | null;
+      /** Format: date-time */
+      readonly alerted_at: string | null;
+      /** Format: date-time */
+      readonly escalated_at: string | null;
+      /** Format: date-time */
+      readonly resolved_at: string | null;
+      readonly note: string;
+    };
     VoidRequest: {
       /** @default  */
       note: string;
@@ -43615,6 +45029,33 @@ export interface operations {
       };
     };
   };
+  data_export_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No response body */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   data_exports_list: {
     parameters: {
       query?: {
@@ -43756,6 +45197,370 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  data_requests_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /**
+         * @description * `access` - Access (a copy of their data)
+         *     * `portability` - Portability (machine-readable copy)
+         *     * `erasure` - Erasure
+         */
+        kind?: "access" | "erasure" | "portability";
+        open?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `received` - Awaiting identity verification
+         *     * `in_progress` - In progress
+         *     * `in_review` - Awaiting review
+         *     * `erasing` - Erasing
+         *     * `delivered` - Delivered
+         *     * `completed` - Completed
+         *     * `blocked` - Blocked by a legal hold
+         *     * `rejected` - Rejected
+         *     * `cancelled` - Cancelled
+         */
+        status?:
+          | "blocked"
+          | "cancelled"
+          | "completed"
+          | "delivered"
+          | "erasing"
+          | "in_progress"
+          | "in_review"
+          | "received"
+          | "rejected";
+        subject_id?: string;
+        subject_type?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedDataRequestList"];
+        };
+      };
+    };
+  };
+  data_requests_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataRequestCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["DataRequestCreateRequest"];
+        "multipart/form-data": components["schemas"]["DataRequestCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataRequest"];
+        };
+      };
+    };
+  };
+  data_requests_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this data subject request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataRequest"];
+        };
+      };
+    };
+  };
+  data_requests_approve_erasure_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this data subject request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataRequest"];
+        };
+      };
+    };
+  };
+  data_requests_approve_export_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this data subject request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataRequest"];
+        };
+      };
+    };
+  };
+  data_requests_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this data subject request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PrivacyReasonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PrivacyReasonRequest"];
+        "multipart/form-data": components["schemas"]["PrivacyReasonRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataRequest"];
+        };
+      };
+    };
+  };
+  data_requests_erasure_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this data subject request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErasureRecord"];
+        };
+      };
+      /** @description No response body */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  data_requests_export_preview_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this data subject request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ExportPreview"];
+        };
+      };
+    };
+  };
+  data_requests_extend_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this data subject request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataRequestExtendRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["DataRequestExtendRequest"];
+        "multipart/form-data": components["schemas"]["DataRequestExtendRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataRequest"];
+        };
+      };
+    };
+  };
+  data_requests_redactions_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this data subject request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RedactionsRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RedactionsRequest"];
+        "multipart/form-data": components["schemas"]["RedactionsRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataRequest"];
+        };
+      };
+    };
+  };
+  data_requests_reject_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this data subject request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PrivacyReasonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PrivacyReasonRequest"];
+        "multipart/form-data": components["schemas"]["PrivacyReasonRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataRequest"];
+        };
+      };
+    };
+  };
+  data_requests_verify_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this data subject request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VerifyRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["VerifyRequest"];
+        "multipart/form-data": components["schemas"]["VerifyRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DataRequest"];
+        };
       };
     };
   };
@@ -44578,6 +46383,53 @@ export interface operations {
       };
     };
   };
+  dpa_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DPAStatus"];
+        };
+      };
+    };
+  };
+  dpa_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AcceptDPARequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AcceptDPARequest"];
+        "multipart/form-data": components["schemas"]["AcceptDPARequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DPAStatus"];
+        };
+      };
+    };
+  };
   enquiries_list: {
     parameters: {
       query?: {
@@ -45303,6 +47155,81 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Entitlements"];
+        };
+      };
+    };
+  };
+  erasure_preview_retrieve: {
+    parameters: {
+      query: {
+        subject_id: string;
+        subject_type: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErasurePreview"];
+        };
+      };
+    };
+  };
+  erasures_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedErasureRecordList"];
+        };
+      };
+    };
+  };
+  erasures_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this erasure record. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErasureRecord"];
         };
       };
     };
@@ -51393,6 +53320,121 @@ export interface operations {
       };
     };
   };
+  legal_holds_list: {
+    parameters: {
+      query?: {
+        active?: boolean;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        subject_id?: string;
+        subject_type?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedLegalHoldList"];
+        };
+      };
+    };
+  };
+  legal_holds_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LegalHoldRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LegalHoldRequest"];
+        "multipart/form-data": components["schemas"]["LegalHoldRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LegalHold"];
+        };
+      };
+    };
+  };
+  legal_holds_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this legal hold. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LegalHold"];
+        };
+      };
+    };
+  };
+  legal_holds_release_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this legal hold. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PrivacyReasonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PrivacyReasonRequest"];
+        "multipart/form-data": components["schemas"]["PrivacyReasonRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LegalHold"];
+        };
+      };
+    };
+  };
   lesson_reports_list: {
     parameters: {
       query?: {
@@ -52347,6 +54389,154 @@ export interface operations {
       };
     };
   };
+  lone_working_visits_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        lesson?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `checked_in` - Checked in
+         *     * `checked_out` - Checked out
+         *     * `overdue` - Overdue
+         *     * `resolved` - Resolved by staff
+         */
+        status?: "checked_in" | "checked_out" | "overdue" | "resolved";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedVisitList"];
+        };
+      };
+    };
+  };
+  lone_working_visits_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lone working visit. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Visit"];
+        };
+      };
+    };
+  };
+  lone_working_visits_resolve_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this lone working visit. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResolveVisitRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ResolveVisitRequest"];
+        "multipart/form-data": components["schemas"]["ResolveVisitRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Visit"];
+        };
+      };
+    };
+  };
+  lone_working_visits_check_in_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CheckInRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CheckInRequest"];
+        "multipart/form-data": components["schemas"]["CheckInRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Visit"];
+        };
+      };
+    };
+  };
+  lone_working_visits_check_out_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CheckInRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CheckInRequest"];
+        "multipart/form-data": components["schemas"]["CheckInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Visit"];
+        };
+      };
+    };
+  };
   makeup_credits_list: {
     parameters: {
       query?: {
@@ -52793,6 +54983,53 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["CoverRequest"];
+        };
+      };
+    };
+  };
+  me_data_requests_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyDataRequest"][];
+        };
+      };
+    };
+  };
+  me_data_requests_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MyDataRequestCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["MyDataRequestCreateRequest"];
+        "multipart/form-data": components["schemas"]["MyDataRequestCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyDataRequest"];
         };
       };
     };
@@ -60439,6 +62676,164 @@ export interface operations {
       };
     };
   };
+  retention_policies_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RetentionPolicy"][];
+        };
+      };
+    };
+  };
+  retention_policies_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this retention policy. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RetentionPolicy"];
+        };
+      };
+    };
+  };
+  retention_policies_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this retention policy. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedRetentionPolicyRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedRetentionPolicyRequest"];
+        "multipart/form-data": components["schemas"]["PatchedRetentionPolicyRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RetentionPolicy"];
+        };
+      };
+    };
+  };
+  retention_runs_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedRetentionRunList"];
+        };
+      };
+    };
+  };
+  retention_runs_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["RetentionRunCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RetentionRunCreateRequest"];
+        "multipart/form-data": components["schemas"]["RetentionRunCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RetentionRun"];
+        };
+      };
+    };
+  };
+  retention_runs_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this retention run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RetentionRun"];
+        };
+      };
+    };
+  };
   review_requests_list: {
     parameters: {
       query?: {
@@ -60813,6 +63208,357 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Role"][];
+        };
+      };
+    };
+  };
+  safeguarding_concerns_list: {
+    parameters: {
+      query?: {
+        /**
+         * @description * `physical` - Physical abuse
+         *     * `emotional` - Emotional abuse
+         *     * `sexual` - Sexual abuse or exploitation
+         *     * `neglect` - Neglect
+         *     * `online` - Online safety
+         *     * `self_harm` - Self-harm or mental health
+         *     * `bullying` - Bullying
+         *     * `radicalisation` - Radicalisation
+         *     * `allegation` - Allegation about an adult
+         *     * `conduct` - Messaging or conduct concern
+         *     * `other` - Other
+         */
+        category?:
+          | "allegation"
+          | "bullying"
+          | "conduct"
+          | "emotional"
+          | "neglect"
+          | "online"
+          | "other"
+          | "physical"
+          | "radicalisation"
+          | "self_harm"
+          | "sexual";
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        immediate_risk?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `open` - Open
+         *     * `in_review` - In review
+         *     * `referred` - Referred externally
+         *     * `closed` - Closed
+         */
+        status?: "closed" | "in_review" | "open" | "referred";
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedConcernListList"];
+        };
+      };
+    };
+  };
+  safeguarding_concerns_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RaiseConcernRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RaiseConcernRequest"];
+        "multipart/form-data": components["schemas"]["RaiseConcernRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RaisedConcern"];
+        };
+      };
+    };
+  };
+  safeguarding_concerns_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this safeguarding concern. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Concern"];
+        };
+      };
+    };
+  };
+  safeguarding_concerns_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this safeguarding concern. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedUpdateConcernRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedUpdateConcernRequest"];
+        "multipart/form-data": components["schemas"]["PatchedUpdateConcernRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Concern"];
+        };
+      };
+    };
+  };
+  safeguarding_concerns_actions_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this safeguarding concern. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddActionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AddActionRequest"];
+        "multipart/form-data": components["schemas"]["AddActionRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SafeguardingAction"];
+        };
+      };
+    };
+  };
+  safeguarding_concerns_history_list: {
+    parameters: {
+      query?: {
+        /**
+         * @description * `physical` - Physical abuse
+         *     * `emotional` - Emotional abuse
+         *     * `sexual` - Sexual abuse or exploitation
+         *     * `neglect` - Neglect
+         *     * `online` - Online safety
+         *     * `self_harm` - Self-harm or mental health
+         *     * `bullying` - Bullying
+         *     * `radicalisation` - Radicalisation
+         *     * `allegation` - Allegation about an adult
+         *     * `conduct` - Messaging or conduct concern
+         *     * `other` - Other
+         */
+        category?:
+          | "allegation"
+          | "bullying"
+          | "conduct"
+          | "emotional"
+          | "neglect"
+          | "online"
+          | "other"
+          | "physical"
+          | "radicalisation"
+          | "self_harm"
+          | "sexual";
+        immediate_risk?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /**
+         * @description * `open` - Open
+         *     * `in_review` - In review
+         *     * `referred` - Referred externally
+         *     * `closed` - Closed
+         */
+        status?: "closed" | "in_review" | "open" | "referred";
+        student?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this safeguarding concern. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CaseHistory"][];
+        };
+      };
+    };
+  };
+  safeguarding_flags_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `open` - To review
+         *     * `dismissed` - Dismissed
+         *     * `escalated` - Escalated to a concern
+         */
+        status?: "dismissed" | "escalated" | "open";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedSafeguardingFlagList"];
+        };
+      };
+    };
+  };
+  safeguarding_flags_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this safeguarding flag. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SafeguardingFlag"];
+        };
+      };
+    };
+  };
+  safeguarding_flags_review_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this safeguarding flag. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReviewSafeguardingFlagRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReviewSafeguardingFlagRequest"];
+        "multipart/form-data": components["schemas"]["ReviewSafeguardingFlagRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SafeguardingFlag"];
+        };
+      };
+    };
+  };
+  safeguarding_raised_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedRaisedConcernList"];
         };
       };
     };
@@ -61473,6 +64219,28 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SignupConfig"];
+        };
+      };
+    };
+  };
+  signup_region_retrieve: {
+    parameters: {
+      query: {
+        /** @description ISO 3166-1 */
+        country: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignupRegion"];
         };
       };
     };
@@ -62154,6 +64922,27 @@ export interface operations {
       };
     };
   };
+  students_privacy_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        student_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChildPrivacy"];
+        };
+      };
+    };
+  };
   students_export_retrieve: {
     parameters: {
       query?: {
@@ -62179,6 +64968,27 @@ export interface operations {
         };
         content: {
           "text/csv": string;
+        };
+      };
+    };
+  };
+  subprocessors_retrieve: {
+    parameters: {
+      query?: {
+        region?: "au" | "eu" | "uk" | "us";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SubprocessorList"];
         };
       };
     };

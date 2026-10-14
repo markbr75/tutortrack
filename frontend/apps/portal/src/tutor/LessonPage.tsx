@@ -8,6 +8,7 @@ import { useState } from "react";
 import { api } from "../api";
 import { JoinButton } from "../JoinButton";
 import { isNetworkError, isOffline, queueChange, useOutbox } from "../offline/client";
+import { CheckInButtons, TutorRaiseConcern } from "./SafeguardingTools";
 import { useTutorMe } from "./useTutorMe";
 
 type Outcome = components["schemas"]["AttendanceOutcomeEnum"];
@@ -220,6 +221,11 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
       {complete.error || cancel.error || openReport.error ? (
         <Alert tone="danger">{(complete.error ?? cancel.error ?? openReport.error)?.message}</Alert>
       ) : null}
+      <CheckInButtons lessonId={lessonId} online={Boolean(l.online)} />
+      <TutorRaiseConcern
+        lessonId={lessonId}
+        studentId={l.attendees.length === 1 ? l.attendees[0]?.student : null}
+      />
     </article>
   );
 }

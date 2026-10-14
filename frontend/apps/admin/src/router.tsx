@@ -20,6 +20,8 @@ import { SsoSettingsPage } from "./routes/SsoSettingsPage";
 import { CataloguePage } from "./catalogue/CataloguePage";
 import { ClassPage, CoursesPage, ReEnrolPage, RegisterPage } from "./courses/CoursesPages";
 import { GrowthPage, ReviewPage } from "./growth/GrowthPages";
+import { DataRequestPage, PrivacyPage } from "./privacy/PrivacyPages";
+import { ConcernPage, SafeguardingPage } from "./safeguarding/SafeguardingPages";
 import { LearningPage } from "./learning/LearningPage";
 import { StudentLearningPage } from "./learning/StudentLearningPage";
 import { AccountingPage } from "./accounting/AccountingPage";
@@ -274,6 +276,22 @@ const tasksRoute = appPage("/tasks", TasksPage);
 const catalogueRoute = appPage("/catalogue", CataloguePage);
 const coursesRoute = appPage("/courses", CoursesPage);
 const growthRoute = appPage("/growth", GrowthPage);
+const privacyRoute = appPage("/privacy", PrivacyPage);
+const dataRequestRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/privacy/requests/$requestId",
+  component: function DataRequestRoute() {
+    return <DataRequestPage requestId={dataRequestRoute.useParams().requestId} />;
+  },
+});
+const safeguardingRoute = appPage("/safeguarding", SafeguardingPage);
+const concernRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/safeguarding/$concernId",
+  component: function ConcernRoute() {
+    return <ConcernPage concernId={concernRoute.useParams().concernId} />;
+  },
+});
 const classRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/classes/$classId",
@@ -443,6 +461,10 @@ const routeTree = rootRoute.addChildren([
     catalogueRoute,
     coursesRoute,
     growthRoute,
+    privacyRoute,
+    dataRequestRoute,
+    safeguardingRoute,
+    concernRoute,
     classRoute,
     registerRoute,
     learningRoute,

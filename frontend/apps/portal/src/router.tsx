@@ -17,6 +17,7 @@ import { BookingPage } from "./pages/BookingPage";
 import { ClassesPage } from "./pages/ClassesPage";
 import { HomePage } from "./pages/HomePage";
 import { HomeworkPage, LearningPage } from "./pages/LearningPage";
+import { PrivacyPage } from "./pages/PrivacyPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ReferralsPage } from "./pages/ReferralsPage";
 import { ReportsPage } from "./pages/ReportsPage";
@@ -86,6 +87,7 @@ const routeTree = rootRoute.addChildren([
   page("/reports", ReportsPage),
   page("/billing", BillingPage),
   page("/profile", ProfilePage),
+  page("/privacy", PrivacyPage),
   page("/referrals", ReferralsPage),
   page("/affiliate", AffiliateHomePage),
   page("/affiliate/clients", AffiliateClientsPage),

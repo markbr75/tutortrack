@@ -31,7 +31,7 @@ from tutortrack.core.exceptions import BusinessRuleViolation
 from tutortrack.core.time import now
 from tutortrack.tenancy.settings_service import get_setting
 
-from . import channels, defaults, events, registry, render
+from . import channels, defaults, events, hooks, registry, render
 from .models import (
     Channel,
     CommunicationPreference,
@@ -364,6 +364,22 @@ def _create(
         return None  # no device has push switched on
     if channel not in {Channel.IN_APP, Channel.PUSH} and suppressed(channel, address):
         status = Message.Status.SUPPRESSED
+    blocked = hooks.run_pre_send(
+        hooks.OutgoingMessage(
+            type_key=t.key,
+            category=t.category,
+            channel=channel,
+            recipient_kind=recipient.kind,
+            recipient_id=recipient.id,
+            recipient_user_id=recipient.user_id,
+            subject=subject_text,
+            body=body,
+        )
+    )
+    if blocked:
+        if channel in {Channel.IN_APP, Channel.PUSH}:
+            return None
+        status = Message.Status.SUPPRESSED
     scheduled = None
     if channel == Channel.SMS and status == Message.Status.QUEUED:
         tz = str((delivery.context.get("organisation") or {}).get("timezone") or "UTC")
@@ -381,6 +397,7 @@ def _create(
                 subject=subject_text[:300],
                 body=body,
                 status=status,
+                error=blocked[:500],
                 related_type=t.related_type,
                 related_id=related_id,
                 target_type=recipient.target[0],

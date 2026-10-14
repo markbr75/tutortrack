@@ -129,5 +129,17 @@
     "requestStatus": {
       "cancelled": "Canceled"
     }
+  },
+  "privacyCentre": {
+    "relationships": {
+      "representative": "Authorized representative"
+    },
+    "anonymised": "Anonymized",
+    "financialErased": "Anonymized",
+    "acceptDpaSubmit": "I accept on behalf of the organization",
+    "companyName": "Organization's legal name",
+    "region": {
+      "elsewhere": "Organizations in this country are hosted in our {{region}} region, so your data stays there."
+    }
   }
 }

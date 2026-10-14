@@ -19,6 +19,29 @@ TENANT_BASE_DOMAIN = env("TENANT_BASE_DOMAIN", default="localhost")
 APP_URL = env("APP_URL", default="https://app.tutortrack.app")
 # Public URL of an organisation's app (emails, redirects, the org switcher).
 TENANT_URL_TEMPLATE = env("TENANT_URL_TEMPLATE", default="https://{slug}.{domain}")
+# Data residency (E29-T11, ADR 0028): the region this stack serves ("" = all, single stack)
+# and each region's signup app. Organisations are created in their country's region.
+TT_REGION = env("TT_REGION", default="")
+# Vulnerability disclosure (/.well-known/security.txt, E29-T12).
+SECURITY_CONTACT_EMAIL = env("SECURITY_CONTACT_EMAIL", default="security@tutortrack.app")
+SECURITY_POLICY_URL = env(
+    "SECURITY_POLICY_URL", default="https://tutortrack.app/security/disclosure-policy"
+)
+REGIONS = {
+    "uk": {"name": "United Kingdom", "app_url": env("REGION_UK_APP_URL", default=APP_URL)},
+    "eu": {
+        "name": "European Union",
+        "app_url": env("REGION_EU_APP_URL", default="https://eu.tutortrack.app"),
+    },
+    "us": {
+        "name": "United States",
+        "app_url": env("REGION_US_APP_URL", default="https://us.tutortrack.app"),
+    },
+    "au": {
+        "name": "Australia",
+        "app_url": env("REGION_AU_APP_URL", default="https://au.tutortrack.app"),
+    },
+}
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -308,6 +331,22 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "COMPONENT_SPLIT_REQUEST": True,
     "ENUM_NAME_OVERRIDES": {
+        # E29 Part 2 (privacy, safeguarding)
+        "ConsentTypeCategoryEnum": "tutortrack.privacy.models.ConsentType.Category",
+        "ReasonEnum": "tutortrack.subscriptions.services.CANCEL_REASONS",
+        "DataRequestKindEnum": "tutortrack.privacy.models.DataSubjectRequest.Kind",
+        "DataRequestStatusEnum": "tutortrack.privacy.models.DataSubjectRequest.Status",
+        "DataRequestChannelEnum": "tutortrack.privacy.models.DataSubjectRequest.Channel",
+        "DataRequestRelationshipEnum": "tutortrack.privacy.models.DataSubjectRequest.Relationship",
+        "ErasureStatusEnum": "tutortrack.privacy.models.ErasureRecord.Status",
+        "ErasureReasonEnum": "tutortrack.privacy.models.ErasureRecord.Reason",
+        "RetentionRunStatusEnum": "tutortrack.privacy.models.RetentionRun.Status",
+        "SafeguardingCategoryEnum": "tutortrack.privacy.models.SafeguardingConcern.Category",
+        "SafeguardingStatusEnum": "tutortrack.privacy.models.SafeguardingConcern.Status",
+        "SafeguardingActionKindEnum": "tutortrack.privacy.models.SafeguardingAction.Kind",
+        "SafeguardingFlagStatusEnum": "tutortrack.privacy.models.SafeguardingFlag.Status",
+        "LoneWorkingStatusEnum": "tutortrack.privacy.models.LoneWorkingVisit.Status",
+        "RelationshipEnum": "tutortrack.people.models.Contact.Relationship",
         "ImportSourceEnum": "tutortrack.migration.models.Source",
         "MigrationSourceEnum": "tutortrack.migration.api.serializers.PROJECT_SOURCES",
         "WebhookEndpointStatusEnum": "tutortrack.developer.models.WebhookEndpoint.Status",

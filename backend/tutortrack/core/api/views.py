@@ -81,9 +81,16 @@ class AuditEntryViewSet(TenantScopedViewMixin, viewsets.ReadOnlyModelViewSet):
     filterset_class = AuditEntryFilter
 
     def get_tenant_queryset(self) -> QuerySet[AuditEntry]:
-        return AuditEntry.objects.filter(organisation_id=require_organisation_id()).select_related(
+        from ..audit import RESTRICTED_OBJECT_TYPES
+        from ..permissions import has_perm
+
+        qs = AuditEntry.objects.filter(organisation_id=require_organisation_id()).select_related(
             "actor"
         )
+        for prefix, codename in RESTRICTED_OBJECT_TYPES.items():
+            if not has_perm(self.request.user, codename):
+                qs = qs.exclude(object_type__startswith=prefix)
+        return qs
 
     @extend_schema(
         parameters=[OpenApiParameter("q", str), OpenApiParameter("actor_email", str)],

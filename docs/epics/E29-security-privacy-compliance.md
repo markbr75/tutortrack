@@ -67,20 +67,20 @@ Platform-wide controls that make TutorTrack trustworthy for businesses handling 
 - [x] **E29-T02** (MVP) EncryptedField with KMS envelope encryption and rotation; apply to sensitive fields.
 - [x] **E29-T03** (MVP) Sensitive-read audit logging and global audit search UI.
 - [x] **E29-T04** (MVP) Consent types/records, capture in forms/portal, cookie banner.
-- [ ] **E29-T05** DSAR workflow and export compiler.
-- [ ] **E29-T06** Erasure/anonymisation engine respecting financial retention and legal holds.
-- [ ] **E29-T07** Retention policies and purge job.
-- [ ] **E29-T08** Safeguarding concerns and DSL role.
-- [ ] **E29-T09** Messaging safeguards (detection, restrictions) and lone-working check-ins.
-- [ ] **E29-T10** COPPA/AADC age-aware defaults.
-- [ ] **E29-T11** Regional stacks and region-aware signup routing; DPA acceptance and sub-processor page.
-- [ ] **E29-T12** Compliance programme artefacts (policies, runbooks, security.txt).
+- [x] **E29-T05** DSAR workflow and export compiler.
+- [x] **E29-T06** Erasure/anonymisation engine respecting financial retention and legal holds.
+- [x] **E29-T07** Retention policies and purge job.
+- [x] **E29-T08** Safeguarding concerns and DSL role.
+- [x] **E29-T09** Messaging safeguards (detection, restrictions) and lone-working check-ins.
+- [x] **E29-T10** COPPA/AADC age-aware defaults.
+- [x] **E29-T11** Regional stacks and region-aware signup routing; DPA acceptance and sub-processor page.
+- [x] **E29-T12** Compliance programme artefacts (policies, runbooks, security.txt).
 
 ## Temporal workflows (E32)
 
 Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
 
-- [ ] **E29-TW1** Privacy workflows (requires E32).
+- [x] **E29-TW1** Privacy workflows (requires E32).
 
 | Workflow | Started by | Steps, timers and signals | Replaces |
 |---|---|---|---|
@@ -117,4 +117,42 @@ Part 1 (MVP) = T01–T04, per the roadmap. T05–T12 and E29-TW1 remain for Part
 - **E05:** register `people.client/contact/student` consent subjects; encrypt SEN/medical notes.
 - **E13:** suppress marketing on `consent.withdrawn` (`marketing_email`/`marketing_sms`).
 - **E30:** impossible-travel detection; platform ToS acceptance at signup.
+
+## Part 2 implementation notes (as built 2026-10-14)
+
+Part 2 = T05–T12 and E29-TW1, all built. Design: ADR 0028. Everything lives in the `privacy`
+app except the per-app providers (`<app>/privacy.py`), the comms pre-send hook seam
+(`comms/hooks.py`) and region routing (`tenancy/regions.py`).
+
+| Area | As built | Why / deviation |
+|---|---|---|
+| Provider registry (T05/T06/T07) | `privacy/registry.py`: each app registers a `Provider` (expand, export, files, erase, revoke) and `RetentionCategory`s in its own `privacy.py`, autodiscovered. Providers: people, crm, identity, comms, billing, payments, payroll, scheduling, delivery, learning, courses, leads, recruitment, growth, calendar_sync, migration, sites, developer, privacy | Apps only touch their own tables; new apps plug in without changing privacy |
+| Data subjects | `privacy.subjects` now also registers `people.tutor`, `recruitment.application`, `growth.affiliate` and display labels. A person is resolved by repeated expansion (client → contacts/students → logins; login → its records); a student's household is *context* (its holds apply, it isn't erased) | |
+| DSAR (T05) | `DataSubjectRequest` (`DSAR-00001`): staff intake (`/data-requests`) or portal (`/me/data-requests`, a parent may ask for their child); deadline `privacy.dsar_deadline_days` (30) with extension up to 60 more days; identity checklist (identity, matches records, authority when a parent/representative asks; a signed-in portal request counts as the identity check); reject/cancel with a reason told to the requester | "30 days" per the spec (UK GDPR says one month) |
+| Export compiler (T05) | Every provider's sections → private JSON draft (S3) → staff review in `/export-preview` (a sensitive read) → redactions (a record, one field, or a file) → package zip: redacted `data.json`, `summary.pdf` (WeasyPrint) and `files/` → secure link `/api/v1/data-export/{token}` (hashed token, `privacy.dsar_link_days` = 7, redirect to a 5-minute presigned URL, every download audited) → on expiry the package and draft are deleted | Safeguarding cases are not exported (exemption; the DSL decides) |
+| Erasure (T06) | `erasure.py`: plan (labels "Erased Student #n" from a per-org sequence, encrypted scrub terms) → legal-hold check → provider steps → delete files (object removed, `StoredFile` blanked, status `rejected`) → revoke logins → finish (audit summary, `data_subject.erased`). Names are replaced, DOB/notes/school/learning needs/custom fields/addresses cleared, records archived (out of search and lists); notes, documents, tasks, tags, learning records, references, preferences, in-app notifications and push devices deleted | A `StoredFile` "deleted" state would need a core migration; the blanked `rejected` row keeps foreign keys valid |
+| Financial records (T06) | Never deleted, amounts never change: student/tutor names on invoice lines become the token and are scrubbed from descriptions (the AC); the bill payer's details on `billing_snapshot` stay for `privacy.financial_retention_years` (6) unless the invoice is already older; the `erased_financial` category anonymises them afterwards. Payments, statements and pay items keep amounts/references; notes and bank narratives are scrubbed; bank details removed | The only sanctioned edit of issued financial records (ADR 0028 §3) |
+| Logins (T06) | Erasure removes the membership in this organisation (owners are skipped), revokes iCal feeds, API keys and app grants; the global `User` is kept | A login may belong to other organisations; account deletion is E30 |
+| Legal holds (T06/T07) | `LegalHold` on any subject; blocks DSAR erasure approval (`legal_hold` 422), `ErasureWorkflow` (→ `blocked`) and every retention category | |
+| Retention (T07) | `RetentionPolicy` per category (created on `organisation.created` and lazily): archived students/clients (6y, erased), rejected applications (183 days, erased), lesson report notes (6y), recordings (1y), message log (2y), unconverted form submissions (1y), erased people's financial details, audit log (7y minimum). `RetentionRun` keeps the dry-run report and what was done; admins are notified | |
+| Audit retention (T07) | Deleted on the platform (BYPASSRLS) connection with `SET LOCAL tutortrack.audit_purge='on'`, filtered to the organisation; `privacy/retention.py` added to the platform-alias allowlist test | The app role has no DELETE on the append-only table |
+| Safeguarding (T08) | `SafeguardingConcern` (`SG-00001`, encrypted description/outcome, immediate-risk flag, attachments), `SafeguardingAction` timeline (encrypted notes; a referral sets status *referred*; closing needs an outcome). Raise from the student page (admin) or the lesson page (tutor portal); raisers get the reference only (`/safeguarding/raised`). `safeguarding.dsl`: owner by default, others via a custom role; admins and branch managers are denied it. Every case opening is `audit.record_read`; `/history` shows the case's own trail; `core.audit.RESTRICTED_OBJECT_TYPES` hides it from the general audit search. DSL alerts (`safeguarding_alert`, immediate for urgent cases) carry the reference and category only | Spec's "DSL role" = a permission granted through custom roles (built-in role list unchanged) |
+| Messaging safeguards (T09) | `comms/hooks.py` pre-send registry, called once in `comms.services._create` (blocked email/SMS → `suppressed` with the reason; in-app/push not created). `privacy.safeguards.check_outgoing`: marketing to under-18s blocked; for messages people write (`sender_user_id`): tutor → child direct blocked, parent required on child threads, contact details (phone ≥ 10 digits, email, social handles) block/flag per setting, keywords flag. `SafeguardingFlag` review queue (dismiss / escalate to a concern). Lesson report comments are screened from `lesson_report.commented` (flag only) | E13 has no tutor–family inbox yet (a parallel agent is adding it): it should call `comms.hooks.run_pre_send` with `sender_user_id` and `participants` |
+| Lone working (T09) | `safeguarding.lone_working` (off / client homes / all in person); tutor "I've arrived"/"I've left" on the lesson page (`/lone-working/visits/check-in|check-out`); `LoneWorkingWorkflow` alerts monitors and the tutor `lone_working_grace_minutes` after the lesson, escalates to DSLs after `lone_working_escalate_minutes`, ends on check-out or "confirm safe" | Timers on Temporal (rule 4a); not listed in TW1's table |
+| Children (T10) | COPPA (`privacy.coppa`: auto = US organisations): `invite_to_portal` needs a `parental-consent` record (new consent type + data migration) for under-13s; unknown DOB = child. AADC (`privacy.child_defaults`): no marketing consent for under-18 students, marketing messages to them blocked; student page shows the defaults (`/students/{id}/privacy`) | Verifiable consent method = a recorded signed form or a parent's portal consent; card/ID-based VPC not built |
+| Regions (T11) | Settings `REGIONS` and `TT_REGION`; signup on the wrong stack → 409 `wrong-region` with the regional signup URL; `GET /signup/region?country=` and a notice + link on the signup page. Deployment per region documented in ADR 0028 | No infrastructure changes (as instructed) |
+| DPA and sub-processors (T11) | Versioned in `privacy/compliance.py`; `DPAAcceptance` (owner-only `privacy.dpa.manage`, records signer, company, IP, browser); public `/api/v1/subprocessors` (`?region=`); change notices once per version per organisation (`manage.py notify_subprocessor_changes`, Celery fan-out) | |
+| Compliance (T12) | `docs/compliance/`: index with SOC 2 and Cyber Essentials maps, information security, access control and reviews, change management, vendor management, sub-processors, DPA, retention, incident response, breach notification (72h clock, tenant notice template), vulnerability disclosure, penetration testing, business continuity. `/.well-known/security.txt` served by the backend (`SECURITY_CONTACT_EMAIL`, `SECURITY_POLICY_URL`) | Tenant notification tooling is the template + E30's platform notify tool |
+| Workflows (TW1) | Queue `privacy`: `DataSubjectRequestWorkflow` (reminders by workflow clock, sent once; stale stages skipped), `ErasureWorkflow` (child of the DSAR workflow; one activity per provider), `RetentionPurgeWorkflow` (Schedule 02:00 org time while `privacy.retention_purge` ≠ off; manual runs from the UI), `LoneWorkingWorkflow`. Replay histories in `backend/tests/workflow_histories/` | |
+| Frontend | Admin: Privacy centre `/privacy` (requests, erasures, legal holds, retention, agreement & sub-processors, settings) and request page; Safeguarding `/safeguarding` (cases, flagged messages, lone working, settings) and case page; student page privacy & "raise a concern" panel; signup region notice. Portal: "Your data" page; tutor lesson page check-in/out and "raise a concern". i18n namespaces `privacyCentre`, `safeguarding` | |
+
+### Verified
+- Backend: `tutortrack/privacy` 112 tests (103 new; erasure AC, DSAR export/redaction/delivery, retention, holds, safeguarding, messaging, lone working, COPPA/AADC, DPA, regions, workflows + replay) and the touched apps' suites (core, identity, tenancy, comms, people, crm, scheduling, delivery, growth, learning, billing, recruitment, leads) pass; ruff, mypy, `makemigrations --check`, `spectacular --fail-on-warn` clean.
+- Frontend: admin (142) and portal (46) vitest, tsc and eslint pass.
+
+### Carried forward
+- **E13 inbox/broadcasts:** call `comms.hooks.run_pre_send` with `sender_user_id`/`participants`; use category `marketing` for broadcasts so the children's block applies.
+- **E30:** platform "notify customers" tool for breaches; global account deletion; login history retention (the tables are global).
+- **E27/E01:** retention for webhook delivery payloads and dispatched outbox events.
+- **Infra:** regional Terraform workspaces and DNS per ADR 0028.
 

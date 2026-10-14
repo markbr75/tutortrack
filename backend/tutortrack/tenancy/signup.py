@@ -49,6 +49,9 @@ def sign_up(
     ``user`` is an already signed-in person adding another organisation (FR-02-7); they
     are not asked for credentials again.
     """
+    from .regions import require_served
+
+    require_served(country)  # E29-T11: organisations are created in their own region
     created_user = False
     if user is None:
         email = email.strip().lower()

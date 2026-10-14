@@ -24,6 +24,14 @@ from .models import AuditEntry
 REDACTED = "[REDACTED]"
 _IGNORED_FIELDS = frozenset({"updated_at", "updated_by"})
 
+# Object types whose audit entries only holders of a permission may see in the global audit
+# search (E29 safeguarding cases: ``{"privacy.safeguarding": "safeguarding.dsl"}``).
+RESTRICTED_OBJECT_TYPES: dict[str, str] = {}
+
+
+def restrict_object_types(prefix: str, codename: str) -> None:
+    RESTRICTED_OBJECT_TYPES[prefix] = codename
+
 
 def object_type_of(instance: models.Model) -> str:
     return instance._meta.label_lower
