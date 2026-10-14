@@ -115,6 +115,7 @@ function FamilyShell() {
     ...(f.invoices ? [{ to: "/billing", label: t("portal.nav.billing") }] : []),
     ...(f.profile ? [{ to: "/profile", label: t("portal.nav.profile") }] : []),
     ...(f.referrals ? [{ to: "/referrals", label: t("referrals.portal.nav") }] : []),
+    ...(f.messages ? [{ to: "/messages", label: t("portalMessages.nav") }] : []),
   ] as const;
   return (
     <div className="mx-auto min-h-screen max-w-3xl">

@@ -65,7 +65,7 @@ class NotificationSettingsView(APIView):
 
     @extend_schema(responses=s.NotificationSettingSerializer(many=True))
     def get(self, request: Request) -> Response:
-        return Response([_setting_out(t.key) for t in registry.all_types()])
+        return Response([_setting_out(t.key) for t in registry.visible_types()])
 
 
 class NotificationSettingView(APIView):
@@ -404,13 +404,35 @@ START_WORDS = {"START", "YES", "UNSTOP"}
 
 @csrf_exempt
 def twilio_inbound(request: HttpRequest) -> HttpResponse:
-    """Replies to the shared number: STOP/START opt-outs (FR-13-5)."""
+    """Incoming texts and WhatsApp messages (Twilio-signed): STOP/START opt-outs
+    (FR-13-5), and everything else to the inbox of the organisation that owns the number
+    or last messaged this phone from the shared sender (E13-T11/T12)."""
+    from .. import inbox, senders
+    from ..providers import strip_wa
+
     if request.method != "POST" or not _twilio_valid(request):
         return HttpResponse(status=403)
-    word = request.POST.get("Body", "").strip().upper()
-    phone = request.POST.get("From", "")
-    if phone and word in STOP_WORDS:
+    body = request.POST.get("Body", "")
+    word = body.strip().upper()
+    raw_from = request.POST.get("From", "")
+    channel = "whatsapp" if raw_from.startswith("whatsapp:") else "sms"
+    phone = raw_from if channel == "sms" else f"whatsapp:{strip_wa(raw_from)}"
+    if raw_from and word in STOP_WORDS:
         services.sms_opt_out(phone, stop=True)
-    elif phone and word in START_WORDS:
+    elif raw_from and word in START_WORDS:
         services.sms_opt_out(phone, stop=False)
+    elif raw_from and body.strip():
+        sender = strip_wa(raw_from)
+        to = strip_wa(request.POST.get("To", ""))
+        org = senders.route_inbound(channel, to=to, sender=sender)
+        if org is not None:
+            from django.db import transaction
+
+            with tenant_context(org), transaction.atomic():
+                inbox.receive_text(
+                    channel=channel,
+                    from_phone=sender,
+                    body=body,
+                    provider_ref=request.POST.get("MessageSid", ""),
+                )
     return HttpResponse("<Response/>", content_type="text/xml")

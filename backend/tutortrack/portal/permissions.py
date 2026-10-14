@@ -11,6 +11,8 @@ PERMISSIONS = {
     "portal.client.profile": "Client portal: edit the household's details",
     "portal.client.book": "Client portal: book lessons online (E08 self-booking)",
     "portal.client.reschedule": "Client portal: ask to move lessons",
+    "portal.client.message": "Client portal: message the business (and tutors, if allowed)",
     "portal.student.view": "Student portal: see own lessons and reports",
+    "portal.student.message": "Student portal: message the business (if allowed)",
     "comms.announcement.manage": "Post news for clients and tutors",
 }

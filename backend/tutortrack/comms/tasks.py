@@ -53,3 +53,22 @@ def send_lesson_reminders(*, organisation_id: str) -> int:
 @shared_task(name="tutortrack.comms.tasks.send_all_lesson_reminders", ignore_result=True)
 def send_all_lesson_reminders() -> int:
     return fan_out_per_org(send_lesson_reminders)
+
+
+@shared_task(
+    base=TenantTask,
+    name="tutortrack.comms.tasks.sync_marketing_contact",
+    autoretry_for=(ConnectionError, TimeoutError),
+    retry_backoff=True,
+    max_retries=5,
+)
+def sync_marketing_contact(*, organisation_id: str, contact_id: str) -> int:
+    """E13-T12: one contact into the connected Mailchimp/Brevo audiences."""
+    from tutortrack.integrations.providers import ProviderError
+
+    from . import marketing
+
+    try:
+        return marketing.sync_contact(contact_id)
+    except ProviderError as exc:
+        raise ConnectionError(str(exc)) from exc  # retried with backoff

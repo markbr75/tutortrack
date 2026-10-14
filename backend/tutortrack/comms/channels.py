@@ -46,10 +46,13 @@ def send_email(
     reply_to: str,
     headers: dict[str, str],
     attachments: list[tuple[str, bytes, str]],
+    from_address: str = "",
 ) -> str:
+    """``from_address`` is a verified custom sending address (E13-T12); otherwise the
+    platform's own sender with the organisation's name."""
     sender = settings.DEFAULT_FROM_EMAIL
-    address = sender.split("<")[-1].rstrip(">").strip()
-    from_email = f'"{from_name}" <{address}>' if from_name else sender
+    address = from_address or sender.split("<")[-1].rstrip(">").strip()
+    from_email = f'"{from_name}" <{address}>' if from_name else (from_address or sender)
     message = EmailMultiAlternatives(
         subject=subject,
         body=text,
@@ -75,7 +78,7 @@ class SmsResult:
 
 
 class SmsProvider(Protocol):
-    def send(self, *, to: str, body: str, status_callback: str) -> SmsResult: ...
+    def send(self, *, to: str, body: str, status_callback: str, sender: str = "") -> SmsResult: ...
 
 
 class TwilioSms:
@@ -84,10 +87,15 @@ class TwilioSms:
         self.token = settings.TWILIO["AUTH_TOKEN"]
         self.sender = settings.TWILIO["FROM"]
 
-    def send(self, *, to: str, body: str, status_callback: str) -> SmsResult:
+    def send(self, *, to: str, body: str, status_callback: str, sender: str = "") -> SmsResult:
         url = f"https://api.twilio.com/2010-04-01/Accounts/{self.sid}/Messages.json"
         data = urllib.parse.urlencode(
-            {"To": to, "From": self.sender, "Body": body, "StatusCallback": status_callback}
+            {
+                "To": to,
+                "From": sender or self.sender,
+                "Body": body,
+                "StatusCallback": status_callback,
+            }
         ).encode()
         auth = base64.b64encode(f"{self.sid}:{self.token}".encode()).decode()
         request = urllib.request.Request(url, data=data, headers={"Authorization": f"Basic {auth}"})
@@ -105,8 +113,10 @@ class FakeSms:
     def __init__(self) -> None:
         self.outbox: list[dict[str, str]] = []
 
-    def send(self, *, to: str, body: str, status_callback: str) -> SmsResult:
-        self.outbox.append({"to": to, "body": body, "status_callback": status_callback})
+    def send(self, *, to: str, body: str, status_callback: str, sender: str = "") -> SmsResult:
+        self.outbox.append(
+            {"to": to, "body": body, "status_callback": status_callback, "from": sender}
+        )
         return SmsResult(f"SMfake{len(self.outbox)}", "queued")
 
 

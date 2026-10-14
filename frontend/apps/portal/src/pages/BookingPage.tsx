@@ -25,6 +25,7 @@ export function BookingPage() {
   const [from, setFrom] = useState(() => isoDate(new Date()));
   const [student, setStudent] = useState("");
   const [promo, setPromo] = useState("");
+  const [credit, setCredit] = useState("");
   const [hold, setHold] = useState<Hold | null>(null);
   const services = useQuery({
     queryKey: ["portal", "booking", "services"],
@@ -44,11 +45,25 @@ export function BookingPage() {
   });
   const students = me.data?.students ?? [];
   const who = student || students[0]?.id || "";
+  // E15-T09: a makeup credit (from a cancelled lesson) makes the booking free.
+  const credits = useQuery({
+    queryKey: ["portal", "makeup-credits"],
+    enabled: Boolean(me.data?.features.makeups),
+    queryFn: async () => unwrap(await api.GET("/api/v1/portal/makeup-credits")),
+  });
+  const usable = (credits.data ?? []).filter((c) => c.student === who);
   const take = useMutation({
     mutationFn: async (slot: { start: string; tutor: string }) =>
       unwrap(
         await api.POST("/api/v1/portal/booking/holds", {
-          body: { service, tutor: slot.tutor, start: slot.start, student: who, promo_code: promo },
+          body: {
+            service,
+            tutor: slot.tutor,
+            start: slot.start,
+            student: who,
+            promo_code: promo,
+            makeup_credit: usable.some((c) => c.id === credit) ? credit : null,
+          },
         }),
       ),
     onSuccess: setHold,
@@ -181,6 +196,26 @@ export function BookingPage() {
                 value={promo}
                 onChange={(e) => setPromo(e.target.value)}
               />
+              {usable.length ? (
+                <SelectField
+                  label={t("portalMakeups.label")}
+                  hint={t("portalMakeups.hint")}
+                  value={credit}
+                  onChange={(e) => setCredit(e.target.value)}
+                  options={[
+                    { value: "", label: t("portalMakeups.none") },
+                    ...usable.map((c) => ({
+                      value: c.id,
+                      label: t("portalMakeups.option", {
+                        lesson: c.source_lesson,
+                        expires: formatDateTime(c.expires_at, i18n.language, undefined, {
+                          dateStyle: "medium",
+                        }),
+                      }),
+                    })),
+                  ]}
+                />
+              ) : null}
             </div>
           )}
           {service ? (

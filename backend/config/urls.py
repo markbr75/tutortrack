@@ -3,6 +3,7 @@ from django.urls import URLPattern, URLResolver, include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 from tutortrack.calendar_sync.api.webhooks import google_calendar, microsoft_graph
+from tutortrack.comms.api.phase2_views import inbound_email as inbox_email
 from tutortrack.comms.api.views import postmark_webhook, twilio_inbound, twilio_status
 from tutortrack.core.api.health import healthz, readyz
 from tutortrack.leads.api.views import inbound_email
@@ -64,6 +65,7 @@ urlpatterns = [
     path("webhooks/inbound-email", inbound_email, name="inbound-email"),
     path("webhooks/twilio/status", twilio_status, name="twilio-status"),
     path("webhooks/twilio/inbound", twilio_inbound, name="twilio-inbound"),
+    path("webhooks/inbound/email", inbox_email, name="inbox-inbound-email"),
     path("webhooks/google-calendar", google_calendar, name="google-calendar-webhook"),
     path("webhooks/microsoft-graph", microsoft_graph, name="microsoft-graph-webhook"),
     # Caddy on-demand TLS "ask" endpoint for custom domains (E24).

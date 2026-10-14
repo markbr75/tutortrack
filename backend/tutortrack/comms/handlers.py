@@ -225,3 +225,58 @@ def payout_paid(event: EventEnvelope) -> None:
     payout = catalogue.load_payout(_id(event))
     if payout is not None:
         notify("payout_paid", payout, key=str(event.id))
+
+
+# --- Phase 2: inbox alerts, marketing sync and the broadcast workflow (E13-T10..T12) -------------
+
+
+@subscribe("message.received")
+def inbox_message_received(event: EventEnvelope) -> None:
+    """Staff hear about new messages (the assignee, else whoever assigns conversations):
+    at most one alert per thread an hour per person (dedupe key)."""
+    from .phase2_types import load_thread_message
+
+    entry = load_thread_message(_id(event))
+    if entry is None:
+        return
+    bucket = event.occurred_at.strftime("%Y%m%d%H")
+    notify("inbox_new_message", entry, key=f"{entry.thread_id}:{bucket}")
+
+
+@subscribe("consent.granted", "consent.withdrawn")
+def marketing_consent_changed(event: EventEnvelope) -> None:
+    """Keep Mailchimp/Brevo audiences in step with marketing consent (E13-T12)."""
+    if not str(event.data.get("category", "")).startswith("marketing_"):
+        return
+    if event.data.get("person_type") != "people.contact":
+        return
+    from . import marketing
+
+    marketing.queue_contact_sync(str(event.data.get("person_id", "")))
+
+
+@subscribe("contact.updated")
+def marketing_contact_updated(event: EventEnvelope) -> None:
+    from . import marketing
+
+    marketing.queue_contact_sync(_id(event))
+
+
+def _broadcast_bridge() -> None:
+    from tutortrack.core.workflows import bridge
+
+    from .broadcasts import broadcast_workflow_id
+    from .processes import BroadcastInput, BroadcastWorkflow
+
+    bridge.on(
+        "broadcast.scheduled",
+        start=BroadcastWorkflow,
+        id=lambda e: broadcast_workflow_id(e.organisation_id, e.subject["id"]),
+        input=lambda e: BroadcastInput(
+            organisation_id=str(e.organisation_id), broadcast_id=e.subject["id"]
+        ),
+        subject=lambda e: ("broadcast", e.subject["id"]),
+    )
+
+
+_broadcast_bridge()

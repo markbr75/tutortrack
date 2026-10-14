@@ -309,6 +309,23 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,
     "ENUM_NAME_OVERRIDES": {
         "ImportSourceEnum": "tutortrack.migration.models.Source",
+        # E13 Phase 2 (broadcasts, inbox, channels)
+        "ThreadKindEnum": "tutortrack.comms.models.Thread.Kind",
+        "ThreadStatusEnum": "tutortrack.comms.models.Thread.Status",
+        "ThreadMessageDirectionEnum": "tutortrack.comms.models.ThreadMessage.Direction",
+        "ThreadMessageChannelEnum": "tutortrack.comms.models.ThreadMessage.Via",
+        "ThreadParticipantRoleEnum": "tutortrack.comms.models.ThreadParticipant.Role",
+        "ReplyChannelEnum": "tutortrack.comms.api.phase2_serializers.REPLY_CHANNELS",
+        "BroadcastStatusEnum": "tutortrack.comms.models.Broadcast.Status",
+        "BroadcastPurposeEnum": "tutortrack.comms.models.Broadcast.Purpose",
+        "BroadcastChannelEnum": "tutortrack.comms.api.phase2_serializers.BROADCAST_CHANNELS",
+        "BroadcastRecipientStatusEnum": "tutortrack.comms.models.BroadcastRecipient.Status",
+        "SegmentAudienceEnum": "tutortrack.comms.models.Audience",
+        "SenderDomainStatusEnum": "tutortrack.comms.models.SenderDomain.Status",
+        "WhatsAppTemplateStatusEnum": "tutortrack.comms.models.WhatsAppTemplate.Status",
+        "WhatsAppTemplateCategoryEnum": "tutortrack.comms.models.WhatsAppTemplate.Category",
+        "PhoneNumberChannelEnum": "tutortrack.comms.api.phase2_serializers.NUMBER_CHANNELS",
+        "PurposeEnum": "tutortrack.tenancy.models.OrganisationDomain.Purpose",
         "MigrationSourceEnum": "tutortrack.migration.api.serializers.PROJECT_SOURCES",
         "WebhookEndpointStatusEnum": "tutortrack.developer.models.WebhookEndpoint.Status",
         "WebhookEndpointSourceEnum": "tutortrack.developer.models.WebhookEndpoint.Source",
@@ -416,8 +433,7 @@ SPECTACULAR_SETTINGS = {
         "TermRolloverModeEnum": "tutortrack.courses.models.TermRollover.Mode",
         "TermRolloverStatusEnum": "tutortrack.courses.models.TermRollover.Status",
         "RolloverOfferStatusEnum": "tutortrack.courses.models.RolloverOffer.Status",
-        # E21 learning tools (and the existing custom-domain purpose, to keep its name)
-        "PurposeEnum": "tutortrack.tenancy.models.OrganisationDomain.Purpose",
+        # E21 learning tools
         "ResourceKindEnum": "tutortrack.learning.models.Resource.Kind",
         "ResourceMediaTypeEnum": "tutortrack.learning.models.Resource.MediaType",
         "ResourceVisibilityEnum": "tutortrack.learning.models.Resource.Visibility",
@@ -494,8 +510,21 @@ TWILIO = {
     "ACCOUNT_SID": env("TWILIO_ACCOUNT_SID", default=""),
     "AUTH_TOKEN": env("TWILIO_AUTH_TOKEN", default=""),
     "FROM": env("TWILIO_FROM", default=""),
+    # E13-T12: the shared WhatsApp Business sender (Twilio), e.g. +447700900000.
+    "WHATSAPP_FROM": env("TWILIO_WHATSAPP_FROM", default=""),
 }
 POSTMARK_WEBHOOK_TOKEN = env("POSTMARK_WEBHOOK_TOKEN", default="")
+# E13 Phase 2: inbox replies arrive at reply+<thread>@REPLY_DOMAIN and
+# inbox+<subdomain>@REPLY_DOMAIN through a Postmark inbound server whose webhook carries
+# INBOUND_TOKEN (empty domain = emails keep the organisation's own reply-to). Custom
+# sending domains use Postmark's Domains API with the account token (empty = a fake).
+COMMS = {
+    "REPLY_DOMAIN": env("COMMS_REPLY_DOMAIN", default=""),
+    "INBOUND_TOKEN": env("COMMS_INBOUND_TOKEN", default=""),
+    "POSTMARK_ACCOUNT_TOKEN": env("POSTMARK_ACCOUNT_TOKEN", default=""),
+    "WHATSAPP_WINDOW_HOURS": 24,
+    "SMS_REPLY_ROUTE_DAYS": 30,
+}
 # Web Push (E16-T09): VAPID keys from ``manage.py generate_vapid_keys`` (empty private key =
 # a fake sender that records pushes). Endpoints must be on one of the browser push services.
 WEB_PUSH = {

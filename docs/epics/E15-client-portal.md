@@ -71,7 +71,7 @@ Client role (household scope), Student role (self scope). All endpoints covered 
 - [x] **E15-T06** Profile, household, consents, sensitive data edits with staff alerts.
 - [x] **E15-T07** Announcements (news posts) admin + portal.
 - [x] **E15-T08** Org portal configuration toggles.
-- [ ] **E15-T09** (Phase 2) Booking, reschedule, packages purchase, messaging.
+- [x] **E15-T09** (Phase 2) Booking, reschedule, packages purchase, messaging.
 
 ## Implementation notes (as built 2026-10-10)
 - **Where it lives:** the `apps/portal` SPA, served at `/portal/` on the organisation's host, so sign-in, sessions, magic links and tenant resolution are shared with the admin app. A CloudFront viewer-request function sends portal deep links to `/portal/index.html`. Admin users with the client or student role are redirected to `/portal/`. The tutor shell and PWA install come with E16. Backend app: `tutortrack.portal`.
@@ -86,3 +86,9 @@ Client role (household scope), Student role (self scope). All endpoints covered 
 - **Infra fix:** CloudFront now also routes `/webhooks/*` and `/ical/*` to the API (they previously fell through to the SPA bucket).
 - **Deferred (Phase 2):** booking, reschedule requests, package purchase and messaging (T09).
 - **Packages (added 2026-10-12 with E10-T12):** the billing page shows each account's package balances and the packages on sale online (`bookable_online` templates, setting `portal.show_package_balances`); "Buy" (`POST /portal/packages`) invoices the package and opens the pay page. The pay page now also offers GoCardless (bank payment) and PayPal when connected, and the payment-method setup link offers GoCardless mandates. T09 stays open for booking, reschedules and messaging.
+
+## Phase 2 implementation notes (as built 2026-10-14)
+- **What was already there:** self-booking with holds, payment at booking and approval (E08-T14, the portal Book page), reschedule requests and answers (E08-T13), package purchase on the billing page (E10-T12) and class enrolment (E20, the portal Classes page). Trial lessons are priced by the booking engine's trial rules. T09 adds what was missing.
+- **Makeup lessons (FR-15-5):** `/portal/makeup-credits` lists the household's unused E09 makeup credits. Booking with `makeup_credit` makes the quote free (`scheduling.hold_slot(makeup_credit=...)`), and booking the lesson uses the credit (`delivery.consume_makeup_credit`), so the student isn't charged. Another household's credits are 404s; used or expired ones are refused.
+- **Messaging (FR-15-9) on the E13 inbox:** families (`portal.client.message`) start and answer conversations with the business at `/portal/threads`, with attachments. With `portal.allow_messaging_tutors` they also message their students' tutors (recent lessons or active jobs). Tutors message the office and the families they teach at `/tutor/threads` (portal Tutor → Messages). Students message only with `portal.allow_student_messaging` (`portal.student.message`). `portal.allow_messaging` turns it all off. Staff see every conversation in the admin inbox, internal notes never reach the portal, and other households' threads are 404s.
+- **Feature flags:** `/portal/me` adds `messages`, `message_tutors` and `makeups`; the portal shows Messages in the menu and a makeup-credit choice on the Book page.

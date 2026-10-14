@@ -22,6 +22,9 @@ import { ClassPage, CoursesPage, ReEnrolPage, RegisterPage } from "./courses/Cou
 import { GrowthPage, ReviewPage } from "./growth/GrowthPages";
 import { LearningPage } from "./learning/LearningPage";
 import { StudentLearningPage } from "./learning/StudentLearningPage";
+import { BroadcastsPage } from "./broadcasts/BroadcastsPage";
+import { MessagingSettingsPage } from "./comms/MessagingSettingsPage";
+import { InboxPage } from "./inbox/InboxPage";
 import { AccountingPage } from "./accounting/AccountingPage";
 import { DataPage } from "./data/DataPage";
 import { ImportPage } from "./data/ImportPage";
@@ -274,6 +277,9 @@ const tasksRoute = appPage("/tasks", TasksPage);
 const catalogueRoute = appPage("/catalogue", CataloguePage);
 const coursesRoute = appPage("/courses", CoursesPage);
 const growthRoute = appPage("/growth", GrowthPage);
+const inboxRoute = appPage("/inbox", InboxPage);
+const broadcastsRoute = appPage("/broadcasts", BroadcastsPage);
+const messagingSettingsRoute = appPage("/settings/messaging", MessagingSettingsPage);
 const classRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/classes/$classId",
@@ -443,6 +449,9 @@ const routeTree = rootRoute.addChildren([
     catalogueRoute,
     coursesRoute,
     growthRoute,
+    inboxRoute,
+    broadcastsRoute,
+    messagingSettingsRoute,
     classRoute,
     registerRoute,
     learningRoute,

@@ -115,9 +115,13 @@ class MeView(PortalView):
 
 def _phase2_features(request: Request, household: Household) -> dict[str, bool]:
     from .booking_views import portal_features
+    from .messaging_views import messaging_features
 
     found = portal_features(request)
-    return {k: v and household.is_client for k, v in found.items()}
+    return {
+        **{k: v and household.is_client for k, v in found.items()},
+        **messaging_features(request, household),
+    }
 
 
 class DashboardView(PortalView):

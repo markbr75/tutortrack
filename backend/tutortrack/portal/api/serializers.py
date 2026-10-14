@@ -31,6 +31,9 @@ class PortalFeaturesSerializer(serializers.Serializer):
     classes = serializers.BooleanField()
     referrals = serializers.BooleanField()
     learning = serializers.BooleanField()
+    messages = serializers.BooleanField()  # E15-T09
+    message_tutors = serializers.BooleanField()
+    makeups = serializers.BooleanField()
 
 
 class PortalMeSerializer(serializers.Serializer):

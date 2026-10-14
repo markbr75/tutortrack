@@ -7,9 +7,19 @@ class CommsConfig(AppConfig):
     verbose_name = "Communications"
 
     def ready(self) -> None:
+        from tutortrack.core.storage.services import register_access_rule
         from tutortrack.crm import selectors as crm
 
-        from . import catalogue, events, handlers, org_settings  # noqa: F401
-        from .selectors import message_timeline
+        from . import (  # noqa: F401
+            catalogue,
+            events,
+            handlers,
+            marketing_providers,
+            org_settings,
+            phase2_types,
+        )
+        from .selectors import may_open_broadcast_file, may_open_thread_file, message_timeline
 
         crm.register_timeline_provider("message", message_timeline)
+        register_access_rule("comms.threadmessage", may_open_thread_file)
+        register_access_rule("comms.broadcast", may_open_broadcast_file)

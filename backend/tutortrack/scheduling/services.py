@@ -2418,9 +2418,11 @@ def hold_slot(
     promo_code: str = "",
     source: str = "portal",
     user: Any = None,
+    makeup_credit: Any = None,
 ) -> tuple[Any, str]:
     """Hold a slot while the person finishes booking (FR-08-9). Returns the hold and, for
-    bookings without an account, the secret token for its status link."""
+    bookings without an account, the secret token for its status link. With a
+    ``makeup_credit`` (E15-T09) the lesson is free and uses the credit when booked."""
     from tutortrack.catalogue import services as catalogue
     from tutortrack.tenancy.models import Branch
     from tutortrack.tenancy.selectors import default_branch_id
@@ -2471,6 +2473,18 @@ def hold_slot(
     online = service.delivery_mode == Service.DeliveryMode.ONLINE
     location = None if online else settings_row.location
     token = secrets.token_urlsafe(24) if student is None else ""
+    quote = quote_booking(
+        service,
+        chosen,
+        start,
+        tz=tz,
+        student=student,
+        promo=promo,
+        online=online,
+        location=location,
+    )
+    if makeup_credit is not None:
+        quote = _makeup_quote(quote, makeup_credit, student)
     hold = BookingHold.objects.create(
         service=service,
         tutor=chosen,
@@ -2485,10 +2499,7 @@ def hold_slot(
         contact={k: str(v)[:200] for k, v in (contact or {}).items()} if student is None else {},
         promo_code=promo,
         trial=student is None or _student_history(student)[str(student.pk)][0],
-        quote=quote_booking(
-            service, chosen, start, tz=tz, student=student, promo=promo, online=online,
-            location=location,
-        ),
+        quote=quote,
         source=source,
         expires_at=now() + timedelta(minutes=settings_row.hold_minutes),
         token_hash=hash_token(token) if token else "",
@@ -2504,6 +2515,16 @@ def hold_slot(
         )
     )
     return hold, token
+
+
+def _makeup_quote(quote: dict[str, Any], credit: Any, student: Student | None) -> dict[str, Any]:
+    """A makeup lesson booked with a credit costs nothing now (E15-T09)."""
+    if student is None or str(credit.student_id) != str(student.pk):
+        raise _invalid("makeup_credit", _("That makeup credit belongs to another student."))
+    if credit.status_at(now()) != "available":
+        raise _invalid("makeup_credit", _("This makeup credit has been used or has expired."))
+    zero = Money(Decimal("0.00"), quote["currency"]).to_dict()
+    return {**quote, "amount": zero, "tax_amount": zero, "makeup_credit_id": str(credit.pk)}
 
 
 def _check_collections(client_id: Any) -> None:
@@ -2626,6 +2647,15 @@ def _book(hold: Any) -> Lesson:
         exclude_hold_ids=[hold.pk],
     )
     lesson = result.lesson
+    credit_id = (hold.quote or {}).get("makeup_credit_id")
+    if credit_id:
+        from tutortrack.delivery import services as delivery
+        from tutortrack.delivery.models import MakeupCredit
+
+        credit = MakeupCredit.objects.filter(pk=credit_id).first()
+        if credit is None:
+            raise BusinessRuleViolation(_("This makeup credit has been used or has expired."))
+        delivery.consume_makeup_credit(credit, lesson)
     if hold.promo_code_id:
         from tutortrack.catalogue import services as catalogue
 

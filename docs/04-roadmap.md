@@ -82,9 +82,9 @@ All ─► E26, E27, E28, E31
 | E10 | ✅ Done (2026-10-09); Phase 2 ✅ Done (2026-10-12) | Phase 1 per ADR 0007. Phase 2: packages with PackageExpiryWorkflow, recurring fixed fees with proration, late fees and collections blocks, split billing (ADR 0022) |
 | E11 | ✅ Done (2026-10-09); Phase 2 ✅ Done (2026-10-12) | Phase 1 per ADR 0008. Phase 2: GoCardless, PayPal, bank statement import and Open Banking with a matching queue, split payments, ProviderMigrationWorkflow (ADR 0022) |
 | E12 | ✅ Done (2026-10-10) | T01–T11 + TW1 (Wise/1099/commission are Phase 3). Bank files, self-billing, holds, pay runs on Temporal. See Implementation notes |
-| E13 | ✅ Done (2026-10-09) | MVP scope (broadcasts, inbox, WhatsApp, custom domains are Phase 2). See Implementation notes |
+| E13 | ✅ Done (2026-10-09); Phase 2 ✅ Done (2026-10-14) | MVP scope. Phase 2: broadcasts to segments with consent rules, throttled `BroadcastWorkflow` and open/click statistics; a team inbox for email, text, WhatsApp and portal chat with assignment, snooze, SLA, notes, canned replies and safeguarding flags; WhatsApp (Twilio) with approved templates; custom sending domains; Mailchimp/Brevo sync on E22 (ADR 0027). See Implementation notes and Phase 2 notes |
 | E14 | ✅ Done (2026-10-10) | T01–T09 + TW1. See Implementation notes |
-| E15 | ✅ Done (2026-10-10) | MVP scope (booking, reschedule, packages and messaging are Phase 2). See Implementation notes |
+| E15 | ✅ Done (2026-10-10); Phase 2 ✅ Done (2026-10-14) | MVP scope. Phase 2 (T09): booking, reschedule and packages from E08/E10 Phase 2, plus makeup-credit booking and portal messaging with the business and tutors on the E13 inbox. See Implementation notes and Phase 2 notes |
 | E16 | ✅ Done (2026-10-10); Phase 2 ✅ Done (2026-10-13) | Responsive tutor shell in the portal app (expenses with E12, compliance with E18). Phase 2: installable PWA with a service worker, offline pack, idempotent outbox with background sync and conflict review, Web Push as an E13 channel (ADR 0023). T11 native shells are Phase 3 |
 | E17 | ✅ Done (2026-10-10) | T01–T08, T10 + TW1 (proposals T09 are Phase 2b). See Implementation notes |
 | E18 | ✅ Done (2026-10-10) | T01–T10 + TW1 (provider integrations T11 are Phase 3). See Implementation notes |

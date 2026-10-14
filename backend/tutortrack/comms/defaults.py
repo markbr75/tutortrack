@@ -380,4 +380,7 @@ def default_template(type_key: str, channel: str) -> tuple[str, str] | None:
     found = DEFAULTS.get((type_key, channel))
     if found is None and channel == "push":
         return DEFAULTS.get((type_key, "in_app"))  # a push shows the in-app title and text
+    if found is None and channel == "whatsapp":
+        # WhatsApp sends an approved template (E13-T12); the text version is the reference.
+        return DEFAULTS.get((type_key, "sms"))
     return found

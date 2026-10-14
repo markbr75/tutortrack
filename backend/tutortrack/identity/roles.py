@@ -104,7 +104,8 @@ ROLES: dict[str, RoleDef] = {
                "reporting.dashboard.view:own", "reporting.operations.view:own",
                "reporting.payroll.view:own", "integrations.personal",
                "sites.profile.edit:own", "growth.review.view:own",
-               "growth.tutor_referral.view:own"),
+               "growth.tutor_referral.view:own", "comms.inbox.view:own",
+               "comms.inbox.reply:own"),
             # Organisation-wide learning settings and approvals stay with staff (E21).
             denies=("learning.curriculum.manage", "learning.progress.approve",
                     "learning.library.manage", "learning.library.charge"),

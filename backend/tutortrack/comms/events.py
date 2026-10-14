@@ -29,3 +29,66 @@ class PushSubscriptionRemoved(_PushSubscriptionEvent):
 
     event_type: ClassVar[str] = "push_subscription.removed"
     reason: str  # removed | expired | failing
+
+
+# --- Phase 2: broadcasts, inbox and sender domains (E13-T10..T12) -------------------------------
+
+
+@dataclass(frozen=True, kw_only=True)
+class _BroadcastEvent(DomainEvent):
+    subject_type: ClassVar[str] = "broadcast"
+    channel: str
+    purpose: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class BroadcastScheduled(_BroadcastEvent):
+    """Starts ``BroadcastWorkflow`` (wait, resolve the segment, send in batches)."""
+
+    event_type: ClassVar[str] = "broadcast.scheduled"
+    scheduled_for: str | None = None
+
+
+@dataclass(frozen=True, kw_only=True)
+class BroadcastSent(_BroadcastEvent):
+    event_type: ClassVar[str] = "broadcast.sent"
+    recipients: int
+    queued: int
+    skipped: int
+
+
+@dataclass(frozen=True, kw_only=True)
+class BroadcastCancelled(_BroadcastEvent):
+    event_type: ClassVar[str] = "broadcast.cancelled"
+
+
+@dataclass(frozen=True, kw_only=True)
+class MessageReceived(DomainEvent):
+    """A message arrived in the inbox (email, text, WhatsApp or portal chat)."""
+
+    event_type: ClassVar[str] = "message.received"
+    subject_type: ClassVar[str] = "thread_message"
+    thread_id: str
+    channel: str
+    author_type: str
+    flagged: bool = False
+
+
+@dataclass(frozen=True, kw_only=True)
+class ThreadAssigned(DomainEvent):
+    event_type: ClassVar[str] = "thread.assigned"
+    subject_type: ClassVar[str] = "thread"
+    assignee_id: str | None
+
+
+@dataclass(frozen=True, kw_only=True)
+class ThreadClosed(DomainEvent):
+    event_type: ClassVar[str] = "thread.closed"
+    subject_type: ClassVar[str] = "thread"
+
+
+@dataclass(frozen=True, kw_only=True)
+class SenderDomainVerified(DomainEvent):
+    event_type: ClassVar[str] = "sender_domain.verified"
+    subject_type: ClassVar[str] = "sender_domain"
+    domain: str
