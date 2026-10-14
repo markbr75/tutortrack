@@ -112,6 +112,8 @@ class WebhookDeliveryWorkflow:
     async def run(self, input: DeliveryInput) -> str:
         for number in range(1, MAX_ATTEMPTS + 1):
             self.attempts = number
+            # A "retry now" that arrives during the attempt must still cut the next wait short.
+            before_attempt = self.nudges
             outcome = await workflow.execute_activity(
                 attempt_delivery,
                 AttemptInput(
@@ -129,7 +131,7 @@ class WebhookDeliveryWorkflow:
             if number == MAX_ATTEMPTS:
                 break
             await report_step(input, f"retry-{number}")
-            seen = self.nudges
+            seen = before_attempt if workflow.patched("retry-now-during-attempt") else self.nudges
             with contextlib.suppress(TimeoutError):
                 await workflow.wait_condition(
                     lambda seen=seen: self.nudges != seen,  # type: ignore[misc]

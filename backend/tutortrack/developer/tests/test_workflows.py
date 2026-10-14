@@ -119,6 +119,26 @@ def test_retry_now_signal_cuts_the_wait_short(org, public_dns, receiver, tempora
     record(temporal_env, wid, "WebhookDeliveryWorkflow-retry-now")
 
 
+def test_retry_now_during_an_attempt_still_cuts_the_next_wait_short(
+    org, public_dns, receiver, temporal_env, monkeypatch
+):
+    """A "retry now" that lands while the attempt is still running isn't lost."""
+    receiver([500])
+    original = services.attempt_delivery
+
+    def attempt_then_click_retry_now(delivery_id, number, attempted_at):
+        outcome = original(delivery_id, number, attempted_at)
+        if number == 1:
+            services.retry_now(WebhookDelivery.objects.get(pk=delivery_id))
+        return outcome
+
+    monkeypatch.setattr(services, "attempt_delivery", attempt_then_click_retry_now)
+    delivery, _secret = deliver(org)
+    # Well inside the 30-second backoff, which isn't skipped while we poll.
+    wait_for(org, lambda: WebhookDelivery.objects.get(pk=delivery.pk).status == "succeeded", 15)
+    assert temporal_env.result(delivery_workflow_id(org.pk, delivery.pk)) == "succeeded"
+
+
 def test_always_failing_gives_up_after_72_hours_and_disables(
     org, user, member, public_dns, receiver, temporal_env
 ):
