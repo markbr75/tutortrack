@@ -5,10 +5,10 @@ from typing import Any
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from tutortrack.core.api.serializers import BaseModelSerializer
+from tutortrack.core.api.serializers import BaseModelSerializer, MoneySerializerField
 
 from .. import mappings, selectors
-from ..models import AccountingConnection, ExternalRecordLink, SyncLogEntry
+from ..models import AccountingConnection, ExternalRecordLink, LedgerPaymentImport, SyncLogEntry
 from ..org_settings import EXPORT_FORMATS
 
 
@@ -70,6 +70,8 @@ class AccountingConnectionSerializer(BaseModelSerializer):
             "sync_bills",
             "attach_pdf",
             "lock_behaviour",
+            "import_payments",
+            "payments_checked_at",
             "chart_fetched_at",
             "last_sync_at",
             "simulated",
@@ -81,7 +83,15 @@ class AccountingConnectionSerializer(BaseModelSerializer):
         read_only_fields = [
             f
             for f in fields
-            if f not in ("mode", "start_date", "sync_bills", "attach_pdf", "lock_behaviour")
+            if f
+            not in (
+                "mode",
+                "start_date",
+                "sync_bills",
+                "attach_pdf",
+                "lock_behaviour",
+                "import_payments",
+            )
         ]
 
     @extend_schema_field(serializers.CharField())
@@ -262,3 +272,40 @@ class ExportQuerySerializer(serializers.Serializer):
         choices=[("export", "export"), ("xero", "xero"), ("quickbooks", "quickbooks")],
         default="export",
     )
+
+
+# --- payment read-back (E23-T09) ------------------------------------------------------------
+
+
+class LedgerPaymentImportSerializer(serializers.ModelSerializer):
+    amount = MoneySerializerField(read_only=True)
+    invoice_number = serializers.CharField(source="invoice.number", read_only=True)
+    client = serializers.UUIDField(source="invoice.client_id", read_only=True)
+    client_name = serializers.CharField(source="invoice.client.display_name", read_only=True)
+
+    class Meta:
+        model = LedgerPaymentImport
+        fields = [
+            "id",
+            "connection",
+            "provider",
+            "external_id",
+            "invoice",
+            "invoice_number",
+            "client",
+            "client_name",
+            "payment",
+            "amount",
+            "paid_on",
+            "reference",
+            "status",
+            "reason",
+            "created_at",
+        ]
+        read_only_fields = fields
+
+
+class ReadBackResultSerializer(serializers.Serializer):
+    checked = serializers.IntegerField()
+    imported = serializers.IntegerField()
+    skipped = serializers.IntegerField()

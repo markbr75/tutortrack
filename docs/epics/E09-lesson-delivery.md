@@ -87,7 +87,7 @@ What happens when a lesson takes place (or doesn't): marking completion and atte
 - [x] **E09-T06** SLA engine: due/overdue computation task, reminders, escalation, pay/invoice hold flags.
 - [x] **E09-T07** Unconfirmed lessons queue and auto-complete task.
 - [x] **E09-T08** Frontend: complete-lesson modal, register UI, cancel flow with policy preview, report editor, report review queue.
-- [ ] **E09-T09** (Phase 2) Client feedback micro-surveys.
+- [x] **E09-T09** (Phase 2) Client feedback micro-surveys.
 
 ## Temporal workflows (E32)
 
@@ -112,3 +112,11 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
 - **Stats:** `/students/{id}/attendance` returns the rate, streak and counts by outcome. Cancellations by the tutor or by us don't count.
 - **Frontend (T08):** the calendar quick view gains a register (outcome per student, minutes late, "mark all present", actual times, balance override) and a cancel flow with a live policy preview, override and series option. It also has "Write report". New pages: report editor with field types, autosave, submit/approve/return/share and comments; reports list (due/overdue/to approve/shared); unconfirmed lessons with bulk actions; lesson policies (organisation cancellation policy and report template builder). Overrides for a branch, service, job or client are API-only for now.
 - **Deferred:** T09 feedback micro-surveys (Phase 2); AI drafting (E31); offline writing (E16); report emails and reminders are events for E13.
+
+## Phase 2b implementation notes (as built 2026-10-14)
+- **T09 feedback micro-surveys (FR-09-9).** `delivery.LessonFeedback` (one per lesson and student, RLS, branch-scoped; tutors see their own lessons' feedback with `delivery.feedback.view:own`). Org settings: `delivery.feedback_enabled` (off by default), `feedback_delay_hours` (2), `feedback_every_n_lessons` (4: the first lesson with a tutor, then every Nth), `feedback_expiry_days` (7), `feedback_alert_at_or_below` (2 stars) and `feedback_invites_review` (off).
+- **Timing on Temporal (no sweeper).** `LessonFeedbackWorkflow` `lesson-feedback:{org}:{lesson}` is started by the bridge on `lesson.completed` when surveys are on and someone attended. It sleeps until the delay, sends (activity `send_lesson_feedback`), waits for `answered` signals (from `lesson_feedback.received`) until the expiry and expires the rest. Replay history recorded.
+- **Consent rules.** The request goes to one contact: the adult learner's own contact, else the family's contacts who receive lesson updates (`receives_reports`), primary first. A contact whose latest E29 consent record of type `lesson-feedback` is a withdrawal is skipped (`skip_reason=no_consent`); no eligible contact gives `no_recipient`. The E13 type `lesson_feedback_request` is in the `reports` category and not transactional, so channel preferences and unsubscribes apply.
+- **Answering.** A signed link `/feedback/<token>` (`django.core.signing`, salted per organisation) opens a public page: 1-5 stars (a radio group) and an optional comment. `POST /public/lesson-feedback/{token}` refuses a second answer (`code=answered`) or an expired link (`code=expired`). `lesson_feedback.received` carries the rating, never the comment.
+- **Results feed:** staff alerts at or below the threshold (`staff_lesson_feedback_low`); an optional E25 review request on 5 stars (trigger `automation`, deduplicated by E25); E19 matching's rating factor now blends approved E25 reviews with answered feedback, weighted by count (`matching.engine.blend_ratings`); shared shortlists and proposals show the same blended rating; E26 gets a standard "Lesson feedback" report (operations family; totals average over all answers) and a `lesson_feedback` builder dataset.
+- **API/UI:** `/lesson-feedback` (list with status/tutor/rating/since filters, `summary`, `withdraw`), admin page `/lesson-feedback` with the settings, public page `/feedback/$token`. DSAR export and erasure cover feedback (comments cleared).

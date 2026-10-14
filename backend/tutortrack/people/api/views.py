@@ -33,6 +33,9 @@ from .serializers import (
     ClientSerializer,
     ContactSerializer,
     DuplicateSerializer,
+    GeocodeRequestSerializer,
+    GeocodeResultSerializer,
+    PeopleMapSerializer,
     QuickAddSerializer,
     StatusSerializer,
     StudentSerializer,
@@ -541,3 +544,93 @@ class DuplicatesView(APIView):
             date_of_birth=p.get("date_of_birth", ""),
         )
         return Response(DuplicateSerializer(rows, many=True).data)
+
+
+class PeopleMapView(APIView):
+    """``/people/map``: geocoded students and tutors for in-person matching (FR-05-11, E05-T12).
+    Points are rounded to about 100 m; the response holds no street addresses."""
+
+    permission_classes = [IsAuthenticated, HasOrganisation]
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("kind", str, enum=["all", "student", "tutor"]),
+            OpenApiParameter("status", str),
+            OpenApiParameter("branch", OpenApiTypes.UUID),
+            OpenApiParameter("subject", str),
+        ],
+        responses=PeopleMapSerializer,
+        examples=[
+            OpenApiExample(
+                "Two people",
+                response_only=True,
+                value={
+                    "points": [
+                        {
+                            "kind": "student",
+                            "id": "01928d6e-0000-7000-8000-000000000001",
+                            "name": "Arjun Patel",
+                            "status": "active",
+                            "area": "SW11",
+                            "lat": 51.464,
+                            "lng": -0.163,
+                            "subjects": ["Maths"],
+                            "travel_radius_km": None,
+                        },
+                        {
+                            "kind": "tutor",
+                            "id": "01928d6e-0000-7000-8000-000000000002",
+                            "name": "Nia Clarke",
+                            "status": "active",
+                            "area": "SW4",
+                            "lat": 51.462,
+                            "lng": -0.138,
+                            "subjects": ["Maths", "Physics"],
+                            "travel_radius_km": 5,
+                        },
+                    ],
+                    "missing": {"student": 3, "tutor": 0},
+                },
+            )
+        ],
+    )
+    def get(self, request: Request) -> Response:
+        if not (
+            has_perm(request.user, "people.student.view")
+            or has_perm(request.user, "people.tutor.view")
+        ):
+            from tutortrack.core.exceptions import PermissionDenied
+
+            raise PermissionDenied()
+        q = request.query_params
+        kind = q.get("kind", "all")
+        kinds = selectors.MAP_KINDS if kind in ("", "all") else (kind,)
+        data = selectors.map_points(
+            request.user,
+            kinds=kinds,
+            status=q.get("status", ""),
+            branch=q.get("branch", ""),
+            subject=q.get("subject", ""),
+        )
+        return Response(PeopleMapSerializer(data).data)
+
+
+class PeopleMapGeocodeView(APIView):
+    """``POST /people/map/geocode``: geocode the people the map can't place yet."""
+
+    permission_classes = [IsAuthenticated, HasOrganisation]
+
+    @extend_schema(
+        request=GeocodeRequestSerializer,
+        responses=GeocodeResultSerializer,
+        examples=[OpenApiExample("Queued", response_only=True, value={"queued": 4})],
+    )
+    def post(self, request: Request) -> Response:
+        payload = GeocodeRequestSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        kinds = payload.validated_data["kinds"]
+        if not any(has_perm(request.user, f"people.{k}.edit") for k in kinds):
+            from tutortrack.core.exceptions import PermissionDenied
+
+            raise PermissionDenied()
+        return Response({"queued": services.geocode_missing(request.user, kinds)})

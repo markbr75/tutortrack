@@ -23,12 +23,29 @@ from tutortrack.privacy.registry import (
     register_retention,
 )
 
-from .models import CancellationRecord, LessonReport, LessonReportComment, MakeupCredit
+from .models import (
+    CancellationRecord,
+    LessonFeedback,
+    LessonReport,
+    LessonReportComment,
+    MakeupCredit,
+)
 
 
 def _reports(person: Person) -> QuerySet[LessonReport]:
     return LessonReport.objects.filter(
         lesson__attendees__student_id__in=person.of("people.student")
+    ).distinct()
+
+
+def _feedback(person: Person) -> QuerySet[LessonFeedback]:
+    """E09-T09 surveys about the person's lessons or answered by them."""
+    from django.db.models import Q
+
+    return LessonFeedback.objects.filter(
+        Q(student_id__in=person.of("people.student"))
+        | Q(contact_id__in=person.of("people.contact"))
+        | Q(client_id__in=person.of("people.client"))
     ).distinct()
 
 
@@ -52,8 +69,20 @@ def export(person: Person) -> list[Section]:
         {"id": str(m.pk), "expires_at": m.expires_at, "consumed_at": m.consumed_at}
         for m in MakeupCredit.objects.filter(student_id__in=person.of("people.student"))
     ]
+    feedback = [
+        {
+            "id": str(f.pk),
+            "lesson": f.lesson.title,
+            "date": f.lesson_date,
+            "status": f.status,
+            "rating": f.rating,
+            "comment": f.comment,
+        }
+        for f in _feedback(person).select_related("lesson")
+    ]
     return [
         Section("delivery.reports", _("Lesson reports"), reports),
+        Section("delivery.feedback", _("Lesson feedback you gave"), feedback),
         Section("delivery.comments", _("Comments on lesson reports"), comments),
         Section("delivery.makeup_credits", _("Make-up credits"), credits),
     ]
@@ -80,6 +109,9 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
         if body != comment.body:
             LessonReportComment.objects.filter(pk=comment.pk).update(body=body)
             out.anonymised += 1
+    out.anonymised += LessonFeedback.objects.filter(
+        pk__in=_feedback(person).exclude(comment="").values("pk")
+    ).update(comment="")
     for record in CancellationRecord.objects.filter(
         lesson__attendees__student_id__in=person.of("people.student")
     ).distinct():

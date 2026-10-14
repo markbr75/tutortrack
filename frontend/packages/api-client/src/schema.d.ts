@@ -252,6 +252,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/accounting/connections/{id}/read-back": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Look for payments recorded directly in the ledger against open synced invoices
+     *     and record them in TutorTrack now (the daily run does the same, E23-T09).
+     */
+    post: operations["accounting_connections_read_back_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/accounting/connections/{id}/refresh": {
     parameters: {
       query?: never;
@@ -303,6 +323,46 @@ export interface paths {
      *     tracking options per branch).
      */
     put: operations["accounting_mappings_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/payment-imports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Payments read back from the ledger (``?status=imported|skipped``), with the
+     *     TutorTrack payment created or the reason it wasn't (E23-T09).
+     */
+    get: operations["accounting_payment_imports_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/payment-imports/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Payments read back from the ledger (``?status=imported|skipped``), with the
+     *     TutorTrack payment created or the reason it wasn't (E23-T09).
+     */
+    get: operations["accounting_payment_imports_retrieve"];
+    put?: never;
     post?: never;
     delete?: never;
     options?: never;
@@ -5410,6 +5470,95 @@ export interface paths {
     patch: operations["custom_fields_partial_update"];
     trace?: never;
   };
+  "/api/v1/custom-reports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Saved custom reports: your own and those shared with you (``?dataset=``). Only the
+     *     owner changes or deletes one; everyone runs it with their own data scope.
+     */
+    get: operations["custom_reports_list"];
+    put?: never;
+    /**
+     * @description Saved custom reports: your own and those shared with you (``?dataset=``). Only the
+     *     owner changes or deletes one; everyone runs it with their own data scope.
+     */
+    post: operations["custom_reports_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/custom-reports/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Saved custom reports: your own and those shared with you (``?dataset=``). Only the
+     *     owner changes or deletes one; everyone runs it with their own data scope.
+     */
+    get: operations["custom_reports_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Saved custom reports: your own and those shared with you (``?dataset=``). Only the
+     *     owner changes or deletes one; everyone runs it with their own data scope.
+     */
+    delete: operations["custom_reports_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Saved custom reports: your own and those shared with you (``?dataset=``). Only the
+     *     owner changes or deletes one; everyone runs it with their own data scope.
+     */
+    patch: operations["custom_reports_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/custom-reports/{id}/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Saved custom reports: your own and those shared with you (``?dataset=``). Only the
+     *     owner changes or deletes one; everyone runs it with their own data scope.
+     */
+    get: operations["custom_reports_export_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/custom-reports/{id}/run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Run the saved report now, with the viewer's own data scope. */
+    get: operations["custom_reports_run_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/custom-roles": {
     parameters: {
       query?: never;
@@ -10217,6 +10366,86 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/lesson-feedback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Families' answers to post-lesson micro-surveys (FR-09-9). Tutors see feedback about
+     *     their own lessons.
+     */
+    get: operations["lesson_feedback_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lesson-feedback/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Families' answers to post-lesson micro-surveys (FR-09-9). Tutors see feedback about
+     *     their own lessons.
+     */
+    get: operations["lesson_feedback_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lesson-feedback/{id}/withdraw": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Families' answers to post-lesson micro-surveys (FR-09-9). Tutors see feedback about
+     *     their own lessons.
+     */
+    post: operations["lesson_feedback_withdraw_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lesson-feedback/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Families' answers to post-lesson micro-surveys (FR-09-9). Tutors see feedback about
+     *     their own lessons.
+     */
+    get: operations["lesson_feedback_summary_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/lesson-reports": {
     parameters: {
       query?: never;
@@ -13210,6 +13439,43 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/people/map": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``/people/map``: geocoded students and tutors for in-person matching (FR-05-11, E05-T12).
+     *     Points are rounded to about 100 m; the response holds no street addresses.
+     */
+    get: operations["people_map_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/people/map/geocode": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description ``POST /people/map/geocode``: geocode the people the map can't place yet. */
+    post: operations["people_map_geocode_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/permissions": {
     parameters: {
       query?: never;
@@ -14730,6 +14996,114 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/proposals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent
+     *     as a signed link with the PDF; the family accepts or declines online.
+     */
+    get: operations["proposals_list"];
+    put?: never;
+    /**
+     * @description Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent
+     *     as a signed link with the PDF; the family accepts or declines online.
+     */
+    post: operations["proposals_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/proposals/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent
+     *     as a signed link with the PDF; the family accepts or declines online.
+     */
+    get: operations["proposals_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent
+     *     as a signed link with the PDF; the family accepts or declines online.
+     */
+    patch: operations["proposals_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/proposals/{id}/pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent
+     *     as a signed link with the PDF; the family accepts or declines online.
+     */
+    get: operations["proposals_pdf_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/proposals/{id}/send": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent
+     *     as a signed link with the PDF; the family accepts or declines online.
+     */
+    post: operations["proposals_send_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/proposals/{id}/withdraw": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent
+     *     as a signed link with the PDF; the family accepts or declines online.
+     */
+    post: operations["proposals_withdraw_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/public-profiles": {
     parameters: {
       query?: never;
@@ -15111,6 +15485,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/public/lesson-feedback/{token}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``/public/lesson-feedback/{token}``: the family rates a lesson from the emailed link. */
+    get: operations["public_lesson_feedback_retrieve"];
+    put?: never;
+    /** @description ``/public/lesson-feedback/{token}``: the family rates a lesson from the emailed link. */
+    post: operations["public_lesson_feedback_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/public/manifest": {
     parameters: {
       query?: never;
@@ -15140,6 +15532,64 @@ export interface paths {
     put?: never;
     /** @description ``/public/offers/{token}``: the family sees and answers a waitlist offer. */
     post: operations["public_offers_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/proposals/{token}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``/public/proposals/{token}``: the family reads the proposal; POST accepts it (typed
+     *     name as signature, optional tutor choice). The response's ``pay_url`` is the deposit's
+     *     payment link.
+     */
+    get: operations["public_proposals_retrieve"];
+    put?: never;
+    /**
+     * @description ``/public/proposals/{token}``: the family reads the proposal; POST accepts it (typed
+     *     name as signature, optional tutor choice). The response's ``pay_url`` is the deposit's
+     *     payment link.
+     */
+    post: operations["public_proposals_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/proposals/{token}/decline": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["public_proposals_decline_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/proposals/{token}/pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["public_proposals_pdf_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -15244,6 +15694,24 @@ export interface paths {
     get: operations["public_services_list"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/shortlists/{token}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``/public/shortlists/{token}``: the family sees the tutor cards and picks one. */
+    get: operations["public_shortlists_retrieve"];
+    put?: never;
+    /** @description ``/public/shortlists/{token}``: the family sees the tutor cards and picks one. */
+    post: operations["public_shortlists_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -15695,6 +16163,63 @@ export interface paths {
      *     archives the template.
      */
     patch: operations["report_templates_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/reporting/builder/datasets": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The datasets this user may build reports on, with their whitelisted columns
+     *     (dimensions, incl. client/student custom fields) and measures.
+     */
+    get: operations["reporting_builder_datasets_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/builder/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Download an unsaved report definition as CSV, Excel or PDF (audited). */
+    post: operations["reporting_builder_export_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/builder/run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Run a report definition (nothing is saved). Figures follow the data scope of
+     *     the dataset's report family.
+     */
+    post: operations["reporting_builder_run_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/reporting/dashboard": {
@@ -16724,6 +17249,70 @@ export interface paths {
      *     ``overrides`` lists the keys set at branch level.
      */
     patch: operations["settings_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/shortlist-shares": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Shortlists shared with families (``?job=``): the signed link, whether it was opened
+     *     and which tutor the family chose.
+     */
+    get: operations["shortlist_shares_list"];
+    put?: never;
+    /**
+     * @description Shortlists shared with families (``?job=``): the signed link, whether it was opened
+     *     and which tutor the family chose.
+     */
+    post: operations["shortlist_shares_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/shortlist-shares/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Shortlists shared with families (``?job=``): the signed link, whether it was opened
+     *     and which tutor the family chose.
+     */
+    get: operations["shortlist_shares_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/shortlist-shares/{id}/revoke": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Shortlists shared with families (``?job=``): the signed link, whether it was opened
+     *     and which tutor the family chose.
+     */
+    post: operations["shortlist_shares_revoke_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/shortlists": {
@@ -19405,6 +19994,9 @@ export interface components {
       sync_bills?: boolean;
       attach_pdf?: boolean;
       lock_behaviour?: components["schemas"]["LockBehaviourEnum"];
+      import_payments?: boolean;
+      /** Format: date-time */
+      readonly payments_checked_at: string | null;
       /** Format: date-time */
       readonly chart_fetched_at: string | null;
       /** Format: date-time */
@@ -19630,10 +20222,23 @@ export interface components {
       filename: string;
       content: string;
     };
+    /**
+     * @description * `csv` - csv
+     *     * `bacs18` - bacs18
+     *     * `sepa` - sepa
+     *     * `nacha` - nacha
+     *     * `aba` - aba
+     * @enum {string}
+     */
+    AffiliateBankFileRequestFileFormatEnum: "csv" | "bacs18" | "sepa" | "nacha" | "aba";
     AffiliateBankFileRequestRequest: {
       statements: string[];
       file_format?:
-        (components["schemas"]["FileFormatEnum"] | components["schemas"]["NullEnum"]) | null;
+        | (
+            | components["schemas"]["AffiliateBankFileRequestFileFormatEnum"]
+            | components["schemas"]["NullEnum"]
+          )
+        | null;
     };
     /**
      * @description * `individual` - Individual
@@ -21201,6 +21806,69 @@ export interface components {
       definition?: components["schemas"]["SegmentDefinitionRequest"];
       attachment_ids?: string[];
     };
+    BuilderChoice: {
+      value: string;
+      label: string;
+    };
+    BuilderDataset: {
+      key: string;
+      label: string;
+      description: string;
+      category: string;
+      category_label: string;
+      date_field: string;
+      dimensions: components["schemas"]["BuilderDimension"][];
+      measures: components["schemas"]["BuilderMeasure"][];
+    };
+    BuilderDimension: {
+      key: string;
+      label: string;
+      type: components["schemas"]["BuilderDimensionTypeEnum"];
+      grains: string[];
+      choices: components["schemas"]["BuilderChoice"][];
+      operators: string[];
+    };
+    /**
+     * @description * `id` - id
+     *     * `choice` - choice
+     *     * `text` - text
+     *     * `date` - date
+     *     * `bool` - bool
+     *     * `number` - number
+     * @enum {string}
+     */
+    BuilderDimensionTypeEnum: "id" | "choice" | "text" | "date" | "bool" | "number";
+    /**
+     * @description * `csv` - csv
+     *     * `xlsx` - xlsx
+     *     * `pdf` - pdf
+     * @enum {string}
+     */
+    BuilderExportFileFormatEnum: "csv" | "xlsx" | "pdf";
+    BuilderExportRequest: {
+      definition: components["schemas"]["ReportDefinitionInputRequest"];
+      file_format: components["schemas"]["BuilderExportFileFormatEnum"];
+      /** @default  */
+      name: string;
+    };
+    BuilderFilterRequest: {
+      field: string;
+      op: components["schemas"]["OpEnum"];
+      value?: unknown;
+    };
+    BuilderMeasure: {
+      key: string;
+      label: string;
+      type: components["schemas"]["BuilderMeasureTypeEnum"];
+    };
+    /**
+     * @description * `count` - count
+     *     * `number` - number
+     *     * `money` - money
+     *     * `hours` - hours
+     * @enum {string}
+     */
+    BuilderMeasureTypeEnum: "count" | "number" | "money" | "hours";
     BuiltinCurriculum: {
       key: string;
       name: string;
@@ -21700,6 +22368,14 @@ export interface components {
       type: string;
       active: boolean;
     };
+    /**
+     * @description * `table` - table
+     *     * `bar` - bar
+     *     * `line` - line
+     *     * `pie` - pie
+     * @enum {string}
+     */
+    ChartEnum: "table" | "bar" | "line" | "pie";
     ChartTaxCode: {
       id: string;
       name: string;
@@ -23016,6 +23692,51 @@ export interface components {
      * @enum {string}
      */
     CustomFieldVisibilityEnum: "staff" | "tutor" | "client_portal" | "public";
+    CustomReport: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      description?: string;
+      readonly dataset: string;
+      definition: {
+        [key: string]: unknown;
+      };
+      shared?: boolean;
+      readonly owner_name: string;
+      readonly is_mine: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    CustomReportWriteRequest: {
+      name: string;
+      /** @default  */
+      description: string;
+      definition: components["schemas"]["ReportDefinitionInputRequest"];
+      /** @default false */
+      shared: boolean;
+    };
+    CustomResult: {
+      definition: {
+        [key: string]: unknown;
+      };
+      period: {
+        [key: string]: string;
+      } | null;
+      columns: components["schemas"]["ReportColumn"][];
+      rows: {
+        [key: string]: unknown;
+      }[];
+      totals: {
+        [key: string]: unknown;
+      }[];
+      chart: components["schemas"]["ReportChart"] | null;
+      notes: string[];
+      truncated: boolean;
+      /** Format: date-time */
+      generated_at: string;
+    };
     CustomRole: {
       /** Format: uuid */
       readonly id: string;
@@ -24279,15 +25000,34 @@ export interface components {
       /** Format: uuid */
       subject_id: string;
     };
-    /**
-     * @description * `csv` - csv
-     *     * `bacs18` - bacs18
-     *     * `sepa` - sepa
-     *     * `nacha` - nacha
-     *     * `aba` - aba
-     * @enum {string}
-     */
-    FileFormatEnum: "csv" | "bacs18" | "sepa" | "nacha" | "aba";
+    FeedbackAnswerRequest: {
+      rating: number;
+      /** @default  */
+      comment: string;
+    };
+    FeedbackPerson: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    FeedbackSummary: {
+      asked: number;
+      answered: number;
+      answer_rate: string;
+      average: string | null;
+      stars: {
+        [key: string]: number;
+      };
+      tutors: components["schemas"]["FeedbackTutorRow"][];
+    };
+    FeedbackTutorRow: {
+      /** Format: uuid */
+      tutor_id: string | null;
+      tutor: string;
+      average: string;
+      answered: number;
+      asked: number;
+    };
     FileRef: {
       /** Format: uuid */
       id: string;
@@ -24415,6 +25155,18 @@ export interface components {
      * @enum {string}
      */
     FutureLessonsEnum: "keep" | "cancel";
+    GeocodeRequestRequest: {
+      /**
+       * @default [
+       *       "student",
+       *       "tutor"
+       *     ]
+       */
+      kinds: components["schemas"]["PersonKindEnum"][];
+    };
+    GeocodeResult: {
+      queued: number;
+    };
     GiveReferenceRequest: {
       responses: {
         [key: string]: string;
@@ -26093,6 +26845,44 @@ export interface components {
       | "adjustment"
       | "write_off"
       | "package_purchase";
+    LedgerPaymentImport: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly connection: string;
+      readonly provider: string;
+      readonly external_id: string;
+      /** Format: uuid */
+      readonly invoice: string;
+      readonly invoice_number: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      /** Format: uuid */
+      readonly payment: string | null;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      /** Format: date */
+      readonly paid_on: string | null;
+      readonly reference: string;
+      readonly status: components["schemas"]["LedgerPaymentImportStatusEnum"];
+      readonly reason: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `imported` - Recorded in TutorTrack
+     *     * `skipped` - Not recorded
+     * @enum {string}
+     */
+    LedgerPaymentImportStatusEnum: "imported" | "skipped";
     LegalHold: {
       /** Format: uuid */
       readonly id: string;
@@ -26270,6 +27060,40 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    LessonFeedback: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly lesson: string;
+      readonly lesson_title: string;
+      /** Format: date-time */
+      readonly lesson_start: string;
+      /** Format: date */
+      readonly lesson_date: string;
+      readonly student: components["schemas"]["FeedbackPerson"];
+      readonly tutor: components["schemas"]["FeedbackPerson"] | null;
+      readonly contact_name: string;
+      readonly status: components["schemas"]["LessonFeedbackStatusEnum"];
+      readonly skip_reason:
+        components["schemas"]["SkipReasonEnum"] | components["schemas"]["BlankEnum"];
+      /** Format: date-time */
+      readonly sent_at: string | null;
+      /** Format: date-time */
+      readonly expires_at: string;
+      readonly rating: number | null;
+      readonly comment: string;
+      /** Format: date-time */
+      readonly answered_at: string | null;
+      readonly low_score_alerted: boolean;
+    };
+    /**
+     * @description * `sent` - Sent
+     *     * `answered` - Answered
+     *     * `expired` - Expired
+     *     * `skipped` - Not sent
+     * @enum {string}
+     */
+    LessonFeedbackStatusEnum: "sent" | "answered" | "expired" | "skipped";
     LessonReasonRequest: {
       /** @default  */
       reason: string;
@@ -26782,6 +27606,24 @@ export interface components {
     };
     ManualRunRequest: {
       subject_ids: string[];
+    };
+    MapMissing: {
+      student: number;
+      tutor: number;
+    };
+    MapPoint: {
+      kind: components["schemas"]["PersonKindEnum"];
+      /** Format: uuid */
+      id: string;
+      name: string;
+      status: string;
+      area: string;
+      /** Format: double */
+      lat: number;
+      /** Format: double */
+      lng: number;
+      subjects: string[];
+      travel_radius_km: number | null;
     };
     MappingKey: {
       key: string;
@@ -27659,6 +28501,18 @@ export interface components {
      * @enum {string}
      */
     OnlineMeetingStatusEnum: "pending" | "active" | "failed" | "deleted";
+    /**
+     * @description * `eq` - eq
+     *     * `neq` - neq
+     *     * `in` - in
+     *     * `gte` - gte
+     *     * `lte` - lte
+     *     * `contains` - contains
+     *     * `empty` - empty
+     *     * `not_empty` - not_empty
+     * @enum {string}
+     */
+    OpEnum: "eq" | "neq" | "in" | "gte" | "lte" | "contains" | "empty" | "not_empty";
     OpenResource: {
       url: string;
       expires_in: number | null;
@@ -28592,6 +29446,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["CurriculumNode"][];
     };
+    PaginatedCustomReportList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["CustomReport"][];
+    };
     PaginatedDataRequestList: {
       /**
        * Format: uri
@@ -28917,6 +29784,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["JobPosting"][];
     };
+    PaginatedLedgerPaymentImportList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["LedgerPaymentImport"][];
+    };
     PaginatedLegalHoldList: {
       /**
        * Format: uri
@@ -28942,6 +29822,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["LessonChangeRequest"][];
+    };
+    PaginatedLessonFeedbackList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["LessonFeedback"][];
     };
     PaginatedLessonList: {
       /**
@@ -29346,6 +30239,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["PromoCode"][];
     };
+    PaginatedProposalList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Proposal"][];
+    };
     PaginatedProviderMigrationList: {
       /**
        * Format: uri
@@ -29684,6 +30590,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Service"][];
     };
+    PaginatedShortlistShareList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ShortlistShare"][];
+    };
     PaginatedSitePageList: {
       /**
        * Format: uri
@@ -29988,6 +30907,7 @@ export interface components {
       sync_bills?: boolean;
       attach_pdf?: boolean;
       lock_behaviour?: components["schemas"]["LockBehaviourEnum"];
+      import_payments?: boolean;
     };
     PatchedAffiliateLinkRequest: {
       /** Format: uuid */
@@ -30356,6 +31276,14 @@ export interface components {
       order?: number;
       validation_regex?: string;
       active?: boolean;
+    };
+    PatchedCustomReportWriteRequest: {
+      name?: string;
+      /** @default  */
+      description: string;
+      definition?: components["schemas"]["ReportDefinitionInputRequest"];
+      /** @default false */
+      shared: boolean;
     };
     PatchedCustomRoleUpdateRequest: {
       name?: string;
@@ -30903,6 +31831,26 @@ export interface components {
       valid_to?: string | null;
       new_clients_only?: boolean;
       active?: boolean;
+    };
+    PatchedProposalWriteRequest: {
+      /** Format: uuid */
+      enquiry?: string;
+      /** @default  */
+      title: string;
+      /** Format: uuid */
+      contact?: string | null;
+      /** @default  */
+      introduction: string;
+      /** @default  */
+      schedule: string;
+      terms?: string | null;
+      lines?: components["schemas"]["ProposalLineRequest"][];
+      tutors?: string[];
+      /** @default  */
+      currency: string;
+      /** Format: decimal */
+      deposit?: string | null;
+      valid_days?: number | null;
     };
     PatchedPublicProfileWriteRequest: {
       display_name?: string;
@@ -31884,6 +32832,10 @@ export interface components {
       country: string;
       bank: components["schemas"]["AffiliateBankDetailsRequest"];
     };
+    PeopleMap: {
+      points: components["schemas"]["MapPoint"][];
+      missing: components["schemas"]["MapMissing"];
+    };
     PercentPair: {
       /** Format: decimal */
       charge_percent: string;
@@ -31901,6 +32853,12 @@ export interface components {
       category: string;
       description: string;
     };
+    /**
+     * @description * `student` - student
+     *     * `tutor` - tutor
+     * @enum {string}
+     */
+    PersonKindEnum: "student" | "tutor";
     PersonRef: {
       id: string;
       name: string;
@@ -33138,6 +34096,132 @@ export interface components {
       new_clients_only?: boolean;
       active?: boolean;
     };
+    Proposal: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly enquiry: string;
+      readonly number: string;
+      readonly title: string;
+      /** Format: uuid */
+      readonly contact: string | null;
+      readonly contact_name: string;
+      readonly status: components["schemas"]["ProposalStatusEnum"];
+      readonly state: components["schemas"]["ProposalStateEnum"];
+      readonly introduction: string;
+      readonly schedule: string;
+      readonly terms: string;
+      lines: components["schemas"]["ProposalLine"][];
+      readonly tutors: string[];
+      readonly currency: string;
+      readonly total: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly deposit: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      readonly valid_days: number;
+      /** Format: date-time */
+      readonly sent_at: string | null;
+      /** Format: date-time */
+      readonly expires_at: string | null;
+      /** Format: date-time */
+      readonly viewed_at: string | null;
+      /** Format: date-time */
+      readonly responded_at: string | null;
+      readonly accepted_name: string;
+      /** Format: uuid */
+      readonly chosen_tutor: string | null;
+      readonly chosen_tutor_name: string;
+      readonly decline_reason: string;
+      /** Format: uuid */
+      readonly payment_request: string | null;
+      readonly job_ids: string[];
+      readonly link: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ProposalAcceptRequest: {
+      name: string;
+      /** Format: uuid */
+      tutor?: string | null;
+    };
+    ProposalDeclineRequest: {
+      /** @default  */
+      reason: string;
+    };
+    ProposalLine: {
+      /** Format: uuid */
+      service?: string | null;
+      description?: string;
+      /** Format: decimal */
+      quantity: string;
+      /** Format: decimal */
+      unit_price: string;
+      /** Format: decimal */
+      readonly amount: string;
+    };
+    ProposalLineRequest: {
+      /** Format: uuid */
+      service?: string | null;
+      description?: string;
+      /** Format: decimal */
+      quantity: string;
+      /** Format: decimal */
+      unit_price: string;
+    };
+    /**
+     * @description * `draft` - draft
+     *     * `sent` - sent
+     *     * `accepted` - accepted
+     *     * `declined` - declined
+     *     * `expired` - expired
+     *     * `withdrawn` - withdrawn
+     * @enum {string}
+     */
+    ProposalStateEnum: "draft" | "sent" | "accepted" | "declined" | "expired" | "withdrawn";
+    /**
+     * @description * `draft` - Draft
+     *     * `sent` - Sent
+     *     * `accepted` - Accepted
+     *     * `declined` - Declined
+     *     * `expired` - Expired
+     *     * `withdrawn` - Withdrawn
+     * @enum {string}
+     */
+    ProposalStatusEnum: "draft" | "sent" | "accepted" | "declined" | "expired" | "withdrawn";
+    ProposalWriteRequest: {
+      /** Format: uuid */
+      enquiry?: string;
+      /** @default  */
+      title: string;
+      /** Format: uuid */
+      contact?: string | null;
+      /** @default  */
+      introduction: string;
+      /** @default  */
+      schedule: string;
+      terms?: string | null;
+      lines?: components["schemas"]["ProposalLineRequest"][];
+      tutors?: string[];
+      /** @default  */
+      currency: string;
+      /** Format: decimal */
+      deposit?: string | null;
+      valid_days?: number | null;
+    };
     ProposeInterviewRequest: {
       options: string[];
       /** @default 30 */
@@ -33361,6 +34445,18 @@ export interface components {
       token?: string;
       waitlist_position?: number | null;
     };
+    PublicFeedback: {
+      organisation: string;
+      student: string;
+      tutor: string;
+      lesson: string;
+      /** Format: date */
+      lesson_date: string;
+      status: components["schemas"]["LessonFeedbackStatusEnum"];
+      /** Format: date-time */
+      expires_at: string;
+      rating: number | null;
+    };
     PublicForm: {
       name: string;
       type: string;
@@ -33491,6 +34587,32 @@ export interface components {
       listed?: boolean;
       slug?: string;
     };
+    PublicProposal: {
+      organisation: string;
+      number: string;
+      title: string;
+      status: components["schemas"]["ProposalStateEnum"];
+      introduction: string;
+      schedule: string;
+      terms: string;
+      lines: components["schemas"]["PublicProposalLine"][];
+      currency: string;
+      total: string;
+      deposit: string | null;
+      /** Format: date-time */
+      expires_at: string | null;
+      tutors: components["schemas"]["PublicTutorCard"][];
+      /** Format: uuid */
+      chosen_tutor: string | null;
+      students: string[];
+      pay_url: string;
+    };
+    PublicProposalLine: {
+      description: string;
+      quantity: string;
+      unit_price: string;
+      amount: string;
+    };
     /** @description A question as the learner sees it (no answers). */
     PublicQuestion: {
       /** Format: uuid */
@@ -33564,6 +34686,24 @@ export interface components {
       pricing_unit: string;
       pricing_unit_label: string;
     };
+    PublicShortlist: {
+      organisation: string;
+      status: components["schemas"]["ShortlistShareStateEnum"];
+      /** Format: date-time */
+      expires_at: string;
+      message: string;
+      job: components["schemas"]["PublicShortlistJob"];
+      tutors: components["schemas"]["PublicTutorCard"][];
+      /** Format: uuid */
+      chosen_tutor: string | null;
+    };
+    PublicShortlistJob: {
+      subject: string;
+      level: string;
+      service: string;
+      students: string[];
+      online: boolean;
+    };
     PublicStudentRequest: {
       first_name: string;
       last_name?: string;
@@ -33603,6 +34743,23 @@ export interface components {
       rating: number | null;
       review_count: number;
     };
+    PublicTutorCard: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      headline: string;
+      bio: string;
+      photo_url: string;
+      subjects: components["schemas"]["PublicTutorSubject"][];
+      qualifications: components["schemas"]["PublicTutorQualification"][];
+      years_experience: number | null;
+      languages: string[];
+      online: boolean;
+      in_person: boolean;
+      /** Format: double */
+      rating: number | null;
+      rating_count: number;
+    };
     PublicTutorDetail: {
       slug: string;
       display_name: string;
@@ -33619,6 +34776,15 @@ export interface components {
       qualifications: components["schemas"]["Qualification"][];
       languages: string[];
       years_experience: number | null;
+    };
+    PublicTutorQualification: {
+      title: string;
+      institution: string;
+      year: number | null;
+    };
+    PublicTutorSubject: {
+      subject: string;
+      level: string;
     };
     PublicWidget: {
       key: string;
@@ -33977,6 +35143,11 @@ export interface components {
     Reactivate: {
       subscription: components["schemas"]["Subscription"];
       url: string;
+    };
+    ReadBackResult: {
+      checked: number;
+      imported: number;
+      skipped: number;
     };
     /**
      * @description * `too_expensive` - too_expensive
@@ -34499,6 +35670,26 @@ export interface components {
       group_by: components["schemas"]["Option"][];
       period: boolean;
       default_period: string;
+    };
+    ReportDefinitionInputRequest: {
+      dataset: string;
+      group_by?: string[];
+      measures?: string[];
+      filters?: components["schemas"]["BuilderFilterRequest"][];
+      /** @default this_month */
+      period: string;
+      /** Format: date */
+      from_date?: string | null;
+      /** Format: date */
+      to_date?: string | null;
+      /** @default  */
+      ordering: string;
+      /** @default 1000 */
+      limit: number;
+      /** @default table */
+      chart: components["schemas"]["ChartEnum"];
+      /** @default  */
+      currency: string;
     };
     ReportDownload: {
       /** Format: uri */
@@ -35989,6 +37180,12 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    ShortlistChoiceRequest: {
+      /** Format: uuid */
+      tutor: string;
+      /** @default  */
+      note: string;
+    };
     ShortlistRequest: {
       /** Format: uuid */
       job: string;
@@ -35996,6 +37193,59 @@ export interface components {
       tutor: string;
       note?: string;
     };
+    ShortlistShare: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly job: string;
+      readonly tutors: string[];
+      /** Format: uuid */
+      readonly contact: string | null;
+      readonly contact_name: string;
+      readonly message: string;
+      readonly status: components["schemas"]["ShortlistShareStatusEnum"];
+      readonly state: components["schemas"]["ShortlistShareStateEnum"];
+      /** Format: date-time */
+      readonly expires_at: string;
+      /** Format: date-time */
+      readonly viewed_at: string | null;
+      /** Format: uuid */
+      readonly chosen_tutor: string | null;
+      readonly chosen_tutor_name: string;
+      /** Format: date-time */
+      readonly chosen_at: string | null;
+      readonly client_note: string;
+      /** Format: uuid */
+      readonly offer_batch: string | null;
+      readonly link: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ShortlistShareCreateRequest: {
+      /** Format: uuid */
+      job: string;
+      tutors?: string[];
+      /** Format: uuid */
+      contact?: string | null;
+      /** @default  */
+      message: string;
+      days?: number | null;
+    };
+    /**
+     * @description * `active` - active
+     *     * `chosen` - chosen
+     *     * `revoked` - revoked
+     *     * `expired` - expired
+     * @enum {string}
+     */
+    ShortlistShareStateEnum: "active" | "chosen" | "revoked" | "expired";
+    /**
+     * @description * `active` - Waiting for the family
+     *     * `chosen` - Tutor chosen
+     *     * `revoked` - Withdrawn
+     * @enum {string}
+     */
+    ShortlistShareStatusEnum: "active" | "chosen" | "revoked";
     /**
      * @description * `qualifications` - qualifications
      *     * `languages` - languages
@@ -36137,6 +37387,13 @@ export interface components {
      * @enum {string}
      */
     SizeEnum: "s" | "m" | "l";
+    /**
+     * @description * `` - None
+     *     * `no_recipient` - No contact receives lesson updates
+     *     * `no_consent` - The family opted out of feedback requests
+     * @enum {string}
+     */
+    SkipReasonEnum: "no_recipient" | "no_consent";
     SkipRequest: {
       /** @default  */
       reason: string;
@@ -36644,10 +37901,18 @@ export interface components {
      *     * `error` - Error
      *     * `retrying` - Will retry
      *     * `skipped` - Skipped
+     *     * `imported` - Imported from the ledger
      * @enum {string}
      */
     SyncOutcomeEnum:
-      "created" | "updated" | "unchanged" | "voided" | "error" | "retrying" | "skipped";
+      | "created"
+      | "updated"
+      | "unchanged"
+      | "voided"
+      | "error"
+      | "retrying"
+      | "skipped"
+      | "imported";
     TOTPConfirmRequest: {
       /** Format: uuid */
       device_id: string;
@@ -38793,6 +40058,31 @@ export interface operations {
       };
     };
   };
+  accounting_connections_read_back_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this accounting connection. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReadBackResult"];
+        };
+      };
+    };
+  };
   accounting_connections_refresh_create: {
     parameters: {
       query?: never;
@@ -38897,6 +40187,55 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["MappingSet"];
+        };
+      };
+    };
+  };
+  accounting_payment_imports_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: "imported" | "skipped";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedLedgerPaymentImportList"];
+        };
+      };
+    };
+  };
+  accounting_payment_imports_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this ledger payment import. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LedgerPaymentImport"];
         };
       };
     };
@@ -48815,6 +50154,178 @@ export interface operations {
       };
     };
   };
+  custom_reports_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        dataset?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedCustomReportList"];
+        };
+      };
+    };
+  };
+  custom_reports_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CustomReportWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CustomReportWriteRequest"];
+        "multipart/form-data": components["schemas"]["CustomReportWriteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomReport"];
+        };
+      };
+    };
+  };
+  custom_reports_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this custom report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomReport"];
+        };
+      };
+    };
+  };
+  custom_reports_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this custom report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  custom_reports_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this custom report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedCustomReportWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedCustomReportWriteRequest"];
+        "multipart/form-data": components["schemas"]["PatchedCustomReportWriteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomReport"];
+        };
+      };
+    };
+  };
+  custom_reports_export_retrieve: {
+    parameters: {
+      query: {
+        file_format: "csv" | "pdf" | "xlsx";
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this custom report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/octet-stream": string;
+        };
+      };
+    };
+  };
+  custom_reports_run_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this custom report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomResult"];
+        };
+      };
+    };
+  };
   custom_roles_list: {
     parameters: {
       query?: {
@@ -57351,6 +58862,109 @@ export interface operations {
       };
     };
   };
+  lesson_feedback_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /** @description 1-5, or low (at or below the alert level) */
+        rating?: string;
+        since?: string;
+        status?: "answered" | "expired" | "sent" | "skipped";
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedLessonFeedbackList"];
+        };
+      };
+    };
+  };
+  lesson_feedback_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson feedback. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonFeedback"];
+        };
+      };
+    };
+  };
+  lesson_feedback_withdraw_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this lesson feedback. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonFeedback"];
+        };
+      };
+    };
+  };
+  lesson_feedback_summary_retrieve: {
+    parameters: {
+      query?: {
+        /** @description 1-5, or low (at or below the alert level) */
+        rating?: string;
+        since?: string;
+        status?: "answered" | "expired" | "sent" | "skipped";
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FeedbackSummary"];
+        };
+      };
+    };
+  };
   lesson_reports_list: {
     parameters: {
       query?: {
@@ -62465,6 +64079,58 @@ export interface operations {
       };
     };
   };
+  people_map_retrieve: {
+    parameters: {
+      query?: {
+        branch?: string;
+        kind?: "all" | "student" | "tutor";
+        status?: string;
+        subject?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PeopleMap"];
+        };
+      };
+    };
+  };
+  people_map_geocode_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["GeocodeRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["GeocodeRequestRequest"];
+        "multipart/form-data": components["schemas"]["GeocodeRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GeocodeResult"];
+        };
+      };
+    };
+  };
   permissions_list: {
     parameters: {
       query?: never;
@@ -64804,6 +66470,184 @@ export interface operations {
       };
     };
   };
+  proposals_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        enquiry?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedProposalList"];
+        };
+      };
+    };
+  };
+  proposals_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ProposalWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ProposalWriteRequest"];
+        "multipart/form-data": components["schemas"]["ProposalWriteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Proposal"];
+        };
+      };
+    };
+  };
+  proposals_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this proposal. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Proposal"];
+        };
+      };
+    };
+  };
+  proposals_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this proposal. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedProposalWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedProposalWriteRequest"];
+        "multipart/form-data": components["schemas"]["PatchedProposalWriteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Proposal"];
+        };
+      };
+    };
+  };
+  proposals_pdf_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this proposal. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": string;
+        };
+      };
+    };
+  };
+  proposals_send_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this proposal. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Proposal"];
+        };
+      };
+    };
+  };
+  proposals_withdraw_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this proposal. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Proposal"];
+        };
+      };
+    };
+  };
   public_profiles_list: {
     parameters: {
       query?: {
@@ -65493,6 +67337,57 @@ export interface operations {
       };
     };
   };
+  public_lesson_feedback_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicFeedback"];
+        };
+      };
+    };
+  };
+  public_lesson_feedback_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FeedbackAnswerRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["FeedbackAnswerRequest"];
+        "multipart/form-data": components["schemas"]["FeedbackAnswerRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicFeedback"];
+        };
+      };
+    };
+  };
   public_manifest_retrieve: {
     parameters: {
       query?: never;
@@ -65559,6 +67454,108 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PublicOffer"];
+        };
+      };
+    };
+  };
+  public_proposals_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicProposal"];
+        };
+      };
+    };
+  };
+  public_proposals_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProposalAcceptRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ProposalAcceptRequest"];
+        "multipart/form-data": components["schemas"]["ProposalAcceptRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicProposal"];
+        };
+      };
+    };
+  };
+  public_proposals_decline_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ProposalDeclineRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ProposalDeclineRequest"];
+        "multipart/form-data": components["schemas"]["ProposalDeclineRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicProposal"];
+        };
+      };
+    };
+  };
+  public_proposals_pdf_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": string;
         };
       };
     };
@@ -65783,6 +67780,57 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PublicService"][];
+        };
+      };
+    };
+  };
+  public_shortlists_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicShortlist"];
+        };
+      };
+    };
+  };
+  public_shortlists_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ShortlistChoiceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ShortlistChoiceRequest"];
+        "multipart/form-data": components["schemas"]["ShortlistChoiceRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicShortlist"];
         };
       };
     };
@@ -66558,6 +68606,81 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ReportTemplate"];
+        };
+      };
+    };
+  };
+  reporting_builder_datasets_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BuilderDataset"][];
+        };
+      };
+    };
+  };
+  reporting_builder_export_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BuilderExportRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BuilderExportRequest"];
+        "multipart/form-data": components["schemas"]["BuilderExportRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/octet-stream": string;
+        };
+      };
+    };
+  };
+  reporting_builder_run_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportDefinitionInputRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReportDefinitionInputRequest"];
+        "multipart/form-data": components["schemas"]["ReportDefinitionInputRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomResult"];
         };
       };
     };
@@ -68655,6 +70778,108 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SettingsArea"];
+        };
+      };
+    };
+  };
+  shortlist_shares_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        job?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedShortlistShareList"];
+        };
+      };
+    };
+  };
+  shortlist_shares_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ShortlistShareCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ShortlistShareCreateRequest"];
+        "multipart/form-data": components["schemas"]["ShortlistShareCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ShortlistShare"];
+        };
+      };
+    };
+  };
+  shortlist_shares_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this shortlist share. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ShortlistShare"];
+        };
+      };
+    };
+  };
+  shortlist_shares_revoke_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this shortlist share. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ShortlistShare"];
         };
       };
     };

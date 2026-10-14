@@ -8,13 +8,15 @@ from typing import Any
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from tutortrack.core.api.mixins import PreconditionFailed, etag_for
@@ -31,7 +33,13 @@ from tutortrack.scheduling.api.serializers import LessonSerializer
 from tutortrack.scheduling.models import Lesson
 
 from .. import selectors, services
-from ..models import CancellationPolicy, LessonReport, MakeupCredit, ReportTemplate
+from ..models import (
+    CancellationPolicy,
+    LessonFeedback,
+    LessonReport,
+    MakeupCredit,
+    ReportTemplate,
+)
 from . import serializers as s
 
 AUTH = [IsAuthenticated, HasOrganisation]
@@ -456,3 +464,147 @@ class AttendanceStatsView(APIView):
         student = get_object_or_404(students, pk=student_id)
         stats = selectors.attendance_stats(student.pk)
         return Response(s.AttendanceStatsSerializer(stats).data)
+
+
+# --- client feedback (E09-T09) --------------------------------------------------------------
+
+FEEDBACK_FILTERS = [
+    OpenApiParameter("status", str, enum=[c for c, _label in LessonFeedback.Status.choices]),
+    OpenApiParameter("tutor", OpenApiTypes.UUID),
+    OpenApiParameter("rating", str, description="1-5, or low (at or below the alert level)"),
+    OpenApiParameter("since", OpenApiTypes.DATE),
+]
+
+
+class LessonFeedbackViewSet(
+    TenantScopedViewMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Families' answers to post-lesson micro-surveys (FR-09-9). Tutors see feedback about
+    their own lessons."""
+
+    model = LessonFeedback
+    serializer_class = s.LessonFeedbackSerializer
+    permission_classes = perms(
+        {"GET": "delivery.feedback.view", "POST": "delivery.feedback.manage"}
+    )
+
+    def _since(self) -> Any:
+        from datetime import date
+
+        raw = self.request.query_params.get("since", "")
+        try:
+            return date.fromisoformat(raw) if raw else None
+        except ValueError:
+            raise ValidationError({"since": ["Use YYYY-MM-DD."]}) from None
+
+    def get_tenant_queryset(self) -> QuerySet[LessonFeedback]:
+        q = self.request.query_params
+        return selectors.feedback(
+            self.request.user,
+            status=q.get("status", ""),
+            tutor=q.get("tutor", ""),
+            rating=q.get("rating", ""),
+            since=self._since(),
+        )
+
+    @extend_schema(parameters=FEEDBACK_FILTERS)
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        parameters=FEEDBACK_FILTERS,
+        responses=s.FeedbackSummarySerializer,
+        examples=[
+            OpenApiExample(
+                "Summary",
+                response_only=True,
+                value={
+                    "asked": 40,
+                    "answered": 30,
+                    "answer_rate": "75.0",
+                    "average": "4.6",
+                    "stars": {"1": 0, "2": 1, "3": 1, "4": 7, "5": 21},
+                    "tutors": [
+                        {
+                            "tutor_id": "01928d6e-0000-7000-8000-000000000002",
+                            "tutor": "Nia Clarke",
+                            "average": "4.8",
+                            "answered": 12,
+                            "asked": 15,
+                        }
+                    ],
+                },
+            )
+        ],
+    )
+    @action(detail=False, methods=["get"], pagination_class=None)
+    def summary(self, request: Request) -> Response:
+        return Response(selectors.feedback_summary(self.get_tenant_queryset()))
+
+    @extend_schema(request=None, responses=s.LessonFeedbackSerializer)
+    @action(detail=True, methods=["post"])
+    def withdraw(self, request: Request, pk: Any = None) -> Response:
+        from .. import feedback
+
+        return Response(self.get_serializer(feedback.withdraw(self.get_object())).data)
+
+
+class PublicLessonFeedbackView(APIView):
+    """``/public/lesson-feedback/{token}``: the family rates a lesson from the emailed link."""
+
+    permission_classes = [AllowAny]
+    authentication_classes: list[Any] = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "public_form"
+
+    def _body(self, request: Request, item: LessonFeedback) -> dict[str, Any]:
+        organisation = getattr(request, "organisation", None)
+        tutor = item.tutor
+        return {
+            "organisation": organisation.name if organisation else "",
+            "student": item.student.preferred_name or item.student.first_name,
+            "tutor": (tutor.display_name or tutor.first_name) if tutor else "",
+            "lesson": item.lesson.title,
+            "lesson_date": item.lesson_date,
+            "status": item.status,
+            "expires_at": item.expires_at,
+            "rating": item.rating,
+        }
+
+    @extend_schema(responses=s.PublicFeedbackSerializer)
+    def get(self, request: Request, token: str) -> Response:
+        from .. import feedback
+
+        if getattr(request, "organisation", None) is None:
+            from rest_framework.exceptions import NotFound
+
+            raise NotFound()
+        return Response(self._body(request, feedback.for_token(token)))
+
+    @extend_schema(
+        request=s.FeedbackAnswerSerializer,
+        responses=s.PublicFeedbackSerializer,
+        examples=[
+            OpenApiExample(
+                "Five stars", request_only=True, value={"rating": 5, "comment": "Great lesson!"}
+            )
+        ],
+    )
+    def post(self, request: Request, token: str) -> Response:
+        from .. import feedback
+
+        if getattr(request, "organisation", None) is None:
+            from rest_framework.exceptions import NotFound
+
+            raise NotFound()
+        payload = s.FeedbackAnswerSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        item = feedback.answer(
+            token,
+            rating=payload.validated_data["rating"],
+            comment=payload.validated_data["comment"],
+        )
+        return Response(self._body(request, item))

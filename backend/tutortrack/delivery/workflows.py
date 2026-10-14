@@ -1,5 +1,5 @@
 """Workflows defined by this app (autodiscovered by the worker)."""
 
-from .processes import LessonReportSlaWorkflow, UnconfirmedLessonWorkflow
+from .processes import LessonFeedbackWorkflow, LessonReportSlaWorkflow, UnconfirmedLessonWorkflow
 
-__all__ = ["LessonReportSlaWorkflow", "UnconfirmedLessonWorkflow"]
+__all__ = ["LessonFeedbackWorkflow", "LessonReportSlaWorkflow", "UnconfirmedLessonWorkflow"]

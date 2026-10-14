@@ -53,7 +53,7 @@ Operational and financial insight: a configurable home dashboard with KPI widget
 - [x] **E26-T05** Payroll and operations reports.
 - [x] **E26-T06** Sales/growth and people/compliance reports.
 - [x] **E26-T07** Exports (CSV/XLSX/PDF) and scheduled reports.
-- [ ] **E26-T08** (Phase 2b) Custom report builder on semantic layer.
+- [x] **E26-T08** (Phase 2b) Custom report builder on semantic layer.
 - [ ] **E26-T09** (Enterprise) Warehouse export.
 
 ## Implementation notes (as built 2026-10-10)
@@ -100,6 +100,16 @@ Operational and financial insight: a configurable home dashboard with KPI widget
   - Delivery sends the comms notification `scheduled_report` (email with the file attached, editable template), once per recipient.
   - Tests cover the happy path, retry, failure, skip, the schedule sync and a replay of recorded histories.
   - Deviation: the workflow has no signals or timers to test; the Schedule provides the timing.
-- **Not built:** T08 custom report builder (Phase 2b) and T09 warehouse export (Enterprise).
+- **Not built:** T09 warehouse export (Enterprise). T08 was built in Phase 2b (see below).
 - **Frontend:** the admin home shows the dashboard. Reports live under `/analytics`: the library, a report page with filters, chart, table, totals, downloads and "save this view", and saved and scheduled reports with the run history.
   - Charts use Recharts with the Okabe-Ito palette. The drawing is hidden from assistive technology, and a table carries the same numbers.
+
+## Phase 2b implementation notes (as built 2026-10-14)
+- **T08 custom report builder (FR-26-3).** `reporting.builder` is a semantic layer of whitelisted datasets: lessons, attendees, charges, payments, pay items, invoices, students, clients, tutors, enquiries and lesson feedback (E09-T09). Each names its dimensions (ORM lookups we wrote, typed id/choice/text/date/bool/number, dates grouped by day/week/month/quarter/year in the organisation's timezone) and measures (count, sum, average, minimum, maximum of a chosen field). Active client, student and tutor custom fields are extra text dimensions (`cf.<entity>.<key>`). A user's definition only names these; field paths, SQL and ordering on unknown columns are refused (422).
+- **Permission-scoped.** The builder needs `reporting.builder.use` (coordinators, finance via `reporting.*`, admins); each dataset belongs to a report family and is scoped like the standard reports (`reporting.<family>.view` with all/branch/own; tutors and branch-restricted users see only their data). Shared reports run with the viewer's own scope.
+- **Maths.** Money is summed per currency (never across currencies) and rounded half-up to the minor unit; averages half-up to two places; hours from minutes to one place. Totals are a separate aggregate over the same filtered rows, so an average's total is the overall average (Hypothesis-tested against Python sums). An optional reporting currency converts rows at E26 FX rates; averages' totals are then left blank.
+- **Limits.** Up to 3 group-by columns, 6 measures, 10 filters and 1,000 rows (truncation is noted); each query runs with a 15 s Postgres `statement_timeout`.
+- **Saved, shared, exported.** `CustomReport` (RLS; private or shared; only the owner edits or deletes). `/reporting/builder/datasets`, `/reporting/builder/run`, `/reporting/builder/export` and `/custom-reports` (+ `run`, `export`). Exports use the T07 CSV/XLSX/PDF writers and are recorded like standard exports (a `ReportRun` keyed `custom:<id>`, an `export` audit entry, the mass-export alert, `report.exported`). Events `custom_report.saved/deleted`.
+- **Compatibility:** `reports.run(key, user, data)` (used by the E31 copilot) is unchanged; a regression test covers it. A standard "Lesson feedback" report was added to the operations family.
+- **Deviation:** heavy queries are not yet sent asynchronously to a read replica; the timeout and row cap bound them instead. Custom reports can't be scheduled yet (scheduled reports stay on standard reports).
+- **Frontend:** `/analytics/builder` (dataset, columns with grains, figures, filter rows with per-type conditions, period, chart, sort, row limit, currency), results with the shared chart and table components, save/share and downloads, and the saved custom reports beside it.

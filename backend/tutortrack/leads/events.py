@@ -104,3 +104,41 @@ class FormSubmitted(DomainEvent):
     subject_type: ClassVar[str] = "form_submission"
     form_id: str | None
     form_type: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class _ProposalEvent(DomainEvent):
+    subject_type: ClassVar[str] = "proposal"
+    enquiry_id: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class ProposalSent(_ProposalEvent):
+    """Starts ``ProposalWorkflow`` (reminder, expiry)."""
+
+    event_type: ClassVar[str] = "proposal.sent"
+    expires_at: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class ProposalAccepted(_ProposalEvent):
+    event_type: ClassVar[str] = "proposal.accepted"
+    client_id: str
+    job_ids: list[str]
+    tutor_id: str | None = None
+    payment_request_id: str | None = None
+
+
+@dataclass(frozen=True, kw_only=True)
+class ProposalDeclined(_ProposalEvent):
+    event_type: ClassVar[str] = "proposal.declined"
+
+
+@dataclass(frozen=True, kw_only=True)
+class ProposalExpired(_ProposalEvent):
+    event_type: ClassVar[str] = "proposal.expired"
+
+
+@dataclass(frozen=True, kw_only=True)
+class ProposalWithdrawn(_ProposalEvent):
+    event_type: ClassVar[str] = "proposal.withdrawn"

@@ -41,7 +41,14 @@ from ..documents import (
     Pushed,
     RefundDoc,
 )
-from .base import Chart, LedgerAccount, LedgerInfo, LedgerTaxCode, TrackingCategory
+from .base import (
+    Chart,
+    LedgerAccount,
+    LedgerInfo,
+    LedgerPayment,
+    LedgerTaxCode,
+    TrackingCategory,
+)
 
 SCOPES = ("com.intuit.quickbooks.accounting", "openid", "email")
 MINOR_VERSION = "73"
@@ -174,6 +181,34 @@ class QuickBooksClient:
         found = self._call(creds, "GET", f"/{entity}/{external_id}")
         record = found.get("Bill" if kind == "bill" else "Invoice")
         return str(record.get("Balance")) if record else None
+
+    def invoice_payments(self, creds: Credentials, external_id: str) -> list[LedgerPayment]:
+        """``ReceivePayment``s linked to the invoice, with the amount applied to it."""
+        invoice = self._read(creds, "Invoice", external_id)
+        out = []
+        for linked in invoice.get("LinkedTxn") or []:
+            if linked.get("TxnType") != "Payment":
+                continue
+            payment = self._read(creds, "Payment", str(linked.get("TxnId")))
+            applied = Decimal(0)
+            for line in payment.get("Line") or []:
+                if any(
+                    t.get("TxnType") == "Invoice" and str(t.get("TxnId")) == external_id
+                    for t in line.get("LinkedTxn") or []
+                ):
+                    applied += Decimal(str(line.get("Amount", "0")))
+            if applied <= 0:
+                continue
+            out.append(
+                LedgerPayment(
+                    id=str(payment.get("Id", "")),
+                    amount=str(applied),
+                    date=str(payment.get("TxnDate", "")),
+                    reference=str(payment.get("PaymentRefNum") or ""),
+                    account=str((payment.get("DepositToAccountRef") or {}).get("value", "")),
+                )
+            )
+        return out
 
     # --- writes -----------------------------------------------------------------------------
 

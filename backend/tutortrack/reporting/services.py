@@ -20,6 +20,8 @@ from tutortrack.core.time import now
 
 from . import exports, facts, fx, reports, widgets
 from .events import (
+    CustomReportDeleted,
+    CustomReportSaved,
     ReportExported,
     ReportRunDelivered,
     ReportRunFailed,
@@ -28,7 +30,7 @@ from .events import (
     ScheduledReportDeleted,
     ScheduledReportSaved,
 )
-from .models import DashboardLayout, ReportRun, SavedReport, ScheduledReport
+from .models import CustomReport, DashboardLayout, ReportRun, SavedReport, ScheduledReport
 from .reports.base import invalid, parse_params
 
 FORMATS = ("csv", "xlsx", "pdf")
@@ -442,3 +444,107 @@ def rebuild_facts(user: Any | None = None) -> dict[str, int]:
 
 def refresh_fx_rates() -> int:
     return fx.fetch_latest()
+
+
+# --- custom reports (T08) -----------------------------------------------------------------------
+
+
+def _clean_definition(user: Any, definition: Any) -> dict[str, Any]:
+    from . import builder
+
+    clean: dict[str, Any] = builder.parse(user, definition).clean
+    return clean
+
+
+@transaction.atomic
+def save_custom_report(
+    user: Any,
+    *,
+    name: str,
+    definition: dict[str, Any],
+    description: str = "",
+    shared: bool = False,
+    report: CustomReport | None = None,
+) -> CustomReport:
+    """Create or change a custom report; the definition is validated against its dataset
+    (and the user's right to build on it) before it is stored."""
+    if not name.strip():
+        raise invalid("name", _("Give the report a name."))
+    clean = _clean_definition(user, definition)
+    if report is None:
+        report = CustomReport.objects.create(
+            name=name.strip()[:120],
+            description=description.strip()[:500],
+            dataset=clean["dataset"],
+            definition=clean,
+            owner=user,
+            shared=shared,
+        )
+        audit.record_create(report)
+    else:
+        if report.owner_id != user.pk:
+            raise PermissionDenied(_("Only the person who built this report can change it."))
+        with audit.track(report):
+            report.name = name.strip()[:120]
+            report.description = description.strip()[:500]
+            report.dataset = clean["dataset"]
+            report.definition = clean
+            report.shared = shared
+            report.save()
+    publish(CustomReportSaved(subject_id=report.pk, dataset=report.dataset, shared=report.shared))
+    return report
+
+
+@transaction.atomic
+def delete_custom_report(user: Any, report: CustomReport) -> None:
+    if report.owner_id != user.pk:
+        raise PermissionDenied(_("Only the person who built this report can delete it."))
+    audit.record(report, "delete")
+    publish(CustomReportDeleted(subject_id=report.pk, dataset=report.dataset))
+    report.delete()
+
+
+@transaction.atomic
+def export_custom(
+    user: Any, definition: dict[str, Any], fmt: str, *, name: str = "", key: str = "custom"
+) -> tuple[str, str, bytes]:
+    """Run a custom report (as this user) and render CSV, Excel or PDF; recorded like
+    standard exports (a run, an ``export`` audit entry, the mass-export alert, an event)."""
+    import re
+
+    from . import builder
+    from .reports.base import Params, ReportDef
+
+    if fmt not in FORMATS:
+        raise invalid("format", _("Choose CSV, Excel or PDF."))
+    if not has_perm(user, "reporting.export"):
+        raise PermissionDenied(_("You can't export reports."))
+    output = builder.run(user, definition)
+    spec = output.spec
+    title = name or str(spec.dataset.label)
+    report = ReportDef(
+        key=key,
+        title=title,
+        category=spec.dataset.category,
+        codename=spec.dataset.codename,
+        description="",
+        run=lambda u, p: output.result,
+        period=spec.period is not None,
+    )
+    params = Params(period=spec.period or builder.periods.resolve("today"), preset=spec.preset)
+    content = exports.render(fmt, report, params, output.result)
+    run = ReportRun.objects.create(
+        report_key=key[:60],
+        params={**spec.clean, "_period": spec.period.as_dict() if spec.period else {}},
+        format=fmt,
+        status=ReportRun.Status.COMPLETED,
+        requested_by=user,
+        row_count=len(output.result.rows),
+        completed_at=now(),
+    )
+    rows = len(output.result.rows)
+    audit.record(run, "export", {"report": key, "format": fmt, "rows": rows})
+    check_mass_export(user, run.organisation_id)
+    publish(ReportExported(subject_id=run.pk, report_key=key[:60], format=fmt, rows=rows))
+    slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-") or "custom-report"
+    return f"{slug}.{fmt}", exports.CONTENT_TYPES[fmt], content

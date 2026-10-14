@@ -65,3 +65,20 @@ class ReportRunFailed(DomainEvent):
     subject_type: ClassVar[str] = "report_run"
     scheduled_report_id: str
     error: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class CustomReportSaved(DomainEvent):
+    """A custom report was created or changed (E26-T08)."""
+
+    event_type: ClassVar[str] = "custom_report.saved"
+    subject_type: ClassVar[str] = "custom_report"
+    dataset: str
+    shared: bool
+
+
+@dataclass(frozen=True, kw_only=True)
+class CustomReportDeleted(DomainEvent):
+    event_type: ClassVar[str] = "custom_report.deleted"
+    subject_type: ClassVar[str] = "custom_report"
+    dataset: str

@@ -53,7 +53,7 @@ Find the right tutor for a job quickly: a scored search across subject competenc
 - [x] **E19-T05** Internal job board and applications.
 - [x] **E19-T06** Cover requests.
 - [x] **E19-T07** Frontend: match search UI with map & heatmap, offer management, tutor job inbox.
-- [ ] **E19-T08** (Phase 2b) Client shortlist sharing.
+- [x] **E19-T08** (Phase 2b) Client shortlist sharing.
 - [x] **E19-T09** Matching analytics widgets.
 
 ## Temporal workflows (E32)
@@ -93,4 +93,11 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
   - `JobOfferCascadeWorkflow` `job-offer:{org}:{batch}`: waves, expiry timers, signals `responded`, `decided` and `cancelled`, first acceptance wins. The id is per batch rather than per job because a job can be offered again after a cascade ends.
   - `CoverRequestWorkflow` `cover:{org}:{request}`: asks the eligible tutors, waits for `accepted` or `cancelled` until the cut-off, then escalates as unfilled.
   - Replay histories are in `backend/tests/workflow_histories/`.
-- **Not built:** T08 client shortlist sharing (Phase 2b).
+- **T08 client shortlist sharing** was built in Phase 2b (see below).
+
+## Phase 2b implementation notes (as built 2026-10-14)
+- **T08 client shortlist sharing (FR-19-5).** `matching.ShortlistShare` (RLS) snapshots the job's shortlisted tutors (all, or a chosen subset), the family contact, a message and an expiry (`matching.share_expiry_days`, 14). `POST /shortlist-shares` emails the signed link `/shortlists/<token>` (E13 `shortlist_shared`); `GET /shortlist-shares?job=` shows whether it was opened and what was chosen; `revoke` withdraws it. Permission `matching.shortlist.share` (coordinators via `matching.*`).
+- **PII minimised on the public page** (`GET /public/shortlists/{token}`): tutor cards with the display name or first name and initial, headline, public bio (the approved E24 profile when there is one), approved subjects, qualifications, experience, languages, delivery modes, the blended families' rating (E25 reviews + E09 feedback) and the published directory photo. Never surnames, contact details, addresses, pay rates or match scores; the job brief is the subject, level, service and the students' first names.
+- **Choosing feeds the offer flow.** `POST /public/shortlists/{token}` records the choice and the family's note, tells staff (`staff_shortlist_choice`) and, with `matching.share_choice_starts_offer` (on), starts an E19 offer batch to that tutor; when offers are already out or the tutor can't be offered, staff decide. Expiry is read from `expires_at` (no sweeper or workflow needed); revoked or foreign tokens are 404.
+- **Links with E17:** proposals reuse the same public tutor cards (`matching.sharing.tutor_card`).
+- **Events:** `shortlist.shared`, `shortlist.tutor_chosen`. DSAR export and erasure cover the family's note and the message.

@@ -39,3 +39,16 @@ class AccountingConnectionError(DomainEvent):
     provider: str
     status: str
     error: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class AccountingPaymentImported(DomainEvent):
+    """A payment recorded directly in the ledger was read back and recorded (E23-T09)."""
+
+    event_type: ClassVar[str] = "accounting.payment_imported"
+    subject_type: ClassVar[str] = "ledger_payment_import"
+    provider: str
+    invoice_id: str
+    payment_id: str
+    external_id: str
+    amount: dict[str, str]

@@ -8,4 +8,5 @@ PERMISSIONS = {
     "leads.pipeline.manage": "Set up pipelines, stages and assignment rules",
     "leads.form.manage": "Build and publish enquiry and registration forms",
     "leads.waitlist.manage": "Manage the waitlist and send place offers",
+    "leads.proposal.manage": "Write, send and withdraw proposals",
 }

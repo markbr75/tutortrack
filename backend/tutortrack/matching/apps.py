@@ -7,4 +7,4 @@ class MatchingConfig(AppConfig):
     verbose_name = "Matching and job marketplace"
 
     def ready(self) -> None:
-        from . import handlers, org_settings  # noqa: F401
+        from . import handlers, notifications, org_settings  # noqa: F401

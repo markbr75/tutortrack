@@ -13,6 +13,7 @@ PERMISSIONS = {
     "reporting.sales.view": "Run sales and growth reports (enquiries, retention, lifetime value)",
     "reporting.people.view": "Run people and compliance reports",
     "reporting.export": "Export reports (CSV, Excel, PDF)",
+    "reporting.builder.use": "Build, save and share custom reports",
     "reporting.schedule.manage": "Schedule reports to be emailed",
     "reporting.manage": "Rebuild reporting data and refresh exchange rates",
 }

@@ -324,6 +324,20 @@ def notify(
     return out
 
 
+def notify_on_commit(type_key: str, subject: Any, *, key: str) -> None:
+    """``notify`` once the transaction commits, in the organisation that was current when
+    it was registered (commit hooks can run after the request's tenant context ends)."""
+    from tutortrack.core.context import tenant_context
+
+    organisation_id = require_organisation_id()
+
+    def send() -> None:
+        with tenant_context(organisation_id):
+            notify(type_key, subject, key=key)
+
+    transaction.on_commit(send)
+
+
 def _deliver(
     t: NotificationType,
     subject: Any,

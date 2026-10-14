@@ -1,0 +1,72 @@
+{% load i18n %}<!doctype html>
+<html lang="{{ org.locale|default:'en-GB' }}">
+<head><meta charset="utf-8"><title>{% trans "Proposal" %} {{ proposal.number }}</title>
+{% include "billing/_style.html" %}
+<style>
+  .tutor { border: 1px solid #e5e7eb; padding: 3mm; margin-bottom: 3mm; }
+  .tutor h3 { margin: 0 0 1mm; font-size: 11pt; }
+  .section { margin-bottom: 6mm; }
+  .section h2 { font-size: 12pt; margin: 0 0 2mm; }
+</style></head>
+<body>
+  {% include "billing/_brand.html" %}
+  <div class="row">
+    <div>
+      <h1>{{ proposal.title }}</h1>
+      <div><strong>{{ org.name }}</strong></div>
+    </div>
+    <div class="muted">
+      <div>{% trans "Proposal" %}: <strong>{{ proposal.number }}</strong></div>
+      {% if proposal.sent_at %}<div>{% trans "Date" %}: {{ proposal.sent_at|date:"j F Y" }}</div>{% endif %}
+      {% if proposal.expires_at %}<div>{% trans "Valid until" %}: {{ proposal.expires_at|date:"j F Y" }}</div>{% endif %}
+    </div>
+  </div>
+  <div class="section">
+    <div class="muted">{% trans "Prepared for" %}</div>
+    <div><strong>{{ client_name }}</strong></div>
+    {% if contact_name %}<div>{{ contact_name }}</div>{% endif %}
+  </div>
+  {% if proposal.introduction %}<div class="section">{{ proposal.introduction|linebreaksbr }}</div>{% endif %}
+  {% if tutors %}
+  <div class="section">
+    <h2>{% trans "Suggested tutors" %}</h2>
+    {% for tutor in tutors %}
+      <div class="tutor">
+        <h3>{{ tutor.name }}</h3>
+        {% if tutor.headline %}<div class="muted">{{ tutor.headline }}</div>{% endif %}
+        {% if tutor.bio %}<div>{{ tutor.bio|linebreaksbr }}</div>{% endif %}
+        {% if tutor.subjects %}<div class="muted">{% for s in tutor.subjects %}{{ s.subject }}{% if s.level %} ({{ s.level }}){% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</div>{% endif %}
+        {% if tutor.qualifications %}<div class="muted">{% for q in tutor.qualifications %}{{ q.title }}{% if not forloop.last %}; {% endif %}{% endfor %}</div>{% endif %}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if proposal.schedule %}<div class="section"><h2>{% trans "Schedule" %}</h2>{{ proposal.schedule|linebreaksbr }}</div>{% endif %}
+  <div class="section">
+    <h2>{% trans "Pricing" %}</h2>
+    <table>
+      <thead><tr>
+        <th>{% trans "Description" %}</th><th class="num">{% trans "Qty" %}</th>
+        <th class="num">{% trans "Price" %}</th><th class="num">{% trans "Amount" %}</th>
+      </tr></thead>
+      <tbody>
+      {% for line in lines %}
+        <tr>
+          <td>{{ line.description }}</td>
+          <td class="num">{{ line.quantity }}</td>
+          <td class="num">{{ line.unit_price }}</td>
+          <td class="num">{{ line.amount }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <table class="totals">
+      <tr class="grand"><td>{% trans "Total" %}</td><td class="num">{{ total }}</td></tr>
+      {% if deposit %}<tr><td>{% trans "Deposit due on acceptance" %}</td><td class="num">{{ deposit }}</td></tr>{% endif %}
+    </table>
+  </div>
+  {% if proposal.terms %}<div class="footer"><strong>{% trans "Terms" %}</strong><div>{{ proposal.terms|linebreaksbr }}</div></div>{% endif %}
+  <div class="footer muted">{% trans "Accept this proposal online using the link in our email." %}</div>
+  {% include "billing/_brand_footer.html" %}
+</body>
+</html>

@@ -561,3 +561,52 @@ def discard_imported(record: Client | Contact | Student | TutorProfile) -> None:
             record.delete()
     except (ProtectedError, RestrictedError) as exc:
         raise BusinessRuleViolation(_("It is in use, so it was kept.")) from exc
+
+
+# --- map view (E05-T12) -------------------------------------------------------------------------
+
+
+def geocode_missing(user: Any, kinds: Iterable[str] = ("student", "tutor")) -> int:
+    """Queue background geocoding for the addresses on the map that have no coordinates yet
+    (students' lesson or family address, tutors' address) among records the user may edit.
+    Returns how many addresses were queued."""
+    from tutortrack.core.permissions import has_perm, scope_queryset
+
+    from .selectors import student_place
+    from .tasks import geocode_address
+
+    address_ids: set[str] = set()
+    kinds = set(kinds)
+    if "student" in kinds and has_perm(user, "people.student.edit"):
+        students = scope_queryset(
+            user,
+            Student.objects.filter(archived_at__isnull=True).select_related(
+                "lesson_address", "client__billing_address"
+            ),
+            "people.student.edit",
+        )
+        for student in students:
+            place = student_place(student)
+            if place is not None and place.lat is None and place.one_line():
+                address_ids.add(str(place.pk))
+    if "tutor" in kinds and has_perm(user, "people.tutor.edit"):
+        tutors = scope_queryset(
+            user,
+            TutorProfile.objects.filter(archived_at__isnull=True, address__lat__isnull=True)
+            .exclude(address__isnull=True)
+            .select_related("address"),
+            "people.tutor.edit",
+        )
+        for tutor in tutors:
+            if tutor.address is not None and tutor.address.one_line():
+                address_ids.add(str(tutor.address_id))
+    from tutortrack.core.context import require_organisation_id
+
+    organisation_id = str(require_organisation_id())
+    for address_id in sorted(address_ids):
+        transaction.on_commit(
+            lambda pk=address_id: geocode_address.delay(  # type: ignore[misc]
+                address_id=pk, organisation_id=organisation_id
+            )
+        )
+    return len(address_ids)

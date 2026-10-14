@@ -5,13 +5,14 @@ from __future__ import annotations
 from typing import Any
 
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from tutortrack.core.api.viewsets import TenantScopedViewMixin
@@ -30,6 +31,7 @@ from ..models import (
     JobPostingApplication,
     OfferBatch,
     Shortlist,
+    ShortlistShare,
 )
 from . import serializers as s
 
@@ -502,3 +504,123 @@ class MyCoverAcceptView(APIView):
             raise NotFound("Cover request not found.")
         cover = services.accept_cover(cover, tutor)
         return Response(s.CoverRequestSerializer(_cover_qs().get(pk=cover.pk)).data)
+
+
+# --- shared shortlists (E19-T08) ------------------------------------------------------------
+
+
+class ShortlistShareViewSet(
+    TenantScopedViewMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Shortlists shared with families (``?job=``): the signed link, whether it was opened
+    and which tutor the family chose."""
+
+    model = ShortlistShare
+    serializer_class = s.ShortlistShareSerializer
+    permission_classes = perms({"GET": "matching.search", "POST": "matching.shortlist.share"})
+
+    def get_tenant_queryset(self) -> Any:
+        qs = ShortlistShare.objects.filter(
+            job__in=selectors.visible_jobs(self.request.user)
+        ).select_related("contact", "chosen_tutor")
+        job = self.request.query_params.get("job")
+        return qs.filter(job_id=job) if job else qs
+
+    @extend_schema(parameters=[OpenApiParameter("job", str, required=False)])
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        request=s.ShortlistShareCreateSerializer,
+        responses={201: s.ShortlistShareSerializer},
+        examples=[
+            OpenApiExample(
+                "Share the whole shortlist",
+                request_only=True,
+                value={
+                    "job": "01928d6e-0000-7000-8000-000000000010",
+                    "message": "Here are three tutors we think would suit Arjun.",
+                    "days": 14,
+                },
+            )
+        ],
+    )
+    def create(self, request: Request) -> Response:
+        from tutortrack.people.models import Contact
+
+        from .. import sharing
+
+        payload = s.ShortlistShareCreateSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        d = payload.validated_data
+        job = _job(request.user, d["job"])
+        tutors = None
+        if d.get("tutors"):
+            found = {str(t.pk): t for t in TutorProfile.objects.filter(pk__in=d["tutors"])}
+            tutors = [found[str(i)] for i in d["tutors"] if str(i) in found]
+        contact = (
+            get_object_or_404(Contact.objects.all(), pk=d["contact"]) if d.get("contact") else None
+        )
+        record, _token = sharing.share(
+            job, tutors=tutors, contact=contact, message=d["message"], days=d.get("days")
+        )
+        return Response(s.ShortlistShareSerializer(record).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=None, responses=s.ShortlistShareSerializer)
+    @action(detail=True, methods=["post"])
+    def revoke(self, request: Request, pk: Any = None) -> Response:
+        from .. import sharing
+
+        return Response(s.ShortlistShareSerializer(sharing.revoke(self.get_object())).data)
+
+
+class PublicShortlistView(APIView):
+    """``/public/shortlists/{token}``: the family sees the tutor cards and picks one."""
+
+    permission_classes = [AllowAny]
+    authentication_classes: list[Any] = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "public_form"
+
+    def _organisation(self, request: Request) -> Any:
+        org = getattr(request, "organisation", None)
+        if org is None:
+            raise NotFound()
+        return org
+
+    @extend_schema(responses=s.PublicShortlistSerializer)
+    def get(self, request: Request, token: str) -> Response:
+        from .. import sharing
+
+        org = self._organisation(request)
+        return Response({"organisation": org.name, **sharing.public_view(token)})
+
+    @extend_schema(
+        request=s.ShortlistChoiceSerializer,
+        responses=s.PublicShortlistSerializer,
+        examples=[
+            OpenApiExample(
+                "Choose a tutor",
+                request_only=True,
+                value={
+                    "tutor": "01928d6e-0000-7000-8000-000000000002",
+                    "note": "Tuesdays after school suit us best.",
+                },
+            )
+        ],
+    )
+    def post(self, request: Request, token: str) -> Response:
+        from .. import sharing
+
+        self._organisation(request)
+        payload = s.ShortlistChoiceSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        sharing.choose(
+            token,
+            tutor_id=str(payload.validated_data["tutor"]),
+            note=payload.validated_data["note"],
+        )
+        return self.get(request, token)

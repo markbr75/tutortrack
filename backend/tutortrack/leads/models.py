@@ -260,3 +260,71 @@ class WaitlistEntry(BranchScopedModel):
 
     def __str__(self) -> str:
         return f"{self.student_id} waiting for {self.subject}"
+
+
+class Proposal(BranchScopedModel):
+    """A branded proposal for an enquiry (FR-17-3, E17-T09): suggested tutors (E19 cards),
+    schedule, priced lines and an optional deposit. Sent as a signed link and PDF; the
+    family accepts online, which converts the enquiry (FR-17-5) and asks for the deposit.
+    ``ProposalWorkflow`` reminds the family and expires it at ``expires_at``.
+
+    ``lines`` = ``[{"service": id|null, "description", "quantity", "unit_price",
+    "amount"}]`` with decimal strings; ``amount`` is rounded half-up per line."""
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        SENT = "sent", _("Sent")
+        ACCEPTED = "accepted", _("Accepted")
+        DECLINED = "declined", _("Declined")
+        EXPIRED = "expired", _("Expired")
+        WITHDRAWN = "withdrawn", _("Withdrawn")
+
+    enquiry = models.ForeignKey(Enquiry, on_delete=models.CASCADE, related_name="proposals")
+    number = models.CharField(max_length=30)
+    title = models.CharField(max_length=200)
+    contact = models.ForeignKey(
+        "people.Contact", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    status = models.CharField(max_length=9, choices=Status.choices, default=Status.DRAFT)
+    introduction = models.TextField(blank=True, default="")
+    schedule = models.TextField(blank=True, default="")
+    terms = models.TextField(blank=True, default="")
+    lines = models.JSONField(default=list, blank=True)
+    tutors = models.JSONField(default=list, blank=True)  # suggested tutor ids (E19 cards)
+    currency = CurrencyField()
+    total = MoneyField(default=0)
+    deposit = MoneyField(null=True, blank=True)
+    valid_days = models.PositiveSmallIntegerField(default=14)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    viewed_at = models.DateTimeField(null=True, blank=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
+    accepted_name = models.CharField(max_length=200, blank=True, default="")
+    accepted_ip = models.GenericIPAddressField(null=True, blank=True)
+    chosen_tutor = models.ForeignKey(
+        "people.TutorProfile", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    decline_reason = models.CharField(max_length=500, blank=True, default="")
+    payment_request = models.ForeignKey(
+        "billing.PaymentRequest",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    job_ids = models.JSONField(default=list, blank=True)
+
+    class Meta(BranchScopedModel.Meta):
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "number"], name="proposal_number_unique"
+            )
+        ]
+
+    @classmethod
+    def own_scope_q(cls, user: object) -> Q:
+        return Q(enquiry__owner=user)
+
+    def __str__(self) -> str:
+        return f"{self.number} {self.title}"

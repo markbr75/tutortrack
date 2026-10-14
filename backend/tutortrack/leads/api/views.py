@@ -12,7 +12,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, ValidationError
@@ -28,7 +28,15 @@ from tutortrack.core.middleware import client_ip
 from tutortrack.core.permissions import HasMethodPermission, HasOrganisation, scope_queryset
 
 from .. import services
-from ..models import AssignmentRule, Enquiry, Form, Pipeline, PipelineStage, WaitlistEntry
+from ..models import (
+    AssignmentRule,
+    Enquiry,
+    Form,
+    Pipeline,
+    PipelineStage,
+    Proposal,
+    WaitlistEntry,
+)
 from . import serializers as s
 
 AUTH = [IsAuthenticated, HasOrganisation]
@@ -587,3 +595,214 @@ def inbound_email(request: HttpRequest) -> HttpResponse:
             body=str(body.get("TextBody", "")),
         )
     return HttpResponse(status=200)
+
+
+# --- proposals (E17-T09) --------------------------------------------------------------------
+
+
+def _pdf_response(content: bytes, filename: str) -> HttpResponse:
+    response = HttpResponse(content, content_type="application/pdf")
+    response["Content-Disposition"] = f'inline; filename="{filename}"'
+    return response
+
+
+PROPOSAL_EXAMPLE = {
+    "enquiry": "01928d6e-0000-7000-8000-000000000020",
+    "title": "GCSE Maths tuition for Arjun",
+    "introduction": "Thank you for talking to us about Arjun.",
+    "schedule": "Weekly on Tuesdays at 16:00, 60 minutes, from 3 November.",
+    "lines": [
+        {
+            "service": "01928d6e-0000-7000-8000-000000000030",
+            "description": "GCSE Maths 1:1, 60 minutes",
+            "quantity": "12",
+            "unit_price": "45.00",
+        }
+    ],
+    "tutors": ["01928d6e-0000-7000-8000-000000000002"],
+    "deposit": "90.00",
+    "valid_days": 14,
+}
+
+
+class ProposalViewSet(
+    TenantScopedViewMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent
+    as a signed link with the PDF; the family accepts or declines online."""
+
+    model = Proposal
+    serializer_class = s.ProposalSerializer
+    http_method_names = ["get", "post", "patch", "head", "options"]
+    permission_classes = perms(
+        {
+            "GET": "leads.enquiry.view",
+            "POST": "leads.proposal.manage",
+            "PATCH": "leads.proposal.manage",
+        }
+    )
+
+    def get_tenant_queryset(self) -> Any:
+        enquiries = scope_queryset(self.request.user, Enquiry.objects.all(), "leads.enquiry.view")
+        qs = Proposal.objects.filter(enquiry__in=enquiries).select_related(
+            "contact", "chosen_tutor"
+        )
+        q = self.request.query_params
+        if q.get("enquiry"):
+            qs = qs.filter(enquiry_id=q["enquiry"])
+        if q.get("status"):
+            qs = qs.filter(status=q["status"])
+        return qs
+
+    @extend_schema(parameters=[OpenApiParameter("enquiry", str), OpenApiParameter("status", str)])
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    def _write(self, request: Request, enquiry: Enquiry, proposal: Proposal | None) -> Proposal:
+        from tutortrack.people.models import Contact
+
+        from .. import proposals
+
+        payload = s.ProposalWriteSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        d = payload.validated_data
+        contact = (
+            get_object_or_404(Contact.objects.all(), pk=d["contact"]) if d.get("contact") else None
+        )
+        return proposals.save_proposal(
+            enquiry,
+            proposal=proposal,
+            title=d["title"],
+            introduction=d["introduction"],
+            schedule=d["schedule"],
+            terms=d["terms"],
+            lines=[dict(row) for row in d["lines"]],
+            tutors=d["tutors"],
+            currency=d["currency"].upper(),
+            deposit=d["deposit"],
+            valid_days=d["valid_days"],
+            contact=contact,
+        )
+
+    @extend_schema(
+        request=s.ProposalWriteSerializer,
+        responses={201: s.ProposalSerializer},
+        examples=[OpenApiExample("Draft", request_only=True, value=PROPOSAL_EXAMPLE)],
+    )
+    def create(self, request: Request) -> Response:
+        enquiry_id = request.data.get("enquiry") if hasattr(request.data, "get") else None
+        if not enquiry_id:
+            raise ValidationError({"enquiry": ["Required."]})
+        enquiries = scope_queryset(request.user, Enquiry.objects.all(), "leads.enquiry.view")
+        enquiry = get_object_or_404(enquiries, pk=enquiry_id)
+        proposal = self._write(request, enquiry, None)
+        return Response(s.ProposalSerializer(proposal).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=s.ProposalWriteSerializer, responses=s.ProposalSerializer)
+    def partial_update(self, request: Request, pk: Any = None) -> Response:
+        proposal = self.get_object()
+        return Response(s.ProposalSerializer(self._write(request, proposal.enquiry, proposal)).data)
+
+    @extend_schema(request=None, responses=s.ProposalSerializer)
+    @action(detail=True, methods=["post"])
+    def send(self, request: Request, pk: Any = None) -> Response:
+        from .. import proposals
+
+        sent = proposals.send(self.get_object(), user=request.user)
+        return Response(s.ProposalSerializer(sent).data)
+
+    @extend_schema(request=None, responses=s.ProposalSerializer)
+    @action(detail=True, methods=["post"])
+    def withdraw(self, request: Request, pk: Any = None) -> Response:
+        from .. import proposals
+
+        return Response(s.ProposalSerializer(proposals.withdraw(self.get_object())).data)
+
+    @extend_schema(responses={(200, "application/pdf"): OpenApiTypes.BINARY})
+    @action(detail=True, methods=["get"])
+    def pdf(self, request: Request, pk: Any = None) -> HttpResponse:
+        from .. import proposals
+
+        proposal = self.get_object()
+        return _pdf_response(proposals.pdf(proposal), f"{proposal.number}.pdf")
+
+
+class PublicProposalView(APIView):
+    """``/public/proposals/{token}``: the family reads the proposal; POST accepts it (typed
+    name as signature, optional tutor choice). The response's ``pay_url`` is the deposit's
+    payment link."""
+
+    permission_classes = [AllowAny]
+    authentication_classes: list[Any] = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "public_form"
+
+    def body(self, request: Request, token: str) -> dict[str, Any]:
+        from .. import proposals
+
+        return {"organisation": _organisation(request).name, **proposals.public_view(token)}
+
+    @extend_schema(responses=s.PublicProposalSerializer)
+    def get(self, request: Request, token: str) -> Response:
+        return Response(self.body(request, token))
+
+    @extend_schema(
+        request=s.ProposalAcceptSerializer,
+        responses=s.PublicProposalSerializer,
+        examples=[
+            OpenApiExample(
+                "Accept",
+                request_only=True,
+                value={"name": "Priya Patel", "tutor": "01928d6e-0000-7000-8000-000000000002"},
+            )
+        ],
+    )
+    def post(self, request: Request, token: str) -> Response:
+        from .. import proposals
+
+        _organisation(request)
+        payload = s.ProposalAcceptSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        tutor = payload.validated_data.get("tutor")
+        proposals.accept(
+            token,
+            name=payload.validated_data["name"],
+            tutor_id=str(tutor) if tutor else None,
+            ip=client_ip(request),
+        )
+        return Response(self.body(request, token))
+
+
+class PublicProposalDeclineView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes: list[Any] = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "public_form"
+
+    @extend_schema(request=s.ProposalDeclineSerializer, responses=s.PublicProposalSerializer)
+    def post(self, request: Request, token: str) -> Response:
+        from .. import proposals
+
+        _organisation(request)
+        payload = s.ProposalDeclineSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        proposals.decline(token, reason=payload.validated_data["reason"])
+        return Response(PublicProposalView().body(request, token))
+
+
+class PublicProposalPdfView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes: list[Any] = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "public_form"
+
+    @extend_schema(responses={(200, "application/pdf"): OpenApiTypes.BINARY})
+    def get(self, request: Request, token: str) -> HttpResponse:
+        from .. import proposals
+
+        _organisation(request)
+        proposal = proposals.for_token(token)
+        return _pdf_response(proposals.pdf(proposal), f"{proposal.number}.pdf")

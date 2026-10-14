@@ -609,3 +609,102 @@ register(
         ordering="-hours",
     )
 )
+
+
+# --- client feedback (E09-T09) ------------------------------------------------------------------
+
+
+def _stars(value: Any) -> str:
+    from decimal import ROUND_HALF_UP
+
+    if value is None:
+        return ""
+    return str(Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+
+def lesson_feedback(user: Any, params: Params) -> Result:
+    """Families' post-lesson ratings per tutor: asked, answered, average and low scores."""
+    from django.db.models import Avg
+
+    from tutortrack.delivery.models import LessonFeedback
+    from tutortrack.tenancy.settings_service import get_setting
+
+    qs = scoped_by(
+        user,
+        LessonFeedback.objects.exclude(status=LessonFeedback.Status.SKIPPED),
+        CODENAME,
+        branch="branch_id",
+        own=Q(tutor_id__in=my_tutor_ids(user)),
+    )
+    qs = filter_facts(
+        in_period(qs, params, "lesson_date"),
+        params,
+        {"branch": "branch_id", "tutor": "tutor_id", "client": "client_id"},
+    )
+    low = int(get_setting("delivery.feedback_alert_at_or_below"))
+    answered = Q(status=LessonFeedback.Status.ANSWERED)
+    data = (
+        qs.values("tutor_id")
+        .annotate(
+            asked=Count("pk"),
+            answered=Count("pk", filter=answered),
+            average=Avg("rating", filter=answered),
+            low=Count("pk", filter=answered & Q(rating__lte=low)),
+        )
+        .order_by("tutor_id")
+    )
+    names = dims.labels("tutor", (r["tutor_id"] for r in data))
+    rows = [
+        {
+            "group": names.get(str(r["tutor_id"]), "") if r["tutor_id"] else str(_("(none)")),
+            "group_id": str(r["tutor_id"] or ""),
+            "asked": r["asked"],
+            "answered": r["answered"],
+            "answer_rate": percent(r["answered"], r["asked"]),
+            "average": _stars(r["average"]),
+            "low": r["low"],
+        }
+        for r in data
+    ]
+    overall = qs.aggregate(
+        asked=Count("pk"),
+        answered=Count("pk", filter=answered),
+        average=Avg("rating", filter=answered),
+        low=Count("pk", filter=answered & Q(rating__lte=low)),
+    )
+    totals = [
+        {
+            "asked": overall["asked"],
+            "answered": overall["answered"],
+            "answer_rate": percent(overall["answered"], overall["asked"]),
+            "average": _stars(overall["average"]),  # the overall average, not a sum
+            "low": overall["low"],
+        }
+    ]
+    return Result(
+        totals=totals,
+        columns=[
+            Column("group", _("Tutor")),
+            Column("asked", _("Asked"), "count"),
+            Column("answered", _("Answered"), "count"),
+            Column("answer_rate", _("Answer rate %"), "percent"),
+            Column("average", _("Average stars"), "number"),
+            Column("low", _("Low ratings"), "count"),
+        ],
+        rows=rows,
+        chart={"type": "bar", "x": "group", "y": ["average"]},
+    )
+
+
+register(
+    ReportDef(
+        key="lesson_feedback",
+        title=_("Lesson feedback"),
+        category="operations",
+        codename=CODENAME,
+        description=_("Families' star ratings after lessons, per tutor (E09 surveys)."),
+        run=lesson_feedback,
+        filters=("branch", "tutor", "client"),
+        ordering="-average",
+    )
+)

@@ -20,7 +20,7 @@ from tutortrack.privacy.registry import (
     register_retention,
 )
 
-from .models import Enquiry, FormSubmission, WaitlistEntry
+from .models import Enquiry, FormSubmission, Proposal, WaitlistEntry
 
 
 def _enquiries(person: Person) -> Q:
@@ -69,8 +69,21 @@ def export(person: Person) -> list[Section]:
         }
         for w in WaitlistEntry.objects.filter(student_id__in=person.of("people.student"))
     ]
+    proposals = [
+        {
+            "id": str(p.pk),
+            "number": p.number,
+            "title": p.title,
+            "status": p.status,
+            "accepted_name": p.accepted_name,
+            "responded_at": p.responded_at,
+            "decline_reason": p.decline_reason,
+        }
+        for p in Proposal.objects.filter(enquiry__in=Enquiry.objects.filter(_enquiries(person)))
+    ]
     return [
         Section("leads.enquiries", _("Enquiries"), enquiries),
+        Section("leads.proposals", _("Proposals"), proposals),
         Section("leads.form_submissions", _("Forms you submitted"), submissions),
         Section("leads.waitlist", _("Waiting lists"), waitlist),
     ]
@@ -91,6 +104,18 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
     out.anonymised += FormSubmission.objects.filter(_submissions(person)).update(
         data={}, ip=None, user_agent="", utm={}
     )
+    for proposal in Proposal.objects.filter(
+        enquiry__in=Enquiry.objects.filter(_enquiries(person))
+    ):  # E17-T09: the signature and free text; amounts stay (they were a quote)
+        Proposal.objects.filter(pk=proposal.pk).update(
+            title=ctx.scrub(proposal.title),
+            introduction=ctx.scrub(proposal.introduction),
+            schedule=ctx.scrub(proposal.schedule),
+            accepted_name="",
+            accepted_ip=None,
+            decline_reason="",
+        )
+        out.anonymised += 1
     out.anonymised += WaitlistEntry.objects.filter(
         student_id__in=person.of("people.student")
     ).update(notes="", offer_details="")

@@ -882,6 +882,62 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/accounting/connections/{id}/read-back": {
+            "post": {
+                "operationId": "accounting_connections_read_back_create",
+                "description": "Look for payments recorded directly in the ledger against open synced invoices\nand record them in TutorTrack now (the daily run does the same, E23-T09).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this accounting connection.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReadBackResult"
+                                },
+                                "examples": {
+                                    "Checked": {
+                                        "value": {
+                                            "checked": 12,
+                                            "imported": 1,
+                                            "skipped": 0
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/accounting/connections/{id}/refresh": {
             "post": {
                 "operationId": "accounting_connections_refresh_create",
@@ -1126,6 +1182,112 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/MappingSet"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/payment-imports": {
+            "get": {
+                "operationId": "accounting_payment_imports_list",
+                "description": "Payments read back from the ledger (``?status=imported|skipped``), with the\nTutorTrack payment created or the reason it wasn't (E23-T09).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "imported",
+                                "skipped"
+                            ]
+                        }
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedLedgerPaymentImportList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/payment-imports/{id}": {
+            "get": {
+                "operationId": "accounting_payment_imports_retrieve",
+                "description": "Payments read back from the ledger (``?status=imported|skipped``), with the\nTutorTrack payment created or the reason it wasn't (E23-T09).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this ledger payment import.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LedgerPaymentImport"
                                 }
                             }
                         },
@@ -22206,6 +22368,372 @@
                 ]
             }
         },
+        "/api/v1/custom-reports": {
+            "get": {
+                "operationId": "custom_reports_list",
+                "description": "Saved custom reports: your own and those shared with you (``?dataset=``). Only the\nowner changes or deletes one; everyone runs it with their own data scope.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "dataset",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "custom-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedCustomReportList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "custom_reports_create",
+                "description": "Saved custom reports: your own and those shared with you (``?dataset=``). Only the\nowner changes or deletes one; everyone runs it with their own data scope.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "custom-reports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomReportWriteRequest"
+                            },
+                            "examples": {
+                                "Save": {
+                                    "value": {
+                                        "name": "Lesson revenue by service",
+                                        "definition": {
+                                            "dataset": "charges",
+                                            "group_by": [
+                                                "service",
+                                                "date:month"
+                                            ],
+                                            "measures": [
+                                                "count",
+                                                "gross"
+                                            ],
+                                            "filters": [
+                                                {
+                                                    "field": "kind",
+                                                    "op": "in",
+                                                    "value": [
+                                                        "lesson"
+                                                    ]
+                                                }
+                                            ],
+                                            "period": "this_year",
+                                            "ordering": "-gross",
+                                            "limit": 100,
+                                            "chart": "bar"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomReportWriteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomReportWriteRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/custom-reports/{id}": {
+            "get": {
+                "operationId": "custom_reports_retrieve",
+                "description": "Saved custom reports: your own and those shared with you (``?dataset=``). Only the\nowner changes or deletes one; everyone runs it with their own data scope.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this custom report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "custom-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "patch": {
+                "operationId": "custom_reports_partial_update",
+                "description": "Saved custom reports: your own and those shared with you (``?dataset=``). Only the\nowner changes or deletes one; everyone runs it with their own data scope.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this custom report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "custom-reports"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCustomReportWriteRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCustomReportWriteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCustomReportWriteRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomReport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "delete": {
+                "operationId": "custom_reports_destroy",
+                "description": "Saved custom reports: your own and those shared with you (``?dataset=``). Only the\nowner changes or deletes one; everyone runs it with their own data scope.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this custom report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "custom-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/custom-reports/{id}/export": {
+            "get": {
+                "operationId": "custom_reports_export_retrieve",
+                "description": "Saved custom reports: your own and those shared with you (``?dataset=``). Only the\nowner changes or deletes one; everyone runs it with their own data scope.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "file_format",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "csv",
+                                "pdf",
+                                "xlsx"
+                            ]
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this custom report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "custom-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/custom-reports/{id}/run": {
+            "get": {
+                "operationId": "custom_reports_run_retrieve",
+                "description": "Run the saved report now, with the viewer's own data scope.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this custom report.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "custom-reports"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/custom-roles": {
             "get": {
                 "operationId": "custom_roles_list",
@@ -40314,6 +40842,277 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/lesson-feedback": {
+            "get": {
+                "operationId": "lesson_feedback_list",
+                "description": "Families' answers to post-lesson micro-surveys (FR-09-9). Tutors see feedback about\ntheir own lessons.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "rating",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "1-5, or low (at or below the alert level)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "since",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "answered",
+                                "expired",
+                                "sent",
+                                "skipped"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "tags": [
+                    "lesson-feedback"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedLessonFeedbackList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/lesson-feedback/{id}": {
+            "get": {
+                "operationId": "lesson_feedback_retrieve",
+                "description": "Families' answers to post-lesson micro-surveys (FR-09-9). Tutors see feedback about\ntheir own lessons.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson feedback.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lesson-feedback"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonFeedback"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/lesson-feedback/{id}/withdraw": {
+            "post": {
+                "operationId": "lesson_feedback_withdraw_create",
+                "description": "Families' answers to post-lesson micro-surveys (FR-09-9). Tutors see feedback about\ntheir own lessons.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson feedback.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lesson-feedback"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonFeedback"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/lesson-feedback/summary": {
+            "get": {
+                "operationId": "lesson_feedback_summary_retrieve",
+                "description": "Families' answers to post-lesson micro-surveys (FR-09-9). Tutors see feedback about\ntheir own lessons.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "rating",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "1-5, or low (at or below the alert level)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "since",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "answered",
+                                "expired",
+                                "sent",
+                                "skipped"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "tags": [
+                    "lesson-feedback"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FeedbackSummary"
+                                },
+                                "examples": {
+                                    "Summary": {
+                                        "value": {
+                                            "asked": 40,
+                                            "answered": 30,
+                                            "answer_rate": "75.0",
+                                            "average": "4.6",
+                                            "stars": {
+                                                "1": 0,
+                                                "2": 1,
+                                                "3": 1,
+                                                "4": 7,
+                                                "5": 21
+                                            },
+                                            "tutors": [
+                                                {
+                                                    "tutor_id": "01928d6e-0000-7000-8000-000000000002",
+                                                    "tutor": "Nia Clarke",
+                                                    "average": "4.8",
+                                                    "answered": 12,
+                                                    "asked": 15
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/lesson-reports": {
             "get": {
                 "operationId": "lesson_reports_list",
@@ -51009,6 +51808,172 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/people/map": {
+            "get": {
+                "operationId": "people_map_retrieve",
+                "description": "``/people/map``: geocoded students and tutors for in-person matching (FR-05-11, E05-T12).\nPoints are rounded to about 100 m; the response holds no street addresses.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "kind",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "all",
+                                "student",
+                                "tutor"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "subject",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "people"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PeopleMap"
+                                },
+                                "examples": {
+                                    "TwoPeople": {
+                                        "value": {
+                                            "points": [
+                                                {
+                                                    "kind": "student",
+                                                    "id": "01928d6e-0000-7000-8000-000000000001",
+                                                    "name": "Arjun Patel",
+                                                    "status": "active",
+                                                    "area": "SW11",
+                                                    "lat": 51.464,
+                                                    "lng": -0.163,
+                                                    "subjects": [
+                                                        "Maths"
+                                                    ],
+                                                    "travel_radius_km": null
+                                                },
+                                                {
+                                                    "kind": "tutor",
+                                                    "id": "01928d6e-0000-7000-8000-000000000002",
+                                                    "name": "Nia Clarke",
+                                                    "status": "active",
+                                                    "area": "SW4",
+                                                    "lat": 51.462,
+                                                    "lng": -0.138,
+                                                    "subjects": [
+                                                        "Maths",
+                                                        "Physics"
+                                                    ],
+                                                    "travel_radius_km": 5
+                                                }
+                                            ],
+                                            "missing": {
+                                                "student": 3,
+                                                "tutor": 0
+                                            }
+                                        },
+                                        "summary": "Two people"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/people/map/geocode": {
+            "post": {
+                "operationId": "people_map_geocode_create",
+                "description": "``POST /people/map/geocode``: geocode the people the map can't place yet.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "people"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GeocodeRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GeocodeRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GeocodeRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GeocodeResult"
+                                },
+                                "examples": {
+                                    "Queued": {
+                                        "value": {
+                                            "queued": 4
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/permissions": {
             "get": {
                 "operationId": "permissions_list",
@@ -55509,6 +56474,382 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/proposals": {
+            "get": {
+                "operationId": "proposals_list",
+                "description": "Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent\nas a signed link with the PDF; the family accepts or declines online.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "enquiry",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "proposals"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedProposalList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "proposals_create",
+                "description": "Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent\nas a signed link with the PDF; the family accepts or declines online.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "proposals"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProposalWriteRequest"
+                            },
+                            "examples": {
+                                "Draft": {
+                                    "value": {
+                                        "enquiry": "01928d6e-0000-7000-8000-000000000020",
+                                        "title": "GCSE Maths tuition for Arjun",
+                                        "introduction": "Thank you for talking to us about Arjun.",
+                                        "schedule": "Weekly on Tuesdays at 16:00, 60 minutes, from 3 November.",
+                                        "lines": [
+                                            {
+                                                "service": "01928d6e-0000-7000-8000-000000000030",
+                                                "description": "GCSE Maths 1:1, 60 minutes",
+                                                "quantity": "12",
+                                                "unit_price": "45.00"
+                                            }
+                                        ],
+                                        "tutors": [
+                                            "01928d6e-0000-7000-8000-000000000002"
+                                        ],
+                                        "deposit": "90.00",
+                                        "valid_days": 14
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProposalWriteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProposalWriteRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Proposal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/proposals/{id}": {
+            "get": {
+                "operationId": "proposals_retrieve",
+                "description": "Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent\nas a signed link with the PDF; the family accepts or declines online.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this proposal.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "proposals"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Proposal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "patch": {
+                "operationId": "proposals_partial_update",
+                "description": "Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent\nas a signed link with the PDF; the family accepts or declines online.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this proposal.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "proposals"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedProposalWriteRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedProposalWriteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedProposalWriteRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Proposal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/proposals/{id}/pdf": {
+            "get": {
+                "operationId": "proposals_pdf_retrieve",
+                "description": "Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent\nas a signed link with the PDF; the family accepts or declines online.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this proposal.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "proposals"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/proposals/{id}/send": {
+            "post": {
+                "operationId": "proposals_send_create",
+                "description": "Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent\nas a signed link with the PDF; the family accepts or declines online.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this proposal.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "proposals"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Proposal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/proposals/{id}/withdraw": {
+            "post": {
+                "operationId": "proposals_withdraw_create",
+                "description": "Proposals on enquiries (``?enquiry=``, ``?status=``): drafts are edited, then sent\nas a signed link with the PDF; the family accepts or declines online.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this proposal.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "proposals"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Proposal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/public-profiles": {
             "get": {
                 "operationId": "public_profiles_list",
@@ -56816,6 +58157,111 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/public/lesson-feedback/{token}": {
+            "get": {
+                "operationId": "public_lesson_feedback_retrieve",
+                "description": "``/public/lesson-feedback/{token}``: the family rates a lesson from the emailed link.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicFeedback"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "public_lesson_feedback_create",
+                "description": "``/public/lesson-feedback/{token}``: the family rates a lesson from the emailed link.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FeedbackAnswerRequest"
+                            },
+                            "examples": {
+                                "FiveStars": {
+                                    "value": {
+                                        "rating": 5,
+                                        "comment": "Great lesson!"
+                                    },
+                                    "summary": "Five stars"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FeedbackAnswerRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FeedbackAnswerRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicFeedback"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/public/manifest": {
             "get": {
                 "operationId": "public_manifest_retrieve",
@@ -56928,6 +58374,206 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/PublicOffer"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/public/proposals/{token}": {
+            "get": {
+                "operationId": "public_proposals_retrieve",
+                "description": "``/public/proposals/{token}``: the family reads the proposal; POST accepts it (typed\nname as signature, optional tutor choice). The response's ``pay_url`` is the deposit's\npayment link.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicProposal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "public_proposals_create",
+                "description": "``/public/proposals/{token}``: the family reads the proposal; POST accepts it (typed\nname as signature, optional tutor choice). The response's ``pay_url`` is the deposit's\npayment link.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProposalAcceptRequest"
+                            },
+                            "examples": {
+                                "Accept": {
+                                    "value": {
+                                        "name": "Priya Patel",
+                                        "tutor": "01928d6e-0000-7000-8000-000000000002"
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProposalAcceptRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProposalAcceptRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicProposal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/public/proposals/{token}/decline": {
+            "post": {
+                "operationId": "public_proposals_decline_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProposalDeclineRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProposalDeclineRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProposalDeclineRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicProposal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/public/proposals/{token}/pdf": {
+            "get": {
+                "operationId": "public_proposals_pdf_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
                                 }
                             }
                         },
@@ -57371,6 +59017,111 @@
                                     "items": {
                                         "$ref": "#/components/schemas/PublicService"
                                     }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/public/shortlists/{token}": {
+            "get": {
+                "operationId": "public_shortlists_retrieve",
+                "description": "``/public/shortlists/{token}``: the family sees the tutor cards and picks one.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicShortlist"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "public_shortlists_create",
+                "description": "``/public/shortlists/{token}``: the family sees the tutor cards and picks one.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShortlistChoiceRequest"
+                            },
+                            "examples": {
+                                "ChooseATutor": {
+                                    "value": {
+                                        "tutor": "01928d6e-0000-7000-8000-000000000002",
+                                        "note": "Tuesdays after school suit us best."
+                                    },
+                                    "summary": "Choose a tutor"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShortlistChoiceRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShortlistChoiceRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicShortlist"
                                 }
                             }
                         },
@@ -58938,6 +60689,180 @@
                 "responses": {
                     "204": {
                         "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/reporting/builder/datasets": {
+            "get": {
+                "operationId": "reporting_builder_datasets_list",
+                "description": "The datasets this user may build reports on, with their whitelisted columns\n(dimensions, incl. client/student custom fields) and measures.",
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/BuilderDataset"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/reporting/builder/export": {
+            "post": {
+                "operationId": "reporting_builder_export_create",
+                "description": "Download an unsaved report definition as CSV, Excel or PDF (audited).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BuilderExportRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BuilderExportRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BuilderExportRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/reporting/builder/run": {
+            "post": {
+                "operationId": "reporting_builder_run_create",
+                "description": "Run a report definition (nothing is saved). Figures follow the data scope of\nthe dataset's report family.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportDefinitionInputRequest"
+                            },
+                            "examples": {
+                                "GrossByServiceAndMonth": {
+                                    "value": {
+                                        "dataset": "charges",
+                                        "group_by": [
+                                            "service",
+                                            "date:month"
+                                        ],
+                                        "measures": [
+                                            "count",
+                                            "gross"
+                                        ],
+                                        "filters": [
+                                            {
+                                                "field": "kind",
+                                                "op": "in",
+                                                "value": [
+                                                    "lesson"
+                                                ]
+                                            }
+                                        ],
+                                        "period": "this_year",
+                                        "ordering": "-gross",
+                                        "limit": 100,
+                                        "chart": "bar"
+                                    },
+                                    "summary": "Gross by service and month"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportDefinitionInputRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportDefinitionInputRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomResult"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 },
                 "x-visibility": "internal"
@@ -63306,6 +65231,220 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/SettingsArea"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/shortlist-shares": {
+            "get": {
+                "operationId": "shortlist_shares_list",
+                "description": "Shortlists shared with families (``?job=``): the signed link, whether it was opened\nand which tutor the family chose.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "job",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "shortlist-shares"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedShortlistShareList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "shortlist_shares_create",
+                "description": "Shortlists shared with families (``?job=``): the signed link, whether it was opened\nand which tutor the family chose.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "shortlist-shares"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShortlistShareCreateRequest"
+                            },
+                            "examples": {
+                                "ShareTheWholeShortlist": {
+                                    "value": {
+                                        "job": "01928d6e-0000-7000-8000-000000000010",
+                                        "message": "Here are three tutors we think would suit Arjun.",
+                                        "days": 14
+                                    },
+                                    "summary": "Share the whole shortlist"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShortlistShareCreateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShortlistShareCreateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShortlistShare"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/shortlist-shares/{id}": {
+            "get": {
+                "operationId": "shortlist_shares_retrieve",
+                "description": "Shortlists shared with families (``?job=``): the signed link, whether it was opened\nand which tutor the family chose.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this shortlist share.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "shortlist-shares"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShortlistShare"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/shortlist-shares/{id}/revoke": {
+            "post": {
+                "operationId": "shortlist_shares_revoke_create",
+                "description": "Shortlists shared with families (``?job=``): the signed link, whether it was opened\nand which tutor the family chose.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this shortlist share.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "shortlist-shares"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShortlistShare"
                                 }
                             }
                         },
@@ -73422,6 +75561,15 @@
                     "lock_behaviour": {
                         "$ref": "#/components/schemas/LockBehaviourEnum"
                     },
+                    "import_payments": {
+                        "type": "boolean"
+                    },
+                    "payments_checked_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
                     "chart_fetched_at": {
                         "type": "string",
                         "format": "date-time",
@@ -73481,6 +75629,7 @@
                     "id",
                     "last_sync_at",
                     "lock_date",
+                    "payments_checked_at",
                     "problems",
                     "provider",
                     "provider_name",
@@ -74109,6 +76258,17 @@
                     "filename"
                 ]
             },
+            "AffiliateBankFileRequestFileFormatEnum": {
+                "enum": [
+                    "csv",
+                    "bacs18",
+                    "sepa",
+                    "nacha",
+                    "aba"
+                ],
+                "type": "string",
+                "description": "* `csv` - csv\n* `bacs18` - bacs18\n* `sepa` - sepa\n* `nacha` - nacha\n* `aba` - aba"
+            },
             "AffiliateBankFileRequestRequest": {
                 "type": "object",
                 "properties": {
@@ -74125,7 +76285,7 @@
                         "nullable": true,
                         "oneOf": [
                             {
-                                "$ref": "#/components/schemas/FileFormatEnum"
+                                "$ref": "#/components/schemas/AffiliateBankFileRequestFileFormatEnum"
                             },
                             {
                                 "$ref": "#/components/schemas/NullEnum"
@@ -79028,6 +81188,196 @@
                     "name"
                 ]
             },
+            "BuilderChoice": {
+                "type": "object",
+                "properties": {
+                    "value": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "label",
+                    "value"
+                ]
+            },
+            "BuilderDataset": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "string"
+                    },
+                    "category_label": {
+                        "type": "string"
+                    },
+                    "date_field": {
+                        "type": "string"
+                    },
+                    "dimensions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BuilderDimension"
+                        }
+                    },
+                    "measures": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BuilderMeasure"
+                        }
+                    }
+                },
+                "required": [
+                    "category",
+                    "category_label",
+                    "date_field",
+                    "description",
+                    "dimensions",
+                    "key",
+                    "label",
+                    "measures"
+                ]
+            },
+            "BuilderDimension": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/BuilderDimensionTypeEnum"
+                    },
+                    "grains": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "choices": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BuilderChoice"
+                        }
+                    },
+                    "operators": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "choices",
+                    "grains",
+                    "key",
+                    "label",
+                    "operators",
+                    "type"
+                ]
+            },
+            "BuilderDimensionTypeEnum": {
+                "enum": [
+                    "id",
+                    "choice",
+                    "text",
+                    "date",
+                    "bool",
+                    "number"
+                ],
+                "type": "string",
+                "description": "* `id` - id\n* `choice` - choice\n* `text` - text\n* `date` - date\n* `bool` - bool\n* `number` - number"
+            },
+            "BuilderExportFileFormatEnum": {
+                "enum": [
+                    "csv",
+                    "xlsx",
+                    "pdf"
+                ],
+                "type": "string",
+                "description": "* `csv` - csv\n* `xlsx` - xlsx\n* `pdf` - pdf"
+            },
+            "BuilderExportRequest": {
+                "type": "object",
+                "properties": {
+                    "definition": {
+                        "$ref": "#/components/schemas/ReportDefinitionInputRequest"
+                    },
+                    "file_format": {
+                        "$ref": "#/components/schemas/BuilderExportFileFormatEnum"
+                    },
+                    "name": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 120
+                    }
+                },
+                "required": [
+                    "definition",
+                    "file_format"
+                ]
+            },
+            "BuilderFilterRequest": {
+                "type": "object",
+                "properties": {
+                    "field": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                    },
+                    "op": {
+                        "$ref": "#/components/schemas/OpEnum"
+                    },
+                    "value": {
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "field",
+                    "op"
+                ]
+            },
+            "BuilderMeasure": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/BuilderMeasureTypeEnum"
+                    }
+                },
+                "required": [
+                    "key",
+                    "label",
+                    "type"
+                ]
+            },
+            "BuilderMeasureTypeEnum": {
+                "enum": [
+                    "count",
+                    "number",
+                    "money",
+                    "hours"
+                ],
+                "type": "string",
+                "description": "* `count` - count\n* `number` - number\n* `money` - money\n* `hours` - hours"
+            },
             "BuiltinCurriculum": {
                 "type": "object",
                 "properties": {
@@ -80574,6 +82924,16 @@
                     "name",
                     "type"
                 ]
+            },
+            "ChartEnum": {
+                "enum": [
+                    "table",
+                    "bar",
+                    "line",
+                    "pie"
+                ],
+                "type": "string",
+                "description": "* `table` - table\n* `bar` - bar\n* `line` - line\n* `pie` - pie"
             },
             "ChartTaxCode": {
                 "type": "object",
@@ -84739,6 +87099,157 @@
                 "type": "string",
                 "description": "* `staff` - Staff\n* `tutor` - Staff and tutors\n* `client_portal` - Also in the client portal\n* `public` - Public forms"
             },
+            "CustomReport": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 120
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "dataset": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "definition": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "shared": {
+                        "type": "boolean"
+                    },
+                    "owner_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "is_mine": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "dataset",
+                    "definition",
+                    "id",
+                    "is_mine",
+                    "name",
+                    "owner_name",
+                    "updated_at"
+                ]
+            },
+            "CustomReportWriteRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                    },
+                    "description": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 500
+                    },
+                    "definition": {
+                        "$ref": "#/components/schemas/ReportDefinitionInputRequest"
+                    },
+                    "shared": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "definition",
+                    "name"
+                ]
+            },
+            "CustomResult": {
+                "type": "object",
+                "properties": {
+                    "definition": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "period": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
+                    "columns": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ReportColumn"
+                        }
+                    },
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "totals": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "chart": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ReportChart"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "notes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "truncated": {
+                        "type": "boolean"
+                    },
+                    "generated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "chart",
+                    "columns",
+                    "definition",
+                    "generated_at",
+                    "notes",
+                    "period",
+                    "rows",
+                    "totals",
+                    "truncated"
+                ]
+            },
             "CustomRole": {
                 "type": "object",
                 "properties": {
@@ -88684,16 +91195,106 @@
                     "subject_id"
                 ]
             },
-            "FileFormatEnum": {
-                "enum": [
-                    "csv",
-                    "bacs18",
-                    "sepa",
-                    "nacha",
-                    "aba"
-                ],
-                "type": "string",
-                "description": "* `csv` - csv\n* `bacs18` - bacs18\n* `sepa` - sepa\n* `nacha` - nacha\n* `aba` - aba"
+            "FeedbackAnswerRequest": {
+                "type": "object",
+                "properties": {
+                    "rating": {
+                        "type": "integer",
+                        "maximum": 5,
+                        "minimum": 1
+                    },
+                    "comment": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 2000
+                    }
+                },
+                "required": [
+                    "rating"
+                ]
+            },
+            "FeedbackPerson": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            },
+            "FeedbackSummary": {
+                "type": "object",
+                "properties": {
+                    "asked": {
+                        "type": "integer"
+                    },
+                    "answered": {
+                        "type": "integer"
+                    },
+                    "answer_rate": {
+                        "type": "string"
+                    },
+                    "average": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "stars": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FeedbackTutorRow"
+                        }
+                    }
+                },
+                "required": [
+                    "answer_rate",
+                    "answered",
+                    "asked",
+                    "average",
+                    "stars",
+                    "tutors"
+                ]
+            },
+            "FeedbackTutorRow": {
+                "type": "object",
+                "properties": {
+                    "tutor_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "tutor": {
+                        "type": "string"
+                    },
+                    "average": {
+                        "type": "string"
+                    },
+                    "answered": {
+                        "type": "integer"
+                    },
+                    "asked": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "answered",
+                    "asked",
+                    "average",
+                    "tutor",
+                    "tutor_id"
+                ]
             },
             "FileRef": {
                 "type": "object",
@@ -89067,6 +91668,32 @@
                 ],
                 "type": "string",
                 "description": "* `keep` - keep\n* `cancel` - cancel"
+            },
+            "GeocodeRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "kinds": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PersonKindEnum"
+                        },
+                        "default": [
+                            "student",
+                            "tutor"
+                        ]
+                    }
+                }
+            },
+            "GeocodeResult": {
+                "type": "object",
+                "properties": {
+                    "queued": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "queued"
+                ]
             },
             "GiveReferenceRequest": {
                 "type": "object",
@@ -93930,6 +96557,127 @@
                 "type": "string",
                 "description": "* `invoice` - Invoice\n* `invoice_void` - Invoice voided\n* `payment` - Payment\n* `credit_note` - Credit note\n* `refund` - Refund\n* `payment_request_payment` - Credit top-up\n* `adjustment` - Adjustment\n* `write_off` - Write-off\n* `package_purchase` - Package purchase"
             },
+            "LedgerPaymentImport": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "connection": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "provider": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "external_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "invoice": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "invoice_number": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "client": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "client_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "payment": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "amount": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "readOnly": true
+                    },
+                    "paid_on": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "reference": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/LedgerPaymentImportStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "amount",
+                    "client",
+                    "client_name",
+                    "connection",
+                    "created_at",
+                    "external_id",
+                    "id",
+                    "invoice",
+                    "invoice_number",
+                    "paid_on",
+                    "payment",
+                    "provider",
+                    "reason",
+                    "reference",
+                    "status"
+                ]
+            },
+            "LedgerPaymentImportStatusEnum": {
+                "enum": [
+                    "imported",
+                    "skipped"
+                ],
+                "type": "string",
+                "description": "* `imported` - Recorded in TutorTrack\n* `skipped` - Not recorded"
+            },
             "LegalHold": {
                 "type": "object",
                 "properties": {
@@ -94573,6 +97321,133 @@
                     "requester",
                     "status"
                 ]
+            },
+            "LessonFeedback": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "lesson": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "lesson_title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "lesson_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "lesson_date": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true
+                    },
+                    "student": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/FeedbackPerson"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "tutor": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/FeedbackPerson"
+                            }
+                        ],
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "contact_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/LessonFeedbackStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "skip_reason": {
+                        "readOnly": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/SkipReasonEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    },
+                    "sent_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "rating": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "comment": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "answered_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "low_score_alerted": {
+                        "type": "boolean",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "answered_at",
+                    "comment",
+                    "contact_name",
+                    "expires_at",
+                    "id",
+                    "lesson",
+                    "lesson_date",
+                    "lesson_start",
+                    "lesson_title",
+                    "low_score_alerted",
+                    "rating",
+                    "sent_at",
+                    "skip_reason",
+                    "status",
+                    "student",
+                    "tutor"
+                ]
+            },
+            "LessonFeedbackStatusEnum": {
+                "enum": [
+                    "sent",
+                    "answered",
+                    "expired",
+                    "skipped"
+                ],
+                "type": "string",
+                "description": "* `sent` - Sent\n* `answered` - Answered\n* `expired` - Expired\n* `skipped` - Not sent"
             },
             "LessonReasonRequest": {
                 "type": "object",
@@ -96166,6 +99041,71 @@
                 },
                 "required": [
                     "subject_ids"
+                ]
+            },
+            "MapMissing": {
+                "type": "object",
+                "properties": {
+                    "student": {
+                        "type": "integer"
+                    },
+                    "tutor": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "student",
+                    "tutor"
+                ]
+            },
+            "MapPoint": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "$ref": "#/components/schemas/PersonKindEnum"
+                    },
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "area": {
+                        "type": "string"
+                    },
+                    "lat": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "lng": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "travel_radius_km": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "area",
+                    "id",
+                    "kind",
+                    "lat",
+                    "lng",
+                    "name",
+                    "status",
+                    "subjects",
+                    "travel_radius_km"
                 ]
             },
             "MappingKey": {
@@ -99196,6 +102136,20 @@
                 "type": "string",
                 "description": "* `pending` - Being created\n* `active` - Ready\n* `failed` - Failed\n* `deleted` - Deleted"
             },
+            "OpEnum": {
+                "enum": [
+                    "eq",
+                    "neq",
+                    "in",
+                    "gte",
+                    "lte",
+                    "contains",
+                    "empty",
+                    "not_empty"
+                ],
+                "type": "string",
+                "description": "* `eq` - eq\n* `neq` - neq\n* `in` - in\n* `gte` - gte\n* `lte` - lte\n* `contains` - contains\n* `empty` - empty\n* `not_empty` - not_empty"
+            },
             "OpenResource": {
                 "type": "object",
                 "properties": {
@@ -101635,6 +104589,32 @@
                     }
                 }
             },
+            "PaginatedCustomReportList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CustomReport"
+                        }
+                    }
+                }
+            },
             "PaginatedDataRequestList": {
                 "type": "object",
                 "required": [
@@ -102285,6 +105265,32 @@
                     }
                 }
             },
+            "PaginatedLedgerPaymentImportList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LedgerPaymentImport"
+                        }
+                    }
+                }
+            },
             "PaginatedLegalHoldList": {
                 "type": "object",
                 "required": [
@@ -102333,6 +105339,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/LessonChangeRequest"
+                        }
+                    }
+                }
+            },
+            "PaginatedLessonFeedbackList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LessonFeedback"
                         }
                     }
                 }
@@ -103143,6 +106175,32 @@
                     }
                 }
             },
+            "PaginatedProposalList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Proposal"
+                        }
+                    }
+                }
+            },
             "PaginatedProviderMigrationList": {
                 "type": "object",
                 "required": [
@@ -103815,6 +106873,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Service"
+                        }
+                    }
+                }
+            },
+            "PaginatedShortlistShareList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ShortlistShare"
                         }
                     }
                 }
@@ -104509,6 +107593,9 @@
                     },
                     "lock_behaviour": {
                         "$ref": "#/components/schemas/LockBehaviourEnum"
+                    },
+                    "import_payments": {
+                        "type": "boolean"
                     }
                 }
             },
@@ -105704,6 +108791,28 @@
                     },
                     "active": {
                         "type": "boolean"
+                    }
+                }
+            },
+            "PatchedCustomReportWriteRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                    },
+                    "description": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 500
+                    },
+                    "definition": {
+                        "$ref": "#/components/schemas/ReportDefinitionInputRequest"
+                    },
+                    "shared": {
+                        "type": "boolean",
+                        "default": false
                     }
                 }
             },
@@ -107517,6 +110626,67 @@
                     },
                     "active": {
                         "type": "boolean"
+                    }
+                }
+            },
+            "PatchedProposalWriteRequest": {
+                "type": "object",
+                "properties": {
+                    "enquiry": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 200
+                    },
+                    "contact": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "introduction": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "schedule": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "terms": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "lines": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProposalLineRequest"
+                        }
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "currency": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 3
+                    },
+                    "deposit": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "valid_days": {
+                        "type": "integer",
+                        "maximum": 90,
+                        "minimum": 1,
+                        "nullable": true
                     }
                 }
             },
@@ -110561,6 +113731,24 @@
                     "payee_name"
                 ]
             },
+            "PeopleMap": {
+                "type": "object",
+                "properties": {
+                    "points": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MapPoint"
+                        }
+                    },
+                    "missing": {
+                        "$ref": "#/components/schemas/MapMissing"
+                    }
+                },
+                "required": [
+                    "missing",
+                    "points"
+                ]
+            },
             "PercentPair": {
                 "type": "object",
                 "properties": {
@@ -110617,6 +113805,14 @@
                     "codename",
                     "description"
                 ]
+            },
+            "PersonKindEnum": {
+                "enum": [
+                    "student",
+                    "tutor"
+                ],
+                "type": "string",
+                "description": "* `student` - student\n* `tutor` - tutor"
             },
             "PersonRef": {
                 "type": "object",
@@ -114782,6 +117978,406 @@
                     "discount"
                 ]
             },
+            "Proposal": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "enquiry": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "number": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "contact": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "contact_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ProposalStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "state": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ProposalStateEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "introduction": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "schedule": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "terms": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "lines": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProposalLine"
+                        }
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "readOnly": true
+                    },
+                    "currency": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "total": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "readOnly": true
+                    },
+                    "deposit": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "valid_days": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "sent_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "viewed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "responded_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "accepted_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "chosen_tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "chosen_tutor_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "decline_reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "payment_request": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "job_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "readOnly": true
+                    },
+                    "link": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "accepted_name",
+                    "chosen_tutor",
+                    "chosen_tutor_name",
+                    "contact",
+                    "contact_name",
+                    "created_at",
+                    "currency",
+                    "decline_reason",
+                    "deposit",
+                    "enquiry",
+                    "expires_at",
+                    "id",
+                    "introduction",
+                    "job_ids",
+                    "lines",
+                    "link",
+                    "number",
+                    "payment_request",
+                    "responded_at",
+                    "schedule",
+                    "sent_at",
+                    "state",
+                    "status",
+                    "terms",
+                    "title",
+                    "total",
+                    "tutors",
+                    "valid_days",
+                    "viewed_at"
+                ]
+            },
+            "ProposalAcceptRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            },
+            "ProposalDeclineRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 500
+                    }
+                }
+            },
+            "ProposalLine": {
+                "type": "object",
+                "properties": {
+                    "service": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "quantity": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,6}(?:\\.\\d{0,2})?$"
+                    },
+                    "unit_price": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                    },
+                    "amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,12}(?:\\.\\d{0,2})?$",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "amount",
+                    "quantity",
+                    "unit_price"
+                ]
+            },
+            "ProposalLineRequest": {
+                "type": "object",
+                "properties": {
+                    "service": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "quantity": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,6}(?:\\.\\d{0,2})?$"
+                    },
+                    "unit_price": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                    }
+                },
+                "required": [
+                    "quantity",
+                    "unit_price"
+                ]
+            },
+            "ProposalStateEnum": {
+                "enum": [
+                    "draft",
+                    "sent",
+                    "accepted",
+                    "declined",
+                    "expired",
+                    "withdrawn"
+                ],
+                "type": "string",
+                "description": "* `draft` - draft\n* `sent` - sent\n* `accepted` - accepted\n* `declined` - declined\n* `expired` - expired\n* `withdrawn` - withdrawn"
+            },
+            "ProposalStatusEnum": {
+                "enum": [
+                    "draft",
+                    "sent",
+                    "accepted",
+                    "declined",
+                    "expired",
+                    "withdrawn"
+                ],
+                "type": "string",
+                "description": "* `draft` - Draft\n* `sent` - Sent\n* `accepted` - Accepted\n* `declined` - Declined\n* `expired` - Expired\n* `withdrawn` - Withdrawn"
+            },
+            "ProposalWriteRequest": {
+                "type": "object",
+                "properties": {
+                    "enquiry": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 200
+                    },
+                    "contact": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "introduction": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "schedule": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "terms": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "lines": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProposalLineRequest"
+                        }
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "currency": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 3
+                    },
+                    "deposit": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "valid_days": {
+                        "type": "integer",
+                        "maximum": 90,
+                        "minimum": 1,
+                        "nullable": true
+                    }
+                }
+            },
             "ProposeInterviewRequest": {
                 "type": "object",
                 "properties": {
@@ -115547,6 +119143,48 @@
                     "student"
                 ]
             },
+            "PublicFeedback": {
+                "type": "object",
+                "properties": {
+                    "organisation": {
+                        "type": "string"
+                    },
+                    "student": {
+                        "type": "string"
+                    },
+                    "tutor": {
+                        "type": "string"
+                    },
+                    "lesson": {
+                        "type": "string"
+                    },
+                    "lesson_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/LessonFeedbackStatusEnum"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "rating": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "expires_at",
+                    "lesson",
+                    "lesson_date",
+                    "organisation",
+                    "rating",
+                    "status",
+                    "student",
+                    "tutor"
+                ]
+            },
             "PublicForm": {
                 "type": "object",
                 "properties": {
@@ -115974,6 +119612,114 @@
                     }
                 }
             },
+            "PublicProposal": {
+                "type": "object",
+                "properties": {
+                    "organisation": {
+                        "type": "string"
+                    },
+                    "number": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/ProposalStateEnum"
+                    },
+                    "introduction": {
+                        "type": "string"
+                    },
+                    "schedule": {
+                        "type": "string"
+                    },
+                    "terms": {
+                        "type": "string"
+                    },
+                    "lines": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PublicProposalLine"
+                        }
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "total": {
+                        "type": "string"
+                    },
+                    "deposit": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PublicTutorCard"
+                        }
+                    },
+                    "chosen_tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "pay_url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "chosen_tutor",
+                    "currency",
+                    "deposit",
+                    "expires_at",
+                    "introduction",
+                    "lines",
+                    "number",
+                    "organisation",
+                    "pay_url",
+                    "schedule",
+                    "status",
+                    "students",
+                    "terms",
+                    "title",
+                    "total",
+                    "tutors"
+                ]
+            },
+            "PublicProposalLine": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string"
+                    },
+                    "quantity": {
+                        "type": "string"
+                    },
+                    "unit_price": {
+                        "type": "string"
+                    },
+                    "amount": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "amount",
+                    "description",
+                    "quantity",
+                    "unit_price"
+                ]
+            },
             "PublicQuestion": {
                 "type": "object",
                 "description": "A question as the learner sees it (no answers).",
@@ -116252,6 +119998,77 @@
                     "subject"
                 ]
             },
+            "PublicShortlist": {
+                "type": "object",
+                "properties": {
+                    "organisation": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/ShortlistShareStateEnum"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "job": {
+                        "$ref": "#/components/schemas/PublicShortlistJob"
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PublicTutorCard"
+                        }
+                    },
+                    "chosen_tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "chosen_tutor",
+                    "expires_at",
+                    "job",
+                    "message",
+                    "organisation",
+                    "status",
+                    "tutors"
+                ]
+            },
+            "PublicShortlistJob": {
+                "type": "object",
+                "properties": {
+                    "subject": {
+                        "type": "string"
+                    },
+                    "level": {
+                        "type": "string"
+                    },
+                    "service": {
+                        "type": "string"
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "online": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "level",
+                    "online",
+                    "service",
+                    "students",
+                    "subject"
+                ]
+            },
             "PublicStudentRequest": {
                 "type": "object",
                 "properties": {
@@ -116370,6 +120187,78 @@
                     "subjects"
                 ]
             },
+            "PublicTutorCard": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "headline": {
+                        "type": "string"
+                    },
+                    "bio": {
+                        "type": "string"
+                    },
+                    "photo_url": {
+                        "type": "string"
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PublicTutorSubject"
+                        }
+                    },
+                    "qualifications": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PublicTutorQualification"
+                        }
+                    },
+                    "years_experience": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "languages": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "online": {
+                        "type": "boolean"
+                    },
+                    "in_person": {
+                        "type": "boolean"
+                    },
+                    "rating": {
+                        "type": "number",
+                        "format": "double",
+                        "nullable": true
+                    },
+                    "rating_count": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "bio",
+                    "headline",
+                    "id",
+                    "in_person",
+                    "languages",
+                    "name",
+                    "online",
+                    "photo_url",
+                    "qualifications",
+                    "rating",
+                    "rating_count",
+                    "subjects",
+                    "years_experience"
+                ]
+            },
             "PublicTutorDetail": {
                 "type": "object",
                 "properties": {
@@ -116443,6 +120332,41 @@
                     "slug",
                     "subjects",
                     "years_experience"
+                ]
+            },
+            "PublicTutorQualification": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "institution": {
+                        "type": "string"
+                    },
+                    "year": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "institution",
+                    "title",
+                    "year"
+                ]
+            },
+            "PublicTutorSubject": {
+                "type": "object",
+                "properties": {
+                    "subject": {
+                        "type": "string"
+                    },
+                    "level": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "level",
+                    "subject"
                 ]
             },
             "PublicWidget": {
@@ -117592,6 +121516,25 @@
                 "required": [
                     "subscription",
                     "url"
+                ]
+            },
+            "ReadBackResult": {
+                "type": "object",
+                "properties": {
+                    "checked": {
+                        "type": "integer"
+                    },
+                    "imported": {
+                        "type": "integer"
+                    },
+                    "skipped": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "checked",
+                    "imported",
+                    "skipped"
                 ]
             },
             "ReasonEnum": {
@@ -119028,6 +122971,81 @@
                     "key",
                     "period",
                     "title"
+                ]
+            },
+            "ReportDefinitionInputRequest": {
+                "type": "object",
+                "properties": {
+                    "dataset": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 40
+                    },
+                    "group_by": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                        }
+                    },
+                    "measures": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 40
+                        }
+                    },
+                    "filters": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BuilderFilterRequest"
+                        }
+                    },
+                    "period": {
+                        "type": "string",
+                        "minLength": 1,
+                        "default": "this_month",
+                        "maxLength": 20
+                    },
+                    "from_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "to_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "ordering": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 80
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "maximum": 1000,
+                        "minimum": 1,
+                        "default": 1000
+                    },
+                    "chart": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ChartEnum"
+                            }
+                        ],
+                        "default": "table"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 3
+                    }
+                },
+                "required": [
+                    "dataset"
                 ]
             },
             "ReportDownload": {
@@ -123689,6 +127707,23 @@
                     "tutor_name"
                 ]
             },
+            "ShortlistChoiceRequest": {
+                "type": "object",
+                "properties": {
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "note": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 1000
+                    }
+                },
+                "required": [
+                    "tutor"
+                ]
+            },
             "ShortlistRequest": {
                 "type": "object",
                 "properties": {
@@ -123709,6 +127744,178 @@
                     "job",
                     "tutor"
                 ]
+            },
+            "ShortlistShare": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "job": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "readOnly": true
+                    },
+                    "contact": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "contact_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ShortlistShareStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "state": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ShortlistShareStateEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "viewed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "chosen_tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "chosen_tutor_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "chosen_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "client_note": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "offer_batch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "link": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "chosen_at",
+                    "chosen_tutor",
+                    "chosen_tutor_name",
+                    "client_note",
+                    "contact",
+                    "contact_name",
+                    "created_at",
+                    "expires_at",
+                    "id",
+                    "job",
+                    "link",
+                    "message",
+                    "offer_batch",
+                    "state",
+                    "status",
+                    "tutors",
+                    "viewed_at"
+                ]
+            },
+            "ShortlistShareCreateRequest": {
+                "type": "object",
+                "properties": {
+                    "job": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "contact": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 2000
+                    },
+                    "days": {
+                        "type": "integer",
+                        "maximum": 90,
+                        "minimum": 1,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "job"
+                ]
+            },
+            "ShortlistShareStateEnum": {
+                "enum": [
+                    "active",
+                    "chosen",
+                    "revoked",
+                    "expired"
+                ],
+                "type": "string",
+                "description": "* `active` - active\n* `chosen` - chosen\n* `revoked` - revoked\n* `expired` - expired"
+            },
+            "ShortlistShareStatusEnum": {
+                "enum": [
+                    "active",
+                    "chosen",
+                    "revoked"
+                ],
+                "type": "string",
+                "description": "* `active` - Waiting for the family\n* `chosen` - Tutor chosen\n* `revoked` - Withdrawn"
             },
             "ShowEnum": {
                 "enum": [
@@ -124198,6 +128405,14 @@
                 ],
                 "type": "string",
                 "description": "* `s` - s\n* `m` - m\n* `l` - l"
+            },
+            "SkipReasonEnum": {
+                "enum": [
+                    "no_recipient",
+                    "no_consent"
+                ],
+                "type": "string",
+                "description": "* `` - None\n* `no_recipient` - No contact receives lesson updates\n* `no_consent` - The family opted out of feedback requests"
             },
             "SkipRequest": {
                 "type": "object",
@@ -125834,10 +130049,11 @@
                     "voided",
                     "error",
                     "retrying",
-                    "skipped"
+                    "skipped",
+                    "imported"
                 ],
                 "type": "string",
-                "description": "* `created` - Created\n* `updated` - Updated\n* `unchanged` - Already up to date\n* `voided` - Voided\n* `error` - Error\n* `retrying` - Will retry\n* `skipped` - Skipped"
+                "description": "* `created` - Created\n* `updated` - Updated\n* `unchanged` - Already up to date\n* `voided` - Voided\n* `error` - Error\n* `retrying` - Will retry\n* `skipped` - Skipped\n* `imported` - Imported from the ledger"
             },
             "TOTPConfirmRequest": {
                 "type": "object",

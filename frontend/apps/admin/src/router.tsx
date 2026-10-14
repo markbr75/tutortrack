@@ -87,6 +87,12 @@ import { VerifyEmailPage } from "./routes/VerifyEmailPage";
 import { DeveloperPage } from "./developer/DeveloperPages";
 import { DeveloperDocsPage, MarketplacePage, OAuthConsentPage } from "./developer/DocsPages";
 import { WebsitePage } from "./website/WebsitePage";
+// Phase 2b (E05-T12, E09-T09, E17-T09, E19-T08, E26-T08)
+import { PeopleMapPage } from "./people/MapPage";
+import { LessonFeedbackPage, PublicFeedbackPage } from "./delivery/FeedbackPages";
+import { PublicProposalPage } from "./leads/ProposalPages";
+import { PublicShortlistPage } from "./matching/SharePages";
+import { BuilderPage } from "./reporting/BuilderPage";
 
 interface RouterContext {
   queryClient: QueryClient;
@@ -166,6 +172,29 @@ const offerRoute = createRoute({
   path: "/offers/$token",
   component: function OfferRoute() {
     return <OfferPage token={offerRoute.useParams().token} />;
+  },
+});
+
+// Phase 2b public links: lesson feedback (E09-T09), proposals (E17-T09), shortlists (E19-T08).
+const feedbackRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/feedback/$token",
+  component: function FeedbackRoute() {
+    return <PublicFeedbackPage token={feedbackRoute.useParams().token} />;
+  },
+});
+const proposalRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/proposals/$token",
+  component: function ProposalRoute() {
+    return <PublicProposalPage token={proposalRoute.useParams().token} />;
+  },
+});
+const shortlistRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/shortlists/$token",
+  component: function ShortlistRoute() {
+    return <PublicShortlistPage token={shortlistRoute.useParams().token} />;
   },
 });
 
@@ -341,6 +370,9 @@ const reportRoute = createRoute({
 });
 const analyticsRoute = appPage("/analytics", ReportsLibraryPage);
 const analyticsSavedRoute = appPage("/analytics/saved", SavedReportsPage);
+const analyticsBuilderRoute = appPage("/analytics/builder", BuilderPage);
+const peopleMapRoute = appPage("/people/map", PeopleMapPage);
+const lessonFeedbackRoute = appPage("/lesson-feedback", LessonFeedbackPage);
 const analyticsReportRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/analytics/$key",
@@ -452,6 +484,9 @@ const routeTree = rootRoute.addChildren([
   referenceRoute,
   reEnrolRoute,
   reviewRoute,
+  feedbackRoute,
+  proposalRoute,
+  shortlistRoute,
   platformRoute.addChildren([
     platformTenantsRoute,
     platformTenantRoute,
@@ -500,7 +535,10 @@ const routeTree = rootRoute.addChildren([
     reportRoute,
     analyticsRoute,
     analyticsSavedRoute,
+    analyticsBuilderRoute,
     analyticsReportRoute,
+    peopleMapRoute,
+    lessonFeedbackRoute,
     unconfirmedRoute,
     deliverySettingsRoute,
     billingRoute,

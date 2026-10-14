@@ -101,7 +101,7 @@ Tutor scope `own`: students on the tutor's active jobs only; client contact fiel
 - [x] **E05-T09** Bulk actions framework (background job + progress).
 - [x] **E05-T10** Duplicate detection and merge. *(Detection done; merge is Phase 2, "minus advanced deduplication" in the roadmap.)*
 - [x] **E05-T11** Frontend: list grids, record pages, quick-add family, tutor profile pages.
-- [ ] **E05-T12** (Phase 2) Map view.
+- [x] **E05-T12** (Phase 2) Map view.
 
 ## Implementation notes (as built 2026-10-09)
 - **Apps.** `people` holds clients, contacts, students, tutor profiles, subjects, qualifications and addresses; `crm` holds the generic capabilities (custom fields, tags, notes, tasks, documents, saved views, bulk jobs). Every table is a `TenantModel` with RLS.
@@ -118,3 +118,8 @@ Tutor scope `own`: students on the tutor's active jobs only; client contact fiel
 - **Not built:** merge tool (Phase 2), map view (T12, Phase 2), sole-trader merged family page variant (the family page already shows client and students together).
 - **Frontend:** client/student/tutor lists with search and status filters, family page, student and tutor pages (status change, subject approval), quick-add family, notes/tasks/timeline tabs on each record, "My tasks", and ⌘K global search.
 
+## Phase 2b implementation notes (as built 2026-10-14)
+- **T12 map view (FR-05-11).** `GET /api/v1/people/map?kind=all|student|tutor&status&branch&subject` returns geocoded students (their lesson address, else the family's billing address) and tutors (their address) that the viewer may see (`scope_queryset` on `people.student.view` / `people.tutor.view`; tutors see themselves and the students on their jobs). Points are rounded to 3 decimal places (about 100 m) and carry the postcode district (`core.geo.area_of`, moved from matching), never a street address. People without coordinates are counted, and `POST /people/map/geocode` queues the E05-T03 Celery geocoding task for the addresses the user may edit.
+- **Geocoding providers.** `core.geo` gains `FakeGeocoder` (stable made-up points around London from a hash of the address: no network; the local default in `.env.example`) and `MapboxGeocoder` (`MAPBOX_ACCESS_TOKEN`) next to Google. Real providers are only reached through `core.net.safe_urlopen`. Keys come from the environment; none are committed. Coordinates stay on `people.Address.lat/lng` (E05-T03).
+- **Frontend (deviation).** The admin app has no map library (matching uses a schematic plot), so `/people/map` is an accessible SVG "map": an equirectangular projection of the rounded points with keyboard-focusable markers (students as circles, tutors as squares, so colour is not the only cue), optional travel-radius rings, and a list view (a table sorted by area) carrying the same information (WCAG 1.1.1/1.3.1/2.1.1). Tiles (Mapbox/Google) can sit behind the same API later without backend changes.
+- **Not built:** the merge tool (T10 remainder) stays a later phase.
