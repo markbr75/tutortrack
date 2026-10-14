@@ -78,7 +78,7 @@ def is_complete(cfg: OrganisationSSO) -> bool:
 
 
 def _origin(request: HttpRequest) -> str:
-    return f"{request.scheme}://{request.get_host()}"
+    return request.build_absolute_uri("/").rstrip("/")
 
 
 def callback_url(request: HttpRequest) -> str:

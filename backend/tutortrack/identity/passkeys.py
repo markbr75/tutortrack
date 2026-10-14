@@ -57,7 +57,7 @@ def rp_id() -> str:
 
 def expected_origin(request: HttpRequest) -> str:
     """The page's origin; it must be on the relying party's domain."""
-    origin = f"{request.scheme}://{request.get_host()}"
+    origin = request.build_absolute_uri("/").rstrip("/")
     host = request.get_host().split(":")[0]
     if host != rp_id() and not host.endswith(f".{rp_id()}"):
         raise InvalidCode(_("Passkeys can't be used on this address."))
