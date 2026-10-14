@@ -254,7 +254,8 @@
   },
   "providers": {
     "google": "Google",
-    "microsoft": "Microsoft"
+    "microsoft": "Microsoft",
+    "apple": "Apple"
   },
   "invite": {
     "title": "Join {{organisation}}",
@@ -6352,5 +6353,106 @@
       "yes": "Yes",
       "no": "No"
     }
+  },
+  "emailChange": {
+    "title": "Email address",
+    "current": "You sign in as {{email}}.",
+    "newEmail": "New email address",
+    "password": "Current password",
+    "passwordHint": "Leave blank if you only sign in with Google, Microsoft, Apple or a link.",
+    "submit": "Change email",
+    "sent": "We've sent a link to {{email}}. Your email changes when you open it. We've also told your current address.",
+    "confirmTitle": "Confirm your new email",
+    "checking": "Confirming your new email address…",
+    "done": "Your email address is now {{email}}. Other devices have been signed out.",
+    "failed": "This link is invalid or has expired. Ask for a new one from your account page."
+  },
+  "esign": {
+    "tab": "Documents",
+    "nav": "Documents",
+    "portalTitle": "Documents",
+    "tutorTitle": "Documents to sign",
+    "none": "No documents yet.",
+    "file": "File",
+    "title": "Title",
+    "category": "Category",
+    "categories": {
+      "contract": "Contract",
+      "consent_form": "Consent form",
+      "report": "Report",
+      "id": "Identity document",
+      "other": "Other"
+    },
+    "askToSign": "Ask them to sign it in their portal",
+    "upload": "Add document",
+    "download": "Download {{title}}",
+    "requestSignature": "Ask for a signature",
+    "cancelRequest": "Stop asking for a signature",
+    "auditTrail": "Signature details",
+    "status": {
+      "not_required": "No signature needed",
+      "awaiting": "Waiting for a signature",
+      "signed": "Signed"
+    },
+    "signedBy": "Signed by {{name}} on {{when}}",
+    "trail": "IP address {{ip}} · browser {{agent}}",
+    "hash": "SHA-256 of the signed file: {{hash}}",
+    "signedCopy": "Download the signed copy",
+    "signedOn": "Signed on {{when}}",
+    "signButton": "Sign {{title}}",
+    "signTitle": "Sign {{title}}",
+    "intro": "Read “{{title}}” first. Signing here has the same effect as signing on paper. We record your name, the time, your IP address and browser, and keep a signed copy.",
+    "read": "Read {{title}}",
+    "fullName": "Your full name",
+    "agree": "I have read “{{title}}” and agree to it.",
+    "sign": "Sign",
+    "cancel": "Cancel",
+    "thanks": "Thank you. It's signed, and a signed copy is kept on your record.",
+    "signedDone": "Signed"
+  },
+  "family": {
+    "nav": "Family",
+    "title": "Family and logins",
+    "household": "Household",
+    "allHouseholds": "All households",
+    "guardiansTitle": "Parents and guardians",
+    "inviteTitle": "Invite another guardian",
+    "portal": {
+      "active": "Has a portal login",
+      "invited": "Invited",
+      "none": "No portal login"
+    },
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email address",
+    "relationship": "Relationship",
+    "relationships": {
+      "parent": "Parent",
+      "guardian": "Guardian",
+      "carer": "Carer",
+      "other": "Other"
+    },
+    "confirm": "They have parental responsibility, or my permission to see my children's lessons, reports and invoices.",
+    "invite": "Send invitation",
+    "invited": "Invitation sent. They have 7 days to accept it.",
+    "loginsTitle": "Logins for children under 13",
+    "loginsIntro": "Give a child under 13 their own login with a username and a PIN that you choose. They don't need an email address. You can change the PIN or remove the login at any time.",
+    "loginActive": "Signs in as {{username}} (PIN set {{when}}).",
+    "username": "Username",
+    "usernameHint": "3 to 40 lower-case letters, numbers, dots or dashes.",
+    "pin": "PIN or password",
+    "pinHint": "At least 6 characters. Avoid 123456 or repeated digits.",
+    "newPin": "New PIN",
+    "consent": "As {{name}}'s parent or guardian, I consent to them having a login.",
+    "createLogin": "Create login",
+    "createFor": "Create a login for {{name}}",
+    "changePin": "Change PIN",
+    "changePinFor": "Change the PIN for {{name}}",
+    "pinChanged": "PIN changed. They have been signed out of every device.",
+    "removeLogin": "Remove login",
+    "hasEmailLogin": "Already signs in with their own email.",
+    "notEligible": "Aged 13 or over: ask us to invite them with their own email.",
+    "childSignIn": "Child sign-in",
+    "childSignInButton": "Sign in with username"
   }
 }

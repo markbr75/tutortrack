@@ -16,6 +16,8 @@ import { ClassroomPage, RecordingsPage } from "./classroom/ClassroomPage";
 import { BillingPage } from "./pages/BillingPage";
 import { BookingPage } from "./pages/BookingPage";
 import { ClassesPage } from "./pages/ClassesPage";
+import { DocumentsPage } from "./pages/DocumentsPage";
+import { FamilyPage } from "./pages/FamilyPage";
 import { HomePage } from "./pages/HomePage";
 import { HomeworkPage, LearningPage } from "./pages/LearningPage";
 import { MessagesPage, TutorMessagesPage } from "./pages/MessagesPage";
@@ -97,6 +99,8 @@ const routeTree = rootRoute.addChildren([
   page("/reports", ReportsPage),
   page("/billing", BillingPage),
   page("/profile", ProfilePage),
+  page("/family", FamilyPage),
+  page("/documents", DocumentsPage),
   page("/privacy", PrivacyPage),
   page("/referrals", ReferralsPage),
   page("/messages", MessagesPage),

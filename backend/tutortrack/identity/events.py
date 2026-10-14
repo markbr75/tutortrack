@@ -89,3 +89,11 @@ class CustomRoleChanged(DomainEvent):
     event_type: ClassVar[str] = "role.changed"
     subject_type: ClassVar[str] = "role"
     action: str  # created | updated | archived
+
+
+@dataclass(frozen=True, kw_only=True)
+class UserEmailChanged(DomainEvent):
+    """Someone confirmed a new sign-in email (FR-03-9). No addresses in the payload."""
+
+    event_type: ClassVar[str] = "user.email_changed"
+    subject_type: ClassVar[str] = "user"

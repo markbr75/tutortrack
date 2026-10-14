@@ -200,6 +200,12 @@ def attach(stored: StoredFile, owner: models.Model) -> StoredFile:
 def download_url(user: Any, stored: StoredFile, *, inline: bool = False) -> tuple[str, int]:
     if not can_access(user, stored):
         raise PermissionDenied()
+    return presign_download(stored, inline=inline)
+
+
+def presign_download(stored: StoredFile, *, inline: bool = False) -> tuple[str, int]:
+    """A short-lived download link, for callers that have already checked access
+    themselves (e.g. the portal's household check on a family's documents)."""
     if not stored.is_downloadable:
         raise Conflict(
             "This file is not available for download yet.",

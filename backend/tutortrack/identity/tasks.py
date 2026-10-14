@@ -93,3 +93,35 @@ def send_security_alert(*, email: str, kind: str, detail: str, who: str) -> None
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[email],
     )
+
+
+@shared_task(name="tutortrack.identity.tasks.send_email_change_verification", ignore_result=True)
+def send_email_change_verification(*, user_id: str, email: str, url: str) -> None:
+    """The confirmation link goes to the *new* address (FR-03-9)."""
+    user = User.objects.filter(pk=user_id, is_active=True).first()
+    if user is None:
+        return
+    with translation.override(user.locale):
+        send_mail(
+            subject=_("Confirm your new email address"),
+            message=render_to_string(
+                "identity/email/email_change_verify.txt", {"user": user, "url": url}
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+        )
+
+
+@shared_task(name="tutortrack.identity.tasks.send_email_change_notice", ignore_result=True)
+def send_email_change_notice(*, email: str, new_email: str, done: bool) -> None:
+    """Tell the *old* address that a change was asked for (or made)."""
+    send_mail(
+        subject=_("Your TutorTrack email address has changed")
+        if done
+        else _("A change of email address was requested"),
+        message=render_to_string(
+            "identity/email/email_change_notice.txt", {"new_email": new_email, "done": done}
+        ),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[email],
+    )

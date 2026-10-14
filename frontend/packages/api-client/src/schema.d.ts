@@ -1839,6 +1839,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/auth/email-change/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Confirm a new email from the emailed link (works signed in or not). */
+    post: operations["auth_email_change_confirm_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/auth/handoff": {
     parameters: {
       query?: never;
@@ -2102,9 +2119,11 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description The provider's redirect back: a GET (Google, Microsoft) or a form POST (Apple). */
     get: operations["auth_sso_callback_retrieve"];
     put?: never;
-    post?: never;
+    /** @description The provider's redirect back: a GET (Google, Microsoft) or a form POST (Apple). */
+    post: operations["auth_sso_callback_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -2118,7 +2137,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** @description Browser navigation: redirects to Google/Microsoft (open on the root app host). */
+    /** @description Browser navigation: redirects to Google, Microsoft or Apple (on the root app host). */
     get: operations["auth_sso_start_retrieve"];
     put?: never;
     post?: never;
@@ -2138,6 +2157,23 @@ export interface paths {
     get: operations["auth_sso_providers_list"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/student-login": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description A child signs in with the username and PIN their guardian set (organisation host). */
+    post: operations["auth_student_login_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -6605,6 +6641,40 @@ export interface paths {
      *     Download through ``/files/{id}/download``.
      */
     delete: operations["documents_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/documents/{id}/request-signature": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Ask the family (or tutor) to sign this document in their portal, or stop asking. */
+    post: operations["documents_request_signature_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/documents/{id}/signatures": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The audit trail: who signed, when, from where, the hash and the signed copy. */
+    get: operations["documents_signatures_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -11848,6 +11918,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/me/email": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Ask to change your sign-in email: a link goes to the new address, a notice to the
+     *     old one. Nothing changes until the link is used.
+     */
+    post: operations["me_email_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/me/guidance": {
     parameters: {
       query?: never;
@@ -12074,6 +12164,23 @@ export interface paths {
     put?: never;
     /** @description The tutor ticks an agreement or training item. */
     post: operations["me_onboarding_done_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/onboarding/{key}/sign": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description The tutor signs an agreement (click-to-sign: typed name, audit trail, signed PDF). */
+    post: operations["me_onboarding_sign_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -15139,6 +15246,54 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/portal/documents": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_documents_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/documents/{document_id}/download": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_documents_download_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/documents/{document_id}/sign": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["portal_documents_sign_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/portal/enrol": {
     parameters: {
       query?: never;
@@ -15170,6 +15325,39 @@ export interface paths {
     put?: never;
     /** @description Give up a place that is still waiting for payment. */
     post: operations["portal_enrolments_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/guardians": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_guardians_list"];
+    put?: never;
+    post: operations["portal_guardians_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/household": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Pick the household the portal shows (people linked to several households). */
+    post: operations["portal_household_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -15731,6 +15919,54 @@ export interface paths {
     get: operations["portal_statement_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/student-logins": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_student_logins_list"];
+    put?: never;
+    post: operations["portal_student_logins_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/student-logins/{student_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations["portal_student_logins_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/student-logins/{student_id}/pin": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["portal_student_logins_pin_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -19877,6 +20113,54 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/tutor/documents": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["tutor_documents_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor/documents/{document_id}/download": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["tutor_documents_download_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor/documents/{document_id}/sign": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["tutor_documents_sign_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/tutor/earnings": {
     parameters: {
       query?: never;
@@ -23784,6 +24068,9 @@ export interface components {
       link?: string;
       done: boolean;
       done_at: string | null;
+      /** @default false */
+      needs_signature: boolean;
+      signature_id?: string | null;
     };
     ChecklistTemplate: {
       /** Format: uuid */
@@ -25607,6 +25894,10 @@ export interface components {
       visibility?: components["schemas"]["NoteVisibilityEnum"];
       /** Format: date */
       expires_on?: string | null;
+      signature_required?: boolean;
+      readonly signature_status: components["schemas"]["SignatureStatusEnum"];
+      /** Format: date-time */
+      readonly signed_at: string | null;
       /** Format: uuid */
       readonly created_by: string | null;
       /** Format: date-time */
@@ -25621,6 +25912,10 @@ export interface components {
      * @enum {string}
      */
     DocumentCategoryEnum: "contract" | "consent_form" | "report" | "id" | "other";
+    DocumentDownload: {
+      url: string;
+      expires_in: number;
+    };
     DocumentRequest: {
       target_type: string;
       target_id: string;
@@ -25631,6 +25926,7 @@ export interface components {
       visibility?: components["schemas"]["NoteVisibilityEnum"];
       /** Format: date */
       expires_on?: string | null;
+      signature_required?: boolean;
     };
     Domain: {
       /** Format: uuid */
@@ -25780,6 +26076,23 @@ export interface components {
      * @enum {string}
      */
     EffectiveEnum: "now" | "period_end" | "checkout";
+    EmailChangeConfirmRequest: {
+      token: string;
+    };
+    EmailChangeDone: {
+      /** Format: email */
+      email: string;
+    };
+    EmailChangePending: {
+      /** Format: email */
+      pending_email: string;
+    };
+    EmailChangeRequestRequest: {
+      /** Format: email */
+      new_email: string;
+      /** @description Your current password (required when the account has one). */
+      password?: string;
+    };
     EmailRequest: {
       /** Format: email */
       email: string;
@@ -26934,6 +27247,32 @@ export interface components {
       /** @default  */
       reason: string;
     };
+    Guardian: {
+      id: string;
+      client_id: string;
+      name: string;
+      relationship: string;
+      portal: components["schemas"]["PortalEnum"];
+    };
+    /**
+     * @description * `carer` - carer
+     *     * `guardian` - guardian
+     *     * `other` - other
+     *     * `parent` - parent
+     * @enum {string}
+     */
+    GuardianInviteRelationshipEnum: "carer" | "guardian" | "other" | "parent";
+    GuardianInviteRequest: {
+      client_id?: string;
+      first_name: string;
+      last_name?: string;
+      /** Format: email */
+      email: string;
+      /** @default guardian */
+      relationship: components["schemas"]["GuardianInviteRelationshipEnum"];
+      /** @description They have parental responsibility or the inviter's permission. */
+      confirm: boolean;
+    };
     Guidance: {
       completed_tours: string[];
       dismissed_tours: string[];
@@ -27181,6 +27520,14 @@ export interface components {
      * @enum {string}
      */
     HoursCheckLevelEnum: "none" | "ok" | "warning" | "blocked";
+    HouseholdChoice: {
+      /** @description Blank shows every household. */
+      client_id: string;
+    };
+    HouseholdChoiceRequest: {
+      /** @description Blank shows every household. */
+      client_id: string;
+    };
     ImpersonateRequest: {
       /** Format: uuid */
       membership_id: string;
@@ -35132,6 +35479,18 @@ export interface components {
       /** Format: date-time */
       issued_at: string;
     };
+    PortalDocument: {
+      id: string;
+      title: string;
+      category: string;
+      filename: string;
+      signature_required: boolean;
+      signature_status: components["schemas"]["SignatureStatusEnum"];
+      /** Format: date-time */
+      signed_at: string | null;
+      /** Format: date-time */
+      created_at: string;
+    };
     PortalEnrolRequest: {
       /** Format: uuid */
       group_class: string;
@@ -35164,6 +35523,13 @@ export interface components {
       /** Format: date-time */
       hold_expires_at: string | null;
     };
+    /**
+     * @description * `active` - active
+     *     * `invited` - invited
+     *     * `none` - none
+     * @enum {string}
+     */
+    PortalEnum: "active" | "invited" | "none";
     PortalFeatures: {
       cancellations: boolean;
       absence: boolean;
@@ -35178,6 +35544,9 @@ export interface components {
       messages: boolean;
       message_tutors: boolean;
       makeups: boolean;
+      guardian_invites: boolean;
+      student_logins: boolean;
+      documents: boolean;
     };
     PortalHomework: {
       /** Format: uuid */
@@ -35267,6 +35636,9 @@ export interface components {
       role: components["schemas"]["PortalMeRoleEnum"];
       organisation: components["schemas"]["PortalOrg"];
       clients: components["schemas"]["NamedRef"][];
+      households: components["schemas"]["NamedRef"][];
+      /** @description The household picked in the switcher; blank shows all. */
+      household: string;
       students: components["schemas"]["NamedRef"][];
       features: components["schemas"]["PortalFeatures"];
       welcome_text: string;
@@ -38401,6 +38773,12 @@ export interface components {
       SAMLResponse: string;
       RelayState?: string;
     };
+    SSOCallbackRequestRequest: {
+      code?: string;
+      state?: string;
+      user?: string;
+      error?: string;
+    };
     SSOProvider: {
       key: string;
       start_url: string;
@@ -39305,6 +39683,65 @@ export interface components {
      * @enum {string}
      */
     ShowEnum: "qualifications" | "languages" | "experience" | "location";
+    SignAgreementRequest: {
+      full_name: string;
+      agree: boolean;
+    };
+    SignRequest: {
+      full_name: string;
+      agree: boolean;
+    };
+    Signature: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly kind: components["schemas"]["SignatureKindEnum"];
+      /** Format: uuid */
+      readonly document: string | null;
+      /** Format: uuid */
+      readonly tutor: string | null;
+      readonly agreement_key: string;
+      readonly title: string;
+      readonly statement: string;
+      /** Format: uuid */
+      readonly signer: string | null;
+      readonly signer_name: string;
+      /** Format: email */
+      readonly signer_email: string;
+      readonly signer_role: string;
+      /** Format: date-time */
+      readonly signed_at: string;
+      readonly ip: string | null;
+      readonly user_agent: string;
+      readonly content_sha256: string;
+      /** Format: uuid */
+      readonly signed_file: string | null;
+    };
+    /**
+     * @description * `document` - Document
+     *     * `agreement` - Tutor agreement
+     * @enum {string}
+     */
+    SignatureKindEnum: "document" | "agreement";
+    SignatureRequestRequest: {
+      /** @default true */
+      signature_required: boolean;
+    };
+    /**
+     * @description * `not_required` - not_required
+     *     * `awaiting` - awaiting
+     *     * `signed` - signed
+     * @enum {string}
+     */
+    SignatureStatusEnum: "not_required" | "awaiting" | "signed";
+    Signed: {
+      signature_id: string;
+      /** Format: date-time */
+      signed_at: string;
+      content_sha256: string;
+    };
+    SignedIn: {
+      signed_in: boolean;
+    };
     SignupConfig: {
       turnstile_site_key: string;
     };
@@ -39748,6 +40185,26 @@ export interface components {
         currency: string;
       } | null;
     };
+    StudentLogin: {
+      student_id: string;
+      student_name: string;
+      /** @description Under 13 (or no date of birth on record). */
+      eligible: boolean;
+      has_email_login: boolean;
+      username: string;
+      /** Format: date-time */
+      pin_changed_at: string | null;
+    };
+    StudentLoginCreateRequest: {
+      student_id: string;
+      username: string;
+      pin: string;
+      /** @default false */
+      parental_consent: boolean;
+    };
+    StudentPinRequest: {
+      pin: string;
+    };
     StudentRef: {
       /** Format: uuid */
       id: string;
@@ -39774,6 +40231,10 @@ export interface components {
       availability?: unknown;
       lesson_address_input?: components["schemas"]["AddressInputRequest"];
       custom_fields?: unknown;
+    };
+    StudentSignInRequest: {
+      username: string;
+      pin: string;
     };
     /**
      * @description * `lead` - Lead
@@ -44915,6 +45376,34 @@ export interface operations {
       };
     };
   };
+  auth_email_change_confirm_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EmailChangeConfirmRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["EmailChangeConfirmRequest"];
+        "multipart/form-data": components["schemas"]["EmailChangeConfirmRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EmailChangeDone"];
+        };
+      };
+    };
+  };
   auth_handoff_create: {
     parameters: {
       query?: never;
@@ -45309,6 +45798,33 @@ export interface operations {
       };
     };
   };
+  auth_sso_callback_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        provider: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/x-www-form-urlencoded": components["schemas"]["SSOCallbackRequestRequest"];
+      };
+    };
+    responses: {
+      /** @description No response body */
+      302: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   auth_sso_start_retrieve: {
     parameters: {
       query?: {
@@ -45350,6 +45866,34 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SSOProvider"][];
+        };
+      };
+    };
+  };
+  auth_student_login_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StudentSignInRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["StudentSignInRequest"];
+        "multipart/form-data": components["schemas"]["StudentSignInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignedIn"];
         };
       };
     };
@@ -54539,6 +55083,64 @@ export interface operations {
       };
     };
   };
+  documents_request_signature_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this document. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["SignatureRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SignatureRequestRequest"];
+        "multipart/form-data": components["schemas"]["SignatureRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Document"];
+        };
+      };
+    };
+  };
+  documents_signatures_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        target_id?: string;
+        target_type?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this document. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Signature"][];
+        };
+      };
+    };
+  };
   domains_list: {
     parameters: {
       query?: {
@@ -63698,6 +64300,34 @@ export interface operations {
       };
     };
   };
+  me_email_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EmailChangeRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["EmailChangeRequestRequest"];
+        "multipart/form-data": components["schemas"]["EmailChangeRequestRequest"];
+      };
+    };
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EmailChangePending"];
+        };
+      };
+    };
+  };
   me_guidance_retrieve: {
     parameters: {
       query?: never;
@@ -64046,6 +64676,36 @@ export interface operations {
       cookie?: never;
     };
     requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorOnboardingState"];
+        };
+      };
+    };
+  };
+  me_onboarding_sign_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SignAgreementRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SignAgreementRequest"];
+        "multipart/form-data": components["schemas"]["SignAgreementRequest"];
+      };
+    };
     responses: {
       200: {
         headers: {
@@ -69004,6 +69664,76 @@ export interface operations {
       };
     };
   };
+  portal_documents_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalDocument"][];
+        };
+      };
+    };
+  };
+  portal_documents_download_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        document_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DocumentDownload"];
+        };
+      };
+    };
+  };
+  portal_documents_sign_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        document_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SignRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SignRequest"];
+        "multipart/form-data": components["schemas"]["SignRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Signed"];
+        };
+      };
+    };
+  };
   portal_enrol_create: {
     parameters: {
       query?: never;
@@ -69052,6 +69782,81 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PortalEnrolment"];
+        };
+      };
+    };
+  };
+  portal_guardians_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Guardian"][];
+        };
+      };
+    };
+  };
+  portal_guardians_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GuardianInviteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["GuardianInviteRequest"];
+        "multipart/form-data": components["schemas"]["GuardianInviteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Guardian"];
+        };
+      };
+    };
+  };
+  portal_household_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["HouseholdChoiceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["HouseholdChoiceRequest"];
+        "multipart/form-data": components["schemas"]["HouseholdChoiceRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HouseholdChoice"];
         };
       };
     };
@@ -69844,6 +70649,103 @@ export interface operations {
         };
         content: {
           "application/pdf": string;
+        };
+      };
+    };
+  };
+  portal_student_logins_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StudentLogin"][];
+        };
+      };
+    };
+  };
+  portal_student_logins_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StudentLoginCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["StudentLoginCreateRequest"];
+        "multipart/form-data": components["schemas"]["StudentLoginCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StudentLogin"];
+        };
+      };
+    };
+  };
+  portal_student_logins_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        student_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  portal_student_logins_pin_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        student_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StudentPinRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["StudentPinRequest"];
+        "multipart/form-data": components["schemas"]["StudentPinRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StudentLogin"];
         };
       };
     };
@@ -77662,6 +78564,76 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TutorReferral"];
+        };
+      };
+    };
+  };
+  tutor_documents_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalDocument"][];
+        };
+      };
+    };
+  };
+  tutor_documents_download_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        document_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DocumentDownload"];
+        };
+      };
+    };
+  };
+  tutor_documents_sign_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        document_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SignRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SignRequest"];
+        "multipart/form-data": components["schemas"]["SignRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Signed"];
         };
       };
     };

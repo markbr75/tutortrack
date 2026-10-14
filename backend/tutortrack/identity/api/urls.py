@@ -1,8 +1,8 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
+from . import account_views, support_views, views
 from . import phase2_views as p2
-from . import support_views, views
 
 router = SimpleRouter(trailing_slash=False)
 router.register("me/sessions", views.SessionViewSet, basename="me-sessions")
@@ -47,6 +47,12 @@ urlpatterns = [
     path("me/passkeys/<uuid:pk>", p2.PasskeyDetailView.as_view(), name="me-passkey"),
     path("me", views.MeView.as_view(), name="me"),
     path("me/password", views.PasswordChangeView.as_view(), name="me-password"),
+    path("me/email", account_views.EmailChangeView.as_view(), name="me-email"),
+    path(
+        "auth/email-change/confirm",
+        account_views.EmailChangeConfirmView.as_view(),
+        name="auth-email-change-confirm",
+    ),
     path("me/logins", views.MyLoginsView.as_view(), name="me-logins"),
     path("me/mfa/totp", views.TOTPSetupView.as_view(), name="me-mfa-totp"),
     path("me/mfa/totp/confirm", views.TOTPConfirmView.as_view(), name="me-mfa-totp-confirm"),

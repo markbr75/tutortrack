@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
+import { Documents } from "./Documents";
 import { textToHtml } from "./html";
 
 type NoteVisibility = components["schemas"]["NoteVisibilityEnum"];
@@ -250,23 +251,28 @@ function stripTags(html: string): string {
 }
 
 const TABS = ["notes", "tasks", "timeline"] as const;
-type Tab = (typeof TABS)[number];
+type Tab = (typeof TABS)[number] | "documents";
 
 /** Notes, tasks and the activity timeline for any record (E05 FR-05-7, 8, 10). */
 export function RecordActivity({ target }: { target: TargetRef }) {
   const { t } = useTranslation();
+  const canSeeDocuments = usePermission("crm.document.view");
   const [tab, setTab] = useState<Tab>("notes");
   return (
     <section aria-label={t("crm.activity")} className="mt-8">
       <Tabs
         label={t("crm.activity")}
-        tabs={TABS.map((key) => ({ key, label: t(`crm.tabs.${key}`) }))}
+        tabs={[
+          ...TABS.map((key): { key: Tab; label: string } => ({ key, label: t(`crm.tabs.${key}`) })),
+          ...(canSeeDocuments ? [{ key: "documents" as Tab, label: t("esign.tab") }] : []),
+        ]}
         value={tab}
         onChange={setTab}
       >
         {tab === "notes" ? <Notes target={target} /> : null}
         {tab === "tasks" ? <Tasks target={target} /> : null}
         {tab === "timeline" ? <Timeline target={target} /> : null}
+        {tab === "documents" ? <Documents target={target} /> : null}
       </Tabs>
     </section>
   );

@@ -6219,6 +6219,71 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/auth/email-change/confirm": {
+            "post": {
+                "operationId": "auth_email_change_confirm_create",
+                "description": "Confirm a new email from the emailed link (works signed in or not).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirmRequest"
+                            },
+                            "examples": {
+                                "Confirm": {
+                                    "value": {
+                                        "token": "eyJ1Ijoi..."
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirmRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirmRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmailChangeDone"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/auth/handoff": {
             "post": {
                 "operationId": "auth_handoff_create",
@@ -6906,6 +6971,7 @@
         "/api/v1/auth/sso/{provider}/callback": {
             "get": {
                 "operationId": "auth_sso_callback_retrieve",
+                "description": "The provider's redirect back: a GET (Google, Microsoft) or a form POST (Apple).",
                 "parameters": [
                     {
                         "in": "query",
@@ -6934,9 +7000,49 @@
                     "auth"
                 ],
                 "security": [
+                    {}
+                ],
+                "responses": {
+                    "302": {
+                        "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "auth_sso_callback_create",
+                "description": "The provider's redirect back: a GET (Google, Microsoft) or a form POST (Apple).",
+                "parameters": [
                     {
-                        "cookieAuth": []
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
                     },
+                    {
+                        "in": "path",
+                        "name": "provider",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SSOCallbackRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
                     {}
                 ],
                 "responses": {
@@ -6950,7 +7056,7 @@
         "/api/v1/auth/sso/{provider}/start": {
             "get": {
                 "operationId": "auth_sso_start_retrieve",
-                "description": "Browser navigation: redirects to Google/Microsoft (open on the root app host).",
+                "description": "Browser navigation: redirects to Google, Microsoft or Apple (on the root app host).",
                 "parameters": [
                     {
                         "in": "query",
@@ -7026,6 +7132,73 @@
                                     "items": {
                                         "$ref": "#/components/schemas/SSOProvider"
                                     }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/auth/student-login": {
+            "post": {
+                "operationId": "auth_student_login_create",
+                "description": "A child signs in with the username and PIN their guardian set (organisation host).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentSignInRequest"
+                            },
+                            "examples": {
+                                "SignIn": {
+                                    "value": {
+                                        "username": "maya.p",
+                                        "pin": "482916"
+                                    },
+                                    "summary": "Sign in"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentSignInRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentSignInRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SignedIn"
                                 }
                             }
                         },
@@ -26399,6 +26572,153 @@
                 "responses": {
                     "204": {
                         "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/documents/{id}/request-signature": {
+            "post": {
+                "operationId": "documents_request_signature_create",
+                "description": "Ask the family (or tutor) to sign this document in their portal, or stop asking.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this document.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "documents"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignatureRequestRequest"
+                            },
+                            "examples": {
+                                "AskForASignature": {
+                                    "value": {
+                                        "signature_required": true
+                                    },
+                                    "summary": "Ask for a signature"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignatureRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignatureRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Document"
+                                },
+                                "examples": {
+                                    "AskForASignature": {
+                                        "value": {
+                                            "signature_required": true
+                                        },
+                                        "summary": "Ask for a signature"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/documents/{id}/signatures": {
+            "get": {
+                "operationId": "documents_signatures_list",
+                "description": "The audit trail: who signed, when, from where, the hash and the signed copy.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this document.",
+                        "required": true
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "target_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "target_type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "documents"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Signature"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 },
                 "x-visibility": "internal"
@@ -46260,6 +46580,72 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/me/email": {
+            "post": {
+                "operationId": "me_email_create",
+                "description": "Ask to change your sign-in email: a link goes to the new address, a notice to the\nold one. Nothing changes until the link is used.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeRequestRequest"
+                            },
+                            "examples": {
+                                "ChangeEmail": {
+                                    "value": {
+                                        "new_email": "sam.new@example.com",
+                                        "password": "correct horse"
+                                    },
+                                    "summary": "Change email"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmailChangePending"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/me/guidance": {
             "get": {
                 "operationId": "me_guidance_retrieve",
@@ -46902,6 +47288,79 @@
                 "tags": [
                     "me"
                 ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TutorOnboardingState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/me/onboarding/{key}/sign": {
+            "post": {
+                "operationId": "me_onboarding_sign_create",
+                "description": "The tutor signs an agreement (click-to-sign: typed name, audit trail, signed PDF).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignAgreementRequest"
+                            },
+                            "examples": {
+                                "Sign": {
+                                    "value": {
+                                        "full_name": "Nia Adeyemi",
+                                        "agree": true
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignAgreementRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignAgreementRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
                 "security": [
                     {
                         "cookieAuth": []
@@ -57126,6 +57585,145 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/portal/documents": {
+            "get": {
+                "operationId": "portal_documents_list",
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PortalDocument"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/portal/documents/{document_id}/download": {
+            "get": {
+                "operationId": "portal_documents_download_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "document_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DocumentDownload"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/portal/documents/{document_id}/sign": {
+            "post": {
+                "operationId": "portal_documents_sign_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "document_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignRequest"
+                            },
+                            "examples": {
+                                "Sign": {
+                                    "value": {
+                                        "full_name": "Priya Patel",
+                                        "agree": true
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Signed"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/portal/enrol": {
             "post": {
                 "operationId": "portal_enrol_create",
@@ -57220,6 +57818,165 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/PortalEnrolment"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/portal/guardians": {
+            "get": {
+                "operationId": "portal_guardians_list",
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Guardian"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "portal_guardians_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GuardianInviteRequest"
+                            },
+                            "examples": {
+                                "InviteAGuardian": {
+                                    "value": {
+                                        "first_name": "Raj",
+                                        "last_name": "Patel",
+                                        "email": "raj@example.com",
+                                        "relationship": "parent",
+                                        "confirm": true
+                                    },
+                                    "summary": "Invite a guardian"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GuardianInviteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GuardianInviteRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Guardian"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/portal/household": {
+            "post": {
+                "operationId": "portal_household_create",
+                "description": "Pick the household the portal shows (people linked to several households).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/HouseholdChoiceRequest"
+                            },
+                            "examples": {
+                                "Switch": {
+                                    "value": {
+                                        "client_id": "1f0c..."
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/HouseholdChoiceRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/HouseholdChoiceRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HouseholdChoice"
                                 }
                             }
                         },
@@ -58714,6 +59471,195 @@
                                 "schema": {
                                     "type": "string",
                                     "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/portal/student-logins": {
+            "get": {
+                "operationId": "portal_student_logins_list",
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/StudentLogin"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "portal_student_logins_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentLoginCreateRequest"
+                            },
+                            "examples": {
+                                "CreateALogin": {
+                                    "value": {
+                                        "student_id": "5b1e...",
+                                        "username": "maya.p",
+                                        "pin": "482916",
+                                        "parental_consent": true
+                                    },
+                                    "summary": "Create a login"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentLoginCreateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentLoginCreateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentLogin"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/portal/student-logins/{student_id}": {
+            "delete": {
+                "operationId": "portal_student_logins_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "student_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/portal/student-logins/{student_id}/pin": {
+            "post": {
+                "operationId": "portal_student_logins_pin_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "student_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "portal"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentPinRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentPinRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentPinRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentLogin"
                                 }
                             }
                         },
@@ -74693,6 +75639,137 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/tutor/documents": {
+            "get": {
+                "operationId": "tutor_documents_list",
+                "tags": [
+                    "tutor"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PortalDocument"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/tutor/documents/{document_id}/download": {
+            "get": {
+                "operationId": "tutor_documents_download_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "document_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutor"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DocumentDownload"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/tutor/documents/{document_id}/sign": {
+            "post": {
+                "operationId": "tutor_documents_sign_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "document_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutor"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Signed"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/tutor/earnings": {
             "get": {
                 "operationId": "tutor_earnings_retrieve",
@@ -87723,6 +88800,14 @@
                     "done_at": {
                         "type": "string",
                         "nullable": true
+                    },
+                    "needs_signature": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "signature_id": {
+                        "type": "string",
+                        "nullable": true
                     }
                 },
                 "required": [
@@ -93392,6 +94477,23 @@
                         "format": "date",
                         "nullable": true
                     },
+                    "signature_required": {
+                        "type": "boolean"
+                    },
+                    "signature_status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SignatureStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "signed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
                     "created_by": {
                         "type": "string",
                         "format": "uuid",
@@ -93410,6 +94512,8 @@
                     "file",
                     "filename",
                     "id",
+                    "signature_status",
+                    "signed_at",
                     "target_id",
                     "target_type"
                 ]
@@ -93424,6 +94528,21 @@
                 ],
                 "type": "string",
                 "description": "* `contract` - Contract\n* `consent_form` - Consent form\n* `report` - Report\n* `id` - Identity document\n* `other` - Other"
+            },
+            "DocumentDownload": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    },
+                    "expires_in": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "expires_in",
+                    "url"
+                ]
             },
             "DocumentRequest": {
                 "type": "object",
@@ -93457,6 +94576,9 @@
                         "type": "string",
                         "format": "date",
                         "nullable": true
+                    },
+                    "signature_required": {
+                        "type": "boolean"
                     }
                 },
                 "required": [
@@ -93948,6 +95070,60 @@
                 ],
                 "type": "string",
                 "description": "* `now` - now\n* `period_end` - period_end\n* `checkout` - checkout"
+            },
+            "EmailChangeConfirmRequest": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "EmailChangeDone": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    }
+                },
+                "required": [
+                    "email"
+                ]
+            },
+            "EmailChangePending": {
+                "type": "object",
+                "properties": {
+                    "pending_email": {
+                        "type": "string",
+                        "format": "email"
+                    }
+                },
+                "required": [
+                    "pending_email"
+                ]
+            },
+            "EmailChangeRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "new_email": {
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 1
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "description": "Your current password (required when the account has one)."
+                    }
+                },
+                "required": [
+                    "new_email"
+                ]
             },
             "EmailRequest": {
                 "type": "object",
@@ -97608,6 +98784,82 @@
                     }
                 }
             },
+            "Guardian": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "client_id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "relationship": {
+                        "type": "string"
+                    },
+                    "portal": {
+                        "$ref": "#/components/schemas/PortalEnum"
+                    }
+                },
+                "required": [
+                    "client_id",
+                    "id",
+                    "name",
+                    "portal",
+                    "relationship"
+                ]
+            },
+            "GuardianInviteRelationshipEnum": {
+                "enum": [
+                    "carer",
+                    "guardian",
+                    "other",
+                    "parent"
+                ],
+                "type": "string",
+                "description": "* `carer` - carer\n* `guardian` - guardian\n* `other` - other\n* `parent` - parent"
+            },
+            "GuardianInviteRequest": {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 1
+                    },
+                    "relationship": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/GuardianInviteRelationshipEnum"
+                            }
+                        ],
+                        "default": "guardian"
+                    },
+                    "confirm": {
+                        "type": "boolean",
+                        "description": "They have parental responsibility or the inviter's permission."
+                    }
+                },
+                "required": [
+                    "confirm",
+                    "email",
+                    "first_name"
+                ]
+            },
             "Guidance": {
                 "type": "object",
                 "properties": {
@@ -98423,6 +99675,30 @@
                 ],
                 "type": "string",
                 "description": "* `none` - none\n* `ok` - ok\n* `warning` - warning\n* `blocked` - blocked"
+            },
+            "HouseholdChoice": {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Blank shows every household."
+                    }
+                },
+                "required": [
+                    "client_id"
+                ]
+            },
+            "HouseholdChoiceRequest": {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Blank shows every household."
+                    }
+                },
+                "required": [
+                    "client_id"
+                ]
             },
             "ImpersonateRequest": {
                 "type": "object",
@@ -121409,6 +122685,48 @@
                     "total"
                 ]
             },
+            "PortalDocument": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "string"
+                    },
+                    "filename": {
+                        "type": "string"
+                    },
+                    "signature_required": {
+                        "type": "boolean"
+                    },
+                    "signature_status": {
+                        "$ref": "#/components/schemas/SignatureStatusEnum"
+                    },
+                    "signed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "category",
+                    "created_at",
+                    "filename",
+                    "id",
+                    "signature_required",
+                    "signature_status",
+                    "signed_at",
+                    "title"
+                ]
+            },
             "PortalEnrolRequest": {
                 "type": "object",
                 "properties": {
@@ -121508,6 +122826,15 @@
                     "weekdays"
                 ]
             },
+            "PortalEnum": {
+                "enum": [
+                    "active",
+                    "invited",
+                    "none"
+                ],
+                "type": "string",
+                "description": "* `active` - active\n* `invited` - invited\n* `none` - none"
+            },
             "PortalFeatures": {
                 "type": "object",
                 "properties": {
@@ -121549,6 +122876,15 @@
                     },
                     "makeups": {
                         "type": "boolean"
+                    },
+                    "guardian_invites": {
+                        "type": "boolean"
+                    },
+                    "student_logins": {
+                        "type": "boolean"
+                    },
+                    "documents": {
+                        "type": "boolean"
                     }
                 },
                 "required": [
@@ -121556,6 +122892,8 @@
                     "booking",
                     "cancellations",
                     "classes",
+                    "documents",
+                    "guardian_invites",
                     "invoices",
                     "learning",
                     "makeups",
@@ -121564,7 +122902,8 @@
                     "profile",
                     "referrals",
                     "reports",
-                    "reschedule"
+                    "reschedule",
+                    "student_logins"
                 ]
             },
             "PortalHomework": {
@@ -121892,6 +123231,16 @@
                             "$ref": "#/components/schemas/NamedRef"
                         }
                     },
+                    "households": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NamedRef"
+                        }
+                    },
+                    "household": {
+                        "type": "string",
+                        "description": "The household picked in the switcher; blank shows all."
+                    },
                     "students": {
                         "type": "array",
                         "items": {
@@ -121915,6 +123264,8 @@
                     "clients",
                     "features",
                     "help_url",
+                    "household",
+                    "households",
                     "organisation",
                     "role",
                     "students",
@@ -131902,6 +133253,23 @@
                     "SAMLResponse"
                 ]
             },
+            "SSOCallbackRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    },
+                    "state": {
+                        "type": "string"
+                    },
+                    "user": {
+                        "type": "string"
+                    },
+                    "error": {
+                        "type": "string"
+                    }
+                }
+            },
             "SSOProvider": {
                 "type": "object",
                 "properties": {
@@ -134790,6 +136158,200 @@
                 "type": "string",
                 "description": "* `qualifications` - qualifications\n* `languages` - languages\n* `experience` - experience\n* `location` - location"
             },
+            "SignAgreementRequest": {
+                "type": "object",
+                "properties": {
+                    "full_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "agree": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "agree",
+                    "full_name"
+                ]
+            },
+            "SignRequest": {
+                "type": "object",
+                "properties": {
+                    "full_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "agree": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "agree",
+                    "full_name"
+                ]
+            },
+            "Signature": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "kind": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SignatureKindEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "document": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "agreement_key": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "statement": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "signer": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "signer_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "signer_email": {
+                        "type": "string",
+                        "format": "email",
+                        "readOnly": true
+                    },
+                    "signer_role": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "signed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "ip": {
+                        "type": "string",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "user_agent": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "content_sha256": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "signed_file": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "agreement_key",
+                    "content_sha256",
+                    "document",
+                    "id",
+                    "ip",
+                    "kind",
+                    "signed_at",
+                    "signed_file",
+                    "signer",
+                    "signer_email",
+                    "signer_name",
+                    "signer_role",
+                    "statement",
+                    "title",
+                    "tutor",
+                    "user_agent"
+                ]
+            },
+            "SignatureKindEnum": {
+                "enum": [
+                    "document",
+                    "agreement"
+                ],
+                "type": "string",
+                "description": "* `document` - Document\n* `agreement` - Tutor agreement"
+            },
+            "SignatureRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "signature_required": {
+                        "type": "boolean",
+                        "default": true
+                    }
+                }
+            },
+            "SignatureStatusEnum": {
+                "enum": [
+                    "not_required",
+                    "awaiting",
+                    "signed"
+                ],
+                "type": "string",
+                "description": "* `not_required` - not_required\n* `awaiting` - awaiting\n* `signed` - signed"
+            },
+            "Signed": {
+                "type": "object",
+                "properties": {
+                    "signature_id": {
+                        "type": "string"
+                    },
+                    "signed_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "content_sha256": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "content_sha256",
+                    "signature_id",
+                    "signed_at"
+                ]
+            },
+            "SignedIn": {
+                "type": "object",
+                "properties": {
+                    "signed_in": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "signed_in"
+                ]
+            },
             "SignupConfig": {
                 "type": "object",
                 "properties": {
@@ -136251,6 +137813,83 @@
                     "student"
                 ]
             },
+            "StudentLogin": {
+                "type": "object",
+                "properties": {
+                    "student_id": {
+                        "type": "string"
+                    },
+                    "student_name": {
+                        "type": "string"
+                    },
+                    "eligible": {
+                        "type": "boolean",
+                        "description": "Under 13 (or no date of birth on record)."
+                    },
+                    "has_email_login": {
+                        "type": "boolean"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "pin_changed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "eligible",
+                    "has_email_login",
+                    "pin_changed_at",
+                    "student_id",
+                    "student_name",
+                    "username"
+                ]
+            },
+            "StudentLoginCreateRequest": {
+                "type": "object",
+                "properties": {
+                    "student_id": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "username": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 40
+                    },
+                    "pin": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1,
+                        "maxLength": 64
+                    },
+                    "parental_consent": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "pin",
+                    "student_id",
+                    "username"
+                ]
+            },
+            "StudentPinRequest": {
+                "type": "object",
+                "properties": {
+                    "pin": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1,
+                        "maxLength": 64
+                    }
+                },
+                "required": [
+                    "pin"
+                ]
+            },
             "StudentRef": {
                 "type": "object",
                 "properties": {
@@ -136335,6 +137974,26 @@
                 "required": [
                     "client",
                     "first_name"
+                ]
+            },
+            "StudentSignInRequest": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 40
+                    },
+                    "pin": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1,
+                        "maxLength": 64
+                    }
+                },
+                "required": [
+                    "pin",
+                    "username"
                 ]
             },
             "StudentStatusEnum": {

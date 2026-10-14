@@ -1,4 +1,5 @@
-"""Announcements (news posts) for the portals (E15-T07)."""
+"""Announcements (news posts) for the portals (E15-T07) and guardian-managed student logins
+(FR-15-1, gap batch G2)."""
 
 from __future__ import annotations
 
@@ -29,3 +30,34 @@ class Announcement(TenantModel):
 
     class Meta(TenantModel.Meta):
         ordering = ["-published_at"]
+
+
+class StudentLogin(TenantModel):
+    """A guardian-managed portal login for a student under 13 (FR-15-1): a username and a
+    PIN or password set by the guardian, no email needed. The login is a ``User`` with an
+    undeliverable placeholder address (``MANAGED_EMAIL_DOMAIN``); it signs in at
+    ``/auth/student-login`` on the organisation's own address. COPPA/AADC: it exists only
+    once parental consent is on record (``privacy.children``)."""
+
+    student = models.OneToOneField(
+        "people.Student", on_delete=models.CASCADE, related_name="managed_login"
+    )
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="managed_student_login"
+    )
+    username = models.CharField(max_length=40)
+    managed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    pin_changed_at = models.DateTimeField()
+
+    class Meta(TenantModel.Meta):
+        ordering = ["username"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "username"], name="student_login_username_unique"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return self.username

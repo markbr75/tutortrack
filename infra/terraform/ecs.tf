@@ -101,7 +101,7 @@ resource "aws_iam_role_policy" "task_s3" {
 locals {
   # The owner credentials only reach the migrate task; every other process connects as the
   # RLS-restricted application role (FR-02-4).
-  secret_keys = ["DJANGO_SECRET_KEY", "DATABASE_URL", "DATABASE_PLATFORM_URL", "REDIS_URL", "CELERY_BROKER_URL", "TURNSTILE_SECRET_KEY", "FIELD_ENCRYPTION_KEYS", "GOOGLE_CLIENT_SECRET", "MICROSOFT_CLIENT_SECRET", "TEMPORAL_API_KEY", "TEMPORAL_PAYLOAD_KEYS"]
+  secret_keys = ["DJANGO_SECRET_KEY", "DATABASE_URL", "DATABASE_PLATFORM_URL", "REDIS_URL", "CELERY_BROKER_URL", "TURNSTILE_SECRET_KEY", "FIELD_ENCRYPTION_KEYS", "GOOGLE_CLIENT_SECRET", "MICROSOFT_CLIENT_SECRET", "APPLE_PRIVATE_KEY", "TEMPORAL_API_KEY", "TEMPORAL_PAYLOAD_KEYS"]
 
   container_base = {
     image     = var.backend_image

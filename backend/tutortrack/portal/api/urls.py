@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework.routers import SimpleRouter
 
 from . import booking_views as bv
+from . import family_views as fv
 from . import messaging_views as mv
 from . import tutor_views, views
 
@@ -10,6 +11,43 @@ router.register("announcements", views.AnnouncementViewSet, basename="announceme
 
 urlpatterns = [
     path("portal/me", views.MeView.as_view(), name="portal-me"),
+    # Gap batch G2: household switcher, guardians, student logins, documents to sign.
+    path("portal/household", fv.HouseholdSwitchView.as_view(), name="portal-household"),
+    path("portal/guardians", fv.GuardiansView.as_view(), name="portal-guardians"),
+    path("portal/student-logins", fv.StudentLoginsView.as_view(), name="portal-student-logins"),
+    path(
+        "portal/student-logins/<uuid:student_id>",
+        fv.StudentLoginDetailView.as_view(),
+        name="portal-student-login",
+    ),
+    path(
+        "portal/student-logins/<uuid:student_id>/pin",
+        fv.StudentLoginPinView.as_view(),
+        name="portal-student-login-pin",
+    ),
+    path("auth/student-login", fv.StudentSignInView.as_view(), name="auth-student-login"),
+    path("portal/documents", fv.PortalDocumentsView.as_view(), name="portal-documents"),
+    path(
+        "portal/documents/<uuid:document_id>/download",
+        fv.PortalDocumentDownloadView.as_view(),
+        name="portal-document-download",
+    ),
+    path(
+        "portal/documents/<uuid:document_id>/sign",
+        fv.PortalDocumentSignView.as_view(),
+        name="portal-document-sign",
+    ),
+    path("tutor/documents", fv.TutorDocumentsView.as_view(), name="tutor-documents"),
+    path(
+        "tutor/documents/<uuid:document_id>/download",
+        fv.TutorDocumentDownloadView.as_view(),
+        name="tutor-document-download",
+    ),
+    path(
+        "tutor/documents/<uuid:document_id>/sign",
+        fv.TutorDocumentSignView.as_view(),
+        name="tutor-document-sign",
+    ),
     path("portal/dashboard", views.DashboardView.as_view(), name="portal-dashboard"),
     path("portal/schedule", views.ScheduleView.as_view(), name="portal-schedule"),
     path("portal/lessons/<uuid:lesson_id>/ics", views.LessonIcsView.as_view(), name="portal-ics"),

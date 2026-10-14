@@ -313,6 +313,10 @@ def notify(
 ) -> list[Message]:
     """Send notification ``type_key`` about ``subject``. ``key`` identifies the occurrence
     (with type, recipient and channel it forms the dedupe key)."""
+    from tutortrack.core import demo_mode
+
+    if demo_mode.active():  # sample data (FR-02-6) never messages anyone
+        return []
     setting = effective(type_key)
     if not setting.enabled and only_channel is None:
         return []

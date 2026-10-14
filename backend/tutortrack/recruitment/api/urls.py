@@ -31,6 +31,9 @@ urlpatterns = [
     path(
         "me/onboarding/<slug:key>/done", v.MyOnboardingItemView.as_view(), name="my-onboarding-item"
     ),
+    path(
+        "me/onboarding/<slug:key>/sign", v.MyOnboardingSignView.as_view(), name="my-onboarding-sign"
+    ),
     path("me/compliance", v.MyComplianceView.as_view(), name="my-compliance"),
     path("me/background-checks", cv.MyBackgroundChecksView.as_view(), name="my-background-checks"),
     path(

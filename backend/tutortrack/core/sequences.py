@@ -47,5 +47,10 @@ def next_value(key: str, *, organisation_id: uuid.UUID | None = None) -> int:
 def next_number(
     key: str, *, prefix: str = "", padding: int = 6, organisation_id: uuid.UUID | None = None
 ) -> str:
-    """e.g. ``next_number("invoice", prefix="INV-")`` -> ``"INV-000001"``."""
+    """e.g. ``next_number("invoice", prefix="INV-")`` -> ``"INV-000001"``. Sample data
+    (``core.demo_mode``) uses its own ``DEMO-`` counter so real numbers stay gap-free."""
+    from . import demo_mode
+
+    if demo_mode.active():
+        key, prefix = f"demo:{key}", f"{demo_mode.SEQUENCE_PREFIX}{prefix}"
     return f"{prefix}{next_value(key, organisation_id=organisation_id):0{padding}d}"

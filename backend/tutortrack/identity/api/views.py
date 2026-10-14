@@ -223,7 +223,7 @@ def _sso_redirect_failure(code: str) -> HttpResponseRedirect:
 
 
 class SSOStartView(APIView):
-    """Browser navigation: redirects to Google/Microsoft (open on the root app host)."""
+    """Browser navigation: redirects to Google, Microsoft or Apple (on the root app host)."""
 
     permission_classes = [AllowAny]
 
@@ -252,30 +252,56 @@ class SSOStartView(APIView):
             max_age=sso.STATE_MAX_AGE,
             httponly=True,
             secure=request.is_secure(),
-            samesite="Lax",
+            # Apple posts back cross-site (form_post): the cookie must travel on that POST.
+            samesite="None" if config.posts_back and request.is_secure() else "Lax",
             path="/api/v1/auth/sso/",
         )
         return response
 
 
+class SSOCallbackRequestSerializer(serializers.Serializer):
+    code = serializers.CharField(required=False, allow_blank=True)
+    state = serializers.CharField(required=False, allow_blank=True)
+    user = serializers.CharField(required=False, allow_blank=True)
+    error = serializers.CharField(required=False, allow_blank=True)
+
+
 class SSOCallbackView(APIView):
+    """The provider's redirect back: a GET (Google, Microsoft) or a form POST (Apple)."""
+
     permission_classes = [AllowAny]
+    authentication_classes: list[Any] = []  # a cross-site POST from the provider, no CSRF
 
     @extend_schema(
         parameters=[OpenApiParameter("code", str), OpenApiParameter("state", str)],
         responses={302: None},
     )
     def get(self, request: Request, provider: str) -> HttpResponseRedirect:
+        return self._finish(request, provider, request.query_params)
+
+    @extend_schema(
+        request={"application/x-www-form-urlencoded": SSOCallbackRequestSerializer},
+        responses={302: None},
+    )
+    def post(self, request: Request, provider: str) -> HttpResponseRedirect:
+        config = sso.get_provider(provider)
+        if config is None or not config.posts_back:
+            raise NotFound()
+        return self._finish(request, provider, request._request.POST)
+
+    def _finish(self, request: Request, provider: str, params: Any) -> HttpResponseRedirect:
         config = sso.get_provider(provider)
         if config is None:
             raise NotFound()
         try:
-            if request.query_params.get("error"):
+            if params.get("error"):
                 raise sso.SSOError("denied")
             state = sso.read_state(
-                request.COOKIES.get(sso.STATE_COOKIE, ""), request.query_params.get("state", "")
+                request.COOKIES.get(sso.STATE_COOKIE, ""), params.get("state", "")
             )
-            claims = sso.exchange(config, request.query_params.get("code", ""), state)
+            claims = sso.exchange(
+                config, params.get("code", ""), state, user_json=params.get("user", "")
+            )
             user = sso.match_user(config, claims, intent=state["i"])
         except sso.SSOError as exc:
             response = _sso_redirect_failure(exc.code)

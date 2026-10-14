@@ -517,6 +517,18 @@ def link_portal_user(target_type: str, target_id: str, user: Any) -> Any:
     return record
 
 
+def unlink_portal_user(target_type: str, target_id: str) -> Any:
+    """Take away a contact's or student's portal login link (e.g. a guardian removed a
+    managed student login, gap batch G2)."""
+    model = {"people.contact": Contact, "people.student": Student}.get(target_type)
+    record = model.objects.filter(pk=target_id).first() if model is not None else None
+    if record is not None and record.user_id is not None:
+        with audit.track(record, action="unlink_portal_user"):
+            record.user = None
+            record.save(update_fields=["user", "updated_at"])
+    return record
+
+
 @transaction.atomic
 def invite_to_portal(record: Contact | Student, *, email: str = "") -> Any:
     """Invite a contact (parent role) or a student (student role) to the portal."""

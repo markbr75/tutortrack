@@ -14,13 +14,13 @@ Tick an item when it is built, and record the as-built details in the owning epi
 - [x] @mentions notify the mentioned staff (FR-05-7/FR-13-2). *S*
 
 ## Batch G2 — Identity, portal households and demo data (E02, E03, E15)
-- [ ] In-product demo data: `@demo_provider` sample data for the main apps (people, catalogue, scheduling, delivery, billing, payments, leads, courses, growth…) so "Explore with demo data" and E27 sandboxes have records (FR-02-6, FR-27-6; E02:135, E25:120). *M*
-- [ ] Apple sign-in against a fake, like Google/Microsoft (FR-03-2; E03:123, E03:159). *S–M*
-- [ ] Change-email flow: verify the new address, notify the old one (FR-03-9). *S*
-- [ ] Portal household switcher (FR-15-1; E15:78). *S*
-- [ ] Invite another guardian from the portal (FR-15-8; E15:83). *S*
-- [ ] Guardian-managed logins for under-13 students (FR-15-1; E15:78). *M*
-- [ ] Document e-signing: click-to-sign with audit, for client documents, portal and tutor agreements (FR-05-9, FR-15-8, FR-18-5; E15:83, E18:100). *M*
+- [x] In-product demo data: `@demo_provider` sample data for the main apps (people, catalogue, scheduling, delivery, billing, payments, leads, courses, growth…) so "Explore with demo data" and E27 sandboxes have records (FR-02-6, FR-27-6; E02:135, E25:120). *M*
+- [x] Apple sign-in against a fake, like Google/Microsoft (FR-03-2; E03:123, E03:159). *S–M*
+- [x] Change-email flow: verify the new address, notify the old one (FR-03-9). *S*
+- [x] Portal household switcher (FR-15-1; E15:78). *S*
+- [x] Invite another guardian from the portal (FR-15-8; E15:83). *S*
+- [x] Guardian-managed logins for under-13 students (FR-15-1; E15:78). *M*
+- [x] Document e-signing: click-to-sign with audit, for client documents, portal and tutor agreements (FR-05-9, FR-15-8, FR-18-5; E15:83, E18:100). *M*
 
 ## Batch G3 — Scheduling, delivery, billing, payments and payroll (E06–E12)
 - [ ] `pricing.discount_display=separate` shows discounts as separate invoice lines (FR-06-7, FR-10-3; E06:129). *S*

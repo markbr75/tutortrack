@@ -34,6 +34,32 @@ describe("tutor onboarding", () => {
     expect(calls.some((c) => c.path.endsWith("/agreement/done"))).toBe(true);
   });
 
+  it("signs the tutor agreement (click-to-sign, gap batch G2)", async () => {
+    window.history.pushState(null, "", "/portal/tutor/onboarding");
+    const item = { key: "agreement", label: "Sign the tutor agreement", kind: "agreement",
+                   mandatory: true, done: false, done_at: null, needs_signature: true,
+                   signature_id: null }; // prettier-ignore
+    const calls = mockApi({
+      ...BASE,
+      "GET /api/v1/me/onboarding": { body: { items: [item], completed_at: null } },
+      "GET /api/v1/tutor/documents": { body: [] },
+      "POST /api/v1/me/onboarding/agreement/sign": {
+        body: { items: [{ ...item, done: true, signature_id: "sig1" }], completed_at: null },
+      },
+    });
+    render(<App />);
+    fireEvent.click(await screen.findByRole("button", { name: "Sign Sign the tutor agreement" }));
+    fireEvent.change(screen.getByLabelText("Your full name"), { target: { value: "Nia Adeyemi" } });
+    fireEvent.click(screen.getByLabelText(/and agree to it/));
+    fireEvent.click(screen.getByRole("button", { name: "Sign" }));
+    expect(await screen.findByText("Signed")).toBeInTheDocument();
+    expect(calls.find((c) => c.path.endsWith("/agreement/sign"))?.body).toEqual({
+      full_name: "Nia Adeyemi",
+      agree: true,
+    });
+    expect(calls.some((c) => c.path.endsWith("/agreement/done"))).toBe(false);
+  });
+
   it("sends a DBS number for checking", async () => {
     window.history.pushState(null, "", "/portal/tutor/compliance");
     const requirement = { id: "r1", key: "dbs_enhanced", name: "Enhanced DBS check",

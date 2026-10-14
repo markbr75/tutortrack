@@ -44,13 +44,16 @@ def setting(key: str) -> bool:
     return bool(get_setting(key))
 
 
+HOUSEHOLD_SESSION_KEY = "portal_household"
+
+
 class PortalView(APIView):
     permission_classes = AUTH
 
     def household(self, request: Request) -> Household:
         if not setting("portal.enabled"):
             raise FeatureDisabled("The portal is turned off.")
-        found = household_for(request.user)
+        found = household_for(request.user, request.session.get(HOUSEHOLD_SESSION_KEY))
         if found is None:
             raise PermissionDenied()
         return found
@@ -89,6 +92,11 @@ class MeView(PortalView):
                 "role": household.role,
                 "organisation": {"name": org.name, "primary_colour": org.primary_colour},
                 "clients": [{"id": str(c.pk), "name": c.display_name} for c in household.clients],
+                # Household switcher (FR-15-1): every household and the one picked.
+                "households": [
+                    {"id": str(c.pk), "name": c.display_name} for c in household.all_clients
+                ],
+                "household": household.selected,
                 "students": [{"id": str(st.pk), "name": st.full_name} for st in household.students],
                 "features": {
                     "cancellations": setting("portal.allow_cancellations")
@@ -105,6 +113,14 @@ class MeView(PortalView):
                         or has_perm(request.user, "portal.student.learning")
                     ),
                     **_phase2_features(request, household),
+                    # Gap batch G2 (FR-15-1, FR-15-8).
+                    "guardian_invites": setting("portal.allow_guardian_invites")
+                    and household.is_client
+                    and has_perm(request.user, "portal.client.profile"),
+                    "student_logins": setting("portal.guardian_managed_logins")
+                    and household.is_client
+                    and has_perm(request.user, "portal.client.profile"),
+                    "documents": household.is_client,
                 },
                 "welcome_text": str(get_setting("portal.welcome_text")),
                 "help_url": str(get_setting("portal.help_url")),

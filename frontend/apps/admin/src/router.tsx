@@ -91,6 +91,7 @@ import { PlanPage } from "./subscription/PlanPage";
 import { TeamPage } from "./routes/TeamPage";
 import { ReportsLibraryPage, ReportViewPage, SavedReportsPage } from "./reporting/ReportingPages";
 import { VerifyEmailPage } from "./routes/VerifyEmailPage";
+import { ConfirmEmailPage } from "./routes/EmailChange";
 import { DeveloperPage } from "./developer/DeveloperPages";
 import { DeveloperDocsPage, MarketplacePage, OAuthConsentPage } from "./developer/DocsPages";
 import { WebsitePage } from "./website/WebsitePage";
@@ -121,6 +122,11 @@ const verifyEmailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/verify-email",
   component: VerifyEmailPage,
+});
+const confirmEmailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/confirm-email",
+  component: ConfirmEmailPage,
 });
 // Onboarding signs in with the handoff token itself, so it sits outside the shell too.
 const onboardingRoute = createRoute({
@@ -531,6 +537,7 @@ const jobRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   signupRoute,
   verifyEmailRoute,
+  confirmEmailRoute,
   onboardingRoute,
   loginRoute,
   magicLinkRoute,

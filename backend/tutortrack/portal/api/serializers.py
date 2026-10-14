@@ -34,12 +34,19 @@ class PortalFeaturesSerializer(serializers.Serializer):
     messages = serializers.BooleanField()  # E15-T09
     message_tutors = serializers.BooleanField()
     makeups = serializers.BooleanField()
+    guardian_invites = serializers.BooleanField()  # gap batch G2
+    student_logins = serializers.BooleanField()
+    documents = serializers.BooleanField()
 
 
 class PortalMeSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=["client", "student"])
     organisation = PortalOrgSerializer()
     clients = NamedRef(many=True)
+    households = NamedRef(many=True)
+    household = serializers.CharField(
+        allow_blank=True, help_text="The household picked in the switcher; blank shows all."
+    )
     students = NamedRef(many=True)
     features = PortalFeaturesSerializer()
     welcome_text = serializers.CharField(allow_blank=True)

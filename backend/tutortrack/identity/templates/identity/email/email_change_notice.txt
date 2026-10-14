@@ -1,0 +1,4 @@
+{% load i18n %}{% autoescape off %}{% if done %}{% blocktranslate %}The email address for your TutorTrack account is now {{ new_email }}. Other devices have been signed out.{% endblocktranslate %}{% else %}{% blocktranslate %}Someone asked to change the email address for your TutorTrack account to {{ new_email }}. Nothing changes until the new address is confirmed.{% endblocktranslate %}{% endif %}
+
+{% translate "If this wasn't you, reset your password straight away and contact the organisation you use TutorTrack with." %}
+{% endautoescape %}

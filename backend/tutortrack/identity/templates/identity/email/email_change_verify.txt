@@ -1,0 +1,8 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with name=user.get_short_name %}Hi {{ name }},{% endblocktranslate %}
+
+{% translate "Use this link to confirm this as the new email address for your TutorTrack account. It expires in 24 hours:" %}
+
+{{ url }}
+
+{% translate "If you didn't ask for this, you can ignore this email: nothing changes until the link is used." %}
+{% endautoescape %}

@@ -194,6 +194,9 @@ class Document(TenantModel, TargetMixin):
         max_length=20, choices=Note.Visibility.choices, default=Note.Visibility.STAFF
     )
     expires_on = models.DateField(null=True, blank=True)
+    # Click-to-sign (FR-05-9, gap batch G2): the family (or tutor) is asked to sign it.
+    signature_required = models.BooleanField(default=False)
+    signed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta(TenantModel.Meta):
         ordering = ["-created_at"]
@@ -205,6 +208,53 @@ class Document(TenantModel, TargetMixin):
 
     def __str__(self) -> str:
         return self.title
+
+    @property
+    def signature_status(self) -> str:
+        if self.signed_at is not None:
+            return "signed"
+        return "awaiting" if self.signature_required else "not_required"
+
+
+class Signature(TenantModel):
+    """Evidence of a click-to-sign (FR-05-9, FR-15-8, FR-18-5): who signed what and when,
+    from where, the SHA-256 of exactly what they saw, and a signed PDF copy (the document
+    or agreement with a signature page). Never edited; erasure only blanks the signer's
+    details (the hash and time stay as evidence)."""
+
+    class Kind(models.TextChoices):
+        DOCUMENT = "document", _("Document")
+        AGREEMENT = "agreement", _("Tutor agreement")
+
+    kind = models.CharField(max_length=10, choices=Kind.choices)
+    document = models.ForeignKey(
+        Document, null=True, blank=True, on_delete=models.SET_NULL, related_name="signatures"
+    )
+    tutor = models.ForeignKey(
+        "people.TutorProfile", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    agreement_key = models.CharField(max_length=80, blank=True, default="")
+    title = models.CharField(max_length=200)
+    statement = models.TextField()
+    signer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    signer_name = models.CharField(max_length=200)
+    signer_email = models.EmailField(blank=True, default="")
+    signer_role = models.CharField(max_length=20)
+    signed_at = models.DateTimeField()
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=500, blank=True, default="")
+    content_sha256 = models.CharField(max_length=64)
+    signed_file = models.ForeignKey(
+        "core.StoredFile", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-signed_at"]
+
+    def __str__(self) -> str:
+        return f"{self.title} signed by {self.signer_name}"
 
 
 class SavedView(TenantModel):

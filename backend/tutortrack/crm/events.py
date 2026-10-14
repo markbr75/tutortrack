@@ -44,3 +44,24 @@ class DocumentUploaded(DomainEvent):
     target_type: str
     target_id: str
     category: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class DocumentSigned(DomainEvent):
+    """A family member or tutor signed a document (FR-05-9, gap batch G2)."""
+
+    event_type: ClassVar[str] = "document.signed"
+    subject_type: ClassVar[str] = "document"
+    signature_id: str
+    target_type: str
+    target_id: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class AgreementSigned(DomainEvent):
+    """A tutor signed an onboarding agreement (FR-18-5, gap batch G2)."""
+
+    event_type: ClassVar[str] = "agreement.signed"
+    subject_type: ClassVar[str] = "signature"
+    tutor_id: str
+    key: str
