@@ -314,6 +314,8 @@ class TutorMeSerializer(serializers.Serializer):
     email = serializers.CharField()
     can_cancel = serializers.BooleanField()
     can_edit_lessons = serializers.BooleanField()
+    can_create_lessons = serializers.BooleanField()
+    can_reschedule = serializers.BooleanField()
     can_see_pay = serializers.BooleanField()
 
 

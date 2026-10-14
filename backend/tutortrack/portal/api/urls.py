@@ -4,7 +4,7 @@ from rest_framework.routers import SimpleRouter
 from . import booking_views as bv
 from . import family_views as fv
 from . import messaging_views as mv
-from . import tutor_views, views
+from . import tutor_g4, tutor_views, views
 
 router = SimpleRouter(trailing_slash=False)
 router.register("announcements", views.AnnouncementViewSet, basename="announcements")
@@ -147,6 +147,25 @@ urlpatterns = [
         name="tutor-msg-families",
     ),
     path("tutor/me", tutor_views.TutorMeView.as_view(), name="tutor-me"),
+    # G4 (FR-16-2/3/4): plan lessons, previous report, a student's lesson history.
+    path("tutor/jobs", tutor_g4.TutorJobsView.as_view(), name="tutor-jobs"),
+    path("tutor/lessons", tutor_g4.TutorLessonsView.as_view(), name="tutor-lessons"),
+    path("tutor/lessons/check", tutor_g4.TutorLessonCheckView.as_view(), name="tutor-lesson-check"),
+    path(
+        "tutor/lessons/<uuid:lesson_id>/move",
+        tutor_g4.TutorLessonMoveView.as_view(),
+        name="tutor-lesson-move",
+    ),
+    path(
+        "tutor/lessons/<uuid:lesson_id>/previous-report",
+        tutor_g4.TutorPreviousReportView.as_view(),
+        name="tutor-previous-report",
+    ),
+    path(
+        "tutor/students/<uuid:student_id>/lessons",
+        tutor_g4.TutorStudentLessonsView.as_view(),
+        name="tutor-student-lessons",
+    ),
     path("tutor/today", tutor_views.TutorTodayView.as_view(), name="tutor-today"),
     path("tutor/offline", tutor_views.TutorOfflineView.as_view(), name="tutor-offline"),
     path("tutor/students", tutor_views.TutorStudentsView.as_view(), name="tutor-students"),

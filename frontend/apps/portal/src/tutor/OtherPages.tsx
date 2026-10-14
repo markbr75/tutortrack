@@ -2,6 +2,7 @@ import { unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
 import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useId, useState } from "react";
 
 import { api } from "../api";
@@ -26,7 +27,15 @@ export function StudentsPage() {
       <ul className="space-y-2">
         {students.data?.map((st) => (
           <li key={st.id} className="rounded-lg border border-border p-3">
-            <p className="font-medium">{st.name}</p>
+            <p className="font-medium">
+              <Link
+                to="/tutor/students/$studentId"
+                params={{ studentId: st.id }}
+                className="underline-offset-2 hover:underline"
+              >
+                {st.name}
+              </Link>
+            </p>
             <p className="text-sm text-muted-foreground">
               {[st.year_group, st.jobs.join(", ")].filter(Boolean).join(" · ")}
             </p>

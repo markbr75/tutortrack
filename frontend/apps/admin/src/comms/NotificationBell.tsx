@@ -6,16 +6,19 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api } from "../api";
+import { useNotificationStream } from "./useNotificationStream";
 
-/** The in-app notification bell (FR-13-8). Polls for the unread count. */
+/** The in-app notification bell (FR-13-8). Updates live over Server-Sent Events (G4) and
+ * falls back to polling the unread count every 30 seconds. */
 export function NotificationBell() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const live = useNotificationStream();
   const count = useQuery({
     queryKey: ["notifications", "unread"],
     queryFn: async () => unwrap(await api.GET("/api/v1/notifications/unread-count")),
-    refetchInterval: 30_000,
+    refetchInterval: live ? false : 30_000,
   });
   const list = useQuery({
     queryKey: ["notifications", "list"],

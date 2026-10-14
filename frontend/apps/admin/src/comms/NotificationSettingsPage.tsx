@@ -51,10 +51,17 @@ function SettingRow({ setting, onEdit }: { setting: Setting; onEdit: () => void 
             type="checkbox"
             className="size-4"
             checked={enabled}
+            disabled={setting.locked}
+            aria-describedby={setting.locked ? `locked-${setting.key}` : undefined}
             onChange={(e) => setEnabled(e.target.checked)}
           />
           {setting.label}
         </label>
+        {setting.locked ? (
+          <p id={`locked-${setting.key}`} className="w-full text-xs text-muted-foreground">
+            {t("templateScope.locked")}
+          </p>
+        ) : null}
         <fieldset className="flex gap-3 text-sm">
           <legend className="sr-only">{t("comms.channels")}</legend>
           {setting.available_channels.map((c) => (
@@ -97,11 +104,98 @@ function SettingRow({ setting, onEdit }: { setting: Setting; onEdit: () => void 
   );
 }
 
+/** Which override the editor works on (G4, FR-13-3): a language and/or a branch; blank
+ * means every language or every branch. */
+function TemplateScope({
+  setting,
+  channel,
+  locale,
+  branch,
+  onChange,
+}: {
+  setting: Setting;
+  channel: Channel;
+  locale: string;
+  branch: string;
+  onChange: (locale: string, branch: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [language, setLanguage] = useState(locale);
+  const branches = useQuery({
+    queryKey: ["branches", "template-scope"],
+    queryFn: async () => unwrap(await api.GET("/api/v1/branches")),
+  });
+  const variants = useQuery({
+    queryKey: ["message-template-variants", setting.key, channel],
+    queryFn: async () =>
+      unwrap(
+        await api.GET("/api/v1/message-templates/{key}/{channel}/variants", {
+          params: { path: { key: setting.key, channel } },
+        }),
+      ),
+  });
+  const branchRows = branches.data?.results ?? [];
+  return (
+    <fieldset className="space-y-2 rounded-md border border-border p-3">
+      <legend className="px-1 text-sm font-medium">{t("templateScope.legend")}</legend>
+      <div className="flex flex-wrap items-end gap-3">
+        <TextField
+          className="w-40"
+          label={t("templateScope.language")}
+          hint={t("templateScope.languageHint")}
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+          onBlur={() => onChange(language.trim(), branch)}
+        />
+        {branchRows.length > 1 ? (
+          <SelectField
+            label={t("templateScope.branch")}
+            value={branch}
+            onChange={(e) => onChange(language.trim(), e.target.value)}
+            options={[
+              { value: "", label: t("templateScope.allBranches") },
+              ...branchRows.map((b) => ({ value: b.id, label: b.name })),
+            ]}
+          />
+        ) : null}
+      </div>
+      {variants.data?.length ? (
+        <div className="text-xs">
+          <p className="font-medium">{t("templateScope.overrides")}</p>
+          <ul className="flex flex-wrap gap-2">
+            {variants.data.map((v) => (
+              <li key={v.id}>
+                <button
+                  type="button"
+                  className="rounded border border-border px-2 py-1 underline-offset-2 hover:underline"
+                  onClick={() => {
+                    setLanguage(v.locale);
+                    onChange(v.locale, v.branch ?? "");
+                  }}
+                >
+                  {[v.locale || t("templateScope.anyLanguage"), v.branch_name]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </fieldset>
+  );
+}
+
 function TemplateEditor({ setting, onClose }: { setting: Setting; onClose: () => void }) {
   const { t } = useTranslation();
   const [channel, setChannel] = useState<Channel>(setting.available_channels[0]!);
-  const key = ["message-template", setting.key, channel];
-  const path = { params: { path: { key: setting.key, channel } } };
+  const [scope, setScope] = useState({ locale: "", branch: "" });
+  const key = ["message-template", setting.key, channel, scope.locale, scope.branch];
+  const query = {
+    ...(scope.locale ? { locale: scope.locale } : {}),
+    ...(scope.branch ? { branch: scope.branch } : {}),
+  };
+  const path = { params: { path: { key: setting.key, channel }, query } };
   const template = useQuery({
     queryKey: key,
     queryFn: async () => unwrap(await api.GET("/api/v1/message-templates/{key}/{channel}", path)),
@@ -116,7 +210,7 @@ function TemplateEditor({ setting, onClose }: { setting: Setting; onClose: () =>
     mutationFn: async () =>
       unwrap(
         await api.POST("/api/v1/message-templates/{key}/{channel}/preview", {
-          ...path,
+          params: { path: { key: setting.key, channel } },
           body: value,
         }),
       ),
@@ -129,13 +223,18 @@ function TemplateEditor({ setting, onClose }: { setting: Setting; onClose: () =>
         );
       if (kind === "revert")
         return unwrap(await api.DELETE("/api/v1/message-templates/{key}/{channel}", path));
-      await api.POST("/api/v1/message-templates/{key}/{channel}/test", path).then(unwrap);
+      await api
+        .POST("/api/v1/message-templates/{key}/{channel}/test", {
+          params: { path: { key: setting.key, channel } },
+        })
+        .then(unwrap);
       return null;
     },
     onSuccess: (data) => {
       if (data) {
         setDraft(null);
         queryClient.setQueryData(key, data);
+        void queryClient.invalidateQueries({ queryKey: ["message-template-variants"] });
       }
     },
   });
@@ -165,6 +264,17 @@ function TemplateEditor({ setting, onClose }: { setting: Setting; onClose: () =>
           value: c,
           label: t(`comms.channel.${c}`),
         }))}
+      />
+      <TemplateScope
+        setting={setting}
+        channel={channel}
+        locale={scope.locale}
+        branch={scope.branch}
+        onChange={(locale, branch) => {
+          setScope({ locale, branch });
+          setDraft(null);
+          preview.reset();
+        }}
       />
       {template.isPending ? (
         <Spinner className="size-5" label={t("grid.loading")} />
@@ -240,7 +350,7 @@ function TemplateEditor({ setting, onClose }: { setting: Setting; onClose: () =>
   );
 }
 
-const CATEGORIES = ["scheduling", "reports", "billing", "account", "staff"] as const;
+const CATEGORIES = ["scheduling", "reports", "billing", "account", "messages", "staff"] as const;
 
 /** Which notifications go out, how and when, and their templates (FR-13-2/3). */
 export function NotificationSettingsPage() {

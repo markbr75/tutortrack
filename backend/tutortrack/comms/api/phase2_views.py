@@ -26,7 +26,7 @@ from tutortrack.core.api.viewsets import TenantScopedViewMixin
 from tutortrack.core.context import tenant_context
 from tutortrack.core.permissions import HasMethodPermission, HasOrganisation, has_perm
 
-from .. import broadcasts, inbox, marketing, selectors, senders
+from .. import broadcasts, inbox, marketing, marketing_inbound, selectors, senders
 from ..models import (
     Broadcast,
     BroadcastRecipient,
@@ -722,6 +722,10 @@ def _marketing_row(provider: str) -> dict[str, Any]:
         "audience_name": str(settings_.get("audience_name", "")),
         "last_sync_at": connection.last_sync_at if connection else None,
         "error": connection.error if connection else "",
+        # G4: where the provider sends unsubscribes back (signed; changes on reconnect).
+        "webhook_url": (
+            marketing_inbound.webhook_url(provider, connection.pk) if connection else ""
+        ),
     }
 
 

@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 
 import { api } from "../api";
+import { DigestPreferences } from "../digests/DigestPreferences";
 
 type Contact = components["schemas"]["PortalContact"];
 type Student = components["schemas"]["PortalStudent"];
@@ -177,6 +178,7 @@ export function ProfilePage() {
       {profile.data?.students.map((s) => (
         <StudentForm key={s.id} student={s} />
       ))}
+      <DigestPreferences />
     </div>
   );
 }

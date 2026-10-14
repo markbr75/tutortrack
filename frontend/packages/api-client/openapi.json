@@ -26652,6 +26652,107 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/digest-preferences/mine": {
+            "get": {
+                "operationId": "digest_preferences_mine_list",
+                "description": "The digest emails the signed-in person can get (G4, FR-13-2/7): on or off, the\nlocal time and (weekly) the day. Tutors: daily agenda and message digest; family\ncontacts: weekly schedule and message digest; staff: message digest.",
+                "tags": [
+                    "digest-preferences"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DigestPreference"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "put": {
+                "operationId": "digest_preferences_mine_update",
+                "description": "The digest emails the signed-in person can get (G4, FR-13-2/7): on or off, the\nlocal time and (weekly) the day. Tutors: daily agenda and message digest; family\ncontacts: weekly schedule and message digest; staff: message digest.",
+                "tags": [
+                    "digest-preferences"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/DigestPreferenceWriteRequest"
+                                }
+                            },
+                            "examples": {
+                                "AgendaAt06:30": {
+                                    "value": [
+                                        [
+                                            {
+                                                "kind": "tutor_agenda",
+                                                "enabled": true,
+                                                "send_time": "06:30"
+                                            }
+                                        ]
+                                    ],
+                                    "summary": "Agenda at 06:30"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/DigestPreferenceWriteRequest"
+                                }
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/DigestPreferenceWriteRequest"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DigestPreference"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/documents": {
             "get": {
                 "operationId": "documents_list",
@@ -49375,8 +49476,16 @@
         "/api/v1/message-templates/{key}/{channel}": {
             "get": {
                 "operationId": "message_templates_retrieve",
-                "description": "A type's template for one channel: the organisation's override or the default.\n``PUT`` saves a new version; ``DELETE`` reverts to the default.",
+                "description": "A type's template for one channel: the organisation's override or the default.\n``PUT`` saves a new version; ``DELETE`` reverts to the default. ``?locale=`` and\n``?branch=`` address a language or branch override (G4).",
                 "parameters": [
+                    {
+                        "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Branch override (id); blank = every branch."
+                    },
                     {
                         "in": "path",
                         "name": "channel",
@@ -49392,6 +49501,14 @@
                             "type": "string"
                         },
                         "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "locale",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Language override (e.g. fr); blank = any."
                     }
                 ],
                 "tags": [
@@ -49418,8 +49535,16 @@
             },
             "put": {
                 "operationId": "message_templates_update",
-                "description": "A type's template for one channel: the organisation's override or the default.\n``PUT`` saves a new version; ``DELETE`` reverts to the default.",
+                "description": "A type's template for one channel: the organisation's override or the default.\n``PUT`` saves a new version; ``DELETE`` reverts to the default. ``?locale=`` and\n``?branch=`` address a language or branch override (G4).",
                 "parameters": [
+                    {
+                        "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Branch override (id); blank = every branch."
+                    },
                     {
                         "in": "path",
                         "name": "channel",
@@ -49435,6 +49560,14 @@
                             "type": "string"
                         },
                         "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "locale",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Language override (e.g. fr); blank = any."
                     }
                 ],
                 "tags": [
@@ -49481,8 +49614,16 @@
             },
             "delete": {
                 "operationId": "message_templates_destroy",
-                "description": "A type's template for one channel: the organisation's override or the default.\n``PUT`` saves a new version; ``DELETE`` reverts to the default.",
+                "description": "A type's template for one channel: the organisation's override or the default.\n``PUT`` saves a new version; ``DELETE`` reverts to the default. ``?locale=`` and\n``?branch=`` address a language or branch override (G4).",
                 "parameters": [
+                    {
+                        "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Branch override (id); blank = every branch."
+                    },
                     {
                         "in": "path",
                         "name": "channel",
@@ -49498,6 +49639,14 @@
                             "type": "string"
                         },
                         "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "locale",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Language override (e.g. fr); blank = any."
                     }
                 ],
                 "tags": [
@@ -49632,6 +49781,54 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/message-templates/{key}/{channel}/variants": {
+            "get": {
+                "operationId": "message_templates_variants_list",
+                "description": "The organisation's language and branch overrides of one template (G4).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "channel",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "message-templates"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TemplateVariant"
+                                    }
                                 }
                             }
                         },
@@ -50665,6 +50862,51 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/UnreadCount"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/notifications/stream": {
+            "get": {
+                "operationId": "notifications_stream_retrieve",
+                "description": "Your in-app notifications as Server-Sent Events (G4, FR-13-8).\n\nEvents: ``ready`` (with the unread count), ``notification`` (id, type, title, link)\nand ``read`` (some were marked read). Comments (``: keep-alive``) keep proxies from\nclosing the connection. The stream ends after a few minutes and the browser\nreconnects. If it can't connect, keep polling ``/notifications/unread-count``.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "format",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "event-stream",
+                                "json"
+                            ]
+                        }
+                    }
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "text/event-stream": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "examples": {
+                                    "Events": {
+                                        "value": "event: ready\ndata: {\"unread\": 2}\n\nevent: notification\ndata: {\"id\": \"…\", \"title\": \"Lesson moved\"}\n\n"
+                                    }
                                 }
                             }
                         },
@@ -77964,6 +78206,266 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/tutor/jobs": {
+            "get": {
+                "operationId": "tutor_jobs_list",
+                "description": "The tutor's active jobs a lesson can be booked on.",
+                "tags": [
+                    "tutor"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TutorJob"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/tutor/lessons": {
+            "post": {
+                "operationId": "tutor_lessons_create",
+                "description": "Book a lesson on one of your jobs (needs the organisation's \"tutors can create\nlessons\" setting). A hard conflict returns 422 with ``conflicts``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "tutor"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorLessonCreateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorLessonCreateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorLessonCreateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/tutor/lessons/{lesson_id}/move": {
+            "post": {
+                "operationId": "tutor_lessons_move_create",
+                "description": "Move your planned lesson (needs \"tutors can reschedule lessons\"; otherwise send a\nreschedule request). A hard conflict returns 422 with ``conflicts``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "lesson_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutor"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorLessonMoveRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorLessonMoveRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorLessonMoveRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/tutor/lessons/{lesson_id}/previous-report": {
+            "get": {
+                "operationId": "tutor_lessons_previous_report_retrieve",
+                "description": "The latest earlier report for this lesson's student(s) that you may read.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "lesson_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutor"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PreviousReportResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/tutor/lessons/check": {
+            "post": {
+                "operationId": "tutor_lessons_check_create",
+                "description": "Conflicts for a proposed time (nothing is saved): a new lesson on ``job`` or a\nmove of ``lesson``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "tutor"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorLessonCheckRequest"
+                            },
+                            "examples": {
+                                "Move": {
+                                    "value": {
+                                        "lesson": "…",
+                                        "start": "2026-11-02T16:00:00Z",
+                                        "end": "2026-11-02T17:00:00Z"
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorLessonCheckRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorLessonCheckRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Conflict"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/tutor/me": {
             "get": {
                 "operationId": "tutor_me_retrieve",
@@ -78067,6 +78569,44 @@
                                     "items": {
                                         "$ref": "#/components/schemas/TutorStudent"
                                     }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/tutor/students/{student_id}/lessons": {
+            "get": {
+                "operationId": "tutor_students_lessons_retrieve",
+                "description": "A student's lessons with you (newest first), attendance and your reports.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "student_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutor"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentHistory"
                                 }
                             }
                         },
@@ -96826,6 +97366,81 @@
                     "records"
                 ]
             },
+            "DigestKindEnum": {
+                "enum": [
+                    "tutor_agenda",
+                    "weekly_schedule",
+                    "message_digest"
+                ],
+                "type": "string",
+                "description": "* `tutor_agenda` - Daily agenda\n* `weekly_schedule` - Weekly schedule\n* `message_digest` - Message digest"
+            },
+            "DigestPreference": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "$ref": "#/components/schemas/DigestKindEnum"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "The person wants it."
+                    },
+                    "org_enabled": {
+                        "type": "boolean",
+                        "description": "The organisation sends it (Settings → Notifications)."
+                    },
+                    "send_time": {
+                        "type": "string",
+                        "format": "time"
+                    },
+                    "weekday": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "Weekly digests: 0 = Monday … 6 = Sunday."
+                    },
+                    "customised": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "customised",
+                    "enabled",
+                    "kind",
+                    "label",
+                    "org_enabled",
+                    "send_time",
+                    "weekday"
+                ]
+            },
+            "DigestPreferenceWriteRequest": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "$ref": "#/components/schemas/DigestKindEnum"
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "send_time": {
+                        "type": "string",
+                        "format": "time",
+                        "nullable": true
+                    },
+                    "weekday": {
+                        "type": "integer",
+                        "maximum": 6,
+                        "minimum": 0,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "kind"
+                ]
+            },
             "DiscountLine": {
                 "type": "object",
                 "properties": {
@@ -109304,6 +109919,10 @@
                     },
                     "error": {
                         "type": "string"
+                    },
+                    "webhook_url": {
+                        "type": "string",
+                        "description": "Paste into Mailchimp/Brevo webhooks (unsubscribes)."
                     }
                 },
                 "required": [
@@ -109315,7 +109934,8 @@
                     "last_sync_at",
                     "name",
                     "provider",
-                    "status"
+                    "status",
+                    "webhook_url"
                 ]
             },
             "MarketingSyncResult": {
@@ -109329,6 +109949,10 @@
                     },
                     "failed": {
                         "type": "integer"
+                    },
+                    "opted_out": {
+                        "type": "integer",
+                        "description": "Contacts who had unsubscribed at the provider (G4)."
                     }
                 },
                 "required": [
@@ -111600,6 +112224,10 @@
                     "transactional": {
                         "type": "boolean"
                     },
+                    "locked": {
+                        "type": "boolean",
+                        "description": "Account emails: can be edited, not switched off."
+                    },
                     "customised": {
                         "type": "boolean"
                     }
@@ -111614,6 +112242,7 @@
                     "has_timing",
                     "key",
                     "label",
+                    "locked",
                     "timing",
                     "transactional"
                 ]
@@ -128359,6 +128988,61 @@
                     "title"
                 ]
             },
+            "PreviousReport": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "lesson_id": {
+                        "type": "string"
+                    },
+                    "lesson_title": {
+                        "type": "string"
+                    },
+                    "lesson_start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "tutor": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "answers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ReportAnswer"
+                        }
+                    }
+                },
+                "required": [
+                    "answers",
+                    "id",
+                    "lesson_id",
+                    "lesson_start",
+                    "lesson_title",
+                    "status",
+                    "tutor"
+                ]
+            },
+            "PreviousReportResult": {
+                "type": "object",
+                "properties": {
+                    "report": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PreviousReport"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "report"
+                ]
+            },
             "PriceList": {
                 "type": "object",
                 "properties": {
@@ -134154,6 +134838,23 @@
                 },
                 "required": [
                     "body"
+                ]
+            },
+            "ReportAnswer": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "value": {}
+                },
+                "required": [
+                    "key",
+                    "label",
+                    "value"
                 ]
             },
             "ReportAnswersRequest": {
@@ -141275,6 +141976,32 @@
                     "user"
                 ]
             },
+            "StudentHistory": {
+                "type": "object",
+                "properties": {
+                    "student": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "lessons": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StudentLesson"
+                        }
+                    },
+                    "attendance_percent": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "attendance_percent",
+                    "lessons",
+                    "student"
+                ]
+            },
             "StudentInRequest": {
                 "type": "object",
                 "properties": {
@@ -141364,6 +142091,52 @@
                 },
                 "required": [
                     "student"
+                ]
+            },
+            "StudentLesson": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "service": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "outcome": {
+                        "type": "string"
+                    },
+                    "report_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "report_status": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "end",
+                    "id",
+                    "outcome",
+                    "report_id",
+                    "report_status",
+                    "service",
+                    "start",
+                    "status",
+                    "title"
                 ]
             },
             "StudentLogin": {
@@ -143087,6 +143860,13 @@
                         "items": {
                             "type": "string"
                         }
+                    },
+                    "locale": {
+                        "type": "string"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "nullable": true
                     }
                 },
                 "required": [
@@ -143216,6 +143996,45 @@
                 ],
                 "type": "string",
                 "description": "* `staff` - staff\n* `client` - client\n* `student` - student"
+            },
+            "TemplateVariant": {
+                "type": "object",
+                "description": "One language or branch override of a template (G4, FR-13-3).",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "locale": {
+                        "type": "string"
+                    },
+                    "branch": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "branch_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "version": {
+                        "type": "integer"
+                    },
+                    "subject": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "branch",
+                    "branch_name",
+                    "id",
+                    "locale",
+                    "subject",
+                    "updated_at",
+                    "version"
+                ]
             },
             "TemplateWriteRequest": {
                 "type": "object",
@@ -145783,6 +146602,122 @@
                 "type": "string",
                 "description": "* `pending` - Waiting for the tutor\n* `confirmed` - Confirmed\n* `flagged` - Problem reported"
             },
+            "TutorJob": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "service": {
+                        "type": "string"
+                    },
+                    "duration_minutes": {
+                        "type": "integer"
+                    },
+                    "online": {
+                        "type": "boolean"
+                    },
+                    "location": {
+                        "type": "string"
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "duration_minutes",
+                    "id",
+                    "location",
+                    "name",
+                    "online",
+                    "service",
+                    "students"
+                ]
+            },
+            "TutorLessonCheckRequest": {
+                "type": "object",
+                "properties": {
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "job": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "lesson": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "end",
+                    "start"
+                ]
+            },
+            "TutorLessonCreateRequest": {
+                "type": "object",
+                "properties": {
+                    "job": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "notes_for_tutor": {
+                        "type": "string",
+                        "default": ""
+                    }
+                },
+                "required": [
+                    "end",
+                    "job",
+                    "start"
+                ]
+            },
+            "TutorLessonMoveRequest": {
+                "type": "object",
+                "properties": {
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 500
+                    }
+                },
+                "required": [
+                    "end",
+                    "start"
+                ]
+            },
             "TutorMe": {
                 "type": "object",
                 "properties": {
@@ -145801,13 +146736,21 @@
                     "can_edit_lessons": {
                         "type": "boolean"
                     },
+                    "can_create_lessons": {
+                        "type": "boolean"
+                    },
+                    "can_reschedule": {
+                        "type": "boolean"
+                    },
                     "can_see_pay": {
                         "type": "boolean"
                     }
                 },
                 "required": [
                     "can_cancel",
+                    "can_create_lessons",
                     "can_edit_lessons",
+                    "can_reschedule",
                     "can_see_pay",
                     "email",
                     "id",

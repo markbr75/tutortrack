@@ -44,6 +44,7 @@ def email_owners_about_security_alerts(event: EventEnvelope) -> None:
     who = User.objects.filter(pk=actor).values_list("email", flat=True).first() or "someone"
     for email in owners:
         send_security_alert.delay(
+            organisation_id=str(event.organisation_id),
             email=email,
             kind=str(event.data.get("kind", "")),
             detail=str(event.data.get("detail", "")),

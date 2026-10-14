@@ -1,17 +1,19 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Spinner } from "@tutortrack/ui";
+import { Button, Spinner } from "@tutortrack/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api } from "../api";
+import { PlanLessonForm } from "./Planning";
 import { useTutorMe } from "./useTutorMe";
 
 /** The next two weeks (and yesterday) as an agenda (E16-T02). */
 export function TutorSchedulePage() {
   const { t, i18n } = useTranslation();
   const me = useTutorMe();
+  const [planning, setPlanning] = useState(false);
   const [range] = useState(() => {
     const start = new Date();
     start.setDate(start.getDate() - 1);
@@ -40,6 +42,12 @@ export function TutorSchedulePage() {
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">{t("tutor.nav.schedule")}</h1>
+      {me.data?.can_create_lessons && !planning ? (
+        <Button size="sm" onClick={() => setPlanning(true)}>
+          {t("tutorPlan.newLesson")}
+        </Button>
+      ) : null}
+      {planning ? <PlanLessonForm onDone={() => setPlanning(false)} /> : null}
       {!lessons.length ? (
         <p className="text-sm text-muted-foreground">{t("portal.noLessons")}</p>
       ) : null}

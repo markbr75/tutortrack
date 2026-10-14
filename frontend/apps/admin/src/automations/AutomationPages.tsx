@@ -402,6 +402,30 @@ function ActionForm({
             </div>
           );
         }
+        if (f.type === "bool") {
+          return (
+            <label key={f.name} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="size-4"
+                checked={config[f.name] !== false}
+                onChange={(e) => set(f.name, e.target.checked)}
+              />
+              {f.label}
+            </label>
+          );
+        }
+        if (f.type === "whatsapp_template" || f.type === "saved_reply") {
+          return (
+            <SavedTemplateSelect
+              key={f.name}
+              kind={f.type}
+              label={label}
+              value={String(config[f.name] ?? "")}
+              onChange={(v) => set(f.name, v)}
+            />
+          );
+        }
         return (
           <TextField
             key={f.name}
@@ -413,6 +437,44 @@ function ActionForm({
         );
       })}
     </div>
+  );
+}
+
+/** G4 actions pick an approved WhatsApp template or a saved message (Settings →
+ * Messaging) instead of typing an id. */
+function SavedTemplateSelect({
+  kind,
+  label,
+  value,
+  onChange,
+}: {
+  kind: "whatsapp_template" | "saved_reply";
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const { t } = useTranslation();
+  const options = useQuery({
+    queryKey: ["automation-saved-templates", kind],
+    queryFn: async () => {
+      if (kind === "whatsapp_template") {
+        const page = unwrap(await api.GET("/api/v1/whatsapp-templates"));
+        return page.results
+          .filter((row) => row.status === "approved" && row.category !== "marketing")
+          .map((row) => ({ value: row.id, label: row.name }));
+      }
+      const page = unwrap(await api.GET("/api/v1/canned-replies"));
+      return page.results.map((row) => ({ value: row.id, label: row.title }));
+    },
+  });
+  return (
+    <SelectField
+      label={label}
+      value={value}
+      hint={options.data && !options.data.length ? t("automationExtras.noneYet") : undefined}
+      onChange={(e) => onChange(e.target.value)}
+      options={[{ value: "", label: "—" }, ...(options.data ?? [])]}
+    />
   );
 }
 

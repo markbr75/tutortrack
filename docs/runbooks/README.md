@@ -14,5 +14,6 @@ same pull request as the change that makes it wrong.
 | [provider-outage.md](provider-outage.md) | Stripe, Twilio, Postmark or Temporal Cloud is down |
 | [incident-comms.md](incident-comms.md) | Telling customers about an incident |
 | [backup-drill.md](backup-drill.md) | The quarterly restore drill |
+| [realtime-notifications.md](realtime-notifications.md) | Switching the web service to ASGI for the realtime bell (SSE), or streams misbehave |
 
 Targets: RPO ≤ 5 minutes (RDS point-in-time recovery), RTO ≤ 4 hours.

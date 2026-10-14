@@ -42,11 +42,17 @@ class OrgNotificationSetting(TenantModel):
 
 class MessageTemplate(TenantModel):
     """An organisation's override of a type's default template for one channel. Saving
-    creates a new version; the previous one is kept (``is_active=False``) for revert."""
+    creates a new version; the previous one is kept (``is_active=False``) for revert.
+
+    G4 (FR-13-3): an override can be for one language (``locale``, e.g. ``fr`` or
+    ``fr-FR``; blank = every language) and/or one branch (blank = every branch)."""
 
     type_key = models.CharField(max_length=60)
     channel = models.CharField(max_length=10, choices=Channel.choices)
-    locale = models.CharField(max_length=10, default="en-GB")
+    locale = models.CharField(max_length=10, blank=True, default="")
+    branch = models.ForeignKey(
+        "tenancy.Branch", null=True, blank=True, on_delete=models.CASCADE, related_name="+"
+    )
     subject = models.CharField(max_length=300, blank=True, default="")
     body = models.TextField()
     version = models.PositiveIntegerField(default=1)
@@ -60,9 +66,14 @@ class MessageTemplate(TenantModel):
         constraints = [
             models.UniqueConstraint(
                 fields=["organisation", "type_key", "channel", "locale"],
-                condition=Q(is_active=True),
-                name="message_template_active_unique",
-            )
+                condition=Q(is_active=True, branch__isnull=True),
+                name="message_template_active_org_unique",
+            ),
+            models.UniqueConstraint(
+                fields=["organisation", "type_key", "channel", "locale", "branch"],
+                condition=Q(is_active=True, branch__isnull=False),
+                name="message_template_active_branch_unique",
+            ),
         ]
 
 
@@ -623,3 +634,32 @@ class InboundRoute(models.Model):
 
     def __str__(self) -> str:
         return f"{self.channel}:{self.kind}:{self.address}"
+
+
+# --- G4: digests (FR-13-2/7) -------------------------------------------------------------------
+
+
+class DigestPreference(TenantModel):
+    """One person's choice for a digest email (the tutor's daily agenda, a family's weekly
+    schedule, the daily message digest): on or off, the local time it arrives and, for
+    weekly digests, the day (0 = Monday). No row = the organisation's defaults."""
+
+    class Kind(models.TextChoices):
+        TUTOR_AGENDA = "tutor_agenda", _("Daily agenda")
+        WEEKLY_SCHEDULE = "weekly_schedule", _("Weekly schedule")
+        MESSAGE_DIGEST = "message_digest", _("Message digest")
+
+    person_type = models.CharField(max_length=10)  # tutor | contact | user
+    person_id = models.CharField(max_length=64)
+    kind = models.CharField(max_length=20, choices=Kind.choices)
+    enabled = models.BooleanField(default=True)
+    send_time = models.TimeField(null=True, blank=True)  # local time; empty = org default
+    weekday = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    class Meta(TenantModel.Meta):
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "person_type", "person_id", "kind"],
+                name="digest_preference_unique",
+            )
+        ]

@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import { api } from "../api";
+import { DigestPreferences } from "../digests/DigestPreferences";
 import {
   currentSubscription,
   disablePush,
@@ -26,6 +27,7 @@ export function NotificationsPage() {
       <ThisDevice />
       <Devices />
       <Preferences />
+      <DigestPreferences />
     </div>
   );
 }

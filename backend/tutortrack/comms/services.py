@@ -82,6 +82,8 @@ def update_setting(
     type_key: str, *, enabled: bool, channels: list[str], timing: list[int] | None = None
 ) -> EffectiveSetting:
     t = registry.get(type_key)
+    if t.locked and (not enabled or "email" not in channels):
+        raise _invalid("enabled", _("Account emails can be edited but not switched off."))
     unknown = set(channels) - set(t.channels)
     if unknown:
         raise _invalid(
@@ -114,8 +116,50 @@ class TemplateSource:
     version: int
 
 
-def template_for(type_key: str, channel: str, locale: str = "en-GB") -> TemplateSource | None:
-    row = MessageTemplate.objects.filter(type_key=type_key, channel=channel, is_active=True).first()
+def _locale_candidates(locale: str) -> list[str]:
+    """``fr-CA`` → ["fr-CA", "fr"]; blank → []."""
+    locale = (locale or "").strip()
+    if not locale:
+        return []
+    out = [locale]
+    language = locale.split("-")[0].split("_")[0]
+    if language and language != locale:
+        out.append(language)
+    return out
+
+
+def _override(type_key: str, channel: str, locale: str, branch_id: Any) -> MessageTemplate | None:
+    """The most specific active override (G4, FR-13-3): the recipient's language first
+    (branch, then organisation-wide), then any-language overrides (branch, then
+    organisation-wide)."""
+    rows = list(MessageTemplate.objects.filter(type_key=type_key, channel=channel, is_active=True))
+    if not rows:
+        return None
+    branch = str(branch_id) if branch_id else None
+    for wanted in [*_locale_candidates(locale), ""]:
+        for scope in ([branch] if branch else []) + [None]:
+            for row in rows:
+                row_branch = str(row.branch_id) if row.branch_id else None
+                if row.locale == wanted and row_branch == scope:
+                    return row
+    return None
+
+
+def template_for(
+    type_key: str, channel: str, locale: str = "", branch_id: Any = None, *, exact: bool = False
+) -> TemplateSource | None:
+    """The template used for a recipient. ``exact`` reads one override slot (the editor):
+    the override saved for exactly that language and branch, else the default."""
+    if exact:
+        row = MessageTemplate.objects.filter(
+            type_key=type_key,
+            channel=channel,
+            is_active=True,
+            locale=locale or "",
+            branch_id=branch_id or None,
+        ).first()
+    else:
+        row = _override(type_key, channel, locale, branch_id)
     if row is not None:
         return TemplateSource(row.subject, row.body, True, row.version)
     default = defaults.default_template(type_key, channel)
@@ -124,13 +168,33 @@ def template_for(type_key: str, channel: str, locale: str = "en-GB") -> Template
     return TemplateSource(default[0], default[1], False, 0)
 
 
+def _check_scope(locale: str, branch_id: Any) -> tuple[str, Any]:
+    locale = (locale or "").strip()
+    if locale and (len(locale) > 10 or not all(c.isalnum() or c in "-_" for c in locale)):
+        raise _invalid("locale", _("Choose a language code such as fr or fr-FR."))
+    if branch_id:
+        from tutortrack.tenancy.models import Branch
+
+        if not Branch.objects.filter(pk=branch_id).exists():
+            raise _invalid("branch", _("Unknown branch."))
+    return locale, branch_id or None
+
+
 @transaction.atomic
 def save_template(
-    type_key: str, channel: str, *, subject: str, body: str, user: Any = None
+    type_key: str,
+    channel: str,
+    *,
+    subject: str,
+    body: str,
+    user: Any = None,
+    locale: str = "",
+    branch_id: Any = None,
 ) -> MessageTemplate:
     t = registry.get(type_key)
     if channel not in t.channels:
         raise _invalid("channel", _("This notification can't be sent by that channel."))
+    locale, branch_id = _check_scope(locale, branch_id)
     for name, source in (("subject", subject), ("body", body)):
         try:
             render.validate(source)
@@ -138,29 +202,45 @@ def save_template(
             raise _invalid(name, _("The template has an error: %(e)s") % {"e": exc}) from exc
     if not body.strip():
         raise _invalid("body", _("Write the message."))
-    current = MessageTemplate.objects.filter(
-        type_key=type_key, channel=channel, is_active=True
-    ).first()
+    slot = MessageTemplate.objects.filter(
+        type_key=type_key, channel=channel, locale=locale, branch_id=branch_id
+    )
+    current = slot.filter(is_active=True).first()
     version = 1
     if current is not None:
         version = current.version + 1
         MessageTemplate.objects.filter(pk=current.pk).update(is_active=False)
     else:
-        last = MessageTemplate.objects.filter(type_key=type_key, channel=channel).first()
+        last = slot.first()
         version = last.version + 1 if last else 1
     row = MessageTemplate.objects.create(
         type_key=type_key, channel=channel, subject=subject, body=body, version=version,
-        created_by=user,
+        created_by=user, locale=locale, branch_id=branch_id,
     )  # fmt: skip
     audit.record_create(row)
     return row
 
 
 @transaction.atomic
-def revert_template(type_key: str, channel: str) -> None:
-    """Back to the platform default (earlier versions stay for the record)."""
-    MessageTemplate.objects.filter(type_key=type_key, channel=channel, is_active=True).update(
-        is_active=False
+def revert_template(
+    type_key: str, channel: str, *, locale: str = "", branch_id: Any = None
+) -> None:
+    """Back to the next template up (earlier versions stay for the record)."""
+    MessageTemplate.objects.filter(
+        type_key=type_key,
+        channel=channel,
+        is_active=True,
+        locale=locale or "",
+        branch_id=branch_id or None,
+    ).update(is_active=False)
+
+
+def template_variants(type_key: str, channel: str) -> list[MessageTemplate]:
+    """The organisation's active overrides of one template (every language and branch)."""
+    return list(
+        MessageTemplate.objects.filter(type_key=type_key, channel=channel, is_active=True)
+        .select_related("branch")
+        .order_by("branch__name", "locale")
     )
 
 
@@ -171,8 +251,10 @@ def render_message(
     *,
     subject: str | None = None,
     body: str | None = None,
+    locale: str = "",
+    branch_id: Any = None,
 ) -> tuple[str, str]:
-    source = template_for(type_key, channel)
+    source = template_for(type_key, channel, locale, branch_id)
     subject_src = subject if subject is not None else (source.subject if source else "")
     body_src = body if body is not None else (source.body if source else "")
     tz = str((context.get("lesson") or {}).get("timezone") or
@@ -375,6 +457,14 @@ def _deliver(
     return messages
 
 
+def _branch_of(subject: Any) -> Any:
+    """The branch a notification's record belongs to (for branch template overrides)."""
+    branch_id = getattr(subject, "branch_id", None)
+    if branch_id is None and isinstance(subject, tuple) and subject:
+        branch_id = getattr(subject[0], "branch_id", None)
+    return branch_id
+
+
 def _create(
     t: NotificationType, subject: Any, delivery: Delivery, channel: str, *, key: str
 ) -> Message | None:
@@ -392,7 +482,13 @@ def _create(
         subject_text, body, meta = "", rendered.body, rendered.meta
     else:
         try:
-            subject_text, body = render_message(t.key, channel, delivery.context)
+            subject_text, body = render_message(
+                t.key,
+                channel,
+                delivery.context,
+                locale=recipient.locale,
+                branch_id=_branch_of(subject),
+            )
         except render.TemplateInvalid as exc:
             subject_text, body = "", f"[template error: {exc}]"
     address = _address(recipient, channel)
@@ -450,10 +546,13 @@ def _create(
         return None  # a concurrent delivery got there first
     if channel == Channel.IN_APP:
         link = t.link(subject) if t.link else ""
-        InAppNotification.objects.create(
+        row = InAppNotification.objects.create(
             user_id=recipient.user_id, type_key=t.key, title=subject_text[:300], body=body,
             link=link[:300],
         )  # fmt: skip
+        from . import realtime
+
+        realtime.notification_created(row)  # G4: open SSE streams update straight away
         Message.objects.filter(pk=message.pk).update(status=Message.Status.DELIVERED, sent_at=now())
         message.status = Message.Status.DELIVERED
     return message
@@ -914,7 +1013,11 @@ def mark_read(user: Any, ids: list[Any] | None = None) -> int:
     qs = InAppNotification.objects.filter(user=user, read_at__isnull=True)
     if ids is not None:
         qs = qs.filter(pk__in=ids)
-    return qs.update(read_at=now())
+    count = qs.update(read_at=now())
+    from . import realtime
+
+    realtime.notifications_read(require_organisation_id(), user.pk, count)
+    return count
 
 
 def test_send(type_key: str, channel: str, *, user: Any) -> Message:

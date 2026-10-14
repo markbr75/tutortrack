@@ -225,7 +225,7 @@ def test_mailchimp_sync(org, staff, django_capture_on_commit_callbacks):
     )
     assert chosen.json()["audience_name"] == "Families"
     result = staff.post("/api/v1/marketing-sync/mailchimp/sync").json()
-    assert result == {"upserted": 1, "unsubscribed": 0, "failed": 0}
+    assert result == {"upserted": 1, "unsubscribed": 0, "failed": 0, "opted_out": 0}
     (audience,) = [a["aud1"] for a in FAKE_AUDIENCES.values()]
     assert set(audience) == {"yes@example.com"}
     assert "status:active" in audience["yes@example.com"]["tags"]

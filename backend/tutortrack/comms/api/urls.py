@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
+from . import g4_views as g4
 from . import phase2_views as p2
 from . import views
 
@@ -18,6 +19,14 @@ router.register("notifications", views.NotificationViewSet, basename="notificati
 router.register("push-subscriptions", views.PushSubscriptionViewSet, basename="push-subscriptions")
 
 urlpatterns = [
+    # G4: realtime bell, digest choices and Mailchimp/Brevo unsubscribes.
+    path("notifications/stream", g4.NotificationStreamView.as_view(), name="notification-stream"),
+    path("digest-preferences/mine", g4.MyDigestsView.as_view(), name="my-digest-preferences"),
+    path(
+        "webhooks/marketing/<slug:provider>/<str:token>",
+        g4.marketing_webhook,
+        name="marketing-webhook",
+    ),
     path(
         "notification-settings",
         views.NotificationSettingsView.as_view(),
@@ -32,6 +41,11 @@ urlpatterns = [
         "message-templates/<slug:key>/<slug:channel>",
         views.TemplateView.as_view(),
         name="message-template",
+    ),
+    path(
+        "message-templates/<slug:key>/<slug:channel>/variants",
+        views.TemplateVariantsView.as_view(),
+        name="message-template-variants",
     ),
     path(
         "message-templates/<slug:key>/<slug:channel>/preview",

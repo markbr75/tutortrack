@@ -26,6 +26,7 @@ from tutortrack.privacy.registry import (
 
 from .models import (
     CommunicationPreference,
+    DigestPreference,
     InAppNotification,
     Message,
     MessageEvent,
@@ -79,9 +80,20 @@ def export(person: Person) -> list[Section]:
         {"id": str(p.pk), "category": p.category, "channels": p.channels}
         for p in CommunicationPreference.objects.filter(_preferences(person))
     ]
+    digests = [
+        {
+            "id": str(d.pk),
+            "kind": d.kind,
+            "enabled": d.enabled,
+            "send_time": d.send_time.isoformat() if d.send_time else None,
+            "weekday": d.weekday,
+        }
+        for d in DigestPreference.objects.filter(_preferences(person))
+    ]
     return [
         Section("comms.messages", _("Messages we sent you"), messages),
         Section("comms.preferences", _("Communication preferences"), preferences),
+        Section("comms.digests", _("Digest email choices"), digests),
     ]
 
 
@@ -109,6 +121,7 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
                 Message.objects.filter(pk=message.pk).update(subject=subject, body=body)
                 out.anonymised += 1
     out.deleted += CommunicationPreference.objects.filter(_preferences(person)).delete()[0]
+    out.deleted += DigestPreference.objects.filter(_preferences(person)).delete()[0]
     users = person.of("identity.user")
     if users:
         out.deleted += InAppNotification.objects.filter(user_id__in=users).delete()[0]

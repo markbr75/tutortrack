@@ -9,6 +9,7 @@ import { api } from "../api";
 import { JoinButton } from "../JoinButton";
 import { isNetworkError, isOffline, queueChange, useOutbox } from "../offline/client";
 import { ClassroomLink, TutorRecordings, VideoRegisterHint } from "./Phase3";
+import { MoveLessonForm, PreviousReport } from "./Planning";
 import { CheckInButtons, TutorRaiseConcern } from "./SafeguardingTools";
 import { useTutorMe } from "./useTutorMe";
 
@@ -30,6 +31,7 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
   const [outcomes, setOutcomes] = useState<Record<string, Outcome>>({});
   const [late, setLate] = useState<Record<string, string>>({});
   const [cancelling, setCancelling] = useState(false);
+  const [moving, setMoving] = useState(false);
   const [reason, setReason] = useState("");
 
   const queued = useOutbox().filter((item) => item.lessonId === lessonId);
@@ -144,6 +146,7 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
         </p>
       </header>
       {l.notes_for_tutor ? <Alert>{l.notes_for_tutor}</Alert> : null}
+      <PreviousReport lessonId={lessonId} />
       {l.online && planned ? <HostJoin lesson={l} /> : null}
       {l.online && planned ? <ClassroomLink lessonId={lessonId} /> : null}
       {completedOffline ? (
@@ -209,6 +212,20 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
         <Button onClick={() => openReport.mutate()} disabled={openReport.isPending}>
           {t("tutor.writeReport")}
         </Button>
+      ) : null}
+      {planned && !started && !moving ? (
+        <Button variant="secondary" onClick={() => setMoving(true)}>
+          {me.data?.can_reschedule ? t("tutorPlan.move") : t("tutorPlan.askToMove")}
+        </Button>
+      ) : null}
+      {moving ? (
+        <MoveLessonForm
+          lesson={l}
+          onDone={() => {
+            setMoving(false);
+            void lesson.refetch();
+          }}
+        />
       ) : null}
       {planned && me.data?.can_cancel && !cancelling ? (
         <Button variant="ghost" onClick={() => setCancelling(true)}>

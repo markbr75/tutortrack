@@ -11,12 +11,16 @@ class CommsConfig(AppConfig):
         from tutortrack.crm import selectors as crm
 
         from . import (  # noqa: F401
+            account_emails,
             catalogue,
+            digests,
             events,
+            g4_types,
             handlers,
             marketing_providers,
             org_settings,
             phase2_types,
+            students,
         )
         from .selectors import may_open_broadcast_file, may_open_thread_file, message_timeline
 

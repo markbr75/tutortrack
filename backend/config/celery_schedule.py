@@ -24,6 +24,11 @@ BEAT_SCHEDULE = {
         "task": "tutortrack.comms.tasks.send_all_lesson_reminders",
         "schedule": timedelta(minutes=5),
     },
+    # Digests at each person's local time, card expiry notices and statements (G4).
+    "scheduled-comms": {
+        "task": "tutortrack.comms.tasks.send_all_scheduled_comms",
+        "schedule": crontab(minute="*/15"),
+    },
     # Our subscription (E04): seat counts nightly, revenue share for the day before.
     "subscription-seats": {
         "task": "tutortrack.subscriptions.tasks.sync_all_seats",

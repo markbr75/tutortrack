@@ -40,6 +40,7 @@ import { TutorReferralsPage } from "./tutor/ReferralsPage";
 import { TutorReportPage } from "./tutor/ReportPage";
 import { TutorSchedulePage } from "./tutor/SchedulePage";
 import { TodayPage } from "./tutor/TodayPage";
+import { StudentHistoryPage } from "./tutor/Planning";
 import { TutorHomeworkPage, TutorResourcesPage, TutorReviewPage } from "./tutor/LearningPages";
 
 const rootRoute = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -53,6 +54,13 @@ const lessonRoute = createRoute({
   path: "/tutor/lessons/$lessonId",
   component: function LessonRoute() {
     return <LessonPage lessonId={lessonRoute.useParams().lessonId} />;
+  },
+});
+const studentHistoryRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/tutor/students/$studentId",
+  component: function StudentHistoryRoute() {
+    return <StudentHistoryPage studentId={studentHistoryRoute.useParams().studentId} />;
   },
 });
 const offlineReportRoute = createRoute({
@@ -112,6 +120,7 @@ const routeTree = rootRoute.addChildren([
   page("/tutor", TodayPage),
   page("/tutor/schedule", TutorSchedulePage),
   page("/tutor/students", StudentsPage),
+  studentHistoryRoute,
   page("/tutor/availability", AvailabilityPage),
   page("/tutor/calendar", CalendarSyncPage),
   page("/tutor/earnings", EarningsPage),

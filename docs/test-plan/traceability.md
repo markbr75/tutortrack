@@ -12,7 +12,7 @@ This file maps each epic to its manual test cases and automated coverage. Counts
 |---|---|---|---|---|---|---|---|
 | E01 Platform foundations | [E01-platform-foundations.md](E01-platform-foundations.md) | TP-E01-001–046 | 46 (16) | — | 41 | 4 | smoke, roles |
 | E02 Multi-tenancy | [E02-multi-tenancy.md](E02-multi-tenancy.md) | TP-E02-001–054 | 54 (18) | branches (`multi_branch`), closure; gap G2 demo data: TP-E02-051–054 | 54 | 2 | roles |
-| E03 Identity and access | [E03-identity-access.md](E03-identity-access.md) | TP-E03-001–068 | 68 (27) | T08 passkeys, T11 custom roles, T12 SAML/OIDC per organisation (Phase 2); gap G2 Apple sign-in, change email: TP-E03-065–068 | 67 | 6 | smoke, roles |
+| E03 Identity and access | [E03-identity-access.md](E03-identity-access.md) | TP-E03-001–069 | 69 (28) | T08 passkeys, T11 custom roles, T12 SAML/OIDC per organisation (Phase 2); gap G2 Apple sign-in, change email: TP-E03-065–068; gap G4 account emails on comms templates: TP-E03-069 | 68 | 6 | smoke, roles |
 | E04 SaaS subscriptions | [E04-saas-subscriptions.md](E04-saas-subscriptions.md) | TP-E04-001–045 | 45 (16) | seats, revenue share, credit packs | 39 | 1 | roles |
 | E05 People and CRM | [E05-people-crm.md](E05-people-crm.md) | TP-E05-001–080 | 80 (36) | T10 duplicate detection, T12 map view (Phase 2); gap G2 documents and e-signing: TP-E05-078–080 | 70 | 7 | people, roles |
 | E06 Catalogue and pricing | [E06-catalogue-pricing.md](E06-catalogue-pricing.md) | TP-E06-001–053 | 53 (23) | T07 pay tiers, T08 premiums and holidays, T09 discounts, promo codes and price lists, T10 rooms (Phase 2) | 50 | 3 | catalogue |
@@ -22,10 +22,10 @@ This file maps each epic to its manual test cases and automated coverage. Counts
 | E10 Client billing | [E10-client-billing.md](E10-client-billing.md) | TP-E10-001–090 | 90 (47) | T12 packages, T13 recurring fees, T14 late fees/collections, T15 split billing (Phase 2) | 75 | 6 | billing, portal-parent |
 | E11 Payments | [E11-payments.md](E11-payments.md) | TP-E11-001–060 | 60 (31) | T11 GoCardless, T12 PayPal, T13 bank statements and Open Banking, T14 split payments (Phase 2) | 50 | 4 | portal-parent, billing, roles |
 | E12 Tutor payroll | [E12-tutor-payroll.md](E12-tutor-payroll.md) | TP-E12-001–047 | 47 (25) | Phase 2 epic; **T12 Wise/1099/commission (Phase 3): TP-E12-033–036** | 35 | 1 | roles |
-| E13 Communications | [E13-communications.md](E13-communications.md) | TP-E13-001–055 | 55 (19) | T10 broadcasts, T11 conversations inbox, T12 WhatsApp, sender domains, Mailchimp/Brevo (Phase 2) | 50 | 4 | inbox, roles |
-| E14 Automation | [E14-automation.md](E14-automation.md) | TP-E14-001–033 | 33 (17) | Phase 2 epic | 23 | 1 | roles |
+| E13 Communications | [E13-communications.md](E13-communications.md) | TP-E13-001–073 | 73 (29) | T10 broadcasts, T11 conversations inbox, T12 WhatsApp, sender domains, Mailchimp/Brevo (Phase 2); gap G4 realtime bell, template versions, students, digests, account emails, unsubscribes, new types: TP-E13-056–073 | 68 | 4 | inbox, roles |
+| E14 Automation | [E14-automation.md](E14-automation.md) | TP-E14-001–038 | 38 (18) | Phase 2 epic; gap G4 new actions, package triggers and recipe: TP-E14-034–038 | 28 | 1 | roles |
 | E15 Client portal | [E15-client-portal.md](E15-client-portal.md) | TP-E15-001–055 | 55 (25) | T09 booking, reschedule, packages, messaging (Phase 2); gap G2 household switcher, guardians, child logins, documents: TP-E15-050–055 | 32 | 6 | roles, portal-parent, portal-tutor |
-| E16 Tutor portal and mobile | [E16-tutor-portal-mobile.md](E16-tutor-portal-mobile.md) | TP-E16-001–048 | 48 (19) | T08 PWA and offline, T09 web push, T10 job offers and board (Phase 2); **T11 Capacitor shells (Phase 3): TP-E16-039–042** | 17 | 2 | roles, portal-tutor |
+| E16 Tutor portal and mobile | [E16-tutor-portal-mobile.md](E16-tutor-portal-mobile.md) | TP-E16-001–056 | 56 (23) | T08 PWA and offline, T09 web push, T10 job offers and board (Phase 2); **T11 Capacitor shells (Phase 3): TP-E16-039–042**; gap G4 planning, previous report, history, dictation, message push: TP-E16-049–056 | 25 | 2 | roles, portal-tutor |
 | E17 Leads and pipeline | [E17-leads-pipeline.md](E17-leads-pipeline.md) | TP-E17-001–067 | 67 (28) | Phase 2 epic; T09 proposals (Phase 2b) | 47 | 5 | leads, roles |
 | E18 Recruitment and compliance | [E18-tutor-recruitment-compliance.md](E18-tutor-recruitment-compliance.md) | TP-E18-001–056 | 56 (27) | Phase 2 epic; **T11 background-check providers (Phase 3): TP-E18-040–044**; gap G2 tutor agreement e-signing: TP-E18-055–056 | 35 | 1 | roles |
 | E19 Matching and marketplace | [E19-matching-marketplace.md](E19-matching-marketplace.md) | TP-E19-001–048 | 48 (24) | Phase 2 epic; T08 shortlist sharing (Phase 2b) | 38 | 0 | — |
@@ -42,7 +42,7 @@ This file maps each epic to its manual test cases and automated coverage. Counts
 | E30 Platform admin and ops | [E30-platform-admin-ops.md](E30-platform-admin-ops.md) | TP-E30-001–067 | 67 (31) | part 1 (Phase 1) and part 2 | 57 | 5 | platform |
 | E31 AI assistant | [E31-ai-assistant.md](E31-ai-assistant.md) | TP-E31-001–045 | 45 (25) | Phase 3 epic (built) | 40 | 1 | inbox |
 | E32 Workflow orchestration (Temporal) | [E32-workflow-orchestration-temporal.md](E32-workflow-orchestration-temporal.md) | TP-E32-001–070 | 70 (29) | all workflows (TW1 tickets of each epic) | 60 | 0 | — |
-| **Total** | 32 files | | **1,883 (834)** | | **1,514** | **80** | |
+| **Total** | 32 files | | **1,951 (871)** | | **1,514** | **80** | |
 
 ## Cross-cutting files
 

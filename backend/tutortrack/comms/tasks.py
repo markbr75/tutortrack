@@ -55,6 +55,23 @@ def send_all_lesson_reminders() -> int:
     return fan_out_per_org(send_lesson_reminders)
 
 
+@shared_task(base=TenantTask, name="tutortrack.comms.tasks.send_scheduled_comms")
+def send_scheduled_comms(*, organisation_id: str) -> dict[str, int]:
+    """G4: every 15 minutes, the digests due now (each person's local time). Dedupe keys
+    make repeats harmless. Card-expiry notices and monthly statements belong to payments
+    and billing (G3)."""
+    from tutortrack.core.time import now
+
+    from . import digests
+
+    return dict(digests.run(now()))
+
+
+@shared_task(name="tutortrack.comms.tasks.send_all_scheduled_comms", ignore_result=True)
+def send_all_scheduled_comms() -> int:
+    return fan_out_per_org(send_scheduled_comms)
+
+
 @shared_task(
     base=TenantTask,
     name="tutortrack.comms.tasks.sync_marketing_contact",

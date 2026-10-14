@@ -20,6 +20,8 @@ class Recipient:
     phone: str = ""
     user_id: str | None = None
     target: tuple[str, str] = ("", "")  # the record whose timeline shows the message
+    # G4 (FR-13-3): the person's language picks a per-locale template override.
+    locale: str = ""
 
     def available(self) -> set[str]:
         out = set()
@@ -62,6 +64,9 @@ class NotificationType:
     # Internal types (broadcasts, inbox replies) send through the pipeline but aren't
     # configurable notifications: not listed in settings or preferences.
     hidden: bool = False
+    # G4: account emails (password reset, verification...) can be edited but not switched
+    # off: the sign-in flows depend on them.
+    locked: bool = False
 
 
 _types: dict[str, NotificationType] = {}
@@ -80,6 +85,10 @@ PUSH_BY_DEFAULT = frozenset(
         "report_overdue",
         "report_comment",
         "payout_paid",
+        # G4 (FR-16-9): messages from families and the office reach the tutor's phone.
+        "conversation_message_tutor",
+        "conversation_message_family",
+        "inbox_new_message",
     }
 )
 

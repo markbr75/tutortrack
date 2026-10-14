@@ -171,9 +171,13 @@ def sync_all(connection: IntegrationConnection) -> dict[str, Any]:
     """Every contact, in pages (consented ones upserted, the rest unsubscribed)."""
     if not connection.settings.get("audience_id"):
         raise BusinessRuleViolation(_("Choose an audience first."))
-    rows = candidates()
+    from .marketing_inbound import reconcile
+
     total = SyncResult()
     try:
+        # G4: people who left the audience there first, so they're never re-subscribed.
+        opted_out = reconcile(connection)
+        rows = candidates()
         for start in range(0, len(rows), PAGE):
             result = _push(connection, rows[start : start + PAGE], unsubscribe=True)
             total.upserted += result.upserted
@@ -187,6 +191,7 @@ def sync_all(connection: IntegrationConnection) -> dict[str, Any]:
         "upserted": total.upserted,
         "unsubscribed": total.unsubscribed,
         "failed": len(total.errors),
+        "opted_out": opted_out,
     }
 
 
