@@ -6,6 +6,7 @@ from . import views
 router = SimpleRouter(trailing_slash=False)
 router.register("messages", views.MessageViewSet, basename="messages")
 router.register("notifications", views.NotificationViewSet, basename="notifications")
+router.register("push-subscriptions", views.PushSubscriptionViewSet, basename="push-subscriptions")
 
 urlpatterns = [
     path(
@@ -37,6 +38,11 @@ urlpatterns = [
         "communication-preferences",
         views.PreferencesView.as_view(),
         name="communication-preferences",
+    ),
+    path(
+        "communication-preferences/mine",
+        views.MyPreferencesView.as_view(),
+        name="my-communication-preferences",
     ),
     path("unsubscribe/<str:token>", views.UnsubscribeView.as_view(), name="unsubscribe"),
     *router.urls,

@@ -218,3 +218,10 @@ def sensitive_updated(event: EventEnvelope) -> None:
         f"/students/{_id(event)}",
         key=str(event.id),
     )
+
+
+@subscribe("payout.paid")
+def payout_paid(event: EventEnvelope) -> None:
+    payout = catalogue.load_payout(_id(event))
+    if payout is not None:
+        notify("payout_paid", payout, key=str(event.id))

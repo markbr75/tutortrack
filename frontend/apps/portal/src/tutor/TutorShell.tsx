@@ -1,11 +1,18 @@
 import { useTranslation } from "@tutortrack/i18n";
 import { Spinner } from "@tutortrack/ui";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import { api } from "../api";
 import { PoweredBy } from "../branding";
+import {
+  clearOfflineData,
+  useOfflineOwner,
+  useOutboxSync,
+  useWarmOfflineCache,
+} from "../offline/client";
+import { OfflineIndicator } from "../offline/OfflineIndicator";
 import { useTutorMe } from "./useTutorMe";
 
 /** The tutor's phone-first shell (E16-T01). */
@@ -17,8 +24,20 @@ export function TutorShell() {
   useEffect(() => {
     if (!location.pathname.startsWith("/tutor")) void navigate({ to: "/tutor" });
   }, [location.pathname, navigate]);
+  // Offline (E16-T08): replay queued changes, keep the next week on the phone, and never
+  // leave one person's data for the next one who signs in here.
+  const identity = useQuery({
+    queryKey: ["identity", "me"],
+    queryFn: async () => (await api.GET("/api/v1/me")).data ?? null,
+  });
+  useOfflineOwner(identity.data?.user?.id);
+  useOutboxSync();
+  useWarmOfflineCache(Boolean(me.data));
   const logout = useMutation({
-    mutationFn: async () => api.POST("/api/v1/auth/logout"),
+    mutationFn: async () => {
+      await clearOfflineData();
+      return api.POST("/api/v1/auth/logout");
+    },
     onSuccess: () => window.location.assign("/portal/"),
   });
   if (me.isPending) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
@@ -35,6 +54,7 @@ export function TutorShell() {
     { to: "/tutor/onboarding", label: t("tutor.nav.onboarding") },
     { to: "/tutor/compliance", label: t("tutor.nav.compliance") },
     { to: "/tutor/profile", label: t("tutor.nav.profile") },
+    { to: "/tutor/notifications", label: t("tutor.nav.notifications") },
   ] as const;
   return (
     <div className="mx-auto min-h-screen max-w-3xl">
@@ -61,6 +81,7 @@ export function TutorShell() {
           </button>
         </nav>
       </header>
+      <OfflineIndicator />
       <main className="p-4">
         <Outlet />
       </main>

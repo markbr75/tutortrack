@@ -3769,6 +3769,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/communication-preferences/mine": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Your own notification channels per category (FR-16-9): e.g. lesson changes by push
+     *     and email, pay by push only. Legally required messages still arrive by email.
+     */
+    get: operations["communication_preferences_mine_retrieve"];
+    /**
+     * @description Your own notification channels per category (FR-16-9): e.g. lesson changes by push
+     *     and email, pay by push only. Legally required messages still arrive by email.
+     */
+    put: operations["communication_preferences_mine_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/compliance/dashboard": {
     parameters: {
       query?: never;
@@ -7198,7 +7222,9 @@ export interface paths {
     };
     /**
      * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
-     *     their own. ``PUT`` saves a draft (autosave).
+     *     their own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and
+     *     ``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor
+     *     PWA's offline drafts, E16-T08).
      */
     get: operations["lesson_reports_list"];
     put?: never;
@@ -7218,12 +7244,16 @@ export interface paths {
     };
     /**
      * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
-     *     their own. ``PUT`` saves a draft (autosave).
+     *     their own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and
+     *     ``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor
+     *     PWA's offline drafts, E16-T08).
      */
     get: operations["lesson_reports_retrieve"];
     /**
      * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
-     *     their own. ``PUT`` saves a draft (autosave).
+     *     their own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and
+     *     ``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor
+     *     PWA's offline drafts, E16-T08).
      */
     put: operations["lesson_reports_update"];
     post?: never;
@@ -7244,7 +7274,9 @@ export interface paths {
     put?: never;
     /**
      * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
-     *     their own. ``PUT`` saves a draft (autosave).
+     *     their own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and
+     *     ``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor
+     *     PWA's offline drafts, E16-T08).
      */
     post: operations["lesson_reports_approve_create"];
     delete?: never;
@@ -7262,13 +7294,17 @@ export interface paths {
     };
     /**
      * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
-     *     their own. ``PUT`` saves a draft (autosave).
+     *     their own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and
+     *     ``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor
+     *     PWA's offline drafts, E16-T08).
      */
     get: operations["lesson_reports_comments_list"];
     put?: never;
     /**
      * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
-     *     their own. ``PUT`` saves a draft (autosave).
+     *     their own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and
+     *     ``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor
+     *     PWA's offline drafts, E16-T08).
      */
     post: operations["lesson_reports_comments_create"];
     delete?: never;
@@ -7288,7 +7324,9 @@ export interface paths {
     put?: never;
     /**
      * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
-     *     their own. ``PUT`` saves a draft (autosave).
+     *     their own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and
+     *     ``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor
+     *     PWA's offline drafts, E16-T08).
      */
     post: operations["lesson_reports_return_create"];
     delete?: never;
@@ -7308,7 +7346,9 @@ export interface paths {
     put?: never;
     /**
      * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
-     *     their own. ``PUT`` saves a draft (autosave).
+     *     their own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and
+     *     ``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor
+     *     PWA's offline drafts, E16-T08).
      */
     post: operations["lesson_reports_share_create"];
     delete?: never;
@@ -7328,7 +7368,9 @@ export interface paths {
     put?: never;
     /**
      * @description Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see
-     *     their own. ``PUT`` saves a draft (autosave).
+     *     their own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and
+     *     ``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor
+     *     PWA's offline drafts, E16-T08).
      */
     post: operations["lesson_reports_submit_create"];
     delete?: never;
@@ -11601,6 +11643,92 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/push-subscriptions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Your devices with push notifications switched on (E16-T09). ``POST`` registers the
+     *     browser's ``PushSubscription`` (again: it refreshes the keys); ``DELETE`` stops pushes to
+     *     a device. Endpoints and keys are stored encrypted and never returned.
+     */
+    get: operations["push_subscriptions_list"];
+    put?: never;
+    /**
+     * @description Your devices with push notifications switched on (E16-T09). ``POST`` registers the
+     *     browser's ``PushSubscription`` (again: it refreshes the keys); ``DELETE`` stops pushes to
+     *     a device. Endpoints and keys are stored encrypted and never returned.
+     */
+    post: operations["push_subscriptions_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/push-subscriptions/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Your devices with push notifications switched on (E16-T09). ``POST`` registers the
+     *     browser's ``PushSubscription`` (again: it refreshes the keys); ``DELETE`` stops pushes to
+     *     a device. Endpoints and keys are stored encrypted and never returned.
+     */
+    get: operations["push_subscriptions_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Your devices with push notifications switched on (E16-T09). ``POST`` registers the
+     *     browser's ``PushSubscription`` (again: it refreshes the keys); ``DELETE`` stops pushes to
+     *     a device. Endpoints and keys are stored encrypted and never returned.
+     */
+    delete: operations["push_subscriptions_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/push-subscriptions/config": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The VAPID public key the browser subscribes with (push is off without one). */
+    get: operations["push_subscriptions_config_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/push-subscriptions/test": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Send a test notification to each of your devices. */
+    post: operations["push_subscriptions_test_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/rates/quote": {
     parameters: {
       query?: never;
@@ -13192,6 +13320,26 @@ export interface paths {
       cookie?: never;
     };
     get: operations["tutor_me_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor/offline": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The offline pack the tutor PWA caches (E16-T08): recent and upcoming lessons with
+     *     their report forms, so registers and reports can be done without a signal.
+     */
+    get: operations["tutor_offline_retrieve"];
     put?: never;
     post?: never;
     delete?: never;
@@ -19906,7 +20054,12 @@ export interface components {
       valid_days: number;
     };
     Manifest: {
+      id: string;
       name: string;
+      description: string;
+      lang: string;
+      categories: string[];
+      shortcuts: components["schemas"]["ManifestShortcut"][];
       short_name: string;
       start_url: string;
       scope: string;
@@ -19920,6 +20073,10 @@ export interface components {
       sizes: string;
       type: string;
       purpose: string;
+    };
+    ManifestShortcut: {
+      name: string;
+      url: string;
     };
     /**
      * @description * `bonus` - bonus
@@ -20268,9 +20425,10 @@ export interface components {
      * @description * `email` - Email
      *     * `sms` - Text message
      *     * `in_app` - In the app
+     *     * `push` - Push notification
      * @enum {string}
      */
-    MessageChannelEnum: "email" | "sms" | "in_app";
+    MessageChannelEnum: "email" | "sms" | "in_app" | "push";
     MessageEvent: {
       readonly type: string;
       /** Format: date-time */
@@ -20395,6 +20553,21 @@ export interface components {
       readonly closes_on: string | null;
       readonly applied: string | null;
     };
+    MyPreference: {
+      category: components["schemas"]["NotificationCategoryEnum"];
+      channels: components["schemas"]["MessageChannelEnum"][];
+      readonly available: components["schemas"]["MessageChannelEnum"][];
+    };
+    MyPreferenceRequest: {
+      category: components["schemas"]["NotificationCategoryEnum"];
+      channels: components["schemas"]["MessageChannelEnum"][];
+    };
+    MyPreferences: {
+      preferences: components["schemas"]["MyPreference"][];
+    };
+    MyPreferencesRequest: {
+      preferences: components["schemas"]["MyPreferenceRequest"][];
+    };
     NamedRef: {
       id: string;
       name: string;
@@ -20465,6 +20638,15 @@ export interface components {
      * @enum {string}
      */
     NoticeSeverityEnum: "info" | "warning" | "outage";
+    /**
+     * @description * `scheduling` - scheduling
+     *     * `reports` - reports
+     *     * `billing` - billing
+     *     * `account` - account
+     *     * `staff` - staff
+     * @enum {string}
+     */
+    NotificationCategoryEnum: "scheduling" | "reports" | "billing" | "account" | "staff";
     NotificationSetting: {
       key: string;
       label: string;
@@ -20615,6 +20797,32 @@ export interface components {
       expired: number;
       /** Format: double */
       acceptance_rate: number;
+    };
+    OfflineAttendee: {
+      id: string;
+      name: string;
+      outcome: string;
+    };
+    OfflineLesson: {
+      id: string;
+      title: string;
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      status: string;
+      attendees: components["schemas"]["OfflineAttendee"][];
+      report: components["schemas"]["OfflineReport"] | null;
+      report_fields: components["schemas"]["TemplateField"][];
+    };
+    OfflineReport: {
+      id: string;
+      status: string;
+      answers: {
+        [key: string]: unknown;
+      };
+      /** @description Send as If-Match when saving, to detect conflicts. */
+      etag: string;
     };
     Onboarding: {
       account: components["schemas"]["ProviderAccount"];
@@ -22016,6 +22224,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["PublicTutor"][];
+    };
+    PaginatedPushSubscriptionList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PushSubscription"][];
     };
     PaginatedReportRunList: {
       /**
@@ -24466,20 +24687,11 @@ export interface components {
       };
     };
     PreferenceRow: {
-      category: components["schemas"]["PreferenceRowCategoryEnum"];
+      category: components["schemas"]["NotificationCategoryEnum"];
       channels: components["schemas"]["MessageChannelEnum"][];
     };
-    /**
-     * @description * `scheduling` - scheduling
-     *     * `reports` - reports
-     *     * `billing` - billing
-     *     * `account` - account
-     *     * `staff` - staff
-     * @enum {string}
-     */
-    PreferenceRowCategoryEnum: "scheduling" | "reports" | "billing" | "account" | "staff";
     PreferenceRowRequest: {
-      category: components["schemas"]["PreferenceRowCategoryEnum"];
+      category: components["schemas"]["NotificationCategoryEnum"];
       channels: components["schemas"]["MessageChannelEnum"][];
     };
     Preferences: {
@@ -25292,6 +25504,36 @@ export interface components {
      * @enum {string}
      */
     PurposeEnum: "app" | "site";
+    PushConfig: {
+      enabled: boolean;
+      vapid_public_key: string;
+    };
+    PushKeysRequest: {
+      p256dh: string;
+      auth: string;
+    };
+    /** @description ``PushSubscription.toJSON()`` from the browser, plus a device name. */
+    PushSubscribeRequest: {
+      /** Format: uri */
+      endpoint: string;
+      keys: components["schemas"]["PushKeysRequest"];
+      /** @default  */
+      device: string;
+    };
+    /** @description A device with push switched on. The endpoint and keys are write-only secrets. */
+    PushSubscription: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly device: string;
+      readonly push_service: string;
+      /** Format: date-time */
+      readonly last_sent_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    PushTest: {
+      delivered: number;
+    };
     Qualification: {
       title: string;
       institution: string;
@@ -28097,6 +28339,12 @@ export interface components {
       can_cancel: boolean;
       can_edit_lessons: boolean;
       can_see_pay: boolean;
+    };
+    TutorOfflinePack: {
+      /** Format: date-time */
+      generated_at: string;
+      days: number;
+      lessons: components["schemas"]["OfflineLesson"][];
     };
     TutorOnboardingState: {
       items: components["schemas"]["ChecklistItem"][];
@@ -36201,6 +36449,50 @@ export interface operations {
       };
     };
   };
+  communication_preferences_mine_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyPreferences"];
+        };
+      };
+    };
+  };
+  communication_preferences_mine_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MyPreferencesRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["MyPreferencesRequest"];
+        "multipart/form-data": components["schemas"]["MyPreferencesRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyPreferences"];
+        };
+      };
+    };
+  };
   compliance_dashboard_retrieve: {
     parameters: {
       query?: never;
@@ -42369,7 +42661,10 @@ export interface operations {
   lesson_reports_update: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        /** @description ETag from a previous GET; 412 if the resource changed. */
+        "If-Match"?: string;
+      };
       path: {
         /** @description A UUID string identifying this lesson report. */
         id: string;
@@ -42559,6 +42854,8 @@ export interface operations {
       header?: {
         /** @description Makes the request safe to retry for 24 hours. */
         "Idempotency-Key"?: string;
+        /** @description The report's ETag: 412 if it changed since (offline drafts). */
+        "If-Match"?: string;
       };
       path: {
         /** @description A UUID string identifying this lesson report. */
@@ -44627,8 +44924,9 @@ export interface operations {
         /**
          * @description * `email` - Email
          *     * `sms` - Text message
+         *     * `push` - Push notification
          */
-        channel?: "email" | "sms";
+        channel?: "email" | "push" | "sms";
         /** @description The pagination cursor value. */
         cursor?: string;
         /** @description Comma-separated fields to return (sparse). */
@@ -49812,6 +50110,149 @@ export interface operations {
       };
     };
   };
+  push_subscriptions_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPushSubscriptionList"];
+        };
+      };
+    };
+  };
+  push_subscriptions_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PushSubscribeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PushSubscribeRequest"];
+        "multipart/form-data": components["schemas"]["PushSubscribeRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PushSubscription"];
+        };
+      };
+    };
+  };
+  push_subscriptions_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this push subscription. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PushSubscription"];
+        };
+      };
+    };
+  };
+  push_subscriptions_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this push subscription. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  push_subscriptions_config_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PushConfig"];
+        };
+      };
+    };
+  };
+  push_subscriptions_test_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PushTest"];
+        };
+      };
+    };
+  };
   rates_quote_create: {
     parameters: {
       query?: never;
@@ -52896,6 +53337,25 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TutorMe"];
+        };
+      };
+    };
+  };
+  tutor_offline_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorOfflinePack"];
         };
       };
     };

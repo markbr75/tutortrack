@@ -61,6 +61,16 @@ class TutorTodayView(TutorView):
         )
 
 
+class TutorOfflineView(TutorView):
+    """The offline pack the tutor PWA caches (E16-T08): recent and upcoming lessons with
+    their report forms, so registers and reports can be done without a signal."""
+
+    @extend_schema(responses=s.TutorOfflinePackSerializer)
+    def get(self, request: Request) -> Response:
+        pack = selectors.offline_pack(self.tutor(request), request.user)
+        return Response(s.TutorOfflinePackSerializer(pack).data)
+
+
 class TutorStudentsView(TutorView):
     @extend_schema(responses=s.TutorStudentSerializer(many=True))
     def get(self, request: Request) -> Response:

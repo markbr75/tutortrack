@@ -15814,6 +15814,78 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/communication-preferences/mine": {
+            "get": {
+                "operationId": "communication_preferences_mine_retrieve",
+                "description": "Your own notification channels per category (FR-16-9): e.g. lesson changes by push\nand email, pay by push only. Legally required messages still arrive by email.",
+                "tags": [
+                    "communication-preferences"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MyPreferences"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "put": {
+                "operationId": "communication_preferences_mine_update",
+                "description": "Your own notification channels per category (FR-16-9): e.g. lesson changes by push\nand email, pay by push only. Legally required messages still arrive by email.",
+                "tags": [
+                    "communication-preferences"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MyPreferencesRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MyPreferencesRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MyPreferencesRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MyPreferences"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/compliance/dashboard": {
             "get": {
                 "operationId": "compliance_dashboard_retrieve",
@@ -28564,7 +28636,7 @@
         "/api/v1/lesson-reports": {
             "get": {
                 "operationId": "lesson_reports_list",
-                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and\n``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor\nPWA's offline drafts, E16-T08).",
                 "parameters": [
                     {
                         "name": "cursor",
@@ -28695,7 +28767,7 @@
         "/api/v1/lesson-reports/{id}": {
             "get": {
                 "operationId": "lesson_reports_retrieve",
-                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and\n``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor\nPWA's offline drafts, E16-T08).",
                 "parameters": [
                     {
                         "in": "query",
@@ -28748,8 +28820,16 @@
             },
             "put": {
                 "operationId": "lesson_reports_update",
-                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and\n``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor\nPWA's offline drafts, E16-T08).",
                 "parameters": [
+                    {
+                        "in": "header",
+                        "name": "If-Match",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ETag from a previous GET; 412 if the resource changed."
+                    },
                     {
                         "in": "path",
                         "name": "id",
@@ -28815,7 +28895,7 @@
         "/api/v1/lesson-reports/{id}/approve": {
             "post": {
                 "operationId": "lesson_reports_approve_create",
-                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and\n``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor\nPWA's offline drafts, E16-T08).",
                 "parameters": [
                     {
                         "in": "header",
@@ -28870,7 +28950,7 @@
         "/api/v1/lesson-reports/{id}/comments": {
             "get": {
                 "operationId": "lesson_reports_comments_list",
-                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and\n``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor\nPWA's offline drafts, E16-T08).",
                 "parameters": [
                     {
                         "in": "path",
@@ -28986,7 +29066,7 @@
             },
             "post": {
                 "operationId": "lesson_reports_comments_create",
-                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and\n``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor\nPWA's offline drafts, E16-T08).",
                 "parameters": [
                     {
                         "in": "header",
@@ -29061,7 +29141,7 @@
         "/api/v1/lesson-reports/{id}/return": {
             "post": {
                 "operationId": "lesson_reports_return_create",
-                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and\n``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor\nPWA's offline drafts, E16-T08).",
                 "parameters": [
                     {
                         "in": "header",
@@ -29135,7 +29215,7 @@
         "/api/v1/lesson-reports/{id}/share": {
             "post": {
                 "operationId": "lesson_reports_share_create",
-                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and\n``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor\nPWA's offline drafts, E16-T08).",
                 "parameters": [
                     {
                         "in": "header",
@@ -29190,7 +29270,7 @@
         "/api/v1/lesson-reports/{id}/submit": {
             "post": {
                 "operationId": "lesson_reports_submit_create",
-                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave).",
+                "description": "Lesson reports (FR-09-5..7). ``?sla=overdue`` lists overdue reports; tutors see\ntheir own. ``PUT`` saves a draft (autosave). Reads carry an ``ETag``; ``PUT`` and\n``submit`` with ``If-Match`` fail with 412 when the report changed meanwhile (the tutor\nPWA's offline drafts, E16-T08).",
                 "parameters": [
                     {
                         "in": "header",
@@ -29199,6 +29279,14 @@
                             "type": "string"
                         },
                         "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "header",
+                        "name": "If-Match",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "The report's ETag: 412 if it changed since (offline drafts)."
                     },
                     {
                         "in": "path",
@@ -33361,10 +33449,11 @@
                             "type": "string",
                             "enum": [
                                 "email",
+                                "push",
                                 "sms"
                             ]
                         },
-                        "description": "* `email` - Email\n* `sms` - Text message"
+                        "description": "* `email` - Email\n* `sms` - Text message\n* `push` - Push notification"
                     },
                     {
                         "name": "cursor",
@@ -43881,6 +43970,266 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/push-subscriptions": {
+            "get": {
+                "operationId": "push_subscriptions_list",
+                "description": "Your devices with push notifications switched on (E16-T09). ``POST`` registers the\nbrowser's ``PushSubscription`` (again: it refreshes the keys); ``DELETE`` stops pushes to\na device. Endpoints and keys are stored encrypted and never returned.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "push-subscriptions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedPushSubscriptionList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "push_subscriptions_create",
+                "description": "Your devices with push notifications switched on (E16-T09). ``POST`` registers the\nbrowser's ``PushSubscription`` (again: it refreshes the keys); ``DELETE`` stops pushes to\na device. Endpoints and keys are stored encrypted and never returned.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "push-subscriptions"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PushSubscribeRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PushSubscribeRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PushSubscribeRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PushSubscription"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/push-subscriptions/{id}": {
+            "get": {
+                "operationId": "push_subscriptions_retrieve",
+                "description": "Your devices with push notifications switched on (E16-T09). ``POST`` registers the\nbrowser's ``PushSubscription`` (again: it refreshes the keys); ``DELETE`` stops pushes to\na device. Endpoints and keys are stored encrypted and never returned.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this push subscription.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "push-subscriptions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PushSubscription"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "delete": {
+                "operationId": "push_subscriptions_destroy",
+                "description": "Your devices with push notifications switched on (E16-T09). ``POST`` registers the\nbrowser's ``PushSubscription`` (again: it refreshes the keys); ``DELETE`` stops pushes to\na device. Endpoints and keys are stored encrypted and never returned.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this push subscription.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "push-subscriptions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/push-subscriptions/config": {
+            "get": {
+                "operationId": "push_subscriptions_config_retrieve",
+                "description": "The VAPID public key the browser subscribes with (push is off without one).",
+                "tags": [
+                    "push-subscriptions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PushConfig"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/push-subscriptions/test": {
+            "post": {
+                "operationId": "push_subscriptions_test_create",
+                "description": "Send a test notification to each of your devices.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "push-subscriptions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PushTest"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/rates/quote": {
             "post": {
                 "operationId": "rates_quote_create",
@@ -50196,6 +50545,33 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/TutorMe"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/tutor/offline": {
+            "get": {
+                "operationId": "tutor_offline_retrieve",
+                "description": "The offline pack the tutor PWA caches (E16-T08): recent and upcoming lessons with\ntheir report forms, so registers and reports can be done without a signal.",
+                "tags": [
+                    "tutor"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TutorOfflinePack"
                                 }
                             }
                         },
@@ -71397,8 +71773,29 @@
             "Manifest": {
                 "type": "object",
                 "properties": {
+                    "id": {
+                        "type": "string"
+                    },
                     "name": {
                         "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "lang": {
+                        "type": "string"
+                    },
+                    "categories": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "shortcuts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ManifestShortcut"
+                        }
                     },
                     "short_name": {
                         "type": "string"
@@ -71427,11 +71824,16 @@
                 },
                 "required": [
                     "background_color",
+                    "categories",
+                    "description",
                     "display",
                     "icons",
+                    "id",
+                    "lang",
                     "name",
                     "scope",
                     "short_name",
+                    "shortcuts",
                     "start_url",
                     "theme_color"
                 ]
@@ -71457,6 +71859,21 @@
                     "sizes",
                     "src",
                     "type"
+                ]
+            },
+            "ManifestShortcut": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "name",
+                    "url"
                 ]
             },
             "ManualItemKindEnum": {
@@ -72692,10 +73109,11 @@
                 "enum": [
                     "email",
                     "sms",
-                    "in_app"
+                    "in_app",
+                    "push"
                 ],
                 "type": "string",
-                "description": "* `email` - Email\n* `sms` - Text message\n* `in_app` - In the app"
+                "description": "* `email` - Email\n* `sms` - Text message\n* `in_app` - In the app\n* `push` - Push notification"
             },
             "MessageEvent": {
                 "type": "object",
@@ -73061,6 +73479,78 @@
                     "title"
                 ]
             },
+            "MyPreference": {
+                "type": "object",
+                "properties": {
+                    "category": {
+                        "$ref": "#/components/schemas/NotificationCategoryEnum"
+                    },
+                    "channels": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MessageChannelEnum"
+                        }
+                    },
+                    "available": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MessageChannelEnum"
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "available",
+                    "category",
+                    "channels"
+                ]
+            },
+            "MyPreferenceRequest": {
+                "type": "object",
+                "properties": {
+                    "category": {
+                        "$ref": "#/components/schemas/NotificationCategoryEnum"
+                    },
+                    "channels": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MessageChannelEnum"
+                        }
+                    }
+                },
+                "required": [
+                    "category",
+                    "channels"
+                ]
+            },
+            "MyPreferences": {
+                "type": "object",
+                "properties": {
+                    "preferences": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MyPreference"
+                        }
+                    }
+                },
+                "required": [
+                    "preferences"
+                ]
+            },
+            "MyPreferencesRequest": {
+                "type": "object",
+                "properties": {
+                    "preferences": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MyPreferenceRequest"
+                        }
+                    }
+                },
+                "required": [
+                    "preferences"
+                ]
+            },
             "NamedRef": {
                 "type": "object",
                 "properties": {
@@ -73280,6 +73770,17 @@
                 ],
                 "type": "string",
                 "description": "* `info` - Information\n* `warning` - Degraded service\n* `outage` - Outage"
+            },
+            "NotificationCategoryEnum": {
+                "enum": [
+                    "scheduling",
+                    "reports",
+                    "billing",
+                    "account",
+                    "staff"
+                ],
+                "type": "string",
+                "description": "* `scheduling` - scheduling\n* `reports` - reports\n* `billing` - billing\n* `account` - account\n* `staff` - staff"
             },
             "NotificationSetting": {
                 "type": "object",
@@ -73871,6 +74372,102 @@
                     "name",
                     "sent",
                     "tutor"
+                ]
+            },
+            "OfflineAttendee": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "outcome": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "outcome"
+                ]
+            },
+            "OfflineLesson": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "attendees": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OfflineAttendee"
+                        }
+                    },
+                    "report": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/OfflineReport"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "report_fields": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TemplateField"
+                        }
+                    }
+                },
+                "required": [
+                    "attendees",
+                    "end",
+                    "id",
+                    "report",
+                    "report_fields",
+                    "start",
+                    "status",
+                    "title"
+                ]
+            },
+            "OfflineReport": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "answers": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "etag": {
+                        "type": "string",
+                        "description": "Send as If-Match when saving, to detect conflicts."
+                    }
+                },
+                "required": [
+                    "answers",
+                    "etag",
+                    "id",
+                    "status"
                 ]
             },
             "Onboarding": {
@@ -77282,6 +77879,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/PublicTutor"
+                        }
+                    }
+                }
+            },
+            "PaginatedPushSubscriptionList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PushSubscription"
                         }
                     }
                 }
@@ -84899,7 +85522,7 @@
                 "type": "object",
                 "properties": {
                     "category": {
-                        "$ref": "#/components/schemas/PreferenceRowCategoryEnum"
+                        "$ref": "#/components/schemas/NotificationCategoryEnum"
                     },
                     "channels": {
                         "type": "array",
@@ -84913,22 +85536,11 @@
                     "channels"
                 ]
             },
-            "PreferenceRowCategoryEnum": {
-                "enum": [
-                    "scheduling",
-                    "reports",
-                    "billing",
-                    "account",
-                    "staff"
-                ],
-                "type": "string",
-                "description": "* `scheduling` - scheduling\n* `reports` - reports\n* `billing` - billing\n* `account` - account\n* `staff` - staff"
-            },
             "PreferenceRowRequest": {
                 "type": "object",
                 "properties": {
                     "category": {
-                        "$ref": "#/components/schemas/PreferenceRowCategoryEnum"
+                        "$ref": "#/components/schemas/NotificationCategoryEnum"
                     },
                     "channels": {
                         "type": "array",
@@ -87583,6 +88195,112 @@
                 ],
                 "type": "string",
                 "description": "* `app` - Apps and portals\n* `site` - Website"
+            },
+            "PushConfig": {
+                "type": "object",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "vapid_public_key": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "enabled",
+                    "vapid_public_key"
+                ]
+            },
+            "PushKeysRequest": {
+                "type": "object",
+                "properties": {
+                    "p256dh": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "auth": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "auth",
+                    "p256dh"
+                ]
+            },
+            "PushSubscribeRequest": {
+                "type": "object",
+                "description": "``PushSubscription.toJSON()`` from the browser, plus a device name.",
+                "properties": {
+                    "endpoint": {
+                        "type": "string",
+                        "format": "uri",
+                        "minLength": 1,
+                        "maxLength": 2000
+                    },
+                    "keys": {
+                        "$ref": "#/components/schemas/PushKeysRequest"
+                    },
+                    "device": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 120
+                    }
+                },
+                "required": [
+                    "endpoint",
+                    "keys"
+                ]
+            },
+            "PushSubscription": {
+                "type": "object",
+                "description": "A device with push switched on. The endpoint and keys are write-only secrets.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "device": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "push_service": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "last_sent_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "device",
+                    "id",
+                    "last_sent_at",
+                    "push_service"
+                ]
+            },
+            "PushTest": {
+                "type": "object",
+                "properties": {
+                    "delivered": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "delivered"
+                ]
             },
             "Qualification": {
                 "type": "object",
@@ -96250,6 +96968,29 @@
                     "email",
                     "id",
                     "name"
+                ]
+            },
+            "TutorOfflinePack": {
+                "type": "object",
+                "properties": {
+                    "generated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "days": {
+                        "type": "integer"
+                    },
+                    "lessons": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OfflineLesson"
+                        }
+                    }
+                },
+                "required": [
+                    "days",
+                    "generated_at",
+                    "lessons"
                 ]
             },
             "TutorOnboardingState": {

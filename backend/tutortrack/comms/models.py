@@ -8,6 +8,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
+from tutortrack.core.crypto import EncryptedField
 from tutortrack.core.models import TenantModel
 
 
@@ -15,6 +16,7 @@ class Channel(models.TextChoices):
     EMAIL = "email", _("Email")
     SMS = "sms", _("Text message")
     IN_APP = "in_app", _("In the app")
+    PUSH = "push", _("Push notification")
 
 
 class OrgNotificationSetting(TenantModel):
@@ -168,6 +170,45 @@ class InAppNotification(TenantModel):
     class Meta(TenantModel.Meta):
         ordering = ["-created_at"]
         indexes = [models.Index(fields=["user", "read_at"], name="inapp_user_unread_idx")]
+
+    @classmethod
+    def own_scope_q(cls, user: object) -> Q:
+        return Q(user=user)
+
+
+class PushSubscription(TenantModel):
+    """A browser's Web Push subscription for a signed-in user (E16-T09).
+
+    The endpoint is a capability URL (anyone holding it can push to the device) and the keys
+    belong to the device, so all three are encrypted at rest and never logged;
+    ``endpoint_hash`` (SHA-256) finds a subscription again. ``push_service`` is the host
+    only, safe to show ("fcm.googleapis.com")."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="push_subscriptions"
+    )
+    endpoint = EncryptedField()
+    endpoint_hash = models.CharField(max_length=64)
+    p256dh = EncryptedField()
+    auth = EncryptedField()
+    device = models.CharField(max_length=120, blank=True, default="")
+    push_service = models.CharField(max_length=120, blank=True, default="")
+    last_sent_at = models.DateTimeField(null=True, blank=True)
+    failures = models.PositiveSmallIntegerField(default=0)
+
+    audit_sensitive_fields = frozenset({"endpoint", "p256dh", "auth"})
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "endpoint_hash"], name="push_subscription_unique"
+            )
+        ]
+        indexes = [models.Index(fields=["user"], name="push_subscription_user_idx")]
+
+    def __str__(self) -> str:
+        return self.device or self.push_service or "Push subscription"
 
     @classmethod
     def own_scope_q(cls, user: object) -> Q:

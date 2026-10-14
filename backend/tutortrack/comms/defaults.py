@@ -367,5 +367,17 @@ for _channel in ("email", "sms", "in_app"):
     DEFAULTS[("automation_message", _channel)] = ("{{ message.subject }}", "{{ message.body }}")
 
 
+DEFAULTS[("payout_paid", "email")] = (
+    "You've been paid",
+    "Hello {{ recipient.first_name }},\n\nWe've sent your pay of {{ payout.amount|money }}."
+    "{% if payout.reference %} Reference: {{ payout.reference }}.{% endif %}\n\n"
+    "Your statement is in the tutor portal." + SIGN,
+)
+DEFAULTS[("payout_paid", "in_app")] = ("You've been paid", "{{ payout.amount|money }}")
+
+
 def default_template(type_key: str, channel: str) -> tuple[str, str] | None:
-    return DEFAULTS.get((type_key, channel))
+    found = DEFAULTS.get((type_key, channel))
+    if found is None and channel == "push":
+        return DEFAULTS.get((type_key, "in_app"))  # a push shows the in-app title and text
+    return found

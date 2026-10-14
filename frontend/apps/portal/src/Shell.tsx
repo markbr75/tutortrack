@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 
 import { api, problemStatus, usePortalMe } from "./api";
 import { BrandMark, PoweredBy } from "./branding";
+import { OfflineBanner } from "./offline/OfflineIndicator";
 import { StatusBanner } from "./StatusBanner";
 import { usePortalBranding } from "./useBranding";
 import { TutorShell } from "./tutor/TutorShell";
@@ -61,7 +62,14 @@ export function Shell() {
   return (
     <>
       <StatusBanner />
-      {who.data?.membership?.role === "tutor" ? <TutorShell /> : <FamilyShell />}
+      {who.data?.membership?.role === "tutor" ? (
+        <TutorShell />
+      ) : (
+        <>
+          <OfflineBanner />
+          <FamilyShell />
+        </>
+      )}
     </>
   );
 }

@@ -9,7 +9,7 @@ class CommsConfig(AppConfig):
     def ready(self) -> None:
         from tutortrack.crm import selectors as crm
 
-        from . import catalogue, handlers, org_settings  # noqa: F401
+        from . import catalogue, events, handlers, org_settings  # noqa: F401
         from .selectors import message_timeline
 
         crm.register_timeline_provider("message", message_timeline)

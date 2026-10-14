@@ -7,6 +7,7 @@ import { useState } from "react";
 
 import { api } from "../api";
 import { JoinButton } from "../JoinButton";
+import { isNetworkError, isOffline, queueChange, useOutbox } from "../offline/client";
 import { useTutorMe } from "./useTutorMe";
 
 type Outcome = components["schemas"]["AttendanceOutcomeEnum"];
@@ -29,39 +30,84 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
   const [cancelling, setCancelling] = useState(false);
   const [reason, setReason] = useState("");
 
+  const queued = useOutbox().filter((item) => item.lessonId === lessonId);
+  const completedOffline = queued.some((item) => item.kind === "lesson.complete");
+
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: ["tutor"] });
   };
+  const writeOffline = () =>
+    void navigate({ to: "/tutor/lessons/$lessonId/report", params: { lessonId } });
   const openReport = useMutation({
-    mutationFn: async () =>
-      unwrap(
-        await api.POST("/api/v1/lessons/{lesson_id}/reports", {
-          params: { path: { lesson_id: lessonId } },
-          body: {},
-        }),
-      ),
+    mutationFn: async () => {
+      if (isOffline()) return null;
+      try {
+        return unwrap(
+          await api.POST("/api/v1/lessons/{lesson_id}/reports", {
+            params: { path: { lesson_id: lessonId } },
+            body: {},
+          }),
+        );
+      } catch (error) {
+        if (isNetworkError(error)) return null;
+        throw error;
+      }
+    },
     onSuccess: (report) =>
-      void navigate({ to: "/tutor/reports/$reportId", params: { reportId: report.id } }),
+      report
+        ? void navigate({ to: "/tutor/reports/$reportId", params: { reportId: report.id } })
+        : writeOffline(),
   });
+  // Without a signal the register is kept on the phone and synced later (E16-T08); the
+  // same Idempotency-Key makes a retry of a request that did arrive harmless.
   const complete = useMutation({
-    mutationFn: async () =>
-      unwrap(
-        await api.POST("/api/v1/lessons/{id}/complete", {
-          ...path,
-          body: {
-            attendance: (lesson.data?.attendees ?? []).map((a) => ({
-              attendee: a.id,
-              outcome: outcomes[a.id] ?? "present",
-              late_minutes:
-                (outcomes[a.id] ?? "present") === "late" && late[a.id] ? Number(late[a.id]) : null,
-            })),
-            actual_start: null,
-            actual_end: null,
-            override_balance: false,
+    mutationFn: async (): Promise<"done" | "queued"> => {
+      const body = {
+        attendance: (lesson.data?.attendees ?? []).map((a) => ({
+          attendee: a.id,
+          outcome: outcomes[a.id] ?? "present",
+          late_minutes:
+            (outcomes[a.id] ?? "present") === "late" && late[a.id] ? Number(late[a.id]) : null,
+        })),
+        actual_start: null,
+        actual_end: null,
+        override_balance: false,
+      };
+      const key = crypto.randomUUID();
+      const queue = async () => {
+        await queueChange(
+          {
+            kind: "lesson.complete",
+            label: lesson.data?.title ?? "",
+            lessonId,
+            reportId: null,
+            body,
+            etag: null,
           },
-        }),
-      ),
-    onSuccess: () => {
+          key,
+        );
+        return "queued" as const;
+      };
+      if (isOffline()) return queue();
+      try {
+        unwrap(
+          await api.POST("/api/v1/lessons/{id}/complete", {
+            ...path,
+            body,
+            headers: { "Idempotency-Key": key },
+          }),
+        );
+        return "done";
+      } catch (error) {
+        if (isNetworkError(error)) return queue();
+        throw error;
+      }
+    },
+    onSuccess: (outcome) => {
+      if (outcome === "queued") {
+        writeOffline();
+        return;
+      }
       refresh();
       openReport.mutate();
     },
@@ -97,8 +143,16 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
       </header>
       {l.notes_for_tutor ? <Alert>{l.notes_for_tutor}</Alert> : null}
       {l.online && planned ? <HostJoin lesson={l} /> : null}
+      {completedOffline ? (
+        <Alert>
+          {t("pwa.completedOffline")}{" "}
+          <button type="button" className="underline" onClick={writeOffline}>
+            {t("tutor.writeReport")}
+          </button>
+        </Alert>
+      ) : null}
 
-      {planned && started ? (
+      {planned && started && !completedOffline ? (
         <form
           className="space-y-3"
           aria-label={t("tutor.register")}

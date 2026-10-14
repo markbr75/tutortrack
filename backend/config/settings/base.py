@@ -388,6 +388,7 @@ SPECTACULAR_SETTINGS = {
         "CancellationPolicyScopeEnum": "tutortrack.delivery.models.CancellationPolicy.Scope",
         "InvoiceStatusEnum": "tutortrack.billing.models.Invoice.Status",
         "MessageChannelEnum": "tutortrack.comms.models.Channel",
+        "NotificationCategoryEnum": "tutortrack.comms.registry.CATEGORIES",
         "ChargeStatusEnum": "tutortrack.billing.models.Charge.Status",
         "ChargeKindEnum": "tutortrack.billing.models.Charge.Kind",
         "InvoiceRunStatusEnum": "tutortrack.billing.models.InvoiceRun.Status",
@@ -470,6 +471,24 @@ TWILIO = {
     "FROM": env("TWILIO_FROM", default=""),
 }
 POSTMARK_WEBHOOK_TOKEN = env("POSTMARK_WEBHOOK_TOKEN", default="")
+# Web Push (E16-T09): VAPID keys from ``manage.py generate_vapid_keys`` (empty private key =
+# a fake sender that records pushes). Endpoints must be on one of the browser push services.
+WEB_PUSH = {
+    "VAPID_PUBLIC_KEY": env("VAPID_PUBLIC_KEY", default=""),
+    "VAPID_PRIVATE_KEY": env("VAPID_PRIVATE_KEY", default=""),
+    "VAPID_SUBJECT": env("VAPID_SUBJECT", default="mailto:support@tutortrack.app"),
+    "TTL_SECONDS": 24 * 60 * 60,
+    "ALLOWED_HOSTS": env.list(
+        "WEB_PUSH_ALLOWED_HOSTS",
+        default=[
+            "fcm.googleapis.com",
+            "updates.push.services.mozilla.com",
+            "push.services.mozilla.com",
+            "notify.windows.com",
+            "push.apple.com",
+        ],
+    ),
+}
 PLATFORM_BASE_URL = env("PLATFORM_BASE_URL", default="http://localhost:8010")
 
 TEMPORAL = {

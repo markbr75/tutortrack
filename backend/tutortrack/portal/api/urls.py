@@ -87,6 +87,7 @@ urlpatterns = [
     ),
     path("tutor/me", tutor_views.TutorMeView.as_view(), name="tutor-me"),
     path("tutor/today", tutor_views.TutorTodayView.as_view(), name="tutor-today"),
+    path("tutor/offline", tutor_views.TutorOfflineView.as_view(), name="tutor-offline"),
     path("tutor/students", tutor_views.TutorStudentsView.as_view(), name="tutor-students"),
     path("tutor/earnings", tutor_views.TutorEarningsView.as_view(), name="tutor-earnings"),
     path(

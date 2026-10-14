@@ -375,7 +375,7 @@ def test_unsubscribe_link_turns_off_that_category(org, family):
         assert services.allowed_channels(
             services.registry.Recipient("contact", str(family["contact"].pk), "", ""),
             "scheduling",
-        ) == {"sms", "in_app"}
+        ) == {"sms", "in_app", "push"}  # every channel but email
     assert public.get("/api/v1/unsubscribe/forged").status_code == 404
 
 

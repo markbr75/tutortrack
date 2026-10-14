@@ -19,6 +19,8 @@ import { CalendarSyncPage } from "./tutor/CalendarSyncPage";
 import { AvailabilityPage, StudentsPage, TutorProfilePage } from "./tutor/OtherPages";
 import { JobsPage } from "./tutor/JobsPages";
 import { ChecksPage, OnboardingPage } from "./tutor/OnboardingPages";
+import { NotificationsPage } from "./push/NotificationsPage";
+import { OfflineReportPage } from "./tutor/OfflineReportPage";
 import { EarningsPage, ExpensesPage } from "./tutor/PayPages";
 import { TutorReportPage } from "./tutor/ReportPage";
 import { TutorSchedulePage } from "./tutor/SchedulePage";
@@ -35,6 +37,13 @@ const lessonRoute = createRoute({
   path: "/tutor/lessons/$lessonId",
   component: function LessonRoute() {
     return <LessonPage lessonId={lessonRoute.useParams().lessonId} />;
+  },
+});
+const offlineReportRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/tutor/lessons/$lessonId/report",
+  component: function OfflineReportRoute() {
+    return <OfflineReportPage lessonId={offlineReportRoute.useParams().lessonId} />;
   },
 });
 const reportRoute = createRoute({
@@ -64,7 +73,9 @@ const routeTree = rootRoute.addChildren([
   page("/tutor/compliance", ChecksPage),
   page("/tutor/jobs", JobsPage),
   page("/tutor/profile", TutorProfilePage),
+  page("/tutor/notifications", NotificationsPage),
   lessonRoute,
+  offlineReportRoute,
   reportRoute,
 ]);
 
