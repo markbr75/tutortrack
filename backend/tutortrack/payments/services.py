@@ -12,7 +12,6 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
-from django.conf import settings
 from django.db import transaction
 from django.db.models import Sum
 from django.utils.translation import gettext as _
@@ -74,7 +73,9 @@ def tenant_url(path: str) -> str:
     from tutortrack.tenancy.models import Organisation
 
     org = Organisation.objects.get(pk=require_organisation_id())
-    return f"https://{org.slug}.{settings.TENANT_BASE_DOMAIN}{path}"
+    # The organisation's own app URL (TENANT_URL_TEMPLATE, or its verified custom app
+    # domain), so providers send payers back to where they started, locally too.
+    return f"{org.base_url}{path}"
 
 
 # --- provider accounts (T01/T02) ----------------------------------------------------------------

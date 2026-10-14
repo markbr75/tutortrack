@@ -17,4 +17,10 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
     },
   },
+  {
+    // Playwright specs run in Node; its fixtures' `use` and `async ({}, use)` are not React.
+    files: ["e2e/**/*.ts", "playwright.config.ts"],
+    languageOptions: { globals: globals.node },
+    rules: { "react-hooks/rules-of-hooks": "off", "no-empty-pattern": "off" },
+  },
 );

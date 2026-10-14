@@ -152,10 +152,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # The journeys (docs/test-plan/README.md) need Temporal reachable (workflows start, no
+      # worker needed), events handled in-process, the console without 2FA, and room for
+      # many sign-ins and public form posts (the specs run in parallel with retries).
       - name: Start backend stack
         run: |
           cp .env.example .env
-          docker compose up -d --build --wait backend
+          sed -i 's/^CELERY_TASK_ALWAYS_EAGER=.*/CELERY_TASK_ALWAYS_EAGER=true/' .env
+          printf 'PLATFORM_REQUIRE_MFA=false\nTHROTTLE_PUBLIC_FORM=1000/hour\nTHROTTLE_LOGIN=600/minute\n' >> .env
+          docker compose up -d --build --wait backend temporal
           docker compose exec -T backend uv run python manage.py seed_demo
       - uses: pnpm/action-setup@v4
         with:
@@ -167,14 +172,18 @@ jobs:
         working-directory: frontend
       # Test the production bundle (vite preview reuses the dev proxy to the API), not the
       # dev server: a cold dev server re-optimises dependencies mid-test.
-      - name: Build and serve the admin app
+      # The admin preview proxies /api to :8010 and /portal to the portal preview on :5174,
+      # so both apps share the organisation's host as in production.
+      - name: Build and serve the admin and portal apps
         working-directory: frontend
         env:
           VITE_API_BASE_URL: http://localhost:8010
         run: |
           pnpm --filter @tutortrack/admin build
+          pnpm --filter @tutortrack/portal build
+          nohup pnpm --filter @tutortrack/portal preview --host 0.0.0.0 --port 5174 --strictPort > /tmp/preview-portal.log 2>&1 &
           nohup pnpm --filter @tutortrack/admin preview --host 0.0.0.0 --port 5173 --strictPort > /tmp/preview.log 2>&1 &
-          for i in $(seq 1 30); do curl -sf -o /dev/null http://localhost:5173/ && break; sleep 1; done
+          for i in $(seq 1 30); do curl -sf -o /dev/null http://localhost:5173/ && curl -sf -o /dev/null http://localhost:5174/portal/ && break; sleep 1; done
       - run: pnpm e2e --project=chromium
         working-directory: frontend
       - if: failure()
@@ -184,4 +193,4 @@ jobs:
           path: frontend/test-results/
           retention-days: 7
       - if: failure()
-        run: docker compose logs --tail=200; cat /tmp/preview.log || true
+        run: docker compose logs --tail=200; cat /tmp/preview.log /tmp/preview-portal.log || true

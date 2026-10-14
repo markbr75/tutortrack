@@ -125,7 +125,7 @@ ADR 0030 records the main decisions. Tenant-facing parts are in a new `success` 
 - **NPS/CSAT (T09):** a non-modal corner prompt (radio group 0-10 and an optional comment). It never takes focus.
   - It appears for staff who joined at least 14 days ago, at most every 90 days, and rests for 30 days after "Not now". Organisations can turn it off (`privacy.satisfaction_surveys`).
   - Answers are `SurveyResponse` rows (`survey.answered`). The console shows NPS, promoters, passives and detractors, NPS by plan and by month, recent comments (organisation and role, never the respondent) and the support CSAT average.
-- **SaaS metrics (T10):** the same nightly run snapshots each organisation's subscription (`SubscriptionSnapshot`: plan, status, seats, MRR). MRR is calculated from E04 list prices: the base fee, active tutors and extra branches above the included quantity, with annual prices divided by 12 and rounded half-up with `core.money`. `/platform/saas-metrics` derives everything from month-end snapshots, one billing currency at a time:
+- **SaaS metrics (T10):** the same nightly run snapshots each organisation's subscription (`SubscriptionSnapshot`: plan, status, seats, MRR). MRR is calculated from E04 list prices: the base fee, active tutors and extra branches above the included quantity, with annual prices divided by 12 and rounded half-up with `core.money`. `/platform/metrics` derives everything from month-end snapshots, one billing currency at a time:
   - MRR, ARR, paying customers, ARPA, customers in trial and MRR past due (dunning oversight);
   - MRR movements: new, reactivation, expansion, contraction and churn, with `end = start + net new` (a Hypothesis test checks it);
   - customer and revenue churn and NRR;

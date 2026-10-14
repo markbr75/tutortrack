@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from django.conf import settings
 from django.utils.dateparse import parse_datetime
 from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import filters, generics
@@ -38,7 +39,10 @@ class PlatformMeView(APIView):
             {
                 "email": request.user.email,  # type: ignore[union-attr]
                 "is_platform_staff": bool(getattr(request.user, "is_platform_staff", False)),
-                "mfa_verified": bool(session and session.mfa_verified),
+                # Satisfied when the deployment does not require 2FA for the console
+                # (PLATFORM_REQUIRE_MFA=false, e.g. the e2e stack), as IsPlatformStaff does.
+                "mfa_verified": bool(session and session.mfa_verified)
+                or not settings.PLATFORM_REQUIRE_MFA,
                 "network_allowed": ip_allowed(client_ip(request)),
             }
         )

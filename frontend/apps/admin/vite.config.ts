@@ -7,6 +7,10 @@ import { defineConfig } from "vitest/config";
 // cookies + CSRF work same-origin, exactly as in production.
 const apiTarget = process.env.VITE_API_BASE_URL ?? "http://localhost:8010";
 const proxied = { target: apiTarget, changeOrigin: false, xfwd: true };
+// The portal app (E15/E16) lives at /portal/ on the same host in production; locally its own
+// server (dev or `vite preview` on :5174) is proxied here so sign-in redirects and sessions
+// behave the same (the e2e journeys rely on this).
+const portalTarget = process.env.PORTAL_DEV_URL ?? "http://localhost:5174";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -34,6 +38,7 @@ export default defineConfig({
       "/static": proxied,
       "/healthz": proxied,
       "/readyz": proxied,
+      "/portal": { target: portalTarget, changeOrigin: false, ws: true },
     },
   },
   test: {

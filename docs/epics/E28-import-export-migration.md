@@ -204,7 +204,7 @@ balances, package balances, availability, enquiries, tags and notes.
   the tenant (learning needs, tax ids) is exported decrypted.
 - Text that looks like a formula is neutralised.
 - `organisation.export_requested` (account closure, platform console) starts an export for
-  the owners. The owner can also start one from `/data-exports`.
+  the owners. The owner can also start one from the `/data/export` tab (API `/api/v1/data-exports`).
 - The `data_export_ready` email (editable in comms) links to `/data/export`. Downloading
   needs the owner's password again, gives a 5-minute presigned link, and is audited as a
   read. The generic file download refuses export archives.

@@ -4,6 +4,11 @@ DEBUG = env.bool("DJANGO_DEBUG", default=True)
 APP_URL = env("APP_URL", default="http://localhost:5173")
 TENANT_URL_TEMPLATE = env("TENANT_URL_TEMPLATE", default="http://{slug}.{domain}:5173")
 LOG_JSON = env.bool("LOG_JSON", default=False)
+# runserver handles each request on a new thread, so persistent connections are never reused
+# and pile up until Postgres runs out of slots (seen in the e2e journeys). Django's advice:
+# no persistent connections in development.
+for _db in DATABASES.values():
+    _db["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=0)
 ALLOWED_HOSTS = env.list(
     "DJANGO_ALLOWED_HOSTS", default=["localhost", "127.0.0.1", ".localhost", "backend"]
 )
