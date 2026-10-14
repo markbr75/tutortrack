@@ -23,13 +23,13 @@ def organisation() -> dict[str, str]:
 
 
 def tenant_link(path: str) -> str:
-    from django.conf import settings
-
+    """An absolute link into the organisation's apps (its TENANT_URL_TEMPLATE address or
+    verified custom app domain), so emailed links also work locally."""
     from tutortrack.core.context import require_organisation_id
     from tutortrack.tenancy.models import Organisation
 
     org = Organisation.objects.get(pk=require_organisation_id())
-    return f"https://{org.slug}.{settings.TENANT_BASE_DOMAIN}{path}"
+    return f"{org.base_url}{path}"
 
 
 def contact_recipient(contact: Any) -> Recipient:

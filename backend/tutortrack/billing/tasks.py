@@ -10,8 +10,10 @@ from tutortrack.core.tasks import TenantTask
 
 
 def pay_url(organisation: object, token: str) -> str:
-    slug = getattr(organisation, "slug", "")
-    return f"https://{slug}.{settings.TENANT_BASE_DOMAIN}/pay/{token}"
+    base = getattr(organisation, "base_url", "") or (
+        f"https://{getattr(organisation, 'slug', '')}.{settings.TENANT_BASE_DOMAIN}"
+    )
+    return f"{base}/pay/{token}"
 
 
 @shared_task(base=TenantTask, name="tutortrack.billing.tasks.send_invoice_email")

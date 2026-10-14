@@ -1,0 +1,11 @@
+{
+  "name": "@tutortrack/e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Playwright journeys (run from the workspace root: pnpm e2e). Dependencies live in the root package.",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

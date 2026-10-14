@@ -17,6 +17,7 @@
     "storybook": "pnpm --filter @tutortrack/ui storybook"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
     "@eslint/js": "^9.26.0",
     "@playwright/test": "^1.52.0",
     "@types/node": "^22",

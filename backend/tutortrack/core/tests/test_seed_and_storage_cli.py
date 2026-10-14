@@ -45,6 +45,24 @@ def test_seed_demo_is_idempotent(settings, django_capture_on_commit_callbacks):
 
         assert Course.objects.count() == 1  # E20 demo course, once
         assert GroupClass.objects.get().sessions.exists()
+        # One sign-in per role for the test plan and the e2e journeys (identity/seeds.py).
+        from tutortrack.identity.models import Membership
+
+        roles = dict(Membership.objects.values_list("user__email", "role"))
+        assert roles["office@tutortrack.localhost"] == "admin"
+        assert roles["manager@tutortrack.localhost"] == "branch_manager"
+        assert roles["coordinator@tutortrack.localhost"] == "coordinator"
+        assert roles["finance@tutortrack.localhost"] == "finance"
+        assert roles["parent@tutortrack.localhost"] == "client"
+        assert roles["student@tutortrack.localhost"] == "student"
+        assert roles["affiliate@tutortrack.localhost"] == "affiliate"
+        nia = TutorProfile.objects.get(email="nia.adeyemi@example.com")
+        assert nia.membership.user.email == "tutor@tutortrack.localhost"
+        assert Client.objects.filter(contacts__user__email="parent@tutortrack.localhost").exists()
+    assert User.objects.get(email="platform@tutortrack.localhost").is_platform_staff
+    northside = Organisation.objects.get(slug="northside")
+    with tenant_context(northside):
+        assert Client.objects.get().display_name == "The Northside Family"
 
 
 @pytest.mark.django_db

@@ -1,0 +1,130 @@
+# E18 — Tutor recruitment, onboarding and compliance: manual tests
+
+**Scope.** Job openings and public application forms, the recruitment pipeline with scorecards, interviews and references, approval into an onboarding tutor with a checklist, compliance requirement types and records (DBS, right to work...), automatic restriction on missing or expired checks with pay hold, the compliance dashboard, and subject competency. Phase 3: background-check provider integrations (T11). Spec: [E18](../epics/E18-tutor-recruitment-compliance.md); decisions in [ADR 0012](../adr/0012-compliance-restrictions.md).
+
+**Built differently from the spec (Implementation notes win):**
+- Public vacancy pages are `/vacancies` and `/vacancies/<slug>` (`/jobs` is the tuition-jobs screen). CV and video are links, not uploads.
+- Stages: Applied, Screening, Interview, References & checks, Decision, Hired, Rejected. The board has no drag and drop. Rejection, interview and reference emails are E13 templates.
+- Interview times are proposed by hand (no slot engine for staff); the applicant picks one at `/interviews/<token>`. No automatic video link.
+- E-signature is a recorded "I agree" with a timestamp.
+- Not built: export and bulk "request missing documents" on the dashboard; FR-18-9 probation reviews and offboarding checklists; public CV uploads.
+- Job openings, requirement types and checklist templates have no admin screen: manage them through the API docs at http://brightminds.localhost:5173/api/v1/docs/ (signed in as Admin), endpoints `/api/v1/job-openings`, `/api/v1/compliance/requirement-types`, `/api/v1/checklist-templates`.
+
+**Common preconditions.**
+- Stack running and seeded (see [README](README.md)); admin app http://brightminds.localhost:5173, portal http://brightminds.localhost:5174/portal/. Password: `SEED_ADMIN_PASSWORD` (default `tutortrack`).
+- The trial carries the Agency plan, so the `recruitment` feature is on. **Recruitment** and **Compliance** appear in the admin navigation for Owner and Admin.
+- Requirement types are seeded from the organisation's country (GB: Enhanced DBS, right to work...) plus photo ID, safeguarding training, qualifications and insurance.
+- The nightly compliance sweep restricts active tutors whose mandatory checks are missing. If Nia Adeyemi or Sam Clarke shows **Restricted**, add and verify their checks first (TP-E18-022) unless the test is about restriction.
+- Temporal worker running for reminders and expiries (http://localhost:8233). Emails in Mailpit (http://localhost:8025).
+- TP-E18-001 creates the opening "Maths tutor, Leeds" (`maths-tutor-leeds`), reused below.
+
+## Openings and applications (FR-18-1, T01)
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E18-001 | Create and publish a job opening | Admin | office@tutortrack.localhost | 1. In the API docs, `POST /api/v1/job-openings` with title "Maths tutor, Leeds", slug `maths-tutor-leeds`, a description, status open, and an application form (type `application` with `applicant.*` fields and a `referees` field).<br>2. Open http://brightminds.localhost:5173/vacancies. | 201. The vacancies page ("Tutor vacancies") lists "Maths tutor, Leeds" with **Apply**. | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_public_openings_and_application` | |
+| TP-E18-002 | Apply as a tutor | Anonymous | TP-E18-001 | 1. Open `/vacancies/maths-tutor-leeds`.<br>2. Fill name "Olu Bello", email olu.bello@example.com, subjects Maths GCSE (self-rated), qualifications, availability, travel radius, right to work, CV link, video link, two referees with emails, consent.<br>3. Click **Apply**. | "Thank you for applying. We'll be in touch." An application appears on **Recruitment** in **Applied**. Each referee gets a reference request email. | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_public_openings_and_application` | |
+| TP-E18-003 | Referees need emails | Anonymous | Opening | 1. Apply with a referee name but no email. | Refused with a field error on **Referee 1 email**. | P2 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_referees_need_emails` | |
+| TP-E18-004 | Application forms aren't enquiry forms | Admin | An enquiry form (E17) | 1. Try to attach an enquiry form to an opening via the API. | Refused; enquiry and application forms stay separate. | P3 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_application_forms_are_not_enquiry_forms` | |
+| TP-E18-005 | Closed or unknown vacancy | Anonymous | Opening | 1. Close the opening.<br>2. Open `/vacancies` and `/vacancies/maths-tutor-leeds`. | The list says "There are no vacancies at the moment." (if none open); the detail says "This vacancy isn't available". | P2 | No | |
+| TP-E18-006 | Vacancies widget | Anonymous | A `job_openings` widget created on **Website → Widgets** | 1. Embed the widget in the widgets playground (http://localhost:5175) or use the preview. | `<tt-job-openings>` lists open vacancies with links to apply. | P3 | No | |
+| TP-E18-007 | Spam protection | Anonymous | Opening | 1. Fill the hidden honeypot input and apply.<br>2. Apply many times quickly. | 1: thank-you shown, no application. 2: throttled with 429. | P3 | No | |
+
+## Pipeline, interviews and references (FR-18-2, FR-18-4, T02–T04)
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E18-008 | Move through stages and score | Admin | Olu's application | 1. Open **Recruitment** and Olu's application.<br>2. Move to **Screening**, then **Interview**.<br>3. Add a scorecard: ratings 1–5 per criterion, recommendation **Hire**. | Stage changes are kept with history; the scorecard shows on the application with the recommendation. | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_pipeline_scorecard_interview_and_reference` | |
+| TP-E18-009 | Invite to interview and applicant chooses | Admin, Applicant | Application in Interview | 1. Enter two **Interview time** options (UK time) and click **Invite to interview**.<br>2. Open the `interview_invite` email and its `/interviews/<token>` link.<br>3. Pick one time. | The application shows "Waiting for the applicant to choose a time", then the chosen time. The applicant sees "Your interview is booked for <time>". | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_pipeline_scorecard_interview_and_reference` | |
+| TP-E18-010 | Interview link expired or reused | Applicant | Used interview link | 1. Open the link again after choosing; open a tampered token. | Shows the booked time or "This link has expired"; no double booking. | P3 | No | |
+| TP-E18-011 | Referee submits a reference | Referee | Reference request email | 1. Open `/references/<token>`.<br>2. Answer the questions, **Overall** 4, leave the concern box unticked, **Send reference**. | "Thank you for your reference." The application's **References** shows Received with the rating. | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_pipeline_scorecard_interview_and_reference` | |
+| TP-E18-012 | Reference raises a concern | Referee, Admin | Second referee link | 1. Tick "I have a concern about this person working with children" and send. | The application shows **Concerns raised** prominently. | P1 | No | |
+| TP-E18-013 | Ask for another reference | Admin | Application | 1. Click **Ask for a reference** with a new referee. | A new request is emailed and listed as **Waiting**. | P2 | No | |
+| TP-E18-014 | Reference reminders and no reply | Admin | Reference request unanswered; Temporal worker | 1. In the Temporal UI follow `ReferenceRequestWorkflow`. | Reminders after 3 and 7 days; after `recruitment.reference_days` the reference shows **No reply**. | P2 | backend: `tutortrack/recruitment/tests/test_workflows.py::test_reference_without_reply_expires_and_application_closes` | |
+| TP-E18-015 | Reject with templated email | Admin | Another application | 1. Enter a reason and click **Reject**, choosing to keep them in the talent pool. | Status **Talent pool** (or **Rejected**). The applicant gets `application_rejected` in Mailpit. | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_rejection_emails_the_applicant` | |
+| TP-E18-016 | Bulk reject | Admin | Three applications | 1. Select three applications and reject them together. | All three rejected; each applicant gets one email. | P2 | No | |
+| TP-E18-017 | Stage reminders | Admin | Application left in a stage beyond its reminder days | 1. Check notifications / Temporal `TutorApplicationWorkflow`. | Owner reminded that the application is waiting. | P3 | No | |
+
+## Approval and onboarding (FR-18-2 AC, FR-18-5, T05)
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E18-018 | Approve creates an onboarding tutor | Admin | Olu's application in Decision | 1. Click **Approve and onboard**. | Status **Hired**. A tutor Olu Bello exists with status `onboarding` and subjects from the application, an invitation email is sent, and an onboarding checklist instance exists. (AC FR-18-2) | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_approval_creates_onboarding_tutor_invitation_and_checklist` | |
+| TP-E18-019 | Tutor completes the checklist in the portal | Tutor (new) | Olu accepts the invitation and sets a password | 1. Open http://brightminds.localhost:5174/portal/tutor/onboarding ("Getting started").<br>2. **Mark done** for the tutor agreement ("I agree") and training items.<br>3. Set availability and add a profile bio. | Manual items show **Done** with a timestamp; automatic items ("Completes when you do it in the portal") tick themselves. | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_onboarding_completes_and_activates` | |
+| TP-E18-020 | Auto-activation when mandatory items are done | Admin | TP-E18-019; checks verified; `recruitment.auto_activate` on | 1. Complete the last mandatory item.<br>2. Open the tutor record. | Status becomes `active`; "You're all set." in the portal. With auto-activate off, staff activate manually. | P1 | backend: `tutortrack/recruitment/tests/test_workflows.py::test_onboarding_finishes_when_the_checklist_is_done` | |
+| TP-E18-021 | Staff tick items on the tutor's behalf | Admin | Onboarding tutor | 1. On the tutor record, mark a checklist item done. | The item is done; progress updates for both staff and tutor. | P3 | No | |
+
+## Compliance records and restriction (FR-18-6, T06, T07)
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E18-022 | Tutor uploads a DBS certificate | Tutor | tutor@ (Nia) | 1. Open `/portal/tutor/compliance` ("Your checks").<br>2. For Enhanced DBS, enter a reference number, issue date 1 year ago, attach a PDF, **Send**. | Status **Being checked**. The expiry date is filled from the renewal interval if left blank. | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_tutors_upload_their_own_documents_but_cannot_verify` | |
+| TP-E18-023 | Staff verify a record | Admin | TP-E18-022 | 1. Open Nia's tutor record → compliance card.<br>2. Click **Verify**. | Status **Verified** with verifier and time; `compliance.record_verified` starts the expiry workflow (`compliance:<org>:<record>:<yyyymmdd>`) in the Temporal UI. | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_uk_requirements_and_dbs_expiring_today_restricts` | |
+| TP-E18-024 | Reject needs a reason | Admin | A submitted record | 1. Click **Reject** with the reason empty.<br>2. Use "Please upload a clearer copy." | 1 refused. 2: status **Rejected**; the tutor sees the reason and can resubmit. | P2 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_reject_needs_a_reason` | |
+| TP-E18-025 | Tutors can't verify their own records | Tutor | tutor@ | 1. Call `POST /api/v1/compliance/records/<id>/verify` as Nia. | 403. | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_tutors_upload_their_own_documents_but_cannot_verify` | |
+| TP-E18-026 | DBS expiring today restricts the tutor | Admin | Sam Clarke active with only a DBS verified whose expiry is today (set expiry date to today) | 1. Wait for the nightly sweep or the record's workflow (Temporal UI), or run the sweep task.<br>2. Open **Compliance** and Sam's record. | The record is **Expired**; Sam is `restricted` and listed as **Restricted** on the dashboard. `tutor.restricted` is published. (AC FR-18-6) | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_uk_requirements_and_dbs_expiring_today_restricts`, `tutortrack/recruitment/tests/test_workflows.py::test_verified_check_reminds_then_expires_and_restricts` | |
+| TP-E18-027 | Assigning a restricted tutor fails | Coordinator | Sam restricted | 1. Add Sam as tutor on Ada Okafor's job.<br>2. Create a lesson with Sam. | Both fail with "tutor not compliant" (`tutor_not_compliant`). | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_uk_requirements_and_dbs_expiring_today_restricts` | |
+| TP-E18-028 | Override with permission and reason | Admin | Sam restricted | 1. Assign Sam with the override and the reason "Supervised session". | Allowed and audited (audit log shows the reason). Coordinators don't get the override option. | P1 | No | |
+| TP-E18-029 | Pay is held while restricted | Finance | Sam restricted with completed lessons | 1. Open the next pay run. | Sam's pay items are held with reason compliance (E12 hold). | P2 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_renewal_lifts_the_restriction_and_pay_holds_follow` | |
+| TP-E18-030 | Renewal lifts the restriction | Admin | Sam restricted by compliance | 1. Sam uploads a new DBS with a future expiry; staff verify. | Sam is `active` again; the pay hold is released; a new expiry workflow starts. | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_renewal_lifts_the_restriction_and_pay_holds_follow` | |
+| TP-E18-031 | Manual restrictions are left alone | Admin | Restrict Nia manually | 1. Verify all Nia's checks. | Nia stays restricted (only compliance-made restrictions lift automatically). | P2 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_manual_restrictions_are_left_alone` | |
+| TP-E18-032 | Expiry reminders at 60, 30 and 7 days | Tutor, Admin | A verified record expiring in 61 days | 1. In the Temporal UI, follow `ComplianceRecordWorkflow` timers (or set expiry to 7 days ahead and wait for the timer). | Reminders to the tutor and compliance staff at 60, 30 and 7 days. | P2 | backend: `tutortrack/recruitment/tests/test_workflows.py::test_verified_check_reminds_then_expires_and_restricts` | |
+| TP-E18-033 | Requirement types per country and scope | Admin | API docs | 1. List `/api/v1/compliance/requirement-types`.<br>2. Add a type "First aid" for in-person work only, not blocking. | GB types present (Enhanced DBS, right to work, photo ID, safeguarding training, qualifications, insurance). The new type applies only to in-person tutors and doesn't restrict. | P2 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_uk_requirements_and_dbs_expiring_today_restricts` | |
+| TP-E18-034 | Reference numbers are encrypted and files private | Admin, Coordinator | A record with a file | 1. As Admin open the document.<br>2. As Coordinator, then as another tutor, try the file URL. | Admin (`compliance.view`) opens it. Coordinator and other tutors get 403. The number is not in API responses to others. | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_compliance_files_are_visible_to_compliance_staff_only` | |
+
+## Compliance dashboard (FR-18-8, T08)
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E18-035 | Tutors × requirements matrix | Admin | Some verified, submitted, missing and expired records | 1. Open **Compliance** (`/compliance`). | One row per tutor; cells show Verified, To check, Missing, Rejected, Expired or –, distinguished by text and colour (not colour alone). Restricted tutors are flagged. | P1 | No | |
+| TP-E18-036 | Dashboard filters | Admin | As above | 1. Filter by requirement and by status. | Rows narrow correctly. | P3 | No | |
+
+## Subject competency (FR-18-3, T09)
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E18-037 | Claimed → assessed → approved | Admin | Sam Clarke, Physics A level (claimed) | 1. `POST /api/v1/tutors/<sam>/subjects/<id>/assess` with evidence "Interview".<br>2. On Sam's tutor record click approve for Physics A level. | Competency moves claimed → assessed → approved with the evidence and approver; `approved` is set for matching (E19). | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_subject_competency` | |
+| TP-E18-038 | Only approved subjects match | Coordinator | Physics not approved for Sam | 1. Open Ada Okafor's job → **Find a tutor**. | Sam is not listed until his subject is approved (see E19). | P1 | backend: `tutortrack/matching/tests/test_matching.py::test_only_approved_compliant_tutors_match_unless_include_restricted` | |
+| TP-E18-039 | Reject a subject | Admin | Claimed subject | 1. Mark it rejected. | Competency **rejected**; never used for matching. | P3 | No | |
+
+## Background-check providers (FR-18-7, T11 — Phase 3)
+
+Verify after the Phase 3 merge.
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E18-040 | Start an online UK check (fake provider) | Admin | Verify after the Phase 3 merge. Provider keys empty (fake); Sam Clarke | 1. On Sam's record, start a background check with the UK provider (uCheck / Atlantic Data).<br>2. Simulate the provider's completion webhook as documented by the build. | A `BackgroundCheck` shows pending, then complete; the result is attached to the DBS record and can be verified. | P2 | No (Phase 3) | |
+| TP-E18-041 | DBS Update Service status check | Admin | Verify after the Phase 3 merge. A verified DBS with an Update Service number | 1. Run the status check. | The result ("no new information" / "changed") is recorded with the date; a changed status flags the record for review. | P2 | No (Phase 3) | |
+| TP-E18-042 | US Checkr check | Admin | Verify after the Phase 3 merge. Organisation with country US (Northside or a test org) | 1. Start a Checkr check; simulate the webhook. | Status tracked via webhook; report linked; adverse results flag the tutor for review. | P3 | No (Phase 3) | |
+| TP-E18-043 | AU WWCC verification link | Admin | Verify after the Phase 3 merge. AU organisation | 1. Open the state WWCC verification link from the record. | The correct state's verification page opens with the number pre-filled where supported. | P3 | No (Phase 3) | |
+| TP-E18-044 | Webhook security | Anonymous | Verify after the Phase 3 merge | 1. Post a provider webhook with a bad signature. | Refused (4xx); nothing changes. | P2 | No (Phase 3) | |
+
+## Permissions
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E18-045 | Coordinator has no recruitment or compliance | Coordinator | coordinator@ | 1. Look for **Recruitment** and **Compliance**; open `/recruitment` and `/compliance`. | Hidden and refused (Coordinator role grants no `recruitment.*` or `compliance.*`). | P1 | e2e: `e2e/roles.spec.ts` | |
+| TP-E18-046 | Tutor sees only their own checks | Tutor | tutor@ | 1. Open `/portal/tutor/compliance`.<br>2. Call `GET /api/v1/compliance/dashboard`. | Own checks only; dashboard 403. | P1 | backend: `tutortrack/recruitment/tests/test_recruitment.py::test_compliance_files_are_visible_to_compliance_staff_only` | |
+| TP-E18-047 | Finance and branch manager | Finance, Branch manager | finance@, manager@ | 1. Open **Recruitment** and **Compliance**. | Finance: hidden. Branch manager: limited to tutors and applications of MAIN. | P2 | No | |
+| TP-E18-048 | Override needs `compliance.override_restriction` | Coordinator | Restricted tutor | 1. Try the override via the API with a reason. | 403. | P1 | No | |
+
+## Tenant isolation
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E18-049 | Vacancies are per organisation | Anonymous | Opening only in brightminds | 1. Open http://northside.localhost:5173/vacancies. | Brightminds' vacancy is not listed; its slug is 404 there. | P1 | No | |
+| TP-E18-050 | Applications and records of another organisation | Owner (Northside) | owner@northside.localhost | 1. Open **Recruitment** and **Compliance** in Northside.<br>2. Request a brightminds application id via the API on the northside host. | No brightminds data; 404. | P1 | No | |
+
+## i18n, time zones and currency
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E18-051 | Interview times in the applicant's view | Applicant | Interview options proposed | 1. Open the interview link with the browser set to another time zone. | Times are labelled clearly (organisation time, Europe/London) and match what staff proposed. | P2 | No | |
+| TP-E18-052 | Dates and expiry | Tutor | Records | 1. Check issue and expiry dates in the portal and dashboard. | en-GB dates (e.g. 14 October 2026); expiry boundary: a record is valid up to, not including, its expiry date. | P2 | No | |
+
+## Errors and edge cases
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E18-053 | Applicant email already a tutor | Anonymous | Apply as nia.adeyemi@example.com | 1. Apply and approve. | Approval links to or warns about the existing tutor; no duplicate login. | P3 | No | |
+| TP-E18-054 | Upload limits | Tutor | A 50 MB file and an `.exe` | 1. Upload each as a check document. | Refused with a clear message (size/type); ClamAV scanning applies when enabled. | P2 | No | |

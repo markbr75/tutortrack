@@ -62,6 +62,13 @@ def test_only_platform_staff_with_2fa_from_allowed_networks(org, staff):
     assert platform_client(staff).get("/api/v1/platform/tenants").status_code == 200
 
 
+def test_console_without_required_2fa_reports_mfa_satisfied(staff, settings):
+    settings.PLATFORM_REQUIRE_MFA = False
+    no_mfa = platform_client(staff, mfa=False)
+    assert no_mfa.get("/api/v1/platform/me").json()["mfa_verified"] is True
+    assert no_mfa.get("/api/v1/platform/tenants").status_code == 200
+
+
 def test_network_allowlist(staff, settings):
     settings.PLATFORM_IP_ALLOWLIST = ["10.0.0.0/8"]
     client = platform_client(staff)
