@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { api, problemStatus, usePortalMe } from "./api";
 import { BrandMark, PoweredBy } from "./branding";
 import { OfflineBanner } from "./offline/OfflineIndicator";
+import { HouseholdSwitcher, StudentSignIn } from "./HouseholdSwitcher";
 import { StatusBanner } from "./StatusBanner";
 import { usePortalBranding } from "./useBranding";
 import { AffiliateShell } from "./affiliate/AffiliatePages";
@@ -46,6 +47,8 @@ export function SignIn() {
           </Button>
         </form>
       )}
+      <hr className="border-border" />
+      <StudentSignIn />
     </main>
   );
 }
@@ -114,6 +117,8 @@ function FamilyShell() {
     ...(f.learning ? [{ to: "/learning", label: t("learning.portal.nav") }] : []),
     ...(f.invoices ? [{ to: "/billing", label: t("portal.nav.billing") }] : []),
     ...(f.profile ? [{ to: "/profile", label: t("portal.nav.profile") }] : []),
+    ...(f.guardian_invites || f.student_logins ? [{ to: "/family", label: t("family.nav") }] : []),
+    ...(f.documents ? [{ to: "/documents", label: t("esign.nav") }] : []),
     ...(f.referrals ? [{ to: "/referrals", label: t("referrals.portal.nav") }] : []),
     ...(f.messages ? [{ to: "/messages", label: t("portalMessages.nav") }] : []),
     { to: "/recordings", label: t("classroom.recordingsNav") },
@@ -123,6 +128,7 @@ function FamilyShell() {
     <div className="mx-auto min-h-screen max-w-3xl">
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border p-4">
         <BrandMark fallback={me.data.organisation.name} />
+        <HouseholdSwitcher me={me.data} />
         <nav aria-label={t("portal.menu")} className="flex flex-wrap gap-1 text-sm">
           {nav.map((item) => (
             <Link

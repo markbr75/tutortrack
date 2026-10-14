@@ -1,0 +1,44 @@
+{% load i18n tz %}<!doctype html>
+<html lang="{{ org.locale|default:'en-GB' }}">
+<head>
+<meta charset="utf-8">
+<title>{{ signature.title }}</title>
+<style>
+  @page { size: A4; margin: 2cm; }
+  body { font-family: sans-serif; font-size: 11pt; color: #111; }
+  h1 { font-size: 16pt; margin: 0 0 4pt; }
+  h2 { font-size: 13pt; margin: 18pt 0 6pt; }
+  .agreement { white-space: pre-wrap; border: 1px solid #ccc; padding: 10pt; }
+  .signature-page { page-break-before: {% if text %}always{% else %}auto{% endif %}; }
+  table { border-collapse: collapse; width: 100%; }
+  th { text-align: left; width: 35%; vertical-align: top; padding: 4pt 8pt 4pt 0; }
+  td { padding: 4pt 0; word-break: break-all; }
+  .statement { margin: 12pt 0; padding: 10pt; background: #f4f4f5; }
+  .mark { font-size: 20pt; font-style: italic; margin: 12pt 0 0; }
+</style>
+</head>
+<body>
+{% if text %}
+<h1>{{ signature.title }}</h1>
+<p>{{ org.name }}</p>
+<div class="agreement">{{ text }}</div>
+{% endif %}
+<section class="signature-page">
+  <h1>{% translate "Signature page" %}</h1>
+  <p>{{ org.name }}</p>
+  <p class="statement">{{ signature.statement }}</p>
+  <p class="mark">{{ signature.signer_name }}</p>
+  <h2>{% translate "Audit trail" %}</h2>
+  <table>
+    <tr><th>{% translate "Document" %}</th><td>{{ signature.title }}{% if original_name %} ({{ original_name }}){% endif %}</td></tr>
+    <tr><th>{% translate "Signed by" %}</th><td>{{ signature.signer_name }}{% if signature.signer_email %} &lt;{{ signature.signer_email }}&gt;{% endif %} ({{ signature.signer_role }})</td></tr>
+    <tr><th>{% translate "Signed at (UTC)" %}</th><td>{{ signature.signed_at|utc|date:"Y-m-d H:i:s" }}</td></tr>
+    <tr><th>{% translate "IP address" %}</th><td>{{ signature.ip|default:"-" }}</td></tr>
+    <tr><th>{% translate "Browser" %}</th><td>{{ signature.user_agent|default:"-" }}</td></tr>
+    <tr><th>{% translate "SHA-256 of what was signed" %}</th><td>{{ signature.content_sha256 }}</td></tr>
+    <tr><th>{% translate "Signature reference" %}</th><td>{{ signature.pk }}</td></tr>
+  </table>
+  {% if original_name %}<p>{% blocktranslate %}The signed file, {{ original_name }}, is attached to this PDF.{% endblocktranslate %}</p>{% endif %}
+</section>
+</body>
+</html>

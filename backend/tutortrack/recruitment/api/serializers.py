@@ -188,6 +188,13 @@ class ChecklistItemSerializer(serializers.Serializer):
     link = serializers.CharField(required=False, allow_blank=True)
     done = serializers.BooleanField()
     done_at = serializers.CharField(allow_null=True)
+    needs_signature = serializers.BooleanField(default=False)
+    signature_id = serializers.CharField(allow_null=True, required=False)
+
+
+class SignAgreementSerializer(serializers.Serializer):
+    full_name = serializers.CharField(max_length=200)
+    agree = serializers.BooleanField()
 
 
 class TutorOnboardingStateSerializer(serializers.Serializer):

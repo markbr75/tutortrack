@@ -6,7 +6,7 @@ from typing import Any
 
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, ValidationError
@@ -269,7 +269,35 @@ class MyOnboardingItemView(APIView):
         item = next((i for i in (instance.items if instance else []) if i["key"] == key), None)
         if item is None or item.get("kind") not in ("agreement", "training", "custom"):
             raise ValidationError({"key": ["This step completes itself when you do it."]})
+        if services.needs_signature(item):
+            raise ValidationError({"key": ["Sign this agreement instead."]})
         services.complete_item(tutor, key, user=request.user)
+        return _onboarding(tutor)
+
+
+class MyOnboardingSignView(APIView):
+    """The tutor signs an agreement (click-to-sign: typed name, audit trail, signed PDF)."""
+
+    permission_classes = AUTH
+
+    @extend_schema(
+        request=s.SignAgreementSerializer,
+        responses=s.TutorOnboardingStateSerializer,
+        examples=[
+            OpenApiExample(
+                "Sign", value={"full_name": "Nia Adeyemi", "agree": True}, request_only=True
+            )
+        ],
+    )
+    def post(self, request: Request, key: str) -> Response:
+        data = s.SignAgreementSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        if not data.validated_data["agree"]:
+            raise ValidationError({"agree": ["Tick to confirm you agree."]})
+        tutor = _my_tutor(request)
+        services.sign_agreement(
+            tutor, key, user=request.user, full_name=data.validated_data["full_name"]
+        )
         return _onboarding(tutor)
 
 

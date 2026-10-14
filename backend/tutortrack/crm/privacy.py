@@ -19,7 +19,7 @@ from tutortrack.privacy.registry import (
     register,
 )
 
-from .models import Document, Note, TaggedItem, Task
+from .models import Document, Note, Signature, TaggedItem, Task
 
 TARGET_TYPES = {
     "people.client": ["people.client"],
@@ -70,16 +70,45 @@ def export(person: Person) -> list[Section]:
         }
         for d in Document.objects.filter(about)
     ]
+    signatures = [
+        {
+            "id": str(s.pk),
+            "title": s.title,
+            "signer_name": s.signer_name,
+            "signer_email": s.signer_email,
+            "signed_at": s.signed_at,
+            "ip": s.ip,
+            "user_agent": s.user_agent,
+            "content_sha256": s.content_sha256,
+        }
+        for s in Signature.objects.filter(_signed_by(person))
+    ]
     return [
         Section("crm.notes", _("Notes"), notes),
         Section("crm.tasks", _("Tasks"), tasks),
         Section("crm.documents", _("Documents"), documents),
+        Section("crm.signatures", _("Signatures"), signatures),
     ]
+
+
+def _signed_by(person: Person) -> Q:
+    """Signatures the person made (by email or as the tutor) or on documents about them."""
+    q = Q(document__in=Document.objects.filter(_about(person)))
+    if person.emails:
+        q |= Q(signer_email__in=sorted(person.emails))
+    if person.of("people.tutor"):
+        q |= Q(tutor_id__in=person.of("people.tutor"))
+    return q
 
 
 def files(person: Person) -> list[Any]:
     about = _about(person)
     out = [d.file for d in Document.objects.filter(about).select_related("file")]
+    out += [
+        s.signed_file
+        for s in Signature.objects.filter(_signed_by(person)).select_related("signed_file")
+        if s.signed_file is not None
+    ]
     for note in Note.objects.filter(about).prefetch_related("attachments"):
         out.extend(note.attachments.all())
     return out
@@ -88,6 +117,19 @@ def files(person: Person) -> list[Any]:
 def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
     out = ErasureOutcome()
     about = _about(person)
+    # Signatures stay as evidence (hash and time) but lose who signed and the signed copy.
+    for signature in Signature.objects.filter(_signed_by(person)):
+        if signature.signed_file_id:
+            out.file_ids.append(str(signature.signed_file_id))
+        out.anonymised += Signature.objects.filter(pk=signature.pk).update(
+            signer=None,
+            signer_name=_("Erased"),
+            signer_email="",
+            ip=None,
+            user_agent="",
+            statement="",
+            signed_file=None,
+        )
     for note in Note.objects.filter(about).prefetch_related("attachments"):
         out.file_ids += [str(f.pk) for f in note.attachments.all()]
         note.attachments.clear()

@@ -7,4 +7,7 @@ class CrmConfig(AppConfig):
     verbose_name = "CRM"
 
     def ready(self) -> None:
-        from . import notifications  # noqa: F401 - the note_mention type (FR-05-7)
+        from . import (
+            notifications,  # noqa: F401 - the note_mention type (FR-05-7)
+            signing,  # noqa: F401 - access to signed copies (gap batch G2)
+        )

@@ -26,7 +26,7 @@ These journeys follow real work across several epics. Each one checks that the h
 | J15 | Public API key and webhooks | P2 |
 | J16 | Automation rule end to end | P2 |
 | J17 | Tenant isolation sweep | P1 |
-| J18 | Phase 3 features (verify after the Phase 3 merge) | P2 |
+| J18 | Phase 3 features | P2 |
 
 ---
 
@@ -358,18 +358,18 @@ These journeys follow real work across several epics. Each one checks that the h
 
 **Automated (in part):** `e2e/roles.spec.ts`.
 
-## J18 — Phase 3 features (verify after the Phase 3 merge)
+## J18 — Phase 3 features
 
-**Goal:** the Phase 3 / Enterprise tickets work together. These were written from the epic requirements while the tickets were being built. Correct the steps against the merged build.
+**Goal:** the Phase 3 / Enterprise tickets work together (checked against the merged build on 2026-10-14; the linked cases give the exact screens and fakes).
 **Roles:** finance, admin, tutor.
-**Preconditions:** the Phase 3 merge deployed; each feature's entitlement granted.
+**Preconditions:** each feature's entitlement granted; the dev fakes for Wise, the check providers, video and the accounting systems (see each case).
 
-1. **Payroll:** pay a tutor through Wise; export 1099-NEC data; the tutor's annual earnings summary; commission-based pay (TP-E12-033, TP-E12-034, TP-E12-035, TP-E12-036).
+1. **Payroll:** pay a tutor through Wise (one transfer per payout); finalise the year and export 1099-NEC data; the tutor's US tax section in the portal; commission-based pay (TP-E12-033, TP-E12-034, TP-E12-035, TP-E12-036).
 2. **Background checks:** start an online UK check (fake provider), a DBS Update Service status check and a US Checkr check; webhook security (TP-E18-040, TP-E18-041, TP-E18-042, TP-E18-044).
 3. **Video:** attendance pre-filled from video events; a recording linked to the lesson, with retention and consent (TP-E22-045, TP-E22-047, TP-E22-048, TP-E22-049).
 4. **Accounting:** Sage and FreeAgent sync; Xero Payroll for employed tutors (TP-E23-041, TP-E23-042, TP-E23-043, TP-E23-044, TP-E23-045).
 5. **Warehouse:** configure a destination; the nightly export writes the documented schemas (TP-E26-053, TP-E26-054).
-6. **Native apps:** the generic native app with the organisation picker, native push and deep links (TP-E16-039, TP-E16-040). Store signing can't be tested locally (see [traceability.md](traceability.md)).
+6. **Native apps:** the generic native app with the organisation picker, and in-app notifications (native push and deep links were not built) (TP-E16-039, TP-E16-040). The apps load the hosted https portal, so they can't be tested against localhost; store signing isn't set up (see [traceability.md](traceability.md)).
 
 **Checkpoints:** each feature is hidden without its entitlement (for example TP-E26-056), and provider webhooks are authenticated (TP-E22-051).
 

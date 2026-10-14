@@ -69,8 +69,11 @@ def test_switcher_requires_sign_in():
 
 @pytest.fixture
 def providers():
-    """Two sample providers standing in for E05+ (people, lessons...)."""
+    """Two sample providers standing in for the apps' real ones (tested in
+    ``test_demo_providers``)."""
+    demo.providers()  # the apps' providers are registered (once) before we set them aside
     before = dict(demo._providers)
+    demo._providers.clear()
     wiped: list[int] = []
 
     @demo.demo_provider(order=10)

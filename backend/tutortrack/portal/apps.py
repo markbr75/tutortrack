@@ -7,4 +7,4 @@ class PortalConfig(AppConfig):
     verbose_name = "Client and student portal"
 
     def ready(self) -> None:
-        from . import org_settings  # noqa: F401
+        from . import notifications, org_settings  # noqa: F401

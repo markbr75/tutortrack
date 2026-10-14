@@ -1,4 +1,4 @@
-"""Google and Microsoft sign-in via OpenID Connect (FR-03-2, E03-T07).
+"""Google, Microsoft and Apple sign-in via OpenID Connect (FR-03-2, E03-T07, gap batch G2).
 
 Flow (authorization code + PKCE):
 1. ``GET /api/v1/auth/sso/{provider}/start`` on the root app host stores
@@ -11,8 +11,15 @@ Flow (authorization code + PKCE):
    created when ``intent=signup``. The session starts on the root host; if an organisation
    was requested the browser continues there with a single-use handoff token.
 
-Implemented on PyJWT instead of django-allauth: we only need OIDC for two providers and
+Implemented on PyJWT instead of django-allauth: we only need OIDC for three providers and
 allauth brings its own account models and flows that overlap the API-first auth.
+
+Apple differs in four ways: the client secret is a short-lived ES256 JWT signed with the
+team's private key (``APPLE_*`` settings); asking for name and email requires
+``response_mode=form_post``, so the callback is a cross-site POST (the state cookie is
+``SameSite=None`` on https); the person's name arrives once, in the posted ``user`` field;
+and ``email_verified`` may be the string ``"true"``. Apple's private-relay addresses are
+treated like any verified email.
 """
 
 from __future__ import annotations
@@ -47,10 +54,47 @@ class Provider:
     issuer: str  # may contain {tenantid} (Microsoft multi-tenant)
     client_id: str
     client_secret: str
+    scope: str = "openid email profile"
+    response_mode: str = ""  # "form_post": the provider POSTs to the callback (Apple)
+    pkce: bool = True
 
     @property
     def enabled(self) -> bool:
         return bool(self.client_id and self.client_secret)
+
+    @property
+    def posts_back(self) -> bool:
+        return self.response_mode == "form_post"
+
+    def secret(self) -> str:
+        if self.key == "apple":
+            return apple_client_secret()
+        return self.client_secret
+
+
+APPLE_ISSUER = "https://appleid.apple.com"
+APPLE_SECRET_TTL = 300
+
+
+def _apple_configured() -> bool:
+    return all(
+        (settings.APPLE_CLIENT_ID, settings.APPLE_TEAM_ID, settings.APPLE_KEY_ID,
+         settings.APPLE_PRIVATE_KEY)
+    )  # fmt: skip
+
+
+def apple_client_secret() -> str:
+    """Apple's client secret: an ES256 JWT from the team, signed with the .p8 key."""
+    import time
+
+    issued = int(time.time())
+    return jwt.encode(
+        {"iss": settings.APPLE_TEAM_ID, "iat": issued, "exp": issued + APPLE_SECRET_TTL,
+         "aud": APPLE_ISSUER, "sub": settings.APPLE_CLIENT_ID},
+        settings.APPLE_PRIVATE_KEY,
+        algorithm="ES256",
+        headers={"kid": settings.APPLE_KEY_ID},
+    )  # fmt: skip
 
 
 def providers() -> dict[str, Provider]:
@@ -72,6 +116,19 @@ def providers() -> dict[str, Provider]:
             issuer="https://login.microsoftonline.com/{tenantid}/v2.0",
             client_id=settings.MICROSOFT_CLIENT_ID,
             client_secret=settings.MICROSOFT_CLIENT_SECRET,
+        ),
+        "apple": Provider(
+            key="apple",
+            authorize_url=f"{APPLE_ISSUER}/auth/authorize",
+            token_url=f"{APPLE_ISSUER}/auth/token",
+            jwks_url=f"{APPLE_ISSUER}/auth/keys",
+            issuer=APPLE_ISSUER,
+            client_id=settings.APPLE_CLIENT_ID,
+            # Signed per request (``Provider.secret``); this only marks it configured.
+            client_secret="es256" if _apple_configured() else "",
+            scope="openid name email",
+            response_mode="form_post",
+            pkce=False,
         ),
     }
 
@@ -109,14 +166,19 @@ def begin(provider: Provider, *, organisation_id: str = "", next_path: str = "/"
     params = {
         "client_id": provider.client_id,
         "response_type": "code",
-        "scope": "openid email profile",
+        "scope": provider.scope,
         "redirect_uri": callback_url(provider),
         "state": state,
         "nonce": nonce,
-        "code_challenge": challenge,
-        "code_challenge_method": "S256",
-        "prompt": "select_account",
     }
+    if provider.pkce:
+        params |= {
+            "code_challenge": challenge,
+            "code_challenge_method": "S256",
+            "prompt": "select_account",
+        }
+    if provider.response_mode:
+        params["response_mode"] = provider.response_mode
     return f"{provider.authorize_url}?{urllib.parse.urlencode(params)}", cookie
 
 
@@ -169,26 +231,38 @@ def verify_id_token(provider: Provider, id_token: str, nonce: str) -> dict[str, 
     return claims
 
 
-def exchange(provider: Provider, code: str, state: dict[str, Any]) -> dict[str, Any]:
-    tokens = _post_form(
-        provider.token_url,
-        {
-            "grant_type": "authorization_code",
-            "code": code,
-            "redirect_uri": callback_url(provider),
-            "client_id": provider.client_id,
-            "client_secret": provider.client_secret,
-            "code_verifier": state["v"],
-        },
-    )
+def exchange(
+    provider: Provider, code: str, state: dict[str, Any], *, user_json: str = ""
+) -> dict[str, Any]:
+    form = {
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": callback_url(provider),
+        "client_id": provider.client_id,
+        "client_secret": provider.secret(),
+    }
+    if provider.pkce:
+        form["code_verifier"] = state["v"]
+    tokens = _post_form(provider.token_url, form)
     if "id_token" not in tokens:
         raise SSOError("token_exchange")
-    return verify_id_token(provider, tokens["id_token"], state["n"])
+    claims = verify_id_token(provider, tokens["id_token"], state["n"])
+    if user_json:  # Apple: the name comes once, beside the code (not in the signed token)
+        try:
+            name = json.loads(user_json).get("name") or {}
+        except (ValueError, AttributeError):
+            name = {}
+        if isinstance(name, dict):
+            claims.setdefault("given_name", str(name.get("firstName", "")))
+            claims.setdefault("family_name", str(name.get("lastName", "")))
+    return claims
 
 
 def _email_verified(provider: Provider, claims: dict[str, Any]) -> bool:
     if provider.key == "google":
         return claims.get("email_verified") is True
+    if provider.key == "apple":
+        return claims.get("email_verified") in (True, "true")
     # Microsoft personal and work accounts: email claim is managed by the identity provider.
     return bool(claims.get("email")) and claims.get("xms_edov", True) is not False
 

@@ -17,6 +17,13 @@ for key, default, label in (
     ("portal.allow_messaging", True, _("Families can message you")),
     ("portal.allow_messaging_tutors", False, _("Families and tutors can message each other")),
     ("portal.allow_student_messaging", False, _("Students can send messages")),
+    # Gap batch G2: families invite another guardian; guardians set up under-13 logins.
+    ("portal.allow_guardian_invites", True, _("Families can invite another guardian")),
+    (
+        "portal.guardian_managed_logins",
+        True,
+        _("Guardians can give children under 13 a username and PIN login"),
+    ),
 ):
     register(key, type="bool", default=default, label=label)
 for key, label in (

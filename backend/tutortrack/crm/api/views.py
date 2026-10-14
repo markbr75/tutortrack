@@ -27,8 +27,17 @@ from tutortrack.core.permissions import (
 )
 from tutortrack.core.time import now
 
-from .. import selectors, services, targets
-from ..models import BulkJob, CustomFieldDefinition, Document, Note, SavedView, Tag, Task
+from .. import selectors, services, signing, targets
+from ..models import (
+    BulkJob,
+    CustomFieldDefinition,
+    Document,
+    Note,
+    SavedView,
+    Signature,
+    Tag,
+    Task,
+)
 
 AUTH = [IsAuthenticated, HasOrganisation]
 
@@ -331,6 +340,9 @@ class TaskViewSet(
 
 class DocumentSerializer(BaseModelSerializer):
     filename = serializers.CharField(source="file.filename", read_only=True)
+    signature_status = serializers.ChoiceField(
+        choices=["not_required", "awaiting", "signed"], read_only=True
+    )
 
     class Meta:
         model = Document
@@ -344,11 +356,42 @@ class DocumentSerializer(BaseModelSerializer):
             "category",
             "visibility",
             "expires_on",
+            "signature_required",
+            "signature_status",
+            "signed_at",
             "created_by",
             "created_at",
         ]
-        read_only_fields = ["id", "filename", "created_by", "created_at"]
+        read_only_fields = ["id", "filename", "signed_at", "created_by", "created_at"]
         extra_kwargs = {"title": {"required": False}}
+
+
+class SignatureSerializer(BaseModelSerializer):
+    class Meta:
+        model = Signature
+        fields = [
+            "id",
+            "kind",
+            "document",
+            "tutor",
+            "agreement_key",
+            "title",
+            "statement",
+            "signer",
+            "signer_name",
+            "signer_email",
+            "signer_role",
+            "signed_at",
+            "ip",
+            "user_agent",
+            "content_sha256",
+            "signed_file",
+        ]
+        read_only_fields = fields
+
+
+class SignatureRequestSerializer(serializers.Serializer):
+    signature_required = serializers.BooleanField(default=True)
 
 
 class DocumentViewSet(
@@ -386,7 +429,41 @@ class DocumentViewSet(
     def perform_create(self, serializer: Any) -> None:
         data = dict(serializer.validated_data)
         require_target(self.request, data["target_type"], data["target_id"])
-        serializer.instance = services.attach_document(**data)
+        sign = data.pop("signature_required", False)
+        document = services.attach_document(**data)
+        if sign:
+            document = signing.request_signature(document)
+        serializer.instance = document
+
+    @extend_schema(
+        request=SignatureRequestSerializer,
+        responses=DocumentSerializer,
+        examples=[OpenApiExample("Ask for a signature", value={"signature_required": True})],
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="request-signature",
+        permission_classes=method_perms({"POST": "crm.document.create"}),
+    )
+    def request_signature(self, request: Request, pk: str | None = None) -> Response:
+        """Ask the family (or tutor) to sign this document in their portal, or stop asking."""
+        document = self.get_object()
+        require_target(request, document.target_type, document.target_id)
+        data = SignatureRequestSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        document = signing.request_signature(
+            document, required=data.validated_data["signature_required"]
+        )
+        return Response(DocumentSerializer(document, context={"request": request}).data)
+
+    @extend_schema(responses=SignatureSerializer(many=True))
+    @action(detail=True, methods=["get"], pagination_class=None)
+    def signatures(self, request: Request, pk: str | None = None) -> Response:
+        """The audit trail: who signed, when, from where, the hash and the signed copy."""
+        document = self.get_object()
+        rows = Signature.objects.filter(document=document)
+        return Response(SignatureSerializer(rows, many=True, context={"request": request}).data)
 
 
 # --- saved views ----------------------------------------------------------------------------------

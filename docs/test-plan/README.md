@@ -19,7 +19,7 @@ This plan lets testers, product owners and developers check every feature of Tut
   - **P2:** should pass. A failure needs a ticket and an agreed fix date.
   - **P3:** nice to check. Run when time allows or when the area changes.
 - **Automated?** names the test that already covers the case: `backend: <file>` (relative to `backend/`, pytest) and/or `e2e: e2e/<spec>.spec.ts` (Playwright, in `frontend/`). "No" means manual only. Automated cases still deserve a human look at P1 before a release, because tests check behaviour, not how the screen looks or reads.
-- **Phase 3 cases** (E12-T12, E16-T11, E18-T11, E22-T10, E23-T10, E26-T09) were written from the epic requirements while those tickets were being built. Their titles say **"Verify after the Phase 3 merge"**. Check them against the merged build and correct the steps if the screens differ.
+- **Phase 3 cases** (E12-T12, E16-T11, E18-T11, E22-T10, E23-T10, E26-T09) were checked against the merged build on 2026-10-14 (routes, labels, roles and the dev fakes they use). Where the build differs from the epic requirement, the case says what was built.
 - **"Not built" items.** Where an epic's Implementation notes say a requirement was not built or was built differently, the case says so. Record such a case as N/A, not Fail.
 - **Seed data.** Steps use the seeded records (the Patel family, tutor Nia Adeyemi, the GCSE Maths 1:1 service and so on). If a case changes shared seed data (for example it archives the Patel family), undo the change or reset the database afterwards.
 

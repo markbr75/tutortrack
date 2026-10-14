@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from typing import Any
 
 from django.db import transaction
@@ -173,8 +173,11 @@ def invite(
     title: str = "",
     target_type: str = "",
     target_id: str = "",
+    deliver: Callable[[Invitation, str], None] | None = None,
 ) -> Invitation:
-    """Invite someone to the organisation in context; emails a 7-day link."""
+    """Invite someone to the organisation in context; emails a 7-day link. ``deliver``
+    replaces the platform email (``deliver(invitation, raw_token)``), e.g. a comms
+    template for a guardian invited from the portal."""
     from datetime import timedelta
 
     from tutortrack.core.events import publish
@@ -221,7 +224,7 @@ def invite(
     )
     audit.record_create(invitation)
     publish(UserInvited(subject_id=invitation.pk, email=email, role=role))
-    _send_invitation(invitation, raw)
+    (deliver or _send_invitation)(invitation, raw)
     return invitation
 
 

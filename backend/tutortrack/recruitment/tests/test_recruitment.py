@@ -352,7 +352,7 @@ def test_reject_needs_a_reason(org, active_tutor):
 # --- onboarding (T05) -----------------------------------------------------------------------
 
 
-def test_onboarding_completes_and_activates(org, application, recruiter):
+def test_onboarding_completes_and_activates(org, application, recruiter, s3):
     from tutortrack.payroll import services as payroll
     from tutortrack.scheduling.models import AvailabilityTemplate
 
@@ -363,8 +363,15 @@ def test_onboarding_completes_and_activates(org, application, recruiter):
         tutor.refresh_from_db()
         assert services.check_onboarding(tutor.pk) == "waiting"
     tutor_api = client_for(org, membership.user)
-    for key in ("agreement", "safeguarding_policy"):
-        assert tutor_api.post(f"/api/v1/me/onboarding/{key}/done").status_code == 200
+    assert tutor_api.post("/api/v1/me/onboarding/safeguarding_policy/done").status_code == 200
+    # The tutor agreement is signed, not ticked (gap batch G2: click-to-sign).
+    assert tutor_api.post("/api/v1/me/onboarding/agreement/done").status_code == 400
+    signed = tutor_api.post(
+        "/api/v1/me/onboarding/agreement/sign",
+        {"full_name": "Nia Okafor", "agree": True},
+        format="json",
+    )
+    assert signed.status_code == 200, signed.json()
     assert tutor_api.post("/api/v1/me/onboarding/payout/done").status_code == 400
     with tenant_context(org):
         payroll.update_profile(

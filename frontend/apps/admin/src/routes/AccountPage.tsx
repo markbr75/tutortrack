@@ -6,6 +6,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 
 import { api, fieldErrors, useMe } from "../api";
 import { AccountDeletionSection } from "./AccountDeletionSection";
+import { EmailChangeSection } from "./EmailChange";
 import { createPasskey, passkeysSupported } from "./webauthn";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -403,6 +404,7 @@ export function AccountPage() {
     <div>
       <h1 className="text-2xl font-semibold">{t("account.title")}</h1>
       <ProfileSection />
+      <EmailChangeSection />
       <PasswordSection />
       <MFASection />
       <PasskeysSection />

@@ -98,3 +98,11 @@ class UserAccountDeleted(DomainEvent):
 
     event_type: ClassVar[str] = "user.account_deleted"
     subject_type: ClassVar[str] = "user"
+
+
+@dataclass(frozen=True, kw_only=True)
+class UserEmailChanged(DomainEvent):
+    """Someone confirmed a new sign-in email (FR-03-9). No addresses in the payload."""
+
+    event_type: ClassVar[str] = "user.email_changed"
+    subject_type: ClassVar[str] = "user"

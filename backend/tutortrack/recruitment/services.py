@@ -436,28 +436,73 @@ def _auto_done(instance: ChecklistInstance, item: dict[str, Any]) -> bool:
     return False
 
 
+def needs_signature(item: dict[str, Any]) -> bool:
+    """Agreements the tutor signs (click-to-sign) rather than ticks: ``"sign": true`` on the
+    item; templates from before gap batch G2 sign their main ``agreement`` item."""
+    return item.get("kind") == "agreement" and bool(
+        item.get("sign", item.get("key") == "agreement")
+    )
+
+
 def checklist_state(instance: ChecklistInstance) -> list[dict[str, Any]]:
     out = []
     for item in instance.items:
         done = instance.done.get(item["key"])
         auto = item.get("kind") not in ("agreement", "training", "custom")
         complete = bool(done) or (auto and _auto_done(instance, item))
-        out.append({**item, "done": complete, "done_at": (done or {}).get("at")})
+        out.append(
+            {
+                **item,
+                "done": complete,
+                "done_at": (done or {}).get("at"),
+                "needs_signature": needs_signature(item),
+                "signature_id": (done or {}).get("signature"),
+            }
+        )
     return out
 
 
 @transaction.atomic
-def complete_item(tutor: TutorProfile, key: str, *, user: Any = None) -> ChecklistInstance:
+def sign_agreement(tutor: TutorProfile, key: str, *, user: Any, full_name: str) -> Any:
+    """The tutor signs an onboarding agreement in the tutor portal (FR-18-5): click-to-sign
+    with an audit trail and a signed PDF copy (``crm.signing``) instead of "I agree"."""
+    from tutortrack.crm import signing
+
+    instance = ChecklistInstance.objects.select_for_update().get(tutor=tutor)
+    item = next((i for i in instance.items if i["key"] == key), None)
+    if item is None:
+        raise NotFound()
+    if not needs_signature(item):
+        raise BusinessRuleViolation(_("This step isn't signed."))
+    if key in instance.done:
+        raise BusinessRuleViolation(_("You have already signed this."))
+    text = str(item.get("text") or "\n\n".join(x for x in (item["label"], item.get("link")) if x))
+    signature = signing.sign_agreement(
+        tutor=tutor,
+        key=key,
+        title=str(item["label"]),
+        text=text,
+        signer=user,
+        full_name=full_name,
+    )
+    complete_item(tutor, key, user=user, signature=str(signature.pk))
+    return signature
+
+
+@transaction.atomic
+def complete_item(
+    tutor: TutorProfile, key: str, *, user: Any = None, signature: str = ""
+) -> ChecklistInstance:
     """The tutor ticks an agreement or training item (or staff do it for them)."""
     instance = ChecklistInstance.objects.select_for_update().get(tutor=tutor)
     item = next((i for i in instance.items if i["key"] == key), None)
     if item is None:
         raise NotFound()
     if key not in instance.done:
-        instance.done = {
-            **instance.done,
-            key: {"at": now().isoformat(), "by": str(getattr(user, "pk", ""))},
-        }
+        entry = {"at": now().isoformat(), "by": str(getattr(user, "pk", ""))}
+        if signature:
+            entry["signature"] = signature
+        instance.done = {**instance.done, key: entry}
         instance.save(update_fields=["done", "updated_at"])
         audit.record(instance, "item_done", {"item": [None, key]})
         publish(events.OnboardingItemDone(subject_id=tutor.pk, item=key))

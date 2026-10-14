@@ -108,6 +108,7 @@ CHECKLIST = [
         "label": "Sign the tutor agreement",
         "kind": "agreement",
         "mandatory": True,
+        "sign": True,  # click-to-sign with a signed PDF copy (FR-18-5, gap batch G2)
     },
     {
         "key": "safeguarding_policy",

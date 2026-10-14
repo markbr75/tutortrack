@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, uploadFile } from "../api";
+import { SignForm } from "../esign/SignForm";
+import { DocumentList } from "../pages/DocumentsPage";
 import { MyBackgroundChecks } from "./Phase3";
 
 /** The onboarding checklist (FR-18-5). */
@@ -20,6 +22,20 @@ export function OnboardingPage() {
       unwrap(await api.POST("/api/v1/me/onboarding/{key}/done", { params: { path: { key } } })),
     onSuccess: (data) => queryClient.setQueryData(["tutor", "onboarding"], data),
   });
+  const [signing, setSigning] = useState<string | null>(null);
+  const sign = useMutation({
+    mutationFn: async ({ key, name }: { key: string; name: string }) =>
+      unwrap(
+        await api.POST("/api/v1/me/onboarding/{key}/sign", {
+          params: { path: { key } },
+          body: { full_name: name, agree: true },
+        }),
+      ),
+    onSuccess: (data) => {
+      setSigning(null);
+      queryClient.setQueryData(["tutor", "onboarding"], data);
+    },
+  });
   if (!state.data) return <Spinner className="size-5" label={t("grid.loading")} />;
   return (
     <div className="space-y-4">
@@ -33,7 +49,15 @@ export function OnboardingPage() {
               {item.mandatory ? " *" : ""}
             </span>
             {item.done ? (
-              <span className="font-medium">{t("onboard.done")}</span>
+              <span className="font-medium">
+                {item.signature_id ? t("esign.signedDone") : t("onboard.done")}
+              </span>
+            ) : item.needs_signature ? (
+              signing === item.key ? null : (
+                <Button size="sm" onClick={() => setSigning(item.key)}>
+                  {t("esign.signButton", { title: item.label })}
+                </Button>
+              )
             ) : ["agreement", "training", "custom"].includes(item.kind) ? (
               <Button size="sm" variant="secondary" onClick={() => tick.mutate(item.key)}>
                 {t("onboard.markDone")}
@@ -41,10 +65,55 @@ export function OnboardingPage() {
             ) : (
               <span className="text-xs text-muted-foreground">{t("onboard.auto")}</span>
             )}
+            {signing === item.key ? (
+              <div className="w-full">
+                {item.link ? (
+                  <a
+                    className="text-sm underline"
+                    href={item.link}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {t("esign.read", { title: item.label })}
+                  </a>
+                ) : null}
+                <SignForm
+                  title={item.label}
+                  pending={sign.isPending}
+                  error={sign.error?.message}
+                  onSign={(name) => sign.mutate({ key: item.key, name })}
+                  onCancel={() => setSigning(null)}
+                />
+              </div>
+            ) : null}
           </li>
         ))}
       </ul>
       {tick.error ? <Alert tone="danger">{tick.error.message}</Alert> : null}
+      <section aria-labelledby="tutor-documents" className="space-y-2">
+        <h2 id="tutor-documents" className="text-lg font-medium">
+          {t("esign.tutorTitle")}
+        </h2>
+        <DocumentList
+          queryKey={["tutor", "documents"]}
+          list={async () => unwrap(await api.GET("/api/v1/tutor/documents"))}
+          download={async (id) =>
+            unwrap(
+              await api.GET("/api/v1/tutor/documents/{document_id}/download", {
+                params: { path: { document_id: id } },
+              }),
+            )
+          }
+          sign={async (id, fullName) =>
+            unwrap(
+              await api.POST("/api/v1/tutor/documents/{document_id}/sign", {
+                params: { path: { document_id: id } },
+                body: { full_name: fullName, agree: true },
+              }),
+            )
+          }
+        />
+      </section>
     </div>
   );
 }

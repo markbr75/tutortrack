@@ -753,6 +753,12 @@ GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID", default="")
 GOOGLE_CLIENT_SECRET = env("GOOGLE_CLIENT_SECRET", default="")
 MICROSOFT_CLIENT_ID = env("MICROSOFT_CLIENT_ID", default="")
 MICROSOFT_CLIENT_SECRET = env("MICROSOFT_CLIENT_SECRET", default="")
+# Sign in with Apple (gap batch G2): Services ID, team, key id and the ES256 private key
+# (.p8 contents; "\n" escapes allowed). The client secret is a short-lived JWT signed with it.
+APPLE_CLIENT_ID = env("APPLE_CLIENT_ID", default="")
+APPLE_TEAM_ID = env("APPLE_TEAM_ID", default="")
+APPLE_KEY_ID = env("APPLE_KEY_ID", default="")
+APPLE_PRIVATE_KEY = env("APPLE_PRIVATE_KEY", default="").replace("\\n", "\n")
 
 # --- Integrations (E22): calendars and video. A provider whose platform keys are empty uses
 # an in-memory fake (development and tests), so every flow works without credentials.
