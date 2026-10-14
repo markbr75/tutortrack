@@ -1,0 +1,2 @@
+# Public Web Push (VAPID) test key in a since-replaced frontend test fixture; not a secret.
+c727744ffea77bb3bf44510d5d7fa322b4d9b398:frontend/apps/portal/src/push/Notifications.test.tsx:generic-api-key:9
