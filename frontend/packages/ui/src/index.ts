@@ -20,4 +20,13 @@ export {
   type TextFieldProps,
 } from "./Form";
 export type { ColumnDef } from "@tanstack/react-table";
+export { MASTERY_LEVELS } from "./masteryLevels";
+export {
+  MasteryHeatmap,
+  TrendChart,
+  type HeatmapUnit,
+  type MasteryLevel,
+  type TrendChartLabels,
+  type TrendPoint,
+} from "./LearningCharts";
 export { Tabs, type TabItem, type TabsProps } from "./Tabs";

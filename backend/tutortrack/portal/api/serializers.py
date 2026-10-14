@@ -30,6 +30,7 @@ class PortalFeaturesSerializer(serializers.Serializer):
     reschedule = serializers.BooleanField()
     classes = serializers.BooleanField()
     referrals = serializers.BooleanField()
+    learning = serializers.BooleanField()
 
 
 class PortalMeSerializer(serializers.Serializer):

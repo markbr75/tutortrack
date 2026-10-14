@@ -1,0 +1,64 @@
+{% load i18n %}<!doctype html>
+<html lang="{{ org.locale|default:'en-GB' }}">
+<head><meta charset="utf-8"><title>{{ report.title }}</title>
+{% include "billing/_style.html" %}
+<style>
+  h2 { font-size: 12pt; margin: 7mm 0 2mm; }
+  .summary { white-space: pre-wrap; line-height: 1.45; }
+  .pill { display: inline-block; padding: 0.5mm 2mm; border: 1px solid #9ca3af; border-radius: 2mm; font-size: 8.5pt; }
+  .bar { height: 2.5mm; background: #e5e7eb; width: 40mm; }
+  .bar span { display: block; height: 2.5mm; background: {{ brand.primary_colour|default:"#111827" }}; }
+</style></head>
+<body>
+  {% include "billing/_brand.html" %}
+  <div class="row">
+    <div><h1>{{ report.title }}</h1><div><strong>{{ org.name }}</strong></div></div>
+    <div class="muted">{{ snap.student.name }}<br>{{ report.period_start|date:"j M Y" }} – {{ report.period_end|date:"j M Y" }}</div>
+  </div>
+
+  {% if report.summary %}<h2>{% trans "Summary" %}</h2><div class="summary">{{ report.summary }}</div>{% endif %}
+
+  <h2>{% trans "Attendance" %}</h2>
+  {% if snap.attendance.lessons %}
+    <p>{% blocktrans with attended=snap.attendance.attended lessons=snap.attendance.lessons rate=snap.attendance.rate %}Attended {{ attended }} of {{ lessons }} lessons ({{ rate }}%).{% endblocktrans %}</p>
+  {% else %}<p class="muted">{% trans "No lessons in this period." %}</p>{% endif %}
+
+  {% if snap.highlights %}
+  <h2>{% trans "From the lessons" %}</h2>
+  <table><tbody>
+    {% for h in snap.highlights %}<tr><td style="width:22mm">{{ h.date }}</td><td>{{ h.text }}<div class="muted">{{ h.tutor }}</div></td></tr>{% endfor %}
+  </tbody></table>
+  {% endif %}
+
+  {% if topics %}
+  <h2>{% trans "Topics covered" %}</h2>
+  <table>
+    <thead><tr><th>{% trans "Topic" %}</th><th>{% trans "Unit" %}</th><th>{% trans "Lessons" %}</th><th>{% trans "Confidence" %}</th></tr></thead>
+    <tbody>{% for t in topics %}<tr><td>{{ t.name }}</td><td class="muted">{{ t.unit }}</td><td class="num">{{ t.lessons }}</td><td><span class="pill">{{ t.level_label }}</span></td></tr>{% endfor %}</tbody>
+  </table>
+  {% endif %}
+
+  {% if snap.goals %}
+  <h2>{% trans "Goals" %}</h2>
+  <table>
+    <thead><tr><th>{% trans "Goal" %}</th><th>{% trans "Target" %}</th><th>{% trans "Progress" %}</th></tr></thead>
+    <tbody>{% for g in snap.goals %}<tr><td>{{ g.title }}</td><td>{{ g.target_grade }}</td><td><div class="bar"><span style="width: {{ g.progress_percent }}%"></span></div>{{ g.progress_percent }}%</td></tr>{% endfor %}</tbody>
+  </table>
+  {% endif %}
+
+  {% if snap.assessments %}
+  <h2>{% trans "Assessments" %}</h2>
+  <table>
+    <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Assessment" %}</th><th class="num">{% trans "Score" %}</th><th>{% trans "Grade" %}</th></tr></thead>
+    <tbody>{% for a in snap.assessments %}<tr><td>{{ a.date }}</td><td>{{ a.name }}</td><td class="num">{% if a.percent %}{{ a.percent }}%{% endif %}</td><td>{{ a.grade }}</td></tr>{% endfor %}</tbody>
+  </table>
+  {% endif %}
+
+  <h2>{% trans "Homework" %}</h2>
+  {% if snap.homework.due %}
+    <p>{% blocktrans with done=snap.homework.on_time due=snap.homework.due rate=snap.homework.completion_rate %}Handed in {{ done }} of {{ due }} pieces on time ({{ rate }}%).{% endblocktrans %}</p>
+  {% else %}<p class="muted">{% trans "No homework was due in this period." %}</p>{% endif %}
+
+  {% include "billing/_brand_footer.html" %}
+</body>
+</html>

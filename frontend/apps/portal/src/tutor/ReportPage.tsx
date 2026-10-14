@@ -23,6 +23,13 @@ export function ReportFieldInput({
 }) {
   const id = useId();
   const { t } = useTranslation();
+  // E21: curriculum topics to pick from; a matching name tags the lesson on submit.
+  const topics = useQuery({
+    queryKey: ["learning", "topics"],
+    enabled: field.type === "topics" && !disabled,
+    staleTime: 300_000,
+    queryFn: async () => unwrap(await api.GET("/api/v1/learning/topics")),
+  });
   const label = field.required ? `${field.label} *` : field.label;
   if (field.type === "rating") {
     return (
@@ -75,21 +82,38 @@ export function ReportFieldInput({
     );
   }
   if (field.type === "topics" || field.type === "attachment") {
+    const list = (value as string[]) ?? [];
     return (
-      <TextField
-        label={label}
-        hint={t("tutor.commaHint")}
-        disabled={disabled}
-        value={((value as string[]) ?? []).join(", ")}
-        onChange={(e) =>
-          onChange(
-            e.target.value
-              .split(",")
-              .map((v) => v.trim())
-              .filter(Boolean),
-          )
-        }
-      />
+      <div className="space-y-2">
+        <TextField
+          label={label}
+          hint={t("tutor.commaHint")}
+          disabled={disabled}
+          value={((value as string[]) ?? []).join(", ")}
+          onChange={(e) =>
+            onChange(
+              e.target.value
+                .split(",")
+                .map((v) => v.trim())
+                .filter(Boolean),
+            )
+          }
+        />
+        {field.type === "topics" && topics.data?.length && !disabled ? (
+          <SelectField
+            label={t("learning.tutor.addTopic")}
+            value=""
+            onChange={(e) => {
+              if (e.target.value && !list.includes(e.target.value))
+                onChange([...list, e.target.value]);
+            }}
+            options={[
+              { value: "", label: t("learning.tutor.chooseTopic") },
+              ...topics.data.map((x) => ({ value: x.name, label: `${x.curriculum}: ${x.name}` })),
+            ]}
+          />
+        ) : null}
+      </div>
     );
   }
   return (

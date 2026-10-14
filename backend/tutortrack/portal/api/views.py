@@ -98,6 +98,12 @@ class MeView(PortalView):
                     "invoices": setting("portal.show_invoices") and household.is_client,
                     "reports": setting("portal.show_reports"),
                     "profile": setting("portal.allow_profile_edits") and household.is_client,
+                    # E21: homework, resources, goals and progress reports.
+                    "learning": setting("learning.portal_enabled")
+                    and (
+                        has_perm(request.user, "portal.client.learning")
+                        or has_perm(request.user, "portal.student.learning")
+                    ),
                     **_phase2_features(request, household),
                 },
                 "welcome_text": str(get_setting("portal.welcome_text")),

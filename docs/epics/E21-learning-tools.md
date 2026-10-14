@@ -50,11 +50,64 @@ Lightweight learning-management features that make tutoring outcomes visible: a 
 `resource.shared`, `homework.assigned/submitted/graded/overdue`, `goal.created/achieved`, `assessment.recorded`, `progress_report.shared`, `loan.overdue`.
 
 ## 5. Delivery plan
-- [ ] **E21-T01** Resource library with sharing and portal display.
-- [ ] **E21-T02** Homework assign/submit/review with reminders.
-- [ ] **E21-T03** Curriculum trees (seed + CSV import), topic tagging in lesson reports, mastery.
-- [ ] **E21-T04** Goals and milestones.
-- [ ] **E21-T05** Assessments and trend charts.
-- [ ] **E21-T06** Progress report generator and sharing.
-- [ ] **E21-T07** Lending library.
-- [ ] **E21-T08** (Phase 3b) Built-in quizzes.
+- [x] **E21-T01** Resource library with sharing and portal display.
+- [x] **E21-T02** Homework assign/submit/review with reminders.
+- [x] **E21-T03** Curriculum trees (seed + CSV import), topic tagging in lesson reports, mastery.
+- [x] **E21-T04** Goals and milestones.
+- [x] **E21-T05** Assessments and trend charts.
+- [x] **E21-T06** Progress report generator and sharing.
+- [x] **E21-T07** Lending library.
+- [x] **E21-T08** (Phase 3b) Built-in quizzes.
+
+## Implementation notes (as built 2026-10-14)
+- **App:** `learning` (every table has RLS). See ADR 0025.
+  - Models: `ResourceFolder`, `Resource`, `ResourceShare`, `ResourceActivity` (new: views and downloads per viewer), `GradeScale`, `Homework`, `HomeworkAssignment`, `HomeworkSubmission`, `Curriculum`, `CurriculumNode` (units and topics), `LessonTopic`, `TopicMastery`, `Goal`, `GoalMilestone`, `Assessment`, `AssessmentResult`, `ProgressReport`, `LibraryItem`, `Loan`, `Quiz`, `QuizQuestion` and `QuizAttempt`.
+  - Records about one learner (assignments, mastery, goals, results, progress reports, loans, library items) are branch-scoped through the student's branch. Tutors work with the `own` scope: students on their jobs, the lessons they teach and the classes they teach (`learning.models.tutor_students`).
+  - Permissions: `learning.resource.*`, `learning.homework.*`, `learning.curriculum.*`, `learning.mastery.edit`, `learning.goal.*`, `learning.assessment.*`, `learning.progress.*`, `learning.library.*`, `learning.quiz.*`, plus `portal.client.learning` and `portal.student.learning`. Coordinators get `learning.*`. Finance gets library view and charge. Tutors keep `learning.*:own`, but their role now denies curriculum editing, progress approval, the library and charging.
+  - Settings (`learning.*`): portal on/off, homework reminder hours, homework from reports and its due days, late submissions, auto-achieving goals, progress approval and sharing on approval, loan period, loan reminder days, overdue notice interval and count.
+- **Resources (T01):** an organisation library (owner empty) and tutors' personal libraries (a tutor's new resources are theirs and private by default). Visibility is staff only, staff and tutors, or the owner only.
+  - Files use the existing direct-to-storage uploads, so the E04 `storage_gb` quota is enforced there. `GET /learning/storage` shows usage against the plan.
+  - Links are typed (YouTube, Google Docs, other). Only http(s) addresses are accepted.
+  - Resources can be tagged by subject, level, curriculum topics and free tags, and filed in folders.
+  - Sharing targets a student, a job (its students), a lesson (its attendees) or a class (E20 attending enrolments). Tutors may only share with their own students. Families see shares in the portal and get a `resource_shared` message. Opening records a view or download.
+  - File access for families and tutors uses `core.storage` access rules on resources, homework attachments and submissions.
+- **Homework (T02):** set for picked students, a class roster, a job's students or a lesson's attendees. Each student gets a `HomeworkAssignment` and `homework.assigned`.
+  - Submission types: text, file, link, mark as done, and quiz (T08). Late work is accepted and flagged unless `learning.late_submissions` is off.
+  - Review: complete with a grade on the homework's scale and feedback (`homework.graded`), or return for resubmission with a new due date (`homework.returned`, a new reminder round). Staff can excuse or cancel.
+  - Grade scales: percentage, letters, 9–1 and a custom list are created on first use. Percent grades also store `score_percent`.
+  - Completion stats per student or overall (due, on time, late, overdue, rate).
+  - "Assign from a lesson/report": the API takes a lesson or report. With `learning.homework_from_reports` (default on), a submitted E09 report's `homework` answer is set for the lesson's students once per report. It is a "mark as done" task, due N days later at 18:00 org time.
+  - Reminders and overdue: `HomeworkReminderWorkflow` (TW1, below).
+- **Curricula (T03):** built-in outlines for GCSE Maths, KS2 English and SAT Math (units and topics with codes) install as editable copies, once each.
+  - CSV import (`unit,topic,code`) is additive: existing units match by name and topics by code or name, so re-imports add only what's new.
+  - Units sit at the top and topics in a unit. A node used by lessons can't be deleted.
+  - Topic tagging (E09): on `lesson_report.submitted`, the report's `topics` answers are matched to curriculum topics by id, code or name (the lesson's subject first). Free text that matches nothing is ignored. Tagging can also be done through `POST /learning/lesson-topics`.
+  - The admin report form suggests topic names (datalist), and the tutor app adds a topic picker. Answers stay human-readable in the shared report.
+  - Tagging moves each lesson student's mastery to at least *learning* and counts coverage. Tutors and staff set mastery (not started, learning, secure, mastered); `topic_mastery.changed` is published.
+  - Coverage view (`/learning/students/{id}/coverage`, also in the portal): a heatmap of units and topics with level and lessons covered.
+- **Goals (T04):** target grade, exam and SMART goals with milestones. Progress is the share of milestones done; without milestones the tutor sets it. When all milestones are done the goal is achieved (setting), or staff mark it achieved. Events: `goal.created`, `goal.achieved` (the family is told). Families see goals marked visible.
+- **Assessments (T05):** assessments (diagnostic, mock exam, quiz, school report, other) with results: score/max (percentage half-up to 2 places, Hypothesis-tested), grade validated against the assessment's scale, notes, attachment and family visibility. `assessment.recorded` is published on the first record, not on corrections.
+  - Score trend: `/learning/students/{id}/trend` (optionally by subject) and the portal results. Shown as an accessible SVG line chart (one 0–100% axis, focusable markers with tooltips, table view) in `packages/ui`.
+- **Progress reports (T06):** generated per student and period, or in bulk for everyone with lessons in the period (tutors: their students).
+  - The stored snapshot holds attendance (outcomes in the period, without tutor and admin cancellations), highlights from written lesson reports (client-visible text only), topics covered with mastery, goals, assessments in the period, and homework stats. Drafts can be regenerated.
+  - Flow: draft → submitted → approved → shared. Submitting needs summary comments. Approval needs `learning.progress.approve`. Shared reports go to the portal and are emailed with a WeasyPrint PDF (`progress_report_shared`). With approval off, submitting approves and shares straight away.
+  - AI draft (E31) seam: `learning.progress.register_drafter`. Until E31 registers one, `POST …/draft-summary` returns 403 `feature-disabled` and `ai_draft_available` is false.
+  - Deviation: approval is a plain status change (no timers), and periodic generation is staff-triggered. There is no per-organisation Temporal Schedule yet.
+- **Lending library (T07):** items with quantity, location and replacement cost (Money). Lending checks availability under a row lock and defaults to `learning.loan_days`. Loans can be returned, extended or marked lost.
+  - Lost with `charge` (needs `learning.library.charge`) bills the family through `billing.services.charge_fee` (ad hoc kind, source key `library-loan:{id}`), so a retried request never bills twice. The endpoint also honours `Idempotency-Key`.
+  - Reminders, overdue and notices: `LoanReminderWorkflow`.
+- **Quizzes (T08, Phase 3b, built):** single-choice, multiple-choice (exact match) and short-answer questions. Short answers are compared ignoring case, accents, spacing and end punctuation.
+  - A quiz is set as homework (`submission_type=quiz`). The portal shows questions without answers. Handing in auto-marks the quiz (`quiz.submitted`), completes the assignment with the percentage grade, and records a *quiz* assessment result, so it appears in the trend.
+  - A quiz's questions can't change once it has been taken.
+  - E18 tutor subject tests: `Quiz.purpose=tutor_test` and `services.take_quiz(student=None, user=…)` are the seam. The E18 UI is not built.
+- **E21-TW1 (Temporal):**
+  - `HomeworkReminderWorkflow` (`homework:{org}:{assignment}:{round}`): started by `homework.assigned` and `homework.returned`. It reminds before the due time (unless the homework was set inside the reminder window), then at the due time marks the assignment overdue (`homework.overdue`) and tells the family. A hand-in signals `changed` and ends it. Due-date changes, cancelling and excusing signal it from the services.
+  - `LoanReminderWorkflow` (`loan:{org}:{loan}`): started by `loan.created`. It reminds before the due date, marks the loan overdue the day after (`loan.overdue`), then sends up to N notices every M days. Return and lost signal it; extending signals from the service.
+  - Activities call idempotent services; overdue events use the activity dedupe key. Tests cover timers, signals, a retry and replay of recorded histories.
+- **Messages (E13):** `homework_assigned`, `homework_reminder`, `homework_overdue`, `homework_graded` (family and student login), `homework_submitted` (tutor), `resource_shared`, `progress_report_shared` (PDF attached), `goal_achieved`, `loan_due` and `loan_overdue`. All are in the `reports` category.
+- **UI:**
+  - Admin `/learning` has tabs for homework (review queue, set homework), resources (storage, share), curricula (built-ins, tree, CSV import), assessments, progress reports (generate, edit, approve, share, PDF), library and quizzes (question builder).
+  - `/learning/students/{id}` shows the coverage heatmap with mastery setting, the score trend, goals with milestones and homework completion.
+  - Family portal `/portal/learning` has tabs for homework, resources, goals, results, progress reports and loans, plus a homework page for handing in (text, link, files, quiz, done). The `learning` feature is in `/portal/me`.
+  - Tutor app: `/portal/tutor/homework` (review queue, set homework), `/portal/tutor/homework/{id}` (review) and `/portal/tutor/resources` (my library, share with my students).
+- **Not built:** FR-21-8 (sending resources to E22 video rooms such as Lessonspace). Lesson shares publish `resource.shared` with `target=lesson` for E22 to pick up when providers support it.

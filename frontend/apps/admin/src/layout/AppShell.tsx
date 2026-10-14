@@ -21,6 +21,7 @@ const NAV = [
   { to: "/jobs", key: "nav.jobs", permission: "jobs.job.view" },
   { to: "/courses", key: "nav.courses", permission: "courses.view" },
   { to: "/growth", key: "referrals.nav", permission: "growth.affiliate.view" },
+  { to: "/learning", key: "learning.nav", permission: "learning.homework.view" },
   { to: "/billing", key: "nav.billing", permission: "billing.invoice.view" },
   { to: "/payroll", key: "nav.payroll", permission: "payroll.view" },
   { to: "/leads", key: "nav.leads", permission: "leads.enquiry.view" },
