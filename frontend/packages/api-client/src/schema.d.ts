@@ -403,6 +403,146 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/accounting/xero-payroll": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``GET /accounting/xero-payroll``: connection, employee links and recent syncs. */
+    get: operations["accounting_xero_payroll_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/xero-payroll/earnings-rate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``GET`` the earnings rates; ``PUT`` the one tutors' hours are paid at. */
+    get: operations["accounting_xero_payroll_earnings_rate_list"];
+    /** @description ``GET`` the earnings rates; ``PUT`` the one tutors' hours are paid at. */
+    put: operations["accounting_xero_payroll_earnings_rate_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/xero-payroll/employees": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``GET /accounting/xero-payroll/employees``: employees in Xero Payroll. */
+    get: operations["accounting_xero_payroll_employees_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/xero-payroll/links": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** @description ``PUT /accounting/xero-payroll/links``: link a tutor to a Xero employee by hand. */
+    put: operations["accounting_xero_payroll_links_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/xero-payroll/match": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description ``POST /accounting/xero-payroll/match``: link employed tutors by email. */
+    post: operations["accounting_xero_payroll_match_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/xero-payroll/sync": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description ``POST /accounting/xero-payroll/sync``: (re)send an approved pay run's timesheets.
+     *     Idempotent per tutor; send ``Idempotency-Key``.
+     */
+    post: operations["accounting_xero_payroll_sync_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/xero-payroll/syncs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``/accounting/xero-payroll/syncs``: timesheet syncs per pay run. */
+    get: operations["accounting_xero_payroll_syncs_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/accounting/xero-payroll/syncs/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``/accounting/xero-payroll/syncs``: timesheet syncs per pay run. */
+    get: operations["accounting_xero_payroll_syncs_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/affiliate-links": {
     parameters: {
       query?: never;
@@ -2194,6 +2334,129 @@ export interface paths {
     };
     /** @description Free start times for a tutor (FR-08-5 AC). */
     get: operations["availability_slots_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/background-checks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``/background-checks``: online checks started from the tutor record. */
+    get: operations["background_checks_list"];
+    put?: never;
+    /** @description ``/background-checks``: online checks started from the tutor record. */
+    post: operations["background_checks_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/background-checks/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``/background-checks``: online checks started from the tutor record. */
+    get: operations["background_checks_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/background-checks/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description ``/background-checks``: online checks started from the tutor record. */
+    post: operations["background_checks_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/background-checks/{id}/details": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Result, certificate number and report link: ``compliance.checks.results``,
+     *     audited.
+     */
+    get: operations["background_checks_details_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/background-checks/{id}/outcome": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Record a manual (AU WWCC) outcome or confirm a "needs review" result. */
+    post: operations["background_checks_outcome_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/background-checks/{id}/refresh": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Ask the provider now (signals the check's workflow). */
+    post: operations["background_checks_refresh_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/background-checks/providers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``/background-checks``: online checks started from the tutor record. */
+    get: operations["background_checks_providers_list"];
     put?: never;
     post?: never;
     delete?: never;
@@ -10655,6 +10918,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/lessons/{id}/classroom": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``GET /lessons/{id}/classroom``: the in-app classroom (FR-22-5) for the lesson's
+     *     tutor, its families or staff.
+     */
+    get: operations["lessons_classroom_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lessons/{id}/classroom/consent": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description ``POST /lessons/{id}/classroom/consent``: a family agrees to recording (E29 consent
+     *     record) from the classroom prompt.
+     */
+    post: operations["lessons_classroom_consent_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/lessons/{id}/complete": {
     parameters: {
       query?: never;
@@ -10772,6 +11075,26 @@ export interface paths {
      *     permission) to schedule anyway.
      */
     post: operations["lessons_reschedule_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/lessons/{id}/video-attendance": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``GET /lessons/{id}/video-attendance``: the register suggested by who joined the
+     *     online lesson, and its actual length (pre-fills the tutor's register).
+     */
+    get: operations["lessons_video_attendance_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -11150,6 +11473,23 @@ export interface paths {
     head?: never;
     /** @description Who am I here: profile, organisation, role, effective permissions, features. */
     patch: operations["me_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/me/background-checks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``GET /me/background-checks``: the tutor's own checks with their invitation links. */
+    get: operations["me_background_checks_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/me/compliance": {
@@ -11641,6 +11981,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/me/recordings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``GET /me/recordings``: recordings shared with the signed-in family. */
+    get: operations["me_recordings_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/me/sessions": {
     parameters: {
       query?: never;
@@ -11686,6 +12043,41 @@ export interface paths {
     put?: never;
     /** @description Sign out every other device. */
     post: operations["me_sessions_revoke_all_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/tax-identity": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The tutor's own tax id (tutor portal): write-only, shown masked. */
+    get: operations["me_tax_identity_retrieve"];
+    /** @description The tutor's own tax id (tutor portal): write-only, shown masked. */
+    put: operations["me_tax_identity_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/tax-summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``GET /me/tax-summary?year=``: what the tutor was paid in a US tax year. */
+    get: operations["me_tax_summary_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -13308,6 +13700,97 @@ export interface paths {
     /** @description The account the organisation pays tutors from (bank files). */
     put: operations["payroll_originator_update"];
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payroll/tax-forms": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Finalised 1099-NEC filings (immutable); tutors see their own. */
+    get: operations["payroll_tax_forms_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payroll/tax-forms/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Finalised 1099-NEC filings (immutable); tutors see their own. */
+    get: operations["payroll_tax_forms_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payroll/tax-years/{year}/1099": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``GET /payroll/tax-years/{year}/1099``: box 1 per contractor tutor paid in USD. */
+    get: operations["payroll_tax_years_1099_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payroll/tax-years/{year}/1099/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``GET /payroll/tax-years/{year}/1099/export``: the IRIS-style CSV; ``full_tin=true``
+     *     needs ``payroll.tax.view`` and is audited.
+     */
+    get: operations["payroll_tax_years_1099_export_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payroll/tax-years/{year}/1099/finalise": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description ``POST /payroll/tax-years/{year}/1099/finalise``: freeze the figures (immutable
+     *     filings; changed figures are filed as corrections). Send ``Idempotency-Key``.
+     */
+    post: operations["payroll_tax_years_1099_finalise_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -15454,6 +15937,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/public/mobile-app": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description White-label app configuration (generic when the plan has no white-label apps). */
+    get: operations["public_mobile_app_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/public/offers/{token}": {
     parameters: {
       query?: never;
@@ -15729,6 +16229,74 @@ export interface paths {
      *     lines per tutor, each with a trace. You only see the sides your role may see.
      */
     post: operations["rates_quote_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/recordings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``/recordings``: recordings of online lessons. Tutors see their own lessons'
+     *     available recordings; ``video.recording.manage`` sees and manages all.
+     */
+    get: operations["recordings_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/recordings/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``/recordings``: recordings of online lessons. Tutors see their own lessons'
+     *     available recordings; ``video.recording.manage`` sees and manages all.
+     */
+    get: operations["recordings_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description ``/recordings``: recordings of online lessons. Tutors see their own lessons'
+     *     available recordings; ``video.recording.manage`` sees and manages all.
+     */
+    delete: operations["recordings_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description ``/recordings``: recordings of online lessons. Tutors see their own lessons'
+     *     available recordings; ``video.recording.manage`` sees and manages all.
+     */
+    patch: operations["recordings_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/recordings/{id}/play": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``GET /recordings/{id}/play``: a playback link after an access check (staff, the
+     *     lesson's tutor, or the family when shared); every read is audited.
+     */
+    get: operations["recordings_play_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -16108,6 +16676,131 @@ export interface paths {
     };
     /** @description Download the report as CSV, Excel or PDF (audited as an export). */
     get: operations["reporting_reports_export_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/warehouse/destinations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Where the organisation's data is exported (Enterprise: ``warehouse_export``). */
+    get: operations["reporting_warehouse_destinations_list"];
+    put?: never;
+    /** @description Where the organisation's data is exported (Enterprise: ``warehouse_export``). */
+    post: operations["reporting_warehouse_destinations_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/warehouse/destinations/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Where the organisation's data is exported (Enterprise: ``warehouse_export``). */
+    get: operations["reporting_warehouse_destinations_retrieve"];
+    /** @description Where the organisation's data is exported (Enterprise: ``warehouse_export``). */
+    put: operations["reporting_warehouse_destinations_update"];
+    post?: never;
+    /** @description Where the organisation's data is exported (Enterprise: ``warehouse_export``). */
+    delete: operations["reporting_warehouse_destinations_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/warehouse/destinations/{id}/check": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Where the organisation's data is exported (Enterprise: ``warehouse_export``). */
+    post: operations["reporting_warehouse_destinations_check_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/warehouse/destinations/{id}/exports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The latest 50 runs. */
+    get: operations["reporting_warehouse_destinations_exports_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/warehouse/destinations/{id}/run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Where the organisation's data is exported (Enterprise: ``warehouse_export``). */
+    post: operations["reporting_warehouse_destinations_run_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/warehouse/exports/{id}/download": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``GET /reporting/warehouse/exports/{id}/download?dataset=``: a 10-minute link to a
+     *     file of a TutorTrack-stored export (audited).
+     */
+    get: operations["reporting_warehouse_exports_download_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reporting/warehouse/schema": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``GET /reporting/warehouse/schema``: the documented dataset schemas. */
+    get: operations["reporting_warehouse_schema_list"];
     put?: never;
     post?: never;
     delete?: never;
@@ -18840,6 +19533,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/tutors/{id}/tax-identity": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``/tutors/{id}/tax-identity``: the tutor's SSN, ITIN or EIN for 1099-NEC forms. Stored
+     *     encrypted; masked unless ``?full=true`` with ``payroll.tax.view`` (audited).
+     */
+    get: operations["tutors_tax_identity_retrieve"];
+    /**
+     * @description ``/tutors/{id}/tax-identity``: the tutor's SSN, ITIN or EIN for 1099-NEC forms. Stored
+     *     encrypted; masked unless ``?full=true`` with ``payroll.tax.view`` (audited).
+     */
+    put: operations["tutors_tax_identity_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/unconfirmed-lessons": {
     parameters: {
       query?: never;
@@ -20062,10 +20779,23 @@ export interface components {
       filename: string;
       content: string;
     };
+    /**
+     * @description * `csv` - csv
+     *     * `bacs18` - bacs18
+     *     * `sepa` - sepa
+     *     * `nacha` - nacha
+     *     * `aba` - aba
+     * @enum {string}
+     */
+    AffiliateBankFileRequestFileFormatEnum: "csv" | "bacs18" | "sepa" | "nacha" | "aba";
     AffiliateBankFileRequestRequest: {
       statements: string[];
       file_format?:
-        (components["schemas"]["FileFormatEnum"] | components["schemas"]["NullEnum"]) | null;
+        | (
+            | components["schemas"]["AffiliateBankFileRequestFileFormatEnum"]
+            | components["schemas"]["NullEnum"]
+          )
+        | null;
     };
     /**
      * @description * `individual` - Individual
@@ -20728,6 +21458,20 @@ export interface components {
         [key: string]: number;
       };
     };
+    AttendanceStudent: {
+      /** Format: uuid */
+      attendee_id: string;
+      /** Format: uuid */
+      student_id: string;
+      name: string;
+      suggested_outcome: string;
+      late_minutes: number | null;
+      minutes_attended: number;
+      /** Format: date-time */
+      first_joined_at: string | null;
+      /** Format: date-time */
+      last_left_at: string | null;
+    };
     AudiencePreview: {
       total: number;
       sendable: number;
@@ -20950,6 +21694,65 @@ export interface components {
       /** Format: date */
       since: string;
     };
+    BackgroundCheck: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      readonly provider: string;
+      readonly provider_label: string;
+      readonly package: string;
+      /** Format: uuid */
+      readonly requirement: string | null;
+      readonly requirement_name: string;
+      /** Format: uuid */
+      readonly record: string | null;
+      readonly status: components["schemas"]["BackgroundCheckStatusEnum"];
+      readonly result:
+        components["schemas"]["BackgroundCheckResultEnum"] | components["schemas"]["BlankEnum"];
+      readonly external_id: string;
+      /** Format: date */
+      readonly certificate_issue_date: string | null;
+      /** Format: date */
+      readonly certificate_expiry_date: string | null;
+      readonly state_code: string;
+      /** Format: date-time */
+      readonly consent_at: string | null;
+      /** Format: date-time */
+      readonly completed_at: string | null;
+      /** Format: date-time */
+      readonly last_checked_at: string | null;
+      readonly checks_run: number;
+      readonly error: string;
+      /** Format: date-time */
+      readonly reviewed_at: string | null;
+      /** Format: date-time */
+      readonly details_purged_at: string | null;
+      readonly verification_link: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `` - No result yet
+     *     * `clear` - Clear
+     *     * `consider` - Needs review
+     *     * `unable` - Couldn't be completed
+     * @enum {string}
+     */
+    BackgroundCheckResultEnum: "clear" | "consider" | "unable";
+    /**
+     * @description * `requested` - Requested
+     *     * `invited` - Waiting for the tutor
+     *     * `in_progress` - In progress
+     *     * `completed` - Completed
+     *     * `cancelled` - Cancelled
+     *     * `expired` - Expired
+     *     * `failed` - Couldn't start
+     * @enum {string}
+     */
+    BackgroundCheckStatusEnum:
+      "requested" | "invited" | "in_progress" | "completed" | "cancelled" | "expired" | "failed";
     Balances: {
       currency: string;
       ledger: components["schemas"]["MoneyOut"];
@@ -22149,9 +22952,63 @@ export interface components {
       is_required: boolean;
       done: boolean;
     };
+    CheckDetails: {
+      certificate_number: string;
+      report_url: string;
+      summary: {
+        [key: string]: unknown;
+      };
+      purged: boolean;
+    };
     CheckInRequest: {
       /** Format: uuid */
       lesson: string;
+    };
+    CheckOutcomeRequest: {
+      result: components["schemas"]["CheckOutcomeResultEnum"];
+      certificate_number?: string;
+      /** Format: date */
+      expiry_date?: string | null;
+      note?: string;
+    };
+    /**
+     * @description * `clear` - clear
+     *     * `consider` - consider
+     *     * `unable` - unable
+     * @enum {string}
+     */
+    CheckOutcomeResultEnum: "clear" | "consider" | "unable";
+    CheckProvider: {
+      key: string;
+      title: string;
+      countries: string[];
+      recommended: boolean;
+      packages: {
+        [key: string]: unknown;
+      }[];
+      connected: boolean;
+      needs_connection: boolean;
+      manual: boolean;
+    };
+    /**
+     * @description * `checkr` - checkr
+     *     * `dbs_update` - dbs_update
+     *     * `ucheck` - ucheck
+     *     * `wwcc` - wwcc
+     * @enum {string}
+     */
+    CheckRequestProviderEnum: "checkr" | "dbs_update" | "ucheck" | "wwcc";
+    CheckRequestRequest: {
+      /** Format: uuid */
+      tutor: string;
+      provider: components["schemas"]["CheckRequestProviderEnum"];
+      package?: string;
+      /** Format: uuid */
+      requirement?: string | null;
+      /** @description The tutor has agreed to the check. */
+      consent: boolean;
+      certificate_number?: string;
+      state_code?: string;
     };
     ChecklistItem: {
       key: string;
@@ -22242,6 +23099,44 @@ export interface components {
      * @enum {string}
      */
     ClassTeacherRoleEnum: "lead" | "assistant";
+    Classroom: {
+      /** Format: uuid */
+      lesson_id: string;
+      title: string;
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      role: components["schemas"]["ClassroomRoleEnum"];
+      provider: string;
+      embeddable: boolean;
+      join_url: string;
+      /** Format: date-time */
+      opens_at: string | null;
+      open: boolean;
+      safeguarding_banner: string;
+      recording: boolean;
+      consent_needed: string[];
+      resources: components["schemas"]["ClassroomResource"][];
+    };
+    ClassroomConsentOut: {
+      consented: string[];
+    };
+    ClassroomConsentRequest: {
+      student_ids?: string[];
+    };
+    ClassroomResource: {
+      /** Format: uuid */
+      id: string;
+      title: string;
+    };
+    /**
+     * @description * `tutor` - tutor
+     *     * `family` - family
+     *     * `staff` - staff
+     * @enum {string}
+     */
+    ClassroomRoleEnum: "tutor" | "family" | "staff";
     Client: {
       /** Format: uuid */
       readonly id: string;
@@ -23632,6 +24527,13 @@ export interface components {
       | "blocked"
       | "rejected"
       | "cancelled";
+    DatasetSchema: {
+      dataset: string;
+      description: string;
+      columns: {
+        [key: string]: unknown;
+      }[];
+    };
     /**
      * @description * `locale` - Locale default
      *     * `dd/MM/yyyy` - 31/12/2026
@@ -23983,6 +24885,14 @@ export interface components {
         [key: string]: string;
       };
     };
+    EarningsRateRef: {
+      id: string;
+      name: string;
+    };
+    EarningsRateRefRequest: {
+      id: string;
+      name: string;
+    };
     Economics: {
       charge: components["schemas"]["MoneyOut"];
       pay?: components["schemas"]["MoneyOut"];
@@ -24008,6 +24918,14 @@ export interface components {
       email: string;
       /** @default / */
       next: string;
+    };
+    EmployeeLink: {
+      /** Format: uuid */
+      tutor: string;
+      tutor_name: string;
+      employee_id: string;
+      name: string;
+      matched_by: string;
     };
     EmptySearch: {
       subject: string;
@@ -24711,15 +25629,6 @@ export interface components {
       /** Format: uuid */
       subject_id: string;
     };
-    /**
-     * @description * `csv` - csv
-     *     * `bacs18` - bacs18
-     *     * `sepa` - sepa
-     *     * `nacha` - nacha
-     *     * `aba` - aba
-     * @enum {string}
-     */
-    FileFormatEnum: "csv" | "bacs18" | "sepa" | "nacha" | "aba";
     FileRef: {
       /** Format: uuid */
       id: string;
@@ -24793,6 +25702,44 @@ export interface components {
       /** Format: uuid */
       branch?: string | null;
     };
+    Form1099Row: {
+      /** Format: uuid */
+      tutor: string;
+      name: string;
+      tin_type: string;
+      tin_hint: string;
+      address: {
+        [key: string]: string;
+      };
+      box1: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      payment_count: number;
+      reportable: boolean;
+      problems: string[];
+      /** Format: uuid */
+      filing?: string | null;
+      changed_since_filing: boolean;
+    };
+    Form1099Summary: {
+      tax_year: number;
+      currency: string;
+      threshold: string;
+      reportable: number;
+      problems: number;
+      rows: components["schemas"]["Form1099Row"][];
+    };
+    /**
+     * @description * `1099-NEC` - Form 1099-NEC
+     * @enum {string}
+     */
+    FormEnum: "1099-NEC";
     FormRequest: {
       type?: components["schemas"]["FormTypeEnum"];
       name: string;
@@ -26437,6 +27384,7 @@ export interface components {
      *     * `sms_credits_monthly` - sms_credits_monthly
      *     * `sso_saml` - sso_saml
      *     * `storage_gb` - storage_gb
+     *     * `warehouse_export` - warehouse_export
      *     * `webhooks` - webhooks
      *     * `white_label` - white_label
      * @enum {string}
@@ -26462,6 +27410,7 @@ export interface components {
       | "sms_credits_monthly"
       | "sso_saml"
       | "storage_gb"
+      | "warehouse_export"
       | "webhooks"
       | "white_label";
     LateFeeRule: {
@@ -26781,6 +27730,36 @@ export interface components {
       /** @default  */
       reason: string;
     };
+    LessonRecording: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly lesson: string;
+      readonly lesson_title: string;
+      /** Format: date-time */
+      readonly lesson_start: string;
+      readonly provider: string;
+      readonly status: components["schemas"]["LessonRecordingStatusEnum"];
+      /** Format: date-time */
+      readonly started_at: string | null;
+      readonly duration_seconds: number;
+      readonly size_bytes: number;
+      readonly file_type: string;
+      readonly missing_consent: unknown;
+      readonly shared_with_family: boolean;
+      /** Format: date-time */
+      readonly deleted_at: string | null;
+      readonly deleted_reason: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `available` - Available
+     *     * `restricted` - Restricted (no recording consent)
+     *     * `deleted` - Deleted
+     * @enum {string}
+     */
+    LessonRecordingStatusEnum: "available" | "restricted" | "deleted";
     LessonReport: {
       /** Format: uuid */
       readonly id: string;
@@ -27005,6 +27984,11 @@ export interface components {
       title: string;
       used: number;
       allowed: number | null;
+    };
+    LinkEmployeeRequest: {
+      /** Format: uuid */
+      tutor: string;
+      employee_id: string;
     };
     Loan: {
       /** Format: uuid */
@@ -27756,6 +28740,18 @@ export interface components {
       due_date?: string | null;
       done?: boolean;
     };
+    MobileAppConfig: {
+      white_label: boolean;
+      appId: string;
+      appName: string;
+      serverUrl: string;
+      allowNavigation: string[];
+      primaryColour: string;
+      onPrimary: string;
+      backgroundColour: string;
+      iconUrl: string;
+      organisation: string | null;
+    };
     /** @description Read-only money in computed responses (quotes, summaries). */
     MoneyOut: {
       amount: string;
@@ -27764,6 +28760,21 @@ export interface components {
     MoveRequest: {
       /** Format: uuid */
       stage: string;
+    };
+    MyBackgroundCheck: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly provider: string;
+      readonly provider_label: string;
+      readonly package: string;
+      readonly status: components["schemas"]["BackgroundCheckStatusEnum"];
+      readonly result:
+        components["schemas"]["BackgroundCheckResultEnum"] | components["schemas"]["BlankEnum"];
+      readonly invite_url: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly completed_at: string | null;
     };
     MyConsentRequest: {
       consent_type: string;
@@ -27847,6 +28858,15 @@ export interface components {
     };
     MyPreferencesRequest: {
       preferences: components["schemas"]["MyPreferenceRequest"][];
+    };
+    MyTaxSummary: {
+      tax_year: number;
+      currency: string;
+      box1: string;
+      reportable: boolean;
+      filed: boolean;
+      filed_box1: string | null;
+      tin_hint: string;
     };
     NamedRef: {
       id: string;
@@ -28780,6 +29800,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["AutomationRun"][];
     };
+    PaginatedBackgroundCheckList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["BackgroundCheck"][];
+    };
     PaginatedBankImportList: {
       /**
        * Format: uri
@@ -29508,6 +30541,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Lesson"][];
     };
+    PaginatedLessonRecordingList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["LessonRecording"][];
+    };
     PaginatedLessonReportList: {
       /**
        * Format: uri
@@ -29806,6 +30852,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Payout"][];
+    };
+    PaginatedPayrollTimesheetSyncList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PayrollTimesheetSync"][];
     };
     PaginatedPhoneNumberList: {
       /**
@@ -30301,6 +31360,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Task"][];
     };
+    PaginatedTaxFormFilingList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["TaxFormFiling"][];
+    };
     PaginatedTenantRowList: {
       /**
        * Format: uri
@@ -30456,6 +31528,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["WaitlistEntry"][];
+    };
+    PaginatedWarehouseDestinationList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["WarehouseDestination"][];
     };
     PaginatedWebhookDeliveryList: {
       /**
@@ -31350,6 +32435,9 @@ export interface components {
       vat_number?: string;
       /** Format: decimal */
       hourly_rate?: string | null;
+      pay_basis?: components["schemas"]["PayBasisEnum"];
+      /** Format: decimal */
+      commission_percent?: string | null;
     };
     PatchedPayTierRequest: {
       name?: string;
@@ -31503,6 +32591,10 @@ export interface components {
       pass_percent?: number;
       time_limit_minutes?: number | null;
       questions?: components["schemas"]["QuestionRequest"][];
+    };
+    PatchedRecordingUpdateRequest: {
+      release?: boolean;
+      share_with_family?: boolean;
     };
     PatchedReferralProgramRequest: {
       name?: string;
@@ -31929,6 +33021,12 @@ export interface components {
       allowed_origins?: string[];
       active?: boolean;
     };
+    /**
+     * @description * `rate` - Pay rate per lesson
+     *     * `commission` - Commission on what the client paid
+     * @enum {string}
+     */
+    PayBasisEnum: "rate" | "commission";
     PayBonusRequest: {
       amount?: {
         /**
@@ -32096,6 +33194,12 @@ export interface components {
        * @description For paid meetings and training
        */
       hourly_rate?: string | null;
+      pay_basis?: components["schemas"]["PayBasisEnum"];
+      /** Format: decimal */
+      commission_percent?: string | null;
+      readonly tin_type: components["schemas"]["TinTypeEnum"];
+      readonly tin_hint: string;
+      readonly wise_ready: boolean;
     };
     /**
      * @description * `stripe` - stripe
@@ -32465,6 +33569,30 @@ export interface components {
       country: string;
       bank: components["schemas"]["AffiliateBankDetailsRequest"];
     };
+    PayrollTimesheetSync: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly pay_run: string;
+      readonly pay_run_number: string;
+      readonly provider: string;
+      readonly status: components["schemas"]["PayrollTimesheetSyncStatusEnum"];
+      readonly results: unknown;
+      readonly attempts: number;
+      readonly error: string;
+      /** Format: date-time */
+      readonly synced_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `pending` - Sending
+     *     * `synced` - Sent
+     *     * `partial` - Sent with problems
+     *     * `error` - Failed
+     * @enum {string}
+     */
+    PayrollTimesheetSyncStatusEnum: "pending" | "synced" | "partial" | "error";
     PercentPair: {
       /** Format: decimal */
       charge_percent: string;
@@ -34720,6 +35848,11 @@ export interface components {
       /** @description Leave out to pay the oldest invoices first (the rest is credit). */
       allocations?: components["schemas"]["AllocationInputRequest"][] | null;
     };
+    RecordingLink: {
+      url: string;
+      password: string;
+      expires_in: number;
+    };
     RecoveryCodes: {
       /** @description Shown once. Each works one time. */
       recovery_codes: string[];
@@ -35836,12 +36969,19 @@ export interface components {
       field: string;
       message: string;
     };
+    RunExportRequest: {
+      /** @default false */
+      full: boolean;
+    };
     RunPreview: {
       clients: number;
       charges: number;
       totals: {
         [key: string]: string;
       };
+    };
+    RunStarted: {
+      workflow_id: string;
     };
     RunStep: {
       step_key: string;
@@ -37427,6 +38567,10 @@ export interface components {
      */
     SyncOutcomeEnum:
       "created" | "updated" | "unchanged" | "voided" | "error" | "retrying" | "skipped";
+    SyncRequestRequest: {
+      /** Format: uuid */
+      pay_run: string;
+    };
     TOTPConfirmRequest: {
       /** Format: uuid */
       device_id: string;
@@ -37509,6 +38653,44 @@ export interface components {
      * @enum {string}
      */
     TaskStatusEnum: "open" | "done" | "cancelled";
+    TaxFormFiling: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      readonly form: components["schemas"]["FormEnum"];
+      readonly tax_year: number;
+      readonly currency: string;
+      readonly box1: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly payment_count: number;
+      readonly tin_type: string;
+      readonly tin_hint: string;
+      readonly payee: unknown;
+      /** Format: uuid */
+      readonly corrects: string | null;
+      readonly superseded: boolean;
+      /** Format: date-time */
+      readonly finalised_at: string;
+    };
+    TaxIdentityOut: {
+      tin_type: string;
+      /** @description Masked unless ?full=true (payroll.tax.view, audited) */
+      tin: string;
+      tin_hint: string;
+    };
+    TaxIdentityRequest: {
+      tin_type: components["schemas"]["TinTypeEnum"];
+      tin: string;
+    };
     TaxMappingRow: {
       /** Format: uuid */
       tax_rate?: string | null;
@@ -38102,6 +39284,13 @@ export interface components {
      * @enum {string}
      */
     TimelineItemKindEnum: "note" | "task" | "document" | "change" | "message";
+    /**
+     * @description * `ssn` - Social Security number
+     *     * `itin` - Individual taxpayer identification number
+     *     * `ein` - Employer identification number
+     * @enum {string}
+     */
+    TinTypeEnum: "ssn" | "itin" | "ein";
     TokenRequest: {
       token: string;
     };
@@ -38403,9 +39592,10 @@ export interface components {
      *     * `bank_file` - Bank transfer (payment file)
      *     * `manual` - Paid manually
      *     * `external_payroll` - Payroll provider (employees)
+     *     * `wise` - Wise transfer
      * @enum {string}
      */
-    TutorPayMethodEnum: "stripe_connect" | "bank_file" | "manual" | "external_payroll";
+    TutorPayMethodEnum: "stripe_connect" | "bank_file" | "manual" | "external_payroll" | "wise";
     TutorPayout: {
       /** Format: uuid */
       readonly id: string;
@@ -38660,6 +39850,11 @@ export interface components {
       total: number;
       remaining: number;
     };
+    UnlinkedTutor: {
+      /** Format: uuid */
+      tutor: string;
+      tutor_name: string;
+    };
     UnmatchedDemand: {
       subject: string;
       area: string;
@@ -38763,6 +39958,13 @@ export interface components {
       };
       note?: string;
     };
+    VideoAttendance: {
+      available: boolean;
+      students: components["schemas"]["AttendanceStudent"][];
+      actual_minutes: number | null;
+      tutor_minutes?: number;
+      guests: number;
+    };
     /**
      * @description * `none` - none
      *     * `builtin` - builtin
@@ -38865,6 +40067,85 @@ export interface components {
     WaiveRequest: {
       reason: string;
     };
+    WarehouseDestination: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly name: string;
+      readonly kind: components["schemas"]["WarehouseDestinationKindEnum"];
+      readonly file_format: components["schemas"]["WarehouseDestinationFileFormatEnum"];
+      readonly config: unknown;
+      readonly datasets: unknown;
+      readonly enabled: boolean;
+      readonly hour: number;
+      readonly full_refresh_weekday: number;
+      readonly has_credentials: boolean;
+      /** Format: date-time */
+      readonly last_export_at: string | null;
+      readonly last_status: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `csv` - CSV (gzip)
+     * @enum {string}
+     */
+    WarehouseDestinationFileFormatEnum: "csv";
+    WarehouseDestinationInputRequest: {
+      /** @default  */
+      name: string;
+      kind: components["schemas"]["WarehouseDestinationKindEnum"];
+      config?: {
+        [key: string]: string;
+      };
+      /** @description Write-only: an AWS key, a service account or a private key. */
+      credentials?: {
+        [key: string]: string;
+      };
+      datasets?: string[];
+      /** @default true */
+      enabled: boolean;
+      /** @default 2 */
+      hour: number;
+      /** @default 6 */
+      full_refresh_weekday: number;
+    };
+    /**
+     * @description * `platform` - TutorTrack storage (download the files)
+     *     * `s3` - Amazon S3 (your bucket)
+     *     * `bigquery` - Google BigQuery
+     *     * `snowflake` - Snowflake
+     * @enum {string}
+     */
+    WarehouseDestinationKindEnum: "platform" | "s3" | "bigquery" | "snowflake";
+    WarehouseDownload: {
+      url: string;
+    };
+    WarehouseExport: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly destination: string;
+      readonly status: components["schemas"]["WarehouseExportStatusEnum"];
+      readonly full: boolean;
+      readonly since: unknown;
+      /** Format: date-time */
+      readonly until: string;
+      readonly manifest: unknown;
+      readonly row_count: number;
+      readonly error: string;
+      /** Format: date-time */
+      readonly finished_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `running` - Running
+     *     * `succeeded` - Succeeded
+     *     * `failed` - Failed
+     *     * `skipped` - Skipped
+     * @enum {string}
+     */
+    WarehouseExportStatusEnum: "running" | "succeeded" | "failed" | "skipped";
     WebhookAttempt: {
       readonly number: number;
       /** Format: date-time */
@@ -39177,6 +40458,27 @@ export interface components {
       /** @default  */
       reason: string;
       refund?: boolean | null;
+    };
+    XeroEarningsRate: {
+      id: string;
+      name: string;
+      kind: string;
+    };
+    XeroEmployee: {
+      id: string;
+      email: string;
+      first_name: string;
+      last_name: string;
+    };
+    XeroPayrollStatus: {
+      connected: boolean;
+      /** Format: uuid */
+      connection_id: string | null;
+      account_name: string;
+      earnings_rate: components["schemas"]["EarningsRateRef"] | null;
+      links: components["schemas"]["EmployeeLink"][];
+      unlinked: components["schemas"]["UnlinkedTutor"][];
+      syncs: components["schemas"]["PayrollTimesheetSync"][];
     };
   };
   responses: never;
@@ -39656,8 +40958,10 @@ export interface operations {
          * @description * `export` - export
          *     * `xero` - xero
          *     * `quickbooks` - quickbooks
+         *     * `sage` - sage
+         *     * `freeagent` - freeagent
          */
-        mapping_set?: "export" | "xero" | "quickbooks";
+        mapping_set?: "export" | "xero" | "quickbooks" | "sage" | "freeagent";
         start: string;
       };
       header?: never;
@@ -39681,7 +40985,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        provider: "export" | "quickbooks" | "xero";
+        provider: "export" | "freeagent" | "quickbooks" | "sage" | "xero";
       };
       cookie?: never;
     };
@@ -39702,7 +41006,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        provider: "export" | "quickbooks" | "xero";
+        provider: "export" | "freeagent" | "quickbooks" | "sage" | "xero";
       };
       cookie?: never;
     };
@@ -39869,6 +41173,210 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["RetryResult"];
+        };
+      };
+    };
+  };
+  accounting_xero_payroll_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["XeroPayrollStatus"];
+        };
+      };
+    };
+  };
+  accounting_xero_payroll_earnings_rate_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["XeroEarningsRate"][];
+        };
+      };
+    };
+  };
+  accounting_xero_payroll_earnings_rate_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EarningsRateRefRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["EarningsRateRefRequest"];
+        "multipart/form-data": components["schemas"]["EarningsRateRefRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["XeroPayrollStatus"];
+        };
+      };
+    };
+  };
+  accounting_xero_payroll_employees_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["XeroEmployee"][];
+        };
+      };
+    };
+  };
+  accounting_xero_payroll_links_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LinkEmployeeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LinkEmployeeRequest"];
+        "multipart/form-data": components["schemas"]["LinkEmployeeRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["XeroPayrollStatus"];
+        };
+      };
+    };
+  };
+  accounting_xero_payroll_match_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["XeroPayrollStatus"];
+        };
+      };
+    };
+  };
+  accounting_xero_payroll_sync_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SyncRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SyncRequestRequest"];
+        "multipart/form-data": components["schemas"]["SyncRequestRequest"];
+      };
+    };
+    responses: {
+      /** @description No response body */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  accounting_xero_payroll_syncs_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPayrollTimesheetSyncList"];
+        };
+      };
+    };
+  };
+  accounting_xero_payroll_syncs_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this payroll timesheet sync. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayrollTimesheetSync"];
         };
       };
     };
@@ -42763,6 +44271,208 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Slot"][];
+        };
+      };
+    };
+  };
+  background_checks_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedBackgroundCheckList"];
+        };
+      };
+    };
+  };
+  background_checks_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CheckRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CheckRequestRequest"];
+        "multipart/form-data": components["schemas"]["CheckRequestRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BackgroundCheck"];
+        };
+      };
+    };
+  };
+  background_checks_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this background check. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BackgroundCheck"];
+        };
+      };
+    };
+  };
+  background_checks_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this background check. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BackgroundCheck"];
+        };
+      };
+    };
+  };
+  background_checks_details_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this background check. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CheckDetails"];
+        };
+      };
+    };
+  };
+  background_checks_outcome_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this background check. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CheckOutcomeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CheckOutcomeRequest"];
+        "multipart/form-data": components["schemas"]["CheckOutcomeRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BackgroundCheck"];
+        };
+      };
+    };
+  };
+  background_checks_refresh_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this background check. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BackgroundCheck"];
+        };
+      };
+    };
+  };
+  background_checks_providers_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CheckProvider"][];
         };
       };
     };
@@ -58988,6 +60698,57 @@ export interface operations {
       };
     };
   };
+  lessons_classroom_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Classroom"];
+        };
+      };
+    };
+  };
+  lessons_classroom_consent_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ClassroomConsentRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ClassroomConsentRequest"];
+        "multipart/form-data": components["schemas"]["ClassroomConsentRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ClassroomConsentOut"];
+        };
+      };
+    };
+  };
   lessons_complete_create: {
     parameters: {
       query?: never;
@@ -59182,6 +60943,27 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["LessonResult"];
+        };
+      };
+    };
+  };
+  lessons_video_attendance_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VideoAttendance"];
         };
       };
     };
@@ -59762,6 +61544,25 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Me"];
+        };
+      };
+    };
+  };
+  me_background_checks_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyBackgroundCheck"][];
         };
       };
     };
@@ -60579,6 +62380,25 @@ export interface operations {
       };
     };
   };
+  me_recordings_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonRecording"][];
+        };
+      };
+    };
+  };
   me_sessions_list: {
     parameters: {
       query?: {
@@ -60640,6 +62460,71 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SessionsRevoked"];
+        };
+      };
+    };
+  };
+  me_tax_identity_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TaxIdentityOut"];
+        };
+      };
+    };
+  };
+  me_tax_identity_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TaxIdentityRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TaxIdentityRequest"];
+        "multipart/form-data": components["schemas"]["TaxIdentityRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TaxIdentityOut"];
+        };
+      };
+    };
+  };
+  me_tax_summary_retrieve: {
+    parameters: {
+      query?: {
+        year?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyTaxSummary"];
         };
       };
     };
@@ -63422,6 +65307,128 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["OriginatorOut"];
+        };
+      };
+    };
+  };
+  payroll_tax_forms_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        tax_year?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedTaxFormFilingList"];
+        };
+      };
+    };
+  };
+  payroll_tax_forms_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this tax form filing. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TaxFormFiling"];
+        };
+      };
+    };
+  };
+  payroll_tax_years_1099_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        year: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Form1099Summary"];
+        };
+      };
+    };
+  };
+  payroll_tax_years_1099_export_retrieve: {
+    parameters: {
+      query?: {
+        full_tin?: boolean;
+      };
+      header?: never;
+      path: {
+        year: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv": string;
+        };
+      };
+    };
+  };
+  payroll_tax_years_1099_finalise_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        year: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TaxFormFiling"][];
         };
       };
     };
@@ -66784,6 +68791,25 @@ export interface operations {
       };
     };
   };
+  public_mobile_app_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MobileAppConfig"];
+        };
+      };
+    };
+  };
   public_offers_retrieve: {
     parameters: {
       query?: never;
@@ -67294,6 +69320,125 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["RateQuote"];
+        };
+      };
+    };
+  };
+  recordings_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        lesson?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedLessonRecordingList"];
+        };
+      };
+    };
+  };
+  recordings_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson recording. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonRecording"];
+        };
+      };
+    };
+  };
+  recordings_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson recording. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  recordings_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson recording. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedRecordingUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedRecordingUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedRecordingUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonRecording"];
+        };
+      };
+    };
+  };
+  recordings_play_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RecordingLink"];
         };
       };
     };
@@ -68028,6 +70173,263 @@ export interface operations {
         };
         content: {
           "application/octet-stream": string;
+        };
+      };
+    };
+  };
+  reporting_warehouse_destinations_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedWarehouseDestinationList"];
+        };
+      };
+    };
+  };
+  reporting_warehouse_destinations_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WarehouseDestinationInputRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["WarehouseDestinationInputRequest"];
+        "multipart/form-data": components["schemas"]["WarehouseDestinationInputRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WarehouseDestination"];
+        };
+      };
+    };
+  };
+  reporting_warehouse_destinations_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this warehouse destination. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WarehouseDestination"];
+        };
+      };
+    };
+  };
+  reporting_warehouse_destinations_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this warehouse destination. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WarehouseDestinationInputRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["WarehouseDestinationInputRequest"];
+        "multipart/form-data": components["schemas"]["WarehouseDestinationInputRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WarehouseDestination"];
+        };
+      };
+    };
+  };
+  reporting_warehouse_destinations_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this warehouse destination. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  reporting_warehouse_destinations_check_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this warehouse destination. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WarehouseDestination"];
+        };
+      };
+    };
+  };
+  reporting_warehouse_destinations_exports_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this warehouse destination. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WarehouseExport"][];
+        };
+      };
+    };
+  };
+  reporting_warehouse_destinations_run_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this warehouse destination. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["RunExportRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RunExportRequest"];
+        "multipart/form-data": components["schemas"]["RunExportRequest"];
+      };
+    };
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RunStarted"];
+        };
+      };
+    };
+  };
+  reporting_warehouse_exports_download_retrieve: {
+    parameters: {
+      query?: {
+        dataset?:
+          | "daily_aggregate"
+          | "dim_client"
+          | "dim_service"
+          | "dim_student"
+          | "dim_tutor"
+          | "fact_charge"
+          | "fact_lesson"
+          | "fact_pay_item"
+          | "fact_payment";
+      };
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WarehouseDownload"];
+        };
+      };
+    };
+  };
+  reporting_warehouse_schema_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DatasetSchema"][];
         };
       };
     };
@@ -73363,6 +75765,56 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  tutors_tax_identity_retrieve: {
+    parameters: {
+      query?: {
+        full?: boolean;
+      };
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TaxIdentityOut"];
+        };
+      };
+    };
+  };
+  tutors_tax_identity_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TaxIdentityRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TaxIdentityRequest"];
+        "multipart/form-data": components["schemas"]["TaxIdentityRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TaxIdentityOut"];
+        };
       };
     };
   };

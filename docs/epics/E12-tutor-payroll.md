@@ -91,7 +91,7 @@ Calculates what each tutor has earned (lesson pay, premiums, travel, bonuses, ex
 - [x] **E12-T09** Stripe Connect Express tutor onboarding and transfers.
 - [x] **E12-T10** External payroll exports.
 - [x] **E12-T11** Frontend: pay runs UI, expenses approval, tutor earnings pages.
-- [ ] **E12-T12** (Phase 3) Wise payouts, 1099 data, commission-based pay.
+- [x] **E12-T12** (Phase 3) Wise payouts, 1099 data, commission-based pay.
 
 ## Temporal workflows (E32)
 
@@ -130,3 +130,21 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
   - Admin `/payroll`: pay runs; run detail with approve, cancel, bank file (by format) and download, mark paid, and payroll exports; expense approvals; pay items with holds. The tutor record shows a pay card.
   - Tutor portal: earnings (coming up, held with what releases it, payouts, statements, year to date), expenses, and pay details (bank account, self-billing agreement, Stripe setup). This replaces the provisional E16 earnings.
 - **Follow-ups:** Phase 3 (T12: Wise, 1099 data, commission pay); re-auth for full bank details; per-item editing in the run UI beyond remove and adjust; paying tutors through Stripe Connect platform setups.
+
+## Phase 3 implementation notes (as built 2026-10-14)
+See ADR 0032 (one ADR for the Phase 3 / Enterprise batch).
+
+- **Wise payouts (FR-12-7):** a new pay method `wise`. The organisation connects its own Wise Business account with an API token through the integration framework (`provider="wise"`, credentials connection; the token is encrypted on the `IntegrationConnection`, the business profile id is its account id). Payroll shows the connection on the pay runs page.
+  - `wise_payouts.send` runs in the pay run's "paying" step: a recipient is created from the tutor's validated bank details (sort code, IBAN, ABA, BSB) and re-created when they change (`wise_recipient_key` hash); then a quote, a transfer with `customerTransactionId` derived from `payout-<id>` (idempotent) and funding from the balance (`payroll.wise_source_currency`, default the payout's currency). Amounts go as decimal strings, never floats.
+  - Settlement: the `transfers#state-change` webhook (`/webhooks/wise`, RSA-SHA256 `X-Signature-SHA256` checked against `WISE_WEBHOOK_PUBLIC_KEY`, routed by transfer id through `integrations.WebhookRoute`) marks the payout and signals `settled`; `PayRunWorkflow`'s existing daily settle check also polls Wise (`payouts_outstanding` activity), so a lost webhook only delays it. No workflow code changed (replays unaffected); a new history `PayRunWorkflow-wise.json` is replayed.
+  - Bounced, refunded or cancelled transfers fail the payout and return its items for the next run (FR-12-7 partial failure). Pay runs warn `no_wise` when Wise isn't connected.
+  - Every Wise call goes through `core.net.safe_urlopen`. Without live credential providers (`INTEGRATIONS_CREDENTIAL_PROVIDERS_LIVE`, off in development and tests) the in-memory `FakeWise` is used.
+- **Commission pay (FR-12-10):** `TutorPayProfile.pay_basis = commission` with `commission_percent`. Lesson pay is then `percent × collected net revenue` for the lesson: each charge's net amount times the paid share of its invoice (`billing.selectors.lesson_collection_lines`), rounded half-up once at line level. It requires "pay only when the client has paid" (validated), so items stay held until the invoice is settled. Commission is re-worked on `invoice.paid/partially_paid/voided` and `payment.succeeded`; amounts already in a run or paid are never changed, the difference becomes an adjustment (clawback after a refund). Hypothesis tests cover the maths.
+- **1099-NEC data (FR-12-9):** the tutor's SSN/ITIN/EIN is stored encrypted (`TutorPayProfile.tin`, with `tin_type` and the last four digits in clear); staff set it on the tutor record and US tutors in the portal (earnings page). Reading the full number needs the new `payroll.tax.view` and is audited.
+  - `tax_forms.year_totals`: box 1 per contractor tutor (employees excluded, they get W-2s) = pay items paid out in the calendar year (payout paid date, organisation time zone), in USD. Expense and mileage reimbursements are left out (accountable plan). Threshold: $600 up to tax year 2025 and $2,000 from 2026 (OBBBA), or the org setting `payroll.form_1099_threshold`.
+  - Finalising a year (`POST /payroll/tax-years/{year}/1099/finalise`, `payroll.tax.manage`, `Idempotency-Key`) freezes `TaxFormFiling` rows (immutable; a changed figure is filed as a correction that supersedes the earlier row). It refuses the current year and rows with a missing TIN or address. `tax_forms.finalised` is published.
+  - `GET …/1099/export` writes the IRS IRIS 1099-NEC CSV columns, masked unless `?full_tin=true` (permission + an audit read per tutor, plus an `export` audit entry). Formula-like cells are neutralised.
+  - Tutors see what they were paid and whether the year is filed (`GET /me/tax-summary`).
+- **Admin UI:** pay method "Wise transfer", pay basis and commission, and the taxpayer id on the tutor's pay card; the Wise connection on the pay runs page; Payroll → US tax forms (`/payroll/tax-forms`). Portal: "US tax information" on the earnings page for tutors paid in USD.
+- **Privacy:** the payroll privacy provider exports the pay basis and masked tax id, and erasure clears the TIN and Wise recipient; filed 1099 rows are retained (financial records). Wise is listed as an optional sub-processor.
+- **Deviations:** payer EIN is taken from the organisation's tax number field (`vat_number`); an IRIS upload itself (e-filing) is out of scope (the CSV is for IRIS or the tenant's filing service). Wise batch groups are not used: one transfer per payout keeps idempotency per payout.

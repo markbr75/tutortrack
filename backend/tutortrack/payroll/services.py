@@ -83,7 +83,16 @@ def currency_for(tutor: TutorProfile) -> str:
     return (profile.currency if profile and profile.currency else "") or _org().default_currency
 
 
-PROFILE_FIELDS = {"method", "currency", "payee_name", "vat_registered", "vat_number", "hourly_rate"}
+PROFILE_FIELDS = {
+    "method",
+    "currency",
+    "payee_name",
+    "vat_registered",
+    "vat_number",
+    "hourly_rate",
+    "pay_basis",
+    "commission_percent",
+}
 
 
 @transaction.atomic
@@ -96,6 +105,7 @@ def update_profile(
     if "method" in changes and changes["method"] not in PayMethod.values:
         raise BusinessRuleViolation(_("Unknown pay method."))
     profile = profile_for(tutor)
+    _check_pay_basis(profile, changes)
     with audit.track(profile, action="update"):
         for key, value in changes.items():
             setattr(profile, key, value)
@@ -107,6 +117,32 @@ def update_profile(
             profile.bank_hint = banking.hint(details)
         profile.save()
     return profile
+
+
+def _check_pay_basis(profile: TutorPayProfile, changes: dict[str, Any]) -> None:
+    """Commission pay (FR-12-10) needs a percentage and "pay only when the client has
+    paid", because it is worked out from what was collected."""
+    from . import commission
+    from .models import PayBasis
+
+    if "pay_basis" in changes and changes["pay_basis"] not in PayBasis.values:
+        raise BusinessRuleViolation(_("Unknown pay basis."))
+    basis = changes.get("pay_basis", profile.pay_basis)
+    if changes.get("commission_percent") not in (None, ""):
+        changes["commission_percent"] = commission.validate_percent(changes["commission_percent"])
+    elif "commission_percent" in changes:
+        changes["commission_percent"] = None
+    if basis != PayBasis.COMMISSION:
+        return
+    if changes.get("commission_percent", profile.commission_percent) is None:
+        message = _("Enter the commission percentage.")
+        raise BusinessRuleViolation(message, extra={"errors": {"commission_percent": [message]}})
+    if not get_setting("payroll.pay_when_client_paid"):
+        message = _(
+            'Commission pay needs "Only pay tutors for lessons once the client has paid" '
+            "in pay settings."
+        )
+        raise BusinessRuleViolation(message, extra={"errors": {"pay_basis": [message]}})
 
 
 def bank_details(profile: TutorPayProfile, *, full: bool) -> dict[str, str]:
@@ -323,11 +359,27 @@ def _desired_lesson_pay(lesson: Any, link: Any) -> Money:
     from tutortrack.scheduling.models import Lesson
 
     zero = Money.zero(link.currency or currency_for(link.tutor))
+    commission_percent = _commission_percent(link.tutor)
+    if commission_percent is not None:  # FR-12-10: a share of what the client paid
+        from . import commission
+
+        if lesson.status not in (Lesson.Status.COMPLETED, Lesson.Status.CANCELLED):
+            return zero
+        return commission.lesson_commission(lesson.pk, commission_percent, zero.currency)
     if lesson.status == Lesson.Status.COMPLETED:
         return lesson_pay(link) or zero
     if lesson.status == Lesson.Status.CANCELLED and get_setting("payroll.include_cancellations"):
         return lesson_pay(link) or zero
     return zero
+
+
+def _commission_percent(tutor: TutorProfile) -> Decimal | None:
+    from .models import PayBasis
+
+    profile = TutorPayProfile.objects.filter(tutor=tutor).first()
+    if profile is None or profile.pay_basis != PayBasis.COMMISSION:
+        return None
+    return profile.commission_percent
 
 
 def _sync_link(lesson: Any, link: Any) -> PayItem | None:
@@ -438,9 +490,12 @@ def sync_event_pay(until: date) -> int:
 
 
 MANUAL_KINDS = {
-    PayItem.Kind.BONUS, PayItem.Kind.REFERRAL, PayItem.Kind.ADJUSTMENT, PayItem.Kind.DEDUCTION,
+    PayItem.Kind.BONUS,
+    PayItem.Kind.REFERRAL,
+    PayItem.Kind.ADJUSTMENT,
+    PayItem.Kind.DEDUCTION,
     PayItem.Kind.SALARY,
-}  # fmt: skip
+}
 
 
 @transaction.atomic
@@ -747,6 +802,13 @@ def _payout_problem(profile: TutorPayProfile) -> tuple[str, str] | None:
         return "no_bank_details", _("%(name)s has no bank details.") % {"name": name}
     if profile.method == PayMethod.STRIPE_CONNECT and not profile.stripe_payouts_enabled:
         return "no_stripe", _("%(name)s hasn't finished Stripe setup.") % {"name": name}
+    if profile.method == PayMethod.WISE:
+        from . import wise_payouts
+
+        if not profile.bank_details:
+            return "no_bank_details", _("%(name)s has no bank details.") % {"name": name}
+        if wise_payouts.connection() is None:
+            return "no_wise", _("Connect Wise to pay %(name)s.") % {"name": name}
     return None
 
 
@@ -941,6 +1003,9 @@ def send_payouts(pay_run_id: Any) -> int:
             Payout.objects.filter(pk=payout.pk).update(
                 status=Payout.Status.PROCESSING, provider_ref=result.ref
             )
+    from . import wise_payouts
+
+    wise_payouts.send(pay_run)  # E12-T12
     return outstanding(pay_run)
 
 

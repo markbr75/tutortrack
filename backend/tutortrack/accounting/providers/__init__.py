@@ -32,7 +32,7 @@ __all__ = [
     "client_for",
 ]
 
-PROVIDERS = ("xero", "quickbooks")
+PROVIDERS = ("xero", "quickbooks", "sage", "freeagent")  # Sage, FreeAgent: E23-T10
 CAPABILITY = "accounting"
 MANAGE = "integrations.accounting.manage"
 
@@ -129,3 +129,90 @@ registry.register(
         health=_health("quickbooks"),
     )
 )
+
+
+# --- E23-T10: Sage Business Cloud Accounting and FreeAgent ----------------------------------------
+
+
+def _client(module: str, name: str) -> Any:
+    def make() -> Any:
+        import importlib
+
+        return getattr(importlib.import_module(f"{__name__}.{module}"), name)()
+
+    return make
+
+
+def _oauth(module: str) -> Any:
+    def make() -> Any:
+        import importlib
+
+        return importlib.import_module(f"{__name__}.{module}").oauth_client()
+
+    return make
+
+
+def _xero_payroll_oauth() -> Any:
+    import dataclasses
+
+    from .xero import oauth_client
+
+    return dataclasses.replace(oauth_client(), provider="xero_payroll")
+
+
+def _xero_payroll(fake: bool) -> Any:
+    def make() -> Any:
+        from .xero_payroll import FakeXeroPayroll, XeroPayrollClient
+
+        return FakeXeroPayroll() if fake else XeroPayrollClient()
+
+    return make
+
+
+def payroll_client() -> Any:
+    """Xero Payroll (E23-T10): the real API with platform keys, the fake otherwise."""
+    return registry.client("xero_payroll", "payroll")
+
+
+# Xero Payroll is its own connection (same Xero app, payroll scopes only), so organisations
+# without Xero Payroll never get asked for payroll access when connecting their ledger.
+registry.register(
+    Provider(
+        ProviderSpec(
+            "xero_payroll",
+            "Xero Payroll",
+            frozenset({"payroll"}),
+            "oauth2",
+            ("organisation",),
+            manage_permission=MANAGE,
+        ),
+        live=_live("XERO_CLIENT_ID", "XERO_CLIENT_SECRET"),
+        scopes=("openid", "profile", "email", "offline_access", *_scopes("xero_payroll")),
+        oauth=_xero_payroll_oauth,
+        clients={"payroll": _xero_payroll(False)},
+        fake_clients={"payroll": _xero_payroll(True)},
+    )
+)
+
+for _key, _label, _module, _class, _rate in (
+    ("sage", "Sage Business Cloud Accounting", "sage", "SageClient", 100),
+    ("freeagent", "FreeAgent", "freeagent", "FreeAgentClient", 100),
+):
+    registry.register(
+        Provider(
+            ProviderSpec(
+                _key,
+                _label,
+                frozenset({CAPABILITY}),
+                "oauth2",
+                ("organisation",),
+                manage_permission=MANAGE,
+            ),
+            live=_live(f"{_key.upper()}_CLIENT_ID", f"{_key.upper()}_CLIENT_SECRET"),
+            scopes=_scopes(_module),
+            oauth=_oauth(_module),
+            clients={CAPABILITY: _client(_module, _class)},
+            fake_clients={CAPABILITY: _fake(_key, _rate)},
+            health=_health(_key),
+        )
+    )

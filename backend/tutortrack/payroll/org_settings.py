@@ -88,3 +88,17 @@ register(
     default="20",
     label=_("VAT rate on self-billing invoices for VAT-registered tutors (%)"),
 )
+
+# --- Phase 3 (E12-T12) ------------------------------------------------------------------------
+register(
+    "payroll.wise_source_currency",
+    type="str",
+    default="",
+    label=_("Wise balance currency tutors are paid from (empty: the payout's currency)"),
+)
+register(
+    "payroll.form_1099_threshold",
+    type="str",
+    default="",
+    label=_("1099-NEC reporting threshold in USD (empty: the IRS threshold for the tax year)"),
+)

@@ -65,7 +65,7 @@ Keep the tenant's books accurate without double entry: sync contacts, invoices, 
 - [x] **E23-T07** Sync dashboard, error mapping, retry/skip, digests.
 - [x] **E23-T08** GL CSV exports.
 - [ ] **E23-T09** (Phase 2b) Read-back of externally recorded payments.
-- [ ] **E23-T10** (Phase 3) Sage Business Cloud, FreeAgent, Xero Payroll.
+- [x] **E23-T10** (Phase 3) Sage Business Cloud, FreeAgent, Xero Payroll.
 
 ## Temporal workflows (E32)
 
@@ -225,3 +225,17 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
 - GL exports leave out self-billing VAT on payroll.
 - The real clients are only tested against request shapes, because there are no credentials.
 - T09 and T10 are later phases.
+
+## Phase 3 implementation notes (as built 2026-10-14)
+See ADR 0032. Kept apart from the Phase 2b read-back (T09) in separate modules.
+
+- **Sage Business Cloud Accounting and FreeAgent:** two more ledgers on the unchanged sync engine (`PROVIDERS` now `xero, quickbooks, sage, freeagent`), registered in the E22 integration framework with OAuth2 (`SAGE_CLIENT_ID/SECRET`, `FREEAGENT_CLIENT_ID/SECRET`, `FREEAGENT_SANDBOX`) and the fake ledger when unconfigured. Mapping sets, dashboards, retries, lock dates, summary journals and backfill work as for Xero.
+  - `providers/sage.py` (API v3.1, `X-Business`): contacts (customer/vendor), sales invoices, purchase invoices (tutor bills), sales credit notes allocated through contact allocations, contact payments (receipts, vendor payments, refunds) allocated per invoice, payouts as a bank transfer plus an "other payment" for fees, journals; void by `DELETE` with a reason.
+  - `providers/freeagent.py` (API v2, records identified by URL): contacts, invoices marked as sent, bills, credit notes, bank transaction explanations for payments, refunds and payouts (transfer + fees), journal sets; void by the `mark_as_cancelled` transition.
+  - Both go through `core.net.safe_urlopen`; they are tested against request shapes (no sandbox credentials in CI) and the shared ledger flow tests (invoice, part payment with fee, refund, payout) run on their fakes.
+- **Xero Payroll (FR-12-8):** a separate organisation connection `xero_payroll` (same Xero app, payroll scopes only, so ledger-only customers are never asked for payroll access), connected from Settings → Accounting → Xero Payroll.
+  - `PayrollEmployeeLink` (RLS) links employed tutors to Xero employees by email (or by hand); `AccountMapping(provider="xero_payroll", kind="earnings_rate")` holds the earnings rate (default: the first ordinary-earnings rate).
+  - On `pay_run.approved` (when connected and the run has employed tutors' hours), `XeroPayrollSyncWorkflow` (`xero-payroll:{org}:{run}:{attempt}`) sends one draft timesheet per employee with a line per day (`payroll.selectors.employee_timesheets`), idempotent per tutor (`Idempotency-Key: tt-<sync>-<tutor>`), retried through rate limits and outages, and records `PayrollTimesheetSync` with each tutor's timesheet or problem (`no_employee`, `no_hours`). Bonuses and reimbursements aren't timesheet units: they are listed in the result for the payroll administrator (and stay in the E12 CSV export). History `XeroPayrollSyncWorkflow-synced.json` is replayed.
+  - API under `/accounting/xero-payroll` (status, match, links, employees, earnings-rate, sync, syncs).
+- **Sub-processors:** Sage and FreeAgent, and Xero Payroll (UK) added as optional.
+- **Merge note:** the T09 read-back (another branch) may add a method to the `AccountingClient` protocol; `SageClient` and `FreeAgentClient` will need it too (they already implement `balance`).

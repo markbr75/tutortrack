@@ -153,6 +153,98 @@ class OnlineMeeting(TenantModel):
         return f"{self.provider} meeting for {self.lesson_id}"
 
 
+class MeetingParticipantEvent(TenantModel):
+    """A join or leave in an online lesson, from the provider's webhook (E22-T10). Stored
+    once per provider event id; the person is matched to the lesson's tutor or students
+    where possible. Names only: no emails or IP addresses are kept."""
+
+    class Kind(models.TextChoices):
+        JOINED = "joined", _("Joined")
+        LEFT = "left", _("Left")
+
+    lesson = models.ForeignKey(
+        "scheduling.Lesson", on_delete=models.CASCADE, related_name="video_events"
+    )
+    meeting = models.ForeignKey(
+        OnlineMeeting, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    provider = models.CharField(max_length=20)
+    event_id = models.CharField(max_length=200)
+    kind = models.CharField(max_length=6, choices=Kind.choices)
+    at = models.DateTimeField()
+    participant_key = models.CharField(max_length=120)  # provider's participant id
+    name = models.CharField(max_length=200, blank=True, default="")
+    role = models.CharField(max_length=10, blank=True, default="")  # tutor | student | guest
+    student = models.ForeignKey(
+        "people.Student", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    tutor = models.ForeignKey(
+        "people.TutorProfile", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta(TenantModel.Meta):
+        ordering = ["at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "provider", "event_id"], name="video_event_once"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.kind} {self.name} at {self.at}"
+
+
+class LessonRecording(TenantModel):
+    """A recording of an online lesson (E22-T10, FR-22-4 "Recordings"): a reference to the
+    file at the provider, never a copy. Links are encrypted and handed out only through
+    an access-checked, audited endpoint. Recordings of lessons where a student has not
+    consented to recording (E29 ``lesson-recording``) are ``restricted``: hidden from
+    families and tutors until staff review them."""
+
+    class Status(models.TextChoices):
+        AVAILABLE = "available", _("Available")
+        RESTRICTED = "restricted", _("Restricted (no recording consent)")
+        DELETED = "deleted", _("Deleted")
+
+    lesson = models.ForeignKey(
+        "scheduling.Lesson", on_delete=models.CASCADE, related_name="recordings"
+    )
+    meeting = models.ForeignKey(
+        OnlineMeeting, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    provider = models.CharField(max_length=20)
+    external_id = models.CharField(max_length=200)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.AVAILABLE)
+    started_at = models.DateTimeField(null=True, blank=True)
+    duration_seconds = models.PositiveIntegerField(default=0)
+    size_bytes = models.BigIntegerField(default=0)
+    file_type = models.CharField(max_length=10, blank=True, default="")
+    play_url = EncryptedField(blank=True, default="")
+    download_url = EncryptedField(blank=True, default="")
+    password = EncryptedField(blank=True, default="")
+    missing_consent = models.JSONField(default=list, blank=True)  # student ids
+    shared_with_family = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_reason = models.CharField(max_length=200, blank=True, default="")
+
+    audit_sensitive_fields = frozenset({"play_url", "download_url", "password"})
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-started_at", "-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "provider", "external_id"], name="recording_once"
+            )
+        ]
+
+    @classmethod
+    def own_scope_q(cls, user: Any) -> Q:
+        return Q(lesson__tutors__tutor__membership__user=user)
+
+    def __str__(self) -> str:
+        return f"Recording of {self.lesson_id}"
+
+
 class MeetingPreference(TenantModel):
     """A tutor's default video provider (FR-22-4 "default per tutor")."""
 

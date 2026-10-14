@@ -9,4 +9,6 @@ PERMISSIONS = {
     "compliance.verify": "Verify or reject compliance records",
     "compliance.manage_types": "Configure compliance requirements",
     "compliance.override_restriction": "Assign restricted tutors (with a reason)",
+    "compliance.checks.request": "Start and cancel online background checks",
+    "compliance.checks.results": "Read background check results and certificates (audited)",
 }

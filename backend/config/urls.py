@@ -2,13 +2,16 @@ from django.contrib import admin
 from django.urls import URLPattern, URLResolver, include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
+from tutortrack.calendar_sync.api.video_webhooks import lessonspace_webhook, zoom_webhook
 from tutortrack.calendar_sync.api.webhooks import google_calendar, microsoft_graph
 from tutortrack.comms.api.phase2_views import inbound_email as inbox_email
 from tutortrack.comms.api.views import postmark_webhook, twilio_inbound, twilio_status
 from tutortrack.core.api.health import healthz, readyz
 from tutortrack.leads.api.views import inbound_email
 from tutortrack.payments.api.views import gocardless_webhook, paypal_webhook, stripe_webhook
+from tutortrack.payroll.api.tax_views import wise_webhook
 from tutortrack.privacy.api.compliance_views import security_txt
+from tutortrack.recruitment.api.check_views import background_check_webhook
 from tutortrack.scheduling.api.views import ical_feed
 from tutortrack.sites.internal import tls_ask
 from tutortrack.subscriptions.api.views import stripe_billing_webhook
@@ -34,6 +37,7 @@ api_v1: list[URLPattern | URLResolver] = [
     path("", include("tutortrack.matching.api.urls")),
     path("", include("tutortrack.automations.api.urls")),
     path("", include("tutortrack.reporting.api.urls")),
+    path("", include("tutortrack.reporting.warehouse.urls")),  # E26-T09
     path("", include("tutortrack.integrations.api.urls")),
     path("", include("tutortrack.calendar_sync.api.urls")),
     path("", include("tutortrack.developer.api.urls")),
@@ -72,6 +76,15 @@ urlpatterns = [
     path("webhooks/inbound/email", inbox_email, name="inbox-inbound-email"),
     path("webhooks/google-calendar", google_calendar, name="google-calendar-webhook"),
     path("webhooks/microsoft-graph", microsoft_graph, name="microsoft-graph-webhook"),
+    # Phase 3 integrations (ADR 0032): payouts, video attendance, background checks.
+    path("webhooks/wise", wise_webhook, name="wise-webhook"),
+    path("webhooks/zoom", zoom_webhook, name="zoom-webhook"),
+    path("webhooks/lessonspace/<str:token>", lessonspace_webhook, name="lessonspace-webhook"),
+    path(
+        "webhooks/background-checks/<slug:provider>",
+        background_check_webhook,
+        name="background-check-webhook",
+    ),
     # Caddy on-demand TLS "ask" endpoint for custom domains (E24).
     path("internal/tls/ask", tls_ask, name="tls-ask"),
     # Temporal Web UI codec server (staff-only, E32 FR-32-9).

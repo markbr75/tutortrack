@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
+from . import check_views as cv
 from . import views as v
 
 router = SimpleRouter(trailing_slash=False)
@@ -8,6 +9,7 @@ router.register("job-openings", v.JobOpeningViewSet, basename="job-openings")
 router.register("application-stages", v.ApplicationStageViewSet, basename="application-stages")
 router.register("applications", v.ApplicationViewSet, basename="applications")
 router.register("checklist-templates", v.ChecklistTemplateViewSet, basename="checklist-templates")
+router.register("background-checks", cv.BackgroundCheckViewSet, basename="background-checks")
 router.register(
     "compliance/requirement-types", v.RequirementTypeViewSet, basename="requirement-types"
 )
@@ -30,6 +32,7 @@ urlpatterns = [
         "me/onboarding/<slug:key>/done", v.MyOnboardingItemView.as_view(), name="my-onboarding-item"
     ),
     path("me/compliance", v.MyComplianceView.as_view(), name="my-compliance"),
+    path("me/background-checks", cv.MyBackgroundChecksView.as_view(), name="my-background-checks"),
     path(
         "compliance/records/<uuid:pk>/verify",
         v.RecordVerifyView.as_view(),

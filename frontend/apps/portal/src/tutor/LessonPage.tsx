@@ -8,6 +8,7 @@ import { useState } from "react";
 import { api } from "../api";
 import { JoinButton } from "../JoinButton";
 import { isNetworkError, isOffline, queueChange, useOutbox } from "../offline/client";
+import { ClassroomLink, TutorRecordings, VideoRegisterHint } from "./Phase3";
 import { CheckInButtons, TutorRaiseConcern } from "./SafeguardingTools";
 import { useTutorMe } from "./useTutorMe";
 
@@ -144,6 +145,7 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
       </header>
       {l.notes_for_tutor ? <Alert>{l.notes_for_tutor}</Alert> : null}
       {l.online && planned ? <HostJoin lesson={l} /> : null}
+      {l.online && planned ? <ClassroomLink lessonId={lessonId} /> : null}
       {completedOffline ? (
         <Alert>
           {t("pwa.completedOffline")}{" "}
@@ -163,6 +165,21 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
           }}
         >
           <h2 className="font-semibold">{t("tutor.register")}</h2>
+          {l.online ? (
+            <VideoRegisterHint
+              lessonId={lessonId}
+              onApply={(s) => {
+                const next: Record<string, Outcome> = {};
+                const minutes: Record<string, string> = {};
+                for (const row of s.students) {
+                  next[row.attendee_id] = row.suggested_outcome as Outcome;
+                  if (row.late_minutes) minutes[row.attendee_id] = String(row.late_minutes);
+                }
+                setOutcomes((o) => ({ ...o, ...next }));
+                setLate((v) => ({ ...v, ...minutes }));
+              }}
+            />
+          ) : null}
           {l.attendees.map((a) => (
             <div key={a.id} className="flex flex-wrap items-end gap-2">
               <SelectField
@@ -221,6 +238,7 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
       {complete.error || cancel.error || openReport.error ? (
         <Alert tone="danger">{(complete.error ?? cancel.error ?? openReport.error)?.message}</Alert>
       ) : null}
+      {l.online ? <TutorRecordings lessonId={lessonId} /> : null}
       <CheckInButtons lessonId={lessonId} online={Boolean(l.online)} />
       <TutorRaiseConcern
         lessonId={lessonId}

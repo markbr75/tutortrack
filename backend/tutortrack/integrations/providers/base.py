@@ -181,6 +181,22 @@ class MeetingInfo:
     data: dict[str, Any] = field(default_factory=dict)
 
 
+@dataclass(frozen=True)
+class RecordingInfo:
+    """A lesson recording at the video provider (E22-T10). URLs are short-lived or need
+    the provider account; we store them encrypted and hand them out only through an
+    access-checked, audited endpoint."""
+
+    external_id: str
+    started_at: datetime | None = None
+    duration_seconds: int = 0
+    size_bytes: int = 0
+    file_type: str = ""
+    play_url: str = ""
+    download_url: str = ""
+    password: str = ""
+
+
 class OAuthClient(Protocol):
     def authorize_url(
         self, *, state: str, redirect_uri: str, code_challenge: str, scopes: tuple[str, ...]

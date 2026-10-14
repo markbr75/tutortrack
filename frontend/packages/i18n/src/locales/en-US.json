@@ -165,5 +165,13 @@
   "tenantHealth": {
     "organisation": "Organization",
     "explain": "Scores are recalculated every night from usage, active tutors, payments, errors, support conversations and NPS. Staff get an email when an organization becomes at risk."
+  },
+  "warehouse": {
+    "hourHint": "In your organization's time zone."
+  },
+  "backgroundChecks": {
+    "status": {
+      "cancelled": "Canceled"
+    }
   }
 }

@@ -12,6 +12,7 @@ import {
   AffiliatePayoutPage,
   AffiliateStatementsPage,
 } from "./affiliate/AffiliatePages";
+import { ClassroomPage, RecordingsPage } from "./classroom/ClassroomPage";
 import { BillingPage } from "./pages/BillingPage";
 import { BookingPage } from "./pages/BookingPage";
 import { ClassesPage } from "./pages/ClassesPage";
@@ -80,6 +81,14 @@ const tutorReviewRoute = createRoute({
   },
 });
 
+const classroomRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/classroom/$lessonId",
+  component: function ClassroomRoute() {
+    return <ClassroomPage lessonId={classroomRoute.useParams().lessonId} />;
+  },
+});
+
 const routeTree = rootRoute.addChildren([
   page("/", HomePage),
   page("/schedule", SchedulePage),
@@ -115,6 +124,8 @@ const routeTree = rootRoute.addChildren([
   page("/tutor/resources", TutorResourcesPage),
   page("/tutor/messages", TutorMessagesPage),
   lessonRoute,
+  classroomRoute,
+  page("/recordings", RecordingsPage),
   offlineReportRoute,
   reportRoute,
 ]);

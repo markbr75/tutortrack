@@ -7,6 +7,7 @@ holding ``reporting.payroll.view:own`` only sees their own earnings.
 
 PERMISSIONS = {
     "reporting.dashboard.view": "See the dashboard",
+    "reporting.warehouse.manage": "Set up and run data warehouse exports (Enterprise)",
     "reporting.finance.view": "Run finance reports (revenue, debtors, tax, margin)",
     "reporting.payroll.view": "Run payroll reports (earnings, pay runs, expenses)",
     "reporting.operations.view": "Run operations reports (lessons, attendance, utilisation)",

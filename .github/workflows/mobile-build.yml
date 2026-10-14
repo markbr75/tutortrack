@@ -1,0 +1,86 @@
+# Native app shells (E16-T11, ADR 0032): builds the generic TutorTrack app or an
+# organisation's white-label app (Enterprise `white_label`) with Capacitor.
+#
+# Manual only (workflow_dispatch): it never runs on push or pull requests, and the normal
+# CI never installs Android or iOS toolchains. Signing needs these repository secrets, which
+# are not configured yet; without them the job builds unsigned debug artifacts:
+#   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS,
+#   ANDROID_KEY_PASSWORD (Play upload key), and for iOS an App Store Connect API key
+#   (APPSTORE_KEY_ID, APPSTORE_ISSUER_ID, APPSTORE_PRIVATE_KEY) plus a distribution
+#   certificate and provisioning profile (Fastlane match).
+#
+# The white-label configuration (app id, name, icon, colours, portal URL) comes from the
+# organisation's E24 brand kit through GET https://<org>/api/v1/public/mobile-app, or
+# `manage.py mobile_app_config --org <slug>` run by ops.
+name: Mobile app build
+
+on:
+  workflow_dispatch:
+    inputs:
+      organisation_host:
+        description: "Organisation host for a white-label build (e.g. brightminds.tutortrack.app); empty = the generic TutorTrack app"
+        required: false
+        default: ""
+      platform:
+        description: "Platform"
+        required: true
+        default: android
+        type: choice
+        options: [android, ios]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ${{ inputs.platform == 'ios' && 'macos-14' || 'ubuntu-24.04' }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: frontend/apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install the Capacitor shell (outside the pnpm workspace)
+        run: npm install --no-audit --no-fund
+      - name: Test the configuration script
+        run: npm test
+      - name: Configure (generic or white-label)
+        env:
+          ORG_HOST: ${{ inputs.organisation_host }}
+        run: |
+          if [ -n "$ORG_HOST" ]; then
+            node scripts/configure.mjs --url "https://${ORG_HOST}/api/v1/public/mobile-app"
+          else
+            node scripts/configure.mjs
+          fi
+      - uses: actions/setup-java@v4
+        if: inputs.platform == 'android'
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Android
+        if: inputs.platform == 'android'
+        run: |
+          npx cap add android
+          if [ -f assets/icon.png ]; then npx capacitor-assets generate --android; fi
+          npx cap sync android
+          cd android && ./gradlew assembleDebug
+      - name: iOS
+        if: inputs.platform == 'ios'
+        run: |
+          npx cap add ios
+          if [ -f assets/icon.png ]; then npx capacitor-assets generate --ios; fi
+          npx cap sync ios
+          xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Debug \
+            -sdk iphonesimulator -derivedDataPath build CODE_SIGNING_ALLOWED=NO
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tutortrack-${{ inputs.platform }}-${{ inputs.organisation_host || 'generic' }}
+          path: |
+            frontend/apps/mobile/android/app/build/outputs/apk/debug/*.apk
+            frontend/apps/mobile/build/Build/Products/Debug-iphonesimulator/*.app
+            frontend/apps/mobile/capacitor.config.json
+          if-no-files-found: warn

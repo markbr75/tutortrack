@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from tutortrack.core.api.serializers import BaseModelSerializer, MoneySerializerField
@@ -9,11 +10,14 @@ from ..models import (
     BankFileExport,
     Expense,
     ExpenseCategory,
+    PayBasis,
     PayItem,
     PayMethod,
     Payout,
     PayRun,
     PayStatement,
+    TaxFormFiling,
+    TinType,
     TutorPayProfile,
 )
 
@@ -25,18 +29,56 @@ class PayProfileSerializer(BaseModelSerializer):
 
     class Meta:
         model = TutorPayProfile
-        fields = ["id", "tutor", "tutor_name", "employment_type", "method", "currency",
-                  "payee_name", "bank_country", "bank_hint", "bank", "vat_registered",
-                  "vat_number", "self_billing_agreed_at", "self_billing_agreement_version",
-                  "stripe_account_id", "stripe_payouts_enabled", "hourly_rate"]  # fmt: skip
-        read_only_fields = ["id", "tutor", "bank_country", "bank_hint", "self_billing_agreed_at",
-                            "self_billing_agreement_version", "stripe_account_id",
-                            "stripe_payouts_enabled"]  # fmt: skip
+        fields = [
+            "id",
+            "tutor",
+            "tutor_name",
+            "employment_type",
+            "method",
+            "currency",
+            "payee_name",
+            "bank_country",
+            "bank_hint",
+            "bank",
+            "vat_registered",
+            "vat_number",
+            "self_billing_agreed_at",
+            "self_billing_agreement_version",
+            "stripe_account_id",
+            "stripe_payouts_enabled",
+            "hourly_rate",
+            "pay_basis",
+            "commission_percent",
+            "tin_type",
+            "tin_hint",
+            "wise_ready",
+        ]
+        read_only_fields = [
+            "id",
+            "tutor",
+            "bank_country",
+            "bank_hint",
+            "self_billing_agreed_at",
+            "self_billing_agreement_version",
+            "stripe_account_id",
+            "stripe_payouts_enabled",
+            "tin_type",
+            "tin_hint",
+            "wise_ready",
+        ]
+
+    wise_ready = serializers.SerializerMethodField()
 
     def get_bank(self, obj: TutorPayProfile) -> dict[str, str]:
         from .. import services
 
         return services.bank_details(obj, full=bool(self.context.get("full_bank")))
+
+    @extend_schema_field(serializers.BooleanField())
+    def get_wise_ready(self, obj: TutorPayProfile) -> bool:
+        """Wise can pay this tutor: bank details on file (the recipient is made on the
+        first payout)."""
+        return bool(obj.bank_details)
 
 
 class PayProfileUpdateSerializer(serializers.Serializer):
@@ -47,6 +89,10 @@ class PayProfileUpdateSerializer(serializers.Serializer):
     vat_number = serializers.CharField(required=False, allow_blank=True, max_length=30)
     hourly_rate = serializers.DecimalField(
         max_digits=10, decimal_places=2, required=False, allow_null=True
+    )
+    pay_basis = serializers.ChoiceField(choices=PayBasis.choices, required=False)
+    commission_percent = serializers.DecimalField(
+        max_digits=5, decimal_places=2, required=False, allow_null=True
     )
 
 
@@ -251,3 +297,75 @@ class EarningsSerializer(serializers.Serializer):
 
 class OnboardingLinkSerializer(serializers.Serializer):
     url = serializers.CharField()
+
+
+# --- Phase 3 (E12-T12): US tax forms -------------------------------------------------------------
+
+
+class TaxIdentitySerializer(serializers.Serializer):
+    tin_type = serializers.ChoiceField(choices=TinType.choices)
+    tin = serializers.CharField(max_length=20)
+
+
+class TaxIdentityOutSerializer(serializers.Serializer):
+    tin_type = serializers.CharField()
+    tin = serializers.CharField(help_text="Masked unless ?full=true (payroll.tax.view, audited)")
+    tin_hint = serializers.CharField()
+
+
+class Form1099RowSerializer(serializers.Serializer):
+    tutor = serializers.UUIDField(source="tutor.pk")
+    name = serializers.CharField()
+    tin_type = serializers.CharField()
+    tin_hint = serializers.CharField()
+    address = serializers.DictField(child=serializers.CharField(allow_blank=True))
+    box1 = MoneySerializerField()
+    payment_count = serializers.IntegerField()
+    reportable = serializers.BooleanField()
+    problems = serializers.ListField(child=serializers.CharField())
+    filing = serializers.UUIDField(source="filing.pk", allow_null=True, default=None)
+    changed_since_filing = serializers.BooleanField()
+
+
+class Form1099SummarySerializer(serializers.Serializer):
+    tax_year = serializers.IntegerField()
+    currency = serializers.CharField()
+    threshold = serializers.CharField()
+    reportable = serializers.IntegerField()
+    problems = serializers.IntegerField()
+    rows = Form1099RowSerializer(many=True)
+
+
+class TaxFormFilingSerializer(BaseModelSerializer):
+    tutor_name = serializers.CharField(source="tutor.full_name", read_only=True)
+    box1 = MoneySerializerField(read_only=True)
+
+    class Meta:
+        model = TaxFormFiling
+        fields = [
+            "id",
+            "tutor",
+            "tutor_name",
+            "form",
+            "tax_year",
+            "currency",
+            "box1",
+            "payment_count",
+            "tin_type",
+            "tin_hint",
+            "payee",
+            "corrects",
+            "superseded",
+            "finalised_at",
+        ]
+        read_only_fields = fields
+
+
+class MyTaxSummarySerializer(serializers.Serializer):
+    tax_year = serializers.IntegerField()
+    currency = serializers.CharField()
+    box1 = serializers.CharField()
+    reportable = serializers.BooleanField()
+    filed = serializers.BooleanField()
+    filed_box1 = serializers.CharField(allow_null=True)
+    tin_hint = serializers.CharField()

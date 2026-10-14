@@ -101,10 +101,12 @@ def send_pay_run_payouts(input: PayRunInput) -> int:
 
 @tenant_activity
 def payouts_outstanding(input: PayRunInput) -> int:
-    from . import services
+    from . import services, wise_payouts
     from .models import PayRun
 
-    return services.outstanding(PayRun.objects.get(pk=input.pay_run_id))
+    run = PayRun.objects.get(pk=input.pay_run_id)
+    wise_payouts.refresh(run)  # E12-T12: poll Wise in case a webhook was lost
+    return services.outstanding(run)
 
 
 @tenant_activity

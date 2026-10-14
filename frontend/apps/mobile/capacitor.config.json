@@ -1,0 +1,27 @@
+{
+  "appId": "app.tutortrack.portal",
+  "appName": "TutorTrack",
+  "webDir": "www",
+  "server": {
+    "allowNavigation": ["*.tutortrack.app"]
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#ffffff"
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#ffffff"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 800,
+      "backgroundColor": "#2563eb",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "backgroundColor": "#2563eb",
+      "style": "DARK"
+    }
+  }
+}

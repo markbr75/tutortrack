@@ -71,7 +71,7 @@ Attract and vet tutors: public application forms, a recruitment pipeline (screen
 - [x] **E18-T08** Compliance dashboard and alerts.
 - [x] **E18-T09** Subject competency approvals.
 - [x] **E18-T10** Frontend: recruitment board, application detail, tutor onboarding (tutor portal), compliance UI.
-- [ ] **E18-T11** (Phase 3) Background check provider integrations.
+- [x] **E18-T11** (Phase 3) Background check provider integrations.
 
 ## Temporal workflows (E32)
 
@@ -109,3 +109,19 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
 - **Frontend (T10):** admin recruitment board, application detail (stage, interview, references, approve or reject), compliance dashboard and tutor compliance card. Tutor portal: Getting started (checklist) and Checks (uploads). Public: vacancies, interview choice and reference pages.
 - **Workflows (TW1):** application reminders when an application sits in a stage too long, plus the reference, onboarding and compliance-record workflows above.
 - **Not built:** T11 (Phase 3 background-check providers); FR-18-9 probation reviews and offboarding checklists; public CV uploads.
+
+## Phase 3 implementation notes (as built 2026-10-14)
+See ADR 0032.
+
+- **Providers (FR-18-7, `recruitment/checks/`):** a `CheckClient` interface (`initiate`, `fetch`, `cancel`) with:
+  - `ucheck` (UK DBS basic/standard/enhanced, with or without the children's barred list): an application and an applicant link; polled every 6 hours;
+  - `dbs_update` (DBS Update Service status check of an existing certificate, no account needed): the government API's answer (`BLANK/NON_BLANK_NO_NEW_INFO` = clear, `NEW_INFO` = needs review, `NO_MATCH_FOUND` = unable) is read from the XML with a regular expression (no XML entity expansion); re-checked every `compliance.dbs_update_recheck_days` (90);
+  - `checkr` (US): candidate + invitation (hosted consent and details); report `clear/consider`; webhooks `/webhooks/background-checks/checkr` verified with the account's API key (HMAC-SHA256, `X-Checkr-Signature`) after routing by candidate id;
+  - `wwcc` (AU Working With Children Checks): no API, so the check carries the state's verification page and staff record the outcome.
+  uCheck and Checkr connect with an API key (integration framework, encrypted); all HTTP goes through `core.net.safe_urlopen`; without live credential providers every provider is `FakeChecks`. The real clients are tested against request shapes only (uCheck endpoint shapes to be confirmed against its partner documentation).
+- **Model:** `BackgroundCheck` (RLS): provider, package, status (`requested → invited/in_progress → completed | cancelled | expired | failed`), result (`clear | consider | unable`), external and candidate ids, consent time, requester, reviewer. The invitation link, result details, certificate number and report link are `EncryptedField`s.
+- **Flow (`BackgroundCheckWorkflow`, `bg-check:{org}:{check}`):** initiate → wait for `updated` (webhooks, staff "Check now" or an outcome) or the provider's polling interval → fetch → until complete, `cancel`led, or the invitation passes `compliance.check_invite_days` (30) and is expired at the provider. DBS Update Service checks then keep re-checking on a timer (up to 20 rounds per run). Histories `BackgroundCheckWorkflow-completed/expired.json` are replayed.
+- **Results onto compliance records:** a completed check submits the mapped requirement (`dbs_enhanced`, `background_check`, `wwcc`) with the certificate number and issue date (expiry from the renewal interval). A clear result is verified by the provider when `compliance.checks_auto_verify` is on (default; `verified_by` empty, which starts the usual `ComplianceRecordWorkflow` for expiry). "Needs review" waits for a `compliance.verify` holder (`POST /background-checks/{id}/outcome`, not the tutor themself). New information from the Update Service rejects the record (restricting the tutor when the requirement blocks) and tells staff.
+- **Sensitive data:** results and numbers are only readable through `GET /background-checks/{id}/details` (new `compliance.checks.results`, audited with `audit.record_read`); events carry ids and the outcome only. Starting and cancelling needs the new `compliance.checks.request` and a recorded tutor consent. A privacy provider exports checks without results; erasure clears results and numbers but keeps the fact of the check as evidence; the new retention category `background_check_details` (183 days, in line with DBS guidance) purges results, certificate numbers and links. uCheck and Checkr are listed as optional sub-processors (UK and US stacks).
+- **UI:** the tutor record has an "Online background checks" card (start with provider, check type, certificate number or state, consent tick; check now, cancel, show result, mark clear or not completed). The tutor portal's Checks page lists the tutor's checks with the link to complete each.
+- **Deviations:** Atlantic Data is not a separate provider (uCheck is Atlantic Data's DBS product); Canadian vulnerable sector checks and NZ police vetting stay manual uploads.

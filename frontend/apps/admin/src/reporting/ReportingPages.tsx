@@ -422,6 +422,9 @@ function ReportsNav() {
       <Link to="/analytics/saved" className={linkClass}>
         {t("reporting.savedTitle")}
       </Link>
+      <Link to="/analytics/warehouse" className={linkClass}>
+        {t("warehouse.navLink")}
+      </Link>
     </nav>
   );
 }

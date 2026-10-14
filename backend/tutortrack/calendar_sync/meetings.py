@@ -126,8 +126,21 @@ def spec_for(lesson: Lesson, provider: str, preference: Any) -> MeetingSpec:
             "passcode": bool(_setting("integrations.zoom_passcode")),
             "recording": str(_setting("integrations.zoom_recording")),
             "use_personal_room": bool(preference and preference.use_personal_room),
+            # E22-T10: Lessonspace calls this per space with join/leave/session events.
+            "webhook_url": video_callback_url(lesson) if provider == "lessonspace" else "",
         },
     )
+
+
+def video_callback_url(lesson: Lesson) -> str:
+    """Signed per-lesson webhook address for providers that take one per room."""
+    from django.conf import settings
+
+    from tutortrack.integrations import routes
+
+    token = routes.callback_token("lessonspace", lesson.organisation_id, lesson.pk)
+    base = settings.INTEGRATIONS["WEBHOOK_BASE_URL"].rstrip("/")
+    return f"{base}/webhooks/lessonspace/{token}"
 
 
 def _creds(connection: IntegrationConnection | None) -> Credentials:
@@ -217,6 +230,10 @@ def reconcile(lesson_id: Any) -> str:
             meeting.last_error = ""
             meeting.data = info.data
             meeting.save()
+            if provider == "zoom" and info.external_id:  # E22-T10 webhook routing
+                from tutortrack.integrations import routes
+
+                routes.remember("zoom", info.external_id)
             _set_lesson_link(lesson, info.join_url, provider)
             event_class = (
                 events.OnlineMeetingCreated if outcome == "created" else events.OnlineMeetingUpdated

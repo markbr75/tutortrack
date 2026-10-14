@@ -78,3 +78,25 @@ class IntegrationConnection(TenantModel):
     @property
     def is_live(self) -> bool:
         return self.status in (self.Status.ACTIVE, self.Status.ERROR)
+
+
+class WebhookRoute(models.Model):
+    """Platform-level routing for provider webhooks (Phase 3: Zoom, Wise, Checkr): which
+    organisation an external id (meeting, transfer, candidate) belongs to. Webhooks arrive
+    on the platform host before any tenant is known; this is the only lookup they make
+    outside a tenant, like ``payments.AccountRoute``. It holds ids only, no personal data."""
+
+    provider = models.CharField(max_length=30)
+    external_id = models.CharField(max_length=255)
+    organisation_id = models.UUIDField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["provider", "external_id"], name="integration_webhook_route_unique"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.provider}:{self.external_id}"

@@ -1,3 +1,5 @@
 packages:
   - "apps/*"
+  # E16-T11: the Capacitor shell installs on its own (manual mobile build workflow only).
+  - "!apps/mobile"
   - "packages/*"

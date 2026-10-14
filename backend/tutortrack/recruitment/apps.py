@@ -10,7 +10,7 @@ class RecruitmentConfig(AppConfig):
         from tutortrack.crm import targets
         from tutortrack.payroll.services import register_hold_rule
 
-        from . import handlers, org_settings  # noqa: F401
+        from . import checks, handlers, org_settings  # noqa: F401
         from .compliance import compliance_hold
         from .models import TutorApplication
 

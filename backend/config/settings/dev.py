@@ -27,6 +27,12 @@ INTEGRATIONS = {
     "CREDENTIAL_PROVIDERS_LIVE": env.bool("INTEGRATIONS_CREDENTIAL_PROVIDERS_LIVE", default=False),
 }
 
+# E26-T09: customer-hosted warehouse destinations use their fake locally unless switched on.
+WAREHOUSE_EXPORT = {
+    **WAREHOUSE_EXPORT,
+    "LIVE": env.bool("WAREHOUSE_EXPORT_LIVE", default=False),
+}
+
 # E24: hosted websites at http://<slug>.site.localhost:8010; fake DNS verifies any domain.
 CUSTOM_DOMAINS = {
     **CUSTOM_DOMAINS,

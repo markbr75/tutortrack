@@ -65,3 +65,6 @@ CUSTOM_DOMAINS = {**CUSTOM_DOMAINS, "SITE_BASE_DOMAIN": "tutortrack-site.test"}
 
 # E31: always the deterministic fake LLM (the suite never calls the real API).
 AI = {**AI, "PROVIDER": "fake", "API_KEY": ""}
+
+# Phase 3 (ADR 0032): warehouse destinations use their fake in tests.
+WAREHOUSE_EXPORT = {**WAREHOUSE_EXPORT, "LIVE": False}

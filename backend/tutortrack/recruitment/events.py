@@ -131,3 +131,34 @@ class TutorRestricted(DomainEvent):
 class TutorUnrestricted(DomainEvent):
     event_type: ClassVar[str] = "tutor.unrestricted"
     subject_type: ClassVar[str] = "tutor"
+
+
+# --- E18-T11 background checks (no results or numbers in payloads) -----------------------------
+
+
+@dataclass(frozen=True, kw_only=True)
+class _CheckEvent(DomainEvent):
+    subject_type: ClassVar[str] = "background_check"
+    tutor_id: str
+    provider: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class BackgroundCheckRequested(_CheckEvent):
+    """Starts ``BackgroundCheckWorkflow``."""
+
+    event_type: ClassVar[str] = "background_check.requested"
+
+
+@dataclass(frozen=True, kw_only=True)
+class BackgroundCheckCompleted(_CheckEvent):
+    event_type: ClassVar[str] = "background_check.completed"
+    result: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class BackgroundCheckFailed(_CheckEvent):
+    """Couldn't start, expired before the tutor finished, or was cancelled."""
+
+    event_type: ClassVar[str] = "background_check.failed"
+    status: str

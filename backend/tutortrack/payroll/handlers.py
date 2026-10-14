@@ -54,9 +54,26 @@ def report_holds(event: EventEnvelope) -> None:
 def client_paid_holds(event: EventEnvelope) -> None:
     from tutortrack.billing.selectors import lessons_on_invoice
 
-    from . import services
+    from . import commission, services
 
-    services.reevaluate_lessons(lessons_on_invoice(event.subject["id"]))
+    lesson_ids = lessons_on_invoice(event.subject["id"])
+    commission.resync(lesson_ids)  # E12-T12: commission follows what was collected
+    services.reevaluate_lessons(lesson_ids)
+
+
+@subscribe("payment.succeeded")
+def commission_on_payment(event: EventEnvelope) -> None:
+    """A further part payment keeps an invoice "partially paid" (no invoice event), so
+    commission pay also follows the payment's invoices (E12-T12)."""
+    from tutortrack.billing.selectors import lessons_on_invoice
+
+    from . import commission
+
+    lesson_ids: list[object] = []
+    for invoice_id in event.data.get("invoice_ids") or []:
+        lesson_ids.extend(lessons_on_invoice(invoice_id))
+    if lesson_ids:
+        commission.resync(lesson_ids)
 
 
 @subscribe("organisation.settings_updated")

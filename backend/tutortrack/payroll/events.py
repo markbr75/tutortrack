@@ -109,3 +109,13 @@ class SelfBillingStatementIssued(DomainEvent):
     subject_type: ClassVar[str] = "pay_statement"
     tutor_id: str
     number: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class TaxFormsFinalised(DomainEvent):
+    """E12-T12: a US tax year's 1099-NEC figures were frozen (``subject_id`` = the year)."""
+
+    event_type: ClassVar[str] = "tax_forms.finalised"
+    subject_type: ClassVar[str] = "tax_year"
+    tax_year: int
+    filings: int

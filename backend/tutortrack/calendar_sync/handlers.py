@@ -22,6 +22,7 @@ from .processes import (
     calendar_workflow_id,
     meeting_workflow_id,
 )
+from .video_processes import RecordingFetchWorkflow, RecordingsInput, recordings_workflow_id
 
 # lesson.updated fields that matter to the meeting (notes, colour... don't).
 MEETING_FIELDS = {
@@ -213,3 +214,27 @@ for _type in ("lesson_series.created", "lesson_series.updated"):
         subject=lambda e: ("lesson_series", e.subject["id"]),
         when=lambda e: bool(_series_lessons(e.subject["id"], online_only=True)),
     )
+
+
+# --- E22-T10: recordings after the lesson -------------------------------------------------------
+
+
+def _wants_recordings(event: EventEnvelope) -> bool:
+    from tutortrack.scheduling.models import Lesson
+
+    from . import video
+
+    lesson = Lesson.objects.filter(pk=event.subject["id"], online=True).first()
+    return lesson is not None and video.recordings_supported(lesson)
+
+
+bridge.on(
+    "lesson.completed",
+    start=RecordingFetchWorkflow,
+    id=lambda e: recordings_workflow_id(e.organisation_id, e.subject["id"]),
+    input=lambda e: RecordingsInput(
+        organisation_id=str(e.organisation_id), lesson_id=e.subject["id"]
+    ),
+    subject=lambda e: ("lesson", e.subject["id"]),
+    when=_wants_recordings,
+)

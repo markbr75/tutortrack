@@ -22,6 +22,9 @@ from tutortrack.core.fields import CurrencyField, MoneyField
 from tutortrack.core.models import BranchScopedModel, TenantModel
 from tutortrack.core.models.base import TimeStampedModel, UUIDModel
 
+# E26-T09: warehouse export models live in their own module (kept apart from the facts).
+from .warehouse.models import WarehouseDestination, WarehouseExport  # noqa: F401
+
 
 def _ref(model: str, **kwargs: Any) -> Any:
     """A reference to another app's record that never constrains or cascades."""

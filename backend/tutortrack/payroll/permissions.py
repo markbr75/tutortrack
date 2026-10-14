@@ -10,4 +10,6 @@ PERMISSIONS = {
     "payroll.payrun.pay": "Send payouts, download bank files and mark pay runs paid",
     "payroll.profile.manage": "Edit tutors' pay method and payout details",
     "payroll.bank_details.view": "See tutors' full bank details (otherwise masked)",
+    "payroll.tax.view": "See tutors' full taxpayer ids (SSN/EIN) and export them on 1099 data",
+    "payroll.tax.manage": "Finalise US tax years (1099-NEC figures)",
 }

@@ -966,13 +966,15 @@
                             "enum": [
                                 "export",
                                 "xero",
-                                "quickbooks"
+                                "quickbooks",
+                                "sage",
+                                "freeagent"
                             ],
                             "type": "string",
                             "default": "export",
                             "minLength": 1
                         },
-                        "description": "* `export` - export\n* `xero` - xero\n* `quickbooks` - quickbooks"
+                        "description": "* `export` - export\n* `xero` - xero\n* `quickbooks` - quickbooks\n* `sage` - sage\n* `freeagent` - freeagent"
                     },
                     {
                         "in": "query",
@@ -1020,7 +1022,9 @@
                             "type": "string",
                             "enum": [
                                 "export",
+                                "freeagent",
                                 "quickbooks",
+                                "sage",
                                 "xero"
                             ]
                         },
@@ -1060,7 +1064,9 @@
                             "type": "string",
                             "enum": [
                                 "export",
+                                "freeagent",
                                 "quickbooks",
+                                "sage",
                                 "xero"
                             ]
                         },
@@ -1437,6 +1443,374 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/RetryResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/xero-payroll": {
+            "get": {
+                "operationId": "accounting_xero_payroll_retrieve",
+                "description": "``GET /accounting/xero-payroll``: connection, employee links and recent syncs.",
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/XeroPayrollStatus"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/xero-payroll/earnings-rate": {
+            "get": {
+                "operationId": "accounting_xero_payroll_earnings_rate_list",
+                "description": "``GET`` the earnings rates; ``PUT`` the one tutors' hours are paid at.",
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/XeroEarningsRate"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "put": {
+                "operationId": "accounting_xero_payroll_earnings_rate_update",
+                "description": "``GET`` the earnings rates; ``PUT`` the one tutors' hours are paid at.",
+                "tags": [
+                    "accounting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EarningsRateRefRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EarningsRateRefRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EarningsRateRefRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/XeroPayrollStatus"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/xero-payroll/employees": {
+            "get": {
+                "operationId": "accounting_xero_payroll_employees_list",
+                "description": "``GET /accounting/xero-payroll/employees``: employees in Xero Payroll.",
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/XeroEmployee"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/xero-payroll/links": {
+            "put": {
+                "operationId": "accounting_xero_payroll_links_update",
+                "description": "``PUT /accounting/xero-payroll/links``: link a tutor to a Xero employee by hand.",
+                "tags": [
+                    "accounting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LinkEmployeeRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LinkEmployeeRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LinkEmployeeRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/XeroPayrollStatus"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/xero-payroll/match": {
+            "post": {
+                "operationId": "accounting_xero_payroll_match_create",
+                "description": "``POST /accounting/xero-payroll/match``: link employed tutors by email.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/XeroPayrollStatus"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/xero-payroll/sync": {
+            "post": {
+                "operationId": "accounting_xero_payroll_sync_create",
+                "description": "``POST /accounting/xero-payroll/sync``: (re)send an approved pay run's timesheets.\nIdempotent per tutor; send ``Idempotency-Key``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SyncRequestRequest"
+                            },
+                            "examples": {
+                                "Retry": {
+                                    "value": {
+                                        "pay_run": "5d0c2c1e-4a8d-4b8c-9a55-0f5e1d0a4c11"
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SyncRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SyncRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/xero-payroll/syncs": {
+            "get": {
+                "operationId": "accounting_xero_payroll_syncs_list",
+                "description": "``/accounting/xero-payroll/syncs``: timesheet syncs per pay run.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedPayrollTimesheetSyncList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/accounting/xero-payroll/syncs/{id}": {
+            "get": {
+                "operationId": "accounting_xero_payroll_syncs_retrieve",
+                "description": "``/accounting/xero-payroll/syncs``: timesheet syncs per pay run.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this payroll timesheet sync.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "accounting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PayrollTimesheetSync"
                                 }
                             }
                         },
@@ -7493,6 +7867,426 @@
                 "x-scopes": [
                     "availability:read"
                 ]
+            }
+        },
+        "/api/v1/background-checks": {
+            "get": {
+                "operationId": "background_checks_list",
+                "description": "``/background-checks``: online checks started from the tutor record.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "background-checks"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedBackgroundCheckList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "background_checks_create",
+                "description": "``/background-checks``: online checks started from the tutor record.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "background-checks"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CheckRequestRequest"
+                            },
+                            "examples": {
+                                "EnhancedDBSThroughUCheck": {
+                                    "value": {
+                                        "tutor": "3f1c3c9e-6a59-4a39-8a68-2a0d7f5b2b10",
+                                        "provider": "ucheck",
+                                        "package": "enhanced_barred",
+                                        "consent": true
+                                    },
+                                    "summary": "Enhanced DBS through uCheck"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CheckRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CheckRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BackgroundCheck"
+                                },
+                                "examples": {
+                                    "EnhancedDBSThroughUCheck": {
+                                        "value": {
+                                            "tutor": "3f1c3c9e-6a59-4a39-8a68-2a0d7f5b2b10",
+                                            "provider": "ucheck",
+                                            "package": "enhanced_barred",
+                                            "consent": true
+                                        },
+                                        "summary": "Enhanced DBS through uCheck"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/background-checks/{id}": {
+            "get": {
+                "operationId": "background_checks_retrieve",
+                "description": "``/background-checks``: online checks started from the tutor record.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this background check.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "background-checks"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BackgroundCheck"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/background-checks/{id}/cancel": {
+            "post": {
+                "operationId": "background_checks_cancel_create",
+                "description": "``/background-checks``: online checks started from the tutor record.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this background check.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "background-checks"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BackgroundCheck"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/background-checks/{id}/details": {
+            "get": {
+                "operationId": "background_checks_details_retrieve",
+                "description": "Result, certificate number and report link: ``compliance.checks.results``,\naudited.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this background check.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "background-checks"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CheckDetails"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/background-checks/{id}/outcome": {
+            "post": {
+                "operationId": "background_checks_outcome_create",
+                "description": "Record a manual (AU WWCC) outcome or confirm a \"needs review\" result.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this background check.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "background-checks"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CheckOutcomeRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CheckOutcomeRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CheckOutcomeRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BackgroundCheck"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/background-checks/{id}/refresh": {
+            "post": {
+                "operationId": "background_checks_refresh_create",
+                "description": "Ask the provider now (signals the check's workflow).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this background check.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "background-checks"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BackgroundCheck"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/background-checks/providers": {
+            "get": {
+                "operationId": "background_checks_providers_list",
+                "description": "``/background-checks``: online checks started from the tutor record.",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "background-checks"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CheckProvider"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
             }
         },
         "/api/v1/bank-reconciliation/imports": {
@@ -42190,6 +42984,109 @@
                 ]
             }
         },
+        "/api/v1/lessons/{id}/classroom": {
+            "get": {
+                "operationId": "lessons_classroom_retrieve",
+                "description": "``GET /lessons/{id}/classroom``: the in-app classroom (FR-22-5) for the lesson's\ntutor, its families or staff.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Classroom"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/lessons/{id}/classroom/consent": {
+            "post": {
+                "operationId": "lessons_classroom_consent_create",
+                "description": "``POST /lessons/{id}/classroom/consent``: a family agrees to recording (E29 consent\nrecord) from the classroom prompt.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClassroomConsentRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClassroomConsentRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClassroomConsentRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClassroomConsentOut"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/lessons/{id}/complete": {
             "post": {
                 "operationId": "lessons_complete_create",
@@ -42686,6 +43583,67 @@
                 "x-scopes": [
                     "lessons:write"
                 ]
+            }
+        },
+        "/api/v1/lessons/{id}/video-attendance": {
+            "get": {
+                "operationId": "lessons_video_attendance_retrieve",
+                "description": "``GET /lessons/{id}/video-attendance``: the register suggested by who joined the\nonline lesson, and its actual length (pre-fills the tutor's register).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VideoAttendance"
+                                },
+                                "examples": {
+                                    "OneStudent7MinutesLate": {
+                                        "value": {
+                                            "available": true,
+                                            "actual_minutes": 52,
+                                            "tutor_minutes": 60,
+                                            "guests": 0,
+                                            "students": [
+                                                {
+                                                    "attendee_id": "0c8f9a8e-0f43-4a59-9bb1-0ad0f6d2a7d1",
+                                                    "student_id": "a1c1e0f2-1d0c-4c73-9a51-0d9c46f3d0b7",
+                                                    "name": "Sam Patel",
+                                                    "suggested_outcome": "late",
+                                                    "late_minutes": 7,
+                                                    "minutes_attended": 52,
+                                                    "first_joined_at": "2026-10-14T16:07:00Z",
+                                                    "last_left_at": "2026-10-14T16:59:00Z"
+                                                }
+                                            ]
+                                        },
+                                        "summary": "One student 7 minutes late"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
             }
         },
         "/api/v1/lessons/bulk": {
@@ -43849,6 +44807,36 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Me"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/me/background-checks": {
+            "get": {
+                "operationId": "me_background_checks_list",
+                "description": "``GET /me/background-checks``: the tutor's own checks with their invitation links.",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/MyBackgroundCheck"
+                                    }
                                 }
                             }
                         },
@@ -45314,6 +46302,36 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/me/recordings": {
+            "get": {
+                "operationId": "me_recordings_list",
+                "description": "``GET /me/recordings``: recordings shared with the signed-in family.",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/LessonRecording"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/me/sessions": {
             "get": {
                 "operationId": "me_sessions_list",
@@ -45415,6 +46433,114 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/SessionsRevoked"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/me/tax-identity": {
+            "get": {
+                "operationId": "me_tax_identity_retrieve",
+                "description": "The tutor's own tax id (tutor portal): write-only, shown masked.",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaxIdentityOut"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "put": {
+                "operationId": "me_tax_identity_update",
+                "description": "The tutor's own tax id (tutor portal): write-only, shown masked.",
+                "tags": [
+                    "me"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaxIdentityRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaxIdentityRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaxIdentityRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaxIdentityOut"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/me/tax-summary": {
+            "get": {
+                "operationId": "me_tax_summary_retrieve",
+                "description": "``GET /me/tax-summary?year=``: what the tutor was paid in a US tax year.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "year",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MyTaxSummary"
                                 }
                             }
                         },
@@ -51254,6 +52380,254 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/OriginatorOut"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/payroll/tax-forms": {
+            "get": {
+                "operationId": "payroll_tax_forms_list",
+                "description": "Finalised 1099-NEC filings (immutable); tutors see their own.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tax_year",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "payroll"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedTaxFormFilingList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/payroll/tax-forms/{id}": {
+            "get": {
+                "operationId": "payroll_tax_forms_retrieve",
+                "description": "Finalised 1099-NEC filings (immutable); tutors see their own.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tax form filing.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "payroll"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaxFormFiling"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/payroll/tax-years/{year}/1099": {
+            "get": {
+                "operationId": "payroll_tax_years_1099_retrieve",
+                "description": "``GET /payroll/tax-years/{year}/1099``: box 1 per contractor tutor paid in USD.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "year",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "payroll"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Form1099Summary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/payroll/tax-years/{year}/1099/export": {
+            "get": {
+                "operationId": "payroll_tax_years_1099_export_retrieve",
+                "description": "``GET /payroll/tax-years/{year}/1099/export``: the IRIS-style CSV; ``full_tin=true``\nneeds ``payroll.tax.view`` and is audited.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "full_tin",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "year",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "payroll"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "text/csv": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/payroll/tax-years/{year}/1099/finalise": {
+            "post": {
+                "operationId": "payroll_tax_years_1099_finalise_create",
+                "description": "``POST /payroll/tax-years/{year}/1099/finalise``: freeze the figures (immutable\nfilings; changed figures are filed as corrections). Send ``Idempotency-Key``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "year",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "payroll"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TaxFormFiling"
+                                    }
                                 }
                             }
                         },
@@ -57815,6 +59189,31 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/public/mobile-app": {
+            "get": {
+                "operationId": "public_mobile_app_retrieve",
+                "description": "White-label app configuration (generic when the plan has no white-label apps).",
+                "tags": [
+                    "public"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MobileAppConfig"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/public/offers/{token}": {
             "get": {
                 "operationId": "public_offers_retrieve",
@@ -58804,6 +60203,232 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/RateQuote"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/recordings": {
+            "get": {
+                "operationId": "recordings_list",
+                "description": "``/recordings``: recordings of online lessons. Tutors see their own lessons'\navailable recordings; ``video.recording.manage`` sees and manages all.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lesson",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "recordings"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedLessonRecordingList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/recordings/{id}": {
+            "get": {
+                "operationId": "recordings_retrieve",
+                "description": "``/recordings``: recordings of online lessons. Tutors see their own lessons'\navailable recordings; ``video.recording.manage`` sees and manages all.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson recording.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "recordings"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonRecording"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "patch": {
+                "operationId": "recordings_partial_update",
+                "description": "``/recordings``: recordings of online lessons. Tutors see their own lessons'\navailable recordings; ``video.recording.manage`` sees and manages all.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson recording.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "recordings"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedRecordingUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedRecordingUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedRecordingUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonRecording"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "delete": {
+                "operationId": "recordings_destroy",
+                "description": "``/recordings``: recordings of online lessons. Tutors see their own lessons'\navailable recordings; ``video.recording.manage`` sees and manages all.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this lesson recording.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "recordings"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/recordings/{id}/play": {
+            "get": {
+                "operationId": "recordings_play_retrieve",
+                "description": "``GET /recordings/{id}/play``: a playback link after an access check (staff, the\nlesson's tutor, or the family when shared); every read is audited.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "recordings"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RecordingLink"
                                 }
                             }
                         },
@@ -60418,6 +62043,512 @@
                                 "schema": {
                                     "type": "string",
                                     "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/reporting/warehouse/destinations": {
+            "get": {
+                "operationId": "reporting_warehouse_destinations_list",
+                "description": "Where the organisation's data is exported (Enterprise: ``warehouse_export``).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedWarehouseDestinationList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "reporting_warehouse_destinations_create",
+                "description": "Where the organisation's data is exported (Enterprise: ``warehouse_export``).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WarehouseDestinationInputRequest"
+                            },
+                            "examples": {
+                                "NightlyToS3": {
+                                    "value": {
+                                        "name": "Data lake",
+                                        "kind": "s3",
+                                        "config": {
+                                            "bucket": "brightminds-warehouse",
+                                            "region": "eu-west-2",
+                                            "prefix": "tutortrack"
+                                        },
+                                        "credentials": {
+                                            "access_key_id": "<key id>",
+                                            "secret_access_key": "<secret>"
+                                        },
+                                        "hour": 2
+                                    },
+                                    "summary": "Nightly to S3"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WarehouseDestinationInputRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WarehouseDestinationInputRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WarehouseDestination"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/reporting/warehouse/destinations/{id}": {
+            "get": {
+                "operationId": "reporting_warehouse_destinations_retrieve",
+                "description": "Where the organisation's data is exported (Enterprise: ``warehouse_export``).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this warehouse destination.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WarehouseDestination"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "put": {
+                "operationId": "reporting_warehouse_destinations_update",
+                "description": "Where the organisation's data is exported (Enterprise: ``warehouse_export``).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this warehouse destination.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WarehouseDestinationInputRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WarehouseDestinationInputRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WarehouseDestinationInputRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WarehouseDestination"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "delete": {
+                "operationId": "reporting_warehouse_destinations_destroy",
+                "description": "Where the organisation's data is exported (Enterprise: ``warehouse_export``).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this warehouse destination.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/reporting/warehouse/destinations/{id}/check": {
+            "post": {
+                "operationId": "reporting_warehouse_destinations_check_create",
+                "description": "Where the organisation's data is exported (Enterprise: ``warehouse_export``).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this warehouse destination.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WarehouseDestination"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/reporting/warehouse/destinations/{id}/exports": {
+            "get": {
+                "operationId": "reporting_warehouse_destinations_exports_list",
+                "description": "The latest 50 runs.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this warehouse destination.",
+                        "required": true
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WarehouseExport"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/reporting/warehouse/destinations/{id}/run": {
+            "post": {
+                "operationId": "reporting_warehouse_destinations_run_create",
+                "description": "Where the organisation's data is exported (Enterprise: ``warehouse_export``).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this warehouse destination.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RunExportRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RunExportRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RunExportRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RunStarted"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/reporting/warehouse/exports/{id}/download": {
+            "get": {
+                "operationId": "reporting_warehouse_exports_download_retrieve",
+                "description": "``GET /reporting/warehouse/exports/{id}/download?dataset=``: a 10-minute link to a\nfile of a TutorTrack-stored export (audited).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "dataset",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "daily_aggregate",
+                                "dim_client",
+                                "dim_service",
+                                "dim_student",
+                                "dim_tutor",
+                                "fact_charge",
+                                "fact_lesson",
+                                "fact_pay_item",
+                                "fact_payment"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WarehouseDownload"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/reporting/warehouse/schema": {
+            "get": {
+                "operationId": "reporting_warehouse_schema_list",
+                "description": "``GET /reporting/warehouse/schema``: the documented dataset schemas.",
+                "tags": [
+                    "reporting"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DatasetSchema"
+                                    }
                                 }
                             }
                         },
@@ -71422,6 +73553,123 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/tutors/{id}/tax-identity": {
+            "get": {
+                "operationId": "tutors_tax_identity_retrieve",
+                "description": "``/tutors/{id}/tax-identity``: the tutor's SSN, ITIN or EIN for 1099-NEC forms. Stored\nencrypted; masked unless ``?full=true`` with ``payroll.tax.view`` (audited).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "full",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaxIdentityOut"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "put": {
+                "operationId": "tutors_tax_identity_update",
+                "description": "``/tutors/{id}/tax-identity``: the tutor's SSN, ITIN or EIN for 1099-NEC forms. Stored\nencrypted; masked unless ``?full=true`` with ``payroll.tax.view`` (audited).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaxIdentityRequest"
+                            },
+                            "examples": {
+                                "SSN": {
+                                    "value": {
+                                        "tin_type": "ssn",
+                                        "tin": "123-45-6789"
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaxIdentityRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaxIdentityRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaxIdentityOut"
+                                },
+                                "examples": {
+                                    "SSN": {
+                                        "value": {
+                                            "tin_type": "ssn",
+                                            "tin": "123-45-6789"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/unconfirmed-lessons": {
             "get": {
                 "operationId": "unconfirmed_lessons_list",
@@ -75534,6 +77782,17 @@
                     "filename"
                 ]
             },
+            "AffiliateBankFileRequestFileFormatEnum": {
+                "enum": [
+                    "csv",
+                    "bacs18",
+                    "sepa",
+                    "nacha",
+                    "aba"
+                ],
+                "type": "string",
+                "description": "* `csv` - csv\n* `bacs18` - bacs18\n* `sepa` - sepa\n* `nacha` - nacha\n* `aba` - aba"
+            },
             "AffiliateBankFileRequestRequest": {
                 "type": "object",
                 "properties": {
@@ -75550,7 +77809,7 @@
                         "nullable": true,
                         "oneOf": [
                             {
-                                "$ref": "#/components/schemas/FileFormatEnum"
+                                "$ref": "#/components/schemas/AffiliateBankFileRequestFileFormatEnum"
                             },
                             {
                                 "$ref": "#/components/schemas/NullEnum"
@@ -77554,6 +79813,52 @@
                     "streak"
                 ]
             },
+            "AttendanceStudent": {
+                "type": "object",
+                "properties": {
+                    "attendee_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "student_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "suggested_outcome": {
+                        "type": "string"
+                    },
+                    "late_minutes": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "minutes_attended": {
+                        "type": "integer"
+                    },
+                    "first_joined_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "last_left_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "attendee_id",
+                    "first_joined_at",
+                    "last_left_at",
+                    "late_minutes",
+                    "minutes_attended",
+                    "name",
+                    "student_id",
+                    "suggested_outcome"
+                ]
+            },
             "AudiencePreview": {
                 "type": "object",
                 "properties": {
@@ -78240,6 +80545,187 @@
                 "required": [
                     "since"
                 ]
+            },
+            "BackgroundCheck": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "tutor_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "provider": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "provider_label": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "package": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "requirement": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "requirement_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "record": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/BackgroundCheckStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "result": {
+                        "readOnly": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/BackgroundCheckResultEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    },
+                    "external_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "certificate_issue_date": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "certificate_expiry_date": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "state_code": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "consent_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_checked_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "checks_run": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "reviewed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "details_purged_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "verification_link": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "certificate_expiry_date",
+                    "certificate_issue_date",
+                    "checks_run",
+                    "completed_at",
+                    "consent_at",
+                    "created_at",
+                    "details_purged_at",
+                    "error",
+                    "external_id",
+                    "id",
+                    "last_checked_at",
+                    "package",
+                    "provider",
+                    "provider_label",
+                    "record",
+                    "requirement",
+                    "requirement_name",
+                    "result",
+                    "reviewed_at",
+                    "state_code",
+                    "status",
+                    "tutor",
+                    "tutor_name",
+                    "verification_link"
+                ]
+            },
+            "BackgroundCheckResultEnum": {
+                "enum": [
+                    "clear",
+                    "consider",
+                    "unable"
+                ],
+                "type": "string",
+                "description": "* `` - No result yet\n* `clear` - Clear\n* `consider` - Needs review\n* `unable` - Couldn't be completed"
+            },
+            "BackgroundCheckStatusEnum": {
+                "enum": [
+                    "requested",
+                    "invited",
+                    "in_progress",
+                    "completed",
+                    "cancelled",
+                    "expired",
+                    "failed"
+                ],
+                "type": "string",
+                "description": "* `requested` - Requested\n* `invited` - Waiting for the tutor\n* `in_progress` - In progress\n* `completed` - Completed\n* `cancelled` - Cancelled\n* `expired` - Expired\n* `failed` - Couldn't start"
             },
             "Balances": {
                 "type": "object",
@@ -82071,6 +84557,30 @@
                     "title"
                 ]
             },
+            "CheckDetails": {
+                "type": "object",
+                "properties": {
+                    "certificate_number": {
+                        "type": "string"
+                    },
+                    "report_url": {
+                        "type": "string"
+                    },
+                    "summary": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "purged": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "certificate_number",
+                    "purged",
+                    "report_url",
+                    "summary"
+                ]
+            },
             "CheckInRequest": {
                 "type": "object",
                 "properties": {
@@ -82081,6 +84591,133 @@
                 },
                 "required": [
                     "lesson"
+                ]
+            },
+            "CheckOutcomeRequest": {
+                "type": "object",
+                "properties": {
+                    "result": {
+                        "$ref": "#/components/schemas/CheckOutcomeResultEnum"
+                    },
+                    "certificate_number": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "expiry_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "note": {
+                        "type": "string",
+                        "maxLength": 300
+                    }
+                },
+                "required": [
+                    "result"
+                ]
+            },
+            "CheckOutcomeResultEnum": {
+                "enum": [
+                    "clear",
+                    "consider",
+                    "unable"
+                ],
+                "type": "string",
+                "description": "* `clear` - clear\n* `consider` - consider\n* `unable` - unable"
+            },
+            "CheckProvider": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "countries": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "recommended": {
+                        "type": "boolean"
+                    },
+                    "packages": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "connected": {
+                        "type": "boolean"
+                    },
+                    "needs_connection": {
+                        "type": "boolean"
+                    },
+                    "manual": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "connected",
+                    "countries",
+                    "key",
+                    "manual",
+                    "needs_connection",
+                    "packages",
+                    "recommended",
+                    "title"
+                ]
+            },
+            "CheckRequestProviderEnum": {
+                "enum": [
+                    "checkr",
+                    "dbs_update",
+                    "ucheck",
+                    "wwcc"
+                ],
+                "type": "string",
+                "description": "* `checkr` - checkr\n* `dbs_update` - dbs_update\n* `ucheck` - ucheck\n* `wwcc` - wwcc"
+            },
+            "CheckRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "provider": {
+                        "$ref": "#/components/schemas/CheckRequestProviderEnum"
+                    },
+                    "package": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "requirement": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "consent": {
+                        "type": "boolean",
+                        "description": "The tutor has agreed to the check."
+                    },
+                    "certificate_number": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "state_code": {
+                        "type": "string",
+                        "maxLength": 3
+                    }
+                },
+                "required": [
+                    "consent",
+                    "provider",
+                    "tutor"
                 ]
             },
             "ChecklistItem": {
@@ -82385,6 +85022,133 @@
                 ],
                 "type": "string",
                 "description": "* `lead` - Teacher\n* `assistant` - Assistant"
+            },
+            "Classroom": {
+                "type": "object",
+                "properties": {
+                    "lesson_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/ClassroomRoleEnum"
+                    },
+                    "provider": {
+                        "type": "string"
+                    },
+                    "embeddable": {
+                        "type": "boolean"
+                    },
+                    "join_url": {
+                        "type": "string"
+                    },
+                    "opens_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "open": {
+                        "type": "boolean"
+                    },
+                    "safeguarding_banner": {
+                        "type": "string"
+                    },
+                    "recording": {
+                        "type": "boolean"
+                    },
+                    "consent_needed": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "resources": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ClassroomResource"
+                        }
+                    }
+                },
+                "required": [
+                    "consent_needed",
+                    "embeddable",
+                    "end",
+                    "join_url",
+                    "lesson_id",
+                    "open",
+                    "opens_at",
+                    "provider",
+                    "recording",
+                    "resources",
+                    "role",
+                    "safeguarding_banner",
+                    "start",
+                    "title"
+                ]
+            },
+            "ClassroomConsentOut": {
+                "type": "object",
+                "properties": {
+                    "consented": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                },
+                "required": [
+                    "consented"
+                ]
+            },
+            "ClassroomConsentRequest": {
+                "type": "object",
+                "properties": {
+                    "student_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                }
+            },
+            "ClassroomResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "title"
+                ]
+            },
+            "ClassroomRoleEnum": {
+                "enum": [
+                    "tutor",
+                    "family",
+                    "staff"
+                ],
+                "type": "string",
+                "description": "* `tutor` - tutor\n* `family` - family\n* `staff` - staff"
             },
             "Client": {
                 "type": "object",
@@ -86809,6 +89573,29 @@
                 "type": "string",
                 "description": "* `received` - Awaiting identity verification\n* `in_progress` - In progress\n* `in_review` - Awaiting review\n* `erasing` - Erasing\n* `delivered` - Delivered\n* `completed` - Completed\n* `blocked` - Blocked by a legal hold\n* `rejected` - Rejected\n* `cancelled` - Cancelled"
             },
+            "DatasetSchema": {
+                "type": "object",
+                "properties": {
+                    "dataset": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "columns": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    }
+                },
+                "required": [
+                    "columns",
+                    "dataset",
+                    "description"
+                ]
+            },
             "DateFormatEnum": {
                 "enum": [
                     "locale",
@@ -87811,6 +90598,37 @@
                     "year_to_date"
                 ]
             },
+            "EarningsRateRef": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            },
+            "EarningsRateRefRequest": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            },
             "Economics": {
                 "type": "object",
                 "properties": {
@@ -87866,6 +90684,34 @@
                 },
                 "required": [
                     "email"
+                ]
+            },
+            "EmployeeLink": {
+                "type": "object",
+                "properties": {
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "tutor_name": {
+                        "type": "string"
+                    },
+                    "employee_id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "matched_by": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "employee_id",
+                    "matched_by",
+                    "name",
+                    "tutor",
+                    "tutor_name"
                 ]
             },
             "EmptySearch": {
@@ -90109,17 +92955,6 @@
                     "subject_id"
                 ]
             },
-            "FileFormatEnum": {
-                "enum": [
-                    "csv",
-                    "bacs18",
-                    "sepa",
-                    "nacha",
-                    "aba"
-                ],
-                "type": "string",
-                "description": "* `csv` - csv\n* `bacs18` - bacs18\n* `sepa` - sepa\n* `nacha` - nacha\n* `aba` - aba"
-            },
             "FileRef": {
                 "type": "object",
                 "properties": {
@@ -90350,6 +93185,124 @@
                     "name",
                     "slug"
                 ]
+            },
+            "Form1099Row": {
+                "type": "object",
+                "properties": {
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "tin_type": {
+                        "type": "string"
+                    },
+                    "tin_hint": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "box1": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ]
+                    },
+                    "payment_count": {
+                        "type": "integer"
+                    },
+                    "reportable": {
+                        "type": "boolean"
+                    },
+                    "problems": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "filing": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "changed_since_filing": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "address",
+                    "box1",
+                    "changed_since_filing",
+                    "name",
+                    "payment_count",
+                    "problems",
+                    "reportable",
+                    "tin_hint",
+                    "tin_type",
+                    "tutor"
+                ]
+            },
+            "Form1099Summary": {
+                "type": "object",
+                "properties": {
+                    "tax_year": {
+                        "type": "integer"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "threshold": {
+                        "type": "string"
+                    },
+                    "reportable": {
+                        "type": "integer"
+                    },
+                    "problems": {
+                        "type": "integer"
+                    },
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Form1099Row"
+                        }
+                    }
+                },
+                "required": [
+                    "currency",
+                    "problems",
+                    "reportable",
+                    "rows",
+                    "tax_year",
+                    "threshold"
+                ]
+            },
+            "FormEnum": {
+                "enum": [
+                    "1099-NEC"
+                ],
+                "type": "string",
+                "description": "* `1099-NEC` - Form 1099-NEC"
             },
             "FormRequest": {
                 "type": "object",
@@ -95280,11 +98233,12 @@
                     "sms_credits_monthly",
                     "sso_saml",
                     "storage_gb",
+                    "warehouse_export",
                     "webhooks",
                     "white_label"
                 ],
                 "type": "string",
-                "description": "* `accounting_integrations` - accounting_integrations\n* `advanced_reports` - advanced_reports\n* `ai_assistant` - ai_assistant\n* `ai_credits_monthly` - ai_credits_monthly\n* `api_access` - api_access\n* `automation` - automation\n* `automation_rules` - automation_rules\n* `courses` - courses\n* `custom_domain` - custom_domain\n* `matching` - matching\n* `max_active_students` - max_active_students\n* `max_branches` - max_branches\n* `max_tutors` - max_tutors\n* `multi_branch` - multi_branch\n* `payroll` - payroll\n* `pipeline` - pipeline\n* `recruitment` - recruitment\n* `sms_credits_monthly` - sms_credits_monthly\n* `sso_saml` - sso_saml\n* `storage_gb` - storage_gb\n* `webhooks` - webhooks\n* `white_label` - white_label"
+                "description": "* `accounting_integrations` - accounting_integrations\n* `advanced_reports` - advanced_reports\n* `ai_assistant` - ai_assistant\n* `ai_credits_monthly` - ai_credits_monthly\n* `api_access` - api_access\n* `automation` - automation\n* `automation_rules` - automation_rules\n* `courses` - courses\n* `custom_domain` - custom_domain\n* `matching` - matching\n* `max_active_students` - max_active_students\n* `max_branches` - max_branches\n* `max_tutors` - max_tutors\n* `multi_branch` - multi_branch\n* `payroll` - payroll\n* `pipeline` - pipeline\n* `recruitment` - recruitment\n* `sms_credits_monthly` - sms_credits_monthly\n* `sso_saml` - sso_saml\n* `storage_gb` - storage_gb\n* `warehouse_export` - warehouse_export\n* `webhooks` - webhooks\n* `white_label` - white_label"
             },
             "LateFeeRule": {
                 "type": "object",
@@ -96293,6 +99247,108 @@
                     }
                 }
             },
+            "LessonRecording": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "lesson": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "lesson_title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "lesson_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "provider": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/LessonRecordingStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "duration_seconds": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "size_bytes": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "file_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "missing_consent": {
+                        "readOnly": true
+                    },
+                    "shared_with_family": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "deleted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "deleted_reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "deleted_at",
+                    "deleted_reason",
+                    "duration_seconds",
+                    "file_type",
+                    "id",
+                    "lesson",
+                    "lesson_start",
+                    "lesson_title",
+                    "missing_consent",
+                    "provider",
+                    "shared_with_family",
+                    "size_bytes",
+                    "started_at",
+                    "status"
+                ]
+            },
+            "LessonRecordingStatusEnum": {
+                "enum": [
+                    "available",
+                    "restricted",
+                    "deleted"
+                ],
+                "type": "string",
+                "description": "* `available` - Available\n* `restricted` - Restricted (no recording consent)\n* `deleted` - Deleted"
+            },
             "LessonReport": {
                 "type": "object",
                 "properties": {
@@ -96984,6 +100040,24 @@
                     "key",
                     "title",
                     "used"
+                ]
+            },
+            "LinkEmployeeRequest": {
+                "type": "object",
+                "properties": {
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "employee_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "employee_id",
+                    "tutor"
                 ]
             },
             "Loan": {
@@ -99468,6 +102542,57 @@
                     "title"
                 ]
             },
+            "MobileAppConfig": {
+                "type": "object",
+                "properties": {
+                    "white_label": {
+                        "type": "boolean"
+                    },
+                    "appId": {
+                        "type": "string"
+                    },
+                    "appName": {
+                        "type": "string"
+                    },
+                    "serverUrl": {
+                        "type": "string"
+                    },
+                    "allowNavigation": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "primaryColour": {
+                        "type": "string"
+                    },
+                    "onPrimary": {
+                        "type": "string"
+                    },
+                    "backgroundColour": {
+                        "type": "string"
+                    },
+                    "iconUrl": {
+                        "type": "string"
+                    },
+                    "organisation": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "allowNavigation",
+                    "appId",
+                    "appName",
+                    "backgroundColour",
+                    "iconUrl",
+                    "onPrimary",
+                    "organisation",
+                    "primaryColour",
+                    "serverUrl",
+                    "white_label"
+                ]
+            },
             "MoneyOut": {
                 "type": "object",
                 "description": "Read-only money in computed responses (quotes, summaries).",
@@ -99494,6 +102619,73 @@
                 },
                 "required": [
                     "stage"
+                ]
+            },
+            "MyBackgroundCheck": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "provider": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "provider_label": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "package": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/BackgroundCheckStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "result": {
+                        "readOnly": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/BackgroundCheckResultEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    },
+                    "invite_url": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "completed_at",
+                    "created_at",
+                    "id",
+                    "invite_url",
+                    "package",
+                    "provider",
+                    "provider_label",
+                    "result",
+                    "status"
                 ]
             },
             "MyConsentRequest": {
@@ -99815,6 +103007,42 @@
                 },
                 "required": [
                     "preferences"
+                ]
+            },
+            "MyTaxSummary": {
+                "type": "object",
+                "properties": {
+                    "tax_year": {
+                        "type": "integer"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "box1": {
+                        "type": "string"
+                    },
+                    "reportable": {
+                        "type": "boolean"
+                    },
+                    "filed": {
+                        "type": "boolean"
+                    },
+                    "filed_box1": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "tin_hint": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "box1",
+                    "currency",
+                    "filed",
+                    "filed_box1",
+                    "reportable",
+                    "tax_year",
+                    "tin_hint"
                 ]
             },
             "NamedRef": {
@@ -102766,6 +105994,32 @@
                     }
                 }
             },
+            "PaginatedBackgroundCheckList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BackgroundCheck"
+                        }
+                    }
+                }
+            },
             "PaginatedBankImportList": {
                 "type": "object",
                 "required": [
@@ -104222,6 +107476,32 @@
                     }
                 }
             },
+            "PaginatedLessonRecordingList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LessonRecording"
+                        }
+                    }
+                }
+            },
             "PaginatedLessonReportList": {
                 "type": "object",
                 "required": [
@@ -104816,6 +108096,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Payout"
+                        }
+                    }
+                }
+            },
+            "PaginatedPayrollTimesheetSyncList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PayrollTimesheetSync"
                         }
                     }
                 }
@@ -105808,6 +109114,32 @@
                     }
                 }
             },
+            "PaginatedTaxFormFilingList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TaxFormFiling"
+                        }
+                    }
+                }
+            },
             "PaginatedTenantRowList": {
                 "type": "object",
                 "required": [
@@ -106116,6 +109448,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/WaitlistEntry"
+                        }
+                    }
+                }
+            },
+            "PaginatedWarehouseDestinationList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WarehouseDestination"
                         }
                     }
                 }
@@ -108993,6 +112351,15 @@
                         "format": "decimal",
                         "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
                         "nullable": true
+                    },
+                    "pay_basis": {
+                        "$ref": "#/components/schemas/PayBasisEnum"
+                    },
+                    "commission_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     }
                 }
             },
@@ -109508,6 +112875,17 @@
                         "items": {
                             "$ref": "#/components/schemas/QuestionRequest"
                         }
+                    }
+                }
+            },
+            "PatchedRecordingUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "release": {
+                        "type": "boolean"
+                    },
+                    "share_with_family": {
+                        "type": "boolean"
                     }
                 }
             },
@@ -110880,6 +114258,14 @@
                     }
                 }
             },
+            "PayBasisEnum": {
+                "enum": [
+                    "rate",
+                    "commission"
+                ],
+                "type": "string",
+                "description": "* `rate` - Pay rate per lesson\n* `commission` - Commission on what the client paid"
+            },
             "PayBonusRequest": {
                 "type": "object",
                 "properties": {
@@ -111339,6 +114725,31 @@
                         "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
                         "nullable": true,
                         "description": "For paid meetings and training"
+                    },
+                    "pay_basis": {
+                        "$ref": "#/components/schemas/PayBasisEnum"
+                    },
+                    "commission_percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "tin_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TinTypeEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "tin_hint": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "wise_ready": {
+                        "type": "boolean",
+                        "readOnly": true
                     }
                 },
                 "required": [
@@ -111351,8 +114762,11 @@
                     "self_billing_agreement_version",
                     "stripe_account_id",
                     "stripe_payouts_enabled",
+                    "tin_hint",
+                    "tin_type",
                     "tutor",
-                    "tutor_name"
+                    "tutor_name",
+                    "wise_ready"
                 ]
             },
             "PayProviderEnum": {
@@ -112479,6 +115893,81 @@
                     "country",
                     "payee_name"
                 ]
+            },
+            "PayrollTimesheetSync": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "pay_run": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "pay_run_number": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "provider": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PayrollTimesheetSyncStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "results": {
+                        "readOnly": true
+                    },
+                    "attempts": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "synced_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "attempts",
+                    "created_at",
+                    "error",
+                    "id",
+                    "pay_run",
+                    "pay_run_number",
+                    "provider",
+                    "results",
+                    "status",
+                    "synced_at"
+                ]
+            },
+            "PayrollTimesheetSyncStatusEnum": {
+                "enum": [
+                    "pending",
+                    "synced",
+                    "partial",
+                    "error"
+                ],
+                "type": "string",
+                "description": "* `pending` - Sending\n* `synced` - Sent\n* `partial` - Sent with problems\n* `error` - Failed"
             },
             "PercentPair": {
                 "type": "object",
@@ -119965,6 +123454,25 @@
                     "method"
                 ]
             },
+            "RecordingLink": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    },
+                    "expires_in": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "expires_in",
+                    "password",
+                    "url"
+                ]
+            },
             "RecoveryCodes": {
                 "type": "object",
                 "properties": {
@@ -123311,6 +126819,15 @@
                     "message"
                 ]
             },
+            "RunExportRequest": {
+                "type": "object",
+                "properties": {
+                    "full": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                }
+            },
             "RunPreview": {
                 "type": "object",
                 "properties": {
@@ -123331,6 +126848,17 @@
                     "charges",
                     "clients",
                     "totals"
+                ]
+            },
+            "RunStarted": {
+                "type": "object",
+                "properties": {
+                    "workflow_id": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "workflow_id"
                 ]
             },
             "RunStep": {
@@ -128500,6 +132028,18 @@
                 "type": "string",
                 "description": "* `created` - Created\n* `updated` - Updated\n* `unchanged` - Already up to date\n* `voided` - Voided\n* `error` - Error\n* `retrying` - Will retry\n* `skipped` - Skipped"
             },
+            "SyncRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "pay_run": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "pay_run"
+                ]
+            },
             "TOTPConfirmRequest": {
                 "type": "object",
                 "properties": {
@@ -128743,6 +132283,146 @@
                 ],
                 "type": "string",
                 "description": "* `open` - Open\n* `done` - Done\n* `cancelled` - Cancelled"
+            },
+            "TaxFormFiling": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "tutor_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "form": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/FormEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "tax_year": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "currency": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "box1": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "readOnly": true
+                    },
+                    "payment_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "tin_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "tin_hint": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "payee": {
+                        "readOnly": true
+                    },
+                    "corrects": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "superseded": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "finalised_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "box1",
+                    "corrects",
+                    "currency",
+                    "finalised_at",
+                    "form",
+                    "id",
+                    "payee",
+                    "payment_count",
+                    "superseded",
+                    "tax_year",
+                    "tin_hint",
+                    "tin_type",
+                    "tutor",
+                    "tutor_name"
+                ]
+            },
+            "TaxIdentityOut": {
+                "type": "object",
+                "properties": {
+                    "tin_type": {
+                        "type": "string"
+                    },
+                    "tin": {
+                        "type": "string",
+                        "description": "Masked unless ?full=true (payroll.tax.view, audited)"
+                    },
+                    "tin_hint": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "tin",
+                    "tin_hint",
+                    "tin_type"
+                ]
+            },
+            "TaxIdentityRequest": {
+                "type": "object",
+                "properties": {
+                    "tin_type": {
+                        "$ref": "#/components/schemas/TinTypeEnum"
+                    },
+                    "tin": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 20
+                    }
+                },
+                "required": [
+                    "tin",
+                    "tin_type"
+                ]
             },
             "TaxMappingRow": {
                 "type": "object",
@@ -130636,6 +134316,15 @@
                 "type": "string",
                 "description": "* `note` - note\n* `task` - task\n* `document` - document\n* `change` - change\n* `message` - message"
             },
+            "TinTypeEnum": {
+                "enum": [
+                    "ssn",
+                    "itin",
+                    "ein"
+                ],
+                "type": "string",
+                "description": "* `ssn` - Social Security number\n* `itin` - Individual taxpayer identification number\n* `ein` - Employer identification number"
+            },
             "TokenRequest": {
                 "type": "object",
                 "properties": {
@@ -131560,10 +135249,11 @@
                     "stripe_connect",
                     "bank_file",
                     "manual",
-                    "external_payroll"
+                    "external_payroll",
+                    "wise"
                 ],
                 "type": "string",
-                "description": "* `stripe_connect` - Stripe (paid to their Stripe account)\n* `bank_file` - Bank transfer (payment file)\n* `manual` - Paid manually\n* `external_payroll` - Payroll provider (employees)"
+                "description": "* `stripe_connect` - Stripe (paid to their Stripe account)\n* `bank_file` - Bank transfer (payment file)\n* `manual` - Paid manually\n* `external_payroll` - Payroll provider (employees)\n* `wise` - Wise transfer"
             },
             "TutorPayout": {
                 "type": "object",
@@ -132372,6 +136062,22 @@
                     "total"
                 ]
             },
+            "UnlinkedTutor": {
+                "type": "object",
+                "properties": {
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "tutor_name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "tutor",
+                    "tutor_name"
+                ]
+            },
             "UnmatchedDemand": {
                 "type": "object",
                 "properties": {
@@ -132735,6 +136441,36 @@
                     "checks"
                 ]
             },
+            "VideoAttendance": {
+                "type": "object",
+                "properties": {
+                    "available": {
+                        "type": "boolean"
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AttendanceStudent"
+                        }
+                    },
+                    "actual_minutes": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "tutor_minutes": {
+                        "type": "integer"
+                    },
+                    "guests": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "actual_minutes",
+                    "available",
+                    "guests",
+                    "students"
+                ]
+            },
             "VideoProviderEnum": {
                 "enum": [
                     "none",
@@ -133042,6 +136778,249 @@
                 "required": [
                     "reason"
                 ]
+            },
+            "WarehouseDestination": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "kind": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/WarehouseDestinationKindEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "file_format": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/WarehouseDestinationFileFormatEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "config": {
+                        "readOnly": true
+                    },
+                    "datasets": {
+                        "readOnly": true
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "hour": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "full_refresh_weekday": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "has_credentials": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "last_export_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_status": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "config",
+                    "created_at",
+                    "datasets",
+                    "enabled",
+                    "file_format",
+                    "full_refresh_weekday",
+                    "has_credentials",
+                    "hour",
+                    "id",
+                    "kind",
+                    "last_export_at",
+                    "last_status",
+                    "name"
+                ]
+            },
+            "WarehouseDestinationFileFormatEnum": {
+                "enum": [
+                    "csv"
+                ],
+                "type": "string",
+                "description": "* `csv` - CSV (gzip)"
+            },
+            "WarehouseDestinationInputRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 100
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/WarehouseDestinationKindEnum"
+                    },
+                    "config": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "credentials": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "writeOnly": true,
+                        "description": "Write-only: an AWS key, a service account or a private key."
+                    },
+                    "datasets": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "hour": {
+                        "type": "integer",
+                        "maximum": 23,
+                        "minimum": 0,
+                        "default": 2
+                    },
+                    "full_refresh_weekday": {
+                        "type": "integer",
+                        "maximum": 6,
+                        "minimum": -1,
+                        "default": 6
+                    }
+                },
+                "required": [
+                    "kind"
+                ]
+            },
+            "WarehouseDestinationKindEnum": {
+                "enum": [
+                    "platform",
+                    "s3",
+                    "bigquery",
+                    "snowflake"
+                ],
+                "type": "string",
+                "description": "* `platform` - TutorTrack storage (download the files)\n* `s3` - Amazon S3 (your bucket)\n* `bigquery` - Google BigQuery\n* `snowflake` - Snowflake"
+            },
+            "WarehouseDownload": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "url"
+                ]
+            },
+            "WarehouseExport": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "destination": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/WarehouseExportStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "full": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "since": {
+                        "readOnly": true
+                    },
+                    "until": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "manifest": {
+                        "readOnly": true
+                    },
+                    "row_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "finished_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "destination",
+                    "error",
+                    "finished_at",
+                    "full",
+                    "id",
+                    "manifest",
+                    "row_count",
+                    "since",
+                    "status",
+                    "until"
+                ]
+            },
+            "WarehouseExportStatusEnum": {
+                "enum": [
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "skipped"
+                ],
+                "type": "string",
+                "description": "* `running` - Running\n* `succeeded` - Succeeded\n* `failed` - Failed\n* `skipped` - Skipped"
             },
             "WebhookAttempt": {
                 "type": "object",
@@ -134066,6 +138045,99 @@
                         "nullable": true
                     }
                 }
+            },
+            "XeroEarningsRate": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "kind",
+                    "name"
+                ]
+            },
+            "XeroEmployee": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "first_name",
+                    "id",
+                    "last_name"
+                ]
+            },
+            "XeroPayrollStatus": {
+                "type": "object",
+                "properties": {
+                    "connected": {
+                        "type": "boolean"
+                    },
+                    "connection_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "account_name": {
+                        "type": "string"
+                    },
+                    "earnings_rate": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/EarningsRateRef"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "links": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EmployeeLink"
+                        }
+                    },
+                    "unlinked": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UnlinkedTutor"
+                        }
+                    },
+                    "syncs": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PayrollTimesheetSync"
+                        }
+                    }
+                },
+                "required": [
+                    "account_name",
+                    "connected",
+                    "connection_id",
+                    "earnings_rate",
+                    "links",
+                    "syncs",
+                    "unlinked"
+                ]
             }
         },
         "securitySchemes": {

@@ -54,7 +54,7 @@ Operational and financial insight: a configurable home dashboard with KPI widget
 - [x] **E26-T06** Sales/growth and people/compliance reports.
 - [x] **E26-T07** Exports (CSV/XLSX/PDF) and scheduled reports.
 - [ ] **E26-T08** (Phase 2b) Custom report builder on semantic layer.
-- [ ] **E26-T09** (Enterprise) Warehouse export.
+- [x] **E26-T09** (Enterprise) Warehouse export.
 
 ## Implementation notes (as built 2026-10-10)
 - **App:** `reporting`, with RLS on every tenant table: `FactLesson`, `FactCharge`, `FactPayment`, `FactPayItem`, `DailyAggregate`, `DashboardLayout`, `SavedReport`, `ScheduledReport` and `ReportRun`. `FxRate` is platform data (no tenant). See ADR 0016.
@@ -103,3 +103,14 @@ Operational and financial insight: a configurable home dashboard with KPI widget
 - **Not built:** T08 custom report builder (Phase 2b) and T09 warehouse export (Enterprise).
 - **Frontend:** the admin home shows the dashboard. Reports live under `/analytics`: the library, a report page with filters, chart, table, totals, downloads and "save this view", and saved and scheduled reports with the run history.
   - Charts use Recharts with the Okabe-Ito palette. The drawing is hidden from assistive technology, and a table carries the same numbers.
+
+## Phase 3 implementation notes (as built 2026-10-14)
+T09 (Enterprise warehouse export). See ADR 0032. Built in its own package (`reporting/warehouse/`) apart from the T08 builder.
+
+- **Datasets and schemas (FR-26-5 "documented schemas"):** `fact_lesson`, `fact_charge`, `fact_payment`, `fact_pay_item`, `daily_aggregate` from the E26 fact layer, plus `dim_client`, `dim_student`, `dim_tutor`, `dim_service` (names only: no dates of birth, contact, tax or bank details, notes). Every row has `id` and `updated_at`; the schemas are served at `GET /reporting/warehouse/schema`, shown on the page and written to each run's manifest.
+- **Destinations:** `WarehouseDestination` (RLS; credentials JSON in an `EncryptedField`, write-only in the API): TutorTrack storage (the existing `AWS_*` storage settings, under `warehouse/<org>/<destination>/`, with presigned 10-minute downloads that are audited), the organisation's S3 bucket (AWS regional endpoints only), BigQuery (service account JWT, tables created from the schema, streaming inserts with deterministic `insertId`s) and Snowflake (key-pair JWT, SQL API, `CREATE TABLE IF NOT EXISTS` and batched `INSERT` with bindings). HTTP goes through `core.net.safe_urlopen`; configurations are validated even in development; `WAREHOUSE_EXPORT_LIVE=false` (development, tests) sends customer-hosted kinds to `FakeDestination`.
+- **Exports:** gzipped CSV per dataset, incremental on `updated_at` from the last successful run's watermark (rows changed in `(since, until]`), a full refresh weekly (per destination, default Sunday) or on demand, at most `WAREHOUSE_EXPORT_MAX_ROWS` rows per dataset per run. Consumers keep the latest row per `id` (rows deleted here disappear at the next full refresh).
+- **Temporal:** each destination has a nightly Temporal Schedule (`warehouse-export`, at its local hour), synced by a handler on `warehouse_destination.saved/deleted`; "Export now" starts the same `WarehouseExportWorkflow`: open the run (idempotent per workflow id) → one retried activity per dataset (a retried step reuses its file name) → finish (manifest, watermark, `export` audit entry, `warehouse_export.finished`). A warehouse that keeps failing marks the run failed; the next run starts from the last good watermark. Histories `WarehouseExportWorkflow-exported/failed.json` are replayed.
+- **Entitlement (E04):** new plan feature `warehouse_export` (Enterprise only; plans re-synced by `subscriptions/0004`). Saving or running needs it (403 `upgrade-required`); scheduled runs of an organisation that lost it are skipped. Permission `reporting.warehouse.manage` (Finance gets it through `reporting.*`).
+- **UI:** Analytics → Warehouse export (`/analytics/warehouse`): destinations with export now, full export, check and delete, run history with downloads, and the dataset schemas.
+- **Deviations:** files are CSV (gzip) rather than Parquet, to avoid adding pyarrow (~40 MB) to the backend image; BigQuery and Snowflake load the same rows directly. Read-only Postgres replica access is not offered.

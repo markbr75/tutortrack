@@ -72,6 +72,9 @@ import { OperationsPage } from "./platform/OperationsPage";
 import { PlatformShell } from "./platform/PlatformShell";
 import { TenantPage } from "./platform/TenantPage";
 import { TenantsPage } from "./platform/TenantsPage";
+import { XeroPayrollPage } from "./accounting/XeroPayrollPage";
+import { TaxFormsPage } from "./payroll/PayPhase3";
+import { WarehousePage } from "./reporting/WarehousePage";
 import { ExpensesPage, PayItemsPage, PayRunPage, PayRunsPage } from "./payroll/PayrollPages";
 import { BoardPage, EnquiryPage } from "./leads/LeadsPages";
 import { FormsPage, FunnelPage, OfferPage, PublicFormPage, WaitlistPage } from "./leads/MorePages";
@@ -393,6 +396,8 @@ const developerDocsRoute = appPage("/developer/docs", DeveloperDocsPage);
 const marketplaceRoute = appPage("/settings/marketplace", MarketplacePage);
 const oauthConsentRoute = appPage("/oauth/authorize", OAuthConsentPage);
 const accountingRoute = appPage("/settings/accounting", AccountingPage);
+const xeroPayrollRoute = appPage("/settings/accounting/payroll", XeroPayrollPage);
+const warehouseRoute = appPage("/analytics/warehouse", WarehousePage);
 const dataRoute = appPage("/data", () => <DataPage />);
 const dataExportRoute = appPage("/data/export", () => <DataPage initialTab="export" />);
 const importRoute = createRoute({
@@ -405,6 +410,7 @@ const importRoute = createRoute({
 const payRunsRoute = appPage("/payroll", PayRunsPage);
 const payExpensesRoute = appPage("/payroll/expenses", ExpensesPage);
 const payItemsRoute = appPage("/payroll/items", PayItemsPage);
+const payTaxFormsRoute = appPage("/payroll/tax-forms", TaxFormsPage);
 const leadsRoute = appPage("/leads", BoardPage);
 const leadsFormsRoute = appPage("/leads/forms", FormsPage);
 const leadsWaitlistRoute = appPage("/leads/waitlist", WaitlistPage);
@@ -552,12 +558,15 @@ const routeTree = rootRoute.addChildren([
     marketplaceRoute,
     oauthConsentRoute,
     accountingRoute,
+    xeroPayrollRoute,
+    warehouseRoute,
     dataRoute,
     dataExportRoute,
     importRoute,
     payRunsRoute,
     payExpensesRoute,
     payItemsRoute,
+    payTaxFormsRoute,
     payRunRoute,
     recruitmentRoute,
     complianceRoute,

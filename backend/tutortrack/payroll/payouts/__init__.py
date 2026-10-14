@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import cache
-from typing import Protocol
+from typing import Any, Protocol
 
 from django.conf import settings
 
@@ -35,6 +35,54 @@ class PayoutProvider(Protocol):
     def transfer(
         self, account: str, *, amount: Money, description: str, idempotency_key: str
     ) -> TransferResult: ...
+
+
+def wise_client() -> Any:
+    """The Wise client (E12-T12): the real API when credential providers are live, the
+    in-memory fake otherwise (development and tests)."""
+    from tutortrack.integrations import providers as registry
+
+    found = registry.client("wise", "payouts")
+    return found
+
+
+def _register_wise() -> None:
+    from tutortrack.integrations import providers as registry
+    from tutortrack.integrations.providers import Provider, ProviderSpec
+
+    def live() -> bool:
+        return bool(settings.INTEGRATIONS["CREDENTIAL_PROVIDERS_LIVE"])
+
+    def real() -> Any:
+        from .wise import WiseApi
+
+        return WiseApi()
+
+    def fake() -> Any:
+        from .wise_fake import FakeWise
+
+        return FakeWise()
+
+    registry.register(
+        Provider(
+            ProviderSpec(
+                "wise",
+                "Wise Business",
+                frozenset({"payouts"}),
+                "credentials",
+                ("organisation",),
+                credential_fields=("api_key",),
+                manage_permission="payroll.payrun.pay",
+            ),
+            live=live,
+            credentials=real,
+            clients={"payouts": real},
+            fake_clients={"payouts": fake},
+        )
+    )
+
+
+_register_wise()
 
 
 @cache

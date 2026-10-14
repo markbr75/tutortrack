@@ -20,6 +20,18 @@ class PayMethod(models.TextChoices):
     BANK_FILE = "bank_file", _("Bank transfer (payment file)")
     MANUAL = "manual", _("Paid manually")
     EXTERNAL_PAYROLL = "external_payroll", _("Payroll provider (employees)")
+    WISE = "wise", _("Wise transfer")
+
+
+class TinType(models.TextChoices):
+    SSN = "ssn", _("Social Security number")
+    ITIN = "itin", _("Individual taxpayer identification number")
+    EIN = "ein", _("Employer identification number")
+
+
+class PayBasis(models.TextChoices):
+    RATE = "rate", _("Pay rate per lesson")
+    COMMISSION = "commission", _("Commission on what the client paid")
 
 
 class TutorPayProfile(TenantModel):
@@ -44,8 +56,16 @@ class TutorPayProfile(TenantModel):
         max_digits=10, decimal_places=2, null=True, blank=True,
         help_text="For paid meetings and training",
     )  # fmt: skip
+    # Phase 3 (E12-T12): Wise recipient, US tax identity (1099-NEC) and commission pay.
+    wise_recipient_id = models.CharField(max_length=60, blank=True, default="")
+    wise_recipient_key = models.CharField(max_length=64, blank=True, default="")
+    tin = EncryptedField(blank=True, default="")  # SSN, ITIN or EIN (digits only)
+    tin_type = models.CharField(max_length=4, choices=TinType.choices, blank=True, default="")
+    tin_hint = models.CharField(max_length=4, blank=True, default="")  # last four digits
+    pay_basis = models.CharField(max_length=12, choices=PayBasis.choices, default=PayBasis.RATE)
+    commission_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
 
-    audit_sensitive_fields: ClassVar[frozenset[str]] = frozenset({"bank_details"})
+    audit_sensitive_fields: ClassVar[frozenset[str]] = frozenset({"bank_details", "tin"})
 
     def __str__(self) -> str:
         return f"Pay profile for {self.tutor_id}"
@@ -335,3 +355,49 @@ class PayrollOriginator(TenantModel):
 
     def __str__(self) -> str:
         return self.name
+
+
+class TaxFormFiling(TenantModel):
+    """A US 1099-NEC record for one tutor and tax year (E12-T12, FR-12-9), frozen when
+    finance finalises the year. Never edited: a correction is a new row that supersedes
+    the earlier one (``corrects``). The TIN itself stays on the pay profile (encrypted);
+    the filing keeps only its type and last four digits."""
+
+    class Form(models.TextChoices):
+        NEC = "1099-NEC", _("Form 1099-NEC")
+
+    tutor = models.ForeignKey("people.TutorProfile", on_delete=models.PROTECT, related_name="+")
+    form = models.CharField(max_length=10, choices=Form.choices, default=Form.NEC)
+    tax_year = models.PositiveSmallIntegerField()
+    currency = CurrencyField()
+    box1 = MoneyField()  # nonemployee compensation
+    payment_count = models.PositiveIntegerField(default=0)
+    tin_type = models.CharField(max_length=4, blank=True, default="")
+    tin_hint = models.CharField(max_length=4, blank=True, default="")
+    payee = models.JSONField(default=dict)  # name, address as filed
+    payer = models.JSONField(default=dict)  # organisation name, address, EIN hint
+    corrects = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.PROTECT, related_name="corrections"
+    )
+    superseded = models.BooleanField(default=False)
+    finalised_by = models.ForeignKey(
+        "identity.User", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    finalised_at = models.DateTimeField()
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-tax_year", "tutor", "-finalised_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "tutor", "tax_year", "form"],
+                condition=Q(superseded=False),
+                name="taxform_one_current_per_year",
+            )
+        ]
+
+    @classmethod
+    def own_scope_q(cls, user: object) -> Q:
+        return Q(tutor__membership__user=user)
+
+    def __str__(self) -> str:
+        return f"{self.form} {self.tax_year} {self.tutor_id}"

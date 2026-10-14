@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import base64
 import math
-from datetime import UTC, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from urllib.parse import quote
 
@@ -18,6 +18,7 @@ from .base import (
     Credentials,
     MeetingInfo,
     MeetingSpec,
+    RecordingInfo,
 )
 from .oauth2 import OAuth2Client
 
@@ -29,6 +30,9 @@ ZOOM_SCOPES = (
     "meeting:update:meeting",
     "meeting:delete:meeting",
     "user:read:user",
+    # E22-T10: cloud recordings (reconnect Zoom to grant them).
+    "cloud_recording:read:list_recording_files",
+    "cloud_recording:delete:recording_file",
 )
 
 
@@ -128,6 +132,55 @@ class ZoomMeetings:
             provider="zoom",
         )
 
+    # E22-T10: cloud recordings of the meeting (``recording.completed`` also pushes them).
+    def list_recordings(self, creds: Credentials, external_id: str) -> list[RecordingInfo]:
+        if external_id.startswith("pmi:"):
+            return []
+        body = http.request(
+            "GET",
+            f"{ZOOM_API}/meetings/{quote(external_id, safe='')}/recordings",
+            token=creds.access_token,
+            provider="zoom",
+        ).json()
+        return [
+            zoom_recording(f, body)
+            for f in body.get("recording_files", [])
+            if f.get("file_type") in ("MP4", "M4A")
+        ]
+
+    def delete_recording(self, creds: Credentials, external_id: str, recording_id: str) -> None:
+        http.request(
+            "DELETE",
+            f"{ZOOM_API}/meetings/{quote(external_id, safe='')}/recordings/"
+            f"{quote(recording_id, safe='')}",
+            token=creds.access_token,
+            provider="zoom",
+        )
+
+
+def zoom_recording(file: dict[str, Any], meeting: dict[str, Any]) -> RecordingInfo:
+    """A Zoom ``recording_files`` entry (from the API or the ``recording.completed``
+    webhook) as a ``RecordingInfo``."""
+    started = file.get("recording_start")
+    ended = file.get("recording_end")
+    duration = 0
+    start_at = None
+    if started:
+        start_at = datetime.fromisoformat(str(started).replace("Z", "+00:00"))
+        if ended:
+            end_at = datetime.fromisoformat(str(ended).replace("Z", "+00:00"))
+            duration = int((end_at - start_at).total_seconds())
+    return RecordingInfo(
+        external_id=str(file.get("id", "")),
+        started_at=start_at,
+        duration_seconds=duration,
+        size_bytes=int(file.get("file_size") or 0),
+        file_type=str(file.get("file_type", "")),
+        play_url=str(file.get("play_url", "")),
+        download_url=str(file.get("download_url", "")),
+        password=str(meeting.get("password", "")),
+    )
+
 
 # --- Lessonspace ----------------------------------------------------------------------------------
 
@@ -147,24 +200,60 @@ class LessonspaceMeetings:
         ).json()
         return AccountInfo(str(body.get("id", "")), str(body.get("name", "")))
 
-    def _launch(self, creds: Credentials, space: str, name: str, leader: bool) -> dict[str, Any]:
+    def _launch(
+        self,
+        creds: Credentials,
+        space: str,
+        name: str,
+        leader: bool,
+        *,
+        user_id: str = "",
+        webhook_url: str = "",
+    ) -> dict[str, Any]:
+        user: dict[str, Any] = {"name": name or "Tutor", "leader": leader}
+        if user_id:
+            user["id"] = user_id  # E22-T10: matches join/leave webhooks to the person
+        payload: dict[str, Any] = {"id": space, "user": user}
+        if webhook_url:
+            payload["webhooks"] = {
+                "session": {
+                    "start": f"{webhook_url}?event=session.start",
+                    "end": f"{webhook_url}?event=session.end",
+                },
+                "user": {
+                    "join": f"{webhook_url}?event=user.join",
+                    "leave": f"{webhook_url}?event=user.leave",
+                },
+            }
         body: dict[str, Any] = http.request(
             "POST",
             f"{LESSONSPACE_API}/spaces/launch/",
             auth_header=f"Organisation {creds.secret}",
-            json_body={"id": space, "user": {"name": name or "Tutor", "leader": leader}},
+            json_body=payload,
             provider="lessonspace",
         ).json()
         return body
 
     def create_meeting(self, creds: Credentials, spec: MeetingSpec) -> MeetingInfo:
         space = spec.space_key or f"lesson-{spec.lesson_id}"
-        host = self._launch(creds, space, spec.host_name, leader=True)
+        hook = str(spec.options.get("webhook_url") or "")
+        host = self._launch(
+            creds, space, spec.host_name, leader=True, user_id="tutor", webhook_url=hook
+        )
         attendees = {
-            student_id: str(self._launch(creds, space, name, leader=False)["client_url"])
+            student_id: str(
+                self._launch(
+                    creds,
+                    space,
+                    name,
+                    leader=False,
+                    user_id=f"student:{student_id}",
+                    webhook_url=hook,
+                )["client_url"]
+            )
             for student_id, name in spec.participants
         }
-        guest = self._launch(creds, space, "Guest", leader=False)
+        guest = self._launch(creds, space, "Guest", leader=False, webhook_url=hook)
         return MeetingInfo(
             external_id=space,
             join_url=str(guest["client_url"]),
@@ -226,6 +315,46 @@ class DailyRooms:
         http.request(
             "DELETE",
             f"{self.API}/rooms/{quote(external_id, safe='')}",
+            auth_header=self._auth(),
+            provider="daily",
+        )
+
+    # E22-T10: cloud recordings of the room (fetched after the lesson by the workflow).
+    def list_recordings(self, creds: Credentials, external_id: str) -> list[RecordingInfo]:
+        body = http.request(
+            "GET",
+            f"{self.API}/recordings",
+            auth_header=self._auth(),
+            params={"room_name": external_id},
+            provider="daily",
+        ).json()
+        return [
+            RecordingInfo(
+                external_id=str(r["id"]),
+                started_at=datetime.fromtimestamp(int(r["start_ts"]), tz=UTC)
+                if r.get("start_ts")
+                else None,
+                duration_seconds=int(r.get("duration") or 0),
+                file_type="MP4",
+            )
+            for r in body.get("data", [])
+            if r.get("status") == "finished"
+        ]
+
+    def recording_link(self, creds: Credentials, recording_id: str) -> str:
+        """A fresh, short-lived download link (Daily's links expire)."""
+        body = http.request(
+            "GET",
+            f"{self.API}/recordings/{quote(recording_id, safe='')}/access-link",
+            auth_header=self._auth(),
+            provider="daily",
+        ).json()
+        return str(body.get("download_link", ""))
+
+    def delete_recording(self, creds: Credentials, external_id: str, recording_id: str) -> None:
+        http.request(
+            "DELETE",
+            f"{self.API}/recordings/{quote(recording_id, safe='')}",
             auth_header=self._auth(),
             provider="daily",
         )
