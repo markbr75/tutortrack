@@ -5,7 +5,7 @@ scheduling's services; this module decides the outcomes."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -187,6 +187,33 @@ def _free_used_this_month(lesson: Lesson, at: datetime) -> int:
     )
 
 
+def _free_used_this_term(lesson: Lesson) -> int | None:
+    """Free cancellations by the lesson's clients of lessons in the same E20 term as this
+    one (FR-09-3 "max free cancellations per term", gap G3). ``None`` when the lesson's
+    date is in no term of its branch (no terms set up, or the holidays)."""
+    from tutortrack.billing.plans import term_dates
+
+    day = lesson.start.astimezone(ZoneInfo(lesson.timezone)).date()
+    term = next(((s, e) for s, e in term_dates(lesson.branch_id) if s <= day <= e), None)
+    if term is None:
+        return None
+    clients = [a.client_id for a in lesson.attendees.all()]
+    since = datetime.combine(term[0] - timedelta(days=1), datetime.min.time(), tzinfo=UTC)
+    until = datetime.combine(term[1] + timedelta(days=2), datetime.min.time(), tzinfo=UTC)
+    records = CancellationRecord.objects.filter(
+        kind=CancellationRecord.Kind.FREE,
+        lesson__attendees__client_id__in=clients,
+        lesson__start__gte=since,
+        lesson__start__lt=until,
+    ).select_related("lesson")
+    lessons = {
+        r.lesson_id
+        for r in records
+        if term[0] <= r.lesson.start.astimezone(ZoneInfo(r.lesson.timezone)).date() <= term[1]
+    }
+    return len(lessons)
+
+
 def cancel_lesson(
     lesson: Lesson,
     *,
@@ -211,6 +238,7 @@ def cancel_lesson(
         cancelled_by=cancelled_by,
         at=at,
         free_used_this_month=_free_used_this_month(lesson, at),
+        free_used_this_term=_free_used_this_term(lesson),
     )
     charge, pay = decision.charge_percent, decision.pay_percent
     if override:
@@ -564,11 +592,50 @@ def _check_editable(report: LessonReport, *, can_edit_any: bool) -> None:
 
 
 @transaction.atomic
+def _attach_files(report: LessonReport, answers: dict[str, Any], *, user: Any) -> dict[str, Any]:
+    """Attachment fields hold uploaded files (``core.storage`` ids, gap G3). A new id must
+    be a file the writer uploaded (finished uploading, not rejected); it is then attached
+    to the report so the report's readers may open it (``delivery/files.py``). Files
+    already on the report stay, and so do the names saved before uploads existed."""
+    import uuid
+
+    from tutortrack.core.models import StoredFile
+    from tutortrack.core.storage.services import attach
+
+    kinds = {f["key"]: f["type"] for f in report.template_version.fields}
+    before = report.answers or {}
+    for key, value in answers.items():
+        if kinds.get(key) != "attachment":
+            continue
+        kept = []
+        for item in value:
+            if item in (before.get(key) or []):
+                kept.append(item)
+                continue
+            try:
+                file_id = str(uuid.UUID(str(item)))
+            except ValueError:
+                raise templates.bad_answer(key, _("Upload the file to attach it.")) from None
+            stored = StoredFile.objects.filter(pk=file_id).first()
+            mine = stored is not None and (
+                stored.uploaded_by_id == getattr(user, "pk", None)
+                or stored.owner_object_id == str(report.pk)
+            )
+            if not mine or stored is None or stored.status != StoredFile.Status.UPLOADED:
+                raise templates.bad_answer(key, _("That file isn't uploaded yet."))
+            if stored.owner_object_id != str(report.pk):
+                attach(stored, report)
+            kept.append(file_id)
+        answers[key] = kept
+    return answers
+
+
 def save_draft(
     report: LessonReport, answers: Any, *, user: Any = None, can_edit_any: bool = False
 ) -> LessonReport:
     _check_editable(report, can_edit_any=can_edit_any)
     cleaned = templates.clean_answers(report.template_version.fields, answers)
+    cleaned = _attach_files(report, cleaned, user=user)
     with audit.track(report, action="edit"):
         report.answers = cleaned
         if report.status in {LessonReport.Status.PENDING, LessonReport.Status.RETURNED}:

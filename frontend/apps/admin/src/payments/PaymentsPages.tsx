@@ -8,6 +8,7 @@ import { api, usePermission } from "../api";
 import { SyncBadge } from "../accounting/SyncBadge";
 import { useSyncStatuses } from "../accounting/useSyncStatuses";
 import { ErrorList } from "../calendar/ErrorList";
+import { PaymentOptions } from "../g3/PaymentOptions";
 import { useCursorList } from "../lists";
 import { PartnerProviders } from "./PartnerProviders";
 
@@ -86,6 +87,7 @@ export function PaymentsSettingsPage() {
       )}
       <ErrorList error={connect.error ?? act.error} />
       <PartnerProviders />
+      <PaymentOptions />
     </div>
   );
 }

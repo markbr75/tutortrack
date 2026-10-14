@@ -5,6 +5,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
 import { api, usePermission } from "../api";
+import {
+  BulkLessonBar,
+  PrintTimetable,
+  SavedFilterSets,
+  SecondaryZoneSelect,
+  type CalendarFilters,
+} from "../g3/CalendarTools";
 import { colourFor, rangeFor, sameDay, shift, STATUS_COLOURS, type View } from "./dates";
 import { NewLesson } from "./NewLesson";
 import { AgendaView, MonthView } from "./OtherViews";
@@ -28,9 +35,27 @@ export function CalendarPage() {
   const [colourBy, setColourBy] = useState<ColourBy>("service");
   const [tutorFilter, setTutorFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [selected, setSelected] = useState<CalendarItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<CalendarItem | null>(null);
   const [creating, setCreating] = useState<{ start: Date; tutor?: string } | null>(null);
+  const [secondaryZone, setSecondaryZone] = useState(() => readZone());
+  const [selecting, setSelecting] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
   const range = rangeFor(view, anchor);
+  const applyFilters = (f: CalendarFilters) => {
+    if (VIEWS.includes(f.view as View)) setView(f.view as View);
+    setTutorFilter(f.tutor ?? "");
+    setStatusFilter(f.status ?? "");
+    if (["service", "tutor", "status", "location"].includes(f.colourBy))
+      setColourBy(f.colourBy as ColourBy);
+  };
+  const chooseZone = (zone: string) => {
+    setSecondaryZone(zone);
+    try {
+      localStorage.setItem(ZONE_KEY, zone);
+    } catch {
+      // storage can be unavailable (private mode): the choice lasts for this visit
+    }
+  };
 
   const query = {
     start: range.start.toISOString(),
@@ -223,7 +248,36 @@ export function CalendarPage() {
             label: t(`calendar.colour.${c}`),
           }))}
         />
+        <SecondaryZoneSelect value={secondaryZone} onChange={chooseZone} />
+        <PrintTimetable start={range.start} end={range.end} tutor={tutorFilter} />
+        {view === "agenda" ? (
+          <Button
+            size="sm"
+            variant={selecting ? "primary" : "secondary"}
+            aria-pressed={selecting}
+            onClick={() => {
+              setSelecting(!selecting);
+              setSelected([]);
+            }}
+          >
+            {t("g3.calendar.selectMode")}
+          </Button>
+        ) : null}
       </div>
+      <div className="mb-4">
+        <SavedFilterSets
+          current={{ view, tutor: tutorFilter, status: statusFilter, colourBy }}
+          onApply={applyFilters}
+        />
+      </div>
+      {selecting && view === "agenda" ? (
+        <BulkLessonBar
+          selected={selected}
+          items={calendar.data ?? []}
+          tutors={(tutors.data?.results ?? []).map((p) => ({ id: p.id, name: p.full_name }))}
+          onDone={setSelected}
+        />
+      ) : null}
       {move.isError ? (
         <div className="mb-3">
           <ErrorList error={move.error} />
@@ -248,19 +302,33 @@ export function CalendarPage() {
           month={anchor.getMonth()}
           items={items}
           colour={colour}
-          onSelect={setSelected}
+          onSelect={setSelectedItem}
           onDay={(day) => {
             setAnchor(day);
             setView("day");
           }}
         />
       ) : view === "agenda" ? (
-        <AgendaView days={range.days} items={items} colour={colour} onSelect={setSelected} />
+        <AgendaView
+          days={range.days}
+          items={items}
+          colour={colour}
+          onSelect={setSelectedItem}
+          secondaryZone={secondaryZone || undefined}
+          selected={selecting ? selected : undefined}
+          onToggle={
+            selecting
+              ? (id) =>
+                  setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]))
+              : undefined
+          }
+        />
       ) : (
         <TimeGrid
           columns={columns}
           colour={colour}
-          onSelect={setSelected}
+          secondaryZone={secondaryZone || undefined}
+          onSelect={setSelectedItem}
           onMove={
             canEdit && view !== "tutors" && view !== "rooms"
               ? (item, start) => move.mutate({ item, start })
@@ -277,7 +345,7 @@ export function CalendarPage() {
           }
         />
       )}
-      <QuickView item={selected} onClose={() => setSelected(null)} />
+      <QuickView item={selectedItem} onClose={() => setSelectedItem(null)} />
       <NewLesson
         start={creating?.start ?? null}
         tutorId={creating?.tutor}
@@ -285,6 +353,16 @@ export function CalendarPage() {
       />
     </section>
   );
+}
+
+const ZONE_KEY = "tt.calendar.secondaryZone";
+
+function readZone(): string {
+  try {
+    return localStorage.getItem(ZONE_KEY) ?? "";
+  } catch {
+    return "";
+  }
 }
 
 function nextHalfHour(): Date {

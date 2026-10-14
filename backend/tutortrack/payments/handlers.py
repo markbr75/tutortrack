@@ -27,12 +27,22 @@ def _autopay(invoice_id: str) -> bool:
     return services.should_autopay(invoice_id)
 
 
+def _collect_on(due_date: str | None) -> str:
+    """Gap G3: with ``payments.autopay_timing = before_due``, auto-pay collects N days
+    before the due date (or now, when that day has passed)."""
+    from . import services
+
+    return services.autopay_date(due_date)
+
+
 bridge.on(
     "invoice.issued",
     start=PaymentCollectionWorkflow,
     id=lambda e: collect_workflow_id(e.organisation_id, e.subject["id"]),
     input=lambda e: CollectInput(
-        organisation_id=str(e.organisation_id), invoice_id=e.subject["id"]
+        organisation_id=str(e.organisation_id),
+        invoice_id=e.subject["id"],
+        collect_on=_collect_on(e.data.get("due_date")),
     ),
     when=lambda e: _autopay(e.subject["id"]),
 )

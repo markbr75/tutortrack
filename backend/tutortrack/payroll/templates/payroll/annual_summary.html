@@ -1,0 +1,40 @@
+{% load i18n %}<!doctype html>
+<html lang="{{ org.locale|default:'en-GB' }}">
+<head><meta charset="utf-8"><title>{{ title }} {{ summary.year }}</title>
+{% include "billing/_style.html" %}</head>
+<body>
+  {% include "billing/_brand.html" %}
+  <div class="row">
+    <div>
+      <h1>{{ title }}</h1>
+      <div><strong>{{ summary.tutor.full_name }}</strong></div>
+      <div>{{ org.name }}</div>
+    </div>
+    <div class="muted">
+      <div>{% if summary.basis == "tax_year" %}{% trans "Tax year" %}{% else %}{% trans "Year" %}{% endif %}:
+        {{ summary.start|date:"DATE_FORMAT" }} – {{ summary.end|date:"DATE_FORMAT" }}</div>
+    </div>
+  </div>
+  {% for row in rows %}
+  <h2>{{ row.currency }}</h2>
+  <table class="totals">
+    <tr><td>{% trans "Earnings" %}</td><td class="num">{{ row.earnings }}</td></tr>
+    <tr><td>{% trans "Expenses repaid" %}</td><td class="num">{{ row.reimbursements }}</td></tr>
+    <tr class="grand"><td>{% trans "Total paid" %}</td><td class="num">{{ row.total }}</td></tr>
+  </table>
+  <p class="muted">{% blocktrans count n=row.payouts %}{{ n }} payment{% plural %}{{ n }} payments{% endblocktrans %}</p>
+  <table>
+    <thead><tr><th>{% trans "Type" %}</th><th class="num">{% trans "Amount" %}</th></tr></thead>
+    <tbody>{% for k in row.by_kind %}<tr><td>{{ k.label }}</td><td class="num">{{ k.amount }}</td></tr>{% endfor %}</tbody>
+  </table>
+  <table>
+    <thead><tr><th>{% trans "Month paid" %}</th><th class="num">{% trans "Amount" %}</th></tr></thead>
+    <tbody>{% for m in row.by_month %}<tr><td>{{ m.month }}</td><td class="num">{{ m.amount }}</td></tr>{% endfor %}</tbody>
+  </table>
+  {% empty %}
+  <p>{% trans "Nothing was paid in this period." %}</p>
+  {% endfor %}
+  <div class="footer muted">{% trans "A summary of what you were paid, to help with your tax return. It isn't a tax document; check it against your own records." %}</div>
+  {% include "billing/_brand_footer.html" %}
+</body>
+</html>

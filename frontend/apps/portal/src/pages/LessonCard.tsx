@@ -83,6 +83,9 @@ export function LessonCard({
 
   const start = new Date(lesson.start);
   const future = start.getTime() > Date.now() && lesson.status === "planned";
+  // Gap G3: lessons booked online can only be cancelled online until the booking window.
+  const cancelUntil = lesson.cancel_online_until ? new Date(lesson.cancel_online_until) : null;
+  const tooLate = cancelUntil !== null && cancelUntil.getTime() <= Date.now();
   const features = me.data?.features;
 
   return (
@@ -131,7 +134,10 @@ export function LessonCard({
         >
           {t("portal.addToCalendar")}
         </a>
-        {actions && future && features?.cancellations && mode === "none" ? (
+        {actions && future && features?.cancellations && mode === "none" && tooLate ? (
+          <span className="text-xs text-muted-foreground">{t("g3.portal.cancelClosed")}</span>
+        ) : null}
+        {actions && future && features?.cancellations && mode === "none" && !tooLate ? (
           <Button
             size="sm"
             variant="secondary"
@@ -166,6 +172,16 @@ export function LessonCard({
             <Alert tone={preview.data.kind === "late" ? "warning" : "info"}>
               {preview.data.message}
             </Alert>
+          ) : null}
+          {cancelUntil && !tooLate ? (
+            <p className="text-xs text-muted-foreground">
+              {t("g3.portal.cancelUntil", {
+                when: formatDateTime(cancelUntil.toISOString(), i18n.language),
+              })}
+            </p>
+          ) : null}
+          {preview.error || cancel.error ? (
+            <Alert tone="danger">{(preview.error ?? cancel.error)?.message}</Alert>
           ) : null}
           <TextField
             label={t("portal.reason")}

@@ -19,6 +19,16 @@ register(
     label=_("Email finance a daily digest of accounting sync errors"),
 )
 register(
+    "accounting.package_deferred_revenue",
+    type="bool",
+    default=False,
+    label=_("Treat package sales as deferred revenue until lessons use them"),
+    help_text=_(
+        "Package sales post to the deferred revenue account; a daily journal moves the "
+        "revenue to sales as units are used or expire."
+    ),
+)
+register(
     "accounting.export_format",
     type="choice",
     default="generic",

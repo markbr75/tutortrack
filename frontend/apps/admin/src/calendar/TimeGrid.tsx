@@ -1,6 +1,7 @@
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 
+import { timeIn } from "../g3/zones";
 import { minutesOfDay, sameDay } from "./dates";
 import type { CalendarItem } from "./types";
 
@@ -22,6 +23,8 @@ interface Props {
   onSelect: (item: CalendarItem) => void;
   onMove?: (item: CalendarItem, start: Date, columnKey: string) => void;
   onCreate?: (start: Date, columnKey: string) => void;
+  /** Gap G3: a second hour column in this timezone (FR-08-7). */
+  secondaryZone?: string;
 }
 
 /** Side-by-side lanes for overlapping items in one column. */
@@ -66,7 +69,7 @@ interface Drag {
 
 /** Day/week/resource time grid with click-to-create and drag-to-reschedule. Every item is
  * a button, so keyboard users open the quick view and reschedule there (WCAG 2.5.7). */
-export function TimeGrid({ columns, colour, onSelect, onMove, onCreate }: Props) {
+export function TimeGrid({ columns, colour, onSelect, onMove, onCreate, secondaryZone }: Props) {
   const { t, i18n } = useTranslation();
   const gridRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
@@ -141,6 +144,28 @@ export function TimeGrid({ columns, colour, onSelect, onMove, onCreate }: Props)
             ))}
           </div>
         </div>
+        {secondaryZone ? (
+          <div className="w-16 shrink-0 border-l border-border" aria-hidden="true">
+            <div className="flex h-10 items-center justify-center border-b border-border px-1 text-center text-[10px] leading-tight text-muted-foreground">
+              {secondaryZone.split("/").pop()?.replace("_", " ")}
+            </div>
+            <div className="relative" style={{ height }}>
+              {hours.map((h) => {
+                const at = new Date(columns[0]?.day ?? now);
+                at.setHours(h, 0, 0, 0);
+                return (
+                  <div
+                    key={h}
+                    className="absolute right-1 -translate-y-2 text-xs text-muted-foreground"
+                    style={{ top: (h - FIRST_HOUR) * 60 * PX_PER_MIN }}
+                  >
+                    {timeIn(at, secondaryZone, i18n.language)}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
         <div className="flex flex-1" ref={gridRef}>
           {columns.map((column, columnIndex) => {
             const layout = lanes(column.items);

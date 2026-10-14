@@ -49,6 +49,12 @@ class PolicyRulesSerializer(serializers.Serializer):
     tutor_cancellation = PercentPairSerializer(required=False)
     admin_cancellation = PercentPairSerializer(required=False)
     max_free_per_month = serializers.IntegerField(min_value=0, required=False, allow_null=True)
+    max_free_per_term = serializers.IntegerField(
+        min_value=0,
+        required=False,
+        allow_null=True,
+        help_text="Free cancellations per E20 term (the branch's terms); null: no limit.",
+    )
     makeup_credit = MakeupRulesSerializer(required=False)
 
 

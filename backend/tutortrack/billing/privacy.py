@@ -36,6 +36,7 @@ from .models import (
     InvoiceLine,
     PackagePurchase,
     PaymentRequest,
+    TutorInvoiceReview,
 )
 
 
@@ -114,12 +115,23 @@ def export(person: Person) -> list[Section]:
             Q(client_id__in=clients) | Q(student_id__in=students)
         )
     ]
+    reviews = [
+        {
+            "id": str(r.pk),
+            "invoice_run": str(r.invoice_run_id),
+            "status": r.status,
+            "comment": r.comment,
+            "decided_at": r.decided_at,
+        }
+        for r in TutorInvoiceReview.objects.filter(tutor_id__in=person.of("people.tutor"))
+    ]
     return [
         Section("billing.invoices", _("Invoices"), invoices),
         Section("billing.charges", _("Charges"), charges),
         Section("billing.credit_notes", _("Credit notes"), credit_notes),
         Section("billing.payment_requests", _("Payment requests"), requests),
         Section("billing.packages", _("Packages"), packages),
+        Section("billing.tutor_reviews", _("Invoice checks (tutor)"), reviews),
     ]
 
 
@@ -153,6 +165,12 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
             tutor_name=ctx.label("people.tutor", line.charge.tutor_id, _("Erased tutor"))
         )
         out.anonymised += 1
+    # Gap G3: what a tutor wrote when checking draft invoices.
+    out.anonymised += (
+        TutorInvoiceReview.objects.filter(tutor_id__in=tutors)
+        .exclude(comment="")
+        .update(comment="")
+    )
     in_scope = Q(client_id__in=households) | Q(student_id__in=students)
     out.anonymised += _scrub_rows(Charge, Charge.objects.filter(in_scope), "description", ctx)
     out.anonymised += _scrub_rows(

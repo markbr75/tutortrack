@@ -136,3 +136,9 @@ Decisions: [ADR 0021](../adr/0021-phase-2-roles-pricing-rules-and-booking.md).
 - **Events:** `pricing.changed` (kind: tier_rate, tutor_rate, premium, discount, price_list, holiday) and `tutor.tier_assigned`. Existing lessons keep their prices until re-priced.
 - **Frontend:** catalogue tabs Rooms, Pay tiers (editable grid, CSV export/import), Premiums and holidays, Discounts (with promo codes) and Price lists; the price check sends `online`.
 - **Tests:** table-driven precedence and modifier tests, Hypothesis properties (rounded, non-negative, split totals with premiums, discounts never raise a line), DB tests for loading, lessons, APIs and tenant isolation of every new endpoint.
+
+## Gap backlog (as built 2026-10-14)
+
+Batch G3 of `docs/05-gap-backlog.md`; design in [ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md).
+
+- **Discounts as separate invoice lines (FR-06-7, FR-10-3; E06:129):** with `pricing.discount_display = separate` an invoice shows a discounted lesson as its undiscounted line plus one negative line per discount (named after the rule), linked to it (`InvoiceLine.kind = discount`, `parent`). The parts are worked out so they add up exactly to the charge (net, tax and gross): the undiscounted line is rounded half-up on its own and the discounts take the difference, shared by size (largest remainder). The charge, the invoice total and the ledger are unchanged; a Hypothesis test checks the sums. Discount lines are removed and credited with their lesson line (a credit note credits a line *with* its discounts, never more than was invoiced); accounting posts them to the lesson line's revenue account. Lesson, advance and late-cancellation charges are split in proportion to what the charge covers (a late-cancellation percentage, a split-billing share or the part a package didn't cover); reconciliation lines stay netted. The setting is on Billing → Options.

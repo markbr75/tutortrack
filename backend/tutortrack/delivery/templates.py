@@ -114,7 +114,10 @@ def clean_fields(raw: Any) -> list[dict[str, Any]]:
 
 
 def _bad(key: str) -> BusinessRuleViolation:
-    message = _("This answer isn't valid.")
+    return bad_answer(key, _("This answer isn't valid."))
+
+
+def bad_answer(key: str, message: str) -> BusinessRuleViolation:
     return BusinessRuleViolation(message, extra={"errors": {key: [message]}})
 
 

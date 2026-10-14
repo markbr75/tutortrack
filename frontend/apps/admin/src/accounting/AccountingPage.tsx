@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { api, usePermission } from "../api";
 import { ErrorList } from "../calendar/ErrorList";
+import { KeyedSettings } from "../g3/KeyedSettings";
 import { ReadBackSection } from "./ReadBackSection";
 import { SyncBadge } from "./SyncBadge";
 import { providerName } from "./providerName";
@@ -753,6 +754,17 @@ export function AccountingPage() {
           <ReadBackSection conn={conn} canManage={canManage} />
         </>
       ) : null}
+      <section className="space-y-2" aria-labelledby="g3-deferred">
+        <h2 id="g3-deferred" className="text-lg font-semibold">
+          {t("g3.accounting.packages")}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t("g3.accounting.packagesHelp")}</p>
+        <KeyedSettings
+          area="accounting"
+          keys={["accounting.package_deferred_revenue"]}
+          label={t("g3.accounting.packages")}
+        />
+      </section>
       {canExport ? <ExportSection connectedProvider={conn?.provider} /> : null}
     </div>
   );

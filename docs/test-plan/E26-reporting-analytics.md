@@ -4,7 +4,7 @@
 
 **Built differently from the spec (Implementation notes win):**
 - Dashboard tiles are reordered and resized with buttons and a size select (WCAG 2.5.7), not drag and drop.
-- Package liabilities, referral/affiliate/review reports are not built. Room utilisation is per location.
+- Package liabilities were added by G3; referral/affiliate/review reports are not built. Room utilisation is per location.
 - Custom-field filters on standard reports cover client fields only. Reports cap long lists at 5,000 rows and run synchronously.
 - Tutors use the portal Today page for their figures; the admin dashboard is for staff.
 - The custom builder caps results at 1,000 rows, 3 group-by columns, 6 measures and 10 filters, with a 15-second query timeout. Custom reports can't be scheduled.
@@ -127,3 +127,11 @@ Page: **Reports and dashboards** → **Warehouse export** (`/analytics/warehouse
 | TP-E26-063 | Empty organisation | Owner | New org with no data | 1. Open dashboard and several reports. | "Nothing to show for this period." — no errors. | P2 | No | |
 | TP-E26-064 | Copilot still uses standard reports | Owner | AI copilot (E31) | 1. Ask the copilot "What's our revenue this month?". | Answer cites the Revenue report with a working `/analytics/...` link. | P2 | backend: `tutortrack/reporting/tests/test_builder.py::test_standard_reports_api_is_unchanged_for_the_ai_copilot` | |
 | TP-E26-065 | Performance smoke | Finance | Staging with a year of data | 1. Time Revenue by tutor for the last 12 months. | Under 3 s (p95 target). | P3 | No | |
+
+## Gap batch G3 (as built 2026-10-14)
+
+Built by gap batch G3 ([ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md)); see the epic's *Gap backlog* notes.
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E26-066 | Package liabilities report | Finance | Package bought, one hour used | 1. Reports → Finance → **Package liabilities**. | One row per package with units left and deferred revenue (net); totals per currency; coordinators can't open it. | P1 | backend: `reporting/tests/test_g3_package_liabilities.py` | |

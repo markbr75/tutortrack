@@ -1352,6 +1352,7 @@
                                 "credit_note",
                                 "invoice",
                                 "journal",
+                                "package_revenue",
                                 "pay_run",
                                 "pay_statement",
                                 "payment",
@@ -6968,6 +6969,131 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/auth/reauthenticate": {
+            "get": {
+                "operationId": "auth_reauthenticate_retrieve",
+                "description": "Confirm it's you before seeing sensitive details (e.g. full bank details).",
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReauthStatus"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "auth_reauthenticate_create",
+                "description": "Confirm it's you before seeing sensitive details (e.g. full bank details).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReauthRequestRequest"
+                            },
+                            "examples": {
+                                "Password": {
+                                    "value": {
+                                        "password": "correct horse"
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReauthRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReauthRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReauthStatus"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/auth/reauthenticate/options": {
+            "post": {
+                "operationId": "auth_reauthenticate_options_create",
+                "description": "Passkey options for re-authentication (the challenge is kept in the session).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicKeyOptions"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/auth/sso/{provider}/callback": {
             "get": {
                 "operationId": "auth_sso_callback_retrieve",
@@ -12366,6 +12492,79 @@
                                     "items": {
                                         "$ref": "#/components/schemas/RoomSchedule"
                                     }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/calendar/timetable": {
+            "get": {
+                "operationId": "calendar_timetable_retrieve",
+                "description": "A printable PDF timetable of the lessons the user can see (FR-08-7, gap G3), usually\nfor one tutor or one student, at most 31 days. No prices.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "end",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "start",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "student",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "timezone",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "IANA zone to show times in"
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "tags": [
+                    "calendar"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
                                 }
                             }
                         },
@@ -17840,11 +18039,12 @@
                                     "lesson",
                                     "package",
                                     "plan",
-                                    "reconciliation"
+                                    "reconciliation",
+                                    "surcharge"
                                 ]
                             }
                         },
-                        "description": "* `lesson` - Lesson\n* `advance` - Lesson (invoiced in advance)\n* `late_cancellation` - Late cancellation fee\n* `reconciliation` - Adjustment for a changed lesson\n* `ad_hoc` - One-off charge\n* `package` - Package\n* `plan` - Recurring fee\n* `late_fee` - Late payment fee\n* `course` - Course fee",
+                        "description": "* `lesson` - Lesson\n* `advance` - Lesson (invoiced in advance)\n* `late_cancellation` - Late cancellation fee\n* `reconciliation` - Adjustment for a changed lesson\n* `ad_hoc` - One-off charge\n* `package` - Package\n* `plan` - Recurring fee\n* `late_fee` - Late payment fee\n* `course` - Course fee\n* `surcharge` - Card surcharge",
                         "explode": true,
                         "style": "form"
                     },
@@ -23349,6 +23549,46 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/CreditNote"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/credit-notes/{id}/pdf": {
+            "get": {
+                "operationId": "credit_notes_pdf_retrieve",
+                "description": "The credit note as a PDF (FR-10-5, gap G3), rendered from its own lines.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this credit note.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "credit-notes"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
                                 }
                             }
                         },
@@ -32626,6 +32866,57 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/invoice-runs/{id}/tutor-reviews": {
+            "get": {
+                "operationId": "invoice_runs_tutor_reviews_list",
+                "description": "What tutors said about their lessons on this run's drafts (gap G3).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this invoice run.",
+                        "required": true
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "invoice-runs"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TutorInvoiceReview"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/invoice-runs/preview": {
             "post": {
                 "operationId": "invoice_runs_preview_create",
@@ -34607,6 +34898,21 @@
                     },
                     {
                         "in": "query",
+                        "name": "attention_reason",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "low_balance",
+                                "no_upcoming_lessons",
+                                "open_offer",
+                                "overdue_reports",
+                                "seeking_tutor"
+                            ]
+                        },
+                        "description": "Jobs needing attention for this reason\n\n* `seeking_tutor` - seeking_tutor\n* `open_offer` - open_offer\n* `no_upcoming_lessons` - no_upcoming_lessons\n* `low_balance` - low_balance\n* `overdue_reports` - overdue_reports"
+                    },
+                    {
+                        "in": "query",
                         "name": "branch",
                         "schema": {
                             "type": "string",
@@ -35123,6 +35429,21 @@
                             "type": "boolean"
                         },
                         "description": "Jobs needing attention"
+                    },
+                    {
+                        "in": "query",
+                        "name": "attention_reason",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "low_balance",
+                                "no_upcoming_lessons",
+                                "open_offer",
+                                "overdue_reports",
+                                "seeking_tutor"
+                            ]
+                        },
+                        "description": "Jobs needing attention for this reason\n\n* `seeking_tutor` - seeking_tutor\n* `open_offer` - open_offer\n* `no_upcoming_lessons` - no_upcoming_lessons\n* `low_balance` - low_balance\n* `overdue_reports` - overdue_reports"
                     },
                     {
                         "in": "query",
@@ -46804,6 +47125,68 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/me/earnings/annual": {
+            "get": {
+                "operationId": "me_earnings_annual_retrieve",
+                "description": "``/me/earnings/annual?year=&basis=&pdf=``: what the tutor was paid in a year, by\nkind and month, for their tax return (FR-12-9, gap G3).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "basis",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "calendar",
+                                "tax_year"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "pdf",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Download as PDF instead of JSON"
+                    },
+                    {
+                        "in": "query",
+                        "name": "year",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Calendar year, or the year a UK tax year starts"
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AnnualEarnings"
+                                }
+                            },
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/me/email": {
             "post": {
                 "operationId": "me_email_create",
@@ -46959,6 +47342,239 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Guidance"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/me/invoice-reviews": {
+            "get": {
+                "operationId": "me_invoice_reviews_list",
+                "description": "``/me/invoice-reviews``: a tutor's checks of their lessons on draft invoices before\nthey are issued (FR-10-3 review window, gap G3). Only lessons, never amounts.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "open",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Only checks still to answer"
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedTutorInvoiceReviewList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/me/invoice-reviews/{id}": {
+            "get": {
+                "operationId": "me_invoice_reviews_retrieve",
+                "description": "``/me/invoice-reviews``: a tutor's checks of their lessons on draft invoices before\nthey are issued (FR-10-3 review window, gap G3). Only lessons, never amounts.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tutor invoice review.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TutorInvoiceReview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/me/invoice-reviews/{id}/confirm": {
+            "post": {
+                "operationId": "me_invoice_reviews_confirm_create",
+                "description": "``/me/invoice-reviews``: a tutor's checks of their lessons on draft invoices before\nthey are issued (FR-10-3 review window, gap G3). Only lessons, never amounts.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tutor invoice review.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TutorInvoiceReview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/me/invoice-reviews/{id}/flag": {
+            "post": {
+                "operationId": "me_invoice_reviews_flag_create",
+                "description": "``/me/invoice-reviews``: a tutor's checks of their lessons on draft invoices before\nthey are issued (FR-10-3 review window, gap G3). Only lessons, never amounts.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this tutor invoice review.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorReviewFlagRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorReviewFlagRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorReviewFlagRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TutorInvoiceReview"
                                 }
                             }
                         },
@@ -51899,6 +52515,73 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/pay-runs/{id}/edit-item": {
+            "post": {
+                "operationId": "pay_runs_edit_item_create",
+                "description": "Change one item's amount (a linked correction in this run) or a manual item's\ndescription (gap G3). Financial: send ``Idempotency-Key``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this pay run.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pay-runs"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EditItemRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EditItemRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EditItemRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PayRunDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/pay-runs/{id}/mark-paid": {
             "post": {
                 "operationId": "pay_runs_mark_paid_create",
@@ -53368,6 +54051,160 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Refund"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "public",
+                "x-scopes": [
+                    "payments:write"
+                ]
+            }
+        },
+        "/api/v1/payments/bulk": {
+            "post": {
+                "operationId": "payments_bulk_create",
+                "description": "Record many manual payments at once (FR-11-5 bulk entry grid, gap G3). Each pays\nthat client's oldest invoices first. All or nothing; send ``Idempotency-Key``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "query",
+                        "name": "client",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "method",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "bank_transfer",
+                                    "card",
+                                    "cash",
+                                    "cheque",
+                                    "direct_debit",
+                                    "other",
+                                    "paypal"
+                                ]
+                            }
+                        },
+                        "description": "* `card` - Card\n* `direct_debit` - Direct debit\n* `bank_transfer` - Bank transfer\n* `cash` - Cash\n* `cheque` - Cheque\n* `paypal` - PayPal\n* `other` - Other",
+                        "explode": true,
+                        "style": "form"
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "disputed",
+                                    "failed",
+                                    "partially_refunded",
+                                    "pending",
+                                    "refunded",
+                                    "succeeded"
+                                ]
+                            }
+                        },
+                        "description": "* `pending` - Pending\n* `succeeded` - Succeeded\n* `failed` - Failed\n* `refunded` - Refunded\n* `partially_refunded` - Partly refunded\n* `disputed` - Disputed",
+                        "explode": true,
+                        "style": "form"
+                    }
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BulkPaymentRequest"
+                            },
+                            "examples": {
+                                "TwoBankTransfers": {
+                                    "value": {
+                                        "rows": [
+                                            {
+                                                "client": "8b0d6c1e-2f4e-4c1a-9d7e-2a6b1f0c3d4e",
+                                                "amount": {
+                                                    "amount": "120.00",
+                                                    "currency": "GBP"
+                                                },
+                                                "method": "bank_transfer",
+                                                "reference": "PATEL OCT"
+                                            },
+                                            {
+                                                "client": "5c2f8a3b-7e1d-4b6a-8c9f-0d1e2f3a4b5c",
+                                                "amount": {
+                                                    "amount": "45.00",
+                                                    "currency": "GBP"
+                                                },
+                                                "method": "cash"
+                                            }
+                                        ]
+                                    },
+                                    "summary": "Two bank transfers"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BulkPaymentRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BulkPaymentRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "apiToken": [
+                            "payments:write"
+                        ]
+                    },
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Payment"
+                                    }
                                 }
                             }
                         },
@@ -77997,6 +78834,77 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/tutors/{id}/earnings/annual": {
+            "get": {
+                "operationId": "tutors_earnings_annual_retrieve",
+                "description": "``/tutors/{id}/earnings/annual``: the same summary for staff (``payroll.view``).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "basis",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "calendar",
+                                "tax_year"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "pdf",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Download as PDF instead of JSON"
+                    },
+                    {
+                        "in": "query",
+                        "name": "year",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Calendar year, or the year a UK tax year starts"
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AnnualEarnings"
+                                }
+                            },
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/tutors/{id}/onboarding": {
             "get": {
                 "operationId": "tutors_onboarding_retrieve",
@@ -83772,6 +84680,38 @@
                     "title"
                 ]
             },
+            "AnnualEarnings": {
+                "type": "object",
+                "properties": {
+                    "year": {
+                        "type": "integer"
+                    },
+                    "basis": {
+                        "$ref": "#/components/schemas/BasisEnum"
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "end": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "currencies": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EarningsCurrency"
+                        }
+                    }
+                },
+                "required": [
+                    "basis",
+                    "currencies",
+                    "end",
+                    "start",
+                    "year"
+                ]
+            },
             "Answer": {
                 "type": "object",
                 "properties": {
@@ -85193,6 +86133,17 @@
                     "suggested_outcome"
                 ]
             },
+            "AttentionReasonsEnum": {
+                "enum": [
+                    "seeking_tutor",
+                    "open_offer",
+                    "no_upcoming_lessons",
+                    "low_balance",
+                    "overdue_reports"
+                ],
+                "type": "string",
+                "description": "* `seeking_tutor` - seeking_tutor\n* `open_offer` - open_offer\n* `no_upcoming_lessons` - no_upcoming_lessons\n* `low_balance` - low_balance\n* `overdue_reports` - overdue_reports"
+            },
             "AudiencePreview": {
                 "type": "object",
                 "properties": {
@@ -86455,6 +87406,14 @@
                 "required": [
                     "file"
                 ]
+            },
+            "BasisEnum": {
+                "enum": [
+                    "calendar",
+                    "tax_year"
+                ],
+                "type": "string",
+                "description": "* `calendar` - calendar\n* `tax_year` - tax_year"
             },
             "BillingIntervalEnum": {
                 "enum": [
@@ -88837,6 +89796,71 @@
                     "ids"
                 ]
             },
+            "BulkPaymentRequest": {
+                "type": "object",
+                "description": "The bulk payment-entry grid (gap G3): up to 200 rows, all recorded or none.",
+                "properties": {
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BulkPaymentRowRequest"
+                        },
+                        "maxItems": 200,
+                        "minItems": 1
+                    }
+                },
+                "required": [
+                    "rows"
+                ]
+            },
+            "BulkPaymentRowRequest": {
+                "type": "object",
+                "properties": {
+                    "client": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "amount": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ]
+                    },
+                    "method": {
+                        "$ref": "#/components/schemas/RecordPaymentMethodEnum"
+                    },
+                    "received_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "reference": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 120
+                    }
+                },
+                "required": [
+                    "amount",
+                    "client",
+                    "method"
+                ]
+            },
             "BulkRejectRequest": {
                 "type": "object",
                 "properties": {
@@ -90030,10 +91054,11 @@
                     "package",
                     "plan",
                     "late_fee",
-                    "course"
+                    "course",
+                    "surcharge"
                 ],
                 "type": "string",
-                "description": "* `lesson` - Lesson\n* `advance` - Lesson (invoiced in advance)\n* `late_cancellation` - Late cancellation fee\n* `reconciliation` - Adjustment for a changed lesson\n* `ad_hoc` - One-off charge\n* `package` - Package\n* `plan` - Recurring fee\n* `late_fee` - Late payment fee\n* `course` - Course fee"
+                "description": "* `lesson` - Lesson\n* `advance` - Lesson (invoiced in advance)\n* `late_cancellation` - Late cancellation fee\n* `reconciliation` - Adjustment for a changed lesson\n* `ad_hoc` - One-off charge\n* `package` - Package\n* `plan` - Recurring fee\n* `late_fee` - Late payment fee\n* `course` - Course fee\n* `surcharge` - Card surcharge"
             },
             "ChargeLine": {
                 "type": "object",
@@ -96768,6 +97793,86 @@
                     "year_to_date"
                 ]
             },
+            "EarningsCurrency": {
+                "type": "object",
+                "properties": {
+                    "currency": {
+                        "type": "string"
+                    },
+                    "earnings": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "reimbursements": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "total": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "by_kind": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EarningsKind"
+                        }
+                    },
+                    "by_month": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EarningsMonth"
+                        }
+                    },
+                    "payouts": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "by_kind",
+                    "by_month",
+                    "currency",
+                    "earnings",
+                    "payouts",
+                    "reimbursements",
+                    "total"
+                ]
+            },
+            "EarningsKind": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "reimbursement": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "amount",
+                    "kind",
+                    "label",
+                    "reimbursement"
+                ]
+            },
+            "EarningsMonth": {
+                "type": "object",
+                "properties": {
+                    "month": {
+                        "type": "string",
+                        "description": "YYYY-MM the money was paid"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    }
+                },
+                "required": [
+                    "amount",
+                    "month"
+                ]
+            },
             "EarningsRateRef": {
                 "type": "object",
                 "properties": {
@@ -96818,6 +97923,50 @@
                 },
                 "required": [
                     "charge"
+                ]
+            },
+            "EditItemRequest": {
+                "type": "object",
+                "description": "Gap G3: edit one item in a run under review (a new amount becomes a correction).",
+                "properties": {
+                    "item": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "amount": {
+                        "type": "object",
+                        "properties": {
+                            "amount": {
+                                "type": "string",
+                                "format": "decimal",
+                                "pattern": "^-?\\d+(\\.\\d+)?$",
+                                "example": "40.00"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "GBP",
+                                "minLength": 3,
+                                "maxLength": 3
+                            }
+                        },
+                        "required": [
+                            "amount",
+                            "currency"
+                        ],
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 200
+                    }
+                },
+                "required": [
+                    "item"
                 ]
             },
             "EditableByEnum": {
@@ -103088,6 +104237,20 @@
                         "readOnly": true,
                         "nullable": true
                     },
+                    "kind": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/InvoiceLineKindEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "parent": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
                     "position": {
                         "type": "integer",
                         "readOnly": true
@@ -103243,7 +104406,9 @@
                     "description",
                     "gross",
                     "id",
+                    "kind",
                     "net",
+                    "parent",
                     "position",
                     "quantity",
                     "student_name",
@@ -103253,6 +104418,14 @@
                     "unit",
                     "unit_price"
                 ]
+            },
+            "InvoiceLineKindEnum": {
+                "enum": [
+                    "line",
+                    "discount"
+                ],
+                "type": "string",
+                "description": "* `line` - Line\n* `discount` - Discount"
             },
             "InvoiceRun": {
                 "type": "object",
@@ -103641,9 +104814,18 @@
                         "type": "string",
                         "format": "date-time",
                         "readOnly": true
+                    },
+                    "attention_reasons": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AttentionReasonsEnum"
+                        },
+                        "readOnly": true,
+                        "description": "Why the job needs attention (filled on ?attention=true lists)."
                     }
                 },
                 "required": [
+                    "attention_reasons",
                     "client",
                     "client_name",
                     "created_at",
@@ -103854,9 +105036,18 @@
                         "type": "string",
                         "format": "date-time",
                         "readOnly": true
+                    },
+                    "attention_reasons": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AttentionReasonsEnum"
+                        },
+                        "readOnly": true,
+                        "description": "Why the job needs attention (filled on ?attention=true lists)."
                     }
                 },
                 "required": [
+                    "attention_reasons",
                     "client",
                     "client_name",
                     "created_at",
@@ -109370,6 +110561,15 @@
                 ],
                 "type": "string",
                 "description": "* `queued` - Queued\n* `sent` - Sent\n* `delivered` - Delivered\n* `opened` - Opened\n* `clicked` - Clicked\n* `bounced` - Bounced\n* `complained` - Marked as spam\n* `failed` - Failed\n* `suppressed` - Not sent (suppressed)"
+            },
+            "MethodsEnum": {
+                "enum": [
+                    "password",
+                    "totp",
+                    "passkey"
+                ],
+                "type": "string",
+                "description": "* `password` - password\n* `totp` - totp\n* `passkey` - passkey"
             },
             "MigrationProject": {
                 "type": "object",
@@ -116598,6 +117798,32 @@
                     }
                 }
             },
+            "PaginatedTutorInvoiceReviewList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TutorInvoiceReview"
+                        }
+                    }
+                }
+            },
             "PaginatedTutorList": {
                 "type": "object",
                 "required": [
@@ -121754,7 +122980,21 @@
                         "description": "GoCardless/PayPal: send the customer here"
                     },
                     "amount": {
-                        "$ref": "#/components/schemas/MoneyOut"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MoneyOut"
+                            }
+                        ],
+                        "description": "What will be charged, card surcharge included"
+                    },
+                    "surcharge": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MoneyOut"
+                            }
+                        ],
+                        "nullable": true,
+                        "description": "The card surcharge in ``amount`` (gap G3)"
                     }
                 },
                 "required": [
@@ -121891,6 +123131,12 @@
                         "readOnly": true,
                         "nullable": true
                     },
+                    "adjusts": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
@@ -121898,6 +123144,7 @@
                     }
                 },
                 "required": [
+                    "adjusts",
                     "amount",
                     "created_at",
                     "date",
@@ -122042,6 +123289,11 @@
                             "type": "string"
                         },
                         "description": "Online providers offered: stripe, gocardless, paypal"
+                    },
+                    "card_surcharge_percent": {
+                        "type": "string",
+                        "default": "0",
+                        "description": "Added to card payments as a separate line (gap G3); 0 when none."
                     }
                 },
                 "required": [
@@ -124338,6 +125590,12 @@
                         "minimum": 0,
                         "nullable": true
                     },
+                    "max_free_per_term": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "nullable": true,
+                        "description": "Free cancellations per E20 term (the branch's terms); null: no limit."
+                    },
                     "makeup_credit": {
                         "$ref": "#/components/schemas/MakeupRules"
                     }
@@ -124374,6 +125632,12 @@
                         "type": "integer",
                         "minimum": 0,
                         "nullable": true
+                    },
+                    "max_free_per_term": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "nullable": true,
+                        "description": "Free cancellations per E20 term (the branch's terms); null: no limit."
                     },
                     "makeup_credit": {
                         "$ref": "#/components/schemas/MakeupRulesRequest"
@@ -125198,6 +126462,12 @@
                     "notes_for_client": {
                         "type": "string"
                     },
+                    "cancel_online_until": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true,
+                        "description": "Self-booked lessons: the last moment to cancel online (gap G3)."
+                    },
                     "tutors": {
                         "type": "array",
                         "items": {
@@ -125212,6 +126482,7 @@
                     }
                 },
                 "required": [
+                    "cancel_online_until",
                     "end",
                     "id",
                     "join_opens_at",
@@ -131595,6 +132866,45 @@
                 },
                 "required": [
                     "reason"
+                ]
+            },
+            "ReauthRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "password": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "code": {
+                        "type": "string",
+                        "default": "",
+                        "description": "Authenticator or recovery code"
+                    },
+                    "credential": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true,
+                        "description": "Passkey assertion"
+                    }
+                }
+            },
+            "ReauthStatus": {
+                "type": "object",
+                "properties": {
+                    "recent": {
+                        "type": "boolean",
+                        "description": "Confirmed within the last few minutes"
+                    },
+                    "methods": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MethodsEnum"
+                        }
+                    }
+                },
+                "required": [
+                    "methods",
+                    "recent"
                 ]
             },
             "Rebuild": {
@@ -144382,6 +145692,97 @@
                     "tutor"
                 ]
             },
+            "TutorInvoiceReview": {
+                "type": "object",
+                "description": "A tutor's check of their lessons on an invoice run's drafts (gap G3). Never amounts.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "invoice_run": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "tutor_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TutorInvoiceReviewStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "comment": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "flagged_invoices": {
+                        "readOnly": true
+                    },
+                    "decided_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "period_start": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true
+                    },
+                    "period_end": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true
+                    },
+                    "review_until": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "lessons": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TutorReviewLesson"
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "comment",
+                    "decided_at",
+                    "flagged_invoices",
+                    "id",
+                    "invoice_run",
+                    "lessons",
+                    "period_end",
+                    "period_start",
+                    "review_until",
+                    "status",
+                    "tutor",
+                    "tutor_name"
+                ]
+            },
+            "TutorInvoiceReviewStatusEnum": {
+                "enum": [
+                    "pending",
+                    "confirmed",
+                    "flagged"
+                ],
+                "type": "string",
+                "description": "* `pending` - Waiting for the tutor\n* `confirmed` - Confirmed\n* `flagged` - Problem reported"
+            },
             "TutorMe": {
                 "type": "object",
                 "properties": {
@@ -145062,6 +146463,62 @@
                 "required": [
                     "email",
                     "first_name"
+                ]
+            },
+            "TutorReviewFlagRequest": {
+                "type": "object",
+                "properties": {
+                    "comment": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2000
+                    },
+                    "invoice_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Only these drafts (default: every draft with your lessons).",
+                        "maxItems": 50
+                    }
+                },
+                "required": [
+                    "comment"
+                ]
+            },
+            "TutorReviewLesson": {
+                "type": "object",
+                "properties": {
+                    "invoice_id": {
+                        "type": "string"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "lesson_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "student": {
+                        "type": "string"
+                    },
+                    "duration_minutes": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "date",
+                    "description",
+                    "duration_minutes",
+                    "invoice_id",
+                    "lesson_id",
+                    "student"
                 ]
             },
             "TutorStartRequest": {

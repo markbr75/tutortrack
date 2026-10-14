@@ -6,7 +6,7 @@
 - The permission to complete a lesson is `scheduling.lesson.complete` (no `delivery.lesson.complete`). Balance override needs `delivery.balance.override`.
 - Reports are addressed by their own id (`/lesson-reports/{id}`), one report per lesson and tutor. Submitting a report completes a started planned lesson (`delivery.report_submit_completes`).
 - Cancellation overrides for a branch, service, job or client exist in the API only; the admin screen edits the organisation policy.
-- "Max free cancellations" counts per calendar month (the per-term limit is not built). There is no `makeup_credit.expired` event (expiry is derived).
+- "Max free cancellations" counts per calendar month, and (G3) per E20 term with `max_free_per_term`. There is no `makeup_credit.expired` event (expiry is derived).
 - SLA and unconfirmed lessons run as Temporal workflows (`LessonReportSlaWorkflow`, `UnconfirmedLessonWorkflow`, started by a 15-minute beat task). Feedback surveys run as `LessonFeedbackWorkflow`.
 - Topics and homework fields are free lists. Attachments are stored as references.
 
@@ -134,3 +134,14 @@
 | TP-E09-067 | Cancel an already completed lesson | Coordinator | Completed lesson | 1. Try **Cancel lesson**. | Refused with a clear message; nothing changes. | P2 | No | |
 | TP-E09-068 | Two staff complete the same lesson at once | Owner, Coordinator | Two browsers on the same lesson | 1. Both submit the register. | One succeeds; the other gets an error or sees it already completed. One charge only. | P2 | No | |
 | TP-E09-069 | Report editor offline in the PWA | Tutor | See E16 offline cases | 1. Go offline, write and submit a report. | "Report queued" banner; it syncs when back online (E16). | P2 | No | |
+
+## Gap batch G3 (as built 2026-10-14)
+
+Built by gap batch G3 ([ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md)); see the epic's *Gap backlog* notes.
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E09-070 | Free cancellations per term | Coordinator | E20 term covering the next 60 days; policy `max_free_per_term` 1 | 1. Client cancels a lesson with notice (free).<br>2. Preview cancelling another lesson in the same term. | The second is late (charged per the policy). | P1 | backend: `delivery/tests/test_g3.py::test_free_cancellations_are_limited_per_term` | |
+| TP-E09-071 | Report attachments are uploads | Tutor (Nia) | Template with an attachment field visible to clients | 1. Write the report → **Add files** → choose a PDF.<br>2. Submit.<br>3. Priya opens the shared report in the portal. | The file uploads and is listed; Priya can download it; staff-only attachments are not offered to her. | P1 | backend: `test_attachments_are_uploaded_files_and_families_can_open_shared_ones` | |
+| TP-E09-072 | Policy overrides screen | Admin | — | 1. Lesson policies → **Overrides** → Service "Maths 1:1" → set rules → save. | An override named "Service: Maths 1:1" is listed and wins for that service's lessons. | P2 | vitest: `G3.test.tsx` sets a policy for one service | |
+| TP-E09-073 | Template assignments | Admin | — | 1. Report templates → open one → tick a job and a service → save. | The template is used for that job's lessons (job wins over service, service over subject). | P2 | No | |

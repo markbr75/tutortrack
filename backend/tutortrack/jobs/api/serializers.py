@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from tutortrack.catalogue.models import Service
@@ -12,6 +13,7 @@ from tutortrack.core.api.serializers import (
 from tutortrack.people.models import Client, Student, TutorProfile
 
 from ..models import Job, JobStatusHistory, JobStudent, JobTutor
+from ..selectors import ATTENTION_REASONS, attention_reasons
 
 RATE = {"decimal_places": 4, "required": False, "allow_null": True}
 
@@ -71,6 +73,15 @@ class JobSerializer(BaseModelSerializer):
     students = JobStudentSerializer(many=True, read_only=True)
     tutors = JobTutorSerializer(many=True, read_only=True)
     default_schedule = ScheduleSlot(many=True, required=False)
+    attention_reasons = serializers.SerializerMethodField(
+        help_text="Why the job needs attention (filled on ?attention=true lists)."
+    )
+
+    @extend_schema_field(
+        serializers.ListField(child=serializers.ChoiceField(choices=ATTENTION_REASONS))
+    )
+    def get_attention_reasons(self, obj: Job) -> list[str]:
+        return attention_reasons(obj)
 
     class Meta:
         model = Job
@@ -83,6 +94,7 @@ class JobSerializer(BaseModelSerializer):
             "expected_total_hours", "goals", "notes_internal", "notes_for_tutor",
             "notes_for_client", "account_manager", "hours_cap", "hours_cap_period",
             "policy_overrides", "custom_fields", "students", "tutors", "created_at",
+            "attention_reasons",
         ]  # fmt: skip
         read_only_fields = [
             "id", "reference", "client", "service", "status", "status_changed_at", "currency",

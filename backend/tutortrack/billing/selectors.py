@@ -251,3 +251,35 @@ def invoice_timeline(user: Any, target_type: str, target_id: str, limit: int) ->
         )
         for i in rows
     ]
+
+
+def low_balance_clients(wanted: set[tuple[str, str, str]]) -> set[tuple[str, str, str]]:
+    """Which ``(client id, currency, billing method)`` pairs are running low (E07
+    "jobs needing attention", gap G3): ``prepaid_credit`` when the projected credit is under
+    ``billing.topup_threshold`` (or below zero when the threshold is off); ``package`` when
+    no active package has more than ``billing.package_low_units`` units left."""
+    from tutortrack.people.models import Client
+    from tutortrack.tenancy.settings_service import get_setting
+
+    from . import ledger
+    from .models import PackagePurchase
+
+    threshold = Decimal(int(get_setting("billing.topup_threshold")))
+    low_units = Decimal(int(get_setting("billing.package_low_units")))
+    clients = {str(c.pk): c for c in Client.objects.filter(pk__in={w[0] for w in wanted})}
+    out = set()
+    for client_id, currency, method in wanted:
+        client = clients.get(client_id)
+        if client is None:
+            continue
+        if method == "prepaid_credit":
+            projected = ledger.balances(client, currency).projected
+            if projected.amount < threshold or projected.is_negative():
+                out.add((client_id, currency, method))
+        elif method == "package":
+            live = PackagePurchase.objects.filter(
+                client=client, currency=currency, status=PackagePurchase.Status.ACTIVE
+            )
+            if not any(p.units_remaining > low_units for p in live):
+                out.add((client_id, currency, method))
+    return out

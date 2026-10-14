@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django_filters import rest_framework as filters
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
@@ -43,6 +43,7 @@ from ..models import (
     ReconciliationMatch,
 )
 from ..providers import ProviderError
+from ..surcharges import surcharge_percent
 from . import serializers as s
 
 AUTH = [IsAuthenticated, HasOrganisation]
@@ -243,6 +244,43 @@ class PaymentViewSet(
             status=status.HTTP_201_CREATED,
         )
 
+    @extend_schema(
+        request=s.BulkPaymentSerializer,
+        responses={201: s.PaymentSerializer(many=True)},
+        examples=[
+            OpenApiExample(
+                "Two bank transfers",
+                request_only=True,
+                value={
+                    "rows": [
+                        {
+                            "client": "8b0d6c1e-2f4e-4c1a-9d7e-2a6b1f0c3d4e",
+                            "amount": {"amount": "120.00", "currency": "GBP"},
+                            "method": "bank_transfer",
+                            "reference": "PATEL OCT",
+                        },
+                        {
+                            "client": "5c2f8a3b-7e1d-4b6a-8c9f-0d1e2f3a4b5c",
+                            "amount": {"amount": "45.00", "currency": "GBP"},
+                            "method": "cash",
+                        },
+                    ]
+                },
+            )
+        ],
+    )
+    @action(detail=False, methods=["post"], pagination_class=None)
+    def bulk(self, request: Request) -> Response:
+        """Record many manual payments at once (FR-11-5 bulk entry grid, gap G3). Each pays
+        that client's oldest invoices first. All or nothing; send ``Idempotency-Key``."""
+        payload = s.BulkPaymentSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        payments = services.record_bulk_payments(
+            [dict(row) for row in payload.validated_data["rows"]], user=request.user
+        )
+        rows = self.get_tenant_queryset().filter(pk__in=[p.pk for p in payments])
+        return Response(self.get_serializer(rows, many=True).data, status=status.HTTP_201_CREATED)
+
     @extend_schema(request=s.AllocateSerializer, responses=s.PaymentSerializer)
     @action(
         detail=True,
@@ -359,6 +397,11 @@ def _page(target: Invoice | PaymentRequest) -> dict[str, Any]:
         "can_pay_online": bool(providers),
         "has_pdf": invoice,
         "providers": providers,
+        "card_surcharge_percent": (
+            str(surcharge_percent(target.branch_id).normalize())
+            if invoice and "stripe" in providers
+            else "0"
+        ),
     }
 
 

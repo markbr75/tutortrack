@@ -691,3 +691,70 @@ def discard_imported_package(purchase: PackagePurchase) -> bool:
         purchase.save()
     _closed(purchase, "cancelled")
     return True
+
+
+# --- deferred revenue (gap G3, FR-26-2 package liabilities, FR-23-2) ---------------------------
+
+
+def sale_net(purchase: PackagePurchase) -> Money:
+    """What the sale put into deferred revenue: the sale charge's net (no tax), or nothing
+    for imported packages (their money came in before TutorTrack)."""
+    charge = purchase.charge
+    if charge is None or charge.status == Charge.Status.VOID:
+        return Money.zero(purchase.currency)
+    return charge.net
+
+
+def credited_net(purchase: PackagePurchase, before: datetime) -> Money:
+    """What credit notes on the sale have given back (net) before ``before``."""
+    if not purchase.charge_id:
+        return Money.zero(purchase.currency)
+    from .models import CreditNoteLine
+
+    total = CreditNoteLine.objects.filter(
+        invoice_line__charge_id=purchase.charge_id, credit_note__issued_at__lt=before
+    ).aggregate(t=Sum("net_amount"))["t"]
+    return Money(Decimal(total or 0), purchase.currency)
+
+
+def units_moved(purchase: PackagePurchase, before: datetime, *, refunded: bool) -> Decimal:
+    """Units used or expired before ``before`` (reversals count back). Units written off
+    by a cancellation that was refunded aren't revenue: the credit note took them back."""
+    rows = purchase.consumptions.filter(created_at__lt=before)
+    if refunded:
+        rows = rows.exclude(kind=PackageConsumption.Kind.ADJUSTMENT)
+    return Decimal(rows.aggregate(t=Sum("units"))["t"] or 0)
+
+
+def recognised_net(purchase: PackagePurchase, before: datetime) -> Money:
+    """Revenue the package has earned before ``before``: the sale's net times the share of
+    units used or expired, rounded half-up. It is cumulative, so daily differences add up
+    exactly to the sale's net once every unit has gone. After a refunded cancellation it is
+    the sale's net less the refund, so the liability ends at exactly zero."""
+    net = sale_net(purchase)
+    zero = Money.zero(purchase.currency)
+    if net.is_zero() or not purchase.units_total:
+        return zero
+    credited = credited_net(purchase, before)
+    closed = purchase.closed_at
+    if (
+        purchase.status == PackagePurchase.Status.CANCELLED
+        and closed is not None
+        and closed < before
+        and credited.is_positive()
+    ):
+        left = net - credited
+        return left if left.is_positive() else zero
+    moved = units_moved(purchase, before, refunded=credited.is_positive())
+    share = min(max(moved / purchase.units_total, ZERO), Decimal(1))
+    return (net * share).round_to_minor()
+
+
+def liability(purchase: PackagePurchase, at: datetime) -> Money:
+    """Deferred revenue still held for a package at ``at`` (net of tax): the sale's net less
+    what has been recognised and less what credit notes have given back."""
+    zero = Money.zero(purchase.currency)
+    if purchase.created_at and purchase.created_at >= at:
+        return zero
+    left = sale_net(purchase) - recognised_net(purchase, at) - credited_net(purchase, at)
+    return left if left.is_positive() else zero

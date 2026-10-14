@@ -11,6 +11,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date, parse_datetime
 from django_filters import rest_framework as filters
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -570,6 +571,50 @@ class CalendarView(APIView):
             ]
         items.sort(key=lambda item: item["start"])
         return Response(s.CalendarItemSerializer(items, many=True).data)
+
+
+class TimetableView(APIView):
+    """A printable PDF timetable of the lessons the user can see (FR-08-7, gap G3), usually
+    for one tutor or one student, at most 31 days. No prices."""
+
+    permission_classes = perms({"GET": "scheduling.lesson.view"})
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("start", str, required=True),
+            OpenApiParameter("end", str),
+            OpenApiParameter("tutor", str, many=True),
+            OpenApiParameter("student", str, many=True),
+            OpenApiParameter("timezone", str, description="IANA zone to show times in"),
+        ],
+        responses={(200, "application/pdf"): OpenApiTypes.BINARY},
+    )
+    def get(self, request: Request) -> HttpResponse:
+        from .. import timetable
+
+        start, end = _range(request)
+        if end - start > timedelta(days=timetable.MAX_DAYS):
+            raise ValidationError({"end": ["A timetable covers at most 31 days."]})
+        filters_ = {
+            k: request.query_params.getlist(k)
+            for k in ("tutor", "student")
+            if request.query_params.getlist(k)
+        }
+        subject = ""
+        if len(filters_.get("tutor", [])) == 1:
+            found = TutorProfile.objects.filter(pk=filters_["tutor"][0]).first()
+            subject = found.full_name if found else ""
+        content = timetable.pdf(
+            request.user,
+            start,
+            end,
+            filters_,
+            timezone=request.query_params.get("timezone", ""),
+            subject=subject,
+        )
+        response = HttpResponse(content, content_type="application/pdf")
+        response["Content-Disposition"] = 'inline; filename="timetable.pdf"'
+        return response
 
 
 class EventViewSet(

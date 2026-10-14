@@ -15,6 +15,7 @@ import { useMemo, useState } from "react";
 
 import { api, usePermission } from "../api";
 import { useCursorList } from "../lists";
+import { ATTENTION_REASONS, AttentionReasons, type AttentionReason } from "../g3/JobAttention";
 import { BOARD_STATUSES, JOB_STATUSES, NEXT_STATUSES, type JobStatus } from "./statuses";
 
 type Job = components["schemas"]["Job"];
@@ -30,12 +31,13 @@ function tutorNames(job: Job): string {
 
 function JobList() {
   const { t } = useTranslation();
-  const [draft, setDraft] = useState({ q: "", status: "", attention: false });
+  const [draft, setDraft] = useState({ q: "", status: "", attention: false, reason: "" });
   const [filters, setFilters] = useState(draft);
   const params = {
     ...(filters.q ? { q: filters.q } : {}),
     ...(filters.status ? { status: [filters.status as JobStatus] } : {}),
-    ...(filters.attention ? { attention: true } : {}),
+    ...(filters.attention && !filters.reason ? { attention: true } : {}),
+    ...(filters.reason ? { attention_reason: filters.reason as AttentionReason } : {}),
   };
   const { query, rows } = useCursorList<Job>(["jobs", params], async (cursor) =>
     unwrap(await api.GET("/api/v1/jobs", { params: { query: { ...params, cursor } } })),
@@ -59,6 +61,11 @@ function JobList() {
         accessorKey: "status",
         cell: ({ getValue }) => t(`jobs.status.${String(getValue())}`),
       },
+      {
+        header: t("g3.attention.column"),
+        id: "attention",
+        cell: ({ row }) => <AttentionReasons reasons={row.original.attention_reasons} />,
+      },
     ],
     [t],
   );
@@ -67,7 +74,7 @@ function JobList() {
       <form
         role="search"
         aria-label={t("jobs.title")}
-        className="mb-6 grid gap-3 sm:grid-cols-[1fr_12rem_auto_auto] sm:items-end"
+        className="mb-6 grid gap-3 sm:grid-cols-[1fr_12rem_auto_12rem_auto] sm:items-end"
         onSubmit={(e) => {
           e.preventDefault();
           setFilters(draft);
@@ -97,6 +104,15 @@ function JobList() {
           />
           {t("jobs.needsAttention")}
         </label>
+        <SelectField
+          label={t("g3.attention.reason")}
+          value={draft.reason}
+          onChange={(e) => setDraft((d) => ({ ...d, reason: e.target.value }))}
+          options={[
+            { value: "", label: t("g3.attention.anyReason") },
+            ...ATTENTION_REASONS.map((r) => ({ value: r, label: t(`g3.attention.reasons.${r}`) })),
+          ]}
+        />
         <Button type="submit">{t("people.apply")}</Button>
       </form>
       {query.isError ? (

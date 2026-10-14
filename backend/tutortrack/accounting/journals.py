@@ -100,11 +100,10 @@ class _Collector:
 
 
 def _sales_line_accounts(c: _Collector, line: Any, branch_id: Any) -> tuple[AccountRef, str]:
-    from .builders import revenue_keys
+    from .builders import line_charge, revenue_account
 
-    charge = getattr(line, "charge", None)
-    keys, code = revenue_keys(charge)
-    account = c.maps.account("revenue", *keys, code=code)
+    charge = line_charge(line)
+    account = revenue_account(c.maps, charge)
     tax_code = c.maps.tax_code(charge.tax_rate_id if charge else None, line.tax_percent)
     return account, tax_code
 
@@ -356,6 +355,60 @@ def sales_postings(
             source=src,
             tracking=track,
         )
+    return c.rows + package_postings(maps, start, end, tz, currency=currency)
+
+
+def package_postings(
+    maps: Mappings, start: date, end: date, tz: str, *, currency: str | None = None
+) -> list[Posting]:
+    """Deferred package revenue released (gap G3, FR-26-2 "package liabilities"): with
+    ``accounting.package_deferred_revenue`` a package sale credits the deferred revenue
+    liability; each day the revenue its used (or expired) units earned moves from the
+    liability to sales: Dr deferred revenue / Cr revenue. Amounts come from
+    ``billing.packages.recognised_net`` (net of tax, cumulative, so they add up exactly to
+    the sale's net once every unit is used or expired)."""
+    from tutortrack.billing import packages
+    from tutortrack.billing.models import PackageConsumption, PackagePurchase
+
+    from .builders import defers_packages, revenue_keys
+
+    if not defers_packages():
+        return []
+    c = _Collector(maps, tz)
+    since, until = local_date_range_to_utc(start, end, tz)
+    by_currency: dict[str, Any] = {"currency": currency} if currency else {}
+    moves = PackageConsumption.objects.filter(
+        created_at__gte=since, created_at__lt=until, **by_currency
+    ).values_list("purchase_id", "created_at")
+    days: dict[Any, set[date]] = defaultdict(set)
+    for purchase_id, at in moves:
+        days[purchase_id].add(c.local(at))
+    purchases = PackagePurchase.objects.filter(pk__in=list(days)).select_related("charge")
+    for purchase in purchases.order_by("created_at"):
+        desc = _("Package revenue: %(name)s") % {"name": purchase.name}
+        ref, src = purchase.name[:100], f"package:{purchase.pk}"
+        track = maps.tracking_for(purchase.branch_id)
+        keys, code = revenue_keys(purchase.charge)
+        for day in sorted(days[purchase.pk]):
+            day_start, day_end = local_date_range_to_utc(day, day, tz)
+            released = packages.recognised_net(purchase, day_end) - packages.recognised_net(
+                purchase, day_start
+            )
+            for account, debit in (
+                (maps.account("deferred_revenue", "package"), True),
+                (maps.account("revenue", "package", *keys, code=code), False),
+            ):
+                c.add(
+                    day,
+                    purchase.currency,
+                    account,
+                    released.amount,
+                    debit=debit,
+                    description=desc,
+                    reference=ref,
+                    source=src,
+                    tracking=track,
+                )
     return c.rows
 
 

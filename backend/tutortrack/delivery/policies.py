@@ -10,6 +10,7 @@ A policy's ``rules`` (JSON, merged over ``DEFAULT_RULES``)::
      "tutor_cancellation": {"charge_percent": 0, "pay_percent": 0},
      "admin_cancellation": {"charge_percent": 0, "pay_percent": 0},
      "max_free_per_month": null,                     # then further ones count as late
+     "max_free_per_term": null,                      # the same per E20 term (gap G3)
      "makeup_credit": {"on_free_cancellation": false, "on_tutor_cancellation": false,
                        "valid_days": 60}}
 
@@ -50,6 +51,7 @@ DEFAULT_RULES: dict[str, Any] = {
     "tutor_cancellation": {"charge_percent": 0, "pay_percent": 0},
     "admin_cancellation": {"charge_percent": 0, "pay_percent": 0},
     "max_free_per_month": None,
+    "max_free_per_term": None,
     "makeup_credit": {
         "on_free_cancellation": False,
         "on_tutor_cancellation": False,
@@ -96,6 +98,12 @@ def clean_rules(raw: dict[str, Any] | None) -> dict[str, Any]:
     if limit is not None and (not isinstance(limit, int) or isinstance(limit, bool) or limit < 0):
         raise _invalid(_("The monthly free cancellation limit is a whole number."))
     rules["max_free_per_month"] = limit
+    term_limit = raw.get("max_free_per_term", rules["max_free_per_term"])
+    if term_limit is not None and (
+        not isinstance(term_limit, int) or isinstance(term_limit, bool) or term_limit < 0
+    ):
+        raise _invalid(_("The termly free cancellation limit is a whole number."))
+    rules["max_free_per_term"] = term_limit
     makeup = {**rules["makeup_credit"], **(raw.get("makeup_credit") or {})}
     if set(makeup) - set(DEFAULT_RULES["makeup_credit"]):
         raise _invalid(_("Unknown makeup credit option."))
@@ -192,7 +200,10 @@ def evaluate_cancellation(
     at: datetime,
     free_used_this_month: int = 0,
     resolved: ResolvedPolicy | None = None,
+    free_used_this_term: int | None = None,
 ) -> CancellationDecision:
+    """``free_used_this_term`` is ``None`` when the lesson isn't in a term (no E20 terms,
+    or the holidays): the termly limit then doesn't apply."""
     policy = resolved or resolve(lesson)
     rules = policy.rules
     notice = int((lesson.start - at).total_seconds() // 60)
@@ -209,8 +220,10 @@ def evaluate_cancellation(
             "admin", charge, pay, notice, False, makeup["valid_days"], free_used_this_month, policy
         )
     limit = rules["max_free_per_month"]
+    term_limit = rules.get("max_free_per_term")
     in_window = notice >= rules["free_window_hours"] * 60
-    if in_window and (limit is None or free_used_this_month < limit):
+    term_ok = term_limit is None or free_used_this_term is None or free_used_this_term < term_limit
+    if in_window and term_ok and (limit is None or free_used_this_month < limit):
         return CancellationDecision(
             "free", NONE, NONE, notice, makeup["on_free_cancellation"], makeup["valid_days"],
             free_used_this_month, policy,

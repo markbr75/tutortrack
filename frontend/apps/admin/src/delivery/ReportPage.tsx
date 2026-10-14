@@ -7,6 +7,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { api, usePermission } from "../api";
 import { AiAssistedBadge } from "../ai/AiParts";
 import { ErrorList } from "../calendar/ErrorList";
+import { AttachmentInput } from "../g3/AttachmentInput";
 import { useTopicSuggestions } from "../learning/hooks";
 
 type Field = components["schemas"]["TemplateField"];
@@ -204,6 +205,16 @@ function FieldInput({
       </fieldset>
     );
   }
+  if (field.type === "attachment")
+    return (
+      <AttachmentInput
+        label={label}
+        hint={hint}
+        value={(value as string[]) ?? []}
+        onChange={onChange}
+        disabled={disabled}
+      />
+    );
   if (LISTS.has(field.type))
     return (
       <ListInput

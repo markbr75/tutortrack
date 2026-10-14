@@ -106,3 +106,12 @@
 | TP-E06-049 | Zero-decimal currency | Owner | An org in JPY (or a JPY service price) | 1. Price check. | Whole yen, no decimals. | P3 | backend: `tutortrack/core/tests/test_money.py` | |
 | TP-E06-050 | Per-month service is not charged per lesson | Owner | Service per month | 1. Price check. | No per-lesson charge line; billed by recurring fees (E10). | P2 | backend: `tutortrack/catalogue/tests/test_rates.py` | |
 | TP-E06-051 | Currency labels follow the org | Owner | USD org | 1. Open Services. | "Default rates (USD)", $ formatting. | P3 | No | |
+
+## Gap batch G3 (as built 2026-10-14)
+
+Built by gap batch G3 ([ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md)); see the epic's *Gap backlog* notes.
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E06-052 | Discounts as separate invoice lines | Finance | Client discount 10% for the Patels; Billing → Options → Discounts on invoices = separate | 1. Complete an Arjun lesson (£45).<br>2. Create an invoice. | Two lines: the lesson at £45.00 and "<discount name>" −£4.50; total £40.50, the same as with netted discounts. | P1 | backend: `billing/tests/test_g3.py::test_separate_discount_lines_add_up_to_the_charge` | |
+| TP-E06-053 | Discount lines with VAT add up exactly | Finance | Service with 20% VAT | 1. Invoice a discounted lesson. | Net, tax and gross of the lesson and discount lines add up to the charge (rounded half-up). | P1 | backend: `test_separate_discounts_with_tax_and_credit_notes`, Hypothesis `test_discount_split_always_adds_up` | |

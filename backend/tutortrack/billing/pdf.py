@@ -92,6 +92,38 @@ def invoice_pdf(invoice: Any) -> bytes:
     )
 
 
+def credit_note_pdf(note: Any) -> bytes:
+    """A credit note (FR-10-5, gap G3): its number, the invoice it credits, the reason, the
+    lines credited and how the credit is used. Billing details come from the credited
+    invoice's snapshot, so they match what the client received."""
+    from tutortrack.tenancy.models import Organisation
+
+    org = Organisation.objects.get(pk=note.organisation_id)
+    fmt = _fmt(_locale(org))
+    invoice = note.invoice
+    return _render(
+        "billing/credit_note.html",
+        {
+            "note": note,
+            "invoice": invoice,
+            "snapshot": invoice.billing_snapshot or {},
+            "lines": [
+                {
+                    "description": line.description,
+                    "net": fmt(line.net),
+                    "tax": fmt(line.tax),
+                    "amount": fmt(line.gross),
+                }
+                for line in note.lines.all()
+            ],
+            "totals": {"net": fmt(note.net), "tax": fmt(note.tax), "total": fmt(note.total)},
+            "has_tax": note.tax.is_positive(),
+            "applied_to_invoice": note.application == "invoice",
+        },
+        org,
+    )
+
+
 def statement_pdf(client: Any, data: Any) -> bytes:
     from tutortrack.tenancy.models import Organisation
 

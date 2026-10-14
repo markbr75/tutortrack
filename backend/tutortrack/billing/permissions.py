@@ -23,4 +23,5 @@ PERMISSIONS = {
     "billing.late_fee.manage": "Set late fee rules and waive late fees",
     "billing.collections.manage": "Close collections cases",
     "billing.split.manage": "Split a job's or student's billing between clients",
+    "billing.tutor_review.respond": "Check own lessons on draft invoices before they are issued",
 }

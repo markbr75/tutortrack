@@ -57,6 +57,10 @@ class PayProfileView(APIView):
         full = request.query_params.get("full") == "true"
         if full and not has_perm(request.user, "payroll.bank_details.view"):
             raise PermissionDenied()
+        if full:  # gap G3: full bank details need a recent re-authentication (E12 §6)
+            from tutortrack.identity.reauth import require_recent
+
+            require_recent(request._request)
         profile = services.profile_for(tutor)
         return Response(s.PayProfileSerializer(profile, context={"full_bank": full}).data)
 
@@ -381,6 +385,26 @@ class PayRunViewSet(
         item = get_object_or_404(PayItem.objects.all(), pk=payload.validated_data["item"])
         return self._out(services.remove_item(pay_run, item))
 
+    @extend_schema(request=s.EditItemSerializer, responses=s.PayRunDetailSerializer)
+    @action(detail=True, methods=["post"], url_path="edit-item")
+    def edit_item(self, request: Request, pk: Any = None) -> Response:
+        """Change one item's amount (a linked correction in this run) or a manual item's
+        description (gap G3). Financial: send ``Idempotency-Key``."""
+        payload = s.EditItemSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+        pay_run = self._run(pk)
+        item = get_object_or_404(PayItem.objects.all(), pk=data["item"])
+        return self._out(
+            services.edit_item(
+                pay_run,
+                item,
+                amount=data.get("amount"),
+                description=data.get("description", ""),
+                reason=data.get("reason", ""),
+            )
+        )
+
     @extend_schema(request=s.AdjustmentSerializer, responses=s.PayRunDetailSerializer)
     @action(detail=True, methods=["post"])
     def adjustments(self, request: Request, pk: Any = None) -> Response:
@@ -493,3 +517,63 @@ class MyEarningsView(APIView):
         tutor = _my_tutor(request)
         data = selectors.earnings(tutor, services.org_today())
         return Response(s.EarningsSerializer(data).data)
+
+
+# --- gap G3: annual earnings summary (FR-12-9) ------------------------------------------------
+
+ANNUAL_PARAMS = [
+    OpenApiParameter("year", int, description="Calendar year, or the year a UK tax year starts"),
+    OpenApiParameter("basis", str, enum=["calendar", "tax_year"]),
+    OpenApiParameter("pdf", bool, description="Download as PDF instead of JSON"),
+]
+
+
+def _annual(request: Request, tutor: TutorProfile) -> Any:
+    from .. import earnings
+
+    today = services.org_today()
+    try:
+        year = int(request.query_params.get("year") or today.year)
+    except ValueError:
+        raise BusinessRuleViolation("Give the year as a number.") from None
+    if not 2000 <= year <= today.year + 1:
+        raise BusinessRuleViolation("Choose a year from 2000 onwards.")
+    data = earnings.summary(tutor, year, request.query_params.get("basis") or None)
+    if request.query_params.get("pdf") in {"1", "true"}:
+        response = HttpResponse(earnings.pdf(data), content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="earnings-{year}.pdf"'
+        return response
+    return Response(s.AnnualEarningsSerializer(data).data)
+
+
+class MyAnnualEarningsView(APIView):
+    """``/me/earnings/annual?year=&basis=&pdf=``: what the tutor was paid in a year, by
+    kind and month, for their tax return (FR-12-9, gap G3)."""
+
+    permission_classes = AUTH
+
+    @extend_schema(
+        parameters=ANNUAL_PARAMS,
+        responses={200: s.AnnualEarningsSerializer, (200, "application/pdf"): OpenApiTypes.BINARY},
+    )
+    def get(self, request: Request) -> Any:
+        return _annual(request, _my_tutor(request))
+
+
+class TutorAnnualEarningsView(APIView):
+    """``/tutors/{id}/earnings/annual``: the same summary for staff (``payroll.view``)."""
+
+    permission_classes = perms({"GET": "payroll.view"})
+
+    @extend_schema(
+        parameters=ANNUAL_PARAMS,
+        responses={200: s.AnnualEarningsSerializer, (200, "application/pdf"): OpenApiTypes.BINARY},
+    )
+    def get(self, request: Request, pk: str) -> Any:
+        from tutortrack.core.permissions import permission_scope
+
+        tutor = _tutor(pk)
+        scope = permission_scope(request.user, "payroll.view")
+        if scope == "own" and selectors.tutor_for_user(request.user) != tutor:
+            raise NotFound()
+        return _annual(request, tutor)

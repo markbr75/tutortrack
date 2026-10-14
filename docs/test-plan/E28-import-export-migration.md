@@ -6,7 +6,7 @@
 - Source ids are kept in `ExternalRef`, not `external_id` columns.
 - Imported invoices are history: original number, one summary line, no ledger entry, no `invoice.issued`, no dunning.
 - Imported package balances become active `PackagePurchase`s (no invoice or ledger).
-- TutorCruncher agents, reviews, proformas and ad hoc charges are counted (`not_imported_*`) but not imported.
+- Since G6, TutorCruncher agents, reviews, unpaid proformas and ad hoc charges after the cutover are imported; Teachworks wage tiers become pay tiers.
 - "Payment methods" and "Switch reminders on" are guidance steps; they change no settings.
 - Per-subject DSAR export lives in E29; grid exports are E05.
 
@@ -113,3 +113,13 @@
 |---|---|---|---|---|---|---|---|---|
 | TP-E28-056 | Failing chunk is retried | Owner | Temporarily break the DB connection mid-import (staging) | 1. Import a large file. | Chunk retried (up to 5 times); import completes or is marked failed with a report. | P3 | backend: `tutortrack/migration/tests/test_workflows.py::test_a_failing_chunk_is_retried` | |
 | TP-E28-057 | Worker restart mid-import | Owner | 5,000-row import | 1. Stop the Temporal worker half-way; restart. | Import continues from the last checkpoint; no duplicate rows. | P2 | No | |
+
+## Gap batch G6 (as built 2026-10-14)
+
+Built by gap batch G6 ([ADR 0034](../adr/0034-gap-batch-g6-consent-capture-account-deletion-and-platform-tools.md)); see the epic's *Gap backlog* notes. Signup now requires `accept_terms: true` (the terms checkbox).
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E28-058 | TutorCruncher agents, reviews, proformas and charges | Owner | Fake TutorCruncher connector | 1. Move from another system → TutorCruncher → run the project. | Agents become affiliates with a commission rule and their clients; reviews are imported (published ones approved, nothing sent); unpaid proformas become payment requests; ad hoc charges after the cutover become uninvoiced charges. | P1 | backend: `test_tutorcruncher_maps_agents_reviews_proformas_and_charges`, `test_charges_and_unpaid_proformas` | |
+| TP-E28-059 | Teachworks wage tiers become pay tiers | Owner | Fake Teachworks connector | 1. Import tutors and services. | Tutors get pay tiers from the cutover; services get tier pay rates. | P2 | backend: `test_teachworks_wage_tiers_become_pay_tiers` | |
+| TP-E28-060 | Consent columns become consent records | Owner | Client CSV with marketing email yes/no | 1. Import the file.<br>2. Re-import it.<br>3. Roll back. | Grants and withdrawals recorded (method import, source `import:...`); re-import adds nothing; rollback removes them. | P1 | backend: `test_consent_columns_are_recorded_with_the_import_as_source`, `test_reimporting_adds_no_duplicates_and_rollback_removes_the_records` | |

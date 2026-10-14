@@ -34,6 +34,7 @@ import { JobsPage } from "./tutor/JobsPages";
 import { ChecksPage, OnboardingPage } from "./tutor/OnboardingPages";
 import { NotificationsPage } from "./push/NotificationsPage";
 import { OfflineReportPage } from "./tutor/OfflineReportPage";
+import { InvoiceReviewPage } from "./tutor/G3Pages";
 import { EarningsPage, ExpensesPage } from "./tutor/PayPages";
 import { TutorReferralsPage } from "./tutor/ReferralsPage";
 import { TutorReportPage } from "./tutor/ReportPage";
@@ -114,6 +115,7 @@ const routeTree = rootRoute.addChildren([
   page("/tutor/availability", AvailabilityPage),
   page("/tutor/calendar", CalendarSyncPage),
   page("/tutor/earnings", EarningsPage),
+  page("/tutor/invoice-review", InvoiceReviewPage),
   page("/tutor/expenses", ExpensesPage),
   page("/tutor/onboarding", OnboardingPage),
   page("/tutor/compliance", ChecksPage),

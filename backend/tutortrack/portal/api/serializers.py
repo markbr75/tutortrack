@@ -79,6 +79,10 @@ class PortalLessonSerializer(serializers.Serializer):
     join_opens_at = serializers.DateTimeField(allow_null=True)
     location = serializers.CharField(allow_blank=True)
     notes_for_client = serializers.CharField(allow_blank=True)
+    cancel_online_until = serializers.DateTimeField(
+        allow_null=True,
+        help_text="Self-booked lessons: the last moment to cancel online (gap G3).",
+    )
     tutors = PortalTutorSerializer(many=True)
     students = PortalAttendeeSerializer(many=True)
 

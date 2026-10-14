@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { api, usePermission } from "../api";
 import { ErrorList } from "../calendar/ErrorList";
+import { PolicyOverrides, TemplateAssignments } from "../g3/DeliveryOverrides";
 
 type Rules = components["schemas"]["PolicyRules"];
 type Field = components["schemas"]["TemplateFieldRequest"];
@@ -29,6 +30,7 @@ const DEFAULT_RULES: Rules = {
   tutor_cancellation: { charge_percent: "0", pay_percent: "0" },
   admin_cancellation: { charge_percent: "0", pay_percent: "0" },
   max_free_per_month: null,
+  max_free_per_term: null,
   makeup_credit: { on_free_cancellation: false, on_tutor_cancellation: false, valid_days: 60 },
 };
 const TYPES: FieldType[] = [
@@ -45,22 +47,36 @@ const TYPES: FieldType[] = [
 ];
 const CHOICES = new Set<FieldType>(["select", "multi_select", "checklist"]);
 
-function PolicyForm() {
+type ScopeType = components["schemas"]["CancellationPolicyScopeEnum"];
+
+/** The organisation policy, or (gap G3) an override for one branch, service, job or
+ * client: the most specific active policy wins (FR-09-3). */
+export function PolicyForm({
+  scopeType = "organisation",
+  scopeId = null,
+  scopeName = "",
+}: {
+  scopeType?: ScopeType;
+  scopeId?: string | null;
+  scopeName?: string;
+}) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const policies = useQuery({
     queryKey: ["cancellation-policies"],
     queryFn: async () => unwrap(await api.GET("/api/v1/cancellation-policies")),
   });
-  const current = policies.data?.find((p) => p.scope_type === "organisation");
+  const current = policies.data?.find(
+    (p) => p.scope_type === scopeType && (p.scope_id ?? null) === scopeId,
+  );
   const [rules, setRules] = useState<Rules | null>(null);
   const value = rules ?? current?.rules ?? DEFAULT_RULES;
   const save = useMutation({
     mutationFn: async () => {
       const body = {
-        name: current?.name ?? t("delivery.settings.policies"),
-        scope_type: "organisation" as const,
-        scope_id: null,
+        name: current?.name ?? (scopeName || t("delivery.settings.policies")),
+        scope_type: scopeType,
+        scope_id: scopeId,
         rules: value,
       };
       return current
@@ -133,6 +149,16 @@ function PolicyForm() {
           update({ max_free_per_month: e.target.value === "" ? null : Number(e.target.value) })
         }
       />
+      <TextField
+        type="number"
+        min={0}
+        label={t("g3.delivery.maxFreeTerm")}
+        hint={t("g3.delivery.maxFreeTermHint")}
+        value={value.max_free_per_term == null ? "" : String(value.max_free_per_term)}
+        onChange={(e) =>
+          update({ max_free_per_term: e.target.value === "" ? null : Number(e.target.value) })
+        }
+      />
       {(["on_free_cancellation", "on_tutor_cancellation"] as const).map((key) => (
         <label key={key} className="flex items-center gap-2 text-sm">
           <input
@@ -170,7 +196,9 @@ function PolicyForm() {
           })
         }
       />
-      <p className="text-sm text-muted-foreground">{t("delivery.settings.overridesHelp")}</p>
+      <p className="text-sm text-muted-foreground">
+        {t(scopeType === "organisation" ? "g3.delivery.orgPolicyHelp" : "g3.delivery.overrideHelp")}
+      </p>
       <ErrorList error={save.error} />
       {save.isSuccess && !rules ? (
         <Alert tone="success">{t("delivery.settings.saved")}</Alert>
@@ -204,11 +232,17 @@ function TemplateEditor({ template, onSaved }: { template: Template | null; onSa
       { key: "covered", label: "", type: "rich_text", required: true, visibility: "student" },
     ],
   );
+  const [assigned, setAssigned] = useState({
+    services: template?.services ?? [],
+    subjects: template?.subjects ?? [],
+    jobs: template?.jobs ?? [],
+  });
   const save = useMutation({
     mutationFn: async () => {
       const body = {
         name,
         is_default: isDefault,
+        ...assigned,
         fields: fields.map((f) => ({
           ...f,
           key:
@@ -353,6 +387,7 @@ function TemplateEditor({ template, onSaved }: { template: Template | null; onSa
           {t("delivery.settings.addField")}
         </Button>
       </fieldset>
+      <TemplateAssignments value={assigned} onChange={setAssigned} />
       <ErrorList error={save.error} />
       <div className="flex gap-2">
         <Button type="submit" disabled={save.isPending}>
@@ -416,16 +451,25 @@ export function DeliverySettingsPage() {
   const canTemplates = usePermission("delivery.template.manage");
   const tabs = [
     ...(canPolicy ? [{ key: "policies" as const, label: t("delivery.settings.policies") }] : []),
+    ...(canPolicy ? [{ key: "overrides" as const, label: t("g3.delivery.overrides") }] : []),
     ...(canTemplates
       ? [{ key: "templates" as const, label: t("delivery.settings.templates") }]
       : []),
   ];
-  const [tab, setTab] = useState<"policies" | "templates">(tabs[0]?.key ?? "policies");
+  const [tab, setTab] = useState<"policies" | "overrides" | "templates">(
+    tabs[0]?.key ?? "policies",
+  );
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold">{t("delivery.settings.title")}</h1>
       <Tabs label={t("delivery.settings.title")} tabs={tabs} value={tab} onChange={setTab}>
-        {tab === "policies" ? <PolicyForm /> : <Templates />}
+        {tab === "policies" ? (
+          <PolicyForm />
+        ) : tab === "overrides" ? (
+          <PolicyOverrides />
+        ) : (
+          <Templates />
+        )}
       </Tabs>
     </div>
   );

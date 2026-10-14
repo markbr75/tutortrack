@@ -1,0 +1,46 @@
+{% load i18n %}<!doctype html>
+<html lang="{{ org.locale|default:'en-GB' }}">
+<head><meta charset="utf-8"><title>{% trans "Timetable" %}{% if subject %} – {{ subject }}{% endif %}</title>
+{% include "billing/_style.html" %}
+<style>
+  .day { break-inside: avoid; margin-top: 14px; }
+  .day h2 { font-size: 13pt; margin: 0 0 4px; }
+  .time { white-space: nowrap; width: 90px; }
+</style></head>
+<body>
+  {% include "billing/_brand.html" %}
+  <div class="row">
+    <div>
+      <h1>{% trans "Timetable" %}</h1>
+      {% if subject %}<div><strong>{{ subject }}</strong></div>{% endif %}
+      <div>{{ org.name }}</div>
+    </div>
+    <div class="muted">
+      <div>{{ start|date:"DATE_FORMAT" }} – {{ end|date:"DATE_FORMAT" }}</div>
+      <div>{% blocktrans %}Times in {{ zone }}{% endblocktrans %}</div>
+    </div>
+  </div>
+  {% for day in days %}
+  <section class="day">
+    <h2>{{ day.day|date:"l" }} {{ day.day|date:"DATE_FORMAT" }}</h2>
+    <table>
+      <thead><tr><th class="time">{% trans "Time" %}</th><th>{% trans "Lesson" %}</th><th>{% trans "Tutor" %}</th><th>{% trans "Students" %}</th><th>{% trans "Where" %}</th></tr></thead>
+      <tbody>
+      {% for l in day.lessons %}
+        <tr>
+          <td class="time">{{ l.start|time:"TIME_FORMAT" }}–{{ l.end|time:"TIME_FORMAT" }}{% if l.own_time %}<div class="muted">{{ l.own_time|time:"TIME_FORMAT" }} {{ l.own_zone }}</div>{% endif %}</td>
+          <td>{{ l.title }}{% if l.status_note %}<div class="muted">{{ l.status_note }}</div>{% endif %}</td>
+          <td>{{ l.tutors }}</td>
+          <td>{{ l.students }}</td>
+          <td>{{ l.place }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% empty %}
+  <p>{% trans "No lessons in this period." %}</p>
+  {% endfor %}
+  {% include "billing/_brand_footer.html" %}
+</body>
+</html>

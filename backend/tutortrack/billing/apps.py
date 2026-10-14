@@ -11,7 +11,7 @@ class BillingConfig(AppConfig):
         from tutortrack.crm import targets
         from tutortrack.delivery import balance
 
-        from . import handlers, org_settings  # noqa: F401
+        from . import handlers, notifications, org_settings  # noqa: F401
         from .guard import PrepaidBalanceGuard
         from .models import Invoice
 

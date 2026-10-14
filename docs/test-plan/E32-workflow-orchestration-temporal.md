@@ -104,3 +104,13 @@ Each row: do the trigger in the app, then find the workflow in the Temporal UI b
 |---|---|---|---|---|---|---|---|---|
 | TP-E32-066 | Activity failure retries then fails visibly | Developer | Make an activity's dependency unavailable (e.g. stop Mailpit for an email activity) | 1. Trigger a process that emails. | Activity retries with backoff (visible in history); after recovery it completes; Sentry gets the failure (if configured). | P2 | No | |
 | TP-E32-067 | Workflow code changes keep running workflows | Developer | After a deploy with `workflow.patched` | 1. Leave long-running workflows across a worker upgrade. | They continue without non-determinism errors. | P3 | backend: replay tests | |
+
+## Gap batch G6 (as built 2026-10-14)
+
+Built by gap batch G6 ([ADR 0034](../adr/0034-gap-batch-g6-consent-capture-account-deletion-and-platform-tools.md)); see the epic's *Gap backlog* notes. Signup now requires `accept_terms: true` (the terms checkbox).
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E32-068 | Workflow console lists failed and stuck processes | Platform staff | A failed workflow in some organisation | 1. `/platform/workflows`. | Failed, timed-out, terminated and stuck processes across organisations with Temporal UI links. | P1 | backend: `test_failed_and_stuck_workflows_across_organisations`; vitest: `G6.test.tsx` workflows | |
+| TP-E32-069 | Terminate, reset or retry with a reason | Platform staff | Failed process | 1. **Terminate** (or Reset/Retry) with a reason. | Done in the process's organisation and audited there; without a reason it is refused. | P1 | backend: `test_workflow_actions_are_audited_with_a_reason` | |
+| TP-E32-070 | Console is platform-only | Owner | — | 1. Call `/api/v1/platform/workflows`. | 403. | P2 | backend: `test_workflow_console_is_for_platform_staff_only` | |

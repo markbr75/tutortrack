@@ -455,6 +455,43 @@ def charge_fee(
     return created
 
 
+@transaction.atomic
+def invoice_surcharge(
+    *, client: Client, amount: Money, source_key: str, description: str, branch_id: Any = None
+) -> Invoice:
+    """A card surcharge (FR-11-1, gap G3) as its own issued invoice, never added to the
+    invoice being paid (issued invoices are immutable). Idempotent per ``source_key`` (the
+    provider payment); no tax is added (surcharges recover a payment cost, ADR 0037)."""
+    amount = amount.round_to_minor()
+    if not amount.is_positive():
+        raise _invalid("amount", _("A surcharge must be more than zero."))
+    charge = (
+        Charge.objects.select_for_update()
+        .filter(source_key=source_key)
+        .exclude(status=Charge.Status.VOID)
+        .first()
+    )
+    if charge is None:
+        charge = _create_charge(
+            client=client,
+            kind=Charge.Kind.SURCHARGE,
+            source_key=source_key,
+            description=description,
+            day=org_today(),
+            price=amount,
+            quantity=Decimal(1),
+            unit="item",
+            tax_percent=Decimal(0),
+            branch_id=branch_id,
+            category="surcharge",
+        )
+        audit.record_create(charge)
+    if charge.invoice_id:
+        return Invoice.objects.get(pk=charge.invoice_id)
+    [draft] = build_drafts(Charge.objects.filter(pk=charge.pk), skip_small=False)
+    return issue_invoice(draft, send=False)
+
+
 def fee_billed(source_key: str, currency: str) -> Money:
     """What a fee has put on invoices so far, less credit notes."""
     total = Money.zero(currency)
@@ -559,10 +596,73 @@ def _recompute(invoice: Invoice) -> None:
     invoice.balance_due = invoice.total - invoice.amount_paid - invoice.amount_credited
 
 
+DISCOUNTABLE_KINDS = (Charge.Kind.LESSON, Charge.Kind.ADVANCE, Charge.Kind.LATE_CANCELLATION)
+
+
+def _money_of(value: Any, currency: str) -> Decimal | None:
+    if not isinstance(value, dict) or value.get("currency") != currency:
+        return None
+    try:
+        return Decimal(str(value.get("amount")))
+    except (ArithmeticError, ValueError):
+        return None
+
+
+def discount_split(charge: Charge) -> tuple[Amounts, list[tuple[str, Amounts]]] | None:
+    """Show a lesson charge's discounts as separate negative lines (FR-06-7, FR-10-3, gap G3)
+    when ``pricing.discount_display`` is ``separate``: the undiscounted line plus one line per
+    discount. The parts are worked out so they add up to the charge exactly (net, tax and
+    gross): the undiscounted line is rounded half-up on its own and the discounts take the
+    difference, shared between them by size (largest remainder). ``None`` means "one line"."""
+    if get_setting("pricing.discount_display") != "separate":
+        return None
+    if charge.kind not in DISCOUNTABLE_KINDS or charge.lesson_attendee_id is None:
+        return None
+    attendee = charge.lesson_attendee
+    snapshot = (attendee.charge_snapshot if attendee else None) or {}
+    currency = charge.currency
+    amount = _money_of(snapshot.get("amount"), currency)
+    undiscounted = _money_of(snapshot.get("undiscounted_amount"), currency)
+    discounts = [
+        (str(d.get("name") or _("Discount")), -(_money_of(d.get("amount"), currency) or 0))
+        for d in snapshot.get("discounts") or []
+        if isinstance(d, dict)
+    ]
+    discounts = [(name, size) for name, size in discounts if size > 0]
+    price = _billed_price(charge)
+    if not discounts or not amount or amount <= 0 or undiscounted is None:
+        return None
+    if undiscounted <= amount or not price.is_positive():
+        return None
+    full_price = Money(undiscounted * price.amount / amount, currency).round_to_minor()
+    full = amounts_for(full_price, charge.tax_percent, inclusive=_inclusive(), exempt=False)
+    gross, tax = charge.gross - full.gross, charge.tax - full.tax
+    if gross.is_positive() or tax.is_positive() or (gross - tax).is_positive() or gross.is_zero():
+        return None
+    weights = [size for _name, size in discounts]
+    parts = [
+        (name, Amounts(g - t, t, g))
+        for (name, _size), g, t in zip(
+            discounts, gross.allocate(weights), tax.allocate(weights), strict=True
+        )
+    ]
+    return full, parts
+
+
 def _add_lines(invoice: Invoice, charges: list[Charge], start: int = 0) -> None:
     charges.sort(key=lambda c: (c.student.full_name if c.student else "", c.date, c.created_at))
-    for position, charge in enumerate(charges, start=start):
-        InvoiceLine.objects.create(
+    position = start
+    for charge in charges:
+        split = discount_split(charge)
+        full = split[0] if split else Amounts(charge.net, charge.tax, charge.gross)
+        unit_price = charge.unit_price
+        if split:
+            gross_price = full.gross if _inclusive() else full.net
+            unit_price = Money(
+                (gross_price.amount / (charge.quantity or Decimal(1))).quantize(Decimal("0.0001")),
+                charge.currency,
+            )
+        line = InvoiceLine.objects.create(
             invoice=invoice,
             charge=charge,
             position=position,
@@ -573,14 +673,43 @@ def _add_lines(invoice: Invoice, charges: list[Charge], start: int = 0) -> None:
             currency=charge.currency,
             quantity=charge.quantity,
             unit=charge.unit,
-            unit_price=charge.unit_price,
+            unit_price=unit_price,
             tax_percent=charge.tax_percent,
-            net=charge.net,
-            tax=charge.tax,
-            gross=charge.gross,
+            net=full.net,
+            tax=full.tax,
+            gross=full.gross,
         )
+        position += 1
+        for name, part in split[1] if split else []:
+            InvoiceLine.objects.create(
+                invoice=invoice,
+                kind=InvoiceLine.Kind.DISCOUNT,
+                parent=line,
+                position=position,
+                date=charge.date,
+                description=name[:300],
+                currency=charge.currency,
+                quantity=Decimal(1),
+                unit_price=part.gross if _inclusive() else part.net,
+                tax_percent=charge.tax_percent,
+                net=part.net,
+                tax=part.tax,
+                gross=part.gross,
+            )
+            position += 1
         charge.invoice = invoice
         charge.save(update_fields=["invoice", "updated_at"])
+
+
+def line_value(line: InvoiceLine) -> Amounts:
+    """A line together with its separately shown discounts (what its charge is worth)."""
+    rows = [line, *line.discount_lines.all()]
+    currency = line.currency
+    return Amounts(
+        sum_money((r.net for r in rows), currency),
+        sum_money((r.tax for r in rows), currency),
+        sum_money((r.gross for r in rows), currency),
+    )
 
 
 def build_drafts(
@@ -684,6 +813,8 @@ def remove_line(invoice: Invoice, line: InvoiceLine) -> Invoice:
     invoice = _draft(invoice)
     if line.invoice_id != invoice.pk:
         raise _invalid("line", _("That line isn't on this invoice."))
+    if line.kind == InvoiceLine.Kind.DISCOUNT:
+        raise _invalid("line", _("Remove the lesson line; its discount goes with it."))
     if line.charge_id:
         Charge.objects.filter(pk=line.charge_id).update(invoice=None)
     line.delete()
@@ -999,25 +1130,33 @@ def create_credit_note(
         raise _invalid("application", _("Choose how to use the credit."))
     if not reason.strip():
         raise _invalid("reason", _("Give a reason."))
-    all_lines = {str(line.pk): line for line in invoice.lines.select_for_update()}
+    # Separately shown discounts (gap G3) are credited with their line: a line's value is
+    # the line plus its discount lines, and discount lines can't be credited on their own.
+    all_lines = {
+        str(line.pk): line
+        for line in invoice.lines.select_for_update().filter(kind=InvoiceLine.Kind.LINE)
+    }
+    values = {key: line_value(line) for key, line in all_lines.items()}
     wanted = lines or [
-        {"line": line, "amount": line.gross - line.credited} for line in all_lines.values()
+        {"line": line, "amount": values[key].gross - line.credited}
+        for key, line in all_lines.items()
     ]
     parts = []
     for row in wanted:
         line = all_lines.get(str(row["line"].pk))
         if line is None:
             raise _invalid("lines", _("That line isn't on this invoice."))
+        value = values[str(line.pk)]
         amount: Money = row["amount"].round_to_minor()
-        remaining = line.gross - line.credited
+        remaining = value.gross - line.credited
         if amount.is_zero():
             continue
         if amount.is_negative() or amount > remaining:
             raise _invalid("lines", _("You can credit at most what's left on each line."))
         tax = (
             Money.zero(invoice.currency)
-            if line.gross.is_zero()
-            else (line.tax * amount.ratio(line.gross)).round_to_minor()
+            if value.gross.is_zero()
+            else (value.tax * amount.ratio(value.gross)).round_to_minor()
         )
         parts.append((line, amount - tax, tax, amount))
     if not parts:
@@ -1398,8 +1537,12 @@ def collect_run(run_id: Any) -> dict[str, Any]:
     for invoice in drafts:
         totals[invoice.currency] += invoice.total.amount
     review_days = int(get_setting("billing.review_days", branch=run.branch))
+    from . import tutor_review
+
+    tutors = tutor_review.enabled(run) and bool(drafts)
+    tutor_days = tutor_review.review_days(run) if tutors else 0
     run.status = InvoiceRun.Status.REVIEW
-    run.review_until = now() + timedelta(days=review_days)
+    run.review_until = now() + timedelta(days=max(review_days, tutor_days))
     run.stats = {
         "drafts": len(drafts),
         "totals": {k: str(v) for k, v in totals.items()},
@@ -1407,6 +1550,9 @@ def collect_run(run_id: Any) -> dict[str, Any]:
         "review_days": review_days,
     }
     run.save(update_fields=["status", "review_until", "stats", "updated_at"])
+    if tutors and tutor_review.open_reviews(run):  # gap G3: tutors check their lessons
+        run.stats = {**run.stats, "tutor_review": True, "tutor_review_days": tutor_days}
+        run.save(update_fields=["stats", "updated_at"])
     return dict(run.stats)
 
 
@@ -1433,8 +1579,13 @@ def issue_run(run_id: Any) -> dict[str, Any]:
             return dict(run.stats)
         run.status = InvoiceRun.Status.ISSUING
         run.save(update_fields=["status", "updated_at"])
+    from .tutor_review import held_invoice_ids
+
+    held = held_invoice_ids(run_id)  # gap G3: drafts a tutor reported a problem with
     issued = failed = 0
     for invoice in Invoice.objects.filter(invoice_run_id=run_id, status=Invoice.Status.DRAFT):
+        if str(invoice.pk) in held:
+            continue
         try:
             with transaction.atomic():
                 issue_invoice(invoice)
@@ -1445,6 +1596,8 @@ def issue_run(run_id: Any) -> dict[str, Any]:
         run = InvoiceRun.objects.select_for_update().get(pk=run_id)
         run.status = InvoiceRun.Status.COMPLETED
         run.stats = {**run.stats, "issued": issued, "failed": failed}
+        if held:
+            run.stats["held"] = len(held)
         run.save(update_fields=["status", "stats", "updated_at"])
     return dict(run.stats)
 

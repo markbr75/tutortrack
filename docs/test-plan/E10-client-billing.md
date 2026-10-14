@@ -4,7 +4,7 @@
 
 **Built differently from the spec (Implementation notes win):**
 - Billing settings (`billing.*`: review days, auto-issue, auto-send, auto-apply credit, minimum amount, reminders, top-ups, prevent negative balance, package activation...) have **no admin screen**. Change them with `PATCH /api/v1/settings/billing` (Swagger at http://localhost:8010/api/v1/docs/ while signed in) or the Django shell.
-- Statements are generated on demand (JSON or PDF); scheduled statement emails are not built. Invoice template designer and tutor pre-review of drafts are not built; credit note PDFs are a follow-up.
+- Statements are generated on demand (JSON or PDF) and, since G3, emailed monthly on a schedule (Billing → Options). Tutor pre-review of drafts and credit note PDFs were added by G3; the invoice template designer is not built.
 - Packages: the `package_purchase` ledger type is unused (a sale is an ordinary invoice). Expiry posts no ledger entry.
 - In advance mode reconciles continuously (credit or extra lines on the next invoice), not in one end-of-period batch.
 - Collections block is exposed for scheduling/booking, but scheduling does not call it yet. Ad hoc charges are never split.
@@ -170,3 +170,15 @@
 | TP-E10-083 | Two runs at the same time | Finance ×2 | Two browsers | 1. Start runs for overlapping periods together. | No charge is invoiced twice (row locks). | P1 | backend: `test_concurrent_runs_never_invoice_a_charge_twice` | |
 | TP-E10-084 | Credit note larger than the invoice | Finance | £45 invoice | 1. Try to credit £60. | Refused. | P2 | No | |
 | TP-E10-085 | Gap-free numbering after a deleted draft | Finance | Delete a draft, issue another | 1. Compare numbers. | No gap (numbers assigned only at issue). | P2 | backend: `test_credit_notes_are_numbered_without_gaps` | |
+
+## Gap batch G3 (as built 2026-10-14)
+
+Built by gap batch G3 ([ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md)); see the epic's *Gap backlog* notes.
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E10-086 | Tutors check their lessons before issuing | Tutor (Nia) and Finance | Billing → Options → tutors check drafts on, 2 days; review days 0 | 1. Run invoicing.<br>2. Nia: portal → **Check invoices** → **These are right**. | Nia sees dates, students and minutes, never amounts; once every tutor has answered the run issues straight away. | P1 | backend: `test_issuing_waits_for_tutors_then_ends_early`; vitest (portal): `G3.test.tsx` | |
+| TP-E10-087 | A flagged draft is held | Tutor and Finance | As above | 1. Nia: **Something's wrong** → comment → **Send**. | Staff get an alert; at the end of the window that draft stays a draft (run shows "1 invoice held"); others are issued. | P1 | backend: `test_flagged_drafts_are_held_when_the_window_ends`, `test_tutors_confirm_or_flag_through_the_api` | |
+| TP-E10-088 | Credit note PDF | Finance | Issued invoice with a credit note | 1. Invoice page → credit notes → **PDF of CN-…**. | A PDF with the number, credited invoice, reason, lines and how the credit is used. | P2 | backend: `test_credit_note_pdf` | |
+| TP-E10-089 | Monthly statements by email | Finance | Billing → Options → statements Every month, day 1; Patel had activity last month | 1. Wait for (or run) the schedule. | Priya gets last month's statement with a PDF, once. | P1 | backend: `test_statement_run_emails_last_months_statements`, `test_statements_go_to_clients_with_activity_once` | |
+| TP-E10-090 | Package liabilities fall as units are used | Finance | 10-hour package sold and paid | 1. Complete one hour.<br>2. Open the Package liabilities report. | Deferred revenue = sale net × 9/10. | P1 | backend: `test_package_revenue_is_recognised_as_units_are_used` | |

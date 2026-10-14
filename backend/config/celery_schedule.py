@@ -63,6 +63,11 @@ BEAT_SCHEDULE = {
         "task": "tutortrack.privacy.tasks.purge_platform_records",
         "schedule": crontab(hour=4, minute=40),
     },
+    # Saved cards expiring this month (G3, FR-11-2); dedupe keys make re-runs send nothing.
+    "card-expiry-notices": {
+        "task": "tutortrack.payments.tasks.card_expiry_notices_all",
+        "schedule": crontab(day_of_month="1", hour=8, minute=5),
+    },
     "idempotency-cleanup": {
         "task": "tutortrack.core.tasks.purge_expired_idempotency_records",
         "schedule": timedelta(hours=1),

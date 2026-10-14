@@ -23,23 +23,23 @@ Tick an item when it is built, and record the as-built details in the owning epi
 - [x] Document e-signing: click-to-sign with audit, for client documents, portal and tutor agreements (FR-05-9, FR-15-8, FR-18-5; E15:83, E18:100). *M*
 
 ## Batch G3 — Scheduling, delivery, billing, payments and payroll (E06–E12)
-- [ ] `pricing.discount_display=separate` shows discounts as separate invoice lines (FR-06-7, FR-10-3; E06:129). *S*
-- [ ] Jobs-needing-attention: no upcoming lessons, low prepaid balance, overdue reports (FR-07-6; E07:77). *S*
-- [ ] Calendar: saved filter sets, secondary timezone, print/PDF timetable, bulk-action UI (FR-08-7, FR-08-10; E08:144). *M*
-- [ ] Enforce the booking cancellation window (FR-08-9; E08:155). *S*
-- [ ] Website builder `booking` block (FR-24-4; E08:161, E24:107). *S*
-- [ ] "Max free cancellations per term" using E20 terms (FR-09-3; E09:106). *S*
-- [ ] Report-template attachment field with real uploads (FR-09-4; E09:108). *S*
-- [ ] UI for branch/service/job/client delivery policy and template overrides (FR-09-3/4; E09:113). *S*
-- [ ] Tutor pre-review of draft invoices (FR-10-3; E10:144, E10:153). *M*
-- [ ] Credit-note PDFs (FR-10-4/5; E10:153). *S*
-- [ ] Scheduled, emailed client statements (FR-10-9; E10:148). *S*
-- [ ] Package deferred revenue: accounting journals and the "package liabilities" report (FR-26-2, FR-23-2; E10:162, E26:87). *M*
-- [ ] Payment methods enabled per branch; card surcharges (FR-11-1; E11:116). *M*
-- [ ] Expiring-card notices; "auto-pay N days before due"; bulk payment-entry grid (FR-11-2/3/5). *S each*
-- [ ] Re-authenticate before showing full bank details (E12 permissions; E12:113, E12:132). *S*
-- [ ] Edit individual items in the pay-run UI (FR-12-5; E12:132). *S*
-- [ ] Annual earnings summary for tutors (FR-12-9). *S*
+- [x] `pricing.discount_display=separate` shows discounts as separate invoice lines (FR-06-7, FR-10-3; E06:129). *S*
+- [x] Jobs-needing-attention: no upcoming lessons, low prepaid balance, overdue reports (FR-07-6; E07:77). *S*
+- [x] Calendar: saved filter sets, secondary timezone, print/PDF timetable, bulk-action UI (FR-08-7, FR-08-10; E08:144). *M*
+- [x] Enforce the booking cancellation window (FR-08-9; E08:155). *S*
+- [x] Website builder `booking` block (FR-24-4; E08:161, E24:107). *S*
+- [x] "Max free cancellations per term" using E20 terms (FR-09-3; E09:106). *S*
+- [x] Report-template attachment field with real uploads (FR-09-4; E09:108). *S*
+- [x] UI for branch/service/job/client delivery policy and template overrides (FR-09-3/4; E09:113). *S*
+- [x] Tutor pre-review of draft invoices (FR-10-3; E10:144, E10:153). *M*
+- [x] Credit-note PDFs (FR-10-4/5; E10:153). *S*
+- [x] Scheduled, emailed client statements (FR-10-9; E10:148). *S*
+- [x] Package deferred revenue: accounting journals and the "package liabilities" report (FR-26-2, FR-23-2; E10:162, E26:87). *M*
+- [x] Payment methods enabled per branch; card surcharges (FR-11-1; E11:116). *M*
+- [x] Expiring-card notices; "auto-pay N days before due"; bulk payment-entry grid (FR-11-2/3/5). *S each*
+- [x] Re-authenticate before showing full bank details (E12 permissions; E12:113, E12:132). *S*
+- [x] Edit individual items in the pay-run UI (FR-12-5; E12:132). *S*
+- [x] Annual earnings summary for tutors (FR-12-9). *S*
 
 ## Batch G4 — Communications, automations and the tutor app (E13, E14, E16)
 - [ ] Realtime in-app notifications over SSE (FR-13-1/8; E13:108). *M*

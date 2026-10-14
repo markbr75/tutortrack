@@ -712,3 +712,79 @@ register(
         period=False,
     )
 )
+
+
+# --- package liabilities (gap G3, FR-26-2) ------------------------------------------------------
+
+
+def package_liabilities(user: Any, params: Params) -> Result:
+    """Unused prepaid package units at the end of the period and the deferred revenue they
+    represent (net of tax): the sale less revenue earned by used or expired units, less
+    refunds (``billing.packages.liability``)."""
+    from tutortrack.billing import packages
+    from tutortrack.billing.models import PackagePurchase
+
+    from ..periods import org_timezone
+
+    _start, at = params.period.utc_bounds(org_timezone())
+    qs = scoped(user, PackagePurchase.objects.filter(created_at__lt=at), CODENAME)
+    qs = filter_facts(qs, params, {"branch": "branch_id", "client": "client_id"})
+    rows = []
+    for purchase in qs.select_related("client", "charge").order_by("client__display_name", "name"):
+        held = packages.liability(purchase, at)
+        moved = packages.units_moved(purchase, at, refunded=False)
+        remaining = max(purchase.units_total - moved, Decimal(0))
+        if held.is_zero() and not remaining:
+            continue
+        rows.append(
+            {
+                "client_id": str(purchase.client_id),
+                "client": purchase.client.display_name,
+                "package": purchase.name,
+                "status": purchase.get_status_display(),
+                "unit": purchase.quantity_type,
+                "units_remaining": str(remaining.normalize()),
+                "expires": purchase.expires_at.date().isoformat() if purchase.expires_at else "",
+                "currency": purchase.currency,
+                "liability": held.amount,
+            }
+        )
+    totals: dict[str, Decimal] = {}
+    for row in rows:
+        totals[row["currency"]] = totals.get(row["currency"], Decimal(0)) + row["liability"]
+    money_columns(rows, ("liability",))
+    return Result(
+        columns=[
+            Column("client", _("Client")),
+            Column("package", _("Package")),
+            Column("status", _("Status")),
+            Column("units_remaining", _("Units left"), "number"),
+            Column("unit", _("Unit")),
+            Column("expires", _("Expires"), "date"),
+            Column("currency", _("Currency")),
+            Column("liability", _("Deferred revenue"), "money"),
+        ],
+        rows=rows,
+        totals=[
+            {"currency": currency, "liability": money(total, currency)}
+            for currency, total in sorted(totals.items())
+        ],
+        notes=[str(_("Amounts are net of tax, at the end of the period."))],
+    )
+
+
+register(
+    ReportDef(
+        key="package_liabilities",
+        title=_("Package liabilities"),
+        category="finance",
+        codename=CODENAME,
+        description=_(
+            "Unused prepaid package units and the deferred revenue they represent, at the end "
+            "of the period."
+        ),
+        run=package_liabilities,
+        filters=("branch", "client"),
+        ordering="client",
+    )
+)

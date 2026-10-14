@@ -5,7 +5,7 @@
 **Built differently from the spec (Implementation notes win):**
 - Without keys, every provider is a **fake** (no network). Fake Stripe: webhooks are plain JSON with header `Stripe-Signature: fake-signature`; method refs containing `fail` are declined, `3ds` need authentication, `debit` stay pending. Fake GoCardless and PayPal redirect straight back to TutorTrack (no external page). Fake state lives in the backend process memory, so use one `runserver` process and don't restart it mid-test.
 - The browser pay page loads real Stripe.js; with the fake key `pk_test_fake` the card form will not work. To pay by "card" in dev, post a fake `payment_intent.succeeded` webhook (see below). PayPal and GoCardless fakes work end to end in the browser.
-- Card surcharges and per-branch method switches are not built (Stripe dashboard controls methods). Evidence submission for disputes stays in Stripe. PayPal can't be saved for auto-pay. GoCardless needs a registered redirect URI in production. The Open Banking consent is given in GoCardless's portal.
+- Methods per branch and card surcharges (where legal) were added by G3 (Settings → Payments). Evidence submission for disputes stays in Stripe. PayPal can't be saved for auto-pay. GoCardless needs a registered redirect URI in production. The Open Banking consent is given in GoCardless's portal.
 - Collection, disputes, provider migration and bank feeds are Temporal workflows (`PaymentCollectionWorkflow` = the collection lock, `DisputeWorkflow`, `ProviderMigrationWorkflow`, `BankFeedSyncWorkflow`).
 
 **Fake webhook recipes (dev).**
@@ -114,3 +114,16 @@
 | TP-E11-052 | Amounts never use floats | Finance | Pay £33.33 three times on £99.99 | 1. Record three payments. | Invoice exactly Paid; balance £0.00. | P2 | No | |
 | TP-E11-053 | PCI scope: no card fields in our DOM | Security reviewer | Real Stripe test key (optional) | 1. Open the pay page; inspect the DOM. | Card fields are inside Stripe iframes only; the CSP allows js.stripe.com and 3-D Secure frames. | P2 | No | |
 | TP-E11-054 | Booking payment hook | Owner | — | 1. Use the self-booking flow that needs payment (E08). | A payment request pay URL is returned; when paid it becomes credit used by the lesson. | P3 | backend: `test_booking_payment_hook_returns_a_pay_link` | |
+
+## Gap batch G3 (as built 2026-10-14)
+
+Built by gap batch G3 ([ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md)); see the epic's *Gap backlog* notes.
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E11-055 | Payment methods per branch | Owner | Settings → Payments → Ways each branch takes payment | 1. Untick Card for the branch → save.<br>2. Open an invoice's pay page. | Card isn't offered; staff can't record a disabled manual method. | P1 | backend: `test_pay_page_offers_only_enabled_providers`, `test_manual_payment_methods_follow_the_branch` | |
+| TP-E11-056 | Card surcharge where legal | Owner, Family | Organisation country US; surcharge 2% | 1. Pay a £40 invoice by card on the pay page. | Charged £40.80; the invoice stays £40 and paid; a separate £0.80 "Card surcharge" invoice is issued and paid. | P1 | backend: `test_card_surcharge_is_charged_and_invoiced_separately` | |
+| TP-E11-057 | Surcharge refused in the UK/EEA or above the cap | Owner | Country GB (then US with 3.5%) | 1. Set a surcharge. | Refused with the reason. | P1 | backend: `test_surcharge_setting_is_refused_where_banned_or_too_high` | |
+| TP-E11-058 | Expiring-card notice | Family | Saved card expiring this month | 1. Run the monthly card check. | One email with a link to add a new card; running again sends nothing. | P2 | backend: `test_expiring_cards_are_told_once` | |
+| TP-E11-059 | Auto-pay before the due date | Finance | Auto-pay timing "A number of days before it is due", 3 | 1. Issue an invoice due in 14 days to an auto-pay client. | Collection waits until 3 days before due; **Collect now** collects at once. | P1 | backend: `test_autopay_waits_until_days_before_due`, `test_collect_now_skips_the_wait` | |
+| TP-E11-060 | Bulk payment entry | Finance | Two clients with open invoices | 1. Billing → **Record payments** → fill two rows → **Record 2 payments**. | Both recorded, oldest invoices paid; a bad row refuses the whole batch with the row marked. | P1 | backend: `test_bulk_entry_records_every_row_or_none`; vitest: `G3.test.tsx` records several payments | |

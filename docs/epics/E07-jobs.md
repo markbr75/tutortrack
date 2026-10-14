@@ -77,3 +77,8 @@ A **Job** is the ongoing engagement for a client's student(s): what's being taug
 - **"Needing attention"** currently means: seeking a tutor for more than 7 days, or an open tutor offer. No upcoming lessons, low prepaid balance and overdue reports are added by E08, E10 and E09.
 - **Frontend:** a jobs list (search, status, needs attention), a board by status (cards move with a select, so no drag-and-drop is needed), and a job page. The job page shows details, students, tutors (assign/offer, replace with preview, remove), status changes with reason, economics and activity. The student page gains its jobs and "Set up lessons".
 
+## Gap backlog (as built 2026-10-14)
+
+Batch G3 of `docs/05-gap-backlog.md`; design in [ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md).
+
+- **Jobs needing attention (FR-07-6; E07:77):** `selectors.with_attention` annotates every job with its reasons: seeking a tutor for more than 7 days, an open offer, **active with no planned lessons from now on**, **low balance** (prepaid credit: the bill-to client's projected credit under `billing.topup_threshold` or below zero; package jobs: no active package with more than `billing.package_low_units` units left, read through `billing.selectors.low_balance_clients`) and **overdue lesson reports** (pending, draft or returned past their due time). `?attention=true` filters on any reason, `?attention_reason=` on one; `Job.attention_reasons` lists them (empty on ordinary lists). The jobs list shows them as badges and has a reason filter.

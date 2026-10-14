@@ -78,6 +78,18 @@ class PaymentMethodAdded(DomainEvent):
 
 
 @dataclass(frozen=True, kw_only=True)
+class PaymentMethodExpiring(DomainEvent):
+    """A saved card expires at the end of this month (FR-11-2, gap G3)."""
+
+    event_type: ClassVar[str] = "payment_method.expiring"
+    subject_type: ClassVar[str] = "payment_method"
+    client_id: str
+    exp_month: int
+    exp_year: int
+    is_default: bool
+
+
+@dataclass(frozen=True, kw_only=True)
 class PaymentMethodRemoved(DomainEvent):
     event_type: ClassVar[str] = "payment_method.removed"
     subject_type: ClassVar[str] = "payment_method"

@@ -845,6 +845,11 @@ def daily(connection_id: str, day: date | None = None) -> dict[str, Any]:
     day = day or org_today() - timedelta(days=1)
     if conn.mode == AccountingConnection.Mode.SUMMARY:
         result["journal"] = sync("journal", day.isoformat(), conn=conn)
+    else:
+        from .builders import defers_packages
+
+        if defers_packages():  # gap G3: deferred package revenue released yesterday
+            result["package_revenue"] = sync("package_revenue", day.isoformat(), conn=conn)
     if conn.import_payments:
         from .readback import read_back
 

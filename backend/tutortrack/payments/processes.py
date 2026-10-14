@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import contextlib
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from typing import Any
 
 from temporalio import workflow
@@ -37,12 +37,19 @@ from tutortrack.core.workflows import (
     workflow_id,
 )
 from tutortrack.core.workflows.links import report_step
-from tutortrack.core.workflows.timers import SettingsSnapshotInput, snapshot_settings
+from tutortrack.core.workflows.timers import (
+    BusinessCalendar,
+    SettingsSnapshotInput,
+    snapshot_settings,
+    wait_until_local,
+)
 
 COLLECT_PROCESS = "collect"
 DISPUTE_PROCESS = "dispute"
 TIMEOUT = timedelta(minutes=5)
 DEBIT_WAIT = timedelta(days=10)
+AUTOPAY_BEFORE_DUE_PATCH = "autopay-before-due"
+COLLECT_TIME = time(9, 0)
 
 
 def collect_workflow_id(organisation_id: object, invoice_id: object) -> str:
@@ -67,6 +74,8 @@ def migration_workflow_id(organisation_id: object, migration_id: object) -> str:
 @dataclass(frozen=True, kw_only=True)
 class CollectInput(WorkflowInput):
     invoice_id: str
+    # Gap G3 "auto-pay N days before due": the local date to collect on ("" = now).
+    collect_on: str = ""
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -139,6 +148,8 @@ class PaymentCollectionWorkflow:
     def __init__(self) -> None:
         self.outcome = ""  # "confirmed" | "failed" (debit webhooks)
         self.paid = False
+        self.now_please = False
+        self.waiting = False
         self.attempts: list[str] = []
 
     @workflow.signal(name="confirmed")
@@ -153,9 +164,14 @@ class PaymentCollectionWorkflow:
     def paid_elsewhere(self) -> None:
         self.paid = True
 
+    @workflow.signal(name="collect_now")
+    def collect_now(self) -> None:
+        """Gap G3: staff pressed "Collect now" while auto-pay waited for its date."""
+        self.now_please = True
+
     @workflow.query
     def state(self) -> dict[str, Any]:
-        return {"attempts": self.attempts, "paid": self.paid}
+        return {"attempts": self.attempts, "paid": self.paid, "waiting": self.waiting}
 
     @workflow.run
     async def run(self, input: CollectInput) -> str:
@@ -167,6 +183,17 @@ class PaymentCollectionWorkflow:
             ),
             start_to_close_timeout=TIMEOUT,
         )
+        if input.collect_on and workflow.patched(AUTOPAY_BEFORE_DUE_PATCH):
+            # Auto-pay N days before the due date (FR-11-3): wait for the day (09:00 local).
+            self.waiting = True
+            await report_step(input, "scheduled")
+            moment = datetime.combine(date.fromisoformat(input.collect_on), COLLECT_TIME)
+            calendar = BusinessCalendar(timezone=str(settings.get("timezone") or "UTC"))
+            await wait_until_local(moment, calendar, until=lambda: self.paid or self.now_please)
+            self.waiting = False
+            if self.paid:
+                await report_step(input, "paid", status="completed")
+                return "paid"
         debit = await workflow.execute_activity(is_debit, input, start_to_close_timeout=TIMEOUT)
         key = "payments.debit_retry_days" if debit else "payments.card_retry_days"
         retries = [int(d) for d in settings.get(key) or []]

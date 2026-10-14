@@ -5,7 +5,7 @@
 **Built differently from the spec (Implementation notes win):**
 - Item statuses are `ready → in_pay_run → approved → paid`, plus `held` and `void` (no "pending").
 - Pay methods: `stripe_connect`, `bank_file`, `manual`, `external_payroll`, and `wise` (Phase 3). Tax IDs stay on the tutor record (Phase 3 adds an encrypted US taxpayer id on the pay card).
-- Full bank details need `payroll.bank_details.view` and are audited; re-authentication for the full view is not built.
+- Full bank details need `payroll.bank_details.view`, a re-authentication in the last 5 minutes (G3) and are audited.
 - Payroll settings (`payroll.*`: pay period, cut-off, pay when client paid, hold on overdue reports, dual-approval threshold, bank file format, expense markup...) have **no admin screen**: use `PATCH /api/v1/settings/payroll`.
 - Stripe payouts use a fake unless `PAYROLL_STRIPE_PAYOUTS` is on. Mileage uses straight line × 1.25 without a Google key.
 - `PayRunWorkflow` and `ExpenseApprovalWorkflow` run on Temporal.
@@ -101,3 +101,14 @@ Wise uses the in-memory `FakeWise` while `INTEGRATIONS_CREDENTIAL_PROVIDERS_LIVE
 | TP-E12-041 | Pay rounding | Finance | 45-min lesson at £28/h | 1. Complete it. | £21.00 exactly; 50-min lesson gives £23.33 (half-up). | P2 | No | |
 | TP-E12-042 | Period boundary in local time | Finance | Lesson at 23:30 local on the last day of the period | 1. Create the run for that period. | The lesson's pay is in that period. | P2 | No | |
 | TP-E12-043 | Minimum payout carried forward | Finance | `payroll.minimum_payout` £10; tutor owed £4 | 1. Approve a run. | The £4 is carried forward with a warning. | P3 | No | |
+
+## Gap batch G3 (as built 2026-10-14)
+
+Built by gap batch G3 ([ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md)); see the epic's *Gap backlog* notes.
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E12-044 | Re-authenticate before full bank details | Finance | Tutor with bank details | 1. Tutor → pay card → **Show full bank details**.<br>2. Enter your password → **Confirm**. | Asked to confirm first; then the full details show (audited). After 5 minutes it asks again. | P1 | backend: `test_pay_profile_api_masks_bank_details_and_audits_full_view`, `test_reauth_window_expires`; vitest: `G3.test.tsx` | |
+| TP-E12-045 | Authenticator code or passkey | Finance with TOTP | — | 1. Confirm with a code. | Accepted; a wrong code is refused and counts as a failed sign-in. | P2 | backend: `identity/tests/test_g3_reauth.py` | |
+| TP-E12-046 | Edit an item in a pay run | Finance | Run under review | 1. Run → Items → **Edit** a lesson item → amount and reason → Save. | A linked correction for the difference appears in the run; totals update; the original item is unchanged. Approved runs can't be edited. | P1 | backend: `test_editing_an_amount_adds_a_linked_correction`, `test_edit_item_api_and_locked_runs` | |
+| TP-E12-047 | Annual earnings summary | Tutor (Nia) | Paid pay runs this tax year | 1. Portal → Earnings → **Earnings summary** → choose a year → **Download PDF**. | Earnings and repaid expenses for the UK tax year (6 Apr – 5 Apr), by type and month; the PDF matches. | P1 | backend: `test_annual_summary_counts_what_was_paid_in_the_year`, `test_tutors_get_their_summary_and_pdf` | |
