@@ -62,7 +62,7 @@ def _tutor_facts(user: Any, tutor_id: Any, redactor: Redactor) -> list[str]:
     ]
 
 
-def write(
+def draft(
     user: Any,
     *,
     kind: str,

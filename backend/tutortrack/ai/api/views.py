@@ -444,7 +444,7 @@ class AIContentView(APIView):
     def post(self, request: Request) -> Response:
         """FR-31-8: draft a broadcast, tutor bio, website page or job advert."""
         data = _valid(s.AIContentInSerializer, request)
-        body = content.write(
+        body = content.draft(
             request.user,
             kind=data["kind"],
             brief=data.get("brief", ""),
