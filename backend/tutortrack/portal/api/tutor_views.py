@@ -47,6 +47,9 @@ class TutorMeView(TutorView):
                 "email": tutor.email,
                 "can_cancel": has_perm(request.user, "scheduling.lesson.cancel"),
                 "can_edit_lessons": has_perm(request.user, "scheduling.lesson.edit"),
+                # G4 (FR-16-2): plan lessons from the tutor app.
+                "can_create_lessons": has_perm(request.user, "scheduling.lesson.create"),
+                "can_reschedule": has_perm(request.user, "scheduling.lesson.reschedule"),
                 "can_see_pay": has_perm(request.user, "billing.rates.view_pay")
                 or has_perm(request.user, "payroll.view"),
             }

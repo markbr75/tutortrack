@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 
 import { api, fieldErrors, useMe } from "../api";
+import { DigestPreferences } from "../comms/DigestPreferences";
 import { AccountDeletionSection } from "./AccountDeletionSection";
 import { EmailChangeSection } from "./EmailChange";
 import { createPasskey, passkeysSupported } from "./webauthn";
@@ -410,6 +411,9 @@ export function AccountPage() {
       <PasskeysSection />
       <SessionsSection />
       <LoginHistorySection />
+      <div className="mt-8 max-w-xl">
+        <DigestPreferences />
+      </div>
       <AccountDeletionSection />
     </div>
   );

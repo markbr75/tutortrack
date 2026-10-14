@@ -83,3 +83,13 @@
 | TP-E14-031 | Daily schedule at 08:00 local across DST | Owner | Daily 08:00 schedule | 1. Check the Temporal Schedule spec and next run times around the last Sunday of October. | Fires at 08:00 Europe/London both before and after the change. | P2 | No | |
 | TP-E14-032 | Condition with a deleted tag | Owner | Automation conditioned on tag "VIP"; delete the tag | 1. Trigger. | Condition evaluates false (no crash); run Skipped. | P3 | No | |
 | TP-E14-033 | Message to a recipient without an address | Owner | Client without email | 1. Trigger an email action. | Step completes with that recipient skipped; no failure loop. | P3 | No | |
+
+## Gap batch G4 (2026-10-14): new actions, package triggers and recipe
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E14-034 | Send the lesson feedback survey | Admin | Lesson feedback on; automation "Lesson completed → Send the lesson feedback survey" | 1. Complete a lesson. | The family gets the E09 feedback request (once per student and lesson). | P2 | backend: `test_feedback_survey_action` | |
+| TP-E14-035 | Add to a mailing list | Admin | Mailchimp connected | 1. Automation "Student status changed → Add to a mailing list: Summer school". | The client is tagged "Summer school" (usable in segments); consented contacts are synced to the audience with the tag. | P2 | backend: `test_mailing_list_action_tags_and_syncs`; frontend: `automations/G4.test.tsx` | |
+| TP-E14-036 | WhatsApp from an approved template | Admin | Approved utility WhatsApp template; contact opted in to WhatsApp | 1. Add "Send a WhatsApp message", choose the template, trigger. | Opted-in contacts get the template; others are skipped; a marketing template is refused. | P2 | backend: `test_whatsapp_action_needs_an_approved_utility_template_and_opt_in` | |
+| TP-E14-037 | Message from a saved template | Admin | A saved reply in Settings → Messaging | 1. Add "Send a saved message", pick it; dry run; trigger. | The dry run shows the saved text; the message uses its title as subject and fills variables. | P2 | backend: `test_saved_reply_action`; frontend: `automations/G4.test.tsx` | |
+| TP-E14-038 | Package under 2 hours recipe | Admin | Settings → Billing low level 2; recipe installed and switched on | 1. Use an hours package down to 1.5 hours. | The family gets the email with the buy link; lessons packages and packages with more left don't match. | P1 | backend: `test_package_under_two_hours_recipe`, `test_package_subject_and_triggers_are_registered` | |

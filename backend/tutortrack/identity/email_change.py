@@ -46,7 +46,7 @@ def change_token(user: User, new_email: str) -> str:
 @transaction.atomic
 def request_change(request: HttpRequest, user: User, *, new_email: str, password: str = "") -> str:
     """Email a confirmation link to ``new_email``. Returns the (normalised) new address."""
-    from .tasks import send_email_change_notice, send_email_change_verification
+    from .tasks import current_org, send_email_change_notice, send_email_change_verification
 
     if user.has_usable_password() and not user.check_password(password or ""):
         raise AuthenticationFailed(_("Your password is incorrect."))
@@ -61,12 +61,16 @@ def request_change(request: HttpRequest, user: User, *, new_email: str, password
         raise _invalid(_("Another account uses this email address."))
     url = f"{settings.APP_URL}/confirm-email?token={change_token(user, email)}"
     audit.record(user, "email_change_requested", {"email": [user.email, email]})
-    user_id, old = str(user.pk), user.email
+    user_id, old, org = str(user.pk), user.email, current_org()
     transaction.on_commit(
-        lambda: send_email_change_verification.delay(user_id=user_id, email=email, url=url)
+        lambda: send_email_change_verification.delay(
+            user_id=user_id, email=email, url=url, organisation_id=org
+        )
     )
     transaction.on_commit(
-        lambda: send_email_change_notice.delay(email=old, new_email=email, done=False)
+        lambda: send_email_change_notice.delay(
+            email=old, new_email=email, done=False, organisation_id=org
+        )
     )
     return email
 
@@ -75,7 +79,7 @@ def request_change(request: HttpRequest, user: User, *, new_email: str, password
 def confirm_change(token: str, *, request: HttpRequest | None = None) -> User:
     """Apply a change from its link. Other sessions are signed out; when the link is opened
     in a browser signed in as this person, that session stays."""
-    from .tasks import send_email_change_notice
+    from .tasks import current_org, send_email_change_notice
 
     try:
         data: dict[str, Any] = signing.loads(token, salt=SALT, max_age=MAX_AGE)
@@ -99,7 +103,10 @@ def confirm_change(token: str, *, request: HttpRequest | None = None) -> User:
         keep = request.session.get(SID_KEY)
     revoke_all_sessions(user, except_id=keep)
     publish(UserEmailChanged(subject_id=user.pk))
+    org = current_org()
     transaction.on_commit(
-        lambda: send_email_change_notice.delay(email=old, new_email=new_email, done=True)
+        lambda: send_email_change_notice.delay(
+            email=old, new_email=new_email, done=True, organisation_id=org
+        )
     )
     return user

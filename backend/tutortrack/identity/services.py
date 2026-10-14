@@ -87,9 +87,11 @@ def create_user(
 
 def send_verification_email(user: User) -> None:
     """Queue the verification email after the current transaction commits."""
+    from .tasks import current_org
     from .tasks import send_verification_email as task
 
-    transaction.on_commit(lambda: task.delay(user_id=str(user.pk)))
+    org = current_org()
+    transaction.on_commit(lambda: task.delay(user_id=str(user.pk), organisation_id=org))
 
 
 def verify_email(token: str) -> User:
@@ -128,6 +130,7 @@ def _send_invitation(invitation: Invitation, raw_token: str) -> None:
             inviter=inviter,
             url=url,
             locale=org.locale,
+            organisation_id=str(org.pk),
         )
     )
 

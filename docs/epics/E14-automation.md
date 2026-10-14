@@ -139,3 +139,10 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
   - `AutomationScheduleWorkflow` is started by each automation's Temporal Schedule.
   - Replay histories are in `backend/tests/workflow_histories/`.
 - **Events:** `automation.saved`, `automation.deleted` and `automation.run_failed`. Automations never react to `automation.*` events.
+
+
+## Gap backlog (as built 2026-10-14)
+Gap batch G4 ([ADR 0038](../adr/0038-gap-batch-g4-communications-automations-and-tutor-app.md)); code in `automations/g4.py`.
+- **Actions (FR-14-3):** "Send the lesson feedback survey" (lesson; E09 `send_for_lesson`, so its rules apply), "Add to a mailing list" (tags the client, which broadcast segments filter on, and queues a Mailchimp/Brevo sync of its contacts; only consented contacts are subscribed, with the tag), "Send a WhatsApp message" (an approved utility template to recipients who opted in to WhatsApp; marketing templates are refused, use a broadcast) and "Send a saved message" (a canned reply from Settings → Messaging, rendered with the record's variables). The builder shows template pickers (`whatsapp_template`, `saved_reply` field types) and a checkbox for `bool` fields.
+- **Package triggers (FR-14-1):** a `package` subject (E10 package purchases: name, counted in, units bought/left, status, expiry, client) with `package.low`, `package.depleted`, `package.expiring` and `package.expired`.
+- **Recipe (FR-14-6):** "Package under 2 hours: offer more" (`package.low` with conditions hours left < 2 and counted in hours). This replaces the earlier deviation ("prepaid balance low" stays as its own recipe). `package.low` fires at `billing.package_low_units`, so the organisation sets that to 2 or more.

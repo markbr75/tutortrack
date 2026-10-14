@@ -28,10 +28,20 @@ RECIPIENTS = GenericRef("comms.Message", "recipient_type", "recipient_id", PERSO
 TIMELINE = GenericRef("comms.Message", "target_type", "target_id", RECORD)
 RELATED = GenericRef("comms.Message", "related_type", "related_id", RECORD)
 PREFERENCES = GenericRef("comms.CommunicationPreference", "person_type", "person_id", PERSON)
+DIGESTS = GenericRef("comms.DigestPreference", "person_type", "person_id", PERSON)
 BROADCASTS = GenericRef("comms.BroadcastRecipient", "recipient_type", "recipient_id", PERSON)
 PARTICIPANTS = GenericRef("comms.ThreadParticipant", "person_type", "person_id", PERSON)
 AUTHORS = GenericRef("comms.ThreadMessage", "author_type", "author_id", PERSON)
-GENERIC = (RECIPIENTS, TIMELINE, RELATED, PREFERENCES, BROADCASTS, PARTICIPANTS, AUTHORS)
+GENERIC = (
+    RECIPIENTS,
+    TIMELINE,
+    RELATED,
+    PREFERENCES,
+    DIGESTS,
+    BROADCASTS,
+    PARTICIPANTS,
+    AUTHORS,
+)
 
 
 def _repoint_unique(ref: GenericRef, ctx: MergeContext, together: tuple[str, ...]) -> int:
@@ -61,7 +71,11 @@ def _count(ctx: MergeContext) -> list[Move]:
     return moves(
         ("comms.messages", _l("Messages"), messages.distinct().count()),
         ("comms.threads", _l("Inbox conversations"), threads + _n(PARTICIPANTS, ctx)),
-        ("comms.preferences", _l("Notification preferences"), _n(PREFERENCES, ctx)),
+        (
+            "comms.preferences",
+            _l("Notification preferences"),
+            _n(PREFERENCES, ctx) + _n(DIGESTS, ctx),
+        ),
         ("comms.broadcasts", _l("Broadcast recipients"), _n(BROADCASTS, ctx)),
     )
 
@@ -77,6 +91,7 @@ def _merge(ctx: MergeContext) -> list[Move]:
     threads += _repoint_unique(PARTICIPANTS, ctx, ("thread_id", "person_type"))
     plain(AUTHORS)
     preferences = _repoint_unique(PREFERENCES, ctx, ("category", "person_type"))
+    preferences += _repoint_unique(DIGESTS, ctx, ("kind", "person_type"))  # G4
     broadcasts = _repoint_unique(BROADCASTS, ctx, ("broadcast_id", "recipient_type"))
     return moves(
         ("comms.messages", _l("Messages"), messages),

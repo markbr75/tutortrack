@@ -70,6 +70,11 @@ class MarketingClient(Protocol):
         self, creds: Credentials, audience_id: str, emails: list[str]
     ) -> SyncResult: ...
 
+    def opted_out(self, creds: Credentials, audience_id: str) -> list[tuple[str, str]]:
+        """G4: (email, ``unsubscribed`` | ``cleaned``) for people who left the audience
+        there, read back before every full sync so they are never re-subscribed."""
+        ...
+
 
 def _http(method: str, url: str, **kwargs: Any) -> Any:
     from tutortrack.integrations.providers.http import request
@@ -172,10 +177,29 @@ class MailchimpClient:
                 result.errors.append(str(exc))
         return result
 
+    def opted_out(self, creds: Credentials, audience_id: str) -> list[tuple[str, str]]:
+        out: list[tuple[str, str]] = []
+        for status in ("unsubscribed", "cleaned"):
+            offset = 0
+            while True:
+                data = self._call(
+                    creds,
+                    "GET",
+                    f"/lists/{audience_id}/members?status={status}&count={OPTED_OUT_PAGE}"
+                    f"&offset={offset}&fields=members.email_address,total_items",
+                )
+                rows = data.get("members", [])
+                out += [(str(r["email_address"]).lower(), status) for r in rows]
+                offset += len(rows)
+                if not rows or offset >= int(data.get("total_items", 0)):
+                    break
+        return out
+
 
 # --- Brevo --------------------------------------------------------------------------------------
 
 BREVO = "https://api.brevo.com/v3"
+OPTED_OUT_PAGE = 500
 
 
 class BrevoClient:
@@ -241,6 +265,27 @@ class BrevoClient:
             result.errors.append(str(exc))
         return result
 
+    def opted_out(self, creds: Credentials, audience_id: str) -> list[tuple[str, str]]:
+        out: list[tuple[str, str]] = []
+        offset = 0
+        while True:
+            data = self._call(
+                creds,
+                "GET",
+                f"/contacts/lists/{int(audience_id)}/contacts?limit={OPTED_OUT_PAGE}"
+                f"&offset={offset}",
+            )
+            rows = data.get("contacts", [])
+            out += [
+                (str(r["email"]).lower(), "unsubscribed")
+                for r in rows
+                if r.get("emailBlacklisted") and r.get("email")
+            ]
+            offset += len(rows)
+            if not rows or offset >= int(data.get("count", 0)):
+                break
+        return out
+
 
 # --- fake twin ----------------------------------------------------------------------------------
 
@@ -284,6 +329,14 @@ class FakeMarketingClient:
                 audience[email.lower()]["status"] = "unsubscribed"
                 done += 1
         return SyncResult(unsubscribed=done)
+
+    def opted_out(self, creds: Credentials, audience_id: str) -> list[tuple[str, str]]:
+        audience = self._lists(creds).setdefault(audience_id, {})
+        return [
+            (email, str(row["status"]))
+            for email, row in sorted(audience.items())
+            if row.get("status") in {"unsubscribed", "cleaned"}
+        ]
 
 
 def client_for(provider: str) -> MarketingClient:

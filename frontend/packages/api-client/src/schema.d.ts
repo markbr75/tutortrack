@@ -6602,6 +6602,32 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/digest-preferences/mine": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The digest emails the signed-in person can get (G4, FR-13-2/7): on or off, the
+     *     local time and (weekly) the day. Tutors: daily agenda and message digest; family
+     *     contacts: weekly schedule and message digest; staff: message digest.
+     */
+    get: operations["digest_preferences_mine_list"];
+    /**
+     * @description The digest emails the signed-in person can get (G4, FR-13-2/7): on or off, the
+     *     local time and (weekly) the day. Tutors: daily agenda and message digest; family
+     *     contacts: weekly schedule and message digest; staff: message digest.
+     */
+    put: operations["digest_preferences_mine_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/documents": {
     parameters: {
       query?: never;
@@ -12614,18 +12640,21 @@ export interface paths {
     };
     /**
      * @description A type's template for one channel: the organisation's override or the default.
-     *     ``PUT`` saves a new version; ``DELETE`` reverts to the default.
+     *     ``PUT`` saves a new version; ``DELETE`` reverts to the default. ``?locale=`` and
+     *     ``?branch=`` address a language or branch override (G4).
      */
     get: operations["message_templates_retrieve"];
     /**
      * @description A type's template for one channel: the organisation's override or the default.
-     *     ``PUT`` saves a new version; ``DELETE`` reverts to the default.
+     *     ``PUT`` saves a new version; ``DELETE`` reverts to the default. ``?locale=`` and
+     *     ``?branch=`` address a language or branch override (G4).
      */
     put: operations["message_templates_update"];
     post?: never;
     /**
      * @description A type's template for one channel: the organisation's override or the default.
-     *     ``PUT`` saves a new version; ``DELETE`` reverts to the default.
+     *     ``PUT`` saves a new version; ``DELETE`` reverts to the default. ``?locale=`` and
+     *     ``?branch=`` address a language or branch override (G4).
      */
     delete: operations["message_templates_destroy"];
     options?: never;
@@ -12661,6 +12690,23 @@ export interface paths {
     put?: never;
     /** @description Send the sample message to yourself (email or your notifications). */
     post: operations["message_templates_test_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/message-templates/{key}/{channel}/variants": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The organisation's language and branch overrides of one template (G4). */
+    get: operations["message_templates_variants_list"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -12912,6 +12958,30 @@ export interface paths {
     put?: never;
     /** @description Your in-app notifications (the bell). Poll ``unread-count``. */
     post: operations["notifications_read_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/notifications/stream": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Your in-app notifications as Server-Sent Events (G4, FR-13-8).
+     *
+     *     Events: ``ready`` (with the unread count), ``notification`` (id, type, title, link)
+     *     and ``read`` (some were marked read). Comments (``: keep-alive``) keep proxies from
+     *     closing the connection. The stream ends after a few minutes and the browser
+     *     reconnects. If it can't connect, keep polling ``/notifications/unread-count``.
+     */
+    get: operations["notifications_stream_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -20528,6 +20598,100 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/tutor/jobs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The tutor's active jobs a lesson can be booked on. */
+    get: operations["tutor_jobs_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor/lessons": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Book a lesson on one of your jobs (needs the organisation's "tutors can create
+     *     lessons" setting). A hard conflict returns 422 with ``conflicts``.
+     */
+    post: operations["tutor_lessons_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor/lessons/{lesson_id}/move": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Move your planned lesson (needs "tutors can reschedule lessons"; otherwise send a
+     *     reschedule request). A hard conflict returns 422 with ``conflicts``.
+     */
+    post: operations["tutor_lessons_move_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor/lessons/{lesson_id}/previous-report": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The latest earlier report for this lesson's student(s) that you may read. */
+    get: operations["tutor_lessons_previous_report_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor/lessons/check": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Conflicts for a proposed time (nothing is saved): a new lesson on ``job`` or a
+     *     move of ``lesson``.
+     */
+    post: operations["tutor_lessons_check_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/tutor/me": {
     parameters: {
       query?: never;
@@ -20589,6 +20753,23 @@ export interface paths {
       cookie?: never;
     };
     get: operations["tutor_students_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor/students/{student_id}/lessons": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description A student's lessons with you (newest first), attendance and your reports. */
+    get: operations["tutor_students_lessons_retrieve"];
     put?: never;
     post?: never;
     delete?: never;
@@ -26229,6 +26410,34 @@ export interface components {
       has_demo_data: boolean;
       records: number;
     };
+    /**
+     * @description * `tutor_agenda` - Daily agenda
+     *     * `weekly_schedule` - Weekly schedule
+     *     * `message_digest` - Message digest
+     * @enum {string}
+     */
+    DigestKindEnum: "tutor_agenda" | "weekly_schedule" | "message_digest";
+    DigestPreference: {
+      kind: components["schemas"]["DigestKindEnum"];
+      label: string;
+      /** @description The person wants it. */
+      enabled: boolean;
+      /** @description The organisation sends it (Settings → Notifications). */
+      org_enabled: boolean;
+      /** Format: time */
+      send_time: string;
+      /** @description Weekly digests: 0 = Monday … 6 = Sunday. */
+      weekday: number | null;
+      customised: boolean;
+    };
+    DigestPreferenceWriteRequest: {
+      kind: components["schemas"]["DigestKindEnum"];
+      /** @default true */
+      enabled: boolean;
+      /** Format: time */
+      send_time?: string | null;
+      weekday?: number | null;
+    };
     DiscountLine: {
       name: string;
       amount: components["schemas"]["MoneyOut"];
@@ -30220,11 +30429,15 @@ export interface components {
       /** Format: date-time */
       last_sync_at: string | null;
       error: string;
+      /** @description Paste into Mailchimp/Brevo webhooks (unsubscribes). */
+      webhook_url: string;
     };
     MarketingSyncResult: {
       upserted: number;
       unsubscribed: number;
       failed: number;
+      /** @description Contacts who had unsubscribed at the provider (G4). */
+      opted_out?: number;
     };
     MarketplaceEntry: {
       key: string;
@@ -30896,6 +31109,8 @@ export interface components {
       timing: number[];
       has_timing: boolean;
       transactional: boolean;
+      /** @description Account emails: can be edited, not switched off. */
+      locked: boolean;
       customised: boolean;
     };
     NotificationSettingUpdateRequest: {
@@ -36755,6 +36970,19 @@ export interface components {
         [key: string]: unknown;
       }[];
     };
+    PreviousReport: {
+      id: string;
+      lesson_id: string;
+      lesson_title: string;
+      /** Format: date-time */
+      lesson_start: string;
+      tutor: string;
+      status: string;
+      answers: components["schemas"]["ReportAnswer"][];
+    };
+    PreviousReportResult: {
+      report: components["schemas"]["PreviousReport"] | null;
+    };
     PriceList: {
       /** Format: uuid */
       readonly id: string;
@@ -38573,6 +38801,11 @@ export interface components {
       /** @default  */
       subject: string;
       attachments?: string[];
+    };
+    ReportAnswer: {
+      key: string;
+      label: string;
+      value: unknown;
     };
     ReportAnswersRequest: {
       answers: {
@@ -40805,6 +41038,13 @@ export interface components {
       /** Format: uuid */
       readonly merged_into: string | null;
     };
+    StudentHistory: {
+      student: {
+        [key: string]: string;
+      };
+      lessons: components["schemas"]["StudentLesson"][];
+      attendance_percent: number | null;
+    };
     StudentInRequest: {
       first_name: string;
       last_name?: string;
@@ -40835,6 +41075,19 @@ export interface components {
         /** @example GBP */
         currency: string;
       } | null;
+    };
+    StudentLesson: {
+      id: string;
+      title: string;
+      service: string;
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      status: string;
+      outcome: string;
+      report_id: string | null;
+      report_status: string;
     };
     StudentLogin: {
       student_id: string;
@@ -41363,6 +41616,8 @@ export interface components {
       customised: boolean;
       version: number;
       variables: string[];
+      locale?: string;
+      branch?: string | null;
     };
     TemplateField: {
       key: string;
@@ -41417,6 +41672,17 @@ export interface components {
      * @enum {string}
      */
     TemplateFieldVisibilityEnum: "staff" | "client" | "student";
+    /** @description One language or branch override of a template (G4, FR-13-3). */
+    TemplateVariant: {
+      id: string;
+      locale: string;
+      branch: string | null;
+      readonly branch_name: string;
+      version: number;
+      subject: string;
+      /** Format: date-time */
+      updated_at: string;
+    };
     TemplateWriteRequest: {
       /** @default  */
       subject: string;
@@ -42196,12 +42462,53 @@ export interface components {
        */
       offer: boolean;
     };
+    TutorJob: {
+      id: string;
+      name: string;
+      service: string;
+      duration_minutes: number;
+      online: boolean;
+      location: string;
+      students: {
+        [key: string]: string;
+      }[];
+    };
+    TutorLessonCheckRequest: {
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      /** Format: uuid */
+      job?: string | null;
+      /** Format: uuid */
+      lesson?: string | null;
+    };
+    TutorLessonCreateRequest: {
+      /** Format: uuid */
+      job: string;
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      /** @default  */
+      notes_for_tutor: string;
+    };
+    TutorLessonMoveRequest: {
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      /** @default  */
+      reason: string;
+    };
     TutorMe: {
       id: string;
       name: string;
       email: string;
       can_cancel: boolean;
       can_edit_lessons: boolean;
+      can_create_lessons: boolean;
+      can_reschedule: boolean;
       can_see_pay: boolean;
     };
     TutorOfflinePack: {
@@ -55681,6 +55988,50 @@ export interface operations {
       };
     };
   };
+  digest_preferences_mine_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DigestPreference"][];
+        };
+      };
+    };
+  };
+  digest_preferences_mine_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DigestPreferenceWriteRequest"][];
+        "application/x-www-form-urlencoded": components["schemas"]["DigestPreferenceWriteRequest"][];
+        "multipart/form-data": components["schemas"]["DigestPreferenceWriteRequest"][];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DigestPreference"][];
+        };
+      };
+    };
+  };
   documents_list: {
     parameters: {
       query?: {
@@ -66107,7 +66458,12 @@ export interface operations {
   };
   message_templates_retrieve: {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description Branch override (id); blank = every branch. */
+        branch?: string;
+        /** @description Language override (e.g. fr); blank = any. */
+        locale?: string;
+      };
       header?: never;
       path: {
         channel: string;
@@ -66129,7 +66485,12 @@ export interface operations {
   };
   message_templates_update: {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description Branch override (id); blank = every branch. */
+        branch?: string;
+        /** @description Language override (e.g. fr); blank = any. */
+        locale?: string;
+      };
       header?: never;
       path: {
         channel: string;
@@ -66157,7 +66518,12 @@ export interface operations {
   };
   message_templates_destroy: {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description Branch override (id); blank = every branch. */
+        branch?: string;
+        /** @description Language override (e.g. fr); blank = any. */
+        locale?: string;
+      };
       header?: never;
       path: {
         channel: string;
@@ -66228,6 +66594,28 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Message"];
+        };
+      };
+    };
+  };
+  message_templates_variants_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        channel: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TemplateVariant"][];
         };
       };
     };
@@ -66710,6 +67098,27 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["UnreadCount"];
+        };
+      };
+    };
+  };
+  notifications_stream_retrieve: {
+    parameters: {
+      query?: {
+        format?: "event-stream" | "json";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/event-stream": string;
         };
       };
     };
@@ -79929,6 +80338,132 @@ export interface operations {
       };
     };
   };
+  tutor_jobs_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorJob"][];
+        };
+      };
+    };
+  };
+  tutor_lessons_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TutorLessonCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TutorLessonCreateRequest"];
+        "multipart/form-data": components["schemas"]["TutorLessonCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonResult"];
+        };
+      };
+    };
+  };
+  tutor_lessons_move_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TutorLessonMoveRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TutorLessonMoveRequest"];
+        "multipart/form-data": components["schemas"]["TutorLessonMoveRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LessonResult"];
+        };
+      };
+    };
+  };
+  tutor_lessons_previous_report_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        lesson_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PreviousReportResult"];
+        };
+      };
+    };
+  };
+  tutor_lessons_check_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TutorLessonCheckRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TutorLessonCheckRequest"];
+        "multipart/form-data": components["schemas"]["TutorLessonCheckRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Conflict"][];
+        };
+      };
+    };
+  };
   tutor_me_retrieve: {
     parameters: {
       query?: never;
@@ -80001,6 +80536,27 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TutorStudent"][];
+        };
+      };
+    };
+  };
+  tutor_students_lessons_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        student_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StudentHistory"];
         };
       };
     };

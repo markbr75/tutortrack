@@ -7,6 +7,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { api } from "../api";
 import { isNetworkError, isOffline, queueChange } from "../offline/client";
 import { AiReportDrafter } from "./AiDrafts";
+import { DictationButton } from "./Dictation";
 import { markReportAssisted } from "./aiApi";
 
 type Field = components["schemas"]["TemplateField"];
@@ -120,9 +121,17 @@ export function ReportFieldInput({
   }
   return (
     <div className="space-y-1">
-      <label htmlFor={id} className="text-sm font-medium">
-        {label}
-      </label>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <label htmlFor={id} className="text-sm font-medium">
+          {label}
+        </label>
+        <DictationButton
+          value={(value as string) ?? ""}
+          onChange={onChange}
+          disabled={disabled}
+          fieldLabel={field.label}
+        />
+      </div>
       <textarea
         id={id}
         disabled={disabled}

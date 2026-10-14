@@ -6690,5 +6690,86 @@
     "notEligible": "Aged 13 or over: ask us to invite them with their own email.",
     "childSignIn": "Child sign-in",
     "childSignInButton": "Sign in with username"
+  },
+  "templateScope": {
+    "legend": "Which version",
+    "language": "Language",
+    "languageHint": "For example fr or fr-FR. Leave blank for every language.",
+    "branch": "Branch",
+    "allBranches": "Every branch",
+    "overrides": "Your other versions:",
+    "anyLanguage": "Any language",
+    "locked": "Account emails can be edited but not switched off: signing in depends on them."
+  },
+  "marketingReturn": {
+    "webhook": "{{name}} webhook address",
+    "webhookHint": "Add this address as a webhook in {{name}} (unsubscribes, cleaned addresses and spam reports) so people who leave there aren't emailed or re-subscribed.",
+    "optedOut_one": "{{count}} person had unsubscribed there and was updated here.",
+    "optedOut_other": "{{count}} people had unsubscribed there and were updated here."
+  },
+  "automationExtras": {
+    "noneYet": "None yet: add them in Settings → Messaging."
+  },
+  "digests": {
+    "title": "Digest emails",
+    "kind": {
+      "tutor_agenda": "Daily agenda",
+      "weekly_schedule": "Weekly schedule",
+      "message_digest": "Unread messages"
+    },
+    "notSent": "Your organisation hasn't turned this email on yet.",
+    "wantIt": "Send me this email",
+    "time": "Time",
+    "day": "Day",
+    "save": "Save digest choices",
+    "saved": "Saved."
+  },
+  "tutorPlan": {
+    "newLesson": "Plan a lesson",
+    "noJobs": "You have no active jobs to book lessons on.",
+    "job": "Job",
+    "when": "Starts",
+    "minutes": "Minutes",
+    "check": "Check for clashes",
+    "book": "Book lesson",
+    "clash": "This time clashes:",
+    "warnings": "Worth checking:",
+    "noClash": "No clashes at that time.",
+    "move": "Move lesson",
+    "askToMove": "Ask to move",
+    "askHelp": "The office (or the family) will approve the new time.",
+    "newTime": "New start time",
+    "reason": "Reason",
+    "moveNow": "Move lesson",
+    "sendRequest": "Send request",
+    "moved": "Lesson moved. The family has been told.",
+    "asked": "Request sent.",
+    "close": "Close"
+  },
+  "previousReport": {
+    "title": "Previous report ({{when}})"
+  },
+  "studentHistory": {
+    "caption": "Lessons, attendance and reports",
+    "attendance": "Attended {{percent}}% of recorded lessons",
+    "none": "No lessons yet.",
+    "when": "When",
+    "lesson": "Lesson",
+    "attendanceCol": "Attendance",
+    "report": "Report",
+    "reportStatus": {
+      "pending": "To write",
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "returned": "Returned"
+    }
+  },
+  "dictation": {
+    "start": "Dictate",
+    "stop": "Stop",
+    "listening": "Listening…",
+    "blocked": "Allow the microphone to dictate.",
+    "failed": "Dictation stopped. Try again or type instead."
   }
 }

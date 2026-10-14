@@ -184,10 +184,12 @@ def complete_login(
 
     check_travel(user, event)  # G6: impossible travel (FR-29-2)
     if is_new_device and had_logins:
-        from .tasks import send_new_device_alert
+        from .tasks import current_org, send_new_device_alert
 
+        org = current_org()
         transaction.on_commit(
             lambda: send_new_device_alert.delay(
+                organisation_id=org,
                 user_id=str(user.pk),
                 ip=client_ip(request) or "",
                 user_agent=request.headers.get("User-Agent", "")[:200],
@@ -253,9 +255,12 @@ def request_magic_link(request: HttpRequest, email: str, *, next_path: str = "/"
     origin = f"{request.scheme}://{request.get_host()}"
     safe_next = next_path if next_path.startswith("/") and not next_path.startswith("//") else "/"
     url = f"{origin}/login/magic?token={raw}&next={safe_next}"
-    from .tasks import send_magic_link
+    from .tasks import current_org, send_magic_link
 
-    transaction.on_commit(lambda: send_magic_link.delay(user_id=str(user.pk), url=url))
+    org = current_org()
+    transaction.on_commit(
+        lambda: send_magic_link.delay(user_id=str(user.pk), url=url, organisation_id=org)
+    )
 
 
 def login_with_magic_link(
@@ -414,9 +419,12 @@ def request_password_reset(request: HttpRequest, email: str) -> None:
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
     url = f"{request.scheme}://{request.get_host()}/reset-password?uid={uid}&token={token}"
-    from .tasks import send_password_reset
+    from .tasks import current_org, send_password_reset
 
-    transaction.on_commit(lambda: send_password_reset.delay(user_id=str(user.pk), url=url))
+    org = current_org()
+    transaction.on_commit(
+        lambda: send_password_reset.delay(user_id=str(user.pk), url=url, organisation_id=org)
+    )
 
 
 @transaction.atomic

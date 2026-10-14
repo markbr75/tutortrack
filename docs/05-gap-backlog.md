@@ -42,19 +42,21 @@ Tick an item when it is built, and record the as-built details in the owning epi
 - [ ] Annual earnings summary for tutors (FR-12-9). *S*
 
 ## Batch G4 — Communications, automations and the tutor app (E13, E14, E16)
-- [ ] Realtime in-app notifications over SSE (FR-13-1/8; E13:108). *M*
-- [ ] Template overrides per locale and per branch (FR-13-3; E13:104). *S–M*
-- [ ] A direct channel to students (FR-13-2/5; E13:103, E13:116). *M*
-- [ ] Digests: daily tutor agenda, weekly client schedule, message digests (FR-13-2/7; E13:103, E13:129). *M*
-- [ ] Identity and account emails on branded, editable comms templates (E02:133, E03:138). *S–M*
-- [ ] Mailchimp/Brevo unsubscribes flow back as suppressions/consent (FR-13-9; E13:135). *S*
-- [ ] Missing notification types: card expiring, statement, low attendance, expense approved/rejected, booking declined (FR-13-2). *S*
-- [ ] Automation actions: send feedback survey, add to broadcast/Mailchimp list, WhatsApp, message from saved template (FR-14-3; E14:122). *M*
-- [ ] Package triggers (`package.low`) and the "package < 2 hours" recipe (FR-14-1/6; E14:130). *S*
-- [ ] Tutor app: create and reschedule lessons with conflict feedback (FR-16-2; E16:66). *M*
-- [ ] Tutor app: previous report on the lesson page; full lesson history per student (FR-16-3/4; E16:66-67). *S–M*
-- [ ] Tutor app: browser voice-to-text for report fields (FR-16-3; E16:66, E16:86). *S*
-- [ ] Push notifications for tutor messages (FR-16-9; E16:86). *S*
+- [x] Realtime in-app notifications over SSE (FR-13-1/8; E13:108). *M*
+- [x] Template overrides per locale and per branch (FR-13-3; E13:104). *S–M*
+- [x] A direct channel to students (FR-13-2/5; E13:103, E13:116). *M*
+- [x] Digests: daily tutor agenda, weekly client schedule, message digests (FR-13-2/7; E13:103, E13:129). *M*
+- [x] Identity and account emails on branded, editable comms templates (E02:133, E03:138). *S–M*
+- [x] Mailchimp/Brevo unsubscribes flow back as suppressions/consent (FR-13-9; E13:135). *S*
+- [x] Missing notification types: card expiring, statement, low attendance, expense approved/rejected, booking declined (FR-13-2). *S*
+- [x] Automation actions: send feedback survey, add to broadcast/Mailchimp list, WhatsApp, message from saved template (FR-14-3; E14:122). *M*
+- [x] Package triggers (`package.low`) and the "package < 2 hours" recipe (FR-14-1/6; E14:130). *S*
+- [x] Tutor app: create and reschedule lessons with conflict feedback (FR-16-2; E16:66). *M*
+- [x] Tutor app: previous report on the lesson page; full lesson history per student (FR-16-3/4; E16:66-67). *S–M*
+- [x] Tutor app: browser voice-to-text for report fields (FR-16-3; E16:66, E16:86). *S*
+- [x] Push notifications for tutor messages (FR-16-9; E16:86). *S*
+
+*G4 built 2026-10-14 (ADR 0038); as-built notes in E02, E03, E13, E14 and E16. Realtime SSE needs ASGI in the deploy to scale (runbook `docs/runbooks/realtime-notifications.md`).*
 
 ## Batch G5 — Leads, recruitment, matching, learning, accounting and reporting (E17–E26)
 - [ ] File uploads on public forms: enquiry attachments, CV/video (FR-17-1, FR-18-1; E17:88, E18:111). *M*

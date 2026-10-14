@@ -466,6 +466,15 @@ function MarketingSync() {
                 </p>
               ) : null}
               {row.error ? <Alert tone="warning">{row.error}</Alert> : null}
+              {row.webhook_url ? (
+                <TextField
+                  label={t("marketingReturn.webhook", { name: row.name })}
+                  hint={t("marketingReturn.webhookHint", { name: row.name })}
+                  readOnly
+                  value={row.webhook_url}
+                  onFocus={(e) => e.target.select()}
+                />
+              ) : null}
               <Button
                 size="sm"
                 variant="secondary"
@@ -496,7 +505,10 @@ function MarketingSync() {
           {t("messaging.marketing.synced", {
             upserted: sync.data.upserted,
             unsubscribed: sync.data.unsubscribed,
-          })}
+          })}{" "}
+          {sync.data.opted_out
+            ? t("marketingReturn.optedOut", { count: sync.data.opted_out })
+            : null}
         </Alert>
       ) : null}
       <Problem error={connect.error ?? sync.error} />

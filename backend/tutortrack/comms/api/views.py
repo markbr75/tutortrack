@@ -47,6 +47,7 @@ def _setting_out(key: str) -> dict[str, Any]:
         "timing": list(e.timing),
         "has_timing": bool(e.type.default_timing),
         "transactional": e.type.transactional,
+        "locked": e.type.locked,
         "customised": e.customised,
     }
 
@@ -82,9 +83,16 @@ class NotificationSettingView(APIView):
         return Response(_setting_out(key))
 
 
-def _template_out(key: str, channel: str) -> dict[str, Any]:
+def _scope(request: Request) -> tuple[str, Any]:
+    """The override slot a template request is about (G4, FR-13-3)."""
+    locale = str(request.query_params.get("locale") or "").strip()
+    branch = str(request.query_params.get("branch") or "").strip() or None
+    return locale, branch
+
+
+def _template_out(key: str, channel: str, locale: str = "", branch: Any = None) -> dict[str, Any]:
     t = _type(key)
-    source = services.template_for(key, channel)
+    source = services.template_for(key, channel, locale, branch, exact=True)
     if source is None:
         source = services.TemplateSource("", "", False, 0)
     return {
@@ -95,12 +103,21 @@ def _template_out(key: str, channel: str) -> dict[str, Any]:
         "customised": source.customised,
         "version": source.version,
         "variables": list(t.variables),
+        "locale": locale,
+        "branch": branch,
     }
+
+
+SCOPE_PARAMS = [
+    OpenApiParameter("locale", str, description="Language override (e.g. fr); blank = any."),
+    OpenApiParameter("branch", str, description="Branch override (id); blank = every branch."),
+]
 
 
 class TemplateView(APIView):
     """A type's template for one channel: the organisation's override or the default.
-    ``PUT`` saves a new version; ``DELETE`` reverts to the default."""
+    ``PUT`` saves a new version; ``DELETE`` reverts to the default. ``?locale=`` and
+    ``?branch=`` address a language or branch override (G4)."""
 
     permission_classes = perms(
         {
@@ -110,23 +127,46 @@ class TemplateView(APIView):
         }
     )
 
-    @extend_schema(responses=s.TemplateSerializer)
+    @extend_schema(responses=s.TemplateSerializer, parameters=SCOPE_PARAMS)
     def get(self, request: Request, key: str, channel: str) -> Response:
-        return Response(_template_out(key, channel))
+        return Response(_template_out(key, channel, *_scope(request)))
 
-    @extend_schema(request=s.TemplateWriteSerializer, responses=s.TemplateSerializer)
+    @extend_schema(
+        request=s.TemplateWriteSerializer, responses=s.TemplateSerializer, parameters=SCOPE_PARAMS
+    )
     def put(self, request: Request, key: str, channel: str) -> Response:
         _type(key)
+        locale, branch = _scope(request)
         payload = s.TemplateWriteSerializer(data=request.data)
         payload.is_valid(raise_exception=True)
-        services.save_template(key, channel, user=request.user, **payload.validated_data)
-        return Response(_template_out(key, channel))
+        services.save_template(
+            key,
+            channel,
+            user=request.user,
+            locale=locale,
+            branch_id=branch,
+            **payload.validated_data,
+        )
+        return Response(_template_out(key, channel, locale, branch))
 
-    @extend_schema(responses=s.TemplateSerializer)
+    @extend_schema(responses=s.TemplateSerializer, parameters=SCOPE_PARAMS)
     def delete(self, request: Request, key: str, channel: str) -> Response:
         _type(key)
-        services.revert_template(key, channel)
-        return Response(_template_out(key, channel))
+        locale, branch = _scope(request)
+        services.revert_template(key, channel, locale=locale, branch_id=branch)
+        return Response(_template_out(key, channel, locale, branch))
+
+
+class TemplateVariantsView(APIView):
+    """The organisation's language and branch overrides of one template (G4)."""
+
+    permission_classes = perms({"GET": "comms.template.manage"})
+
+    @extend_schema(responses=s.TemplateVariantSerializer(many=True))
+    def get(self, request: Request, key: str, channel: str) -> Response:
+        _type(key)
+        rows = services.template_variants(key, channel)
+        return Response(s.TemplateVariantSerializer(rows, many=True).data)
 
 
 class TemplatePreviewView(APIView):

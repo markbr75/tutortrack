@@ -81,13 +81,17 @@ def check(user: Any, event: Any) -> bool:
         return False
     detail = f"{previous.country} -> {event.country} within {settings.IMPOSSIBLE_TRAVEL_HOURS}h"
     _alert_organisations(user, detail)
-    from .tasks import send_impossible_travel_alert
+    from .tasks import current_org, send_impossible_travel_alert
 
-    user_id, ip = str(user.pk), event.ip or ""
+    user_id, ip, org = str(user.pk), event.ip or "", current_org()
     before, now_country = previous.country, event.country
     transaction.on_commit(
         lambda: send_impossible_travel_alert.delay(
-            user_id=user_id, ip=ip, previous_country=before, country=now_country
+            user_id=user_id,
+            ip=ip,
+            previous_country=before,
+            country=now_country,
+            organisation_id=org,
         )
     )
     return True

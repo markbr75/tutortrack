@@ -516,6 +516,9 @@ class MarketingConnectionSerializer(serializers.Serializer):
     audience_name = serializers.CharField(allow_blank=True)
     last_sync_at = serializers.DateTimeField(allow_null=True)
     error = serializers.CharField(allow_blank=True)
+    webhook_url = serializers.CharField(
+        allow_blank=True, help_text="Paste into Mailchimp/Brevo webhooks (unsubscribes)."
+    )
 
 
 class MarketingAudienceSerializer(serializers.Serializer):
@@ -532,3 +535,6 @@ class MarketingSyncResultSerializer(serializers.Serializer):
     upserted = serializers.IntegerField()
     unsubscribed = serializers.IntegerField()
     failed = serializers.IntegerField()
+    opted_out = serializers.IntegerField(
+        required=False, help_text="Contacts who had unsubscribed at the provider (G4)."
+    )

@@ -377,6 +377,7 @@ SPECTACULAR_SETTINGS = {
         "BroadcastPurposeEnum": "tutortrack.comms.models.Broadcast.Purpose",
         "BroadcastChannelEnum": "tutortrack.comms.api.phase2_serializers.BROADCAST_CHANNELS",
         "BroadcastRecipientStatusEnum": "tutortrack.comms.models.BroadcastRecipient.Status",
+        "DigestKindEnum": "tutortrack.comms.models.DigestPreference.Kind",  # G4
         "SegmentAudienceEnum": "tutortrack.comms.models.Audience",
         "SenderDomainStatusEnum": "tutortrack.comms.models.SenderDomain.Status",
         "WhatsAppTemplateStatusEnum": "tutortrack.comms.models.WhatsAppTemplate.Status",

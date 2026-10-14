@@ -66,6 +66,10 @@ KNOWN_GENERIC = {
         "people.contact": ("contact",),
         "people.student": ("student",),
     },
+    ("comms.DigestPreference", "person_type", "person_id"): {  # G4 digests
+        "people.contact": ("contact",),
+        "people.student": ("student",),
+    },
     ("comms.BroadcastRecipient", "recipient_type", "recipient_id"): {
         "people.contact": ("contact",),
     },

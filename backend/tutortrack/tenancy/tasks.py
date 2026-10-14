@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-from django.conf import settings
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
 from django.utils import translation
 from django.utils.translation import gettext as _
 
@@ -29,13 +26,20 @@ def send_closure_notice(*, organisation_id: str) -> None:
     if not emails:
         return
     deletion = (org.closed_at or org.updated_at) + timedelta(days=days)
+    from tutortrack.comms import account_emails
+
     with translation.override(org.locale):
-        send_mail(
-            subject=_("Your TutorTrack account has been closed"),
-            message=render_to_string(
-                "tenancy/email/closure_notice.txt",
-                {"organisation": org, "days": days, "deletion_date": deletion.date()},
-            ),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=emails,
+        subject = _("Your TutorTrack account has been closed")
+    # G4: on the organisation's (editable) account template, with its branding.
+    for email in emails:
+        account_emails.send(
+            "account_closure_notice",
+            to=email,
+            subject=subject,
+            django_template="tenancy/email/closure_notice.txt",
+            legacy={"organisation": org, "days": days, "deletion_date": deletion.date()},
+            variables={"closure": {"days": days, "deletion_date": deletion.date()}},
+            locale=org.locale,
+            organisation_id=str(org.pk),
+            recipient=("owner", ""),
         )

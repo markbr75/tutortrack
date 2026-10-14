@@ -41,6 +41,7 @@ def contact_recipient(contact: Any) -> Recipient:
         email=contact.email,
         phone=contact.mobile,
         target=("people.client", str(contact.client_id)),
+        locale=contact.language or "",
     )
 
 
@@ -56,6 +57,7 @@ def tutor_recipient(tutor: Any) -> Recipient:
         phone=tutor.phone,
         user_id=str(membership.user_id) if active else None,
         target=("people.tutor", str(tutor.pk)),
+        locale=str(getattr(membership.user, "locale", "") or "") if active else "",
     )
 
 
@@ -67,6 +69,7 @@ def user_recipient(user: Any) -> Recipient:
         first_name=user.first_name or user.email,
         email=user.email,
         user_id=str(user.pk),
+        locale=str(getattr(user, "locale", "") or ""),
     )
 
 
@@ -146,6 +149,9 @@ def lesson_people(lesson: Any, *, clients: bool = True, tutors: bool = True) -> 
     if clients:
         for client in {a.client_id: a.client for a in lesson.attendees.all()}.values():
             out += [contact_recipient(c) for c in client_contacts(client, "receives_reminders")]
+        from .students import lesson_students  # G4: the student themselves, when allowed
+
+        out += lesson_students(lesson, out)
     if tutors:
         out += [tutor_recipient(t.tutor) for t in lesson.tutors.all()]
     return _dedupe(out)

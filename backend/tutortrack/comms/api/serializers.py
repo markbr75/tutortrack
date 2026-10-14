@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from typing import Any
+
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from tutortrack.core.api.serializers import BaseModelSerializer
@@ -21,6 +24,7 @@ class NotificationSettingSerializer(serializers.Serializer):
     timing = serializers.ListField(child=serializers.IntegerField())
     has_timing = serializers.BooleanField()
     transactional = serializers.BooleanField()
+    locked = serializers.BooleanField(help_text="Account emails: can be edited, not switched off.")
     customised = serializers.BooleanField()
 
 
@@ -40,6 +44,24 @@ class TemplateSerializer(serializers.Serializer):
     customised = serializers.BooleanField()
     version = serializers.IntegerField()
     variables = serializers.ListField(child=serializers.CharField())
+    locale = serializers.CharField(allow_blank=True, required=False)
+    branch = serializers.CharField(allow_null=True, required=False)
+
+
+class TemplateVariantSerializer(serializers.Serializer):
+    """One language or branch override of a template (G4, FR-13-3)."""
+
+    id = serializers.CharField()
+    locale = serializers.CharField(allow_blank=True)
+    branch = serializers.CharField(source="branch_id", allow_null=True)
+    branch_name = serializers.SerializerMethodField()
+    version = serializers.IntegerField()
+    subject = serializers.CharField(allow_blank=True)
+    updated_at = serializers.DateTimeField()
+
+    @extend_schema_field(serializers.CharField(allow_blank=True))
+    def get_branch_name(self, row: Any) -> str:
+        return row.branch.name if row.branch_id else ""
 
 
 class TemplateWriteSerializer(serializers.Serializer):

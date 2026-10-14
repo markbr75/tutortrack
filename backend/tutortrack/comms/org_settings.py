@@ -64,3 +64,68 @@ register(
     default=False,
     label=_("Stop tutors and families sharing email addresses or phone numbers in messages"),
 )
+
+# --- G4: digests and students (FR-13-2/5/7) ------------------------------------------------------
+register(
+    "comms.digest_agenda_time",
+    type="str",
+    default="07:00",
+    max_length=5,
+    label=_("Tutors' daily agenda arrives at (HH:MM, their time)"),
+)
+register(
+    "comms.digest_weekly_day",
+    type="choice",
+    default="6",
+    choices=(
+        ("0", _("Monday")),
+        ("1", _("Tuesday")),
+        ("2", _("Wednesday")),
+        ("3", _("Thursday")),
+        ("4", _("Friday")),
+        ("5", _("Saturday")),
+        ("6", _("Sunday")),
+    ),
+    label=_("Families' weekly schedule arrives on"),
+)
+register(
+    "comms.digest_weekly_time",
+    type="str",
+    default="18:00",
+    max_length=5,
+    label=_("Families' weekly schedule arrives at (HH:MM)"),
+)
+register(
+    "comms.digest_messages_time",
+    type="str",
+    default="17:00",
+    max_length=5,
+    label=_("The daily digest of unread messages arrives at (HH:MM)"),
+)
+register(
+    "comms.student_direct",
+    type="choice",
+    default="off",
+    choices=(
+        ("off", _("No: only their parents or guardians")),
+        ("adults", _("Adult learners (18 and over)")),
+        ("teens", _("Students aged 13 and over (never marketing to under-18s)")),
+    ),
+    label=_("Students get lesson messages themselves"),
+)
+register(
+    "comms.low_attendance_percent",
+    type="int",
+    default=75,
+    min_value=0,
+    max_value=100,
+    label=_("Alert when a student attends less than this % of their last lessons (0: off)"),
+)
+register(
+    "comms.low_attendance_lessons",
+    type="int",
+    default=6,
+    min_value=2,
+    max_value=50,
+    label=_("Low attendance: how many recent lessons to look at"),
+)
