@@ -106,6 +106,7 @@ function FamilyShell() {
     ...(f.booking ? [{ to: "/book", label: t("portalBooking.nav") }] : []),
     ...(f.classes ? [{ to: "/classes", label: t("portalCourses.nav") }] : []),
     ...(f.reports ? [{ to: "/reports", label: t("portal.nav.reports") }] : []),
+    ...(f.learning ? [{ to: "/learning", label: t("learning.portal.nav") }] : []),
     ...(f.invoices ? [{ to: "/billing", label: t("portal.nav.billing") }] : []),
     ...(f.profile ? [{ to: "/profile", label: t("portal.nav.profile") }] : []),
   ] as const;

@@ -29,6 +29,7 @@ class PortalFeaturesSerializer(serializers.Serializer):
     booking = serializers.BooleanField()
     reschedule = serializers.BooleanField()
     classes = serializers.BooleanField()
+    learning = serializers.BooleanField()
 
 
 class PortalMeSerializer(serializers.Serializer):

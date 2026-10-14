@@ -6,6 +6,7 @@ import { useEffect, useId, useRef, useState } from "react";
 
 import { api, usePermission } from "../api";
 import { ErrorList } from "../calendar/ErrorList";
+import { useTopicSuggestions } from "../learning/hooks";
 
 type Field = components["schemas"]["TemplateField"];
 type Answers = Record<string, unknown>;
@@ -61,6 +62,9 @@ function ListInput({
 }) {
   const { t } = useTranslation();
   const [draft, setDraft] = useState("");
+  // E21: suggest curriculum topics; a matching name or code tags the lesson on submit.
+  const topics = useTopicSuggestions(field.type === "topics" && !disabled);
+  const listId = useId();
   return (
     <fieldset className="space-y-1">
       <legend className="text-sm font-medium">{field.label}</legend>
@@ -86,8 +90,18 @@ function ListInput({
           <TextField
             label={t("delivery.reports.newItem", { label: field.label })}
             value={draft}
+            list={topics.data?.length ? listId : undefined}
             onChange={(e) => setDraft(e.target.value)}
           />
+          {topics.data?.length ? (
+            <datalist id={listId}>
+              {topics.data.map((topic) => (
+                <option key={topic.id} value={topic.name}>
+                  {topic.curriculum} · {topic.unit}
+                </option>
+              ))}
+            </datalist>
+          ) : null}
           <Button
             type="button"
             size="sm"

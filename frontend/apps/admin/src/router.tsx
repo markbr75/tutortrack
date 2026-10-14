@@ -19,6 +19,8 @@ import { RolesPage } from "./routes/RolesPage";
 import { SsoSettingsPage } from "./routes/SsoSettingsPage";
 import { CataloguePage } from "./catalogue/CataloguePage";
 import { ClassPage, CoursesPage, ReEnrolPage, RegisterPage } from "./courses/CoursesPages";
+import { LearningPage } from "./learning/LearningPage";
+import { StudentLearningPage } from "./learning/StudentLearningPage";
 import { AccountingPage } from "./accounting/AccountingPage";
 import { DataPage } from "./data/DataPage";
 import { ImportPage } from "./data/ImportPage";
@@ -276,6 +278,14 @@ const registerRoute = createRoute({
     return <RegisterPage sessionId={registerRoute.useParams().sessionId} />;
   },
 });
+const learningRoute = appPage("/learning", LearningPage);
+const studentLearningRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/learning/students/$studentId",
+  component: function StudentLearningRoute() {
+    return <StudentLearningPage studentId={studentLearningRoute.useParams().studentId} />;
+  },
+});
 const jobsRoute = appPage("/jobs", JobsPage);
 const calendarRoute = appPage("/calendar", CalendarPage);
 const availabilityRoute = appPage("/availability", AvailabilityPage);
@@ -423,6 +433,8 @@ const routeTree = rootRoute.addChildren([
     coursesRoute,
     classRoute,
     registerRoute,
+    learningRoute,
+    studentLearningRoute,
     jobsRoute,
     jobRoute,
     jobMatchRoute,

@@ -7213,6 +7213,1558 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/learning/assessment-results": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Assessment results (score/max, grade, notes, attachment); the percentage is
+     *     calculated.
+     */
+    get: operations["learning_assessment_results_list"];
+    put?: never;
+    /**
+     * @description Assessment results (score/max, grade, notes, attachment); the percentage is
+     *     calculated.
+     */
+    post: operations["learning_assessment_results_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/assessment-results/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Assessment results (score/max, grade, notes, attachment); the percentage is
+     *     calculated.
+     */
+    get: operations["learning_assessment_results_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Assessment results (score/max, grade, notes, attachment); the percentage is
+     *     calculated.
+     */
+    delete: operations["learning_assessment_results_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Assessment results (score/max, grade, notes, attachment); the percentage is
+     *     calculated.
+     */
+    patch: operations["learning_assessment_results_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/learning/assessments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_assessments_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["learning_assessments_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/assessments/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_assessments_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["learning_assessments_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/learning/curricula": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_curricula_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["learning_curricula_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/curricula/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_curricula_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["learning_curricula_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/learning/curricula/{id}/archive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["learning_curricula_archive_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/curricula/{id}/import": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Add units and topics from CSV (``unit,topic,code``); existing ones are kept. */
+    post: operations["learning_curricula_import_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/curricula/{id}/tree": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Units in order with their topics. */
+    get: operations["learning_curricula_tree_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/curricula/builtins": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Specifications that can be installed (GCSE Maths, KS2 English, SAT Math). */
+    get: operations["learning_curricula_builtins_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/curricula/install": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["learning_curricula_install_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/curriculum-nodes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_curriculum_nodes_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["learning_curriculum_nodes_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/curriculum-nodes/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_curriculum_nodes_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    delete: operations["learning_curriculum_nodes_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["learning_curriculum_nodes_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/learning/folders": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_folders_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["learning_folders_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/folders/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_folders_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    delete: operations["learning_folders_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["learning_folders_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/learning/goals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Student goals (target grade, exam, SMART) with milestones; progress follows the
+     *     milestones done, or the tutor sets it.
+     */
+    get: operations["learning_goals_list"];
+    put?: never;
+    /**
+     * @description Student goals (target grade, exam, SMART) with milestones; progress follows the
+     *     milestones done, or the tutor sets it.
+     */
+    post: operations["learning_goals_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/goals/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Student goals (target grade, exam, SMART) with milestones; progress follows the
+     *     milestones done, or the tutor sets it.
+     */
+    get: operations["learning_goals_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Student goals (target grade, exam, SMART) with milestones; progress follows the
+     *     milestones done, or the tutor sets it.
+     */
+    patch: operations["learning_goals_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/learning/goals/{id}/milestone": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Student goals (target grade, exam, SMART) with milestones; progress follows the
+     *     milestones done, or the tutor sets it.
+     */
+    post: operations["learning_goals_milestone_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/goals/{id}/status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Student goals (target grade, exam, SMART) with milestones; progress follows the
+     *     milestones done, or the tutor sets it.
+     */
+    post: operations["learning_goals_status_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/grade-scales": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_grade_scales_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["learning_grade_scales_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/grade-scales/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_grade_scales_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["learning_grade_scales_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/learning/homework": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Homework set from a lesson, report, class, job or standalone. Each student gets an
+     *     assignment with its own reminder workflow.
+     */
+    get: operations["learning_homework_list"];
+    put?: never;
+    /**
+     * @description Homework set from a lesson, report, class, job or standalone. Each student gets an
+     *     assignment with its own reminder workflow.
+     */
+    post: operations["learning_homework_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/homework-assignments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description One student's homework: submissions, review (grade and feedback, or back for
+     *     resubmission) and completion stats.
+     */
+    get: operations["learning_homework_assignments_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/homework-assignments/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description One student's homework: submissions, review (grade and feedback, or back for
+     *     resubmission) and completion stats.
+     */
+    get: operations["learning_homework_assignments_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/homework-assignments/{id}/excuse": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description One student's homework: submissions, review (grade and feedback, or back for
+     *     resubmission) and completion stats.
+     */
+    post: operations["learning_homework_assignments_excuse_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/homework-assignments/{id}/review": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description One student's homework: submissions, review (grade and feedback, or back for
+     *     resubmission) and completion stats.
+     */
+    post: operations["learning_homework_assignments_review_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/homework-assignments/stats": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Completion stats (optionally for one student). */
+    get: operations["learning_homework_assignments_stats_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/homework/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Homework set from a lesson, report, class, job or standalone. Each student gets an
+     *     assignment with its own reminder workflow.
+     */
+    get: operations["learning_homework_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Homework set from a lesson, report, class, job or standalone. Each student gets an
+     *     assignment with its own reminder workflow.
+     */
+    patch: operations["learning_homework_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/learning/homework/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Homework set from a lesson, report, class, job or standalone. Each student gets an
+     *     assignment with its own reminder workflow.
+     */
+    post: operations["learning_homework_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/lesson-topics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Topics covered in lessons. POST tags a lesson (students' mastery moves on). */
+    get: operations["learning_lesson_topics_list"];
+    put?: never;
+    /** @description Topics covered in lessons. POST tags a lesson (students' mastery moves on). */
+    post: operations["learning_lesson_topics_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/lesson-topics/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** @description Topics covered in lessons. POST tags a lesson (students' mastery moves on). */
+    delete: operations["learning_lesson_topics_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/library-items": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_library_items_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["learning_library_items_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/library-items/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_library_items_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["learning_library_items_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/learning/library-items/{id}/archive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["learning_library_items_archive_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/loans": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Loans: lend, return, extend, and lost (optionally charging the replacement cost
+     *     as an ad hoc charge: send ``Idempotency-Key``).
+     */
+    get: operations["learning_loans_list"];
+    put?: never;
+    /**
+     * @description Loans: lend, return, extend, and lost (optionally charging the replacement cost
+     *     as an ad hoc charge: send ``Idempotency-Key``).
+     */
+    post: operations["learning_loans_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/loans/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Loans: lend, return, extend, and lost (optionally charging the replacement cost
+     *     as an ad hoc charge: send ``Idempotency-Key``).
+     */
+    get: operations["learning_loans_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/loans/{id}/extend": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Loans: lend, return, extend, and lost (optionally charging the replacement cost
+     *     as an ad hoc charge: send ``Idempotency-Key``).
+     */
+    post: operations["learning_loans_extend_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/loans/{id}/lost": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Mark lost; with ``charge`` the family is billed (E10 ad hoc charge, once). */
+    post: operations["learning_loans_lost_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/loans/{id}/return": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Loans: lend, return, extend, and lost (optionally charging the replacement cost
+     *     as an ad hoc charge: send ``Idempotency-Key``).
+     */
+    post: operations["learning_loans_return_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/mastery": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_mastery_list"];
+    put?: never;
+    /** @description Set a student's mastery of a topic (not started, learning, secure, mastered). */
+    post: operations["learning_mastery_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/progress-reports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Progress reports: generated from attendance, lesson report highlights, topics,
+     *     goals, assessments and homework; the tutor writes the summary; approval shares them
+     *     with the family (portal and PDF by email).
+     */
+    get: operations["learning_progress_reports_list"];
+    put?: never;
+    /** @description Generate (or refresh the draft of) one student's report for a period. */
+    post: operations["learning_progress_reports_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/progress-reports/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Progress reports: generated from attendance, lesson report highlights, topics,
+     *     goals, assessments and homework; the tutor writes the summary; approval shares them
+     *     with the family (portal and PDF by email).
+     */
+    get: operations["learning_progress_reports_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Progress reports: generated from attendance, lesson report highlights, topics,
+     *     goals, assessments and homework; the tutor writes the summary; approval shares them
+     *     with the family (portal and PDF by email).
+     */
+    patch: operations["learning_progress_reports_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/learning/progress-reports/{id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Progress reports: generated from attendance, lesson report highlights, topics,
+     *     goals, assessments and homework; the tutor writes the summary; approval shares them
+     *     with the family (portal and PDF by email).
+     */
+    post: operations["learning_progress_reports_approve_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/progress-reports/{id}/draft-summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description An AI draft of the summary comments (E31; 403 ``feature-disabled`` until it
+     *     ships). The draft is returned, not saved.
+     */
+    post: operations["learning_progress_reports_draft_summary_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/progress-reports/{id}/pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Progress reports: generated from attendance, lesson report highlights, topics,
+     *     goals, assessments and homework; the tutor writes the summary; approval shares them
+     *     with the family (portal and PDF by email).
+     */
+    get: operations["learning_progress_reports_pdf_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/progress-reports/{id}/regenerate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Progress reports: generated from attendance, lesson report highlights, topics,
+     *     goals, assessments and homework; the tutor writes the summary; approval shares them
+     *     with the family (portal and PDF by email).
+     */
+    post: operations["learning_progress_reports_regenerate_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/progress-reports/{id}/reopen": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Progress reports: generated from attendance, lesson report highlights, topics,
+     *     goals, assessments and homework; the tutor writes the summary; approval shares them
+     *     with the family (portal and PDF by email).
+     */
+    post: operations["learning_progress_reports_reopen_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/progress-reports/{id}/share": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Progress reports: generated from attendance, lesson report highlights, topics,
+     *     goals, assessments and homework; the tutor writes the summary; approval shares them
+     *     with the family (portal and PDF by email).
+     */
+    post: operations["learning_progress_reports_share_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/progress-reports/{id}/submit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Progress reports: generated from attendance, lesson report highlights, topics,
+     *     goals, assessments and homework; the tutor writes the summary; approval shares them
+     *     with the family (portal and PDF by email).
+     */
+    post: operations["learning_progress_reports_submit_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/progress-reports/generate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Draft reports for everyone with lessons in the period (or the students given). */
+    post: operations["learning_progress_reports_generate_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/quiz-attempts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_quiz_attempts_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/quiz-attempts/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_quiz_attempts_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/quizzes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Built-in quizzes (multiple choice and short answer, auto-marked), set as homework
+     *     (``submission_type=quiz``).
+     */
+    get: operations["learning_quizzes_list"];
+    put?: never;
+    /**
+     * @description Built-in quizzes (multiple choice and short answer, auto-marked), set as homework
+     *     (``submission_type=quiz``).
+     */
+    post: operations["learning_quizzes_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/quizzes/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Built-in quizzes (multiple choice and short answer, auto-marked), set as homework
+     *     (``submission_type=quiz``).
+     */
+    get: operations["learning_quizzes_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Built-in quizzes (multiple choice and short answer, auto-marked), set as homework
+     *     (``submission_type=quiz``).
+     */
+    patch: operations["learning_quizzes_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/learning/quizzes/{id}/archive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Built-in quizzes (multiple choice and short answer, auto-marked), set as homework
+     *     (``submission_type=quiz``).
+     */
+    post: operations["learning_quizzes_archive_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/resource-shares": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["learning_resource_shares_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/resource-shares/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    delete: operations["learning_resource_shares_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/resources": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The resource library: organisation library and tutors' personal libraries; files
+     *     (uploaded through ``/files/uploads``, counted against the plan's storage) and links
+     *     (YouTube, Google Docs, any web page).
+     */
+    get: operations["learning_resources_list"];
+    put?: never;
+    /**
+     * @description The resource library: organisation library and tutors' personal libraries; files
+     *     (uploaded through ``/files/uploads``, counted against the plan's storage) and links
+     *     (YouTube, Google Docs, any web page).
+     */
+    post: operations["learning_resources_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/resources/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The resource library: organisation library and tutors' personal libraries; files
+     *     (uploaded through ``/files/uploads``, counted against the plan's storage) and links
+     *     (YouTube, Google Docs, any web page).
+     */
+    get: operations["learning_resources_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description The resource library: organisation library and tutors' personal libraries; files
+     *     (uploaded through ``/files/uploads``, counted against the plan's storage) and links
+     *     (YouTube, Google Docs, any web page).
+     */
+    patch: operations["learning_resources_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/learning/resources/{id}/activity": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Who viewed or downloaded the resource. */
+    get: operations["learning_resources_activity_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/resources/{id}/archive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description The resource library: organisation library and tutors' personal libraries; files
+     *     (uploaded through ``/files/uploads``, counted against the plan's storage) and links
+     *     (YouTube, Google Docs, any web page).
+     */
+    post: operations["learning_resources_archive_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/resources/{id}/open": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description A short-lived download link (files) or the link itself; records the view. */
+    post: operations["learning_resources_open_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/resources/{id}/share": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Share with students, every student of a job, a lesson's attendees or a class.
+     *     Families see it in the portal (and are told).
+     */
+    post: operations["learning_resources_share_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/resources/{id}/shares": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The resource library: organisation library and tutors' personal libraries; files
+     *     (uploaded through ``/files/uploads``, counted against the plan's storage) and links
+     *     (YouTube, Google Docs, any web page).
+     */
+    get: operations["learning_resources_shares_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/storage": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Storage used against the plan's allowance (E04 ``storage_gb``). */
+    get: operations["learning_storage_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/students/{student_id}/coverage": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The student's topic heatmap: every curriculum they've covered (plus any asked
+     *     for), units and topics with mastery and lessons covered.
+     */
+    get: operations["learning_students_coverage_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/students/{student_id}/trend": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Score trend over time (results with a percentage), oldest first. */
+    get: operations["learning_students_trend_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/learning/topics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Topics for the lesson report "topics covered" picker (the lesson's subject
+     *     first).
+     */
+    get: operations["learning_topics_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/lesson-reports": {
     parameters: {
       query?: never;
@@ -10713,6 +12265,212 @@ export interface paths {
     put?: never;
     /** @description Give up a place that is still waiting for payment. */
     post: operations["portal_enrolments_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/learning/coverage/{student_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_learning_coverage_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/learning/goals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_learning_goals_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/learning/homework": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_learning_homework_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/learning/homework/{assignment_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_learning_homework_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/learning/homework/{assignment_id}/submit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Hand in homework: text, a link, uploaded files (``/files/uploads`` first), the
+     *     quiz answers (``{question_id: choice ids | text}``), or nothing for "done".
+     */
+    post: operations["portal_learning_homework_submit_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/learning/loans": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_learning_loans_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/learning/progress-reports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_learning_progress_reports_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/learning/progress-reports/{report_id}/pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_learning_progress_reports_pdf_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/learning/resources": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Resources shared with the household's students (directly, their jobs, lessons
+     *     and classes), newest share first.
+     */
+    get: operations["portal_learning_resources_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/learning/resources/{resource_id}/open": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Open a shared resource (download link or the link itself); the view is
+     *     recorded for the tutor.
+     */
+    post: operations["portal_learning_resources_open_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/learning/results": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Assessment results, oldest first (for the trend chart). */
+    get: operations["portal_learning_results_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/learning/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Counts for the portal home: homework to do, resources, goals, reports, loans. */
+    get: operations["portal_learning_summary_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -14618,9 +16376,92 @@ export interface components {
      * @enum {string}
      */
     AssessSubjectStatusEnum: "claimed" | "assessed" | "approved" | "rejected";
+    Assessment: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      kind?: components["schemas"]["AssessmentKindEnum"];
+      /** Format: uuid */
+      subject?: string | null;
+      /** @default  */
+      readonly subject_name: string;
+      /** Format: uuid */
+      level?: string | null;
+      /** Format: date */
+      held_on: string;
+      /** Format: decimal */
+      max_score?: string | null;
+      /** Format: uuid */
+      grade_scale?: string | null;
+      description?: string;
+      readonly results_count: number;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `diagnostic` - Diagnostic
+     *     * `mock_exam` - Mock exam
+     *     * `quiz` - Quiz
+     *     * `school_report` - School report
+     *     * `other` - Other
+     * @enum {string}
+     */
+    AssessmentKindEnum: "diagnostic" | "mock_exam" | "quiz" | "school_report" | "other";
+    AssessmentRequest: {
+      name: string;
+      kind?: components["schemas"]["AssessmentKindEnum"];
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      /** Format: date */
+      held_on: string;
+      /** Format: decimal */
+      max_score?: string | null;
+      /** Format: uuid */
+      grade_scale?: string | null;
+      description?: string;
+    };
     AssignCoverRequest: {
       /** Format: uuid */
       tutor: string;
+    };
+    Assignment: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly homework: string;
+      readonly homework_title: string;
+      readonly submission_type: string;
+      /** Format: uuid */
+      readonly student: string;
+      readonly student_name: string;
+      readonly status: components["schemas"]["HomeworkAssignmentStatusEnum"];
+      readonly round: number;
+      /** Format: date-time */
+      readonly due_at: string;
+      /** Format: date-time */
+      readonly submitted_at: string | null;
+      readonly is_late: boolean;
+      /** Format: date-time */
+      readonly completed_at: string | null;
+      readonly grade: string;
+      /** Format: decimal */
+      readonly score_percent: string | null;
+      readonly feedback: string;
+      /** Format: date-time */
+      readonly reviewed_at: string | null;
+      /** Format: date-time */
+      readonly reminded_at: string | null;
+      /** Format: date-time */
+      readonly overdue_at: string | null;
+      readonly submissions: components["schemas"]["Submission"][];
+    };
+    AssignmentCounts: {
+      total: number;
+      submitted: number;
+      completed: number;
+      overdue: number;
     };
     AssignmentRule: {
       /** Format: uuid */
@@ -15450,6 +17291,16 @@ export interface components {
       total: number;
       won: number;
     };
+    BuiltinCurriculum: {
+      key: string;
+      name: string;
+      subject: string;
+      level: string;
+      exam_board: string;
+      units: number;
+      topics: number;
+      installed: boolean;
+    };
     BulkInviteRequest: {
       emails: string[];
       role: components["schemas"]["RoleEnum"];
@@ -15943,6 +17794,14 @@ export interface components {
       employment_type?: string;
       items?: unknown;
       is_default?: boolean;
+    };
+    Choice: {
+      id?: string;
+      text: string;
+    };
+    ChoiceRequest: {
+      id?: string;
+      text: string;
     };
     ClassCancelRequest: {
       /** @default  */
@@ -16681,6 +18540,29 @@ export interface components {
      * @enum {string}
      */
     CoverStatusEnum: "open" | "accepted" | "filled" | "unfilled" | "cancelled";
+    Coverage: {
+      curriculum: components["schemas"]["LearningRef"];
+      units: components["schemas"]["CoverageUnit"][];
+      summary: components["schemas"]["MasterySummary"];
+      covered: number;
+      topics: number;
+    };
+    CoverageTopic: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      code: string;
+      level: components["schemas"]["TopicMasteryLevelEnum"];
+      lessons: number;
+      /** Format: date-time */
+      last_covered: string | null;
+    };
+    CoverageUnit: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      topics: components["schemas"]["CoverageTopic"][];
+    };
     CreateCoverRequest: {
       lessons: string[];
       /** @default  */
@@ -16868,6 +18750,70 @@ export interface components {
      * @enum {string}
      */
     CreditTypeEnum: "sms" | "ai";
+    CsvImportRequest: {
+      content: string;
+    };
+    CsvImportResult: {
+      units: number;
+      topics: number;
+      skipped: number;
+    };
+    Curriculum: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      exam_board?: string;
+      description?: string;
+      readonly source_key: string;
+      readonly topic_count: number;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    CurriculumNode: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      curriculum: string;
+      /** Format: uuid */
+      parent?: string | null;
+      kind?: components["schemas"]["CurriculumNodeKindEnum"];
+      name: string;
+      /** @default  */
+      code: string;
+      position?: number;
+    };
+    /**
+     * @description * `unit` - Unit
+     *     * `topic` - Topic
+     * @enum {string}
+     */
+    CurriculumNodeKindEnum: "unit" | "topic";
+    CurriculumNodeRequest: {
+      /** Format: uuid */
+      curriculum: string;
+      /** Format: uuid */
+      parent?: string | null;
+      kind?: components["schemas"]["CurriculumNodeKindEnum"];
+      name: string;
+      /** @default  */
+      code: string;
+      position?: number;
+    };
+    CurriculumRequest: {
+      name: string;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      exam_board?: string;
+      description?: string;
+    };
     CustomField: {
       /** Format: uuid */
       readonly id: string;
@@ -17284,6 +19230,9 @@ export interface components {
     DownloadLink: {
       url: string;
       expires_in: number;
+    };
+    DraftSummary: {
+      summary: string;
     };
     DryRun: {
       matched: boolean;
@@ -18024,6 +19973,13 @@ export interface components {
       /** Format: uuid */
       subject_id: string;
     };
+    FileRef: {
+      /** Format: uuid */
+      id: string;
+      filename: string;
+      content_type: string;
+      size_bytes: number;
+    };
     /**
      * @description * `` -
      *     * `csv` - csv
@@ -18152,6 +20108,67 @@ export interface components {
       /** @default false */
       concerns: boolean;
     };
+    Goal: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      student: string;
+      readonly student_name: string;
+      kind?: components["schemas"]["GoalKindEnum"];
+      title: string;
+      description?: string;
+      /** Format: uuid */
+      subject?: string | null;
+      target_grade?: string;
+      current_grade?: string;
+      /** Format: date */
+      exam_date?: string | null;
+      /** Format: date */
+      due_date?: string | null;
+      readonly status: components["schemas"]["GoalStatusEnum"];
+      progress_percent?: number;
+      /** Format: date-time */
+      readonly achieved_at: string | null;
+      visible_to_family?: boolean;
+      milestones?: components["schemas"]["Milestone"][];
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `target_grade` - Target grade
+     *     * `exam` - Exam
+     *     * `custom` - SMART goal
+     * @enum {string}
+     */
+    GoalKindEnum: "target_grade" | "exam" | "custom";
+    GoalRequest: {
+      /** Format: uuid */
+      student: string;
+      kind?: components["schemas"]["GoalKindEnum"];
+      title: string;
+      description?: string;
+      /** Format: uuid */
+      subject?: string | null;
+      target_grade?: string;
+      current_grade?: string;
+      /** Format: date */
+      exam_date?: string | null;
+      /** Format: date */
+      due_date?: string | null;
+      progress_percent?: number;
+      visible_to_family?: boolean;
+      milestones?: components["schemas"]["MilestoneRequest"][];
+    };
+    /**
+     * @description * `active` - In progress
+     *     * `achieved` - Achieved
+     *     * `abandoned` - Stopped
+     * @enum {string}
+     */
+    GoalStatusEnum: "active" | "achieved" | "abandoned";
+    GoalStatusRequest: {
+      status: components["schemas"]["GoalStatusEnum"];
+    };
     GoogleSheetImportRequest: {
       url: string;
       entity: string;
@@ -18162,6 +20179,30 @@ export interface components {
       };
       /** Format: uuid */
       saved_mapping?: string | null;
+    };
+    GradeScale: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      kind: components["schemas"]["GradeScaleKindEnum"];
+      grades?: string[];
+      is_default?: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `percent` - Percentage
+     *     * `letter` - Letter grades
+     *     * `numeric` - GCSE 9–1
+     *     * `custom` - Custom
+     * @enum {string}
+     */
+    GradeScaleKindEnum: "percent" | "letter" | "numeric" | "custom";
+    GradeScaleRequest: {
+      name: string;
+      kind: components["schemas"]["GradeScaleKindEnum"];
+      grades?: string[];
+      is_default?: boolean;
     };
     GrantRequestRequest: {
       days: number;
@@ -18332,6 +20373,100 @@ export interface components {
       date: string;
       name: string;
     };
+    Homework: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly title: string;
+      readonly instructions: string;
+      /** Format: date-time */
+      readonly due_at: string;
+      readonly expected_minutes: number | null;
+      readonly submission_type: components["schemas"]["HomeworkSubmissionTypeEnum"];
+      /** Format: uuid */
+      readonly lesson: string | null;
+      /** Format: uuid */
+      readonly lesson_report: string | null;
+      /** Format: uuid */
+      readonly job: string | null;
+      /** Format: uuid */
+      readonly group_class: string | null;
+      /** Format: uuid */
+      readonly set_by: string | null;
+      readonly set_by_name: string;
+      /** Format: uuid */
+      readonly grade_scale: string | null;
+      /** Format: uuid */
+      readonly quiz: string | null;
+      /** @default  */
+      readonly quiz_title: string;
+      readonly resources: string[];
+      readonly attachment_files: components["schemas"]["FileRef"][];
+      readonly status: components["schemas"]["HomeworkStatusEnum"];
+      readonly counts: components["schemas"]["AssignmentCounts"];
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `assigned` - To do
+     *     * `submitted` - Submitted
+     *     * `returned` - Returned for resubmission
+     *     * `completed` - Completed
+     *     * `excused` - Excused
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    HomeworkAssignmentStatusEnum:
+      "assigned" | "submitted" | "returned" | "completed" | "excused" | "cancelled";
+    HomeworkCreateRequest: {
+      title: string;
+      instructions?: string;
+      /** Format: date-time */
+      due_at: string;
+      expected_minutes?: number | null;
+      submission_type?: components["schemas"]["HomeworkSubmissionTypeEnum"];
+      students?: string[];
+      /** Format: uuid */
+      group_class?: string | null;
+      /** Format: uuid */
+      job?: string | null;
+      /** Format: uuid */
+      lesson?: string | null;
+      /** Format: uuid */
+      lesson_report?: string | null;
+      /** Format: uuid */
+      set_by?: string | null;
+      /** Format: uuid */
+      grade_scale?: string | null;
+      /** Format: uuid */
+      quiz?: string | null;
+      resources?: string[];
+      attachments?: string[];
+    };
+    HomeworkStats: {
+      total: number;
+      submitted: number;
+      completed: number;
+      late: number;
+      due: number;
+      overdue: number;
+      on_time: number;
+      completion_rate: string | null;
+    };
+    /**
+     * @description * `active` - Active
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    HomeworkStatusEnum: "active" | "cancelled";
+    /**
+     * @description * `file` - File upload
+     *     * `text` - Written answer
+     *     * `link` - Link
+     *     * `none` - Mark as done
+     *     * `quiz` - Quiz
+     * @enum {string}
+     */
+    HomeworkSubmissionTypeEnum: "file" | "text" | "link" | "none" | "quiz";
     /**
      * @description * `week` - Per week
      *     * `month` - Per month
@@ -18534,6 +20669,14 @@ export interface components {
       readonly read_at: string | null;
       /** Format: date-time */
       readonly created_at: string;
+    };
+    InstallBuiltinRequest: {
+      /** @description A key from /learning/curricula/builtins */
+      key: string;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
     };
     /** @description Tokens and secrets are never serialised. */
     IntegrationConnection: {
@@ -19518,6 +21661,14 @@ export interface components {
       /** @default s */
       size: components["schemas"]["SizeEnum"];
     };
+    LearningArchiveRequest: {
+      archived: boolean;
+    };
+    LearningRef: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
     LedgerAdjustRequest: {
       /** @description Positive adds to what the client owes */
       amount: {
@@ -19801,6 +21952,20 @@ export interface components {
      * @enum {string}
      */
     LessonStatusEnum: "planned" | "completed" | "cancelled" | "missed";
+    LessonTopic: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly lesson: string;
+      /** Format: uuid */
+      readonly node: string;
+      readonly node_name: string;
+      readonly curriculum_name: string;
+      /** Format: uuid */
+      readonly report: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
     LessonTutor: {
       /** Format: uuid */
       readonly id: string;
@@ -19892,12 +22057,132 @@ export interface components {
       name: string;
       order?: number;
     };
+    LibraryItem: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      branch?: string;
+      name: string;
+      kind?: components["schemas"]["LibraryItemKindEnum"];
+      description?: string;
+      identifier?: string;
+      quantity?: number;
+      replacement_cost?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      location?: string;
+      readonly available: number;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `book` - Book
+     *     * `instrument` - Instrument
+     *     * `device` - Device
+     *     * `other` - Other
+     * @enum {string}
+     */
+    LibraryItemKindEnum: "book" | "instrument" | "device" | "other";
+    LibraryItemRequest: {
+      /** Format: uuid */
+      branch?: string;
+      name: string;
+      kind?: components["schemas"]["LibraryItemKindEnum"];
+      description?: string;
+      identifier?: string;
+      quantity?: number;
+      replacement_cost?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      location?: string;
+    };
     LimitUsage: {
       key: string;
       title: string;
       used: number;
       allowed: number | null;
     };
+    Loan: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly item: string;
+      readonly item_name: string;
+      /** Format: uuid */
+      readonly student: string;
+      readonly student_name: string;
+      readonly status: components["schemas"]["LoanStatusEnum"];
+      /** Format: date */
+      readonly lent_on: string;
+      /** Format: date */
+      readonly due_date: string;
+      /** Format: date */
+      readonly returned_on: string | null;
+      readonly notes: string;
+      readonly return_notes: string;
+      /** Format: date-time */
+      readonly reminded_at: string | null;
+      /** Format: date-time */
+      readonly overdue_at: string | null;
+      readonly overdue_notices: number;
+      readonly is_overdue: boolean;
+      /** Format: date-time */
+      readonly replacement_charged_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    LoanCreateRequest: {
+      /** Format: uuid */
+      item: string;
+      /** Format: uuid */
+      student: string;
+      /** Format: date */
+      due_date?: string | null;
+      notes?: string;
+    };
+    LoanExtendRequest: {
+      /** Format: date */
+      due_date: string;
+    };
+    LoanLostRequest: {
+      /** @default false */
+      charge: boolean;
+      amount?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
+    LoanReturnRequest: {
+      /** Format: date */
+      returned_on?: string | null;
+      notes?: string;
+    };
+    /**
+     * @description * `out` - On loan
+     *     * `returned` - Returned
+     *     * `lost` - Lost
+     * @enum {string}
+     */
+    LoanStatusEnum: "out" | "returned" | "lost";
     Location: {
       /** Format: uuid */
       readonly id: string;
@@ -20192,6 +22477,29 @@ export interface components {
      * @enum {string}
      */
     MarketplaceStatusEnum: "connected" | "available" | "coming_soon";
+    Mastery: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly student: string;
+      /** Format: uuid */
+      readonly node: string;
+      readonly node_name: string;
+      readonly curriculum_name: string;
+      readonly level: components["schemas"]["TopicMasteryLevelEnum"];
+      readonly covered_count: number;
+      /** Format: date-time */
+      readonly last_covered_at: string | null;
+      readonly notes: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    MasterySummary: {
+      not_started: number;
+      learning: number;
+      secure: number;
+      mastered: number;
+    };
     Match: {
       /** Format: uuid */
       readonly id: string;
@@ -20502,6 +22810,29 @@ export interface components {
       /** Format: decimal */
       distance: string;
       unit: string;
+    };
+    Milestone: {
+      /** Format: uuid */
+      id?: string;
+      title: string;
+      /** Format: date */
+      due_date?: string | null;
+      done?: boolean;
+      /** Format: date-time */
+      readonly done_at: string | null;
+    };
+    MilestoneDoneRequest: {
+      /** Format: uuid */
+      milestone: string;
+      done: boolean;
+    };
+    MilestoneRequest: {
+      /** Format: uuid */
+      id?: string;
+      title: string;
+      /** Format: date */
+      due_date?: string | null;
+      done?: boolean;
     };
     /** @description Read-only money in computed responses (quotes, summaries). */
     MoneyOut: {
@@ -20881,6 +23212,11 @@ export interface components {
      * @enum {string}
      */
     OnlineMeetingStatusEnum: "pending" | "active" | "failed" | "deleted";
+    OpenResource: {
+      url: string;
+      expires_in: number | null;
+      kind: components["schemas"]["ResourceKindEnum"];
+    };
     Operations: {
       outbox_pending: number;
       outbox_lag_seconds: number;
@@ -21302,6 +23638,32 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Application"][];
     };
+    PaginatedAssessmentList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Assessment"][];
+    };
+    PaginatedAssignmentList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Assignment"][];
+    };
     PaginatedAuditEntryList: {
       /**
        * Format: uri
@@ -21575,6 +23937,32 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["CreditNote"][];
     };
+    PaginatedCurriculumList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Curriculum"][];
+    };
+    PaginatedCurriculumNodeList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["CurriculumNode"][];
+    };
     PaginatedDeadLetterList: {
       /**
        * Format: uri
@@ -21718,6 +24106,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["ExternalRecordLink"][];
     };
+    PaginatedGoalList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Goal"][];
+    };
     PaginatedGroupClassList: {
       /**
        * Format: uri
@@ -21730,6 +24131,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["GroupClass"][];
+    };
+    PaginatedHomeworkList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Homework"][];
     };
     PaginatedImportBatchList: {
       /**
@@ -21887,6 +24301,45 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["LessonReport"][];
     };
+    PaginatedLessonTopicList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["LessonTopic"][];
+    };
+    PaginatedLibraryItemList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["LibraryItem"][];
+    };
+    PaginatedLoanList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Loan"][];
+    };
     PaginatedLocationList: {
       /**
        * Format: uri
@@ -21925,6 +24378,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["MakeupCredit"][];
+    };
+    PaginatedMasteryList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Mastery"][];
     };
     PaginatedMembershipList: {
       /**
@@ -22173,6 +24639,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Product"][];
     };
+    PaginatedProgressReportList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ProgressReport"][];
+    };
     PaginatedPromoCodeList: {
       /**
        * Format: uri
@@ -22238,6 +24717,32 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["PushSubscription"][];
     };
+    PaginatedQuizAttemptList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["QuizAttempt"][];
+    };
+    PaginatedQuizList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Quiz"][];
+    };
     PaginatedReportRunList: {
       /**
        * Format: uri
@@ -22250,6 +24755,45 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["ReportRun"][];
+    };
+    PaginatedResourceList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Resource"][];
+    };
+    PaginatedResourceShareList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ResourceShare"][];
+    };
+    PaginatedResultList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Result"][];
     };
     PaginatedRoomList: {
       /**
@@ -22592,6 +25136,21 @@ export interface components {
       criteria?: unknown;
       reminder_days?: number | null;
     };
+    PatchedAssessmentRequest: {
+      name?: string;
+      kind?: components["schemas"]["AssessmentKindEnum"];
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      /** Format: date */
+      held_on?: string;
+      /** Format: decimal */
+      max_score?: string | null;
+      /** Format: uuid */
+      grade_scale?: string | null;
+      description?: string;
+    };
     PatchedAssignmentRuleRequest: {
       /** Format: uuid */
       pipeline?: string | null;
@@ -22827,6 +25386,26 @@ export interface components {
       low_threshold?: number;
       allow_overage?: boolean;
     };
+    PatchedCurriculumNodeRequest: {
+      /** Format: uuid */
+      curriculum?: string;
+      /** Format: uuid */
+      parent?: string | null;
+      kind?: components["schemas"]["CurriculumNodeKindEnum"];
+      name?: string;
+      /** @default  */
+      code: string;
+      position?: number;
+    };
+    PatchedCurriculumRequest: {
+      name?: string;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      exam_board?: string;
+      description?: string;
+    };
     PatchedCustomFieldRequest: {
       entity_type?: string;
       key?: string;
@@ -22938,6 +25517,30 @@ export interface components {
       /** Format: uuid */
       branch?: string | null;
     };
+    PatchedGoalRequest: {
+      /** Format: uuid */
+      student?: string;
+      kind?: components["schemas"]["GoalKindEnum"];
+      title?: string;
+      description?: string;
+      /** Format: uuid */
+      subject?: string | null;
+      target_grade?: string;
+      current_grade?: string;
+      /** Format: date */
+      exam_date?: string | null;
+      /** Format: date */
+      due_date?: string | null;
+      progress_percent?: number;
+      visible_to_family?: boolean;
+      milestones?: components["schemas"]["MilestoneRequest"][];
+    };
+    PatchedGradeScaleRequest: {
+      name?: string;
+      kind?: components["schemas"]["GradeScaleKindEnum"];
+      grades?: string[];
+      is_default?: boolean;
+    };
     PatchedGroupClassUpdateRequest: {
       name?: string;
       capacity?: number;
@@ -22970,6 +25573,16 @@ export interface components {
       branch?: string | null;
       skip_lessons?: boolean;
       active?: boolean;
+    };
+    PatchedHomeworkUpdateRequest: {
+      title?: string;
+      instructions?: string;
+      /** Format: date-time */
+      due_at?: string;
+      expected_minutes?: number | null;
+      /** Format: uuid */
+      grade_scale?: string | null;
+      resources?: string[];
     };
     PatchedInvoiceUpdateRequest: {
       po_number?: string;
@@ -23100,6 +25713,25 @@ export interface components {
       subject?: string;
       name?: string;
       order?: number;
+    };
+    PatchedLibraryItemRequest: {
+      /** Format: uuid */
+      branch?: string;
+      name?: string;
+      kind?: components["schemas"]["LibraryItemKindEnum"];
+      description?: string;
+      identifier?: string;
+      quantity?: number;
+      replacement_cost?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      location?: string;
     };
     PatchedLocationRequest: {
       name?: string;
@@ -23319,6 +25951,10 @@ export interface components {
       tutor_share_percent?: string;
       active?: boolean;
     };
+    PatchedProgressUpdateRequest: {
+      title?: string;
+      summary?: string;
+    };
     PatchedPromoCodeRequest: {
       code?: string;
       /** Format: uuid */
@@ -23342,6 +25978,18 @@ export interface components {
       listed?: boolean;
       slug?: string;
     };
+    PatchedQuizRequest: {
+      title?: string;
+      description?: string;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      purpose?: components["schemas"]["QuizPurposeEnum"];
+      pass_percent?: number;
+      time_limit_minutes?: number | null;
+      questions?: components["schemas"]["QuestionRequest"][];
+    };
     PatchedReportTemplateRequest: {
       name?: string;
       description?: string;
@@ -23362,6 +26010,49 @@ export interface components {
       blocking?: boolean;
       applies_to?: unknown;
       active?: boolean;
+    };
+    PatchedResourceFolderRequest: {
+      name?: string;
+      /** Format: uuid */
+      parent?: string | null;
+      /** Format: uuid */
+      owner?: string | null;
+    };
+    PatchedResourceRequest: {
+      title?: string;
+      description?: string;
+      kind?: components["schemas"]["ResourceKindEnum"];
+      /** Format: uuid */
+      file?: string | null;
+      url?: string;
+      /** Format: uuid */
+      folder?: string | null;
+      /** Format: uuid */
+      owner?: string | null;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      topics?: string[];
+      tags?: string[];
+      visibility?: components["schemas"]["ResourceVisibilityEnum"];
+    };
+    PatchedResultRequest: {
+      /** Format: uuid */
+      assessment?: string;
+      /** Format: uuid */
+      student?: string;
+      /** Format: decimal */
+      score?: string | null;
+      /** Format: decimal */
+      max_score?: string | null;
+      grade?: string;
+      notes?: string;
+      /** Format: uuid */
+      attachment?: string | null;
+      /** Format: date */
+      taken_on?: string;
+      visible_to_family?: boolean;
     };
     PatchedRoomRequest: {
       /** Format: uuid */
@@ -24485,6 +27176,32 @@ export interface components {
       booking: boolean;
       reschedule: boolean;
       classes: boolean;
+      learning: boolean;
+    };
+    PortalHomework: {
+      /** Format: uuid */
+      id: string;
+      title: string;
+      instructions: string;
+      /** Format: uuid */
+      student: string;
+      student_name: string;
+      tutor_name: string;
+      /** Format: date-time */
+      due_at: string;
+      status: components["schemas"]["HomeworkAssignmentStatusEnum"];
+      overdue: boolean;
+      can_submit: boolean;
+      submission_type: components["schemas"]["HomeworkSubmissionTypeEnum"];
+      expected_minutes: number | null;
+      is_late: boolean;
+      grade: string;
+      feedback: string;
+      resources: components["schemas"]["PortalResourceRef"][];
+      attachments: components["schemas"]["FileRef"][];
+      submissions: components["schemas"]["Submission"][];
+      quiz: components["schemas"]["PortalQuiz"] | null;
+      quiz_result: components["schemas"]["PortalQuizResult"] | null;
     };
     PortalInvoice: {
       id: string;
@@ -24518,6 +27235,20 @@ export interface components {
       notes_for_client: string;
       tutors: components["schemas"]["PortalTutor"][];
       students: components["schemas"]["PortalAttendee"][];
+    };
+    PortalLoan: {
+      /** Format: uuid */
+      id: string;
+      item: string;
+      student_name: string;
+      status: components["schemas"]["LoanStatusEnum"];
+      /** Format: date */
+      lent_on: string;
+      /** Format: date */
+      due_date: string;
+      /** Format: date */
+      returned_on: string | null;
+      is_overdue: boolean;
     };
     PortalMe: {
       role: components["schemas"]["PortalMeRoleEnum"];
@@ -24597,6 +27328,35 @@ export interface components {
       contacts: components["schemas"]["PortalContact"][];
       students: components["schemas"]["PortalStudent"][];
     };
+    PortalProgress: {
+      /** Format: uuid */
+      id: string;
+      title: string;
+      /** Format: uuid */
+      student: string;
+      student_name: string;
+      /** Format: date */
+      period_start: string;
+      /** Format: date */
+      period_end: string;
+      summary: string;
+      snapshot: unknown;
+      /** Format: date-time */
+      shared_at: string;
+    };
+    PortalQuiz: {
+      /** Format: uuid */
+      id: string;
+      title: string;
+      time_limit_minutes: number | null;
+      questions: components["schemas"]["PublicQuestion"][];
+    };
+    PortalQuizResult: {
+      /** Format: decimal */
+      percent: string;
+      passed: boolean;
+      marks: unknown;
+    };
     PortalReport: {
       id: string;
       lesson_title: string;
@@ -24614,6 +27374,43 @@ export interface components {
       description: string;
       amount: components["schemas"]["MoneyOut"];
       pay_token: string;
+    };
+    PortalResource: {
+      /** Format: uuid */
+      id: string;
+      title: string;
+      description: string;
+      kind: components["schemas"]["ResourceKindEnum"];
+      media_type: components["schemas"]["ResourceMediaTypeEnum"];
+      subject: string;
+      message: string;
+      /** Format: date-time */
+      shared_at: string;
+    };
+    PortalResourceRef: {
+      /** Format: uuid */
+      id: string;
+      title: string;
+      media_type: components["schemas"]["ResourceMediaTypeEnum"];
+    };
+    PortalResult: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      kind: components["schemas"]["AssessmentKindEnum"];
+      subject: string;
+      /** Format: uuid */
+      student: string;
+      student_name: string;
+      /** Format: date */
+      date: string;
+      /** Format: decimal */
+      score: string | null;
+      /** Format: decimal */
+      max_score: string | null;
+      /** Format: decimal */
+      percent: string | null;
+      grade: string;
     };
     PortalRolloverOffer: {
       /** Format: uuid */
@@ -24639,6 +27436,22 @@ export interface components {
       school?: string;
       year_group?: string;
       learning_needs?: string;
+    };
+    PortalSubmitRequest: {
+      body?: string;
+      link?: string;
+      files?: string[];
+      quiz_answers?: {
+        [key: string]: unknown;
+      };
+    };
+    PortalSummary: {
+      homework_due: number;
+      homework_overdue: number;
+      resources: number;
+      goals: number;
+      reports: number;
+      loans: number;
     };
     PortalTutor: {
       name: string;
@@ -25013,6 +27826,74 @@ export interface components {
     ProfileRejectRequest: {
       reason: string;
     };
+    ProgressCreateRequest: {
+      /** Format: uuid */
+      student: string;
+      period?: components["schemas"]["ProgressReportPeriodEnum"];
+      /** Format: date */
+      period_start: string;
+      /** Format: date */
+      period_end: string;
+      title?: string;
+    };
+    ProgressGenerateRequest: {
+      period: components["schemas"]["ProgressReportPeriodEnum"];
+      /** Format: date */
+      period_start: string;
+      /** Format: date */
+      period_end: string;
+      students?: string[];
+    };
+    ProgressGenerateResult: {
+      created: number;
+      refreshed: number;
+      skipped: number;
+    };
+    ProgressReport: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly student: string;
+      readonly student_name: string;
+      readonly period: components["schemas"]["ProgressReportPeriodEnum"];
+      /** Format: date */
+      readonly period_start: string;
+      /** Format: date */
+      readonly period_end: string;
+      readonly title: string;
+      readonly status: components["schemas"]["ProgressReportStatusEnum"];
+      readonly summary: string;
+      readonly snapshot: unknown;
+      /** Format: date-time */
+      readonly generated_at: string | null;
+      /** Format: uuid */
+      readonly author: string | null;
+      readonly author_name: string;
+      /** Format: date-time */
+      readonly submitted_at: string | null;
+      /** Format: date-time */
+      readonly approved_at: string | null;
+      /** Format: date-time */
+      readonly shared_at: string | null;
+      readonly ai_draft_available: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `monthly` - Monthly
+     *     * `termly` - Termly
+     *     * `custom` - Custom period
+     * @enum {string}
+     */
+    ProgressReportPeriodEnum: "monthly" | "termly" | "custom";
+    /**
+     * @description * `draft` - Draft
+     *     * `submitted` - Waiting for approval
+     *     * `approved` - Approved
+     *     * `shared` - Shared with the family
+     * @enum {string}
+     */
+    ProgressReportStatusEnum: "draft" | "submitted" | "approved" | "shared";
     PromoCode: {
       /** Format: uuid */
       readonly id: string;
@@ -25394,6 +28275,15 @@ export interface components {
       listed?: boolean;
       slug?: string;
     };
+    /** @description A question as the learner sees it (no answers). */
+    PublicQuestion: {
+      /** Format: uuid */
+      id: string;
+      kind: components["schemas"]["QuizQuestionKindEnum"];
+      prompt: string;
+      choices: components["schemas"]["Choice"][];
+      points: number;
+    };
     PublicReference: {
       applicant: string;
       status: string;
@@ -25546,6 +28436,24 @@ export interface components {
      * @enum {string}
      */
     QuantityTypeEnum: "hours" | "lessons" | "credit";
+    Question: {
+      /** Format: uuid */
+      readonly id: string;
+      kind?: components["schemas"]["QuizQuestionKindEnum"];
+      prompt: string;
+      choices?: components["schemas"]["Choice"][];
+      answer: string[];
+      points?: number;
+      explanation?: string;
+    };
+    QuestionRequest: {
+      kind?: components["schemas"]["QuizQuestionKindEnum"];
+      prompt: string;
+      choices?: components["schemas"]["ChoiceRequest"][];
+      answer: string[];
+      points?: number;
+      explanation?: string;
+    };
     QuickAddContactRequest: {
       first_name: string;
       last_name?: string;
@@ -25599,6 +28507,76 @@ export interface components {
       /** Format: date */
       start_date?: string;
       default_duration_minutes?: number;
+    };
+    Quiz: {
+      /** Format: uuid */
+      readonly id: string;
+      title: string;
+      description?: string;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      purpose?: components["schemas"]["QuizPurposeEnum"];
+      pass_percent?: number;
+      time_limit_minutes?: number | null;
+      /** Format: uuid */
+      readonly owner: string | null;
+      questions?: components["schemas"]["Question"][];
+      readonly attempts_count: number;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    QuizAttempt: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly quiz: string;
+      readonly quiz_title: string;
+      /** Format: uuid */
+      readonly student: string | null;
+      /** @default  */
+      readonly student_name: string;
+      /** Format: uuid */
+      readonly assignment: string | null;
+      /** Format: decimal */
+      readonly score: string;
+      /** Format: decimal */
+      readonly max_score: string;
+      /** Format: decimal */
+      readonly percent: string;
+      readonly passed: boolean;
+      readonly answers: unknown;
+      readonly marks: unknown;
+      /** Format: date-time */
+      readonly submitted_at: string;
+    };
+    /**
+     * @description * `learning` - Homework and practice
+     *     * `tutor_test` - Tutor subject test (E18)
+     * @enum {string}
+     */
+    QuizPurposeEnum: "learning" | "tutor_test";
+    /**
+     * @description * `single` - Multiple choice (one answer)
+     *     * `multiple` - Multiple choice (several answers)
+     *     * `short` - Short answer
+     * @enum {string}
+     */
+    QuizQuestionKindEnum: "single" | "multiple" | "short";
+    QuizRequest: {
+      title: string;
+      description?: string;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      purpose?: components["schemas"]["QuizPurposeEnum"];
+      pass_percent?: number;
+      time_limit_minutes?: number | null;
+      questions?: components["schemas"]["QuestionRequest"][];
     };
     Quote: {
       list_price: components["schemas"]["MoneyOut"];
@@ -26251,11 +29229,190 @@ export interface components {
      * @enum {string}
      */
     RescheduleRequestStatusEnum: "pending" | "approved" | "declined" | "cancelled" | "expired";
+    Resource: {
+      /** Format: uuid */
+      readonly id: string;
+      title: string;
+      description?: string;
+      kind: components["schemas"]["ResourceKindEnum"];
+      /** Format: uuid */
+      file?: string | null;
+      /** @default  */
+      readonly file_name: string;
+      readonly file_size: number;
+      url?: string;
+      readonly media_type: components["schemas"]["ResourceMediaTypeEnum"];
+      /** Format: uuid */
+      folder?: string | null;
+      /** Format: uuid */
+      owner?: string | null;
+      readonly owner_name: string;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      topics?: string[];
+      tags?: string[];
+      visibility?: components["schemas"]["ResourceVisibilityEnum"];
+      readonly share_count: number;
+      /** Format: date-time */
+      readonly archived_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ResourceActivity: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly user_name: string;
+      /** Format: uuid */
+      readonly student: string | null;
+      /** @default  */
+      readonly student_name: string;
+      readonly views: number;
+      readonly downloads: number;
+      /** Format: date-time */
+      readonly first_opened_at: string;
+      /** Format: date-time */
+      readonly last_opened_at: string;
+    };
+    ResourceFolder: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      /** Format: uuid */
+      parent?: string | null;
+      /** Format: uuid */
+      owner?: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ResourceFolderRequest: {
+      name: string;
+      /** Format: uuid */
+      parent?: string | null;
+      /** Format: uuid */
+      owner?: string | null;
+    };
+    /**
+     * @description * `file` - File
+     *     * `link` - Link
+     * @enum {string}
+     */
+    ResourceKindEnum: "file" | "link";
+    /**
+     * @description * `pdf` - PDF
+     *     * `image` - Image
+     *     * `audio` - Audio
+     *     * `video` - Video
+     *     * `document` - Document
+     *     * `youtube` - YouTube
+     *     * `google_docs` - Google Docs
+     *     * `link` - Web link
+     * @enum {string}
+     */
+    ResourceMediaTypeEnum:
+      "pdf" | "image" | "audio" | "video" | "document" | "youtube" | "google_docs" | "link";
+    ResourceRequest: {
+      title: string;
+      description?: string;
+      kind: components["schemas"]["ResourceKindEnum"];
+      /** Format: uuid */
+      file?: string | null;
+      url?: string;
+      /** Format: uuid */
+      folder?: string | null;
+      /** Format: uuid */
+      owner?: string | null;
+      /** Format: uuid */
+      subject?: string | null;
+      /** Format: uuid */
+      level?: string | null;
+      topics?: string[];
+      tags?: string[];
+      visibility?: components["schemas"]["ResourceVisibilityEnum"];
+    };
+    ResourceShare: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly resource: string;
+      readonly resource_title: string;
+      readonly target: components["schemas"]["TargetEnum"];
+      /** Format: uuid */
+      readonly target_id: string;
+      readonly target_name: string;
+      readonly message: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `staff` - Staff only
+     *     * `tutors` - Staff and all tutors
+     *     * `private` - Only the owner (and staff)
+     * @enum {string}
+     */
+    ResourceVisibilityEnum: "staff" | "tutors" | "private";
     RespondRequest: {
       accept: boolean;
     };
+    Result: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      assessment: string;
+      readonly assessment_name: string;
+      readonly assessment_kind: string;
+      /** Format: uuid */
+      student: string;
+      readonly student_name: string;
+      /** Format: decimal */
+      score?: string | null;
+      /** Format: decimal */
+      max_score?: string | null;
+      /** Format: decimal */
+      readonly percent: string | null;
+      grade?: string;
+      notes?: string;
+      /** Format: uuid */
+      attachment?: string | null;
+      /** Format: date */
+      taken_on?: string;
+      visible_to_family?: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ResultRequest: {
+      /** Format: uuid */
+      assessment: string;
+      /** Format: uuid */
+      student: string;
+      /** Format: decimal */
+      score?: string | null;
+      /** Format: decimal */
+      max_score?: string | null;
+      grade?: string;
+      notes?: string;
+      /** Format: uuid */
+      attachment?: string | null;
+      /** Format: date */
+      taken_on?: string;
+      visible_to_family?: boolean;
+    };
     RetryResult: {
       retried: number;
+    };
+    /**
+     * @description * `complete` - complete
+     *     * `resubmit` - resubmit
+     * @enum {string}
+     */
+    ReviewOutcomeEnum: "complete" | "resubmit";
+    ReviewRequest: {
+      outcome: components["schemas"]["ReviewOutcomeEnum"];
+      grade?: string;
+      feedback?: string;
+      /** Format: date-time */
+      due_at?: string | null;
     };
     RevokeRequestRequest: {
       token: string;
@@ -26912,6 +30069,14 @@ export interface components {
     SessionsRevoked: {
       revoked: number;
     };
+    SetMasteryRequest: {
+      /** Format: uuid */
+      student: string;
+      /** Format: uuid */
+      node: string;
+      level: components["schemas"]["TopicMasteryLevelEnum"];
+      notes?: string;
+    };
     /**
      * @description One registered setting. Fields are declared in get_fields() because names such as
      *     ``label`` and ``help_text`` clash with attributes of DRF's Field class.
@@ -26985,6 +30150,13 @@ export interface components {
       intent: string;
       redirect_url: string;
       consent_text: string;
+    };
+    ShareRequestRequest: {
+      students?: string[];
+      jobs?: string[];
+      lessons?: string[];
+      classes?: string[];
+      message?: string;
     };
     Shortlist: {
       /** Format: uuid */
@@ -27323,6 +30495,11 @@ export interface components {
     StatusRequest: {
       status: string;
     };
+    StorageUsage: {
+      used_bytes: number;
+      library_bytes: number;
+      limit_gb: number | null;
+    };
     StoredFile: {
       /** Format: uuid */
       readonly id: string;
@@ -27486,6 +30663,21 @@ export interface components {
       exam_boards?: string[];
       order?: number;
     };
+    Submission: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly attempt: number;
+      readonly body: string;
+      /** Format: uri */
+      readonly link: string;
+      readonly files: components["schemas"]["FileRef"][];
+      /** Format: uuid */
+      readonly quiz_attempt: string | null;
+      readonly submitted_by_name: string;
+      readonly is_late: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
     SubmitRecordRequest: {
       /** Format: uuid */
       requirement: string;
@@ -27612,11 +30804,24 @@ export interface components {
       colour?: string;
       entity_types?: unknown;
     };
+    TagLessonRequest: {
+      /** Format: uuid */
+      lesson: string;
+      nodes: string[];
+    };
     TagRequest: {
       name: string;
       colour?: string;
       entity_types?: unknown;
     };
+    /**
+     * @description * `student` - student
+     *     * `job` - job
+     *     * `lesson` - lesson
+     *     * `group_class` - group_class
+     * @enum {string}
+     */
+    TargetEnum: "student" | "job" | "lesson" | "group_class";
     Task: {
       /** Format: uuid */
       readonly id: string;
@@ -28153,6 +31358,24 @@ export interface components {
      * @enum {string}
      */
     TopUpResultStatusEnum: "paid" | "redirect";
+    /**
+     * @description * `not_started` - Not started
+     *     * `learning` - Learning
+     *     * `secure` - Secure
+     *     * `mastered` - Mastered
+     * @enum {string}
+     */
+    TopicMasteryLevelEnum: "not_started" | "learning" | "secure" | "mastered";
+    TopicSuggestion: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      code: string;
+      unit: string;
+      curriculum: string;
+      /** Format: uuid */
+      curriculum_id: string;
+    };
     TrackingMappingRow: {
       /** Format: uuid */
       branch: string;
@@ -28176,6 +31399,31 @@ export interface components {
       reason: string;
       /** @default false */
       override_capacity: boolean;
+    };
+    TreeTopic: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      code: string;
+      position: number;
+    };
+    TreeUnit: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      code: string;
+      position: number;
+      topics: components["schemas"]["TreeTopic"][];
+    };
+    TrendPoint: {
+      /** Format: date */
+      date: string;
+      /** Format: decimal */
+      percent: string;
+      grade: string;
+      name: string;
+      kind: components["schemas"]["AssessmentKindEnum"];
+      subject: string;
     };
     /**
      * @description * `continuing` - Continuing
@@ -42583,6 +45831,2825 @@ export interface operations {
       };
     };
   };
+  learning_assessment_results_list: {
+    parameters: {
+      query?: {
+        assessment?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedResultList"];
+        };
+      };
+    };
+  };
+  learning_assessment_results_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResultRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ResultRequest"];
+        "multipart/form-data": components["schemas"]["ResultRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Result"];
+        };
+      };
+    };
+  };
+  learning_assessment_results_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this assessment result. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Result"];
+        };
+      };
+    };
+  };
+  learning_assessment_results_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this assessment result. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  learning_assessment_results_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this assessment result. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedResultRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedResultRequest"];
+        "multipart/form-data": components["schemas"]["PatchedResultRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Result"];
+        };
+      };
+    };
+  };
+  learning_assessments_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /**
+         * @description * `diagnostic` - Diagnostic
+         *     * `mock_exam` - Mock exam
+         *     * `quiz` - Quiz
+         *     * `school_report` - School report
+         *     * `other` - Other
+         */
+        kind?: "diagnostic" | "mock_exam" | "other" | "quiz" | "school_report";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        subject?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAssessmentList"];
+        };
+      };
+    };
+  };
+  learning_assessments_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssessmentRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AssessmentRequest"];
+        "multipart/form-data": components["schemas"]["AssessmentRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Assessment"];
+        };
+      };
+    };
+  };
+  learning_assessments_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this assessment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Assessment"];
+        };
+      };
+    };
+  };
+  learning_assessments_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this assessment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedAssessmentRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedAssessmentRequest"];
+        "multipart/form-data": components["schemas"]["PatchedAssessmentRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Assessment"];
+        };
+      };
+    };
+  };
+  learning_curricula_list: {
+    parameters: {
+      query?: {
+        archived?: boolean;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedCurriculumList"];
+        };
+      };
+    };
+  };
+  learning_curricula_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CurriculumRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CurriculumRequest"];
+        "multipart/form-data": components["schemas"]["CurriculumRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Curriculum"];
+        };
+      };
+    };
+  };
+  learning_curricula_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this curriculum. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Curriculum"];
+        };
+      };
+    };
+  };
+  learning_curricula_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this curriculum. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedCurriculumRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedCurriculumRequest"];
+        "multipart/form-data": components["schemas"]["PatchedCurriculumRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Curriculum"];
+        };
+      };
+    };
+  };
+  learning_curricula_archive_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this curriculum. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LearningArchiveRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LearningArchiveRequest"];
+        "multipart/form-data": components["schemas"]["LearningArchiveRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Curriculum"];
+        };
+      };
+    };
+  };
+  learning_curricula_import_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this curriculum. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CsvImportRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CsvImportRequest"];
+        "multipart/form-data": components["schemas"]["CsvImportRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CsvImportResult"];
+        };
+      };
+    };
+  };
+  learning_curricula_tree_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this curriculum. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TreeUnit"][];
+        };
+      };
+    };
+  };
+  learning_curricula_builtins_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BuiltinCurriculum"][];
+        };
+      };
+    };
+  };
+  learning_curricula_install_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["InstallBuiltinRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["InstallBuiltinRequest"];
+        "multipart/form-data": components["schemas"]["InstallBuiltinRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Curriculum"];
+        };
+      };
+    };
+  };
+  learning_curriculum_nodes_list: {
+    parameters: {
+      query?: {
+        curriculum?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedCurriculumNodeList"];
+        };
+      };
+    };
+  };
+  learning_curriculum_nodes_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CurriculumNodeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CurriculumNodeRequest"];
+        "multipart/form-data": components["schemas"]["CurriculumNodeRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CurriculumNode"];
+        };
+      };
+    };
+  };
+  learning_curriculum_nodes_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this curriculum node. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CurriculumNode"];
+        };
+      };
+    };
+  };
+  learning_curriculum_nodes_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this curriculum node. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  learning_curriculum_nodes_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this curriculum node. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedCurriculumNodeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedCurriculumNodeRequest"];
+        "multipart/form-data": components["schemas"]["PatchedCurriculumNodeRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CurriculumNode"];
+        };
+      };
+    };
+  };
+  learning_folders_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceFolder"][];
+        };
+      };
+    };
+  };
+  learning_folders_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResourceFolderRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ResourceFolderRequest"];
+        "multipart/form-data": components["schemas"]["ResourceFolderRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceFolder"];
+        };
+      };
+    };
+  };
+  learning_folders_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this resource folder. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceFolder"];
+        };
+      };
+    };
+  };
+  learning_folders_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this resource folder. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  learning_folders_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this resource folder. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedResourceFolderRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedResourceFolderRequest"];
+        "multipart/form-data": components["schemas"]["PatchedResourceFolderRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceFolder"];
+        };
+      };
+    };
+  };
+  learning_goals_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `active` - In progress
+         *     * `achieved` - Achieved
+         *     * `abandoned` - Stopped
+         */
+        status?: "abandoned" | "achieved" | "active";
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedGoalList"];
+        };
+      };
+    };
+  };
+  learning_goals_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GoalRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["GoalRequest"];
+        "multipart/form-data": components["schemas"]["GoalRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Goal"];
+        };
+      };
+    };
+  };
+  learning_goals_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this goal. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Goal"];
+        };
+      };
+    };
+  };
+  learning_goals_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this goal. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedGoalRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedGoalRequest"];
+        "multipart/form-data": components["schemas"]["PatchedGoalRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Goal"];
+        };
+      };
+    };
+  };
+  learning_goals_milestone_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this goal. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MilestoneDoneRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["MilestoneDoneRequest"];
+        "multipart/form-data": components["schemas"]["MilestoneDoneRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Goal"];
+        };
+      };
+    };
+  };
+  learning_goals_status_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this goal. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GoalStatusRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["GoalStatusRequest"];
+        "multipart/form-data": components["schemas"]["GoalStatusRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Goal"];
+        };
+      };
+    };
+  };
+  learning_grade_scales_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GradeScale"][];
+        };
+      };
+    };
+  };
+  learning_grade_scales_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GradeScaleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["GradeScaleRequest"];
+        "multipart/form-data": components["schemas"]["GradeScaleRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GradeScale"];
+        };
+      };
+    };
+  };
+  learning_grade_scales_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this grade scale. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GradeScale"];
+        };
+      };
+    };
+  };
+  learning_grade_scales_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this grade scale. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedGradeScaleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedGradeScaleRequest"];
+        "multipart/form-data": components["schemas"]["PatchedGradeScaleRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GradeScale"];
+        };
+      };
+    };
+  };
+  learning_homework_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        group_class?: string;
+        job?: string;
+        lesson?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        set_by?: string;
+        /**
+         * @description * `active` - Active
+         *     * `cancelled` - Cancelled
+         */
+        status?: "active" | "cancelled";
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedHomeworkList"];
+        };
+      };
+    };
+  };
+  learning_homework_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["HomeworkCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["HomeworkCreateRequest"];
+        "multipart/form-data": components["schemas"]["HomeworkCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Homework"];
+        };
+      };
+    };
+  };
+  learning_homework_assignments_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        homework?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        overdue?: boolean;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `assigned` - To do
+         *     * `submitted` - Submitted
+         *     * `returned` - Returned for resubmission
+         *     * `completed` - Completed
+         *     * `excused` - Excused
+         *     * `cancelled` - Cancelled
+         */
+        status?: ("assigned" | "cancelled" | "completed" | "excused" | "returned" | "submitted")[];
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAssignmentList"];
+        };
+      };
+    };
+  };
+  learning_homework_assignments_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this homework assignment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Assignment"];
+        };
+      };
+    };
+  };
+  learning_homework_assignments_excuse_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this homework assignment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Assignment"];
+        };
+      };
+    };
+  };
+  learning_homework_assignments_review_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this homework assignment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReviewRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReviewRequest"];
+        "multipart/form-data": components["schemas"]["ReviewRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Assignment"];
+        };
+      };
+    };
+  };
+  learning_homework_assignments_stats_retrieve: {
+    parameters: {
+      query?: {
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HomeworkStats"];
+        };
+      };
+    };
+  };
+  learning_homework_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this homework. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Homework"];
+        };
+      };
+    };
+  };
+  learning_homework_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this homework. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedHomeworkUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedHomeworkUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedHomeworkUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Homework"];
+        };
+      };
+    };
+  };
+  learning_homework_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this homework. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Homework"];
+        };
+      };
+    };
+  };
+  learning_lesson_topics_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        lesson?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedLessonTopicList"];
+        };
+      };
+    };
+  };
+  learning_lesson_topics_create: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TagLessonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TagLessonRequest"];
+        "multipart/form-data": components["schemas"]["TagLessonRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedLessonTopicList"];
+        };
+      };
+    };
+  };
+  learning_lesson_topics_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this lesson topic. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  learning_library_items_list: {
+    parameters: {
+      query?: {
+        archived?: boolean;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /**
+         * @description * `book` - Book
+         *     * `instrument` - Instrument
+         *     * `device` - Device
+         *     * `other` - Other
+         */
+        kind?: "book" | "device" | "instrument" | "other";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        q?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedLibraryItemList"];
+        };
+      };
+    };
+  };
+  learning_library_items_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LibraryItemRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LibraryItemRequest"];
+        "multipart/form-data": components["schemas"]["LibraryItemRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LibraryItem"];
+        };
+      };
+    };
+  };
+  learning_library_items_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this library item. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LibraryItem"];
+        };
+      };
+    };
+  };
+  learning_library_items_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this library item. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedLibraryItemRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedLibraryItemRequest"];
+        "multipart/form-data": components["schemas"]["PatchedLibraryItemRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LibraryItem"];
+        };
+      };
+    };
+  };
+  learning_library_items_archive_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this library item. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LearningArchiveRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LearningArchiveRequest"];
+        "multipart/form-data": components["schemas"]["LearningArchiveRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LibraryItem"];
+        };
+      };
+    };
+  };
+  learning_loans_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        item?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        overdue?: boolean;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `out` - On loan
+         *     * `returned` - Returned
+         *     * `lost` - Lost
+         */
+        status?: "lost" | "out" | "returned";
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedLoanList"];
+        };
+      };
+    };
+  };
+  learning_loans_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LoanCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LoanCreateRequest"];
+        "multipart/form-data": components["schemas"]["LoanCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Loan"];
+        };
+      };
+    };
+  };
+  learning_loans_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this loan. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Loan"];
+        };
+      };
+    };
+  };
+  learning_loans_extend_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this loan. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LoanExtendRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LoanExtendRequest"];
+        "multipart/form-data": components["schemas"]["LoanExtendRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Loan"];
+        };
+      };
+    };
+  };
+  learning_loans_lost_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this loan. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["LoanLostRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LoanLostRequest"];
+        "multipart/form-data": components["schemas"]["LoanLostRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Loan"];
+        };
+      };
+    };
+  };
+  learning_loans_return_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this loan. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["LoanReturnRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LoanReturnRequest"];
+        "multipart/form-data": components["schemas"]["LoanReturnRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Loan"];
+        };
+      };
+    };
+  };
+  learning_mastery_list: {
+    parameters: {
+      query?: {
+        curriculum?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedMasteryList"];
+        };
+      };
+    };
+  };
+  learning_mastery_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetMasteryRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SetMasteryRequest"];
+        "multipart/form-data": components["schemas"]["SetMasteryRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Mastery"];
+        };
+      };
+    };
+  };
+  learning_progress_reports_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        period_end_after?: string;
+        /**
+         * @description * `draft` - Draft
+         *     * `submitted` - Waiting for approval
+         *     * `approved` - Approved
+         *     * `shared` - Shared with the family
+         */
+        status?: ("approved" | "draft" | "shared" | "submitted")[];
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedProgressReportList"];
+        };
+      };
+    };
+  };
+  learning_progress_reports_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProgressCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ProgressCreateRequest"];
+        "multipart/form-data": components["schemas"]["ProgressCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProgressReport"];
+        };
+      };
+    };
+  };
+  learning_progress_reports_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this progress report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProgressReport"];
+        };
+      };
+    };
+  };
+  learning_progress_reports_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this progress report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedProgressUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedProgressUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedProgressUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProgressReport"];
+        };
+      };
+    };
+  };
+  learning_progress_reports_approve_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this progress report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProgressReport"];
+        };
+      };
+    };
+  };
+  learning_progress_reports_draft_summary_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this progress report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftSummary"];
+        };
+      };
+    };
+  };
+  learning_progress_reports_pdf_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this progress report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": string;
+        };
+      };
+    };
+  };
+  learning_progress_reports_regenerate_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this progress report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProgressReport"];
+        };
+      };
+    };
+  };
+  learning_progress_reports_reopen_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this progress report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProgressReport"];
+        };
+      };
+    };
+  };
+  learning_progress_reports_share_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this progress report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProgressReport"];
+        };
+      };
+    };
+  };
+  learning_progress_reports_submit_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this progress report. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProgressReport"];
+        };
+      };
+    };
+  };
+  learning_progress_reports_generate_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProgressGenerateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ProgressGenerateRequest"];
+        "multipart/form-data": components["schemas"]["ProgressGenerateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProgressGenerateResult"];
+        };
+      };
+    };
+  };
+  learning_quiz_attempts_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        quiz?: string;
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedQuizAttemptList"];
+        };
+      };
+    };
+  };
+  learning_quiz_attempts_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this quiz attempt. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QuizAttempt"];
+        };
+      };
+    };
+  };
+  learning_quizzes_list: {
+    parameters: {
+      query?: {
+        archived?: boolean;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedQuizList"];
+        };
+      };
+    };
+  };
+  learning_quizzes_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuizRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["QuizRequest"];
+        "multipart/form-data": components["schemas"]["QuizRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Quiz"];
+        };
+      };
+    };
+  };
+  learning_quizzes_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this quiz. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Quiz"];
+        };
+      };
+    };
+  };
+  learning_quizzes_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this quiz. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedQuizRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedQuizRequest"];
+        "multipart/form-data": components["schemas"]["PatchedQuizRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Quiz"];
+        };
+      };
+    };
+  };
+  learning_quizzes_archive_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this quiz. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LearningArchiveRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LearningArchiveRequest"];
+        "multipart/form-data": components["schemas"]["LearningArchiveRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Quiz"];
+        };
+      };
+    };
+  };
+  learning_resource_shares_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        group_class?: string;
+        job?: string;
+        lesson?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        resource?: string;
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedResourceShareList"];
+        };
+      };
+    };
+  };
+  learning_resource_shares_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this resource share. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  learning_resources_list: {
+    parameters: {
+      query?: {
+        archived?: boolean;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        folder?: string;
+        /**
+         * @description * `file` - File
+         *     * `link` - Link
+         */
+        kind?: "file" | "link";
+        level?: string;
+        /**
+         * @description * `organisation` - organisation
+         *     * `personal` - personal
+         */
+        library?: "organisation" | "personal";
+        /**
+         * @description * `pdf` - PDF
+         *     * `image` - Image
+         *     * `audio` - Audio
+         *     * `video` - Video
+         *     * `document` - Document
+         *     * `youtube` - YouTube
+         *     * `google_docs` - Google Docs
+         *     * `link` - Web link
+         */
+        media_type?:
+          "audio" | "document" | "google_docs" | "image" | "link" | "pdf" | "video" | "youtube";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        owner?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        q?: string;
+        subject?: string;
+        topic?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedResourceList"];
+        };
+      };
+    };
+  };
+  learning_resources_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResourceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ResourceRequest"];
+        "multipart/form-data": components["schemas"]["ResourceRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Resource"];
+        };
+      };
+    };
+  };
+  learning_resources_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this resource. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Resource"];
+        };
+      };
+    };
+  };
+  learning_resources_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this resource. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedResourceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedResourceRequest"];
+        "multipart/form-data": components["schemas"]["PatchedResourceRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Resource"];
+        };
+      };
+    };
+  };
+  learning_resources_activity_list: {
+    parameters: {
+      query?: {
+        archived?: boolean;
+        folder?: string;
+        /**
+         * @description * `file` - File
+         *     * `link` - Link
+         */
+        kind?: "file" | "link";
+        level?: string;
+        /**
+         * @description * `organisation` - organisation
+         *     * `personal` - personal
+         */
+        library?: "organisation" | "personal";
+        /**
+         * @description * `pdf` - PDF
+         *     * `image` - Image
+         *     * `audio` - Audio
+         *     * `video` - Video
+         *     * `document` - Document
+         *     * `youtube` - YouTube
+         *     * `google_docs` - Google Docs
+         *     * `link` - Web link
+         */
+        media_type?:
+          "audio" | "document" | "google_docs" | "image" | "link" | "pdf" | "video" | "youtube";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        owner?: string;
+        q?: string;
+        subject?: string;
+        topic?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this resource. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceActivity"][];
+        };
+      };
+    };
+  };
+  learning_resources_archive_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this resource. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LearningArchiveRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["LearningArchiveRequest"];
+        "multipart/form-data": components["schemas"]["LearningArchiveRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Resource"];
+        };
+      };
+    };
+  };
+  learning_resources_open_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this resource. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OpenResource"];
+        };
+      };
+    };
+  };
+  learning_resources_share_create: {
+    parameters: {
+      query?: {
+        archived?: boolean;
+        folder?: string;
+        /**
+         * @description * `file` - File
+         *     * `link` - Link
+         */
+        kind?: "file" | "link";
+        level?: string;
+        /**
+         * @description * `organisation` - organisation
+         *     * `personal` - personal
+         */
+        library?: "organisation" | "personal";
+        /**
+         * @description * `pdf` - PDF
+         *     * `image` - Image
+         *     * `audio` - Audio
+         *     * `video` - Video
+         *     * `document` - Document
+         *     * `youtube` - YouTube
+         *     * `google_docs` - Google Docs
+         *     * `link` - Web link
+         */
+        media_type?:
+          "audio" | "document" | "google_docs" | "image" | "link" | "pdf" | "video" | "youtube";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        owner?: string;
+        q?: string;
+        subject?: string;
+        topic?: string;
+      };
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this resource. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ShareRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ShareRequestRequest"];
+        "multipart/form-data": components["schemas"]["ShareRequestRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceShare"][];
+        };
+      };
+    };
+  };
+  learning_resources_shares_list: {
+    parameters: {
+      query?: {
+        archived?: boolean;
+        folder?: string;
+        /**
+         * @description * `file` - File
+         *     * `link` - Link
+         */
+        kind?: "file" | "link";
+        level?: string;
+        /**
+         * @description * `organisation` - organisation
+         *     * `personal` - personal
+         */
+        library?: "organisation" | "personal";
+        /**
+         * @description * `pdf` - PDF
+         *     * `image` - Image
+         *     * `audio` - Audio
+         *     * `video` - Video
+         *     * `document` - Document
+         *     * `youtube` - YouTube
+         *     * `google_docs` - Google Docs
+         *     * `link` - Web link
+         */
+        media_type?:
+          "audio" | "document" | "google_docs" | "image" | "link" | "pdf" | "video" | "youtube";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        owner?: string;
+        q?: string;
+        subject?: string;
+        topic?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this resource. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceShare"][];
+        };
+      };
+    };
+  };
+  learning_storage_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StorageUsage"];
+        };
+      };
+    };
+  };
+  learning_students_coverage_list: {
+    parameters: {
+      query?: {
+        curriculum?: string[];
+      };
+      header?: never;
+      path: {
+        student_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Coverage"][];
+        };
+      };
+    };
+  };
+  learning_students_trend_list: {
+    parameters: {
+      query?: {
+        subject?: string;
+      };
+      header?: never;
+      path: {
+        student_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TrendPoint"][];
+        };
+      };
+    };
+  };
+  learning_topics_list: {
+    parameters: {
+      query?: {
+        lesson?: string;
+        q?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TopicSuggestion"][];
+        };
+      };
+    };
+  };
   lesson_reports_list: {
     parameters: {
       query?: {
@@ -48508,6 +54575,260 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PortalEnrolment"];
+        };
+      };
+    };
+  };
+  portal_learning_coverage_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        student_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Coverage"][];
+        };
+      };
+    };
+  };
+  portal_learning_goals_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Goal"][];
+        };
+      };
+    };
+  };
+  portal_learning_homework_list: {
+    parameters: {
+      query?: {
+        /** @description Only work still to do */
+        open?: boolean;
+        student?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalHomework"][];
+        };
+      };
+    };
+  };
+  portal_learning_homework_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        assignment_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalHomework"];
+        };
+      };
+    };
+  };
+  portal_learning_homework_submit_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        assignment_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PortalSubmitRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PortalSubmitRequest"];
+        "multipart/form-data": components["schemas"]["PortalSubmitRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalHomework"];
+        };
+      };
+    };
+  };
+  portal_learning_loans_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalLoan"][];
+        };
+      };
+    };
+  };
+  portal_learning_progress_reports_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalProgress"][];
+        };
+      };
+    };
+  };
+  portal_learning_progress_reports_pdf_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        report_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": string;
+        };
+      };
+    };
+  };
+  portal_learning_resources_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalResource"][];
+        };
+      };
+    };
+  };
+  portal_learning_resources_open_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        resource_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OpenResource"];
+        };
+      };
+    };
+  };
+  portal_learning_results_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalResult"][];
+        };
+      };
+    };
+  };
+  portal_learning_summary_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalSummary"];
         };
       };
     };

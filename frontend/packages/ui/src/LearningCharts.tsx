@@ -1,0 +1,213 @@
+import { useId, useState } from "react";
+
+import { cn } from "./cn";
+import { MASTERY_LEVELS, type MasteryLevel } from "./masteryLevels";
+
+export type { MasteryLevel };
+
+export interface TrendPoint {
+  date: string;
+  percent: string;
+  name: string;
+  grade?: string;
+}
+
+export interface TrendChartLabels {
+  title: string;
+  date: string;
+  assessment: string;
+  score: string;
+  showTable: string;
+  empty: string;
+}
+
+const W = 600;
+const H = 220;
+const PAD = { top: 12, right: 16, bottom: 28, left: 40 };
+const TICKS = [0, 25, 50, 75, 100];
+
+/** Score % over time: one 2px line in the brand colour, focusable 8px markers with a
+ * tooltip, a recessive grid on one 0-100 axis and a table view (WCAG 2.2 AA). */
+export function TrendChart({
+  points,
+  labels,
+  formatDate,
+}: {
+  points: ReadonlyArray<TrendPoint>;
+  labels: TrendChartLabels;
+  formatDate: (iso: string) => string;
+}) {
+  const titleId = useId();
+  const [active, setActive] = useState<number | null>(null);
+  if (!points.length) return <p className="text-sm text-muted-foreground">{labels.empty}</p>;
+  const innerW = W - PAD.left - PAD.right;
+  const innerH = H - PAD.top - PAD.bottom;
+  const times = points.map((p) => new Date(p.date).getTime());
+  const first = Math.min(...times);
+  const span = Math.max(...times) - first || 1;
+  const x = (i: number) =>
+    PAD.left + (points.length === 1 ? innerW / 2 : ((times[i]! - first) / span) * innerW);
+  const y = (pct: number) => PAD.top + innerH - (Math.min(Math.max(pct, 0), 100) / 100) * innerH;
+  const path = points
+    .map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(Number(p.percent)).toFixed(1)}`)
+    .join(" ");
+  const shown = active !== null ? points[active] : null;
+  return (
+    <figure className="space-y-2">
+      <figcaption id={titleId} className="text-sm font-semibold">
+        {labels.title}
+      </figcaption>
+      <div className="relative">
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          className="h-auto w-full max-w-2xl"
+          role="img"
+          aria-labelledby={titleId}
+        >
+          {TICKS.map((tick) => (
+            <g key={tick}>
+              <line
+                x1={PAD.left}
+                x2={W - PAD.right}
+                y1={y(tick)}
+                y2={y(tick)}
+                className="stroke-border"
+                strokeWidth={1}
+              />
+              <text
+                x={PAD.left - 6}
+                y={y(tick) + 4}
+                textAnchor="end"
+                className="fill-muted-foreground text-[11px]"
+              >
+                {tick}%
+              </text>
+            </g>
+          ))}
+          <path d={path} fill="none" className="stroke-brand" strokeWidth={2} />
+          {points.map((p, i) => (
+            <circle
+              key={`${p.date}-${i}`}
+              cx={x(i)}
+              cy={y(Number(p.percent))}
+              r={active === i ? 6 : 4}
+              className="fill-brand stroke-background"
+              strokeWidth={2}
+              tabIndex={0}
+              role="button"
+              aria-label={`${p.name}, ${formatDate(p.date)}: ${p.percent}%`}
+              onMouseEnter={() => setActive(i)}
+              onMouseLeave={() => setActive(null)}
+              onFocus={() => setActive(i)}
+              onBlur={() => setActive(null)}
+            />
+          ))}
+          <text x={PAD.left} y={H - 6} className="fill-muted-foreground text-[11px]">
+            {formatDate(points[0]!.date)}
+          </text>
+          {points.length > 1 ? (
+            <text
+              x={W - PAD.right}
+              y={H - 6}
+              textAnchor="end"
+              className="fill-muted-foreground text-[11px]"
+            >
+              {formatDate(points[points.length - 1]!.date)}
+            </text>
+          ) : null}
+        </svg>
+        {shown ? (
+          <div
+            role="status"
+            className="pointer-events-none absolute left-2 top-2 rounded-md border border-border bg-background px-2 py-1 text-xs shadow"
+          >
+            <p className="font-medium">{shown.name}</p>
+            <p>
+              {formatDate(shown.date)} · {shown.percent}%{shown.grade ? ` · ${shown.grade}` : ""}
+            </p>
+          </div>
+        ) : null}
+      </div>
+      <details>
+        <summary className="cursor-pointer text-sm underline">{labels.showTable}</summary>
+        <table className="mt-2 w-full text-sm">
+          <thead>
+            <tr className="text-left">
+              <th scope="col">{labels.date}</th>
+              <th scope="col">{labels.assessment}</th>
+              <th scope="col">{labels.score}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {points.map((p, i) => (
+              <tr key={`${p.date}-${i}`}>
+                <td>{formatDate(p.date)}</td>
+                <td>{p.name}</td>
+                <td>
+                  {p.percent}%{p.grade ? ` (${p.grade})` : ""}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </details>
+    </figure>
+  );
+}
+
+export interface HeatmapUnit {
+  id: string;
+  name: string;
+  topics: ReadonlyArray<{ id: string; name: string; level: MasteryLevel; lessons: number }>;
+}
+
+const LEVEL_STYLE: Record<MasteryLevel, string> = {
+  not_started: "bg-muted text-foreground",
+  learning: "bg-brand/15 text-foreground",
+  secure: "bg-brand/40 text-foreground",
+  mastered: "bg-brand text-brand-foreground",
+};
+
+/** Topic coverage heatmap: one hue from light (not started) to full (mastered); every
+ * cell also names its level and lesson count, so colour is never the only cue. */
+export function MasteryHeatmap({
+  units,
+  levelLabels,
+  lessonsLabel,
+  legendLabel,
+}: {
+  units: ReadonlyArray<HeatmapUnit>;
+  levelLabels: Record<MasteryLevel, string>;
+  lessonsLabel: (count: number) => string;
+  legendLabel: string;
+}) {
+  return (
+    <div className="space-y-3">
+      <ul aria-label={legendLabel} className="flex flex-wrap gap-2 text-xs">
+        {MASTERY_LEVELS.map((level) => (
+          <li key={level} className={cn("rounded px-2 py-1", LEVEL_STYLE[level])}>
+            {levelLabels[level]}
+          </li>
+        ))}
+      </ul>
+      {units.map((unit) => (
+        <section key={unit.id} aria-label={unit.name}>
+          <h4 className="mb-1 text-sm font-medium">{unit.name}</h4>
+          <ul className="grid grid-cols-2 gap-[2px] sm:grid-cols-3 lg:grid-cols-4">
+            {unit.topics.map((topic) => (
+              <li
+                key={topic.id}
+                className={cn("rounded px-2 py-1 text-xs", LEVEL_STYLE[topic.level])}
+              >
+                <span className="block font-medium">{topic.name}</span>
+                <span className="block">
+                  {levelLabels[topic.level]} · {lessonsLabel(topic.lessons)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  );
+}

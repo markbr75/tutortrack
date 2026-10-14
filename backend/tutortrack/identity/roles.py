@@ -67,7 +67,7 @@ ROLES: dict[str, RoleDef] = {
             "coordinator", "Coordinator",
             "People, jobs, scheduling, communications and leads; can view invoices.",
             _g("people.*", "crm.*", "jobs.*", "scheduling.*", "delivery.*", "comms.*", "leads.*",
-               "courses.*",
+               "courses.*", "learning.*",
                "matching.*", "integrations.personal", "integrations.view", "billing.invoice.view",
                "billing.rates.view_charge", "catalogue.view",
                "org.settings.view", "team.view", "privacy.consent.view",
@@ -84,7 +84,7 @@ ROLES: dict[str, RoleDef] = {
             _g("billing.*", "payments.*", "payroll.*", "integrations.accounting.*",
                "reporting.*", "people.client.view", "org.settings.view", "team.view",
                "crm.note.view", "crm.search", "catalogue.view", "rates.manage", "courses.view",
-               "subscription.view"),
+               "subscription.view", "learning.library.view", "learning.library.charge"),
         ),
         RoleDef(
             "tutor", "Tutor",
@@ -101,6 +101,9 @@ ROLES: dict[str, RoleDef] = {
                "reporting.dashboard.view:own", "reporting.operations.view:own",
                "reporting.payroll.view:own", "integrations.personal",
                "sites.profile.edit:own"),
+            # Organisation-wide learning settings and approvals stay with staff (E21).
+            denies=("learning.curriculum.manage", "learning.progress.approve",
+                    "learning.library.manage", "learning.library.charge"),
         ),
         RoleDef("client", "Client", "Portal: own household's students, lessons and invoices.",
                 _g("portal.client.*:own"), is_staff=False),

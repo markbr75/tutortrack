@@ -10,6 +10,7 @@ import { BillingPage } from "./pages/BillingPage";
 import { BookingPage } from "./pages/BookingPage";
 import { ClassesPage } from "./pages/ClassesPage";
 import { HomePage } from "./pages/HomePage";
+import { HomeworkPage, LearningPage } from "./pages/LearningPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { SchedulePage } from "./pages/SchedulePage";
@@ -25,6 +26,7 @@ import { EarningsPage, ExpensesPage } from "./tutor/PayPages";
 import { TutorReportPage } from "./tutor/ReportPage";
 import { TutorSchedulePage } from "./tutor/SchedulePage";
 import { TodayPage } from "./tutor/TodayPage";
+import { TutorHomeworkPage, TutorResourcesPage, TutorReviewPage } from "./tutor/LearningPages";
 
 const rootRoute = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   component: Shell,
@@ -53,6 +55,20 @@ const reportRoute = createRoute({
     return <TutorReportPage reportId={reportRoute.useParams().reportId} />;
   },
 });
+const homeworkRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/learning/homework/$assignmentId",
+  component: function HomeworkRoute() {
+    return <HomeworkPage assignmentId={homeworkRoute.useParams().assignmentId} />;
+  },
+});
+const tutorReviewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/tutor/homework/$assignmentId",
+  component: function TutorReviewRoute() {
+    return <TutorReviewPage assignmentId={tutorReviewRoute.useParams().assignmentId} />;
+  },
+});
 
 const routeTree = rootRoute.addChildren([
   page("/", HomePage),
@@ -74,6 +90,11 @@ const routeTree = rootRoute.addChildren([
   page("/tutor/jobs", JobsPage),
   page("/tutor/profile", TutorProfilePage),
   page("/tutor/notifications", NotificationsPage),
+  page("/learning", LearningPage),
+  homeworkRoute,
+  page("/tutor/homework", TutorHomeworkPage),
+  tutorReviewRoute,
+  page("/tutor/resources", TutorResourcesPage),
   lessonRoute,
   offlineReportRoute,
   reportRoute,
