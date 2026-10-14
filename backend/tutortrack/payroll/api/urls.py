@@ -18,6 +18,9 @@ urlpatterns = [
          name="my-self-billing"),
     path("me/pay-profile/stripe", views.StripeOnboardingView.as_view(), name="my-stripe-payouts"),
     path("me/earnings", views.MyEarningsView.as_view(), name="my-earnings"),
+    path("me/earnings/annual", views.MyAnnualEarningsView.as_view(), name="my-annual-earnings"),
+    path("tutors/<uuid:pk>/earnings/annual", views.TutorAnnualEarningsView.as_view(),
+         name="tutor-annual-earnings"),
     path("payroll/originator", views.OriginatorView.as_view(), name="payroll-originator"),
     path("payouts/<uuid:pk>/fail", views.FailPayoutView.as_view(), name="payout-fail"),
     # Phase 3 (E12-T12): US tax identity and 1099-NEC data

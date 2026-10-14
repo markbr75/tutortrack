@@ -7,6 +7,7 @@ from .processes import (
     PackageExpiryWorkflow,
     PaymentRequestWorkflow,
     ScheduledInvoiceRunWorkflow,
+    StatementRunWorkflow,
 )
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "PackageExpiryWorkflow",
     "PaymentRequestWorkflow",
     "ScheduledInvoiceRunWorkflow",
+    "StatementRunWorkflow",
 ]

@@ -6,7 +6,7 @@
 - Help articles and "What's new" are markdown files in the repo (`backend/tutortrack/success/help/`), not a headless CMS or Intercom. Support chat is built in (no third-party widget).
 - Product analytics are first-party (`POST /analytics/events`), only for consenting staff; families and students are never tracked.
 - Daily logical backups are replaced by cross-account snapshot copies; `manage.py tenant_dump <slug>` restores one organisation's rows.
-- There is no plans-and-prices screen (API `/api/v1/platform/plans` only), no MRR filter on the tenant list, and the console has no workflow (processes) page — use the API (`/api/v1/processes/<id>/terminate|restart`) and the Temporal UI.
+- Since G6 the console has a plans-and-prices screen, an MRR filter on the tenant list and a workflow console (`/platform/workflows`).
 - SaaS metrics are computed from nightly subscription snapshots (no Stripe backfill; no currency conversion). The route is `/platform/metrics`.
 - Support-access grants are owner-only; admins can view sessions.
 
@@ -128,3 +128,15 @@
 |---|---|---|---|---|---|---|---|---|
 | TP-E30-061 | Erasure removes usage and anonymises chats | Owner | A staff member with events and chats | 1. Erase the member (E29). | Their events deleted; chats anonymised. | P2 | backend: `tutortrack/success/tests/test_success.py::test_erasure_removes_usage_and_anonymises_chats` | |
 | TP-E30-062 | Old usage events purged | Owner | Retention `product_usage` 395 days | 1. Run a purge. | Older events deleted. | P3 | backend: `tutortrack/success/tests/test_success.py::test_old_usage_events_are_purged` | |
+
+## Gap batch G6 (as built 2026-10-14)
+
+Built by gap batch G6 ([ADR 0034](../adr/0034-gap-batch-g6-consent-capture-account-deletion-and-platform-tools.md)); see the epic's *Gap backlog* notes. Signup now requires `accept_terms: true` (the terms checkbox).
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E30-063 | Send a breach notice | Platform staff | Platform console | 1. **Customer notices** → Breach template → fill in → **Preview**.<br>2. Give a reason → **Send notice**. | Preview shows the organisations count; sent once to each organisation's owners and admins, audited in each organisation. | P1 | backend: `test_breach_notice_reaches_owners_and_admins_and_is_audited`; vitest: `G6.test.tsx` breach notice | |
+| TP-E30-064 | Plans and prices screen | Platform staff | — | 1. `/platform/plans` → edit a price's amount and Stripe price id → save. | Saved; visible plans and trial days editable. | P2 | vitest: `G6.test.tsx` edits a plan price | |
+| TP-E30-065 | Tenant list by MRR; tenant integrations | Platform staff | Nightly snapshots exist | 1. Filter tenants by MRR and sort.<br>2. Open a tenant. | Filter and sort work; the tenant page shows integration connections (no secrets) and add-ons. | P2 | backend: `test_tenant_list_filters_and_sorts_by_mrr`, `test_tenant_detail_shows_integration_status` | |
+| TP-E30-066 | Revenue share reconciliation | Platform staff | Revenue-share organisation with metered payments | 1. `/platform/revenue-share?month=` → **Report missing days** with a reason. | Unreported days are reported to the meter (audited); MRR includes revenue share. | P2 | backend: `test_revenue_share_counts_in_mrr_and_reconciles` | |
+| TP-E30-067 | Support reply notifies the person | Owner | Open support conversation | 1. Platform staff reply. | In-app, email and push notification with a link that opens the chat. | P2 | backend: `test_a_support_reply_emails_and_notifies_the_person` | |

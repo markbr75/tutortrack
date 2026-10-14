@@ -34,6 +34,7 @@ KINDS: dict[str, Any] = {
     "receivable": _lazy("Accounts receivable"),
     "payable": _lazy("Accounts payable (tutors)"),
     "sales_tax": _lazy("Sales tax (VAT) liability"),
+    "deferred_revenue": _lazy("Deferred revenue (unused packages)"),
 }
 ALWAYS = ("revenue", "clearing", "bank", "fees", "bad_debt")
 JOURNAL = ("receivable", "sales_tax", "rounding")
@@ -48,9 +49,12 @@ class AccountRef:
 
 
 def required_kinds(conn: AccountingConnection | None) -> tuple[str, ...]:
+    from .builders import defers_packages
+
+    deferred = ("deferred_revenue",) if defers_packages() else ()
     if conn is None:
-        return EXPORT_REQUIRED
-    kinds = list(ALWAYS)
+        return (*EXPORT_REQUIRED, *deferred)
+    kinds = [*ALWAYS, *deferred]
     if conn.sync_bills:
         kinds.append("tutor_cost")
     if conn.mode == AccountingConnection.Mode.SUMMARY:

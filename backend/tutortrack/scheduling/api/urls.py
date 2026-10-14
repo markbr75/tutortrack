@@ -17,6 +17,7 @@ router.register("booking/holds", views.BookingHoldViewSet, basename="booking-hol
 urlpatterns = [
     path("calendar", views.CalendarView.as_view(), name="calendar"),
     path("calendar/rooms", views.RoomScheduleView.as_view(), name="calendar-rooms"),
+    path("calendar/timetable", views.TimetableView.as_view(), name="calendar-timetable"),
     path("lessons/reprice", views.RepriceView.as_view(), name="lessons-reprice"),
     path(
         "lessons/<uuid:lesson_id>/reschedule-requests",

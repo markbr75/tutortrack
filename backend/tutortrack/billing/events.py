@@ -288,3 +288,39 @@ class BillingSplitChanged(DomainEvent):
     subject_type: ClassVar[str] = "billing_split"
     target: str  # job | student
     shares: list[dict[str, str]]
+
+
+# --- gap G3: tutor pre-review of drafts, statements ---------------------------------------------
+
+
+@dataclass(frozen=True, kw_only=True)
+class TutorReviewRequested(DomainEvent):
+    """Tutors are asked to check their lessons on an invoice run's drafts (FR-10-3)."""
+
+    event_type: ClassVar[str] = "invoice_run.tutor_review_requested"
+    subject_type: ClassVar[str] = "invoice_run"
+    tutor_ids: list[str]
+    review_until: str | None = None
+
+
+@dataclass(frozen=True, kw_only=True)
+class TutorReviewAnswered(DomainEvent):
+    """A tutor confirmed their lessons or reported a problem (drafts held for staff)."""
+
+    event_type: ClassVar[str] = "invoice_run.tutor_reviewed"
+    subject_type: ClassVar[str] = "invoice_run"
+    review_id: str
+    tutor_id: str
+    status: str  # confirmed | flagged
+    held_invoice_ids: list[str]
+
+
+@dataclass(frozen=True, kw_only=True)
+class StatementSent(DomainEvent):
+    """A scheduled monthly statement was emailed to a client (FR-10-9)."""
+
+    event_type: ClassVar[str] = "client.statement_sent"
+    subject_type: ClassVar[str] = "client"
+    currency: str
+    period_start: str
+    period_end: str

@@ -191,6 +191,11 @@ class PayItem(BranchScopedModel):
     expense = models.ForeignKey(
         "payroll.Expense", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
     )
+    # Gap G3: a correction made by editing an item in the pay-run review is an adjustment
+    # item linked to the item it corrects (the original item never changes).
+    adjusts = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.PROTECT, related_name="corrections"
+    )
 
     class Meta(BranchScopedModel.Meta):
         ordering = ["date", "created_at"]

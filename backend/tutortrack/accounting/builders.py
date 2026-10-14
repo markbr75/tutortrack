@@ -66,6 +66,7 @@ OBJECT_TYPES = (
     "bill",
     "bill_payment",
     "journal",
+    "package_revenue",
     *sorted(CONTAINERS),
 )
 
@@ -269,6 +270,30 @@ def _supplier(ctx: Context, object_id: str) -> Built:
     return Built(doc, name)
 
 
+def line_charge(line: Any) -> Any:
+    """The charge behind an invoice line; a separately shown discount line (gap G3) posts
+    like the lesson line it belongs to."""
+    charge = getattr(line, "charge", None)
+    if charge is None and getattr(line, "parent_id", None):
+        charge = line.parent.charge
+    return charge
+
+
+def defers_packages() -> bool:
+    from tutortrack.tenancy.settings_service import get_setting
+
+    return bool(get_setting("accounting.package_deferred_revenue"))
+
+
+def revenue_account(maps: Mappings, charge: Any) -> Any:
+    """Where a sales line's net posts. With deferred package revenue (gap G3, FR-26-2) a
+    package sale is a liability until lessons use the units (``package_postings``)."""
+    if charge is not None and charge.kind == "package" and defers_packages():
+        return maps.account("deferred_revenue", "package")
+    keys, code = revenue_keys(charge)
+    return maps.account("revenue", *keys, code=code)
+
+
 def revenue_keys(charge: Any) -> tuple[list[str], str]:
     """Mapping keys for a charge's revenue account, most specific first, and the account
     code saved on its product or service."""
@@ -293,9 +318,8 @@ def revenue_keys(charge: Any) -> tuple[list[str], str]:
 
 def sales_line(ctx: Context, line: Any, *, net: Decimal, tax: Decimal, branch_id: Any) -> Line:
     """One invoice (or credit note) line: account by service/product, tax by rate."""
-    charge = getattr(line, "charge", None)
-    keys, code = revenue_keys(charge)
-    account = ctx.maps.account("revenue", *keys, code=code)
+    charge = line_charge(line)
+    account = revenue_account(ctx.maps, charge)
     tax_code = ctx.maps.tax_code(charge.tax_rate_id if charge else None, line.tax_percent)
     quantity = line.quantity.normalize() if line.quantity != 1 else None
     description = line.description
@@ -740,7 +764,34 @@ def _journal(ctx: Context, object_id: str) -> Built:
     return Built(doc, _("Summary journal %(day)s") % {"day": object_id})
 
 
+def _package_revenue(ctx: Context, object_id: str) -> Built:
+    """Individual mode: the day's deferred package revenue released as one manual journal
+    (summary mode carries the same lines in the daily summary journal)."""
+    if ctx.conn.mode == AccountingConnection.Mode.SUMMARY:
+        raise Skip(_("Posted in the daily summary journal instead."))
+    if not defers_packages():
+        raise Skip(_("Package revenue isn't deferred."))
+    day = date.fromisoformat(object_id)
+    ctx.check_start(day)
+    currency = ctx.conn.base_currency or ctx.org.default_currency
+    postings = journals.package_postings(ctx.maps, day, day, str(ctx.tz), currency=currency)
+    lines = journals.summarise(postings)
+    if not lines:
+        raise Skip(_("No package units were used that day."))
+    doc = JournalDoc(
+        kind="journal",
+        ref=f"package-revenue-{object_id}",
+        date=object_id,
+        currency=currency,
+        narration=_("TutorTrack package revenue %(day)s (%(currency)s)")
+        % {"day": object_id, "currency": currency},
+        lines=tuple(lines),
+    )
+    return Built(doc, _("Package revenue %(day)s") % {"day": object_id})
+
+
 BUILDERS = {
+    "package_revenue": _package_revenue,
     "contact": _contact,
     "supplier": _supplier,
     "invoice": _invoice,

@@ -48,6 +48,36 @@ function Reply({ reportId }: { reportId: string }) {
   );
 }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Files attached to a shared report (gap G3): download links (scanned files only). */
+function ReportFiles({ ids }: { ids: string[] }) {
+  const { t } = useTranslation();
+  const open = async (id: string) => {
+    const link = unwrap(await api.GET("/api/v1/files/{id}/download", { params: { path: { id } } }));
+    window.open(link.url, "_blank", "noopener");
+  };
+  return (
+    <ul className="space-y-1">
+      {ids.map((id, n) =>
+        UUID.test(id) ? (
+          <li key={id}>
+            <button
+              type="button"
+              className="underline underline-offset-2"
+              onClick={() => void open(id)}
+            >
+              {t("g3.files.attachment", { n: n + 1 })}
+            </button>
+          </li>
+        ) : (
+          <li key={id}>{id}</li>
+        ),
+      )}
+    </ul>
+  );
+}
+
 function show(value: unknown): string {
   return Array.isArray(value) ? value.join(", ") : String(value ?? "");
 }
@@ -82,7 +112,13 @@ export function ReportsPage() {
             {r.answers.map((a) => (
               <div key={a.label}>
                 <dt className="text-sm font-medium">{a.label}</dt>
-                <dd className="whitespace-pre-wrap text-sm">{show(a.value)}</dd>
+                <dd className="whitespace-pre-wrap text-sm">
+                  {a.type === "attachment" && Array.isArray(a.value) ? (
+                    <ReportFiles ids={a.value as string[]} />
+                  ) : (
+                    show(a.value)
+                  )}
+                </dd>
               </div>
             ))}
           </dl>

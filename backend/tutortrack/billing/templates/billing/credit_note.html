@@ -1,0 +1,56 @@
+{% load i18n %}<!doctype html>
+<html lang="{{ org.locale|default:'en-GB' }}">
+<head><meta charset="utf-8"><title>{% trans "Credit note" %} {{ note.number }}</title>
+{% include "billing/_style.html" %}</head>
+<body>
+  {% include "billing/_brand.html" %}
+  <div class="row">
+    <div>
+      <h1>{% trans "Credit note" %}</h1>
+      <div><strong>{{ snapshot.organisation|default:org.name }}</strong></div>
+    </div>
+    <div class="muted">
+      <div>{% trans "Credit note number" %}: <strong>{{ note.number }}</strong></div>
+      <div>{% trans "Issued" %}: {{ note.issued_at|date:"DATE_FORMAT" }}</div>
+      <div>{% trans "Credits invoice" %}: {{ invoice.number }}</div>
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <div class="muted">{% trans "Issued to" %}</div>
+      <div><strong>{{ snapshot.client_name }}</strong></div>
+      {% if snapshot.contact_name %}<div>{{ snapshot.contact_name }}</div>{% endif %}
+      {% for line in snapshot.address %}<div>{{ line }}</div>{% endfor %}
+    </div>
+  </div>
+  <p><strong>{% trans "Reason" %}:</strong> {{ note.reason }}</p>
+  <table>
+    <thead><tr>
+      <th>{% trans "Description" %}</th>
+      {% if has_tax %}<th class="num">{% trans "Net" %}</th><th class="num">{% trans "Tax" %}</th>{% endif %}
+      <th class="num">{% trans "Amount" %}</th>
+    </tr></thead>
+    <tbody>
+    {% for line in lines %}
+      <tr>
+        <td>{{ line.description }}</td>
+        {% if has_tax %}<td class="num">{{ line.net }}</td><td class="num">{{ line.tax }}</td>{% endif %}
+        <td class="num">{{ line.amount }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <table class="totals">
+    {% if has_tax %}
+    <tr><td>{% trans "Net" %}</td><td class="num">{{ totals.net }}</td></tr>
+    <tr><td>{% trans "Tax" %}</td><td class="num">{{ totals.tax }}</td></tr>
+    {% endif %}
+    <tr class="grand"><td>{% trans "Total credited" %}</td><td class="num">{{ totals.total }}</td></tr>
+  </table>
+  <div class="footer">
+    {% if applied_to_invoice %}{% blocktrans with number=invoice.number %}This credit reduces what is owed on invoice {{ number }}.{% endblocktrans %}{% else %}{% trans "This credit is kept on your account and used for future invoices." %}{% endif %}
+  </div>
+  {% if snapshot.footer %}<div class="footer muted">{{ snapshot.footer|linebreaksbr }}</div>{% endif %}
+  {% include "billing/_brand_footer.html" %}
+</body>
+</html>

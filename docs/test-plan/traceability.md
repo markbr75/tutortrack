@@ -13,15 +13,15 @@ This file maps each epic to its manual test cases and automated coverage. Counts
 | E01 Platform foundations | [E01-platform-foundations.md](E01-platform-foundations.md) | TP-E01-001–046 | 46 (16) | — | 41 | 4 | smoke, roles |
 | E02 Multi-tenancy | [E02-multi-tenancy.md](E02-multi-tenancy.md) | TP-E02-001–050 | 50 (15) | branches (`multi_branch`), closure | 50 | 2 | roles |
 | E03 Identity and access | [E03-identity-access.md](E03-identity-access.md) | TP-E03-001–064 | 64 (26) | T08 passkeys, T11 custom roles, T12 SAML/OIDC per organisation (Phase 2) | 62 | 6 | smoke, roles |
-| E04 SaaS subscriptions | [E04-saas-subscriptions.md](E04-saas-subscriptions.md) | TP-E04-001–041 | 41 (15) | seats, revenue share, credit packs | 35 | 1 | roles |
+| E04 SaaS subscriptions | [E04-saas-subscriptions.md](E04-saas-subscriptions.md) | TP-E04-001–045 | 45 (16) | seats, revenue share, credit packs | 39 | 1 | roles |
 | E05 People and CRM | [E05-people-crm.md](E05-people-crm.md) | TP-E05-001–060 | 60 (24) | T10 duplicate detection, T12 map view (Phase 2) | 47 | 7 | people, roles |
-| E06 Catalogue and pricing | [E06-catalogue-pricing.md](E06-catalogue-pricing.md) | TP-E06-001–051 | 51 (21) | T07 pay tiers, T08 premiums and holidays, T09 discounts, promo codes and price lists, T10 rooms (Phase 2) | 48 | 3 | catalogue |
-| E07 Jobs | [E07-jobs.md](E07-jobs.md) | TP-E07-001–035 | 35 (15) | — | 25 | 2 | jobs-scheduling |
-| E08 Scheduling and calendar | [E08-scheduling-calendar.md](E08-scheduling-calendar.md) | TP-E08-001–069 | 69 (32) | T12 rooms, T13 reschedule requests, T14 self-booking, T15 time-off approval (Phase 2) | 57 | 4 | jobs-scheduling, delivery, portal-tutor |
-| E09 Lesson delivery | [E09-lesson-delivery.md](E09-lesson-delivery.md) | TP-E09-001–069 | 69 (29) | T09 lesson feedback surveys (Phase 2; built in the Phase 2b batch) | 56 | 8 | delivery, portal-tutor, roles |
-| E10 Client billing | [E10-client-billing.md](E10-client-billing.md) | TP-E10-001–085 | 85 (43) | T12 packages, T13 recurring fees, T14 late fees/collections, T15 split billing (Phase 2) | 70 | 6 | billing, portal-parent |
-| E11 Payments | [E11-payments.md](E11-payments.md) | TP-E11-001–054 | 54 (26) | T11 GoCardless, T12 PayPal, T13 bank statements and Open Banking, T14 split payments (Phase 2) | 44 | 4 | portal-parent, billing, roles |
-| E12 Tutor payroll | [E12-tutor-payroll.md](E12-tutor-payroll.md) | TP-E12-001–043 | 43 (22) | Phase 2 epic; **T12 Wise/1099/commission (Phase 3): TP-E12-033–036, verify after merge** | 31 | 1 | roles |
+| E06 Catalogue and pricing | [E06-catalogue-pricing.md](E06-catalogue-pricing.md) | TP-E06-001–053 | 53 (23) | T07 pay tiers, T08 premiums and holidays, T09 discounts, promo codes and price lists, T10 rooms (Phase 2) | 50 | 3 | catalogue |
+| E07 Jobs | [E07-jobs.md](E07-jobs.md) | TP-E07-001–038 | 38 (17) | — | 28 | 2 | jobs-scheduling |
+| E08 Scheduling and calendar | [E08-scheduling-calendar.md](E08-scheduling-calendar.md) | TP-E08-001–075 | 75 (34) | T12 rooms, T13 reschedule requests, T14 self-booking, T15 time-off approval (Phase 2) | 60 | 4 | jobs-scheduling, delivery, portal-tutor |
+| E09 Lesson delivery | [E09-lesson-delivery.md](E09-lesson-delivery.md) | TP-E09-001–073 | 73 (31) | T09 lesson feedback surveys (Phase 2; built in the Phase 2b batch) | 58 | 8 | delivery, portal-tutor, roles |
+| E10 Client billing | [E10-client-billing.md](E10-client-billing.md) | TP-E10-001–090 | 90 (47) | T12 packages, T13 recurring fees, T14 late fees/collections, T15 split billing (Phase 2) | 75 | 6 | billing, portal-parent |
+| E11 Payments | [E11-payments.md](E11-payments.md) | TP-E11-001–060 | 60 (31) | T11 GoCardless, T12 PayPal, T13 bank statements and Open Banking, T14 split payments (Phase 2) | 50 | 4 | portal-parent, billing, roles |
+| E12 Tutor payroll | [E12-tutor-payroll.md](E12-tutor-payroll.md) | TP-E12-001–047 | 47 (25) | Phase 2 epic; **T12 Wise/1099/commission (Phase 3): TP-E12-033–036, verify after merge** | 35 | 1 | roles |
 | E13 Communications | [E13-communications.md](E13-communications.md) | TP-E13-001–055 | 55 (19) | T10 broadcasts, T11 conversations inbox, T12 WhatsApp, sender domains, Mailchimp/Brevo (Phase 2) | 50 | 4 | inbox, roles |
 | E14 Automation | [E14-automation.md](E14-automation.md) | TP-E14-001–033 | 33 (17) | Phase 2 epic | 23 | 1 | roles |
 | E15 Client portal | [E15-client-portal.md](E15-client-portal.md) | TP-E15-001–049 | 49 (21) | T09 booking, reschedule, packages, messaging (Phase 2) | 24 | 6 | roles, portal-parent, portal-tutor |
@@ -32,17 +32,17 @@ This file maps each epic to its manual test cases and automated coverage. Counts
 | E20 Classes and courses | [E20-classes-courses.md](E20-classes-courses.md) | TP-E20-001–064 | 64 (26) | Phase 3 epic (built) | 50 | 2 | courses |
 | E21 Learning tools | [E21-learning-tools.md](E21-learning-tools.md) | TP-E21-001–054 | 54 (26) | Phase 3 epic; T08 quizzes (Phase 3b, built) | 47 | 0 | — |
 | E22 Calendar sync and video | [E22-calendar-video-integrations.md](E22-calendar-video-integrations.md) | TP-E22-001–058 | 58 (21) | Phase 2 epic; **T10 video attendance and recordings (Phase 3): TP-E22-045–051, verify after merge** | 47 | 0 | — |
-| E23 Accounting integrations | [E23-accounting-integrations.md](E23-accounting-integrations.md) | TP-E23-001–053 | 53 (18) | Phase 2 epic; T09 ledger payment read-back (Phase 2b); **T10 Sage/FreeAgent/Xero Payroll (Phase 3): TP-E23-041–046, verify after merge** | 42 | 0 | — |
-| E24 Website, widgets, white-label | [E24-website-widgets-branding.md](E24-website-widgets-branding.md) | TP-E24-001–059 | 59 (25) | Phase 2 epic | 49 | 1 | roles |
+| E23 Accounting integrations | [E23-accounting-integrations.md](E23-accounting-integrations.md) | TP-E23-001–055 | 55 (19) | Phase 2 epic; T09 ledger payment read-back (Phase 2b); **T10 Sage/FreeAgent/Xero Payroll (Phase 3): TP-E23-041–046, verify after merge** | 44 | 0 | — |
+| E24 Website, widgets, white-label | [E24-website-widgets-branding.md](E24-website-widgets-branding.md) | TP-E24-001–064 | 64 (26) | Phase 2 epic | 54 | 1 | roles |
 | E25 Reviews, referrals, affiliates | [E25-reviews-referrals-affiliates.md](E25-reviews-referrals-affiliates.md) | TP-E25-001–078 | 78 (35) | Phase 3 epic (built) | 66 | 0 | — |
-| E26 Reporting and analytics | [E26-reporting-analytics.md](E26-reporting-analytics.md) | TP-E26-001–065 | 65 (30) | Phase 2 epic; T08 custom report builder (Phase 2b); **T09 warehouse export (Enterprise): TP-E26-053–057, verify after merge** | 49 | 0 | — |
-| E27 Public API and webhooks | [E27-public-api-webhooks.md](E27-public-api-webhooks.md) | TP-E27-001–060 | 60 (28) | Phase 2 epic | 49 | 1 | smoke |
-| E28 Import, export, migration | [E28-import-export-migration.md](E28-import-export-migration.md) | TP-E28-001–057 | 57 (27) | Phase 2 epic | 47 | 0 | — |
-| E29 Security, privacy, compliance | [E29-security-privacy-compliance.md](E29-security-privacy-compliance.md) | TP-E29-001–075 | 75 (43) | part 1 (Phase 1) and part 2 | 67 | 3 | leads, roles |
-| E30 Platform admin and ops | [E30-platform-admin-ops.md](E30-platform-admin-ops.md) | TP-E30-001–062 | 62 (30) | part 1 (Phase 1) and part 2 | 53 | 5 | platform |
+| E26 Reporting and analytics | [E26-reporting-analytics.md](E26-reporting-analytics.md) | TP-E26-001–066 | 66 (31) | Phase 2 epic; T08 custom report builder (Phase 2b); **T09 warehouse export (Enterprise): TP-E26-053–057, verify after merge** | 50 | 0 | — |
+| E27 Public API and webhooks | [E27-public-api-webhooks.md](E27-public-api-webhooks.md) | TP-E27-001–065 | 65 (30) | Phase 2 epic | 54 | 1 | smoke |
+| E28 Import, export, migration | [E28-import-export-migration.md](E28-import-export-migration.md) | TP-E28-001–060 | 60 (29) | Phase 2 epic | 50 | 0 | — |
+| E29 Security, privacy, compliance | [E29-security-privacy-compliance.md](E29-security-privacy-compliance.md) | TP-E29-001–082 | 82 (47) | part 1 (Phase 1) and part 2 | 74 | 3 | leads, roles |
+| E30 Platform admin and ops | [E30-platform-admin-ops.md](E30-platform-admin-ops.md) | TP-E30-001–067 | 67 (31) | part 1 (Phase 1) and part 2 | 57 | 5 | platform |
 | E31 AI assistant | [E31-ai-assistant.md](E31-ai-assistant.md) | TP-E31-001–045 | 45 (25) | Phase 3 epic (built) | 40 | 1 | inbox |
-| E32 Workflow orchestration (Temporal) | [E32-workflow-orchestration-temporal.md](E32-workflow-orchestration-temporal.md) | TP-E32-001–067 | 67 (27) | all workflows (TW1 tickets of each epic) | 57 | 0 | — |
-| **Total** | 32 files | | **1,818 (799)** | | **1,455** | **80** | |
+| E32 Workflow orchestration (Temporal) | [E32-workflow-orchestration-temporal.md](E32-workflow-orchestration-temporal.md) | TP-E32-001–070 | 70 (29) | all workflows (TW1 tickets of each epic) | 60 | 0 | — |
+| **Total** | 32 files | | **1,883 (834)** | | **1,514** | **80** | |
 
 ## Cross-cutting files
 

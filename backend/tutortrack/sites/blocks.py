@@ -127,6 +127,7 @@ class BlockType:
     props: type[serializers.Serializer]
     assets: Callable[[dict[str, Any]], list[str]] = lambda props: []
     load: Callable[[dict[str, Any], Any], dict[str, Any]] | None = None
+    widget: bool = False  # renders a web component: the page loads the widgets script
 
 
 _registry: dict[str, BlockType] = {}
@@ -241,7 +242,7 @@ register(BlockType("subject_list", _l("Subject list"), SubjectListProps, load=_s
 register(BlockType("pricing_table", _l("Pricing table"), PricingProps, load=_pricing))
 register(BlockType("testimonials", _l("Testimonials"), TestimonialsProps, load=_testimonials))
 register(BlockType("faq", _l("FAQ"), FaqProps))
-register(BlockType("form", _l("Enquiry form"), FormProps))
+register(BlockType("form", _l("Enquiry form"), FormProps, widget=True))
 register(BlockType("cta", _l("Call to action"), CtaProps))
 register(BlockType("map", _l("Map"), MapProps, load=_map))
 register(BlockType("blog_list", _l("Latest blog posts"), BlogListProps, load=_blog))  # G6
@@ -319,6 +320,7 @@ def prepare(blocks: list[dict[str, Any]], organisation: Any) -> list[dict[str, A
                 **block,
                 "props": props,
                 "data": data,
+                "widget": block_type.widget,
                 "template": f"sites/blocks/{block_type.key}.html",
             }
         )

@@ -4,7 +4,24 @@ from __future__ import annotations
 
 from celery import shared_task
 
-from tutortrack.core.tasks import TenantTask
+from tutortrack.core.tasks import TenantTask, fan_out_per_org
+
+
+@shared_task(
+    base=TenantTask, name="tutortrack.payments.tasks.card_expiry_notices", ignore_result=True
+)
+def card_expiry_notices(*, organisation_id: str) -> int:
+    """Gap G3: tell clients whose saved card expires this month (once per card)."""
+    from tutortrack.billing.services import org_today
+
+    from .notices import notify_expiring
+
+    return notify_expiring(org_today())
+
+
+@shared_task(name="tutortrack.payments.tasks.card_expiry_notices_all", ignore_result=True)
+def card_expiry_notices_all() -> int:
+    return fan_out_per_org(card_expiry_notices)
 
 
 @shared_task(

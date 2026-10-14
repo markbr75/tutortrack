@@ -149,6 +149,24 @@ def completed_lesson_count(*, client_id: object = None, tutor_id: object = None)
 # --- Phase 2 reads (E06 promo codes, E08-T12..T15) ----------------------------------------------
 
 
+def online_cancellation_deadline(lesson: Lesson) -> datetime | None:
+    """The last moment a family may cancel a lesson they booked online themselves
+    (``BookingSettings.cancellation_window_hours``, FR-08-9, gap G3). ``None``: no limit
+    (lessons staff booked, or a window of 0 hours). Later than this they contact the
+    organisation; staff can still cancel under the cancellation policy."""
+    from datetime import timedelta
+
+    from .models import BookingSettings
+
+    if lesson.created_via != Lesson.CreatedVia.CLIENT_BOOKING:
+        return None
+    found = BookingSettings.objects.first()
+    hours = found.cancellation_window_hours if found is not None else 24
+    if not hours:
+        return None
+    return lesson.start - timedelta(hours=hours)
+
+
 def client_has_lessons(client: Any) -> bool:
     """Whether the client already has (non-cancelled) lessons: promo codes for new
     clients only (E06-T09)."""

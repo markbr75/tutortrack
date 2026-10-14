@@ -31,6 +31,7 @@ from ..models import (
     PackageConsumption,
     PackagePurchase,
     PaymentRequest,
+    TutorInvoiceReview,
 )
 
 
@@ -96,6 +97,8 @@ class InvoiceLineSerializer(BaseModelSerializer):
         fields = [
             "id",
             "charge",
+            "kind",
+            "parent",
             "position",
             "date",
             "description",
@@ -318,6 +321,59 @@ class InvoiceRunSerializer(BaseModelSerializer):
             "created_at",
         ]
         read_only_fields = fields
+
+
+class TutorReviewLessonSerializer(serializers.Serializer):
+    invoice_id = serializers.CharField()
+    date = serializers.DateField()
+    lesson_id = serializers.CharField(allow_null=True)
+    description = serializers.CharField()
+    student = serializers.CharField(allow_blank=True)
+    duration_minutes = serializers.IntegerField(allow_null=True)
+
+
+class TutorInvoiceReviewSerializer(BaseModelSerializer):
+    """A tutor's check of their lessons on an invoice run's drafts (gap G3). Never amounts."""
+
+    tutor_name = serializers.CharField(source="tutor.full_name", read_only=True)
+    period_start = serializers.DateField(source="invoice_run.period_start", read_only=True)
+    period_end = serializers.DateField(source="invoice_run.period_end", read_only=True)
+    review_until = serializers.DateTimeField(source="invoice_run.review_until", read_only=True)
+    lessons = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TutorInvoiceReview
+        fields = [
+            "id",
+            "invoice_run",
+            "tutor",
+            "tutor_name",
+            "status",
+            "comment",
+            "flagged_invoices",
+            "decided_at",
+            "period_start",
+            "period_end",
+            "review_until",
+            "lessons",
+        ]
+        read_only_fields = fields
+
+    @extend_schema_field(TutorReviewLessonSerializer(many=True))
+    def get_lessons(self, obj: TutorInvoiceReview) -> list[dict[str, Any]]:
+        from ..tutor_review import lessons_for
+
+        return TutorReviewLessonSerializer(lessons_for(obj), many=True).data  # type: ignore[return-value]
+
+
+class TutorReviewFlagSerializer(serializers.Serializer):
+    comment = serializers.CharField(max_length=2000)
+    invoice_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        required=False,
+        max_length=50,
+        help_text="Only these drafts (default: every draft with your lessons).",
+    )
 
 
 class InvoiceRunCreateSerializer(serializers.Serializer):

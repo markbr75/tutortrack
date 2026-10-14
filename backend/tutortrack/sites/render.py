@@ -170,7 +170,7 @@ def render(
         "nav": nav,
         "blocks": prepared,
         "needs_widgets": site.cookie_banner
-        or any(b["type"] == "form" for b in prepared)
+        or any(b["type"] == "form" or b.get("widget") for b in prepared)
         or bool(extra and extra.get("needs_widgets")),
         "widgets_src": widgets_script_url(),
         "schema": _json_ld(_schema(site, organisation, base, brand)),

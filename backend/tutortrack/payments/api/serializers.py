@@ -178,6 +178,20 @@ class RecordPaymentSerializer(serializers.Serializer):
     )
 
 
+class BulkPaymentRowSerializer(serializers.Serializer):
+    client = TenantRelatedField(Client)
+    amount = MoneySerializerField()
+    method = serializers.ChoiceField(choices=MANUAL_METHODS)
+    received_at = serializers.DateTimeField(required=False, allow_null=True, default=None)
+    reference = serializers.CharField(max_length=120, required=False, allow_blank=True, default="")
+
+
+class BulkPaymentSerializer(serializers.Serializer):
+    """The bulk payment-entry grid (gap G3): up to 200 rows, all recorded or none."""
+
+    rows = serializers.ListField(child=BulkPaymentRowSerializer(), min_length=1, max_length=200)
+
+
 class AllocateSerializer(serializers.Serializer):
     allocations = AllocationInputSerializer(many=True)
 
@@ -241,6 +255,10 @@ class PayPageSerializer(serializers.Serializer):
         child=serializers.CharField(),
         help_text="Online providers offered: stripe, gocardless, paypal",
     )
+    card_surcharge_percent = serializers.CharField(
+        default="0",
+        help_text="Added to card payments as a separate line (gap G3); 0 when none.",
+    )
 
 
 class PayIntentRequestSerializer(serializers.Serializer):
@@ -260,7 +278,10 @@ class PayIntentSerializer(serializers.Serializer):
     redirect_url = serializers.CharField(
         default="", help_text="GoCardless/PayPal: send the customer here"
     )
-    amount = MoneyOut()
+    amount = MoneyOut(help_text="What will be charged, card surcharge included")
+    surcharge = MoneyOut(
+        required=False, allow_null=True, help_text="The card surcharge in ``amount`` (gap G3)"
+    )
 
 
 class ConfirmSerializer(serializers.Serializer):

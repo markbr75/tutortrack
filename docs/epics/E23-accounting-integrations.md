@@ -246,3 +246,10 @@ See ADR 0032. Kept apart from the Phase 2b read-back (T09) in separate modules.
   - API under `/accounting/xero-payroll` (status, match, links, employees, earnings-rate, sync, syncs).
 - **Sub-processors:** Sage and FreeAgent, and Xero Payroll (UK) added as optional.
 - **Merged with T09 (2026-10-14):** payment read-back is limited to Xero and QuickBooks (`readback.READ_BACK_PROVIDERS`); switching it on for Sage or FreeAgent is refused until their clients implement `invoice_payments` (tracked in `docs/05-gap-backlog.md`).
+
+## Gap backlog (as built 2026-10-14)
+
+Batch G3 of `docs/05-gap-backlog.md`; design in [ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md).
+
+- **Package deferred revenue (FR-23-2, FR-26-2; E10:162):** `accounting.package_deferred_revenue` (off by default) posts package sales to a new mapping kind `deferred_revenue` (required while it is on) instead of revenue, and releases the revenue as units are used or expire: Dr deferred revenue / Cr revenue (key `package`, then the sale's keys) per package and local day (`journals.package_postings`, amounts from `billing.packages.recognised_net`, so the releases add up exactly to the sale's net). Summary mode carries the lines in the daily summary journal and GL exports; individual mode syncs a daily `package_revenue` journal from the daily housekeeping. A refunded cancellation's credit note debits the liability; the release on that day trues up the rest.
+- **Discount lines (gap G3, E06):** separately shown discount lines post to the revenue account of the lesson line they belong to (`builders.line_charge`).

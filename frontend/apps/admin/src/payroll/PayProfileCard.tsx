@@ -4,6 +4,7 @@ import { Alert } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api, usePermission } from "../api";
+import { AnnualEarningsLinks, FullBankDetails } from "../g3/PayrollExtras";
 import { PayPhase3Fields } from "./PayPhase3";
 
 const METHODS = ["manual", "bank_file", "stripe_connect", "wise", "external_payroll"] as const;
@@ -66,6 +67,8 @@ export function PayProfileCard({ tutorId }: { tutorId: string }) {
       {p.method === "wise" && !p.wise_ready ? (
         <p className="mt-2 text-sm text-muted-foreground">{t("payrollPhase3.wiseNeedsBank")}</p>
       ) : null}
+      <FullBankDetails tutorId={tutorId} />
+      <AnnualEarningsLinks tutorId={tutorId} />
       <PayPhase3Fields tutorId={tutorId} />
     </section>
   );

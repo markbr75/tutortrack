@@ -293,7 +293,11 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
                     </span>
                   ) : null}
                 </td>
-                {mode === "credit" ? (
+                {mode === "credit" && row.kind === "discount" ? (
+                  <td className="py-2 pr-3 text-right text-xs text-muted-foreground">
+                    {t("g3.billing.creditedWithLine")}
+                  </td>
+                ) : mode === "credit" ? (
                   <td className="py-2 pr-3 text-right">
                     <TextField
                       className="w-28"
@@ -306,7 +310,11 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
                     />
                   </td>
                 ) : null}
-                {draft && canCreate ? (
+                {draft && canCreate && row.kind === "discount" ? (
+                  <td className="py-2 text-right text-xs text-muted-foreground">
+                    {t("g3.billing.removedWithLine")}
+                  </td>
+                ) : draft && canCreate ? (
                   <td className="py-2 text-right">
                     <Button size="sm" variant="ghost" onClick={() => removeLine.mutate(row.id)}>
                       {t("billing.remove")}
@@ -411,7 +419,15 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
           <ul className="mt-2 space-y-1 text-sm">
             {inv.credit_notes.map((note) => (
               <li key={note.id}>
-                {note.number} · {money(note.total)} · {note.reason}
+                {note.number} · {money(note.total)} · {note.reason} ·{" "}
+                <a
+                  className="underline underline-offset-2"
+                  href={`/api/v1/credit-notes/${note.id}/pdf`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {t("g3.billing.creditNotePdf", { number: note.number })}
+                </a>
               </li>
             ))}
           </ul>

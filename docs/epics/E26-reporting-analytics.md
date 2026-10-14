@@ -124,3 +124,9 @@ T09 (Enterprise warehouse export). See ADR 0032. Built in its own package (`repo
 - **Entitlement (E04):** new plan feature `warehouse_export` (Enterprise only; plans re-synced by `subscriptions/0004`). Saving or running needs it (403 `upgrade-required`); scheduled runs of an organisation that lost it are skipped. Permission `reporting.warehouse.manage` (Finance gets it through `reporting.*`).
 - **UI:** Analytics → Warehouse export (`/analytics/warehouse`): destinations with export now, full export, check and delete, run history with downloads, and the dataset schemas.
 - **Deviations:** files are CSV (gzip) rather than Parquet, to avoid adding pyarrow (~40 MB) to the backend image; BigQuery and Snowflake load the same rows directly. Read-only Postgres replica access is not offered.
+
+## Gap backlog (as built 2026-10-14)
+
+Batch G3 of `docs/05-gap-backlog.md`; design in [ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md).
+
+- **Package liabilities (FR-26-2; E26:87):** finance report `package_liabilities`: per package bought before the end of the period, units left, expiry and the deferred revenue still held (net of tax: sale less revenue earned by used or expired units, less refunds), with totals per currency. Filters branch and client; `reporting.finance.view` scope applies.

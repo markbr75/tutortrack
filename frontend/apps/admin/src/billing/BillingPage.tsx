@@ -9,6 +9,7 @@ import { api, usePermission } from "../api";
 import { ErrorList } from "../calendar/ErrorList";
 import { toDateInput } from "../calendar/dates";
 import { useCursorList } from "../lists";
+import { BillingOptions, BulkPayments, RunTutorReviews } from "../g3/BillingExtras";
 import { BankReconciliation } from "../payments/BankReconciliation";
 import { PaymentsList } from "../payments/PaymentsPages";
 import { LateFeesTab, PackagesTab, PlansTab, SplitsTab } from "./Phase2Tabs";
@@ -25,7 +26,9 @@ type Tab =
   | "plans"
   | "lateFees"
   | "splits"
-  | "bank";
+  | "bank"
+  | "record"
+  | "options";
 type InvoiceFilter = "draft" | "open" | "overdue" | "paid" | "all";
 type Money = { amount: string; currency: string };
 
@@ -359,12 +362,21 @@ function Runs() {
               {typeof (run.stats as { drafts?: number }).drafts === "number"
                 ? ` · ${t("billing.drafts", { count: (run.stats as { drafts: number }).drafts })}`
                 : ""}
+              {typeof (run.stats as { held?: number }).held === "number"
+                ? ` · ${t("g3.tutorReview.held", { count: (run.stats as { held: number }).held })}`
+                : ""}
               {run.status === "review" && canIssue ? (
                 <Button size="sm" onClick={() => approve.mutate(run.id)}>
                   {t("billing.approveRun")}
                 </Button>
               ) : null}
             </span>
+            {(run.stats as { tutor_review?: boolean }).tutor_review ? (
+              <details className="w-full text-sm">
+                <summary className="cursor-pointer">{t("g3.tutorReview.title")}</summary>
+                <RunTutorReviews runId={run.id} />
+              </details>
+            ) : null}
           </li>
         ))}
       </ul>
@@ -439,6 +451,8 @@ export function BillingPage() {
   const canPlans = usePermission("billing.plan.view");
   const canSplits = usePermission("billing.split.manage");
   const canBank = usePermission("payments.reconcile");
+  const canRecord = usePermission("payments.payment.record");
+  const canSettings = usePermission("billing.settings.manage");
   const tabs = [
     { key: "invoices" as const, label: t("billing.tabs.invoices") },
     ...(canPayments ? [{ key: "payments" as const, label: t("payments.title") }] : []),
@@ -451,6 +465,8 @@ export function BillingPage() {
     { key: "lateFees" as const, label: t("lateFees.tab") },
     ...(canSplits ? [{ key: "splits" as const, label: t("splits.title") }] : []),
     ...(canBank ? [{ key: "bank" as const, label: t("bank.title") }] : []),
+    ...(canRecord ? [{ key: "record" as const, label: t("g3.bulkPayments.tab") }] : []),
+    ...(canSettings ? [{ key: "options" as const, label: t("g3.billingOptions.tab") }] : []),
   ];
   const [tab, setTab] = useState<Tab>("invoices");
   return (
@@ -468,6 +484,8 @@ export function BillingPage() {
         {tab === "lateFees" ? <LateFeesTab /> : null}
         {tab === "splits" ? <SplitsTab /> : null}
         {tab === "bank" ? <BankReconciliation /> : null}
+        {tab === "record" ? <BulkPayments /> : null}
+        {tab === "options" ? <BillingOptions /> : null}
       </Tabs>
     </div>
   );

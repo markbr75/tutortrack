@@ -3,7 +3,7 @@ from __future__ import annotations
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from tutortrack.core.api.serializers import BaseModelSerializer, MoneySerializerField
+from tutortrack.core.api.serializers import BaseModelSerializer, MoneyOut, MoneySerializerField
 
 from ..bankfiles import FORMAT_CHOICES
 from ..models import (
@@ -133,7 +133,7 @@ class PayItemSerializer(BaseModelSerializer):
         model = PayItem
         fields = ["id", "tutor", "tutor_name", "kind", "status", "description", "date",
                   "quantity", "unit", "amount", "hold_reasons", "hold_note", "lesson",
-                  "pay_run", "pay_run_number", "expense", "created_at"]  # fmt: skip
+                  "pay_run", "pay_run_number", "expense", "adjusts", "created_at"]  # fmt: skip
         read_only_fields = fields
 
 
@@ -261,6 +261,15 @@ class RemoveItemSerializer(serializers.Serializer):
     item = serializers.UUIDField()
 
 
+class EditItemSerializer(serializers.Serializer):
+    """Gap G3: edit one item in a run under review (a new amount becomes a correction)."""
+
+    item = serializers.UUIDField()
+    amount = MoneySerializerField(required=False, allow_null=True, default=None)
+    description = serializers.CharField(max_length=300, required=False, allow_blank=True)
+    reason = serializers.CharField(max_length=200, required=False, allow_blank=True, default="")
+
+
 class MarkPaidSerializer(serializers.Serializer):
     payouts = serializers.ListField(child=serializers.UUIDField(), required=False)
     reference = serializers.CharField(required=False, allow_blank=True, max_length=100)
@@ -369,3 +378,36 @@ class MyTaxSummarySerializer(serializers.Serializer):
     filed = serializers.BooleanField()
     filed_box1 = serializers.CharField(allow_null=True)
     tin_hint = serializers.CharField()
+
+
+# --- gap G3: annual earnings summary (FR-12-9) ------------------------------------------------
+
+
+class EarningsKindSerializer(serializers.Serializer):
+    kind = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+    amount = MoneyOut()
+    reimbursement = serializers.BooleanField()
+
+
+class EarningsMonthSerializer(serializers.Serializer):
+    month = serializers.CharField(help_text="YYYY-MM the money was paid")
+    amount = MoneyOut()
+
+
+class EarningsCurrencySerializer(serializers.Serializer):
+    currency = serializers.CharField()
+    earnings = MoneyOut()
+    reimbursements = MoneyOut()
+    total = MoneyOut()
+    by_kind = EarningsKindSerializer(many=True)
+    by_month = EarningsMonthSerializer(many=True)
+    payouts = serializers.IntegerField()
+
+
+class AnnualEarningsSerializer(serializers.Serializer):
+    year = serializers.IntegerField()
+    basis = serializers.ChoiceField(choices=["calendar", "tax_year"])
+    start = serializers.DateField()
+    end = serializers.DateField()
+    currencies = EarningsCurrencySerializer(many=True)

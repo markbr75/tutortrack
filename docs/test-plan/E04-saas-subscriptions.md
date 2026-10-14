@@ -101,3 +101,14 @@
 | ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
 |---|---|---|---|---|---|---|---|---|
 | TP-E04-041 | Prices and dates are localised | Owner | GB and US orgs | 1. Compare plan cards and renewal dates. | £ / $ by currency; dates in each locale's format; pluralised "1 day" / "N days". | P2 | No | |
+
+## Gap batch G6 (as built 2026-10-14)
+
+Built by gap batch G6 ([ADR 0034](../adr/0034-gap-batch-g6-consent-capture-account-deletion-and-platform-tools.md)); see the epic's *Gap backlog* notes. Signup now requires `accept_terms: true` (the terms checkbox).
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E04-042 | Buy an add-on in-app | Owner | Paid subscription with a card; Billing & plan | 1. **Add-ons** → Priority support → **Add**.<br>2. Confirm the prorated price. | A Stripe subscription item is added and the add-on is active; the `priority_support` feature is on (entitlements). | P1 | backend: `test_buying_an_add_on_adds_a_stripe_item_and_grants_the_feature`; vitest: `G6.test.tsx` buys an add-on | |
+| TP-E04-043 | Add-ons survive a plan change and end on cancel | Owner | Add-on active | 1. Change plan.<br>2. Remove the add-on in Stripe's portal (or cancel it). | The add-on stays across the plan change; removed in Stripe → it ends when the update arrives. | P2 | backend: `test_add_ons_stay_when_the_plan_changes_and_stop_on_cancel`, `test_an_add_on_removed_in_stripes_portal_ends` | |
+| TP-E04-044 | Trial without a card goes to checkout | Owner | Trial, no card | 1. Try to buy an add-on. | Answer `checkout_required`; the page sends you to checkout. | P2 | backend: `test_a_trial_without_a_card_is_sent_to_checkout` | |
+| TP-E04-045 | Only the owner buys add-ons | Admin | — | 1. Try `POST /api/v1/subscription/addons/custom_domain`. | 403. | P2 | backend: `test_only_the_owner_buys` | |

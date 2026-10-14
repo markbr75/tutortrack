@@ -51,5 +51,7 @@ def _classes(props: dict[str, Any], org: Any) -> dict[str, Any]:
 
 
 blocks.register(
-    blocks.BlockType("class_catalogue", _("Class catalogue"), ClassCatalogueProps, load=_classes)
+    blocks.BlockType(
+        "class_catalogue", _("Class catalogue"), ClassCatalogueProps, load=_classes, widget=True
+    )
 )

@@ -53,6 +53,7 @@ export function TutorShell() {
     { to: "/tutor/resources", label: t("learning.tutor.resources") },
     ...(me.data.can_see_pay ? [{ to: "/tutor/earnings", label: t("tutor.nav.earnings") }] : []),
     { to: "/tutor/expenses", label: t("tutor.nav.expenses") },
+    { to: "/tutor/invoice-review", label: t("g3.tutorReview.nav") },
     { to: "/tutor/onboarding", label: t("tutor.nav.onboarding") },
     { to: "/tutor/compliance", label: t("tutor.nav.compliance") },
     { to: "/tutor/profile", label: t("tutor.nav.profile") },

@@ -44,6 +44,7 @@ from ..models import (
     LateFeeRule,
     PackagePurchase,
     PaymentRequest,
+    TutorInvoiceReview,
 )
 from . import serializers as s
 
@@ -340,6 +341,13 @@ class CreditNoteViewSet(
             qs = qs.filter(client_id=client)
         return qs.select_related("invoice").prefetch_related("lines")
 
+    @extend_schema(responses={(200, "application/pdf"): OpenApiTypes.BINARY})
+    @action(detail=True, methods=["get"])
+    def pdf(self, request: Request, pk: Any = None) -> HttpResponse:
+        """The credit note as a PDF (FR-10-5, gap G3), rendered from its own lines."""
+        note = self.get_object()
+        return _pdf(pdf.credit_note_pdf(note), f"{note.number}.pdf")
+
 
 # --- invoice runs -------------------------------------------------------------------------------
 
@@ -408,6 +416,75 @@ class InvoiceRunViewSet(
         return Response(
             self.get_serializer(services.approve_run(self.get_object(), user=request.user)).data
         )
+
+    @extend_schema(responses=s.TutorInvoiceReviewSerializer(many=True))
+    @action(detail=True, methods=["get"], url_path="tutor-reviews", pagination_class=None)
+    def tutor_reviews(self, request: Request, pk: Any = None) -> Response:
+        """What tutors said about their lessons on this run's drafts (gap G3)."""
+        run = self.get_object()
+        rows = TutorInvoiceReview.objects.filter(invoice_run=run).select_related(
+            "tutor", "invoice_run"
+        )
+        return Response(s.TutorInvoiceReviewSerializer(rows, many=True).data)
+
+
+class MyInvoiceReviewViewSet(
+    TenantScopedViewMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """``/me/invoice-reviews``: a tutor's checks of their lessons on draft invoices before
+    they are issued (FR-10-3 review window, gap G3). Only lessons, never amounts."""
+
+    model = TutorInvoiceReview
+    serializer_class = s.TutorInvoiceReviewSerializer
+    permission_classes = perms(
+        {"GET": "billing.tutor_review.respond", "POST": "billing.tutor_review.respond"}
+    )
+
+    def get_tenant_queryset(self) -> QuerySet[TutorInvoiceReview]:
+        from tutortrack.payroll.selectors import tutor_for_user
+
+        tutor = tutor_for_user(self.request.user)
+        if tutor is None:
+            return TutorInvoiceReview.objects.none()
+        qs = TutorInvoiceReview.objects.filter(tutor=tutor).select_related("invoice_run", "tutor")
+        if self.action == "list" and self.request.query_params.get("open") in {"1", "true"}:
+            qs = qs.filter(
+                status=TutorInvoiceReview.Status.PENDING,
+                invoice_run__status=InvoiceRun.Status.REVIEW,
+            )
+        return qs.order_by("-created_at")
+
+    @extend_schema(
+        parameters=[OpenApiParameter("open", bool, description="Only checks still to answer")]
+    )
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(request=None, responses=s.TutorInvoiceReviewSerializer)
+    @action(detail=True, methods=["post"])
+    def confirm(self, request: Request, pk: Any = None) -> Response:
+        from .. import tutor_review
+
+        review = tutor_review.confirm(self.get_object(), user=request.user)
+        return Response(self.get_serializer(review).data)
+
+    @extend_schema(request=s.TutorReviewFlagSerializer, responses=s.TutorInvoiceReviewSerializer)
+    @action(detail=True, methods=["post"])
+    def flag(self, request: Request, pk: Any = None) -> Response:
+        from .. import tutor_review
+
+        payload = s.TutorReviewFlagSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        review = tutor_review.flag(
+            self.get_object(),
+            comment=payload.validated_data["comment"],
+            invoice_ids=[str(i) for i in payload.validated_data.get("invoice_ids") or []],
+            user=request.user,
+        )
+        return Response(self.get_serializer(review).data)
 
 
 # --- payment requests ---------------------------------------------------------------------------

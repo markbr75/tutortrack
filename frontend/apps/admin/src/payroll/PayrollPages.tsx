@@ -6,6 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
+import { RunItems } from "../g3/PayrollExtras";
 import { WiseConnectionCard } from "./PayPhase3";
 
 type Totals = Record<string, string>;
@@ -283,6 +284,7 @@ export function PayRunPage({ id }: { id: string }) {
           </tbody>
         </table>
       </div>
+      <RunItems runId={id} editable={r.status === "review"} />
       <p className="text-sm">
         {t("payroll.exportFor")}{" "}
         {["xero", "quickbooks", "brightpay", "gusto", "generic"].map((f) => (

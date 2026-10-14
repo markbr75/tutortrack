@@ -420,6 +420,16 @@ def test_pay_profile_api_masks_bank_details_and_audits_full_view(org, world):
                                "sort_code": "30-96-34", "account_number": "12345678"})  # fmt: skip
     assert saved.status_code == 200, saved.content
     assert saved.json()["bank"]["account_number"] == "••••5678"
+    refused = finance.get(path, {"full": "true"})  # gap G3: re-authenticate first
+    assert refused.status_code == 403
+    assert refused.json()["type"].endswith("reauthentication-required")
+    assert "password" in refused.json()["methods"]
+    from tutortrack.identity.tests.factories import TEST_PASSWORD
+
+    wrong = finance.post("/api/v1/auth/reauthenticate", {"password": "nope"}, format="json")
+    assert wrong.status_code == 403
+    ok = finance.post("/api/v1/auth/reauthenticate", {"password": TEST_PASSWORD}, format="json")
+    assert ok.status_code == 200, ok.content
     full = finance.get(path, {"full": "true"}).json()
     assert full["bank"]["account_number"] == "12345678"
     with tenant_context(org):

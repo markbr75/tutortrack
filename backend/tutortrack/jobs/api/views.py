@@ -49,6 +49,11 @@ class JobFilter(filters.FilterSet):
     tutor = filters.UUIDFilter(method="by_tutor")
     q = filters.CharFilter(method="search", label="Search reference and name")
     attention = filters.BooleanFilter(method="needs_attention", label="Jobs needing attention")
+    attention_reason = filters.ChoiceFilter(
+        choices=[(r, r) for r in selectors.ATTENTION_REASONS],
+        method="by_attention_reason",
+        label="Jobs needing attention for this reason",
+    )
 
     class Meta:
         model = Job
@@ -62,6 +67,9 @@ class JobFilter(filters.FilterSet):
 
     def needs_attention(self, qs: QuerySet[Job], name: str, value: bool) -> QuerySet[Job]:
         return selectors.needing_attention(qs) if value else qs
+
+    def by_attention_reason(self, qs: QuerySet[Job], name: str, value: str) -> QuerySet[Job]:
+        return selectors.needing_attention(qs, reason=value) if value else qs
 
 
 class JobViewSet(

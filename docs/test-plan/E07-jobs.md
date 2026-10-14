@@ -80,3 +80,13 @@
 |---|---|---|---|---|---|---|---|---|
 | TP-E07-034 | Quick setup time is in the organisation's timezone | Coordinator | Account timezone America/New_York | 1. **Set up lessons** Thursday 17:00. | Lessons at 17:00 Europe/London (the org/lesson timezone), shown as 12:00 in the viewer's New York time. | P2 | No | |
 | TP-E07-035 | Weekday names and pluralisation | Coordinator | — | 1. Check the "Weekly" schedule and "1 future lesson will move" vs "3 future lessons will move". | Correct day names and plural forms. | P3 | No | |
+
+## Gap batch G3 (as built 2026-10-14)
+
+Built by gap batch G3 ([ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md)); see the epic's *Gap backlog* notes.
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E07-036 | Active job without upcoming lessons | Coordinator | Active job, no future lessons | 1. Jobs → tick **Needs attention**. | The job is listed with the badge "No upcoming lessons"; adding a future lesson removes it. | P1 | backend: `jobs/tests/test_g3_attention.py::test_active_job_without_upcoming_lessons` | |
+| TP-E07-037 | Low prepaid balance or package units | Coordinator | Prepaid job with little credit; package job with no package | 1. Filter by reason **Low balance**. | Both jobs listed; selling a package removes the package job. | P1 | backend: `test_low_prepaid_balance_and_package_units` | |
+| TP-E07-038 | Overdue reports | Coordinator | Job with an overdue lesson report | 1. Filter by reason **Overdue reports**. | The job is listed. | P2 | backend: `test_overdue_reports`, `test_list_filters_and_shows_reasons` | |

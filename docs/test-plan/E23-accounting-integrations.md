@@ -141,3 +141,12 @@ Verify after the Phase 3 merge.
 |---|---|---|---|---|---|---|---|---|
 | TP-E23-052 | Credit note waits for the refund | Finance | A refund that issues a credit note | 1. Refund; watch both records. | The credit note syncs after the refund reopens the invoice. | P3 | No | |
 | TP-E23-053 | Switching sync off mid-backfill | Finance | Backfill running | 1. **Switch sync off**. | Backfill stops; nothing half-posted. | P3 | No | |
+
+## Gap batch G3 (as built 2026-10-14)
+
+Built by gap batch G3 ([ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md)); see the epic's *Gap backlog* notes.
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E23-054 | Package sales as deferred revenue | Finance | Accounting → Package sales on; deferred revenue account mapped | 1. Sell and pay a package.<br>2. Complete a lesson that uses it.<br>3. Export the GL journal. | The sale credits deferred revenue; the lesson day moves its share to package revenue (balanced). | P1 | backend: `accounting/tests/test_g3_deferred.py` | |
+| TP-E23-055 | Daily package journal in individual mode | Finance | Individual mode | 1. Next day's housekeeping. | A `package_revenue` journal syncs for the day. | P2 | backend: `test_individual_mode_daily_package_journal` | |

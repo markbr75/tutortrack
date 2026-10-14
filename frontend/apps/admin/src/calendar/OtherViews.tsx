@@ -1,5 +1,6 @@
 import { formatDate, useTranslation } from "@tutortrack/i18n";
 
+import { timeIn } from "../g3/zones";
 import { sameDay } from "./dates";
 import type { CalendarItem } from "./types";
 
@@ -94,11 +95,19 @@ export function AgendaView({
   items,
   colour,
   onSelect,
+  selected,
+  onToggle,
+  secondaryZone,
 }: {
   days: Date[];
   items: CalendarItem[];
   colour: (item: CalendarItem) => string;
   onSelect: (item: CalendarItem) => void;
+  /** Gap G3: lessons chosen for bulk actions (checkboxes show when given). */
+  selected?: string[];
+  onToggle?: (id: string) => void;
+  /** Gap G3: also show times in this timezone. */
+  secondaryZone?: string;
 }) {
   const { t, i18n } = useTranslation();
   const withItems = days
@@ -119,7 +128,16 @@ export function AgendaView({
           </h2>
           <ul className="divide-y divide-border rounded-md border border-border">
             {dayItems.map((item) => (
-              <li key={`${item.kind}-${item.id}`}>
+              <li key={`${item.kind}-${item.id}`} className="flex items-start">
+                {onToggle && item.kind === "lesson" ? (
+                  <input
+                    type="checkbox"
+                    className="ml-2 mt-3 size-4 shrink-0"
+                    aria-label={t("g3.calendar.selectLesson", { title: item.title })}
+                    checked={selected?.includes(item.id) ?? false}
+                    onChange={() => onToggle(item.id)}
+                  />
+                ) : null}
                 <button
                   type="button"
                   className="flex w-full items-start gap-3 p-2 text-left text-sm hover:bg-muted"
@@ -132,6 +150,12 @@ export function AgendaView({
                   />
                   <span className="w-28 shrink-0 tabular-nums">
                     {time(item.start, i18n.language)}–{time(item.end, i18n.language)}
+                    {secondaryZone ? (
+                      <span className="block text-xs text-muted-foreground">
+                        {timeIn(new Date(item.start), secondaryZone, i18n.language)}{" "}
+                        {secondaryZone.split("/").pop()?.replace("_", " ")}
+                      </span>
+                    ) : null}
                   </span>
                   <span className={item.status === "cancelled" ? "line-through" : undefined}>
                     <span className="font-medium">{item.title}</span>

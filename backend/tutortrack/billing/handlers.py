@@ -45,6 +45,50 @@ def follow_invoice_schedule(event: EventEnvelope) -> None:
         from .schedules import sync_invoice_schedules
 
         sync_invoice_schedules()
+    if event.data.get("area") == "billing" and keys & {
+        "billing.statement_schedule",
+        "billing.statement_day",
+    }:
+        from .statements import sync_schedule
+
+        sync_schedule()  # gap G3: monthly client statements (Temporal Schedule)
+
+
+@subscribe("invoice_run.tutor_review_requested")
+def ask_tutors(event: EventEnvelope) -> None:
+    """Gap G3: tell each tutor to check their lessons on the drafts (deduplicated)."""
+    from tutortrack.comms.services import notify
+    from tutortrack.people.models import TutorProfile
+
+    from .models import InvoiceRun
+
+    run = InvoiceRun.objects.filter(pk=event.subject["id"]).first()
+    if run is None:
+        return
+    for tutor in TutorProfile.objects.filter(pk__in=event.data.get("tutor_ids") or []):
+        notify("tutor_invoice_review", (run, tutor), key=f"{run.pk}:{tutor.pk}")
+
+
+@subscribe("invoice_run.tutor_reviewed")
+def tell_staff_about_flags(event: EventEnvelope) -> None:
+    if event.data.get("status") != "flagged":
+        return
+    from django.utils.translation import gettext as _
+
+    from tutortrack.comms.services import notify
+    from tutortrack.people.models import TutorProfile
+
+    tutor = TutorProfile.objects.filter(pk=event.data.get("tutor_id")).first()
+    held = len(event.data.get("held_invoice_ids") or [])
+    title = _("%(tutor)s reported a problem with draft invoices") % {
+        "tutor": tutor.full_name if tutor else _("A tutor")
+    }
+    body = _("%(n)s draft invoice(s) are held until you check them.") % {"n": held}
+    notify(
+        "staff_invoice_review_flagged",
+        (title, body, f"/billing?run={event.subject['id']}"),
+        key=str(event.id),
+    )
 
 
 @subscribe("invoice.issued", "invoice.paid")

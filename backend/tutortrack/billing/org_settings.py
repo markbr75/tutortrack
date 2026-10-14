@@ -182,3 +182,41 @@ register(
     ),
     label=_("While a client is in collections"),
 )
+
+# --- gap G3 -----------------------------------------------------------------------------------
+register(
+    "billing.tutor_review",
+    type="bool",
+    default=False,
+    scope="branch",
+    label=_("Ask tutors to check their lessons on draft invoices"),
+    help_text=_(
+        "Tutors see the dates, students and lessons (never amounts). Drafts a tutor reports "
+        "a problem with are held for you to correct."
+    ),
+)
+register(
+    "billing.tutor_review_days",
+    type="int",
+    default=2,
+    min_value=1,
+    max_value=14,
+    scope="branch",
+    label=_("Days tutors have to check draft invoices"),
+)
+register(
+    "billing.statement_schedule",
+    type="choice",
+    default="none",
+    choices=(("none", _("Don't send")), ("monthly", _("Every month"))),
+    label=_("Email clients a statement"),
+    help_text=_("Clients with account activity or a balance get last month's statement."),
+)
+register(
+    "billing.statement_day",
+    type="int",
+    default=1,
+    min_value=1,
+    max_value=28,
+    label=_("Day of the month statements are sent"),
+)

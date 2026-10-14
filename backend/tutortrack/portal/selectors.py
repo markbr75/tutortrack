@@ -9,6 +9,7 @@ from django.db.models import Q, QuerySet
 
 from tutortrack.core.time import now
 from tutortrack.scheduling.external import join_link
+from tutortrack.scheduling.selectors import online_cancellation_deadline
 from tutortrack.tenancy.settings_service import get_setting
 
 from .household import Household
@@ -33,6 +34,7 @@ def lesson_card(lesson: Any, household: Household) -> dict[str, Any]:
         "join_opens_at": join.opens_at if join else None,
         "location": lesson.location.name if lesson.location else "",
         "notes_for_client": lesson.notes_for_client,
+        "cancel_online_until": online_cancellation_deadline(lesson),
         "tutors": [
             {
                 "name": t.tutor.full_name,

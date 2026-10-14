@@ -2095,6 +2095,41 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/auth/reauthenticate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Confirm it's you before seeing sensitive details (e.g. full bank details). */
+    get: operations["auth_reauthenticate_retrieve"];
+    put?: never;
+    /** @description Confirm it's you before seeing sensitive details (e.g. full bank details). */
+    post: operations["auth_reauthenticate_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/auth/reauthenticate/options": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Passkey options for re-authentication (the challenge is kept in the session). */
+    post: operations["auth_reauthenticate_options_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/auth/sso/{provider}/callback": {
     parameters: {
       query?: never;
@@ -3459,6 +3494,26 @@ export interface paths {
     };
     /** @description The room resource view: each room with its lessons in ``[start, end)`` (E08-T12). */
     get: operations["calendar_rooms_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/calendar/timetable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description A printable PDF timetable of the lessons the user can see (FR-08-7, gap G3), usually
+     *     for one tutor or one student, at most 31 days. No prices.
+     */
+    get: operations["calendar_timetable_retrieve"];
     put?: never;
     post?: never;
     delete?: never;
@@ -5734,6 +5789,23 @@ export interface paths {
      *     instead (it is never evaluated).
      */
     get: operations["credit_notes_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/credit-notes/{id}/pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The credit note as a PDF (FR-10-5, gap G3), rendered from its own lines. */
+    get: operations["credit_notes_pdf_retrieve"];
     put?: never;
     post?: never;
     delete?: never;
@@ -8368,6 +8440,23 @@ export interface paths {
      *     mode); ``approve`` issues the drafts without waiting for the review period.
      */
     post: operations["invoice_runs_approve_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoice-runs/{id}/tutor-reviews": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description What tutors said about their lessons on this run's drafts (gap G3). */
+    get: operations["invoice_runs_tutor_reviews_list"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -11914,6 +12003,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/me/earnings/annual": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``/me/earnings/annual?year=&basis=&pdf=``: what the tutor was paid in a year, by
+     *     kind and month, for their tax return (FR-12-9, gap G3).
+     */
+    get: operations["me_earnings_annual_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/me/guidance": {
     parameters: {
       query?: never;
@@ -11944,6 +12053,86 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations["me_guidance_tours_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/invoice-reviews": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``/me/invoice-reviews``: a tutor's checks of their lessons on draft invoices before
+     *     they are issued (FR-10-3 review window, gap G3). Only lessons, never amounts.
+     */
+    get: operations["me_invoice_reviews_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/invoice-reviews/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``/me/invoice-reviews``: a tutor's checks of their lessons on draft invoices before
+     *     they are issued (FR-10-3 review window, gap G3). Only lessons, never amounts.
+     */
+    get: operations["me_invoice_reviews_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/invoice-reviews/{id}/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description ``/me/invoice-reviews``: a tutor's checks of their lessons on draft invoices before
+     *     they are issued (FR-10-3 review window, gap G3). Only lessons, never amounts.
+     */
+    post: operations["me_invoice_reviews_confirm_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/invoice-reviews/{id}/flag": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description ``/me/invoice-reviews``: a tutor's checks of their lessons on draft invoices before
+     *     they are issued (FR-10-3 review window, gap G3). Only lessons, never amounts.
+     */
+    post: operations["me_invoice_reviews_flag_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -13361,6 +13550,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/pay-runs/{id}/edit-item": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Change one item's amount (a linked correction in this run) or a manual item's
+     *     description (gap G3). Financial: send ``Idempotency-Key``.
+     */
+    post: operations["pay_runs_edit_item_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/pay-runs/{id}/mark-paid": {
     parameters: {
       query?: never;
@@ -13792,6 +14001,26 @@ export interface paths {
      *     cheque, other) and allocates it, oldest invoices first unless told otherwise.
      */
     post: operations["payments_refund_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/payments/bulk": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Record many manual payments at once (FR-11-5 bulk entry grid, gap G3). Each pays
+     *     that client's oldest invoices first. All or nothing; send ``Idempotency-Key``.
+     */
+    post: operations["payments_bulk_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -20434,6 +20663,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/tutors/{id}/earnings/annual": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description ``/tutors/{id}/earnings/annual``: the same summary for staff (``payroll.view``). */
+    get: operations["tutors_earnings_annual_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/tutors/{id}/onboarding": {
     parameters: {
       query?: never;
@@ -22089,6 +22335,15 @@ export interface components {
       /** Format: date-time */
       expires_at?: string | null;
     };
+    AnnualEarnings: {
+      year: number;
+      basis: components["schemas"]["BasisEnum"];
+      /** Format: date */
+      start: string;
+      /** Format: date */
+      end: string;
+      currencies: components["schemas"]["EarningsCurrency"][];
+    };
     Answer: {
       label: string;
       type: string;
@@ -22567,6 +22822,16 @@ export interface components {
       /** Format: date-time */
       last_left_at: string | null;
     };
+    /**
+     * @description * `seeking_tutor` - seeking_tutor
+     *     * `open_offer` - open_offer
+     *     * `no_upcoming_lessons` - no_upcoming_lessons
+     *     * `low_balance` - low_balance
+     *     * `overdue_reports` - overdue_reports
+     * @enum {string}
+     */
+    AttentionReasonsEnum:
+      "seeking_tutor" | "open_offer" | "no_upcoming_lessons" | "low_balance" | "overdue_reports";
     AudiencePreview: {
       total: number;
       sendable: number;
@@ -22982,6 +23247,12 @@ export interface components {
        */
       month_first: boolean;
     };
+    /**
+     * @description * `calendar` - calendar
+     *     * `tax_year` - tax_year
+     * @enum {string}
+     */
+    BasisEnum: "calendar" | "tax_year";
     /**
      * @description * `month` - Monthly
      *     * `year` - Annual
@@ -23712,6 +23983,28 @@ export interface components {
       /** @default admin */
       cancelled_by: components["schemas"]["CancelledByEnum"];
     };
+    /** @description The bulk payment-entry grid (gap G3): up to 200 rows, all recorded or none. */
+    BulkPaymentRequest: {
+      rows: components["schemas"]["BulkPaymentRowRequest"][];
+    };
+    BulkPaymentRowRequest: {
+      /** Format: uuid */
+      client: string;
+      amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      method: components["schemas"]["RecordPaymentMethodEnum"];
+      /** Format: date-time */
+      received_at?: string | null;
+      /** @default  */
+      reference: string;
+    };
     BulkRejectRequest: {
       applications: string[];
       reason: string;
@@ -24100,6 +24393,7 @@ export interface components {
      *     * `plan` - Recurring fee
      *     * `late_fee` - Late payment fee
      *     * `course` - Course fee
+     *     * `surcharge` - Card surcharge
      * @enum {string}
      */
     ChargeKindEnum:
@@ -24111,7 +24405,8 @@ export interface components {
       | "package"
       | "plan"
       | "late_fee"
-      | "course";
+      | "course"
+      | "surcharge";
     ChargeLine: {
       student_id: string;
       client_id: string | null;
@@ -26241,6 +26536,26 @@ export interface components {
         [key: string]: string;
       };
     };
+    EarningsCurrency: {
+      currency: string;
+      earnings: components["schemas"]["MoneyOut"];
+      reimbursements: components["schemas"]["MoneyOut"];
+      total: components["schemas"]["MoneyOut"];
+      by_kind: components["schemas"]["EarningsKind"][];
+      by_month: components["schemas"]["EarningsMonth"][];
+      payouts: number;
+    };
+    EarningsKind: {
+      kind: string;
+      label: string;
+      amount: components["schemas"]["MoneyOut"];
+      reimbursement: boolean;
+    };
+    EarningsMonth: {
+      /** @description YYYY-MM the money was paid */
+      month: string;
+      amount: components["schemas"]["MoneyOut"];
+    };
     EarningsRateRef: {
       id: string;
       name: string;
@@ -26254,6 +26569,23 @@ export interface components {
       pay?: components["schemas"]["MoneyOut"];
       margin?: components["schemas"]["MoneyOut"];
       margin_percent?: string | null;
+    };
+    /** @description Gap G3: edit one item in a run under review (a new amount becomes a correction). */
+    EditItemRequest: {
+      /** Format: uuid */
+      item: string;
+      amount?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      description?: string;
+      /** @default  */
+      reason: string;
     };
     /**
      * @description * `staff` - Staff
@@ -28225,6 +28557,9 @@ export interface components {
       readonly id: string;
       /** Format: uuid */
       readonly charge: string | null;
+      readonly kind: components["schemas"]["InvoiceLineKindEnum"];
+      /** Format: uuid */
+      readonly parent: string | null;
       readonly position: number;
       /** Format: date */
       readonly date: string;
@@ -28282,6 +28617,12 @@ export interface components {
         currency: string;
       };
     };
+    /**
+     * @description * `line` - Line
+     *     * `discount` - Discount
+     * @enum {string}
+     */
+    InvoiceLineKindEnum: "line" | "discount";
     InvoiceRun: {
       /** Format: uuid */
       readonly id: string;
@@ -28421,6 +28762,8 @@ export interface components {
       readonly tutors: components["schemas"]["JobTutor"][];
       /** Format: date-time */
       readonly created_at: string;
+      /** @description Why the job needs attention (filled on ?attention=true lists). */
+      readonly attention_reasons: components["schemas"]["AttentionReasonsEnum"][];
     };
     JobCreate: {
       /** Format: uuid */
@@ -28491,6 +28834,8 @@ export interface components {
       readonly tutors: components["schemas"]["JobTutor"][];
       /** Format: date-time */
       readonly created_at: string;
+      /** @description Why the job needs attention (filled on ?attention=true lists). */
+      readonly attention_reasons: components["schemas"]["AttentionReasonsEnum"][];
     };
     JobCreateRequest: {
       name?: string;
@@ -30251,6 +30596,13 @@ export interface components {
       | "complained"
       | "failed"
       | "suppressed";
+    /**
+     * @description * `password` - password
+     *     * `totp` - totp
+     *     * `passkey` - passkey
+     * @enum {string}
+     */
+    MethodsEnum: "password" | "totp" | "passkey";
     MigrationProject: {
       /** Format: uuid */
       readonly id: string;
@@ -33155,6 +33507,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["TierAssignment"][];
     };
+    PaginatedTutorInvoiceReviewList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["TutorInvoiceReview"][];
+    };
     PaginatedTutorList: {
       /**
        * Format: uri
@@ -34798,7 +35163,10 @@ export interface components {
        * @default
        */
       redirect_url: string;
+      /** @description What will be charged, card surcharge included */
       amount: components["schemas"]["MoneyOut"];
+      /** @description The card surcharge in ``amount`` (gap G3) */
+      surcharge?: components["schemas"]["MoneyOut"] | null;
     };
     PayIntentRequestRequest: {
       /** Format: decimal */
@@ -34840,6 +35208,8 @@ export interface components {
       readonly pay_run_number: string;
       /** Format: uuid */
       readonly expense: string | null;
+      /** Format: uuid */
+      readonly adjusts: string | null;
       /** Format: date-time */
       readonly created_at: string;
     };
@@ -34904,6 +35274,11 @@ export interface components {
       has_pdf: boolean;
       /** @description Online providers offered: stripe, gocardless, paypal */
       providers: string[];
+      /**
+       * @description Added to card payments as a separate line (gap G3); 0 when none.
+       * @default 0
+       */
+      card_surcharge_percent: string;
     };
     /**
      * @description * `invoice` - invoice
@@ -35620,6 +35995,8 @@ export interface components {
       tutor_cancellation?: components["schemas"]["PercentPair"];
       admin_cancellation?: components["schemas"]["PercentPair"];
       max_free_per_month?: number | null;
+      /** @description Free cancellations per E20 term (the branch's terms); null: no limit. */
+      max_free_per_term?: number | null;
       makeup_credit?: components["schemas"]["MakeupRules"];
     };
     /** @description All keys optional on input (defaults fill the gaps); complete on output. */
@@ -35632,6 +36009,8 @@ export interface components {
       tutor_cancellation?: components["schemas"]["PercentPairRequest"];
       admin_cancellation?: components["schemas"]["PercentPairRequest"];
       max_free_per_month?: number | null;
+      /** @description Free cancellations per E20 term (the branch's terms); null: no limit. */
+      max_free_per_term?: number | null;
       makeup_credit?: components["schemas"]["MakeupRulesRequest"];
     };
     PortalAffiliate: {
@@ -35843,6 +36222,11 @@ export interface components {
       join_opens_at: string | null;
       location: string;
       notes_for_client: string;
+      /**
+       * Format: date-time
+       * @description Self-booked lessons: the last moment to cancel online (gap G3).
+       */
+      cancel_online_until: string | null;
       tutors: components["schemas"]["PortalTutor"][];
       students: components["schemas"]["PortalAttendee"][];
     };
@@ -37751,6 +38135,24 @@ export interface components {
     ReasonEnum: "too_expensive" | "missing_features" | "switching" | "closing" | "other";
     ReasonRequest: {
       reason: string;
+    };
+    ReauthRequestRequest: {
+      /** @default  */
+      password: string;
+      /**
+       * @description Authenticator or recovery code
+       * @default
+       */
+      code: string;
+      /** @description Passkey assertion */
+      credential?: {
+        [key: string]: unknown;
+      } | null;
+    };
+    ReauthStatus: {
+      /** @description Confirmed within the last few minutes */
+      recent: boolean;
+      methods: components["schemas"]["MethodsEnum"][];
     };
     Rebuild: {
       lessons: number;
@@ -41735,6 +42137,35 @@ export interface components {
        */
       offer: boolean;
     };
+    /** @description A tutor's check of their lessons on an invoice run's drafts (gap G3). Never amounts. */
+    TutorInvoiceReview: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly invoice_run: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      readonly status: components["schemas"]["TutorInvoiceReviewStatusEnum"];
+      readonly comment: string;
+      readonly flagged_invoices: unknown;
+      /** Format: date-time */
+      readonly decided_at: string | null;
+      /** Format: date */
+      readonly period_start: string;
+      /** Format: date */
+      readonly period_end: string;
+      /** Format: date-time */
+      readonly review_until: string;
+      readonly lessons: components["schemas"]["TutorReviewLesson"][];
+    };
+    /**
+     * @description * `pending` - Waiting for the tutor
+     *     * `confirmed` - Confirmed
+     *     * `flagged` - Problem reported
+     * @enum {string}
+     */
+    TutorInvoiceReviewStatusEnum: "pending" | "confirmed" | "flagged";
     TutorMe: {
       id: string;
       name: string;
@@ -41949,6 +42380,20 @@ export interface components {
       custom_fields?: unknown;
       /** @default true */
       invite: boolean;
+    };
+    TutorReviewFlagRequest: {
+      comment: string;
+      /** @description Only these drafts (default: every draft with your lessons). */
+      invoice_ids?: string[];
+    };
+    TutorReviewLesson: {
+      invoice_id: string;
+      /** Format: date */
+      date: string;
+      lesson_id: string | null;
+      description: string;
+      student: string;
+      duration_minutes: number | null;
     };
     TutorStartRequest: {
       body: string;
@@ -43297,6 +43742,7 @@ export interface operations {
           | "credit_note"
           | "invoice"
           | "journal"
+          | "package_revenue"
           | "pay_run"
           | "pay_statement"
           | "payment"
@@ -45963,6 +46409,75 @@ export interface operations {
       };
     };
   };
+  auth_reauthenticate_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReauthStatus"];
+        };
+      };
+    };
+  };
+  auth_reauthenticate_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ReauthRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReauthRequestRequest"];
+        "multipart/form-data": components["schemas"]["ReauthRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReauthStatus"];
+        };
+      };
+    };
+  };
+  auth_reauthenticate_options_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicKeyOptions"];
+        };
+      };
+    };
+  };
   auth_sso_callback_retrieve: {
     parameters: {
       query?: {
@@ -48476,6 +48991,32 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["RoomSchedule"][];
+        };
+      };
+    };
+  };
+  calendar_timetable_retrieve: {
+    parameters: {
+      query: {
+        end?: string;
+        start: string;
+        student?: string[];
+        /** @description IANA zone to show times in */
+        timezone?: string;
+        tutor?: string[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": string;
         };
       };
     };
@@ -51070,6 +51611,7 @@ export interface operations {
          *     * `plan` - Recurring fee
          *     * `late_fee` - Late payment fee
          *     * `course` - Course fee
+         *     * `surcharge` - Card surcharge
          */
         kind?: (
           | "ad_hoc"
@@ -51081,6 +51623,7 @@ export interface operations {
           | "package"
           | "plan"
           | "reconciliation"
+          | "surcharge"
         )[];
         lesson?: string;
         /** @description Which field to use when ordering the results. */
@@ -53568,6 +54111,28 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["CreditNote"];
+        };
+      };
+    };
+  };
+  credit_notes_pdf_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this credit note. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": string;
         };
       };
     };
@@ -58103,6 +58668,31 @@ export interface operations {
       };
     };
   };
+  invoice_runs_tutor_reviews_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this invoice run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorInvoiceReview"][];
+        };
+      };
+    };
+  };
   invoice_runs_preview_create: {
     parameters: {
       query?: never;
@@ -59022,6 +59612,21 @@ export interface operations {
       query?: {
         /** @description Jobs needing attention */
         attention?: boolean;
+        /**
+         * @description Jobs needing attention for this reason
+         *
+         *     * `seeking_tutor` - seeking_tutor
+         *     * `open_offer` - open_offer
+         *     * `no_upcoming_lessons` - no_upcoming_lessons
+         *     * `low_balance` - low_balance
+         *     * `overdue_reports` - overdue_reports
+         */
+        attention_reason?:
+          | "low_balance"
+          | "no_upcoming_lessons"
+          | "open_offer"
+          | "overdue_reports"
+          | "seeking_tutor";
         branch?: string;
         client?: string;
         /** @description The pagination cursor value. */
@@ -59230,6 +59835,21 @@ export interface operations {
       query?: {
         /** @description Jobs needing attention */
         attention?: boolean;
+        /**
+         * @description Jobs needing attention for this reason
+         *
+         *     * `seeking_tutor` - seeking_tutor
+         *     * `open_offer` - open_offer
+         *     * `no_upcoming_lessons` - no_upcoming_lessons
+         *     * `low_balance` - low_balance
+         *     * `overdue_reports` - overdue_reports
+         */
+        attention_reason?:
+          | "low_balance"
+          | "no_upcoming_lessons"
+          | "open_offer"
+          | "overdue_reports"
+          | "seeking_tutor";
         branch?: string;
         client?: string;
         /** @description Which field to use when ordering the results. */
@@ -64473,6 +65093,32 @@ export interface operations {
       };
     };
   };
+  me_earnings_annual_retrieve: {
+    parameters: {
+      query?: {
+        basis?: "calendar" | "tax_year";
+        /** @description Download as PDF instead of JSON */
+        pdf?: boolean;
+        /** @description Calendar year, or the year a UK tax year starts */
+        year?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AnnualEarnings"];
+          "application/pdf": string;
+        };
+      };
+    };
+  };
   me_guidance_retrieve: {
     parameters: {
       query?: never;
@@ -64518,6 +65164,117 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Guidance"];
+        };
+      };
+    };
+  };
+  me_invoice_reviews_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Only checks still to answer */
+        open?: boolean;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedTutorInvoiceReviewList"];
+        };
+      };
+    };
+  };
+  me_invoice_reviews_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this tutor invoice review. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorInvoiceReview"];
+        };
+      };
+    };
+  };
+  me_invoice_reviews_confirm_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this tutor invoice review. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorInvoiceReview"];
+        };
+      };
+    };
+  };
+  me_invoice_reviews_flag_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this tutor invoice review. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TutorReviewFlagRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TutorReviewFlagRequest"];
+        "multipart/form-data": components["schemas"]["TutorReviewFlagRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorInvoiceReview"];
         };
       };
     };
@@ -66915,6 +67672,37 @@ export interface operations {
       };
     };
   };
+  pay_runs_edit_item_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this pay run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EditItemRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["EditItemRequest"];
+        "multipart/form-data": components["schemas"]["EditItemRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PayRunDetail"];
+        };
+      };
+    };
+  };
   pay_runs_mark_paid_create: {
     parameters: {
       query?: never;
@@ -67604,6 +68392,61 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Refund"];
+        };
+      };
+    };
+  };
+  payments_bulk_create: {
+    parameters: {
+      query?: {
+        client?: string;
+        /**
+         * @description * `card` - Card
+         *     * `direct_debit` - Direct debit
+         *     * `bank_transfer` - Bank transfer
+         *     * `cash` - Cash
+         *     * `cheque` - Cheque
+         *     * `paypal` - PayPal
+         *     * `other` - Other
+         */
+        method?: (
+          "bank_transfer" | "card" | "cash" | "cheque" | "direct_debit" | "other" | "paypal"
+        )[];
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /**
+         * @description * `pending` - Pending
+         *     * `succeeded` - Succeeded
+         *     * `failed` - Failed
+         *     * `refunded` - Refunded
+         *     * `partially_refunded` - Partly refunded
+         *     * `disputed` - Disputed
+         */
+        status?: (
+          "disputed" | "failed" | "partially_refunded" | "pending" | "refunded" | "succeeded"
+        )[];
+      };
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BulkPaymentRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BulkPaymentRequest"];
+        "multipart/form-data": components["schemas"]["BulkPaymentRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Payment"][];
         };
       };
     };
@@ -79377,6 +80220,34 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TutorCompliance"];
+        };
+      };
+    };
+  };
+  tutors_earnings_annual_retrieve: {
+    parameters: {
+      query?: {
+        basis?: "calendar" | "tax_year";
+        /** @description Download as PDF instead of JSON */
+        pdf?: boolean;
+        /** @description Calendar year, or the year a UK tax year starts */
+        year?: number;
+      };
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AnnualEarnings"];
+          "application/pdf": string;
         };
       };
     };

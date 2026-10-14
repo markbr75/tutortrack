@@ -853,6 +853,69 @@ def add_adjustment(
     return pay_run
 
 
+def effective_amount(item: PayItem) -> Money:
+    """An item with the corrections made to it in pay-run reviews (gap G3)."""
+    total = item.amount
+    for fix in item.corrections.exclude(status=PayItem.Status.VOID):
+        total = total + fix.amount
+    return total
+
+
+@transaction.atomic
+def edit_item(
+    pay_run: PayRun,
+    item: PayItem,
+    *,
+    amount: Money | None = None,
+    description: str = "",
+    reason: str = "",
+) -> PayRun:
+    """Edit one item in the run under review (FR-12-5, gap G3). The item itself never
+    changes: a new amount becomes a linked ``adjustment`` item in the same run for the
+    difference (so the run, statements and payouts show the correction), and a new
+    description is only taken for manual items (bonus, salary...)."""
+    pay_run = PayRun.objects.select_for_update().get(pk=pay_run.pk)
+    _editable(pay_run)
+    if item.pay_run_id != pay_run.pk or item.adjusts_id:
+        raise NotFound()
+    if description and description != item.description:
+        if item.kind not in MANUAL_KINDS:
+            message = _("Only manual items can be renamed; change the amount instead.")
+            raise BusinessRuleViolation(message, extra={"errors": {"description": [message]}})
+        with audit.track(item, action="edit"):
+            item.description = description[:300]
+            item.save(update_fields=["description", "updated_at"])
+    if amount is not None:
+        amount = amount.round_to_minor()
+        if amount.currency != item.currency:
+            message = _("Use the item's currency.")
+            raise BusinessRuleViolation(message, extra={"errors": {"amount": [message]}})
+        delta = amount - effective_amount(item)
+        if not delta.is_zero():
+            if not reason.strip():
+                message = _("Say why the amount changes.")
+                raise BusinessRuleViolation(message, extra={"errors": {"reason": [message]}})
+            count = item.corrections.count()
+            fix = create_manual_item(
+                tutor=item.tutor,
+                kind=PayItem.Kind.ADJUSTMENT,
+                description=_("Correction to %(item)s: %(reason)s")
+                % {"item": item.description[:150], "reason": reason[:120]},
+                amount=delta,
+                day=pay_run.period_end,
+                source_key=f"edit:{item.pk}:{count + 1}",
+            )
+            PayItem.objects.filter(pk=fix.pk).update(
+                status=PayItem.Status.IN_PAY_RUN,
+                pay_run=pay_run,
+                adjusts=item,
+                hold_reasons=[],
+                branch_id=item.branch_id,
+            )
+    _recompute(pay_run)
+    return pay_run
+
+
 @transaction.atomic
 def approve(pay_run: PayRun, *, user: Any) -> PayRun:
     """Record an approval; the run is approved once enough different people agree."""

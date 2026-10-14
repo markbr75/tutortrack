@@ -138,3 +138,7 @@ Batch G6 of `docs/05-gap-backlog.md`; design in ADR 0034.
   their cover images become public assets. New block `blog_list` ("Latest blog posts"); `blog`
   is a reserved page address. Admin: Website → Blog tab. Deviation: no versions for posts
   (publishing is a status) and no rich-text editor.
+
+**Gap G3** ([ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md)):
+
+- **Booking block (FR-24-4; E24:107):** the website builder's `booking` block (heading, intro, days) embeds the E08 `<tt-booking>` widget when online booking is on; see E08's gap notes.

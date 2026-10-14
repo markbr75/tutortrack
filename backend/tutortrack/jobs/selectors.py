@@ -112,18 +112,119 @@ def summary(job: Job) -> JobSummary:
     )
 
 
-def needing_attention(queryset: QuerySet[Job], *, seeking_days: int = 7) -> QuerySet[Job]:
-    """Jobs seeking a tutor for more than ``seeking_days`` and active jobs with an open
-    tutor offer. E08/E09/E10 add "no upcoming lessons", overdue reports and low balance."""
+ATTENTION_REASONS = (
+    "seeking_tutor",
+    "open_offer",
+    "no_upcoming_lessons",
+    "low_balance",
+    "overdue_reports",
+)
+
+
+def _low_balance_job_ids(queryset: QuerySet[Job]) -> list[Any]:
+    """Active prepaid jobs whose paying client's projected credit is under the top-up
+    threshold, and active package jobs whose client has no package with more than the
+    "low" number of units left (FR-07-6, gap G3). Read through billing's selectors."""
+    from tutortrack.billing.selectors import low_balance_clients
+
+    jobs = list(
+        queryset.filter(
+            status=Job.Status.ACTIVE, billing_method__in=["prepaid_credit", "package"]
+        ).values("pk", "client_id", "bill_to_id", "billing_method", "currency")
+    )
+    if not jobs:
+        return []
+    wanted = {
+        (str(j["bill_to_id"] or j["client_id"]), j["currency"], j["billing_method"]) for j in jobs
+    }
+    low = low_balance_clients(wanted)
+    return [
+        j["pk"]
+        for j in jobs
+        if (str(j["bill_to_id"] or j["client_id"]), j["currency"], j["billing_method"]) in low
+    ]
+
+
+def with_attention(queryset: QuerySet[Job], *, seeking_days: int = 7) -> QuerySet[Job]:
+    """Annotate each job with the reasons it needs attention (``att_*`` booleans).
+
+    * seeking a tutor for more than ``seeking_days``;
+    * an open tutor offer;
+    * active with no planned lessons from now on (E08);
+    * low prepaid balance or package units (E10);
+    * a lesson report overdue (E09).
+    """
+    from django.db.models import BooleanField, Case, Exists, OuterRef, Value, When
+
+    from tutortrack.delivery.models import LessonReport
+    from tutortrack.scheduling.models import Lesson
+
+    if "att_seeking_tutor" in queryset.query.annotations:
+        return queryset
     cutoff = now() - timedelta(days=seeking_days)
-    return queryset.filter(
-        Q(status=Job.Status.SEEKING_TUTOR, status_changed_at__lt=cutoff)
-        | Q(status=Job.Status.SEEKING_TUTOR, status_changed_at__isnull=True, created_at__lt=cutoff)
-        | Q(
-            tutors__status=JobTutor.Status.OFFERED,
-            status__in=[Job.Status.SEEKING_TUTOR, Job.Status.ACTIVE],
-        )
-    ).distinct()
+    upcoming = Lesson.objects.filter(
+        job=OuterRef("pk"), status=Lesson.Status.PLANNED, start__gte=now()
+    )
+    overdue = LessonReport.objects.filter(
+        lesson__job=OuterRef("pk"),
+        status__in=[
+            LessonReport.Status.PENDING,
+            LessonReport.Status.DRAFT,
+            LessonReport.Status.RETURNED,
+        ],
+        due_at__lte=now(),
+    )
+    offers = JobTutor.objects.filter(job=OuterRef("pk"), status=JobTutor.Status.OFFERED)
+    low = _low_balance_job_ids(queryset)
+    return queryset.annotate(
+        att_seeking_tutor=Case(
+            When(
+                Q(status=Job.Status.SEEKING_TUTOR)
+                & (
+                    Q(status_changed_at__lt=cutoff)
+                    | Q(status_changed_at__isnull=True, created_at__lt=cutoff)
+                ),
+                then=Value(True),
+            ),
+            default=Value(False),
+            output_field=BooleanField(),
+        ),
+        att_open_offer=Case(
+            When(
+                Q(status__in=[Job.Status.SEEKING_TUTOR, Job.Status.ACTIVE]) & Exists(offers),
+                then=Value(True),
+            ),
+            default=Value(False),
+            output_field=BooleanField(),
+        ),
+        att_no_upcoming_lessons=Case(
+            When(Q(status=Job.Status.ACTIVE) & ~Exists(upcoming), then=Value(True)),
+            default=Value(False),
+            output_field=BooleanField(),
+        ),
+        att_low_balance=Case(
+            When(pk__in=low, then=Value(True)), default=Value(False), output_field=BooleanField()
+        ),
+        att_overdue_reports=Exists(overdue),
+    )
+
+
+def needing_attention(
+    queryset: QuerySet[Job], *, seeking_days: int = 7, reason: str = ""
+) -> QuerySet[Job]:
+    """Jobs needing attention for any reason (or the one ``reason``), with ``att_*``
+    annotations for the list to show why (FR-07-6)."""
+    annotated = with_attention(queryset, seeking_days=seeking_days)
+    reasons = [reason] if reason in ATTENTION_REASONS else list(ATTENTION_REASONS)
+    q = Q()
+    for name in reasons:
+        q |= Q(**{f"att_{name}": True})
+    return annotated.filter(q)
+
+
+def attention_reasons(job: Job) -> list[str]:
+    """The reasons a job (annotated by ``with_attention``) needs attention."""
+    return [r for r in ATTENTION_REASONS if getattr(job, f"att_{r}", False)]
 
 
 def last_assignment(tutor_ids: list[str]) -> dict[str, Any]:

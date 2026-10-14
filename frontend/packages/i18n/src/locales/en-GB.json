@@ -6588,5 +6588,202 @@
         "help": "Agents who introduce clients (with their commission) and your reviews."
       }
     }
+  },
+  "g3": {
+    "attention": {
+      "column": "Needs attention",
+      "reason": "Reason",
+      "anyReason": "Any reason",
+      "reasons": {
+        "seeking_tutor": "Seeking a tutor",
+        "open_offer": "Offer waiting",
+        "no_upcoming_lessons": "No upcoming lessons",
+        "low_balance": "Low balance",
+        "overdue_reports": "Overdue reports"
+      }
+    },
+    "billing": {
+      "creditedWithLine": "Credited with its lesson",
+      "removedWithLine": "Removed with its lesson",
+      "creditNotePdf": "PDF of {{number}}"
+    },
+    "billingOptions": {
+      "tab": "Options",
+      "review": "Tutors check draft invoices",
+      "statements": "Monthly statements",
+      "discounts": "Discounts on invoices"
+    },
+    "tutorReview": {
+      "title": "Tutor checks",
+      "nav": "Check invoices",
+      "pageTitle": "Check your lessons before invoices go out",
+      "help": "These lessons are about to be invoiced. Check the dates, students and lessons. If something is wrong, tell us and we'll hold those invoices.",
+      "nothing": "Nothing to check at the moment.",
+      "period": "Lessons {{start}} to {{end}}",
+      "until": "Please answer by {{when}}.",
+      "lessons": "Your lessons on these invoices",
+      "date": "Date",
+      "lesson": "Lesson",
+      "student": "Student",
+      "minutes": "Minutes",
+      "confirm": "These are right",
+      "flag": "Something's wrong",
+      "whatsWrong": "What's wrong?",
+      "send": "Send",
+      "back": "Back",
+      "held_one": "{{count}} invoice held",
+      "held_other": "{{count}} invoices held",
+      "status": {
+        "pending": "Waiting for the tutor",
+        "confirmed": "Confirmed",
+        "flagged": "Problem reported"
+      }
+    },
+    "bulkPayments": {
+      "tab": "Record payments",
+      "title": "Record several payments",
+      "help": "Each payment pays that client's oldest invoices first; anything left becomes credit. If any row can't be recorded, none are.",
+      "client": "Client",
+      "amount": "Amount",
+      "method": "Method",
+      "date": "Date received",
+      "reference": "Reference",
+      "rowClient": "Client, row {{n}}",
+      "rowAmount": "Amount, row {{n}}",
+      "rowMethod": "Method, row {{n}}",
+      "rowDate": "Date received, row {{n}}",
+      "rowReference": "Reference, row {{n}}",
+      "rowFailed": "This row couldn't be recorded.",
+      "chooseClient": "Choose a client",
+      "methods": {
+        "bank_transfer": "Bank transfer",
+        "cash": "Cash",
+        "cheque": "Cheque",
+        "other": "Other"
+      },
+      "addRow": "Add a row",
+      "record_one": "Record {{count}} payment",
+      "record_other": "Record {{count}} payments",
+      "done_one": "{{count}} payment recorded.",
+      "done_other": "{{count}} payments recorded."
+    },
+    "calendar": {
+      "savedSets": "Saved filters",
+      "chooseSet": "Choose saved filters",
+      "deleteSet": "Delete these saved filters",
+      "setName": "Name for these filters",
+      "saveSet": "Save filters",
+      "secondaryZone": "Also show times in",
+      "noSecondaryZone": "No second time zone",
+      "print": "Print timetable (PDF)",
+      "bulkTitle": "Bulk actions",
+      "selected_one": "{{count}} lesson selected",
+      "selected_other": "{{count}} lessons selected",
+      "action": "Action",
+      "actions": {
+        "complete": "Mark complete",
+        "cancel": "Cancel",
+        "reassign_tutor": "Give to another tutor",
+        "change_location": "Change location",
+        "delete": "Delete (planned lessons only)"
+      },
+      "chooseTutor": "Choose a tutor",
+      "location": "Location",
+      "apply": "Apply to selected",
+      "export": "Export selected (CSV)",
+      "someFailed_one": "{{count}} lesson couldn't be changed; it is still selected.",
+      "someFailed_other": "{{count}} lessons couldn't be changed; they are still selected.",
+      "selectMode": "Select lessons",
+      "selectLesson": "Select {{title}}"
+    },
+    "delivery": {
+      "maxFreeTerm": "Free cancellations per term",
+      "maxFreeTermHint": "Leave empty for no limit. Terms come from your term dates; lessons in the holidays aren't counted.",
+      "orgPolicyHelp": "Set different rules for a branch, service, job or client on the Overrides tab.",
+      "overrideHelp": "These rules replace your organisation's rules for this record.",
+      "overrides": "Overrides",
+      "overridesHelp": "The most specific rules win: client, then job, then service, then branch, then your organisation's rules.",
+      "noOverrides": "No overrides yet.",
+      "edit": "Edit",
+      "setOverride": "Set rules for one record",
+      "scope": "Rules for a",
+      "scopes": {
+        "organisation": "Organisation",
+        "branch": "Branch",
+        "service": "Service",
+        "job": "Job",
+        "client": "Client"
+      },
+      "chooseRecord": "Choose one",
+      "overrideName": "{{scope}}: {{name}}",
+      "subjects": "Subjects",
+      "noneYet": "None yet.",
+      "assignHelp": "Use this template for the jobs, services or subjects ticked here. A job's template wins over a service's, and a service's over a subject's."
+    },
+    "files": {
+      "add": "Add files",
+      "remove": "Remove file",
+      "uploading": "Uploading",
+      "failed": "The file couldn't be uploaded. Try again.",
+      "scanning": "being checked",
+      "attachment": "Attachment {{n}}"
+    },
+    "paymentOptions": {
+      "autopay": "Auto-pay and card reminders",
+      "methods": "Ways each branch takes payment",
+      "methodsHelp": "The payment page offers only these, and staff can record only these. A card surcharge is added as a separate line where the law allows it.",
+      "branch": "Branch",
+      "method": {
+        "card": "Card and wallets (Stripe)",
+        "direct_debit": "Direct debit",
+        "paypal": "PayPal",
+        "bank_transfer": "Bank transfer",
+        "cash": "Cash",
+        "cheque": "Cheque",
+        "other": "Other"
+      }
+    },
+    "payroll": {
+      "showFullBank": "Show full bank details",
+      "fullBank": "Full bank details",
+      "annual": "Earnings summary",
+      "annualPdf": "{{year}} (PDF)",
+      "items": "Items in this run",
+      "edit": "Edit",
+      "editItem": "Edit {{item}}",
+      "newAmount": "Amount",
+      "description": "Description",
+      "reason": "Why it changes",
+      "saveItem": "Save"
+    },
+    "reauth": {
+      "title": "Confirm it's you",
+      "help": "For your security, confirm it's you before we show these details.",
+      "password": "Your password",
+      "code": "Or a code from your authenticator app",
+      "confirm": "Confirm",
+      "passkey": "Use a passkey",
+      "cancel": "Cancel",
+      "failed": "That didn't match. Try again."
+    },
+    "portal": {
+      "cancelClosed": "To cancel this lesson now, please contact us.",
+      "cancelUntil": "You can cancel this lesson online until {{when}}."
+    },
+    "annual": {
+      "title": "Earnings summary",
+      "year": "Year",
+      "pdf": "Download PDF",
+      "taxYear": "Tax year {{start}} to {{end}}",
+      "calendar": "{{start}} to {{end}}",
+      "earnings": "Earnings",
+      "expenses": "Expenses repaid",
+      "total": "Total paid",
+      "nothing": "Nothing was paid in this period."
+    },
+    "accounting": {
+      "packages": "Package sales",
+      "packagesHelp": "Treat package sales as deferred revenue: map a deferred revenue account, and a daily journal moves revenue to sales as lessons use the units."
+    }
   }
 }

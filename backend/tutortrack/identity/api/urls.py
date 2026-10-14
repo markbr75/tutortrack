@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
-from . import account_views, support_views, views
+from . import account_views, reauth_views, support_views, views
 from . import phase2_views as p2
 
 router = SimpleRouter(trailing_slash=False)
@@ -32,6 +32,12 @@ urlpatterns = [
         name="auth-sso-callback",
     ),
     path("auth/passkey/options", p2.PasskeyAuthOptionsView.as_view(), name="auth-passkey-options"),
+    path("auth/reauthenticate", reauth_views.ReauthView.as_view(), name="auth-reauthenticate"),
+    path(
+        "auth/reauthenticate/options",
+        reauth_views.ReauthOptionsView.as_view(),
+        name="auth-reauthenticate-options",
+    ),
     path("auth/passkey/verify", p2.PasskeyVerifyView.as_view(), name="auth-passkey-verify"),
     path("auth/org-sso", p2.OrgSSOInfoView.as_view(), name="auth-org-sso"),
     path("auth/org-sso/start", p2.OrgSSOStartView.as_view(), name="auth-org-sso-start"),

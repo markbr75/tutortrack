@@ -119,3 +119,22 @@
 |---|---|---|---|---|---|---|---|---|
 | TP-E24-058 | Public assets only serve published images | Anonymous | A draft logo upload | 1. Request its public asset URL. | 404 until used in the published kit. | P2 | backend: `tutortrack/sites/tests/test_branding_widgets.py::test_public_assets_only_serve_published_images` | |
 | TP-E24-059 | Strict hosts | Admin | `CUSTOM_DOMAINS_STRICT_HOSTS=true`, `DJANGO_ALLOWED_HOSTS=*` | 1. Request an unknown host. | Refused. | P3 | backend: `tutortrack/sites/tests/test_domains.py::test_strict_hosts_refuse_unknown_hostnames` | |
+
+## Gap batch G6 (as built 2026-10-14)
+
+Built by gap batch G6 ([ADR 0034](../adr/0034-gap-batch-g6-consent-capture-account-deletion-and-platform-tools.md)); see the epic's *Gap backlog* notes. Signup now requires `accept_terms: true` (the terms checkbox).
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E24-060 | Write, publish and view a blog post | Owner | Published site | 1. Website → **Blog** → New post (title, summary, body, cover).<br>2. **Publish**.<br>3. Open `/blog` and the post on the site host. | Post listed (10 per page) and served at `/blog/<slug>` with `og:type=article`, BlogPosting JSON-LD and canonical; it joins `sitemap.xml` and `/blog/rss.xml`. | P1 | backend: `test_posts_are_drafted_published_and_served`; vitest: `G6.test.tsx` blog | |
+| TP-E24-061 | Scheduled and unpublished posts | Owner | — | 1. Publish with a future date.<br>2. Unpublish another post. | The future post appears only from its date; the unpublished one disappears from the blog, sitemap and feed. | P2 | backend: `test_scheduled_posts_wait_and_unpublished_posts_disappear` | |
+| TP-E24-062 | Latest posts block | Owner | Two posts | 1. Add a **Latest blog posts** block to the home page; publish. | The page shows the newest posts with links. | P2 | backend: `test_latest_posts_block` | |
+| TP-E24-063 | `blog` is reserved and slugs are unique | Owner | — | 1. Create a page with address `blog`.<br>2. Create two posts with the same title. | The page is refused; the second post gets a different address. | P3 | backend: `test_slugs_are_unique_and_blog_is_a_reserved_page_address` | |
+
+## Gap batch G3 (as built 2026-10-14)
+
+Built by gap batch G3 ([ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md)); see the epic's *Gap backlog* notes.
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E24-064 | Online booking block | Owner | Online booking on | 1. Add the **Online booking** block, publish. | The page embeds the booking widget (widgets script loaded). | P2 | backend: `scheduling/tests/test_g3.py::test_booking_block_renders_the_widget_when_booking_is_on` | |

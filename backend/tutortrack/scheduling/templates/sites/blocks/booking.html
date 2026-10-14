@@ -1,0 +1,15 @@
+{% load i18n %}<section aria-labelledby="{{ block.id }}-h"><div class="wrap">
+  <h2 id="{{ block.id }}-h">{{ p.heading|default:_("Book a lesson") }}</h2>
+  {% if p.intro %}<p>{{ p.intro }}</p>{% endif %}
+  {% if d.enabled %}
+  <tt-booking days="{{ p.days|default:7 }}"></tt-booking>
+  <noscript>
+    {% if d.services %}
+    <ul>{% for s in d.services %}<li>{{ s.name }}{% if s.duration_minutes %} · {% blocktrans with n=s.duration_minutes %}{{ n }} minutes{% endblocktrans %}{% endif %}</li>{% endfor %}</ul>
+    {% endif %}
+    <p class="muted">{% trans "Turn on JavaScript to see free times and book online, or contact us to book." %}</p>
+  </noscript>
+  {% else %}
+  <p class="muted">{% trans "Online booking isn't open at the moment. Please contact us to book a lesson." %}</p>
+  {% endif %}
+</div></section>

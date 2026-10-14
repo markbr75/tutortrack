@@ -115,7 +115,7 @@ export class TtBooking extends TtWidget {
   private async pick(service: Service): Promise<void> {
     this.service = service;
     this.slots = undefined;
-    const days = Number(this.options.days ?? 7);
+    const days = Number(this.options.days ?? this.getAttribute("days") ?? 7);
     const from = new Date();
     const to = new Date(from.getTime() + (days - 1) * 86_400_000);
     const tutor = this.tutor ? `&tutor=${encodeURIComponent(this.tutor)}` : "";

@@ -670,6 +670,10 @@ def record_manual_payment(
         raise _invalid("amount", _("Record a positive amount."))
     if method not in Payment.Method.values or method == Payment.Method.CARD:
         raise _invalid("method", _("Card payments are taken through the payment page."))
+    from .surcharges import MANUAL, enabled_methods
+
+    if method in MANUAL and method not in enabled_methods(client.branch_id):
+        raise _invalid("method", _("This branch doesn't take that way of paying."))
     if payment_request is not None and payment_request.client_id != client.pk:
         raise _invalid("payment_request", _("That request is for another client."))
     payment = Payment.objects.create(
@@ -690,6 +694,29 @@ def record_manual_payment(
     audit.record_create(payment)
     _book(payment, invoice=None, allocations=allocations, user=user)
     return payment
+
+
+@transaction.atomic
+def record_bulk_payments(rows: list[dict[str, Any]], *, user: Any = None) -> list[Payment]:
+    """The bulk payment-entry grid (FR-11-5, gap G3): many manual payments at once, each
+    paying that client's oldest invoices first. All or nothing: if any row is refused,
+    nothing is recorded and the errors come back by row number."""
+    if not rows:
+        raise _invalid("rows", _("Add at least one payment."))
+    errors: dict[str, Any] = {}
+    out: list[Payment] = []
+    for index, row in enumerate(rows):
+        try:
+            with transaction.atomic():
+                out.append(record_manual_payment(user=user, **row))
+        except BusinessRuleViolation as exc:
+            errors[str(index)] = (exc.extra or {}).get("errors") or {"row": [str(exc)]}
+    if errors:
+        raise BusinessRuleViolation(
+            _("Some payments couldn't be recorded, so none were. Correct them and try again."),
+            extra={"errors": {"rows": errors}},
+        )
+    return out
 
 
 @transaction.atomic
@@ -743,8 +770,10 @@ def record_provider_payment(
     invoice: Invoice | None = None,
     payment_request: PaymentRequest | None = None,
     fee: Money | None = None,
+    allocations: list[tuple[Invoice, Money]] | None = None,
 ) -> Payment:
-    """A provider payment that succeeded (idempotent on the provider reference)."""
+    """A provider payment that succeeded (idempotent on the provider reference).
+    ``allocations`` (a card surcharge, gap G3) replace "pay ``invoice``, then the rest"."""
     existing = Payment.objects.filter(provider=account.provider, provider_ref=provider_ref).first()
     if existing is not None:
         if existing.status == Payment.Status.PENDING:
@@ -768,7 +797,7 @@ def record_provider_payment(
         reference=provider_ref,
         payment_request=payment_request,
     )
-    _book(payment, invoice=invoice, allocations=None)
+    _book(payment, invoice=invoice, allocations=allocations)
     return payment
 
 
@@ -860,13 +889,48 @@ def collection_running(invoice: Invoice) -> bool:
     return WorkflowLink.objects.filter(workflow_id=wid, status="running").exists()
 
 
+def autopay_date(due_date: str | None) -> str:
+    """The local date auto-pay collects on (FR-11-3, gap G3): "" means at once (on issue,
+    the setting's default), else ``payments.autopay_days_before_due`` before the due date,
+    when that is still ahead."""
+    from datetime import date
+
+    if get_setting("payments.autopay_timing") != "before_due" or not due_date:
+        return ""
+    day = date.fromisoformat(due_date) - timedelta(
+        days=int(get_setting("payments.autopay_days_before_due"))
+    )
+    return day.isoformat() if day > billing.org_today() else ""
+
+
+def _waiting_for_date(invoice: Invoice) -> str:
+    """The collection workflow's id when it is waiting for its auto-pay date (gap G3)."""
+    from tutortrack.core.workflows.ops import query_now
+
+    from .processes import collect_workflow_id
+
+    if not collection_running(invoice):
+        return ""
+    wid = collect_workflow_id(invoice.organisation_id, invoice.pk)
+    try:
+        state = query_now(wid, "state")
+    except Exception:
+        return ""
+    return wid if isinstance(state, dict) and state.get("waiting") else ""
+
+
 def start_collection(invoice: Invoice) -> None:
     """``POST /invoices/{id}/collect``: charge the default method now. The workflow is the
-    invoice's collection lock: a second attempt while one is in flight is refused."""
-    from tutortrack.core.workflows import start_now
+    invoice's collection lock: a second attempt while one is in flight is refused. An
+    auto-pay waiting for its date (gap G3) is told to collect now instead."""
+    from tutortrack.core.workflows import signal, start_now
 
     from .processes import CollectInput, PaymentCollectionWorkflow, collect_workflow_id
 
+    waiting = _waiting_for_date(invoice)
+    if waiting:
+        signal(waiting, "collect_now")
+        return
     if collection_running(invoice):
         raise Conflict(
             _("A payment is already being collected for this invoice."),
@@ -987,10 +1051,10 @@ def collection_failed(
 def _credit_note_for(invoice: Invoice, amount: Money, reason: str, user: Any) -> Any:
     lines = []
     left = amount
-    for line in invoice.lines.order_by("-position"):
+    for line in invoice.lines.filter(kind="line").order_by("-position"):
         if not left.is_positive():
             break
-        take = min(left, line.gross - line.credited)
+        take = min(left, billing.line_value(line).gross - line.credited)
         if take.is_positive():
             lines.append({"line": line, "amount": take})
             left = left - take
@@ -1193,12 +1257,24 @@ def _metadata(target: Invoice | PaymentRequest) -> dict[str, str]:
     return {key: str(target.pk), "organisation_id": str(target.organisation_id)}
 
 
+PROVIDER_METHOD = {
+    Provider.STRIPE: "card",
+    Provider.GOCARDLESS: "direct_debit",
+    Provider.PAYPAL: "paypal",
+}
+
+
 def pay_providers(branch_id: Any) -> list[str]:
-    """Online providers the pay page offers for this branch (FR-11-4)."""
+    """Online providers the pay page offers for this branch (FR-11-4): connected and
+    enabled for the branch (``payments.enabled_methods``, gap G3)."""
+    from .surcharges import enabled_methods
+
+    methods = enabled_methods(branch_id)
     return [
         p
         for p in (Provider.STRIPE, Provider.GOCARDLESS, Provider.PAYPAL)
-        if (a := account_for(branch_id, p)) is not None
+        if PROVIDER_METHOD[p] in methods
+        and (a := account_for(branch_id, p)) is not None
         and a.status == ProviderAccount.Status.ACTIVE
     ]
 
@@ -1219,19 +1295,26 @@ def create_pay_intent(
         raise _invalid("amount", _("Pay up to %(due)s.") % {"due": due})
     if pay != due and not get_setting("payments.allow_partial"):
         raise _invalid("amount", _("Pay the full amount."))
+    if provider not in pay_providers(target.branch_id):
+        raise _invalid("provider", _("That way of paying isn't available here."))
     if provider in REDIRECT_PROVIDERS:
         return _start_redirect_payment(target, pay, provider, return_url)
     account = active_account_for(target.branch_id)
     stripe = get_provider(account.provider)
     customer = customer_for(target.client, account) if save_method else None
+    surcharge = card_surcharge(target, pay)
+    metadata = _metadata(target)
+    if surcharge.is_positive():
+        metadata["surcharge"] = str(surcharge.amount)
+    total = pay + surcharge
     try:
         intent = stripe.create_payment_intent(
             account.account_ref,
-            amount=pay,
+            amount=total,
             customer=customer,
             save_method=save_method,
-            metadata=_metadata(target),
-            idempotency_key=f"pay-{target.pk}-{pay.to_minor()}-{int(save_method)}-{secrets.token_hex(4)}",
+            metadata=metadata,
+            idempotency_key=f"pay-{target.pk}-{total.to_minor()}-{int(save_method)}-{secrets.token_hex(4)}",
         )
     except ProviderError as exc:
         raise _provider_failed(exc) from exc
@@ -1240,8 +1323,24 @@ def create_pay_intent(
         "account": account.account_ref,
         "client_secret": intent.client_secret,
         "intent": intent.ref,
-        "amount": pay,
+        "amount": total,
+        "surcharge": surcharge,
     }
+
+
+def card_surcharge(target: Invoice | PaymentRequest, pay: Money) -> Money:
+    """The card surcharge for paying ``pay`` of an invoice online (gap G3); payment
+    requests (prepaid top-ups) are not surcharged."""
+    from .surcharges import surcharge_for
+
+    if not isinstance(target, Invoice):
+        return Money.zero(pay.currency).round_to_minor()
+    return surcharge_for(target.branch_id, pay)
+
+
+def _same_target(metadata: dict[str, str], target: Invoice | PaymentRequest) -> bool:
+    wanted = _metadata(target)
+    return {k: metadata.get(k) for k in wanted} == wanted
 
 
 def _start_redirect_payment(
@@ -1281,7 +1380,7 @@ def _finish_redirect_payment(
         )
     except ProviderError as exc:
         raise _provider_failed(exc) from exc
-    if intent.metadata != _metadata(target):
+    if not _same_target(intent.metadata, target):
         raise _invalid("intent", _("That payment is for something else."))
     if intent.amount is None or not intent.payment:
         return intent.status or "pending"
@@ -1348,7 +1447,7 @@ def confirm_pay_intent(
         intent = stripe.retrieve_intent(account.account_ref, intent_ref)
     except ProviderError as exc:
         raise _provider_failed(exc) from exc
-    if intent.metadata != _metadata(target):
+    if not _same_target(intent.metadata, target):
         raise _invalid("intent", _("That payment is for something else."))
     if intent.status != "succeeded" or intent.amount is None:
         return intent.status
@@ -1391,6 +1490,13 @@ def record_intent(
         fee = get_provider(account.provider).fee_for(account.account_ref, ref)
     except ProviderError:
         fee = None
+    allocations = None
+    surcharge = _surcharge_in(metadata, amount)
+    if invoice is not None and surcharge.is_positive():
+        existing = Payment.objects.filter(provider=account.provider, provider_ref=ref).first()
+        if existing is not None:
+            return existing
+        allocations = _surcharge_allocations(invoice, amount, surcharge, ref)
     return record_provider_payment(
         account=account,
         client=target.client,
@@ -1401,7 +1507,42 @@ def record_intent(
         invoice=invoice,
         payment_request=request,
         fee=fee,
+        allocations=allocations,
     )
+
+
+def _surcharge_in(metadata: dict[str, str], amount: Money) -> Money:
+    try:
+        value = Money(Decimal(str(metadata.get("surcharge") or "0")), amount.currency)
+    except (ArithmeticError, ValueError):
+        return Money.zero(amount.currency)
+    return (
+        value.round_to_minor()
+        if value.is_positive() and value < amount
+        else Money.zero(amount.currency)
+    )
+
+
+def _surcharge_allocations(
+    invoice: Invoice, amount: Money, surcharge: Money, ref: str
+) -> list[tuple[Invoice, Money]]:
+    """The card surcharge is its own invoice (gap G3): the invoice paid gets the rest."""
+    fee_invoice = billing.invoice_surcharge(
+        client=invoice.client,
+        amount=surcharge,
+        source_key=f"surcharge:{ref}",
+        description=_("Card surcharge for %(number)s") % {"number": invoice.number},
+        branch_id=invoice.branch_id,
+    )
+    invoice.refresh_from_db()
+    fee_invoice.refresh_from_db()
+    rest = amount - surcharge
+    out = []
+    for target, share in ((invoice, rest), (fee_invoice, surcharge)):
+        take = min(share, target.balance_due) if target.is_open else Money.zero(amount.currency)
+        if take.is_positive():
+            out.append((target, take))
+    return out
 
 
 # --- webhooks (T01) and payouts (T08) -----------------------------------------------------------

@@ -4,7 +4,7 @@
 
 **Built differently from the spec (Implementation notes win):**
 - Our own OAuth2 provider (not django-oauth-toolkit). Tokens: API keys `ttk_<prefix>_<secret>`, OAuth `tta_` / `ttr_` / `ttc_`.
-- Form submissions are not public (create an enquiry instead). Reviews are not public.
+- Since G6, reviews (scope `reviews`) and form submissions (read-only, `enquiries` scope) are in the public API.
 - Zapier/Make platform packages are not in this repo; they are generated from manifests at `/api/v1/developer/connectors/{zapier|make}`.
 - Sandboxes don't copy provider connections (that is how "test mode" is met). Maximum 3 per organisation.
 - Webhook endpoints subscribe to explicit types or `<aggregate>.*`, never `*`.
@@ -120,3 +120,15 @@
 | TP-E27-058 | Deprecation headers | API client | When an endpoint is declared deprecated | 1. Call it. | `Deprecation`, `Sunset` and `Link` headers. (None declared yet — check after the first deprecation.) | P3 | backend: `tutortrack/developer/tests/test_auth.py::test_deprecated_endpoints_announce_sunset` | |
 | TP-E27-059 | Endpoint receiver times out | Owner | Bin that sleeps > 10 s | 1. Send test event. | Attempt logged as timeout after 10 s; retried. | P3 | No | |
 | TP-E27-060 | Redirects are not followed | Owner | Endpoint that returns 302 | 1. Send test event. | Attempt recorded as failed (3xx), not followed. | P3 | No | |
+
+## Gap batch G6 (as built 2026-10-14)
+
+Built by gap batch G6 ([ADR 0034](../adr/0034-gap-batch-g6-consent-capture-account-deletion-and-platform-tools.md)); see the epic's *Gap backlog* notes. Signup now requires `accept_terms: true` (the terms checkbox).
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E27-061 | New event types are offered and documented | Developer (owner) | — | 1. Developer → Webhooks → new endpoint → event list. | Types added after E27 (reviews, referrals, packages, bookings, homework, lesson feedback...) are listed with `payload_fields`; safeguarding, consent and security types are never listed. | P1 | backend: `test_event_types_added_after_e27_are_offered`, `test_never_types_are_never_offered` | |
+| TP-E27-062 | Ids-only events never leak content | Developer | Endpoint subscribed to `background_check.*` | 1. Complete a background check. | The delivery carries only the listed ids (no result, no flags). | P1 | backend: `test_background_check_results_and_safeguarding_flags_never_leave` | |
+| TP-E27-063 | Reviews need the `reviews` scope | Developer | API key with and without `reviews:read` | 1. `GET /api/v1/reviews` with each key. | Without the scope 403; with it the reviews list. | P2 | backend: `test_reviews_need_the_reviews_scope` | |
+| TP-E27-064 | Form submissions in the public API | Developer | Key with `enquiries:read` | 1. `GET /api/v1/form-submissions?form=<slug>`. | Submissions listed without IP or browser; POST is refused (read-only). | P2 | backend: `test_form_submissions_are_listed_without_ip_or_browser`, `test_form_submissions_are_read_only` | |
+| TP-E27-065 | Marketplace live status | Owner | Xero connected, Zoom not | 1. Settings → **Integrations**. | Xero shows Connected (with a detail line), Zoom Available; payroll, marketing, banking and screening categories appear. | P2 | backend: `test_marketplace_reports_live_status` | |

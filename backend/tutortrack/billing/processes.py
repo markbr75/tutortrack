@@ -57,6 +57,8 @@ PACKAGE_PROCESS = "package"
 PLAN_PROCESS = "billing-plan"
 REMINDER_TIME = time(9, 0)
 LATE_FEES_PATCH = "late-fees-collections"
+TUTOR_REVIEW_PATCH = "tutor-review"
+STATEMENT_PROCESS = "client-statements"
 PLAN_PERIODS_PER_RUN = 24
 
 
@@ -274,12 +276,18 @@ def charge_plan_period(input: PlanPeriodInput) -> str:
 class InvoiceRunWorkflow:
     def __init__(self) -> None:
         self.approved = False
+        self.tutors_done = False
         self.step = "collecting"
         self.stats: dict[str, Any] = {}
 
     @workflow.signal(name="approve")
     def approve(self) -> None:
         self.approved = True
+
+    @workflow.signal(name="tutors_done")
+    def all_tutors_answered(self) -> None:
+        """Gap G3: every tutor has checked their lessons on the drafts."""
+        self.tutors_done = True
 
     @workflow.query
     def state(self) -> dict[str, Any]:
@@ -300,6 +308,21 @@ class InvoiceRunWorkflow:
                     with contextlib.suppress(TimeoutError):
                         await workflow.wait_condition(
                             lambda: self.approved, timeout=timedelta(days=days)
+                        )
+                tutor_days = int(self.stats.get("tutor_review_days", 0))
+                if (
+                    self.stats.get("tutor_review")
+                    and workflow.patched(TUTOR_REVIEW_PATCH)
+                    and tutor_days > days
+                ):
+                    # Gap G3: tutors have at least ``tutor_days`` to check their lessons;
+                    # the window ends early once they all answer (or staff approve).
+                    self.step = "tutor_review"
+                    await report_step(input, self.step)
+                    with contextlib.suppress(TimeoutError):
+                        await workflow.wait_condition(
+                            lambda: self.approved or self.tutors_done,
+                            timeout=timedelta(days=tutor_days - days),
                         )
             else:
                 try:
@@ -663,3 +686,67 @@ class BillingPlanWorkflow:
                 )
         await report_step(input, "ended", status="completed")
         return f"charged:{len(self.charged)}"
+
+
+# --- gap G3: scheduled client statements (FR-10-9) ------------------------------------------
+
+STATEMENT_BATCH = 50
+
+
+@dataclass(frozen=True, kw_only=True)
+class StatementRunInput(WorkflowInput):
+    pass
+
+
+@dataclass(frozen=True, kw_only=True)
+class StatementBatchInput(WorkflowInput):
+    client_ids: list[str]
+    start: str  # ISO date
+    end: str
+
+
+@tenant_activity
+def plan_statements(input: StatementRunInput) -> dict[str, Any]:
+    """Last month's period and the clients to send statements to."""
+    from . import services, statements
+
+    start, end = statements.last_month(services.org_today())
+    clients = sorted({client for client, _currency in statements.due(start, end)})
+    return {"start": start.isoformat(), "end": end.isoformat(), "clients": clients}
+
+
+@tenant_activity
+def send_statement_batch(input: StatementBatchInput) -> int:
+    from . import statements
+
+    return statements.send(
+        input.client_ids, date.fromisoformat(input.start), date.fromisoformat(input.end)
+    )
+
+
+@register_workflow(process=STATEMENT_PROCESS, task_queue="billing", cancel_permission=None)
+@workflow.defn
+class StatementRunWorkflow:
+    """Started monthly by the organisation's statement **Temporal Schedule**
+    (``billing.statements.sync_schedule``): emails last month's statements in batches."""
+
+    @workflow.run
+    async def run(self, input: StatementRunInput) -> str:
+        plan = await workflow.execute_activity(
+            plan_statements, input, start_to_close_timeout=TIMEOUT
+        )
+        clients = list(plan["clients"])
+        sent = 0
+        for index in range(0, len(clients), STATEMENT_BATCH):
+            sent += await workflow.execute_activity(
+                send_statement_batch,
+                StatementBatchInput(
+                    organisation_id=input.organisation_id,
+                    client_ids=clients[index : index + STATEMENT_BATCH],
+                    start=str(plan["start"]),
+                    end=str(plan["end"]),
+                ),
+                start_to_close_timeout=timedelta(minutes=30),
+            )
+        await report_step(input, "sent", status="completed")
+        return f"sent:{sent}"

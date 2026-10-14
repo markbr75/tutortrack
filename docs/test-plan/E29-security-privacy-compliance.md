@@ -7,7 +7,7 @@
 - Erasure keeps the global login (`User`) and removes the membership in this organisation; owners are skipped.
 - Financial records are never deleted: names on invoice lines become the "Erased Student #n" token; bill-payer details stay for `privacy.financial_retention_years` (6).
 - Safeguarding cases are not included in DSAR exports (exemption; the DSL decides).
-- Impossible-travel detection is not built. COPPA verifiable consent is a recorded signed form or a parent's portal consent.
+- Impossible-travel detection (G6) is country-based from the CDN header; no GeoIP database ships. COPPA verifiable consent is a recorded signed form or a parent's portal consent.
 - Consent types and records have no admin screen: use the API (`/api/v1/consent-types`, `/api/v1/consents`, `/api/v1/me/consents`; the browsable API works in dev while signed in).
 - Regions: one local stack serves every region; region routing is configured by `REGIONS`/`TT_REGION`.
 
@@ -151,3 +151,17 @@
 |---|---|---|---|---|---|---|---|---|
 | TP-E29-074 | Overdue request shows clearly | Admin | Request past deadline (set deadline days small) | 1. Open Data requests. | "overdue by n days" in red text with an accessible label. | P2 | No | |
 | TP-E29-075 | Worker restart during erasure | Owner | Large erasure | 1. Stop the worker mid-erasure; restart. | Erasure completes; steps are idempotent (no double processing). | P2 | backend: `tutortrack/privacy/tests/test_erasure.py::test_steps_are_idempotent` | |
+
+## Gap batch G6 (as built 2026-10-14)
+
+Built by gap batch G6 ([ADR 0034](../adr/0034-gap-batch-g6-consent-capture-account-deletion-and-platform-tools.md)); see the epic's *Gap backlog* notes. Signup now requires `accept_terms: true` (the terms checkbox).
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E29-076 | Ticked consent on a public form is recorded | Anonymous | Enquiry form with a consent field (key `marketing-email`) | 1. Submit the form with the box ticked. | A consent record for the new contact (source `form:<slug>`); photo consent is recorded for the children. | P1 | backend: `test_ticked_consent_fields_are_recorded_as_consent_records`, `test_photo_consent_on_a_form_is_recorded_for_the_children` | |
+| TP-E29-077 | Enrolment, review and feedback consents | Family | — | 1. Enrol online accepting terms.<br>2. Leave a review agreeing to publication.<br>3. On a feedback survey tick "don't ask me again". | Records for `terms`, `review-publication`, and a withdrawal of `lesson-feedback`. | P2 | backend: `test_online_enrolment_records_terms_and_ticked_consents`, `test_review_publication_consent_is_recorded`, `test_dont_ask_again_withdraws_the_feedback_consent` | |
+| TP-E29-078 | Signup requires the terms | Anonymous | — | 1. On `/signup` leave the terms box unticked → submit.<br>2. Tick it → submit. | First refused (`accept_terms`); then the account is created and a `TermsAcceptance` with the versions, IP and browser is stored. | P1 | backend: `test_signup_records_terms_acceptance` | |
+| TP-E29-079 | Delete your account | Tutor in two organisations | — | 1. Account → **Delete your account** → preview.<br>2. Enter the password → delete. | Membership ended and erasure run in each organisation; sessions, MFA, passkeys and login history gone; `user.account_deleted`. | P1 | backend: `test_deleting_an_account_erases_it_in_every_organisation`; vitest: `G6.test.tsx` deletes the account | |
+| TP-E29-080 | Last owner can't delete their account | Owner (only owner) | — | 1. Preview account deletion. | Blocked with the reason; nothing deleted; a wrong password deletes nothing. | P1 | backend: `test_preview_lists_organisations_and_blocks_the_last_owner`, `test_a_wrong_password_deletes_nothing` | |
+| TP-E29-081 | Impossible travel alert | Any staff | `CF-IPCountry` header set | 1. Sign in from GB, then within 2 hours from US. | Email to the person and `security.alert` (`impossible_travel`) for the owners; login history shows the country. | P2 | backend: `test_another_country_too_soon_alerts_the_person_and_the_owners` | |
+| TP-E29-082 | Platform retention | Platform | Old login events and dispatched events | 1. Run `purge_platform_records`. | Login history over 400 days and organisation-less events over 90 days removed; pending events kept. | P3 | backend: `test_platform_purge_removes_old_login_history_and_platform_events` | |

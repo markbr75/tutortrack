@@ -76,6 +76,7 @@ class Charge(BranchScopedModel):
         PLAN = "plan", _("Recurring fee")
         LATE_FEE = "late_fee", _("Late payment fee")
         COURSE = "course", _("Course fee")
+        SURCHARGE = "surcharge", _("Card surcharge")
 
     class Status(models.TextChoices):
         UNINVOICED = "uninvoiced", _("Not invoiced")
@@ -246,7 +247,17 @@ class Invoice(BranchScopedModel):
 
 
 class InvoiceLine(TenantModel):
+    class Kind(models.TextChoices):
+        LINE = "line", _("Line")
+        DISCOUNT = "discount", _("Discount")
+
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name="lines")
+    kind = models.CharField(max_length=8, choices=Kind.choices, default=Kind.LINE)
+    # A discount line shown separately (``pricing.discount_display=separate``, G3) belongs
+    # to the line of the charge it was taken off; together they add up to that charge.
+    parent = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="discount_lines"
+    )
     charge = models.OneToOneField(
         Charge, null=True, blank=True, on_delete=models.SET_NULL, related_name="line"
     )
@@ -623,4 +634,34 @@ class BillingSplit(TenantModel):
             models.CheckConstraint(
                 condition=Q(percent__gt=0) & Q(percent__lte=100), name="billing_split_percent"
             ),
+        ]
+
+
+class TutorInvoiceReview(TenantModel):
+    """A tutor's check of their lessons on an invoice run's drafts (FR-10-3 review window,
+    TutorBird parity, gap G3). Tutors see dates, students and lessons, never amounts."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Waiting for the tutor")
+        CONFIRMED = "confirmed", _("Confirmed")
+        FLAGGED = "flagged", _("Problem reported")
+
+    invoice_run = models.ForeignKey(
+        InvoiceRun, on_delete=models.CASCADE, related_name="tutor_reviews"
+    )
+    tutor = models.ForeignKey("people.TutorProfile", on_delete=models.PROTECT, related_name="+")
+    status = models.CharField(max_length=9, choices=Status.choices, default=Status.PENDING)
+    comment = models.TextField(blank=True, default="")
+    flagged_invoices = models.JSONField(default=list, blank=True)  # invoice ids held
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta(TenantModel.Meta):
+        ordering = ["created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["invoice_run", "tutor"], name="tutor_invoice_review_unique"
+            )
         ]

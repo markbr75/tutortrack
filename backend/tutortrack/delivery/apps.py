@@ -9,7 +9,7 @@ class DeliveryConfig(AppConfig):
     def ready(self) -> None:
         from tutortrack.crm import targets
 
-        from . import handlers, notifications, org_settings  # noqa: F401
+        from . import files, handlers, notifications, org_settings  # noqa: F401
         from .models import LessonReport
 
         targets.register(

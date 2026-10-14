@@ -9,6 +9,7 @@ from typing import Any
 from django.db.models import QuerySet
 from django.http import HttpResponse
 from django.utils.dateparse import parse_date, parse_datetime
+from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
@@ -18,7 +19,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from tutortrack.core.api.viewsets import TenantScopedViewMixin
-from tutortrack.core.exceptions import FeatureDisabled, NotFound, PermissionDenied
+from tutortrack.core.exceptions import (
+    BusinessRuleViolation,
+    FeatureDisabled,
+    NotFound,
+    PermissionDenied,
+)
 from tutortrack.core.permissions import HasMethodPermission, HasOrganisation, has_perm
 from tutortrack.core.time import now
 from tutortrack.people.models import Contact, Student
@@ -177,6 +183,14 @@ class CancelView(PortalView):
         payload = s.PortalCancelSerializer(data=request.data)
         payload.is_valid(raise_exception=True)
         preview = request.query_params.get("preview") in {"1", "true"}
+        from tutortrack.scheduling.selectors import online_cancellation_deadline
+
+        deadline = online_cancellation_deadline(lesson)
+        if deadline is not None and now() > deadline:  # gap G3: booking cancellation window
+            raise BusinessRuleViolation(
+                _("It's too late to cancel this lesson online. Please contact us."),
+                extra={"code": "cancellation_window_closed", "deadline": deadline.isoformat()},
+            )
         result = delivery.cancel_lesson(
             lesson,
             user=request.user,
