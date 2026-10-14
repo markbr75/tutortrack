@@ -43,6 +43,18 @@ register(
     label=_("Nightly retention purge"),
 )
 
+register(
+    "privacy.account_deletion",
+    type="choice",
+    default="erase",
+    choices=(
+        ("erase", _("Erase their records here straight away (financial records kept)")),
+        ("review", _("Log an erasure request for us to review")),
+    ),
+    label=_("When someone deletes their TutorTrack account"),
+    help_text=_("A legal hold always turns an immediate erasure into a request to review."),
+)
+
 # --- children's privacy (FR-29-7) ---------------------------------------------------------------
 register(
     "privacy.coppa",

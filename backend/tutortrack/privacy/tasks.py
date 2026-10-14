@@ -20,6 +20,13 @@ def notify_subprocessor_change(*, organisation_id: str) -> bool:
     return notify()
 
 
+@shared_task(name="tutortrack.privacy.tasks.purge_platform_records", ignore_result=True)
+def purge_platform_records() -> dict[str, int]:
+    from .platform_retention import purge_platform_records as purge
+
+    return purge()
+
+
 @shared_task(name="tutortrack.privacy.tasks.notify_subprocessor_changes", ignore_result=True)
 def notify_subprocessor_changes() -> int:
     return fan_out_per_org(notify_subprocessor_change)

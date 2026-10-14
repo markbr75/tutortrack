@@ -244,6 +244,10 @@ def post_message(
     publish(
         events.SupportConversationReplied(subject_id=conversation.pk, from_support=from_support)
     )
+    if from_support:  # G6: the person hears by email and push, not only in the chat
+        from .notifications import notify_reply
+
+        notify_reply(conversation, message)
     return message
 
 

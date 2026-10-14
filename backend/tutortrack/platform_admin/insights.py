@@ -75,14 +75,44 @@ def subscription_value() -> dict[str, Any]:
         interval=subscription.interval,
         currency=str(subscription.currency),
     )
+    share = revenue_share_value(subscription)
     return {
         "plan_key": subscription.plan.key,
         "status": subscription.status,
         "interval": subscription.interval,
         "currency": str(subscription.currency),
         "seats": subscription.seats,
-        "mrr": mrr,
+        "mrr": mrr + share,
+        "revenue_share_mrr": share,
     }
+
+
+def revenue_share_value(subscription: Any) -> Decimal:
+    """G6: share x payments processed in the last 30 days, from what was metered."""
+    from datetime import timedelta
+
+    from django.db.models import Sum
+
+    from tutortrack.core.money import Money
+    from tutortrack.subscriptions.models import MeterReport, PlanPrice
+    from tutortrack.subscriptions.services import REVENUE_METER
+
+    price = PlanPrice.objects.filter(
+        plan=subscription.plan,
+        currency=subscription.currency,
+        component=PlanPrice.Component.REVENUE_SHARE,
+    ).first()
+    if price is None:
+        return Decimal(0)
+    since = now().date() - timedelta(days=metrics.REVENUE_SHARE_DAYS)
+    minor = (
+        MeterReport.objects.filter(meter=REVENUE_METER, period_date__gt=since).aggregate(
+            total=Sum("quantity")
+        )["total"]
+        or 0
+    )
+    processed = Money.from_minor(int(minor), str(subscription.currency)).amount
+    return metrics.revenue_share_mrr(processed, price.unit_amount, str(subscription.currency))
 
 
 @transaction.atomic

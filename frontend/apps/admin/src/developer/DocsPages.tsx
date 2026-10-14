@@ -170,7 +170,9 @@ export function MarketplacePage() {
       {categories.map((category) => (
         <section key={category} aria-labelledby={`mk-${category}`} className="space-y-2">
           <h2 id={`mk-${category}`} className="font-semibold">
-            {t(`marketplace.categories.${category}`, { defaultValue: category })}
+            {t(`marketplace.categories.${category}`, {
+              defaultValue: t(`gapG6.categories.${category}`, { defaultValue: category }),
+            })}
           </h2>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {entries.data
@@ -180,10 +182,13 @@ export function MarketplacePage() {
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium">{entry.name}</span>
                     <span className="rounded bg-muted px-2 py-0.5 text-xs">
-                      {t(`marketplace.status.${entry.status}`)}
+                      {entry.status === "needs_attention"
+                        ? t("gapG6.needsAttention")
+                        : t(`marketplace.status.${entry.status}`)}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">{entry.description}</p>
+                  {entry.detail ? <p className="text-sm">{entry.detail}</p> : null}
                   {entry.settings_path && entry.status !== "coming_soon" ? (
                     <a href={entry.settings_path} className={`${linkClass} text-sm`}>
                       {entry.status === "connected"

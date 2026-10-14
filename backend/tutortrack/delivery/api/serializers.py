@@ -349,3 +349,8 @@ class PublicFeedbackSerializer(serializers.Serializer):
 class FeedbackAnswerSerializer(serializers.Serializer):
     rating = serializers.IntegerField(min_value=1, max_value=5)
     comment = serializers.CharField(max_length=2000, required=False, allow_blank=True, default="")
+    stop_asking = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text="The family ticked 'don't ask me again': withdraws the lesson-feedback consent.",
+    )

@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useState } from "react";
 
 import { api, usePermission } from "../api";
+import { BlogTab } from "./BlogTab";
 import { errorText, fieldErrors, useBrandingOptions } from "./helpers";
 import { Card } from "./shared";
 import { contrast, isHex, onColour, readableOnWhite, WHITE } from "./contrast";
@@ -16,7 +17,7 @@ import { ReviewsTab, WidgetsTab } from "./WidgetsTab";
 type BrandKit = components["schemas"]["BrandKit"];
 type Domain = components["schemas"]["Domain"];
 
-type Tab = "branding" | "domains" | "widgets" | "reviews" | "site" | "profiles";
+type Tab = "branding" | "domains" | "widgets" | "reviews" | "site" | "blog" | "profiles";
 
 /** Website & branding (E24): brand kit with live preview, custom domains, widgets with
  * embed codes, testimonials, the website builder and public profile moderation. */
@@ -24,9 +25,9 @@ export function WebsitePage() {
   const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>(() => {
     const wanted = new URLSearchParams(window.location.search).get("tab");
-    return (["branding", "domains", "widgets", "reviews", "site", "profiles"] as const).includes(
-      wanted as Tab,
-    )
+    return (
+      ["branding", "domains", "widgets", "reviews", "site", "blog", "profiles"] as const
+    ).includes(wanted as Tab)
       ? (wanted as Tab)
       : "branding";
   });
@@ -37,6 +38,7 @@ export function WebsitePage() {
     { key: "widgets" as const, label: t("website.tabs.widgets") },
     { key: "reviews" as const, label: t("website.tabs.reviews") },
     { key: "site" as const, label: t("website.tabs.site") },
+    { key: "blog" as const, label: t("blogPosts.tab") },
     ...(canModerate ? [{ key: "profiles" as const, label: t("website.tabs.profiles") }] : []),
   ];
   return (
@@ -48,6 +50,7 @@ export function WebsitePage() {
         {tab === "widgets" ? <WidgetsTab /> : null}
         {tab === "reviews" ? <ReviewsTab /> : null}
         {tab === "site" ? <SiteTab /> : null}
+        {tab === "blog" ? <BlogTab /> : null}
         {tab === "profiles" ? <ProfilesTab /> : null}
       </Tabs>
     </div>

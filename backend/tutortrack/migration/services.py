@@ -851,7 +851,11 @@ STEPS: list[tuple[str, tuple[str, ...]]] = [
     ("people", ("clients", "students", "tutors")),
     ("services", ("services",)),
     ("jobs", ("jobs", "lessons", "availability")),
-    ("balances", ("opening_balances", "invoices", "payments", "packages")),
+    (
+        "balances",
+        ("opening_balances", "invoices", "payments", "packages", "charges", "payment_requests"),
+    ),
+    ("growth", ("affiliates", "reviews")),  # G6: E25 records (after people exist)
     ("payment_methods", ()),
     ("invite_users", ()),
     ("reminders", ()),
@@ -1065,6 +1069,8 @@ def _imported_totals(project: MigrationProject) -> dict[str, Any]:
         "invoices": counts.get("invoices", 0),
         "balances_sum": str(balance),
         "future_lessons": future,
+        "affiliates": counts.get("affiliates", 0),
+        "reviews": counts.get("reviews", 0),
     }
 
 
@@ -1104,7 +1110,10 @@ def _source_totals_from_files(project: MigrationProject) -> dict[str, Any]:
     }
 
 
-RECONCILED = ("clients", "students", "tutors", "jobs", "invoices", "balances_sum", "future_lessons")
+RECONCILED = (
+    "clients", "students", "tutors", "jobs", "invoices", "balances_sum", "future_lessons",
+    "affiliates", "reviews",
+)  # fmt: skip
 
 
 def reconcile(project_id: Any) -> dict[str, Any]:

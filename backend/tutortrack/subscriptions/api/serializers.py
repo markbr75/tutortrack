@@ -166,3 +166,17 @@ class EntitlementsSerializer(serializers.Serializer):
     features = serializers.DictField(child=serializers.BooleanField())
     limits = serializers.DictField(child=serializers.IntegerField(allow_null=True))
     required_plans = serializers.DictField(child=serializers.CharField())
+
+
+class AddonSerializer(serializers.Serializer):
+    """An add-on in the in-app shop (G6, FR-04-1)."""
+
+    key = serializers.CharField()
+    name = serializers.CharField()
+    description = serializers.CharField()
+    feature = serializers.CharField()
+    price = MoneyOut(allow_null=True)
+    interval = serializers.CharField()
+    active = serializers.BooleanField()
+    included_in_plan = serializers.BooleanField()
+    started_at = serializers.DateTimeField(allow_null=True)

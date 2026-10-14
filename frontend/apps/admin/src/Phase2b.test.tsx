@@ -112,7 +112,11 @@ describe("lesson feedback (E09-T09)", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Send feedback" }));
     expect(await screen.findByText("Thank you for your feedback.")).toBeInTheDocument();
-    expect(calls.find((c) => c.method === "POST")?.body).toEqual({ rating: 4, comment: "Lovely" });
+    expect(calls.find((c) => c.method === "POST")?.body).toEqual({
+      rating: 4,
+      comment: "Lovely",
+      stop_asking: false,
+    });
   });
 
   it("shows staff the answers and a summary per tutor", async () => {

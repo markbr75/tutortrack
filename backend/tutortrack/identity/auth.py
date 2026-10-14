@@ -110,6 +110,8 @@ def _record(
     success: bool,
     reason: str = "",
 ) -> LoginEvent:
+    from .travel import country_for
+
     ua = request.headers.get("User-Agent", "")[:500]
     return LoginEvent.objects.create(
         user=user,
@@ -120,6 +122,7 @@ def _record(
         method=method,
         success=success,
         reason=reason,
+        country=country_for(request),
     )
 
 
@@ -176,7 +179,10 @@ def complete_login(
         device_hash=device_hash(request.headers.get("User-Agent", "")[:500]),
     ).exists()
     had_logins = LoginEvent.objects.filter(user=user, success=True).exists()
-    _record(request, user.email, method, user=user, success=True)
+    event = _record(request, user.email, method, user=user, success=True)
+    from .travel import check as check_travel
+
+    check_travel(user, event)  # G6: impossible travel (FR-29-2)
     if is_new_device and had_logins:
         from .tasks import send_new_device_alert
 

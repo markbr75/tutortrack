@@ -72,6 +72,8 @@ def clean_schema(schema: Any) -> dict[str, Any]:
             keys.add(key)
             if f.get("type") not in FIELD_TYPES:
                 raise BusinessRuleViolation(_("Unknown field type: %(t)s") % {"t": f.get("type")})
+            if f.get("consent_key") and not re.fullmatch(r"[a-z0-9-]{1,60}", str(f["consent_key"])):
+                raise BusinessRuleViolation(_("Consent fields name a consent type by its key."))
             if f.get("maps_to") and f["maps_to"] not in MAPPINGS:
                 raise BusinessRuleViolation(_("Unknown mapping: %(m)s") % {"m": f["maps_to"]})
     mapped = {f.get("maps_to") for f in fields_of(schema)}

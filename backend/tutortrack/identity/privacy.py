@@ -67,6 +67,7 @@ def export(person: Person) -> list[Section]:
             "success": e.success,
             "ip": e.ip,
             "user_agent": e.user_agent,
+            "country": e.country,
         }
         for e in LoginEvent.objects.filter(user_id__in=users).order_by("-created_at")[:200]
     ]
@@ -81,8 +82,15 @@ def export(person: Person) -> list[Section]:
         {"id": str(a.pk), "provider": a.provider, "email": a.email}
         for a in SocialAccount.objects.filter(user_id__in=users)
     ]
+    from tutortrack.privacy.models import TermsAcceptance
+
+    terms = [  # G6: the platform terms this login accepted
+        {"version": a.version, "context": a.context, "at": a.accepted_at, "ip": a.ip}
+        for a in TermsAcceptance.objects.filter(user_id__in=users)
+    ]
     return [
         Section("identity.profile", _("Login and profile"), profile),
+        Section("identity.terms", _("TutorTrack terms accepted"), terms),
         Section("identity.memberships", _("Access to this organisation"), memberships),
         Section("identity.logins", _("Sign-in history"), logins),
         Section("identity.sessions", _("Signed-in devices"), sessions),

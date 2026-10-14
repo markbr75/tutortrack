@@ -212,7 +212,7 @@ def all_importers() -> list[Importer]:
 
 
 def _load() -> None:
-    from . import catalogue, crm, finance, jobs, lessons, people  # noqa: F401
+    from . import catalogue, crm, extras, finance, jobs, lessons, people  # noqa: F401
 
 
 # --- value coercion -----------------------------------------------------------------------------

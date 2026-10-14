@@ -27,6 +27,8 @@ describe("SignupPage", () => {
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "long-pass-123" } });
     fireEvent.change(screen.getByLabelText("Business name"), { target: { value: "Sam Tutoring" } });
     fireEvent.change(screen.getByLabelText("Type of business"), { target: { value: "agency" } });
+    expect(screen.getByRole("button", { name: "Create account" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("checkbox", { name: /Terms of Service/ }));
     fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
     await waitFor(() =>
@@ -39,6 +41,7 @@ describe("SignupPage", () => {
       business_name: "Sam Tutoring",
       business_type: "agency",
       country: "GB",
+      accept_terms: true,
     });
   });
 
@@ -57,7 +60,8 @@ describe("SignupPage", () => {
       },
     });
     render(<App />);
-    fireEvent.click(await screen.findByRole("button", { name: "Create account" }));
+    fireEvent.click(await screen.findByRole("checkbox", { name: /Terms of Service/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
     const email = screen.getByLabelText("Email");
     expect(await screen.findByText("An account with this email already exists.")).toBeVisible();
     expect(email).toHaveAttribute("aria-invalid", "true");

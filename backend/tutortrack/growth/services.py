@@ -362,6 +362,17 @@ def submit_review(
         request.submitted_at = now()
         request.save(update_fields=["status", "submitted_at", "updated_at"])
     _published(review, events.ReviewSubmitted, request_id=str(request.pk))
+    if publish_consent and request.contact_id:
+        # G6 (FR-29-3): the tick on the review page is E29 evidence too.
+        from tutortrack.privacy.capture import record_ticked
+
+        record_ticked(
+            people={"people.contact": [request.contact_id]},
+            keys=["review-publication"],
+            method="form",
+            source=f"review:{request.pk}",
+            given_by_name=name,
+        )
     return review
 
 
@@ -411,6 +422,29 @@ def create_review(
     audit.record_create(review)
     _published(review, events.ReviewSubmitted, request_id=None)
     return review
+
+
+@transaction.atomic
+def discard_imported(obj: Any) -> None:
+    """An E28 import is rolled back (G6): remove an imported affiliate, its rule or client
+    attribution, or an imported review, while nothing has been built on it."""
+    if isinstance(obj, Affiliate):
+        if CommissionItem.objects.filter(affiliate=obj).exists():
+            raise BusinessRuleViolation(_("Commission was earned, so it was kept."))
+        AffiliateReferral.objects.filter(affiliate=obj).delete()
+        CommissionRule.objects.filter(affiliate=obj).delete()
+        AffiliateLink.objects.filter(affiliate=obj).delete()
+    elif (
+        isinstance(obj, AffiliateReferral)
+        and CommissionItem.objects.filter(
+            affiliate_id=obj.affiliate_id, client_id=obj.client_id
+        ).exists()
+    ):
+        raise BusinessRuleViolation(_("Commission was earned, so it was kept."))
+    elif isinstance(obj, Review) and (obj.response or obj.testimonial_id):
+        raise BusinessRuleViolation(_("The review was answered or published, so it was kept."))
+    audit.record(obj, "delete")
+    obj.delete()
 
 
 @transaction.atomic

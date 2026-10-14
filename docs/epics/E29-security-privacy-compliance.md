@@ -161,3 +161,44 @@ app except the per-app providers (`<app>/privacy.py`), the comms pre-send hook s
 - `comms.queue_message` (inbox replies by email/SMS/WhatsApp, broadcasts) runs `hooks.run_pre_send` with the message's `category`; broadcasts pass `marketing` or `service` from their purpose, so marketing broadcasts skip children (`skip_reason="safeguarding"`).
 - Messages people write in the inbox (staff replies, portal chat from families, students and tutors) are screened with the sender and the thread's participants *before* they are stored, and a hard block is refused with a 422. The block rolls the message back but the safeguarding flag is recorded outside that rollback, so the DSL still sees it.
 - With `safeguarding.require_parent_on_threads` on (the default), a student under 18 can only start a portal conversation when a parent is on it.
+
+## Gap backlog (as built 2026-10-14)
+
+Batch G6 of `docs/05-gap-backlog.md`; design in ADR 0034.
+
+
+- **Consent capture (FR-29-3; E29:106):** `privacy.capture.record_ticked` writes E29 consent
+  records for public enquiry/registration forms (each `consent` field names a `consent_key`,
+  default `data-processing`; chosen in the form builder), class enrolment and waitlist
+  (`accept_terms` → `terms`, plus `consents`), the review page (`review-publication`), the
+  lesson-feedback page ("don't ask me again" withdraws `lesson-feedback`) and imports.
+  `ConsentRecord.source` records where; types that apply to students are recorded for the
+  children "on behalf of a child"; unknown keys and refused consents (AADC) never block a
+  submission. Referral links land on the enquiry form, so referees' consent is captured there.
+  New default types `review-publication` and `lesson-feedback` (created on first use).
+- **Platform terms (FR-29-3; E29:108):** `TermsAcceptance` (global) with user, terms and
+  privacy-notice versions (`compliance.TERMS_VERSION`), time, IP, browser and the
+  organisation created; `/signup` requires `accept_terms`, `/signup/config` returns the
+  versions and URLs, and the signup page has the checkbox.
+- **Account deletion (FR-03-9, FR-29-4; E29:135):** `/api/v1/me/account-deletion` (preview,
+  then delete with the password or the email typed). Last owners of open organisations and
+  platform staff are refused with reasons. Per organisation the membership ends and the E29
+  erasure runs (`privacy.account_deletion`: `erase` default, or `review` to log an erasure
+  request; a legal hold always logs a request). The login is anonymised (sessions, MFA,
+  passkeys, SSO links, sign-in links and login history deleted); `AccountDeletion` keeps an
+  email hash; platform event `user.account_deleted`. Account page: "Delete your account".
+- **Retention (FR-29-5; E29:155-156):** category `dispatched_events` (90 days, dispatched
+  outbox rows of the organisation; pending and dead letters kept); platform task
+  `purge_platform_records` (beat 04:40) for login history (`LOGIN_HISTORY_RETENTION_DAYS`
+  400) and organisation-less events (`OUTBOX_RETENTION_DAYS` 90). Deviation: login history is
+  one global table, so its period is a platform setting rather than a per-organisation one.
+- **Notify customers (FR-29-9; E29:145):** platform console "Customer notices": breach (72-hour
+  notice), security, service and legal templates, preview, a required reason and a once-only
+  send to each organisation's owners and admins through comms (hidden transactional type
+  `platform_customer_notice`), audited in each organisation's log.
+- **Impossible travel (FR-29-2; E29:104):** the sign-in country comes from
+  `GEOIP_COUNTRY_HEADER` (`CF-IPCountry`) or an optional `GEOIP_LOOKUP` class and is stored on
+  `LoginEvent.country` (shown in login history). Another country within
+  `IMPOSSIBLE_TRAVEL_HOURS` (2) emails the person and raises `security.alert`
+  (`impossible_travel`) in each organisation where they are staff. Deviation: no GeoIP
+  database ships; the rule is country-based, not distance-based.

@@ -55,3 +55,11 @@ def emit_metrics(environment: str = "") -> dict[str, Any]:
     sys.stdout.write(emf_line(metrics, {"Environment": env}) + "\n")
     sys.stdout.flush()
     return metrics
+
+
+@shared_task(name="tutortrack.platform_admin.tasks.deliver_customer_notice", ignore_result=True)
+def deliver_customer_notice(*, organisation_id: str, notice_id: str) -> int:
+    """G6: one organisation's copy of a customer notice (runs in its tenant context)."""
+    from .notices import deliver
+
+    return deliver(notice_id, organisation_id)

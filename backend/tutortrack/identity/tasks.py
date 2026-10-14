@@ -67,6 +67,21 @@ def send_new_device_alert(*, user_id: str, ip: str, user_agent: str) -> None:
             )
 
 
+@shared_task(name="tutortrack.identity.tasks.send_impossible_travel_alert", ignore_result=True)
+def send_impossible_travel_alert(
+    *, user_id: str, ip: str, previous_country: str, country: str
+) -> None:
+    user = User.objects.filter(pk=user_id, is_active=True).first()
+    if user is not None:
+        with translation.override(user.locale):
+            _send(
+                user,
+                _("Sign-in from a new country on your TutorTrack account"),
+                "identity/email/impossible_travel.txt",
+                {"ip": ip, "previous_country": previous_country, "country": country},
+            )
+
+
 @shared_task(name="tutortrack.identity.tasks.send_invitation", ignore_result=True)
 def send_invitation(
     *, email: str, organisation_name: str, inviter: str, url: str, locale: str

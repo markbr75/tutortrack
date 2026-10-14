@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 
 import { api } from "../api";
+import { AddonsSection } from "./AddonsSection";
 import {
   daysUntil,
   useSubscription,
@@ -84,6 +85,7 @@ export function PlanPage() {
       {usage.data ? (
         <CreditsSection credits={usage.data.credits} canManage={sub.can_manage} />
       ) : null}
+      <AddonsSection canManage={sub.can_manage} />
       <InvoicesSection />
       {sub.can_manage ? <CancelSection sub={sub} /> : null}
     </div>

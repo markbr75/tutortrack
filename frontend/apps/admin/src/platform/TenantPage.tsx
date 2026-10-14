@@ -76,6 +76,32 @@ export function TenantPage({ id }: { id: string }) {
         </Section>
         <Actions detail={d} />
       </div>
+      <Section title={t("gapG6.integrations")}>
+        {d.addons?.length ? (
+          <p className="text-sm">
+            {t("gapG6.addons")}: {d.addons.map((a) => t(`addons.names.${a}`)).join(", ")}
+          </p>
+        ) : null}
+        {d.integrations?.length ? (
+          <ul className="space-y-1 text-sm">
+            {d.integrations.map((row) => (
+              <li key={`${row.provider}-${row.level}-${row.status}`}>
+                <span className="font-medium">{row.provider}</span> ·{" "}
+                {t(`gapG6.integrationStatus.${row.status}`)} ·{" "}
+                {t("gapG6.connections", { count: row.connections })}
+                {row.last_sync_at
+                  ? ` · ${t("gapG6.lastSync", { date: formatDateTime(row.last_sync_at) })}`
+                  : ""}
+                {row.failed_syncs
+                  ? ` · ${t("gapG6.failedSyncs", { count: row.failed_syncs })}`
+                  : ""}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground">{t("gapG6.noIntegrations")}</p>
+        )}
+      </Section>
       <Overrides detail={d} />
       <Members detail={d} />
       {d.recent_errors.length || d.dead_letters ? (

@@ -6352,5 +6352,241 @@
       "yes": "Yes",
       "no": "No"
     }
+  },
+  "customerNotices": {
+    "nav": "Customer notices",
+    "title": "Notify customers",
+    "intro": "Send a breach, security, service or legal notice to organisations' owners and admins. Each organisation's audit log records what was sent and when.",
+    "template": "Template",
+    "variables": {
+      "summary": "What happened",
+      "when": "When",
+      "data_affected": "Data involved",
+      "actions_taken": "What we have done",
+      "your_actions": "What customers may need to do",
+      "contact": "Contact"
+    },
+    "organisations": "Organisation IDs",
+    "organisationsHint": "Leave empty to send to every open organisation; separate IDs with commas.",
+    "preview": "Preview",
+    "previewTitle": "Check before sending",
+    "goesTo_one": "Goes to the owners and admins of {{count}} organisation.",
+    "goesTo_other": "Goes to the owners and admins of {{count}} organisations.",
+    "reason": "Reason",
+    "reasonHint": "For example the incident reference.",
+    "send": "Send notice",
+    "discard": "Back",
+    "history": "Sent notices",
+    "none": "No notices yet.",
+    "status": {
+      "draft": "Draft",
+      "sending": "Sending",
+      "sent": "Sent"
+    },
+    "counts": "{{organisations}} organisations, {{people}} people"
+  },
+  "workflowConsole": {
+    "nav": "Workflows",
+    "title": "Failed and stuck workflows",
+    "intro": "Durable processes across all organisations that failed, timed out or seem stuck. Every action needs a reason and is written to the organisation's audit log.",
+    "show": "Show",
+    "both": "Failed and stuck",
+    "failed": "Failed",
+    "stuck": "Stuck",
+    "search": "Search",
+    "none": "Nothing needs attention.",
+    "started": "started",
+    "openTemporal": "Open in Temporal",
+    "action": "Action",
+    "actions": {
+      "terminate": "Terminate",
+      "reset": "Reset to the last step",
+      "retry": "Start again"
+    },
+    "reason": "Reason",
+    "apply": "Apply",
+    "status": {
+      "running": "Running",
+      "completed": "Completed",
+      "failed": "Failed",
+      "cancelled": "Cancelled",
+      "terminated": "Terminated",
+      "timed_out": "Timed out"
+    }
+  },
+  "platformPlans": {
+    "nav": "Plans and prices",
+    "title": "Plans and prices",
+    "intro": "Change a plan's name, visibility and trial, and its prices and Stripe price IDs. Changes apply to new subscriptions and plan changes.",
+    "name": "Name",
+    "description": "Description",
+    "visibility": "Visibility",
+    "visibilities": {
+      "public": "Public",
+      "legacy": "Legacy",
+      "custom": "Custom (contact sales)"
+    },
+    "trialDays": "Trial days",
+    "save": "Save",
+    "currency": "Currency",
+    "prices": "Prices for {{plan}}",
+    "component": "Component",
+    "interval": "Interval",
+    "amount": "Amount",
+    "included": "Included",
+    "stripePrice": "Stripe price ID",
+    "noPrices": "This plan has no list prices.",
+    "amountFor": "Amount for {{price}}",
+    "includedFor": "Included quantity for {{price}}",
+    "stripeFor": "Stripe price ID for {{price}}",
+    "components": {
+      "base_fee": "Base fee",
+      "active_tutor": "Per active tutor",
+      "revenue_share": "Share of payments (%)",
+      "branch": "Per extra branch"
+    },
+    "intervals": {
+      "month": "Monthly",
+      "year": "Annual"
+    }
+  },
+  "revenueShare": {
+    "nav": "Revenue share",
+    "title": "Revenue share",
+    "intro": "Payments processed through TutorTrack compared with what was reported to Stripe, for organisations on a revenue-share plan.",
+    "month": "Month",
+    "organisation": "Organisation",
+    "processed": "Processed",
+    "reported": "Reported",
+    "difference": "Difference",
+    "expectedFee": "Expected fee",
+    "state": "Reconciliation",
+    "ok": "Matches",
+    "none": "No organisations on a revenue-share plan.",
+    "unreported_one": "{{count}} day not reported",
+    "unreported_other": "{{count}} days not reported",
+    "changed_one": "{{count}} day changed after reporting",
+    "changed_other": "{{count}} days changed after reporting",
+    "reportMissing": "Report missing days"
+  },
+  "addons": {
+    "title": "Add-ons",
+    "per": {
+      "month": "{{price}} a month",
+      "year": "{{price}} a year"
+    },
+    "included": "Included in your plan",
+    "active": "Active",
+    "buy": "Add",
+    "confirmText": "This is added to your subscription now, with a prorated charge.",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "stop": "Remove",
+    "names": {
+      "custom_domain": "Custom domain",
+      "white_label": "White-label apps",
+      "priority_support": "Priority support"
+    }
+  },
+  "accountDeletion": {
+    "title": "Delete your account",
+    "intro": "Deletes your TutorTrack login in every organisation you belong to. It can't be undone.",
+    "start": "Delete my account…",
+    "outcome": {
+      "erased": "{{organisation}}: your records there are erased (financial records are kept, anonymised).",
+      "request_logged": "{{organisation}}: they receive a request to erase your records."
+    },
+    "blocked": "You can't delete your account yet:",
+    "blockers": {
+      "last_owner": "You are the only owner of {{organisation}}. Make someone else an owner or close the organisation first.",
+      "platform_staff": "TutorTrack staff accounts are closed by an administrator."
+    },
+    "password": "Your password",
+    "confirmEmail": "Type your email address to confirm",
+    "reason": "Why are you leaving? (optional)",
+    "final": "Your account is deleted straight away and you are signed out.",
+    "confirm": "Delete my account",
+    "cancel": "Cancel"
+  },
+  "blogPosts": {
+    "tab": "Blog",
+    "intro": "News and blog posts appear at /blog on your website, with an RSS feed. Add the \"Latest blog posts\" block to show them on a page.",
+    "new": "New post",
+    "none": "No posts yet.",
+    "edit": "Edit",
+    "editTitle": "Edit post",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "status": {
+      "draft": "Draft",
+      "published": "Published"
+    },
+    "title": "Title",
+    "slug": "Address",
+    "slugHint": "The end of the post's web address. Leave empty to use the title.",
+    "excerpt": "Summary",
+    "body": "Post",
+    "bodyHint": "Plain text. Leave a blank line between paragraphs.",
+    "author": "Author",
+    "seoTitle": "Search engine title",
+    "metaDescription": "Search engine description",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "gapG6": {
+    "mrrMin": "MRR at least",
+    "mrrMax": "MRR at most",
+    "sort": "Sort by",
+    "sortNewest": "Newest",
+    "sortMrr": "Highest MRR",
+    "sortName": "Name",
+    "integrations": "Integrations",
+    "addons": "Add-ons",
+    "integrationStatus": {
+      "active": "Connected",
+      "error": "Error",
+      "needs_reconnect": "Needs reconnecting",
+      "disconnected": "Disconnected"
+    },
+    "connections_one": "{{count}} connection",
+    "connections_other": "{{count}} connections",
+    "lastSync": "last sync {{date}}",
+    "failedSyncs_one": "{{count}} failed sync",
+    "failedSyncs_other": "{{count}} failed syncs",
+    "noIntegrations": "Nothing connected.",
+    "acceptTermsBefore": "I accept TutorTrack's",
+    "termsLink": "Terms of Service",
+    "acceptTermsAnd": "and have read the",
+    "privacyLink": "privacy notice",
+    "needsAttention": "Needs attention",
+    "categories": {
+      "payroll": "Payroll and payouts",
+      "marketing": "Email marketing",
+      "banking": "Banking",
+      "screening": "Background checks"
+    },
+    "stopAskingFeedback": "Don't ask me for lesson feedback again",
+    "consentKey": "Records consent to",
+    "consentKeys": {
+      "default": "Processing of personal data",
+      "terms": "Terms of service",
+      "privacy-policy": "Privacy policy",
+      "marketing-email": "News and offers by email",
+      "marketing-sms": "News and offers by SMS",
+      "photo-video": "Photos and video",
+      "lesson-recording": "Recording online lessons"
+    },
+    "entities": {
+      "charges": "ad hoc charges",
+      "payment_requests": "payment requests",
+      "affiliates": "affiliates",
+      "reviews": "reviews"
+    },
+    "steps": {
+      "growth": {
+        "title": "Affiliates and reviews",
+        "help": "Agents who introduce clients (with their commission) and your reviews."
+      }
+    }
   }
 }

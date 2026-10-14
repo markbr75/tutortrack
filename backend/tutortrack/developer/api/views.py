@@ -498,7 +498,13 @@ class EventTypesView(APIView):
 
     @extend_schema(tags=["webhooks"], responses=s.EventTypeSerializer(many=True))
     def get(self, request: Request) -> Response:
-        rows = [e.__dict__ for e in catalogue.event_types()]
+        rows = [
+            {
+                **e.__dict__,
+                "payload_fields": [{"name": n, "json_type": t} for n, t in e.payload_fields],
+            }
+            for e in catalogue.event_types()
+        ]
         return Response(s.EventTypeSerializer(rows, many=True).data)
 
 

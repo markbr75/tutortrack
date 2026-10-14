@@ -28,6 +28,7 @@ PAYLOAD = {
     "business_name": "Sam Patel Tutoring",
     "country": "GB",
     "timezone": "Europe/London",
+    "accept_terms": True,
 }
 
 
@@ -239,7 +240,28 @@ def test_slug_check(org):
 def test_signup_config_is_public(settings):
     settings.TURNSTILE_SITE_KEY = "site-key"
     response = APIClient().get("/api/v1/signup/config")
-    assert response.json() == {"turnstile_site_key": "site-key"}
+    body = response.json()
+    assert body["turnstile_site_key"] == "site-key"
+    assert body["terms_version"]
+    assert body["terms_url"].startswith("https://")
+
+
+def test_signup_records_terms_acceptance(root, django_capture_on_commit_callbacks):
+    """G6 (FR-29-3): who accepted which version of the platform terms, when and from where."""
+    from tutortrack.privacy.compliance import TERMS_VERSION
+    from tutortrack.privacy.models import TermsAcceptance
+
+    refused = signup(root, django_capture_on_commit_callbacks, accept_terms=False)
+    assert refused.status_code == 400
+    assert "accept_terms" in str(refused.json())
+    response = signup(root, django_capture_on_commit_callbacks)
+    assert response.status_code == 201, response.json()
+    acceptance = TermsAcceptance.objects.get()
+    assert str(acceptance.user_id) == response.json()["user"]["id"]
+    assert str(acceptance.organisation_id) == response.json()["organisation"]["id"]
+    assert (acceptance.version, acceptance.context) == (TERMS_VERSION, "signup")
+    assert acceptance.accepted_at is not None
+    assert acceptance.ip == "127.0.0.1"
 
 
 def test_existing_password_login_still_works_after_signup(root, django_capture_on_commit_callbacks):

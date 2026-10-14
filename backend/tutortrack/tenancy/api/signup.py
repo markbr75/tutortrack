@@ -61,6 +61,16 @@ class SignupRequestSerializer(serializers.Serializer):
         style={"input_type": "password"},
     )
     turnstile_token = serializers.CharField(required=False, allow_blank=True)
+    accept_terms = serializers.BooleanField(
+        default=False,
+        help_text="The person ticked that they accept TutorTrack's Terms of Service and "
+        "privacy notice (versions from /signup/config). Required.",
+    )
+
+    def validate_accept_terms(self, value: bool) -> bool:
+        if not value:
+            raise serializers.ValidationError(_("Accept the Terms of Service to continue."))
+        return value
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         request = self.context["request"]
@@ -122,6 +132,7 @@ class SignupView(APIView):
                     "country": "GB",
                     "business_type": "sole_trader",
                     "timezone": "Europe/London",
+                    "accept_terms": True,
                     "turnstile_token": "<token from the widget>",
                 },
                 request_only=True,
@@ -146,6 +157,7 @@ class SignupView(APIView):
             password=data.get("password", ""),
             first_name=data.get("first_name", ""),
             last_name=data.get("last_name", ""),
+            accepted_terms=data["accept_terms"],
         )
         if signed_in is None:
             login(request, result.user, backend=SESSION_BACKEND)
@@ -215,6 +227,9 @@ class SignupRegionView(APIView):
 
 class SignupConfigSerializer(serializers.Serializer):
     turnstile_site_key = serializers.CharField(allow_blank=True)
+    terms_version = serializers.CharField()
+    terms_url = serializers.CharField()
+    privacy_notice_url = serializers.CharField()
 
 
 class SignupConfigView(APIView):
@@ -225,7 +240,17 @@ class SignupConfigView(APIView):
 
     @extend_schema(responses=SignupConfigSerializer)
     def get(self, request: Request) -> Response:
-        return Response({"turnstile_site_key": settings.TURNSTILE_SITE_KEY})
+        from tutortrack.privacy.compliance import terms_info
+
+        terms = terms_info()
+        return Response(
+            {
+                "turnstile_site_key": settings.TURNSTILE_SITE_KEY,
+                "terms_version": terms["version"],
+                "terms_url": terms["url"],
+                "privacy_notice_url": terms["privacy_notice_url"],
+            }
+        )
 
 
 class SlugCheckSerializer(serializers.Serializer):

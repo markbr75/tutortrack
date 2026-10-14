@@ -22,6 +22,7 @@ from ..models import (
 ENDPOINT_TOGGLE = [("active", "active"), ("paused", "paused")]
 MARKETPLACE_STATUS = [
     ("connected", "connected"),
+    ("needs_attention", "needs_attention"),
     ("available", "available"),
     ("coming_soon", "coming_soon"),
 ]
@@ -334,12 +335,20 @@ class WebhookDeliveryDetailSerializer(WebhookDeliverySerializer):
         read_only_fields = fields
 
 
+class EventPayloadFieldSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    json_type = serializers.CharField(help_text="string, integer, boolean, array... (| null)")
+
+
 class EventTypeSerializer(serializers.Serializer):
     key = serializers.CharField()
     aggregate = serializers.CharField()
     subject_type = serializers.CharField()
     description = serializers.CharField()
     version = serializers.IntegerField()
+    payload_fields = EventPayloadFieldSerializer(
+        many=True, help_text="The fields of ``event_data`` (the event's own payload)."
+    )
 
 
 class EventSampleSerializer(serializers.Serializer):
@@ -383,6 +392,7 @@ class MarketplaceEntrySerializer(serializers.Serializer):
     category = serializers.CharField()
     description = serializers.CharField()
     status = serializers.ChoiceField(choices=MARKETPLACE_STATUS)
+    detail = serializers.CharField(allow_blank=True)
     settings_path = serializers.CharField()
     kind = serializers.ChoiceField(choices=MARKETPLACE_KIND)
     client_id = serializers.CharField(allow_blank=True)

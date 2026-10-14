@@ -9,6 +9,7 @@ import hashlib
 from typing import Any
 
 from django.http import Http404, HttpRequest, HttpResponse
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
 
 from . import render, selectors, services
@@ -80,6 +81,97 @@ def tutor_page(request: HttpRequest, slug: str) -> HttpResponse:
         template="sites/tutor.html",
     )
     return _respond(request, html, organisation, site)
+
+
+# --- blog (G6, FR-24-4) --------------------------------------------------------------------------
+
+POSTS_PER_PAGE = 10
+
+
+@require_GET
+def blog_index(request: HttpRequest) -> HttpResponse:
+    organisation, site = _site(request)
+    try:
+        number = max(1, int(request.GET.get("page", "1")))
+    except ValueError:
+        number = 1
+    posts = list(
+        selectors.live_posts(site)[(number - 1) * POSTS_PER_PAGE : number * POSTS_PER_PAGE + 1]
+    )
+    if number > 1 and not posts:
+        raise Http404()
+    has_next = len(posts) > POSTS_PER_PAGE
+    html = render.render(
+        request=request,
+        organisation=organisation,
+        site=site,
+        title=str(_("Blog")),
+        seo_title="",
+        meta_description="",
+        blocks=[],
+        path="blog",
+        extra={
+            "posts": [selectors.post_card(p, organisation) for p in posts[:POSTS_PER_PAGE]],
+            "page_number": number,
+            "next_page": number + 1 if has_next else None,
+            "previous_page": number - 1 if number > 1 else None,
+        },
+        template="sites/blog_list.html",
+    )
+    return _respond(request, html, organisation, site)
+
+
+@require_GET
+def blog_post(request: HttpRequest, slug: str) -> HttpResponse:
+    organisation, site = _site(request)
+    post = selectors.live_posts(site).filter(slug=slug).first()
+    if post is None:
+        raise Http404()
+    card = selectors.post_card(post, organisation)
+    base = f"{request.scheme}://{request.get_host()}"
+    article = {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": post.title,
+        "datePublished": post.published_at.isoformat() if post.published_at else "",
+        "url": f"{base}/blog/{post.slug}",
+        "publisher": {"@type": site.business_type, "name": site.name or organisation.name},
+    }
+    if post.author_name:
+        article["author"] = {"@type": "Person", "name": post.author_name}
+    if card["image_url"]:
+        article["image"] = base + card["image_url"]
+    html = render.render(
+        request=request,
+        organisation=organisation,
+        site=site,
+        title=post.title,
+        seo_title=post.seo_title,
+        meta_description=post.meta_description or post.excerpt,
+        blocks=[],
+        path=f"blog/{post.slug}",
+        extra={
+            "post": card,
+            "paragraphs": [p for p in post.body.split("\n\n") if p.strip()],
+            "og_type": "article",
+            "article_schema": render._json_ld(article),
+            **({"og_image": base + card["image_url"]} if card["image_url"] else {}),
+        },
+        template="sites/blog_post.html",
+    )
+    return _respond(request, html, organisation, site)
+
+
+@require_GET
+def blog_rss(request: HttpRequest) -> HttpResponse:
+    organisation, site = _site(request)
+    base = f"{request.scheme}://{request.get_host()}"
+    posts = list(selectors.live_posts(site)[:20])
+    response = HttpResponse(
+        render.rss(base, site, organisation, posts), content_type="application/rss+xml"
+    )
+    response["Cache-Control"] = CACHE
+    return response
 
 
 @require_GET

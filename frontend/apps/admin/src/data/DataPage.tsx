@@ -26,6 +26,7 @@ const STEPS = [
   "services",
   "jobs",
   "balances",
+  "growth",
   "payment_methods",
   "invite_users",
   "reminders",
@@ -34,7 +35,8 @@ const STEP_ENTITIES: Record<string, string[]> = {
   people: ["clients", "students", "tutors"],
   services: ["services"],
   jobs: ["jobs", "lessons", "availability"],
-  balances: ["opening_balances", "invoices", "payments", "packages"],
+  balances: ["opening_balances", "invoices", "payments", "packages", "charges", "payment_requests"],
+  growth: ["affiliates", "reviews"],
 };
 
 export function DataPage({ initialTab = "imports" }: { initialTab?: TabKey }) {
@@ -225,7 +227,11 @@ export function BatchTable({ batches }: { batches: ImportBatch[] }) {
                 {b.filename || b.entity}
               </Link>
             </td>
-            <td>{t(`dataTransfer.entities.${b.entity}`, { defaultValue: b.entity })}</td>
+            <td>
+              {t(`dataTransfer.entities.${b.entity}`, {
+                defaultValue: t(`gapG6.entities.${b.entity}`, { defaultValue: b.entity }),
+              })}
+            </td>
             <td>{t(`dataTransfer.status.${b.status}`)}</td>
             <td>{statsOf(b).rows ?? 0}</td>
             <td>{formatDateTime(b.created_at, i18n.language)}</td>
@@ -366,12 +372,17 @@ function ProjectView({ project }: { project: MigrationProject }) {
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h3 className="font-medium">
-                  {index + 1}. {t(`dataTransfer.steps.${step}.title`)}
+                  {index + 1}.{" "}
+                  {t(`dataTransfer.steps.${step}.title`, {
+                    defaultValue: t(`gapG6.steps.${step}.title`),
+                  })}
                 </h3>
                 <span className="text-sm">{t(`dataTransfer.stepStatus.${state}`)}</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                {t(`dataTransfer.steps.${step}.help`)}
+                {t(`dataTransfer.steps.${step}.help`, {
+                  defaultValue: t(`gapG6.steps.${step}.help`),
+                })}
               </p>
               {batches.length ? <BatchTable batches={batches} /> : null}
               {current ? (
@@ -432,7 +443,9 @@ function ProjectView({ project }: { project: MigrationProject }) {
               {report.lines.map((line) => (
                 <tr key={line.metric} className="border-t border-border">
                   <th scope="row" className="font-normal">
-                    {t(`dataTransfer.metrics.${line.metric}`)}
+                    {t(`dataTransfer.metrics.${line.metric}`, {
+                      defaultValue: t(`gapG6.entities.${line.metric}`),
+                    })}
                   </th>
                   <td>{line.source}</td>
                   <td>{line.imported}</td>

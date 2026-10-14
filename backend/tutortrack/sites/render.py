@@ -178,6 +178,8 @@ def render(
         "preview": preview,
         "year": organisation.created_at.year if organisation.created_at else "",
         "social": sorted(brand.social_links.items()),
+        "og_type": "website",
+        "rss_url": "/blog/rss.xml" if selectors.live_posts(site).exists() else "",
         **(extra or {}),
     }
     return render_to_string(template, context, request=request)
@@ -214,6 +216,9 @@ def content_security_policy(site: Site) -> str:
 def sitemap(base: str, site: Site) -> str:
     urls = [f"{base}/{p.path}" if p.path else f"{base}/" for p in selectors.live_pages(site)]
     urls += [f"{base}/tutors/{p.slug}" for p in selectors.directory()]
+    posts = list(selectors.live_posts(site))
+    if posts:  # G6: the blog
+        urls += [f"{base}/blog", *(f"{base}/blog/{p.slug}" for p in posts)]
     body = "".join(f"<url><loc>{escape(u)}</loc></url>" for u in urls)
     return (
         '<?xml version="1.0" encoding="UTF-8"?>'
@@ -225,6 +230,32 @@ def robots(base: str, site: Site | None) -> str:
     if site is None or not site.published:
         return "User-agent: *\nDisallow: /\n"
     return f"User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: {base}/sitemap.xml\n"
+
+
+def rss(base: str, site: Site, organisation: Any, posts: list[Any]) -> str:
+    """RSS 2.0 for ``/blog/rss.xml`` (G6, FR-24-4); text is escaped."""
+    from email.utils import format_datetime
+
+    items = "".join(
+        "<item>"
+        f"<title>{escape(p.title)}</title>"
+        f"<link>{escape(f'{base}/blog/{p.slug}')}</link>"
+        f'<guid isPermaLink="true">{escape(f"{base}/blog/{p.slug}")}</guid>'
+        f"<pubDate>{format_datetime(p.published_at)}</pubDate>"
+        f"<description>{escape(p.excerpt or p.body[:300])}</description>"
+        "</item>"
+        for p in posts
+    )
+    title = escape(site.name or organisation.name)
+    description = escape(site.meta_description or site.name or organisation.name)
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<rss version="2.0"><channel>'
+        f"<title>{title}</title><link>{escape(base + '/blog')}</link>"
+        f"<description>{description}</description>"
+        f"<language>{escape(organisation.locale or 'en-GB')}</language>"
+        f"{items}</channel></rss>"
+    )
 
 
 def page_for_path(site: Site, path: str) -> SitePage | None:

@@ -218,6 +218,21 @@ def _one(key: str) -> Callable[[dict[str, Any]], list[str]]:
     return lambda props: [str(props[key])] if props.get(key) else []
 
 
+class BlogListProps(serializers.Serializer):
+    heading = _text()
+    limit = serializers.IntegerField(min_value=1, max_value=12, default=3)
+
+
+def _blog(props: dict[str, Any], org: Any) -> dict[str, Any]:
+    from . import selectors
+
+    site = selectors.site()
+    if site is None:
+        return {"posts": []}
+    rows = selectors.live_posts(site)[: int(props.get("limit", 3))]
+    return {"posts": [selectors.post_card(p, org) for p in rows]}
+
+
 register(BlockType("hero", _l("Hero"), HeroProps, assets=_one("image")))
 register(BlockType("text", _l("Text"), TextProps))
 register(BlockType("image", _l("Image"), ImageProps, assets=_one("image")))
@@ -229,6 +244,7 @@ register(BlockType("faq", _l("FAQ"), FaqProps))
 register(BlockType("form", _l("Enquiry form"), FormProps))
 register(BlockType("cta", _l("Call to action"), CtaProps))
 register(BlockType("map", _l("Map"), MapProps, load=_map))
+register(BlockType("blog_list", _l("Latest blog posts"), BlogListProps, load=_blog))  # G6
 
 
 # --- validation ----------------------------------------------------------------------------------

@@ -26,6 +26,7 @@ from . import blocks as block_registry
 from . import brand, cors, events, moderation, themes
 from . import widgets as widget_registry
 from .models import (
+    BlogPost,
     BrandKit,
     PublicProfile,
     Site,
@@ -600,7 +601,7 @@ def update_site(site: Site, **changes: Any) -> Site:
 
 def _clean_path(path: Any) -> str:
     value = slugify(str(path or ""))[:80]
-    if value in ("api", "tutors", "sitemap", "robots", "internal", "widgets", "static"):
+    if value in ("api", "tutors", "sitemap", "robots", "internal", "widgets", "static", "blog"):
         raise _invalid("path", _("That address is reserved."))
     return value
 
@@ -713,3 +714,85 @@ def restore_version(page: SitePage, number: int) -> SitePage:
         page.status = SitePage.Status.CHANGED if page.live_version_id else SitePage.Status.DRAFT
         page.save()
     return page
+
+
+# --- blog and news (G6, FR-24-4) -----------------------------------------------------------------
+
+POST_FIELDS = ("title", "excerpt", "body", "author_name", "seo_title", "meta_description")
+MAX_BODY = 50_000
+
+
+def _post_slug(site: Site, raw: Any, exclude: Any = None) -> str:
+    value = slugify(str(raw or ""))[:120]
+    if not value:
+        raise _invalid("slug", _("Give the post an address."))
+    clash = BlogPost.objects.filter(site=site, slug=value)
+    if exclude is not None:
+        clash = clash.exclude(pk=exclude)
+    if clash.exists():
+        raise _invalid("slug", _("Another post already uses that address."))
+    return value
+
+
+def _post_fields(post: BlogPost, changes: dict[str, Any]) -> None:
+    for name in POST_FIELDS:
+        if name in changes:
+            setattr(post, name, str(changes[name] or "").strip())
+    if len(post.body) > MAX_BODY:
+        raise _invalid("body", _("Posts can be up to 50,000 characters."))
+    if not post.title:
+        raise _invalid("title", _("Give the post a title."))
+    if "cover_image" in changes:
+        post.cover_image = _image(changes["cover_image"], "cover_image")
+
+
+@transaction.atomic
+def create_post(site: Site, *, title: str, slug: str = "", **changes: Any) -> BlogPost:
+    post = BlogPost(site=site, slug=_post_slug(site, slug or title))
+    _post_fields(post, {"title": title, **changes})
+    post.save()
+    audit.record_create(post)
+    return post
+
+
+@transaction.atomic
+def update_post(post: BlogPost, **changes: Any) -> BlogPost:
+    with audit.track(post):
+        if "slug" in changes and changes["slug"] != post.slug:
+            post.slug = _post_slug(post.site, changes["slug"], exclude=post.pk)
+        _post_fields(post, changes)
+        post.save()
+    if post.status == BlogPost.Status.PUBLISHED:
+        _bump_after_commit()
+    return post
+
+
+@transaction.atomic
+def publish_post(post: BlogPost, *, at: Any = None) -> BlogPost:
+    """Make the post live now (or at ``at``, a scheduled date)."""
+    post = BlogPost.objects.select_for_update().get(pk=post.pk)
+    with audit.track(post, "publish"):
+        post.status = BlogPost.Status.PUBLISHED
+        post.published_at = at or post.published_at or now()
+        post.save(update_fields=["status", "published_at", "updated_at"])
+    publish(events.BlogPostPublished(subject_id=post.pk, slug=post.slug))
+    _bump_after_commit()
+    return post
+
+
+@transaction.atomic
+def unpublish_post(post: BlogPost) -> BlogPost:
+    with audit.track(post, "unpublish"):
+        post.status = BlogPost.Status.DRAFT
+        post.save(update_fields=["status", "updated_at"])
+    _bump_after_commit()
+    return post
+
+
+@transaction.atomic
+def delete_post(post: BlogPost) -> None:
+    audit.record(post, "delete", {"slug": [post.slug, None]})
+    live = post.status == BlogPost.Status.PUBLISHED
+    post.delete()
+    if live:
+        _bump_after_commit()

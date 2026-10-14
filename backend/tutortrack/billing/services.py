@@ -1573,6 +1573,22 @@ def discard_imported_invoice(invoice: Invoice) -> Invoice:
 
 
 @transaction.atomic
+def discard_imported_charge(charge: Charge) -> Charge:
+    """An E28 import is rolled back (G6): its uninvoiced charge is voided (never deleted)."""
+    if charge.invoice_id is not None:
+        raise BusinessRuleViolation(_("The charge is on an invoice, so it was kept."))
+    return void_charge(charge, reason=_("Import rolled back"))
+
+
+@transaction.atomic
+def discard_imported_payment_request(request: PaymentRequest) -> PaymentRequest:
+    """An E28 import is rolled back (G6): an unpaid imported request is cancelled."""
+    if request.status != PaymentRequest.Status.OPEN:
+        raise BusinessRuleViolation(_("The request was paid or closed, so it was kept."))
+    return cancel_payment_request(request)
+
+
+@transaction.atomic
 def post_opening_balance(client: Client, amount: Money, *, as_of: date, user: Any = None) -> Any:
     """The client's balance carried over at cutover (E28): positive owes, negative credit."""
     from .selectors import OPENING_BALANCE

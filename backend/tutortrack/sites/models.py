@@ -240,3 +240,36 @@ class SitePageVersion(TenantModel):
 
     def __str__(self) -> str:
         return f"{self.page_id} v{self.number}"
+
+
+class BlogPost(TenantModel):
+    """A blog or news post on the hosted website (G6, FR-24-4): ``/blog``, ``/blog/<slug>``
+    and the RSS feed ``/blog/rss.xml``. The body is plain text (paragraphs separated by a
+    blank line), shown escaped."""
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        PUBLISHED = "published", _("Published")
+
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name="posts")
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=120)
+    excerpt = models.CharField(max_length=300, blank=True, default="")
+    body = models.TextField(blank=True, default="")
+    cover_image = models.ForeignKey(
+        "core.StoredFile", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    author_name = models.CharField(max_length=120, blank=True, default="")
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
+    published_at = models.DateTimeField(null=True, blank=True)
+    seo_title = models.CharField(max_length=120, blank=True, default="")
+    meta_description = models.CharField(max_length=300, blank=True, default="")
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-published_at", "-created_at"]
+        constraints = [
+            models.UniqueConstraint(fields=["site", "slug"], name="blog_post_slug_unique")
+        ]
+
+    def __str__(self) -> str:
+        return self.title

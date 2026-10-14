@@ -9,6 +9,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from tutortrack.core.crypto import EncryptedField
+from tutortrack.core.ids import new_id
 from tutortrack.core.models import TenantModel
 
 
@@ -72,6 +73,9 @@ class ConsentRecord(TenantModel):
     ip = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.CharField(max_length=500, blank=True, default="")
     recorded_at = models.DateTimeField()
+    # Where the tick came from (G6): "form:<form>", "enrolment:<class>", "review:<request>",
+    # "lesson-feedback:<feedback>", "import:<system>:<batch>". Blank for staff/portal records.
+    source = models.CharField(max_length=120, blank=True, default="")
 
     class Meta(TenantModel.Meta):
         ordering = ["-recorded_at", "-id"]
@@ -213,6 +217,7 @@ class ErasureRecord(TenantModel):
     class Reason(models.TextChoices):
         REQUEST = "request", _("Data subject request")
         RETENTION = "retention", _("Retention policy")
+        ACCOUNT = "account", _("The person deleted their account")
 
     request = models.ForeignKey(
         DataSubjectRequest, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
@@ -518,3 +523,34 @@ class SubprocessorNotice(TenantModel):
 
     def __str__(self) -> str:
         return f"Sub-processors {self.version}"
+
+
+class TermsAcceptance(models.Model):
+    """A person accepted a version of TutorTrack's platform Terms of Service and privacy
+    notice (G6, FR-29-3). Global, not tenant data: the login is TutorTrack's own customer
+    relationship. Append-only evidence; ``organisation`` is the one created at signup."""
+
+    class Context(models.TextChoices):
+        SIGNUP = "signup", _("Signup")
+        REACCEPT = "reaccept", _("New version accepted")
+
+    id = models.UUIDField(primary_key=True, default=new_id, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="terms_acceptances"
+    )
+    version = models.CharField(max_length=20)
+    privacy_notice_version = models.CharField(max_length=20, blank=True, default="")
+    context = models.CharField(max_length=10, choices=Context.choices, default=Context.SIGNUP)
+    organisation = models.ForeignKey(
+        "tenancy.Organisation", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    accepted_at = models.DateTimeField()
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=500, blank=True, default="")
+
+    class Meta:
+        ordering = ["-accepted_at"]
+        indexes = [models.Index(fields=["user", "-accepted_at"], name="terms_acceptance_user")]
+
+    def __str__(self) -> str:
+        return f"Terms {self.version}"

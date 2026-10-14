@@ -22,7 +22,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import generics, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -41,7 +41,15 @@ from tutortrack.tenancy import custom_domains
 from tutortrack.tenancy.models import Branch, OrganisationDomain
 
 from .. import blocks, brand, embed, render, selectors, services, themes, widgets
-from ..models import BrandKit, PublicProfile, Site, SitePage, Testimonial, WidgetConfig
+from ..models import (
+    BlogPost,
+    BrandKit,
+    PublicProfile,
+    Site,
+    SitePage,
+    Testimonial,
+    WidgetConfig,
+)
 from . import serializers as s
 
 AUTH: list[Any] = [IsAuthenticated, HasOrganisation]
@@ -450,6 +458,86 @@ class SiteBlocksView(APIView):
     @extend_schema(responses=s.BlockTypeSerializer(many=True))
     def get(self, request: Request) -> Response:
         return Response(blocks.describe())
+
+
+class BlogPostViewSet(TenantScopedViewMixin, viewsets.ModelViewSet):
+    """Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,
+    ``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters."""
+
+    model = BlogPost
+    serializer_class = s.BlogPostSerializer
+    lookup_value_regex = UUID
+    http_method_names = ["get", "post", "patch", "delete"]
+    permission_classes = perms(
+        {**VIEW_MANAGE, **dict.fromkeys(("POST", "PATCH", "DELETE"), "sites.site.manage")}
+    )
+
+    def get_tenant_queryset(self) -> Any:
+        qs = selectors.blog_posts(self.request.user)
+        status_filter = self.request.query_params.get("status")
+        return qs.filter(status=status_filter) if status_filter else qs
+
+    def _site(self) -> Site:
+        site = selectors.site()
+        if site is None:
+            raise NotFound("Create the website first.")
+        return site
+
+    def _changes(self, serializer: Any) -> dict[str, Any]:
+        data = dict(serializer.validated_data)
+        if "cover_image_id" in data:
+            data["cover_image"] = data.pop("cover_image_id")
+        return data
+
+    @extend_schema(
+        examples=[
+            OpenApiExample(
+                "A news post",
+                request_only=True,
+                value={
+                    "title": "Summer exam results",
+                    "excerpt": "Our students' best year yet.",
+                    "body": "Congratulations to everyone...\n\nWhat comes next...",
+                    "author_name": "Priya, Director",
+                },
+            )
+        ]
+    )
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().create(request, *args, **kwargs)
+
+    def perform_create(self, serializer: Any) -> None:
+        data = self._changes(serializer)
+        serializer.instance = services.create_post(
+            self._site(), title=data.pop("title"), slug=data.pop("slug", ""), **data
+        )
+
+    def perform_update(self, serializer: Any) -> None:
+        serializer.instance = services.update_post(serializer.instance, **self._changes(serializer))
+
+    def perform_destroy(self, instance: BlogPost) -> None:
+        services.delete_post(instance)
+
+    def _require_publish(self, request: Request) -> None:
+        if not has_perm(request.user, "sites.site.publish"):
+            raise PermissionDenied()
+
+    @extend_schema(request=s.BlogPublishSerializer, responses=s.BlogPostSerializer)
+    @action(detail=True, methods=["post"])
+    def publish(self, request: Request, pk: str) -> Response:
+        self._require_publish(request)
+        payload = s.BlogPublishSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        post = services.publish_post(
+            self.get_object(), at=payload.validated_data.get("published_at")
+        )
+        return Response(s.BlogPostSerializer(post).data)
+
+    @extend_schema(request=None, responses=s.BlogPostSerializer)
+    @action(detail=True, methods=["post"])
+    def unpublish(self, request: Request, pk: str) -> Response:
+        self._require_publish(request)
+        return Response(s.BlogPostSerializer(services.unpublish_post(self.get_object())).data)
 
 
 class PagePagination(CursorPagination):

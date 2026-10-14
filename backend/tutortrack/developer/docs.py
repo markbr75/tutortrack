@@ -38,6 +38,19 @@ CHANGELOG: tuple[ChangelogEntry, ...] = (
             )
         ),
     ),
+    ChangelogEntry(
+        date(2026, 10, 14),
+        str(_("Reviews, form submissions and more webhook events")),
+        "added",
+        str(
+            _(
+                "New resources /reviews (reviews scope) and /form-submissions (enquiries "
+                "scope). Webhooks offer review, referral, commission, proposal, shortlist, "
+                "package, booking, broadcast, inbox, homework, lesson feedback, recording and "
+                "background check events; each event type lists its payload fields."
+            )
+        ),
+    ),
 )
 
 

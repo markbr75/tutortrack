@@ -202,3 +202,68 @@ def money_or_none(amount: Decimal | None, currency: str) -> Any:
 
 def not_found(what: str) -> str:
     return _("%(what)s not found.") % {"what": what}
+
+
+# --- consent (G6, FR-29-3) ----------------------------------------------------------------------
+
+# Import column -> E29 consent type key. "Yes" grants, "No" records a withdrawal.
+CONSENT_COLUMNS = {
+    "consent_marketing_email": "marketing-email",
+    "consent_marketing_sms": "marketing-sms",
+    "consent_data_processing": "data-processing",
+    "consent_photo_video": "photo-video",
+    "consent_lesson_recording": "lesson-recording",
+}
+_CONSENT_LABELS = {
+    "consent_marketing_email": (
+        _l("Consent: marketing email"),
+        ("marketing email", "email opt in", "newsletter", "marketing consent"),
+    ),
+    "consent_marketing_sms": (_l("Consent: marketing SMS"), ("sms opt in", "marketing sms")),
+    "consent_data_processing": (
+        _l("Consent: data processing"),
+        ("gdpr consent", "data consent", "privacy consent"),
+    ),
+    "consent_photo_video": (
+        _l("Consent: photos and video"),
+        ("photo consent", "photo permission", "media consent"),
+    ),
+    "consent_lesson_recording": (
+        _l("Consent: lesson recording"),
+        ("recording consent", "recording permission"),
+    ),
+}
+
+
+def consent_fields(*keys: str) -> list[FieldSpec]:
+    return [
+        FieldSpec(k, _CONSENT_LABELS[k][0], "bool", synonyms=_CONSENT_LABELS[k][1]) for k in keys
+    ]
+
+
+def apply_consents(
+    ctx: Context, values: dict[str, Any], people: dict[str, list[Any]]
+) -> list[dict[str, Any]]:
+    """Consent columns become E29 consent records, method ``import``, with the source system
+    and batch recorded. Returns refs so rolling the import back removes them."""
+    from tutortrack.privacy.capture import record_ticked
+
+    granted = [key for col, key in CONSENT_COLUMNS.items() if values.get(col) is True]
+    withdrawn = [key for col, key in CONSENT_COLUMNS.items() if values.get(col) is False]
+    system = ctx.system or "file"
+    source = f"import:{system}:{ctx.batch.pk}"[:120]
+    created: list[dict[str, Any]] = []
+    for keys, state in ((granted, True), (withdrawn, False)):
+        if not keys:
+            continue
+        captured = record_ticked(
+            people={t: [p.pk for p in objs if p is not None] for t, objs in people.items()},
+            keys=keys,
+            method="import",
+            source=source,
+            given_by_name=_("Imported from %(system)s") % {"system": system},
+            granted=state,
+            skip_if_current=True,
+        )
+        created += [{"type": "privacy.consentrecord", "id": str(r.pk)} for r in captured.records]
+    return created

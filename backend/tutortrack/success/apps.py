@@ -10,4 +10,4 @@ class SuccessConfig(AppConfig):
     verbose_name = "Customer success"
 
     def ready(self) -> None:
-        from . import handlers, org_settings  # noqa: F401 - registrations
+        from . import handlers, notifications, org_settings  # noqa: F401 - registrations

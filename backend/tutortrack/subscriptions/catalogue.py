@@ -30,6 +30,7 @@ FEATURES: dict[str, Any] = {
     "advanced_reports": _("Advanced reports"),
     "ai_assistant": _("AI assistant"),
     "warehouse_export": _("Data warehouse export"),  # E26-T09 (Enterprise only)
+    "priority_support": _("Priority support"),  # G6: an add-on (Enterprise includes it)
 }
 
 LIMITS: dict[str, Any] = {
@@ -212,3 +213,61 @@ def sync_plans(models: Any = None) -> int:
                                   "included_quantity": component.included},
                     )  # fmt: skip
     return len(PLANS)
+
+
+# --- add-ons bought in the app (G6, FR-04-1) ------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class AddonDef:
+    key: str
+    name: Any
+    description: Any
+    feature: str  # the entitlement it grants
+    monthly: dict[str, str]  # per currency; annual = ANNUAL_MONTHS x monthly
+
+
+ADDONS: tuple[AddonDef, ...] = (
+    AddonDef(
+        "custom_domain",
+        _("Custom domain"),
+        _("Your website and portal on your own domain, with HTTPS."),
+        "custom_domain",
+        _prices("10", "12", "12", "19", "16", "20"),
+    ),
+    AddonDef(
+        "white_label",
+        _("White-label apps"),
+        _("The tutor and family apps under your own name and logo."),
+        "white_label",
+        _prices("49", "59", "55", "95", "79", "99"),
+    ),
+    AddonDef(
+        "priority_support",
+        _("Priority support"),
+        _("Answers within four working hours and a named contact."),
+        "priority_support",
+        _prices("29", "35", "33", "55", "47", "59"),
+    ),
+)
+
+
+def addon_def(key: str) -> AddonDef | None:
+    return next((a for a in ADDONS if a.key == key), None)
+
+
+def sync_addon_prices(price_model: Any = None, using: str = "default") -> int:
+    """Write the add-on prices (idempotent; Stripe price ids already stored are kept).
+    Data migrations pass ``using=schema_editor.connection.alias``: the table is created in
+    the same migration, on the owner connection."""
+    if price_model is None:
+        from .models import AddonPrice as price_model
+    for addon in ADDONS:
+        for currency, monthly in addon.monthly.items():
+            for interval in ("month", "year"):
+                amount = Decimal(monthly) * (ANNUAL_MONTHS if interval == "year" else 1)
+                price_model.objects.using(using).update_or_create(
+                    addon=addon.key, currency=currency, interval=interval,
+                    defaults={"unit_amount": amount},
+                )  # fmt: skip
+    return len(ADDONS)

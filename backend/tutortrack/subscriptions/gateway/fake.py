@@ -31,8 +31,12 @@ def _id(prefix: str) -> str:
 
 
 def _price_amount(ref: str) -> Money | None:
+    from ..addons import addon_price_for_ref
     from ..services import price_for_ref
 
+    addon = addon_price_for_ref(ref)
+    if addon is not None:
+        return Money(addon.unit_amount, addon.currency)
     price = price_for_ref(ref)
     if price is None or price.component == "revenue_share":
         return None

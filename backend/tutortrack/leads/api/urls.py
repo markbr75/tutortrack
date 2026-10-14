@@ -8,6 +8,7 @@ router.register("pipelines", views.PipelineViewSet, basename="pipelines")
 router.register("enquiries", views.EnquiryViewSet, basename="enquiries")
 router.register("assignment-rules", views.AssignmentRuleViewSet, basename="assignment-rules")
 router.register("forms", views.FormViewSet, basename="forms")
+router.register("form-submissions", views.FormSubmissionViewSet, basename="form-submissions")
 router.register("waitlist", views.WaitlistViewSet, basename="waitlist")
 router.register("proposals", views.ProposalViewSet, basename="proposals")
 

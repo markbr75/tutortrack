@@ -77,6 +77,13 @@ def _compute(organisation_id: Any) -> dict[str, Any] | None:
                 features[row.key] = bool(row.bool_value)
             elif row.key in LIMITS:
                 limits[row.key] = row.int_value
+        from .catalogue import addon_def
+        from .models import SubscriptionAddon
+
+        for addon in SubscriptionAddon.objects.filter(status=SubscriptionAddon.Status.ACTIVE):
+            definition = addon_def(addon.addon)  # G6: bought add-ons grant their feature
+            if definition is not None and definition.feature in features:
+                features[definition.feature] = True
         overrides = EntitlementOverride.objects.filter(
             Q(expires_at__isnull=True) | Q(expires_at__gt=now())
         )

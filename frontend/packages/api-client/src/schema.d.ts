@@ -7502,6 +7502,48 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/form-submissions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Form submissions, newest first (G6, public API). ``?form=``, ``?spam=true`` and
+     *     ``?created_after=`` filter. People who see only some enquiries see only the
+     *     submissions behind those.
+     */
+    get: operations["form_submissions_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/form-submissions/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Form submissions, newest first (G6, public API). ``?form=``, ``?spam=true`` and
+     *     ``?created_after=`` filter. People who see only some enquiries see only the
+     *     submissions behind those.
+     */
+    get: operations["form_submissions_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/forms": {
     parameters: {
       query?: never;
@@ -11727,6 +11769,30 @@ export interface paths {
     patch: operations["me_partial_update"];
     trace?: never;
   };
+  "/api/v1/me/account-deletion": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description What deleting your account will do (GET), and deleting it (POST). Organisations you
+     *     are the last owner of must be handed over or closed first.
+     */
+    get: operations["me_account_deletion_retrieve"];
+    put?: never;
+    /**
+     * @description What deleting your account will do (GET), and deleting it (POST). Organisations you
+     *     are the last owner of must be handed over or closed first.
+     */
+    post: operations["me_account_deletion_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/me/background-checks": {
     parameters: {
       query?: never;
@@ -14298,6 +14364,74 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/platform/customer-notices": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Customer notices: the history (``GET``) and a new draft (``POST``). */
+    get: operations["platform_customer_notices_list"];
+    put?: never;
+    /** @description Customer notices: the history (``GET``) and a new draft (``POST``). */
+    post: operations["platform_customer_notices_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/customer-notices/{id}/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["platform_customer_notices_preview_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/customer-notices/{id}/send": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Send a draft notice (once) to the chosen organisations' owners and admins. */
+    post: operations["platform_customer_notices_send_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/customer-notices/templates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Templates for customer notices (breach, security, service, legal). */
+    get: operations["platform_customer_notices_templates_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/platform/dead-letters": {
     parameters: {
       query?: never;
@@ -14571,6 +14705,43 @@ export interface paths {
     options?: never;
     head?: never;
     patch: operations["platform_plans_prices_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/platform/revenue-share": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Revenue-share reconciliation for a month (``?month=YYYY-MM``, default this month):
+     *     payments processed vs what was reported to the Stripe meter, per organisation.
+     */
+    get: operations["platform_revenue_share_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/revenue-share/report-missing": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Report an organisation's unreported days for a month to the meter (audited). */
+    post: operations["platform_revenue_share_report_missing_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/platform/saas-metrics": {
@@ -14897,6 +15068,50 @@ export interface paths {
     get: operations["platform_usage_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/workflows": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Failed and stuck durable processes across organisations, with Temporal UI links.
+     *     ``?state=failed|stuck``, ``?process=``, ``?organisation=``, ``?search=``.
+     */
+    get: operations["platform_workflows_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/workflows/{organisation_id}/{workflow_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Terminate, reset or retry one process (a reason is required; audited in the
+     *     organisation's log). ``GET`` refreshes its status from Temporal.
+     */
+    get: operations["platform_workflows_retrieve"];
+    put?: never;
+    /**
+     * @description Terminate, reset or retry one process (a reason is required; audited in the
+     *     organisation's log). ``GET`` refreshes its status from Temporal.
+     */
+    post: operations["platform_workflows_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -18811,6 +19026,98 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/sites/posts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,
+     *     ``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters.
+     */
+    get: operations["sites_posts_list"];
+    put?: never;
+    /**
+     * @description Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,
+     *     ``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters.
+     */
+    post: operations["sites_posts_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sites/posts/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,
+     *     ``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters.
+     */
+    get: operations["sites_posts_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,
+     *     ``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters.
+     */
+    delete: operations["sites_posts_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,
+     *     ``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters.
+     */
+    patch: operations["sites_posts_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/sites/posts/{id}/publish": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,
+     *     ``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters.
+     */
+    post: operations["sites_posts_publish_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sites/posts/{id}/unpublish": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Blog and news posts on the website (G6, FR-24-4): ``/blog`` lists published posts,
+     *     ``/blog/<slug>`` shows one and ``/blog/rss.xml`` is the feed. ``?status=`` filters.
+     */
+    post: operations["sites_posts_unpublish_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/sites/themes": {
     parameters: {
       query?: never;
@@ -18976,6 +19283,50 @@ export interface paths {
     put?: never;
     post?: never;
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/subscription/addons": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Add-ons the organisation can buy in the app (G6, FR-04-1): custom domain,
+     *     white-label apps and priority support.
+     */
+    get: operations["subscription_addons_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/subscription/addons/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Buy (``POST``) or stop (``DELETE``) an add-on: an extra item on the TutorTrack
+     *     subscription, prorated, that grants the add-on's feature while active.
+     */
+    post: operations["subscription_addons_create"];
+    /**
+     * @description Buy (``POST``) or stop (``DELETE``) an add-on: an extra item on the TutorTrack
+     *     subscription, prorated, that grants the add-on's feature while active.
+     */
+    delete: operations["subscription_addons_destroy"];
     options?: never;
     head?: never;
     patch?: never;
@@ -21202,6 +21553,38 @@ export interface components {
       balances: components["schemas"]["BalancesOut"];
       auto_pay: boolean;
     };
+    AccountDeletionBlocker: {
+      organisation_id: string;
+      organisation_name: string;
+      /** @description last_owner | platform_staff */
+      reason: string;
+    };
+    AccountDeletionOrganisation: {
+      organisation_id: string;
+      name: string;
+      role?: string;
+      /** @description erased | request_logged */
+      outcome: string;
+      reference?: string;
+    };
+    AccountDeletionPreview: {
+      organisations: components["schemas"]["AccountDeletionOrganisation"][];
+      blockers: components["schemas"]["AccountDeletionBlocker"][];
+      needs_password: boolean;
+    };
+    AccountDeletionRequestRequest: {
+      password?: string;
+      /** @description Without a password: type your email. */
+      confirm_email?: string;
+      reason?: string;
+    };
+    AccountDeletionResult: {
+      /** Format: uuid */
+      id: string;
+      /** Format: date-time */
+      completed_at: string;
+      organisations: components["schemas"]["AccountDeletionOrganisation"][];
+    };
     AccountMappingRow: {
       kind: string;
       /** @default default */
@@ -21349,6 +21732,19 @@ export interface components {
       tax_rate?: string | null;
       /** Format: uuid */
       product?: string | null;
+    };
+    /** @description An add-on in the in-app shop (G6, FR-04-1). */
+    Addon: {
+      key: string;
+      name: string;
+      description: string;
+      feature: string;
+      price: components["schemas"]["MoneyOut"] | null;
+      interval: string;
+      active: boolean;
+      included_in_plan: boolean;
+      /** Format: date-time */
+      started_at: string | null;
     };
     Address: {
       line1?: string;
@@ -21792,6 +22188,8 @@ export interface components {
      *     * `enquiries:write` - enquiries:write
      *     * `crm:read` - crm:read
      *     * `crm:write` - crm:write
+     *     * `reviews:read` - reviews:read
+     *     * `reviews:write` - reviews:write
      *     * `branches:read` - branches:read
      *     * `webhooks:read` - webhooks:read
      *     * `webhooks:write` - webhooks:write
@@ -21821,6 +22219,8 @@ export interface components {
       | "enquiries:write"
       | "crm:read"
       | "crm:write"
+      | "reviews:read"
+      | "reviews:write"
       | "branches:read"
       | "webhooks:read"
       | "webhooks:write";
@@ -22717,6 +23117,59 @@ export interface components {
       key: string;
       title: string;
       fields: components["schemas"]["BlockField"][];
+    };
+    /**
+     * @description A blog or news post (G6). ``body`` is plain text: paragraphs separated by a blank
+     *     line.
+     */
+    BlogPost: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly site: string;
+      title: string;
+      slug?: string;
+      excerpt?: string;
+      body?: string;
+      /** Format: uuid */
+      cover_image?: string | null;
+      author_name?: string;
+      readonly status: components["schemas"]["BlogPostStatusEnum"];
+      /** Format: date-time */
+      readonly published_at: string | null;
+      seo_title?: string;
+      meta_description?: string;
+      readonly url: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    /**
+     * @description A blog or news post (G6). ``body`` is plain text: paragraphs separated by a blank
+     *     line.
+     */
+    BlogPostRequest: {
+      title: string;
+      slug?: string;
+      excerpt?: string;
+      body?: string;
+      /** Format: uuid */
+      cover_image?: string | null;
+      author_name?: string;
+      seo_title?: string;
+      meta_description?: string;
+    };
+    /**
+     * @description * `draft` - Draft
+     *     * `published` - Published
+     * @enum {string}
+     */
+    BlogPostStatusEnum: "draft" | "published";
+    BlogPublishRequest: {
+      /**
+       * Format: date-time
+       * @description Schedule for later; default now.
+       */
+      published_at?: string | null;
     };
     BoardColumn: {
       stage: components["schemas"]["Stage"];
@@ -25203,6 +25656,42 @@ export interface components {
         [key: string]: "all" | "branch" | "own" | "none" | null;
       };
     };
+    CustomerNotice: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly kind: string;
+      template: string;
+      subject?: string;
+      body?: string;
+      variables?: {
+        [key: string]: string;
+      };
+      /** @description Empty: every open organisation. */
+      organisation_ids?: string[];
+      readonly status: string;
+      readonly reason: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly sent_at: string | null;
+      readonly organisations_count: number;
+      readonly recipients_count: number;
+    };
+    CustomerNoticePreview: {
+      subject: string;
+      body: string;
+      organisations: number;
+    };
+    CustomerNoticeRequest: {
+      template: string;
+      subject?: string;
+      body?: string;
+      variables?: {
+        [key: string]: string;
+      };
+      /** @description Empty: every open organisation. */
+      organisation_ids?: string[];
+    };
     DPAAcceptance: {
       /** Format: uuid */
       readonly id: string;
@@ -26102,9 +26591,10 @@ export interface components {
     /**
      * @description * `request` - Data subject request
      *     * `retention` - Retention policy
+     *     * `account` - The person deleted their account
      * @enum {string}
      */
-    ErasureReasonEnum: "request" | "retention";
+    ErasureReasonEnum: "request" | "retention" | "account";
     ErasureRecord: {
       /** Format: uuid */
       readonly id: string;
@@ -26142,6 +26632,11 @@ export interface components {
       at: string;
       detail: string;
     };
+    EventPayloadField: {
+      name: string;
+      /** @description string, integer, boolean, array... (| null) */
+      json_type: string;
+    };
     EventSample: {
       event_type: string;
       synthetic: boolean;
@@ -26153,6 +26648,8 @@ export interface components {
       subject_type: string;
       description: string;
       version: number;
+      /** @description The fields of ``event_data`` (the event's own payload). */
+      payload_fields: components["schemas"]["EventPayloadField"][];
     };
     Exception: {
       /** Format: uuid */
@@ -26500,6 +26997,11 @@ export interface components {
       rating: number;
       /** @default  */
       comment: string;
+      /**
+       * @description The family ticked 'don't ask me again': withdraws the lesson-feedback consent.
+       * @default false
+       */
+      stop_asking: boolean;
     };
     FeedbackPerson: {
       /** Format: uuid */
@@ -26644,6 +27146,24 @@ export interface components {
       published?: boolean;
       /** Format: uuid */
       branch?: string | null;
+    };
+    /**
+     * @description A form submission (G6, public API ``enquiries`` scope). The visitor's IP address and
+     *     browser stay out of the API.
+     */
+    FormSubmission: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly form: string | null;
+      /** @default  */
+      readonly form_name: string;
+      readonly answers: unknown;
+      readonly utm: unknown;
+      readonly created_records: unknown;
+      readonly spam: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
     };
     /**
      * @description * `enquiry` - Enquiry
@@ -28287,6 +28807,7 @@ export interface components {
      *     * `multi_branch` - multi_branch
      *     * `payroll` - payroll
      *     * `pipeline` - pipeline
+     *     * `priority_support` - priority_support
      *     * `recruitment` - recruitment
      *     * `sms_credits_monthly` - sms_credits_monthly
      *     * `sso_saml` - sso_saml
@@ -28313,6 +28834,7 @@ export interface components {
       | "multi_branch"
       | "payroll"
       | "pipeline"
+      | "priority_support"
       | "recruitment"
       | "sms_credits_monthly"
       | "sso_saml"
@@ -29097,6 +29619,8 @@ export interface components {
       reason: string;
       ip: string | null;
       user_agent: string;
+      /** @description ISO country code of the sign-in, when known. */
+      country: string;
     };
     LoginRequest: {
       /** Format: email */
@@ -29361,6 +29885,7 @@ export interface components {
       category: string;
       description: string;
       status: components["schemas"]["MarketplaceStatusEnum"];
+      detail: string;
       settings_path: string;
       kind: components["schemas"]["MarketplaceKindEnum"];
       client_id: string;
@@ -29374,11 +29899,12 @@ export interface components {
     MarketplaceKindEnum: "native" | "partner";
     /**
      * @description * `connected` - connected
+     *     * `needs_attention` - needs_attention
      *     * `available` - available
      *     * `coming_soon` - coming_soon
      * @enum {string}
      */
-    MarketplaceStatusEnum: "connected" | "available" | "coming_soon";
+    MarketplaceStatusEnum: "connected" | "needs_attention" | "available" | "coming_soon";
     Mastery: {
       /** Format: uuid */
       readonly id: string;
@@ -29992,6 +30518,14 @@ export interface components {
      * @enum {string}
      */
     NoticeSeverityEnum: "info" | "warning" | "outage";
+    NoticeTemplate: {
+      key: string;
+      title: string;
+      kind: string;
+      subject: string;
+      body: string;
+      variables: string[];
+    };
     /**
      * @description * `scheduling` - scheduling
      *     * `reports` - reports
@@ -30918,6 +31452,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["BillingPlan"][];
     };
+    PaginatedBlogPostList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["BlogPost"][];
+    };
     PaginatedBookingHoldList: {
       /**
        * Format: uri
@@ -31411,6 +31958,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["ExternalRecordLink"][];
+    };
+    PaginatedFormSubmissionList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["FormSubmission"][];
     };
     PaginatedGoalList: {
       /**
@@ -31996,6 +32556,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["PlatformSupportRow"][];
+    };
+    PaginatedPlatformWorkflowList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PlatformWorkflow"][];
     };
     PaginatedPremiumRuleList: {
       /**
@@ -32879,6 +33452,21 @@ export interface components {
       end_date?: string | null;
       prorate?: boolean;
       attendance_independent?: boolean;
+    };
+    /**
+     * @description A blog or news post (G6). ``body`` is plain text: paragraphs separated by a blank
+     *     line.
+     */
+    PatchedBlogPostRequest: {
+      title?: string;
+      slug?: string;
+      excerpt?: string;
+      body?: string;
+      /** Format: uuid */
+      cover_image?: string | null;
+      author_name?: string;
+      seo_title?: string;
+      meta_description?: string;
     };
     PatchedBranchRequest: {
       name?: string;
@@ -34987,6 +35575,27 @@ export interface components {
       /** Format: date-time */
       created_at: string;
     };
+    PlatformWorkflow: {
+      /** Format: uuid */
+      organisation_id: string;
+      organisation_name: string;
+      workflow_id: string;
+      run_id: string;
+      workflow_type: string;
+      process: string;
+      subject_type: string;
+      subject_id: string;
+      status: string;
+      current_step: string;
+      /** Format: date-time */
+      started_at: string;
+      /** Format: date-time */
+      updated_at: string;
+      /** Format: date-time */
+      closed_at: string | null;
+      last_error: string;
+      readonly temporal_url: string;
+    };
     Point: {
       /** Format: double */
       lat: number;
@@ -36406,6 +37015,8 @@ export interface components {
       student: components["schemas"]["PublicStudentRequest"];
       /** @default false */
       accept_terms: boolean;
+      /** @description Other consent types ticked on the form (e.g. marketing-email, photo-video). */
+      consents?: string[];
       /** @default false */
       join_waitlist: boolean;
       captcha?: string;
@@ -38083,6 +38694,37 @@ export interface components {
     RetryResult: {
       retried: number;
     };
+    RevenueShareFixRequest: {
+      /** Format: uuid */
+      organisation_id: string;
+      month: string;
+    };
+    RevenueShareReport: {
+      month: string;
+      rows: components["schemas"]["RevenueShareRow"][];
+      totals: {
+        [key: string]: components["schemas"]["RevenueShareTotals"];
+      };
+    };
+    RevenueShareRow: {
+      organisation_id: string;
+      organisation_name: string;
+      currency: string;
+      percent: string;
+      processed: string;
+      reported: string;
+      difference: string;
+      expected_fee: string;
+      reported_fee: string;
+      unreported_days: string[];
+      changed_days: string[];
+      ok: boolean;
+    };
+    RevenueShareTotals: {
+      processed: string;
+      reported: string;
+      expected_fee: string;
+    };
     Review: {
       /** Format: uuid */
       readonly id: string;
@@ -38184,9 +38826,10 @@ export interface components {
      * @description * `request` - Review request
      *     * `portal` - Portal
      *     * `staff` - Entered by staff
+     *     * `import` - Imported from another system
      * @enum {string}
      */
-    ReviewSourceEnum: "request" | "portal" | "staff";
+    ReviewSourceEnum: "request" | "portal" | "staff" | "import";
     /**
      * @description * `pending` - Waiting for moderation
      *     * `approved` - Approved
@@ -39307,6 +39950,9 @@ export interface components {
     ShowEnum: "qualifications" | "languages" | "experience" | "location";
     SignupConfig: {
       turnstile_site_key: string;
+      terms_version: string;
+      terms_url: string;
+      privacy_notice_url: string;
     };
     SignupOrganisation: {
       /** Format: uuid */
@@ -39335,6 +39981,11 @@ export interface components {
       email?: string;
       password?: string;
       turnstile_token?: string;
+      /**
+       * @description The person ticked that they accept TutorTrack's Terms of Service and privacy notice (versions from /signup/config). Required.
+       * @default false
+       */
+      accept_terms: boolean;
     };
     SignupResponse: {
       user: components["schemas"]["SignupUser"];
@@ -40313,6 +40964,8 @@ export interface components {
     TenantDetail: {
       organisation: components["schemas"]["TenantOrganisation"];
       subscription: components["schemas"]["TenantSubscription"] | null;
+      integrations: components["schemas"]["TenantIntegration"][];
+      addons: string[];
       overrides: components["schemas"]["Override"][];
       usage: {
         [key: string]: number;
@@ -40321,6 +40974,17 @@ export interface components {
       recent_errors: components["schemas"]["Error"][];
       dead_letters: number;
       audit: components["schemas"]["Audit"][];
+    };
+    TenantIntegration: {
+      provider: string;
+      level: string;
+      status: string;
+      connections: number;
+      /** Format: date-time */
+      last_sync_at: string | null;
+      /** Format: date-time */
+      error_at: string | null;
+      failed_syncs: number;
     };
     TenantOrganisation: {
       /** Format: uuid */
@@ -40359,6 +41023,8 @@ export interface components {
       last_activity: string | null;
       members: number;
       readonly mrr: components["schemas"]["MoneyOut"] | null;
+      /** @description MRR from the latest nightly snapshot (incl. revenue share). */
+      readonly snapshot_mrr: components["schemas"]["MoneyOut"] | null;
     };
     TenantSubscription: {
       plan: string;
@@ -41959,6 +42625,17 @@ export interface components {
       /** @default  */
       reason: string;
       refund?: boolean | null;
+    };
+    /**
+     * @description * `terminate` - terminate
+     *     * `reset` - reset
+     *     * `retry` - retry
+     * @enum {string}
+     */
+    WorkflowActionActionEnum: "terminate" | "reset" | "retry";
+    WorkflowActionRequest: {
+      action: components["schemas"]["WorkflowActionActionEnum"];
+      reason: string;
     };
     XeroEarningsRate: {
       id: string;
@@ -56005,6 +56682,57 @@ export interface operations {
       };
     };
   };
+  form_submissions_list: {
+    parameters: {
+      query?: {
+        created_after?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        form?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        spam?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedFormSubmissionList"];
+        };
+      };
+    };
+  };
+  form_submissions_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this form submission. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FormSubmission"];
+        };
+      };
+    };
+  };
   forms_list: {
     parameters: {
       query?: {
@@ -63448,6 +64176,53 @@ export interface operations {
       };
     };
   };
+  me_account_deletion_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountDeletionPreview"];
+        };
+      };
+    };
+  };
+  me_account_deletion_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["AccountDeletionRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AccountDeletionRequestRequest"];
+        "multipart/form-data": components["schemas"]["AccountDeletionRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountDeletionResult"];
+        };
+      };
+    };
+  };
   me_background_checks_list: {
     parameters: {
       query?: never;
@@ -67706,6 +68481,123 @@ export interface operations {
       };
     };
   };
+  platform_customer_notices_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomerNotice"][];
+        };
+      };
+    };
+  };
+  platform_customer_notices_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CustomerNoticeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CustomerNoticeRequest"];
+        "multipart/form-data": components["schemas"]["CustomerNoticeRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomerNotice"];
+        };
+      };
+    };
+  };
+  platform_customer_notices_preview_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomerNoticePreview"];
+        };
+      };
+    };
+  };
+  platform_customer_notices_send_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlatformReasonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PlatformReasonRequest"];
+        "multipart/form-data": components["schemas"]["PlatformReasonRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomerNotice"];
+        };
+      };
+    };
+  };
+  platform_customer_notices_templates_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["NoticeTemplate"][];
+        };
+      };
+    };
+  };
   platform_dead_letters_list: {
     parameters: {
       query?: {
@@ -68161,6 +69053,55 @@ export interface operations {
       };
     };
   };
+  platform_revenue_share_retrieve: {
+    parameters: {
+      query?: {
+        month?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RevenueShareReport"];
+        };
+      };
+    };
+  };
+  platform_revenue_share_report_missing_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RevenueShareFixRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RevenueShareFixRequest"];
+        "multipart/form-data": components["schemas"]["RevenueShareFixRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Count"];
+        };
+      };
+    };
+  };
   platform_saas_metrics_retrieve: {
     parameters: {
       query?: {
@@ -68321,8 +69262,14 @@ export interface operations {
         created_after?: string;
         /** @description ISO datetime */
         created_before?: string;
+        /** @description Billing currency of the MRR filter */
+        currency?: string;
         /** @description The pagination cursor value. */
         cursor?: string;
+        /** @description Latest snapshot MRR at most (G6) */
+        mrr_max?: string;
+        /** @description Latest snapshot MRR at least (G6) */
+        mrr_min?: string;
         /** @description Which field to use when ordering the results. */
         ordering?: string;
         /** @description Number of results to return per page. */
@@ -68683,6 +69630,89 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["UsageSummary"];
+        };
+      };
+    };
+  };
+  platform_workflows_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        organisation?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        process?: string;
+        search?: string;
+        state?: "failed" | "stuck";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPlatformWorkflowList"];
+        };
+      };
+    };
+  };
+  platform_workflows_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        organisation_id: string;
+        workflow_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PlatformWorkflow"];
+        };
+      };
+    };
+  };
+  platform_workflows_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        organisation_id: string;
+        workflow_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WorkflowActionRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["WorkflowActionRequest"];
+        "multipart/form-data": components["schemas"]["WorkflowActionRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PlatformWorkflow"];
         };
       };
     };
@@ -75561,6 +76591,182 @@ export interface operations {
       };
     };
   };
+  sites_posts_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedBlogPostList"];
+        };
+      };
+    };
+  };
+  sites_posts_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BlogPostRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BlogPostRequest"];
+        "multipart/form-data": components["schemas"]["BlogPostRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BlogPost"];
+        };
+      };
+    };
+  };
+  sites_posts_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BlogPost"];
+        };
+      };
+    };
+  };
+  sites_posts_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  sites_posts_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedBlogPostRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedBlogPostRequest"];
+        "multipart/form-data": components["schemas"]["PatchedBlogPostRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BlogPost"];
+        };
+      };
+    };
+  };
+  sites_posts_publish_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["BlogPublishRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BlogPublishRequest"];
+        "multipart/form-data": components["schemas"]["BlogPublishRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BlogPost"];
+        };
+      };
+    };
+  };
+  sites_posts_unpublish_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BlogPost"];
+        };
+      };
+    };
+  };
   sites_themes_list: {
     parameters: {
       query?: never;
@@ -75902,6 +77108,69 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Subscription"];
         };
+      };
+    };
+  };
+  subscription_addons_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Addon"][];
+        };
+      };
+    };
+  };
+  subscription_addons_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Repeat the same key to retry safely without buying twice. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Addon"];
+        };
+      };
+    };
+  };
+  subscription_addons_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

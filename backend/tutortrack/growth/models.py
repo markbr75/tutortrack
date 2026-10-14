@@ -95,6 +95,7 @@ class Review(TenantModel):
         REQUEST = "request", _("Review request")
         PORTAL = "portal", _("Portal")
         STAFF = "staff", _("Entered by staff")
+        IMPORT = "import", _("Imported from another system")
 
     request = models.OneToOneField(
         ReviewRequest, null=True, blank=True, on_delete=models.SET_NULL, related_name="review"

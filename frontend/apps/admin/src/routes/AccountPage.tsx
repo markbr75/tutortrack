@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 
 import { api, fieldErrors, useMe } from "../api";
+import { AccountDeletionSection } from "./AccountDeletionSection";
 import { createPasskey, passkeysSupported } from "./webauthn";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -300,7 +301,8 @@ function LoginHistorySection() {
             {" · "}
             {formatDateTime(e.created_at, i18n.language)}
             <span className="block text-muted-foreground">
-              {e.ip} · {e.user_agent}
+              {e.ip}
+              {e.country ? ` (${e.country})` : ""} · {e.user_agent}
             </span>
           </li>
         ))}
@@ -406,6 +408,7 @@ export function AccountPage() {
       <PasskeysSection />
       <SessionsSection />
       <LoginHistorySection />
+      <AccountDeletionSection />
     </div>
   );
 }

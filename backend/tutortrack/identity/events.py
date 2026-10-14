@@ -89,3 +89,12 @@ class CustomRoleChanged(DomainEvent):
     event_type: ClassVar[str] = "role.changed"
     subject_type: ClassVar[str] = "role"
     action: str  # created | updated | archived
+
+
+@dataclass(frozen=True, kw_only=True)
+class UserAccountDeleted(DomainEvent):
+    """A person deleted their whole TutorTrack login (G6). Platform-level (no organisation);
+    ids only, never a webhook event type."""
+
+    event_type: ClassVar[str] = "user.account_deleted"
+    subject_type: ClassVar[str] = "user"

@@ -175,3 +175,17 @@ these as the source of truth; the coding pattern is in `docs/02-architecture.md`
 - **E13/E06:** quiet hours and holiday calendars feeding `BusinessCalendar`.
 - Worker Versioning (build IDs) is configured per deployment when the first breaking workflow change ships; replay tests guard until then.
 
+## Gap backlog (as built 2026-10-14)
+
+Batch G6 of `docs/05-gap-backlog.md`; design in ADR 0034.
+
+
+- **Workflow console (FR-32-10; E32:161, E32:174):** `/platform/workflows` lists failed,
+  timed-out, terminated and stuck processes across organisations (stuck = running with an
+  error, or no progress for 14 days) from `WorkflowLink` through the platform alias, with
+  Temporal UI deep links (`TEMPORAL_UI_URL`). Terminate, reset (to the last completed
+  workflow task) and retry (start again with the stored input) need a reason, run in the
+  process's organisation and are audited there; `GET` on a row refreshes its status.
+  Deviation: the list comes from `WorkflowLink` rather than Temporal visibility queries, so
+  workflows started without a link (platform schedules) don't appear; alarms remain an
+  infrastructure follow-up.

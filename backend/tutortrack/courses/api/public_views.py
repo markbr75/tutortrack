@@ -114,6 +114,7 @@ class PublicEnrolView(PublicView):
             contact=dict(data["contact"]),
             student=dict(data["student"]),
             accept_terms=data["accept_terms"],
+            consents=data.get("consents") or [],
         )
         return Response(
             s.PublicEnrolmentSerializer(_status_body(enrolment, token)).data,
@@ -134,7 +135,7 @@ class PublicEnrolView(PublicView):
         with transaction.atomic():
             contact = data["contact"]
             student = data["student"]
-            _client, _contact, created = people.quick_add_family(
+            _client, person, created = people.quick_add_family(
                 contact={
                     k: contact.get(k, "") for k in ("first_name", "last_name", "email", "phone")
                 },
@@ -152,6 +153,13 @@ class PublicEnrolView(PublicView):
                 ],
             )
             entry = services.join_waitlist(group_class, created[0])
+            services.capture_public_consent(
+                group_class,
+                person,
+                created,
+                accept_terms=data["accept_terms"],
+                consents=data.get("consents") or [],
+            )
         body = {
             "id": None,
             "status": "waitlisted",

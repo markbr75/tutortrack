@@ -6,7 +6,7 @@
 <title>{{ page_title }}</title>
 {% if meta_description %}<meta name="description" content="{{ meta_description }}">{% endif %}
 <link rel="canonical" href="{{ canonical }}">
-<meta property="og:type" content="website">
+<meta property="og:type" content="{{ og_type|default:'website' }}">
 <meta property="og:title" content="{{ page_title }}">
 {% if meta_description %}<meta property="og:description" content="{{ meta_description }}">{% endif %}
 <meta property="og:url" content="{{ canonical }}">
@@ -59,6 +59,8 @@ footer.site ul{list-style:none;display:flex;gap:14px;padding:0;margin:0 0 8px}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 <script type="application/ld+json">{{ schema }}</script>
+{% if article_schema %}<script type="application/ld+json">{{ article_schema }}</script>{% endif %}
+{% if rss_url %}<link rel="alternate" type="application/rss+xml" title="{{ site.name }}" href="{{ rss_url }}">{% endif %}
 {% if analytics_js %}<script>{{ analytics_js }}</script>{% endif %}
 {% if needs_widgets %}<script type="module" src="{{ widgets_src }}" data-org="{{ org.slug }}" data-api=""></script>{% endif %}
 </head>

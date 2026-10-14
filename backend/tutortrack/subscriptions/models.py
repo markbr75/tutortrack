@@ -295,3 +295,52 @@ class BillingEvent(TenantModel):
 
     def __str__(self) -> str:
         return f"{self.type} {self.event_id}"
+
+
+class AddonPrice(models.Model):
+    """The price of an add-on (G6, FR-04-1) in one currency and interval. Platform data."""
+
+    addon = models.CharField(max_length=30)
+    currency = CurrencyField()
+    interval = models.CharField(max_length=5, choices=Interval.choices)
+    unit_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    stripe_price_id = models.CharField(max_length=100, blank=True, default="")
+
+    class Meta:
+        ordering = ["addon", "currency", "interval"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["addon", "currency", "interval"], name="addon_price_unique"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.addon}:{self.currency}:{self.interval}"
+
+
+class SubscriptionAddon(TenantModel):
+    """An add-on the organisation bought in the app (G6). While ``active`` it is an item on
+    the Stripe subscription and grants its entitlement."""
+
+    class Status(models.TextChoices):
+        ACTIVE = "active", _("Active")
+        CANCELLED = "cancelled", _("Cancelled")
+
+    addon = models.CharField(max_length=30)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
+    price_ref = models.CharField(max_length=120, blank=True, default="")
+    started_at = models.DateTimeField()
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["addon", "-started_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "addon"],
+                condition=Q(status="active"),
+                name="subscription_addon_active_unique",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return self.addon

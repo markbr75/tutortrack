@@ -109,7 +109,9 @@ def items_for(subscription: Subscription, plan: Plan, interval: str) -> list[Ite
             items.append(Item(price_ref(price), max(0, branches - price.included_quantity)))
         else:
             items.append(Item(price_ref(price), 1))
-    return items
+    from .addons import addon_items
+
+    return items + addon_items(subscription.currency, interval)  # G6: bought add-ons stay
 
 
 # --- subscription state -------------------------------------------------------------------------
@@ -525,6 +527,9 @@ def _apply_remote(subscription: Subscription, remote: RemoteSubscription) -> Non
             fields.append("past_due_since")
         fields.append("status")
     subscription.save(update_fields=[*fields, "updated_at"])
+    from .addons import reconcile_remote
+
+    reconcile_remote(subscription, remote.price_ids)  # G6: add-ons removed in Stripe's portal
     _sync_org(subscription)
     entitlements.invalidate(subscription.organisation_id)
 

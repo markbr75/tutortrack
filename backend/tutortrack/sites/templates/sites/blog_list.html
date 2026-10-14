@@ -1,0 +1,23 @@
+{% extends "sites/page.html" %}{% load i18n %}
+{% block content %}
+<section aria-labelledby="blog-h"><div class="wrap">
+  <h1 id="blog-h">{% trans "Blog" %}</h1>
+  {% if posts %}
+  <ul class="grid">{% for post in posts %}<li><article class="card">
+    {% if post.image_url %}<img src="{{ post.image_url }}" alt="" style="width:100%;height:160px;border-radius:var(--tt-radius)">{% endif %}
+    <h2><a href="{{ post.href }}">{{ post.title }}</a></h2>
+    <p class="muted"><time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"j F Y" }}</time>{% if post.author %} · {{ post.author }}{% endif %}</p>
+    <p>{{ post.excerpt }}</p>
+  </article></li>{% endfor %}</ul>
+  {% else %}
+  <p>{% trans "No posts yet." %}</p>
+  {% endif %}
+  {% if previous_page or next_page %}
+  <nav aria-label="{% trans 'More posts' %}"><p>
+    {% if previous_page %}<a href="/blog?page={{ previous_page }}" rel="prev">{% trans "Newer posts" %}</a>{% endif %}
+    {% if next_page %}<a href="/blog?page={{ next_page }}" rel="next">{% trans "Older posts" %}</a>{% endif %}
+  </p></nav>
+  {% endif %}
+  <p><a href="/blog/rss.xml">{% trans "RSS feed" %}</a></p>
+</div></section>
+{% endblock %}

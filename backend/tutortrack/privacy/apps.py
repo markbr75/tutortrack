@@ -14,6 +14,7 @@ class PrivacyConfig(AppConfig):
             notifications,
             org_settings,
             own_data,
+            platform_retention,
             retention,
             safeguarding,
             safeguards,

@@ -14,6 +14,7 @@ from ..models import (
     Enquiry,
     EnquiryStageHistory,
     Form,
+    FormSubmission,
     Pipeline,
     PipelineStage,
     Proposal,
@@ -221,6 +222,20 @@ class FormSerializer(serializers.ModelSerializer):
 
     def validate_schema(self, value: Any) -> Any:
         return forms.clean_schema(value)
+
+
+class FormSubmissionSerializer(serializers.ModelSerializer):
+    """A form submission (G6, public API ``enquiries`` scope). The visitor's IP address and
+    browser stay out of the API."""
+
+    form_name = serializers.CharField(source="form.name", default="", read_only=True)
+    answers = serializers.JSONField(source="data", read_only=True)
+
+    class Meta:
+        model = FormSubmission
+        fields = ["id", "form", "form_name", "answers", "utm", "created_records", "spam",
+                  "created_at"]  # fmt: skip
+        read_only_fields = fields
 
 
 class PublicFormSerializer(serializers.Serializer):

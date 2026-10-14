@@ -95,6 +95,11 @@ RESOURCES: dict[str, Resource] = {
             write=("crm.note.create", "crm.note.edit", "crm.task.create", "crm.task.edit",
                    "crm.tag.apply", "crm.tag.manage", "crm.customfield.manage"),
         ),
+        Resource(
+            "reviews", str(_("Reviews")),
+            read=("growth.review.view",),
+            write=("growth.review.manage",),
+        ),
         Resource("branches", str(_("Branches")), read=("org.settings.view",)),
         Resource(
             "webhooks", str(_("Webhook endpoints")),
@@ -173,6 +178,8 @@ PUBLIC_VIEWS: dict[str, str] = {
     "payments.api.views.PaymentViewSet": "payments",
     "payroll.api.views.PayItemViewSet": "payroll",
     "leads.api.views.EnquiryViewSet": "enquiries",
+    "leads.api.views.FormSubmissionViewSet": "enquiries",  # G6
+    "growth.api.views.ReviewViewSet": "reviews",  # G6
     "crm.api.views.TagViewSet": "crm",
     "crm.api.views.CustomFieldViewSet": "crm",
     "crm.api.views.NoteViewSet": "crm",

@@ -52,7 +52,7 @@ def test_tutorcruncher_records_map_to_our_fields(tenant):
     totals = source.totals(KEY, cutover=cutover)
     assert totals["clients"] == 2
     assert totals["future_lessons"] == 4
-    assert totals["not_imported_agents"] == 1
+    assert (totals["affiliates"], totals["reviews"]) == (1, 1)
 
 
 def test_wrong_api_key_is_rejected(tenant, user):
@@ -108,13 +108,23 @@ def test_tutorcruncher_migration_end_to_end(tenant, user, member, s3):
 
     services.start_step(project.pk, "balances")
     balances = finish_step_imports(project, "balances")
-    assert {b.entity for b in balances} == {"opening_balances", "invoices"}
+    assert {b.entity for b in balances} == {
+        "opening_balances",
+        "invoices",
+        "charges",
+        "payment_requests",
+    }
     assert Invoice.objects.count() == 2
     jane = Client.objects.get(contacts__email="jane.smith@example.com")
     assert sum(e.amount.amount for e in ClientLedgerEntry.objects.filter(client=jane)) == Decimal(
         "90.00"
     )
     services.complete_step(project, "balances")
+    services.start_step(project.pk, "growth")
+    growth = finish_step_imports(project, "growth")
+    assert {b.entity for b in growth} == {"affiliates", "reviews"}
+    assert all(b.status == "completed" for b in growth), [b.stats for b in growth]
+    services.complete_step(project, "growth")
     services.complete_step(project, "payment_methods")
     assert services.invite_imported_tutors(project) == 2
     assert Invitation.objects.filter(email="alex.jones@example.com").exists()
@@ -129,6 +139,8 @@ def test_tutorcruncher_migration_end_to_end(tenant, user, member, s3):
     assert lines["balances_sum"]["source"] == "60.00"
     assert lines["balances_sum"]["ok"]
     assert lines["future_lessons"]["ok"], lines["future_lessons"]
+    assert lines["affiliates"]["ok"]
+    assert lines["reviews"]["ok"]
     project.refresh_from_db()
     assert project.status == "completed"
     assert project.reconciliation["ok"]

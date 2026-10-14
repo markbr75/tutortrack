@@ -37,7 +37,16 @@ DEFAULT_TYPES: list[dict[str, Any]] = [
      "applies_to": ["people.student", "people.contact"]},
     {"key": "parental-consent", "name": "Parental consent for a child's login",
      "category": "parental_consent", "applies_to": ["people.student"]},
+    # G6: ticked on the E25 review page and the E09 lesson-feedback page.
+    {"key": "review-publication", "name": "Publishing my review on the website",
+     "category": "other", "applies_to": ["people.contact"]},
+    {"key": "lesson-feedback", "name": "Lesson feedback requests", "category": "other",
+     "applies_to": ["people.contact"]},
 ]  # fmt: skip
+
+
+# Default types added after organisations existed; created on first use.
+LAZY_DEFAULT_KEYS = frozenset({"parental-consent", "review-publication", "lesson-feedback"})
 
 
 def ensure_default_types() -> int:
@@ -119,9 +128,10 @@ def record_consent(
     given_by: Any = None,
     given_by_name: str = "",
     on_behalf_of_child: bool = False,
+    source: str = "",
 ) -> ConsentRecord:
-    if key == "parental-consent":
-        ensure_default_types()  # organisations created before E29 Part 2
+    if key in LAZY_DEFAULT_KEYS and not ConsentType.objects.filter(key=key).exists():
+        ensure_default_types()  # organisations created before the type was a default
     consent_type = ConsentType.objects.filter(key=key, is_active=True).first()
     if consent_type is None:
         raise NotFound(_("Unknown consent type."))
@@ -146,6 +156,7 @@ def record_consent(
         ip=ctx.ip,
         user_agent=(ctx.user_agent or "")[:500],
         recorded_at=now(),
+        source=source[:120],
     )
     audit.record_create(record)
     event_cls = ConsentGranted if granted else ConsentWithdrawn
@@ -159,6 +170,18 @@ def record_consent(
         data["consent_version"] = consent_type.version
     publish(event_cls(subject_id=record.pk, **data))
     return record
+
+
+@transaction.atomic
+def discard_imported_consent(record_id: Any) -> bool:
+    """Rolling an E28 import back removes the consent records it wrote (only those: records
+    are otherwise append-only evidence). Audited."""
+    record = ConsentRecord.objects.filter(pk=record_id, method=ConsentRecord.Method.IMPORT).first()
+    if record is None:
+        return False
+    audit.record(record, "delete", {"source": [record.source, None]})
+    record.delete()
+    return True
 
 
 def withdraw_consent(

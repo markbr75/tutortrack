@@ -58,6 +58,11 @@ BEAT_SCHEDULE = {
         "task": "tutortrack.core.events.tasks.dispatch_outbox",
         "schedule": timedelta(seconds=10),
     },
+    # Login history and organisation-less events past their retention (G6, FR-29-5).
+    "platform-retention": {
+        "task": "tutortrack.privacy.tasks.purge_platform_records",
+        "schedule": crontab(hour=4, minute=40),
+    },
     "idempotency-cleanup": {
         "task": "tutortrack.core.tasks.purge_expired_idempotency_records",
         "schedule": timedelta(hours=1),

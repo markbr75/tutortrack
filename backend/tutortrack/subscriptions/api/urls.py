@@ -21,5 +21,7 @@ urlpatterns = [
          name="subscription-credits"),
     path("subscription/credits/<str:credit_type>/top-up", views.TopUpView.as_view(),
          name="subscription-top-up"),
+    path("subscription/addons", views.AddonsView.as_view(), name="subscription-addons"),
+    path("subscription/addons/<slug:key>", views.AddonView.as_view(), name="subscription-addon"),
     path("entitlements", views.EntitlementsView.as_view(), name="entitlements"),
 ]  # fmt: skip
