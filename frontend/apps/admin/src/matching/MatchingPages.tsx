@@ -6,6 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
+import { AiMatchExplain } from "../ai/AiWidgets";
 
 type Row = components["schemas"]["MatchRow"];
 type Point = components["schemas"]["Point"];
@@ -272,6 +273,7 @@ export function JobMatchPage({ jobId }: { jobId: string }) {
                             </span>
                           ) : null}
                           <Breakdown row={row} />
+                          <AiMatchExplain jobId={jobId} tutorId={row.tutor.id} />
                         </td>
                         <td className="font-semibold">{row.score}</td>
                         <td>{row.distance_km === null ? "—" : `${row.distance_km} km`}</td>

@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     "tutortrack.courses",
     "tutortrack.growth",
     "tutortrack.learning",
+    "tutortrack.ai",
     # Last: subscribes webhooks to the event types every other app registers (E27).
     "tutortrack.developer",
 ]
@@ -452,6 +453,11 @@ SPECTACULAR_SETTINGS = {
         "LoanStatusEnum": "tutortrack.learning.models.Loan.Status",
         "QuizPurposeEnum": "tutortrack.learning.models.Quiz.Purpose",
         "QuizQuestionKindEnum": "tutortrack.learning.models.QuizQuestion.Kind",
+        # E31 AI assistant
+        "AIFeatureEnum": "tutortrack.ai.models.Feature",
+        "AIToneEnum": "tutortrack.ai.models.AIFeatureSetting.Tone",
+        "AILanguageEnum": "tutortrack.ai.models.AIFeatureSetting.Language",
+        "AIRatingEnum": "tutortrack.ai.models.AIFeedback.Rating",
     },
     "POSTPROCESSING_HOOKS": ["drf_spectacular.hooks.postprocess_schema_enums"],
     "GET_LIB_DOC_EXCLUDES": "tutortrack.core.api.schema.lib_doc_excludes",
@@ -594,6 +600,24 @@ GOOGLE_MAPS_API_KEY = env("GOOGLE_MAPS_API_KEY", default="")
 # "ecb" (no key), "oxr" (needs OPENEXCHANGERATES_APP_ID) or empty for fixed fake rates.
 FX_RATES_PROVIDER = env("FX_RATES_PROVIDER", default="")
 OPENEXCHANGERATES_APP_ID = env("OPENEXCHANGERATES_APP_ID", default="")
+
+# --- AI assistant (E31, ADR 0029): Anthropic Claude through the official SDK ------------------
+# PROVIDER: "anthropic" or "fake"; empty = anthropic when ANTHROPIC_API_KEY is set, else the
+# deterministic fake (CI and local development never call the real API).
+AI = {
+    "PROVIDER": env("AI_PROVIDER", default=""),
+    "API_KEY": env("ANTHROPIC_API_KEY", default=""),
+    "MODEL_DEFAULT": env("AI_MODEL_DEFAULT", default="claude-opus-5-5"),  # drafting, copilot
+    "MODEL_FAST": env("AI_MODEL_FAST", default="claude-haiku-5-5"),  # classify, extract
+    "FALLBACKS": env.bool("AI_REFUSAL_FALLBACKS", default=True),  # server-side, Opus only
+    "TIMEOUT_SECONDS": env.float("AI_TIMEOUT_SECONDS", default=90.0),
+    "MAX_RETRIES": env.int("AI_MAX_RETRIES", default=2),
+    "USER_REQUESTS_PER_MINUTE": env.int("AI_USER_REQUESTS_PER_MINUTE", default=20),
+    "MAX_TOOL_ROUNDS": 6,
+    # Dotted path of a speech-to-text ``Transcriber`` for voice notes (none ships yet).
+    "TRANSCRIBER": env("AI_TRANSCRIBER", default=""),
+    "MAX_AUDIO_MB": 20,
+}
 
 # --- Public API and webhooks (E27) ------------------------------------------------------------
 TENANT_RESOLVER = "tutortrack.developer.auth.resolve"  # API tokens carry their organisation

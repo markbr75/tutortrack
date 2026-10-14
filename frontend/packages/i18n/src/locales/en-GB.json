@@ -4933,5 +4933,173 @@
     "hint": "A makeup lesson booked with a credit is free.",
     "none": "Don't use a credit",
     "option": "For {{lesson}} (use by {{expires}})"
+  },
+  "ai": {
+    "nav": {
+      "copilot": "Ask the copilot",
+      "settings": "AI assistant"
+    },
+    "badge": "AI-assisted",
+    "draft": "Draft with AI",
+    "useDraft": "Use this draft",
+    "copy": "Copy",
+    "disclaimer": "AI drafts can be wrong. Check them before you use or send them.",
+    "feedback": {
+      "label": "Was this helpful?",
+      "up": "Helpful",
+      "down": "Not helpful",
+      "thanks": "Thanks for the feedback."
+    },
+    "errors": {
+      "credits": "Your organisation has no AI credits left this month. Top up from Billing & plan.",
+      "rate": "Too many AI requests. Wait a minute and try again.",
+      "refused": "The AI declined this request. Try rewording it, or write it yourself.",
+      "unavailable": "The AI service isn't available right now. Try again shortly.",
+      "incomplete": "The AI couldn't finish. Try a shorter request.",
+      "disabled": "This AI feature is turned off for your organisation."
+    },
+    "content": {
+      "title": "Draft with AI",
+      "brief": "What should it say?",
+      "write": "Write draft",
+      "subject": "Subject"
+    },
+    "inbox": {
+      "suggest": "Suggest reply",
+      "summarise": "Summarise",
+      "summary": "Summary",
+      "classify": "Classify",
+      "intent": "Intent: {{intent}} ({{confidence}}%)",
+      "intents": {
+        "reschedule": "Reschedule",
+        "cancellation": "Cancellation",
+        "billing": "Billing",
+        "complaint": "Complaint",
+        "new_enquiry": "New enquiry",
+        "feedback": "Feedback",
+        "other": "Other"
+      }
+    },
+    "enquiry": {
+      "paste": "Paste an email or message to fill in the form",
+      "extract": "Fill in with AI",
+      "filled": "Filled in from the message. Check before you add it.",
+      "triage": "Triage with AI",
+      "nextSteps": "Suggested next steps",
+      "priority": "Suggested priority: {{priority}}",
+      "reply": "Draft reply"
+    },
+    "progress": {
+      "explain": "Explain to parent",
+      "language": "Language",
+      "sameLanguage": "Same language"
+    },
+    "languages": {
+      "fr": "French",
+      "es": "Spanish",
+      "de": "German",
+      "pl": "Polish",
+      "ro": "Romanian",
+      "ur": "Urdu",
+      "pa": "Punjabi",
+      "ar": "Arabic",
+      "zh": "Chinese"
+    },
+    "matching": {
+      "explain": "Explain this ranking",
+      "intro": "Suggested introduction"
+    },
+    "jobAd": {
+      "title": "Write a job advert"
+    },
+    "weekdays": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "modes": {
+      "online": "Online",
+      "in_person": "In person",
+      "either": "Online or in person"
+    },
+    "command": {
+      "open": "Ask AI",
+      "title": "Command bar",
+      "label": "What would you like to do?",
+      "placeholder": "e.g. Move Sam's Thursday maths to 5pm from next week",
+      "run": "Go",
+      "working": "Working…",
+      "close": "Close",
+      "proposals": "Proposed changes",
+      "confirm": "Confirm",
+      "discard": "Discard",
+      "done": "Done.",
+      "discarded": "Discarded.",
+      "failed": "That didn't work: {{error}}",
+      "searches": "Tutor search",
+      "runSearch": "Run this search",
+      "results": "Matching tutors",
+      "noResults": "No tutors match.",
+      "empty": "Nothing to propose."
+    },
+    "copilot": {
+      "title": "Business copilot",
+      "intro": "Ask about your business. Answers only use the standard reports you can run, and each answer links to them.",
+      "unavailable": "The copilot isn't available to you.",
+      "conversation": "Conversation",
+      "label": "Your question",
+      "placeholder": "e.g. What's our outstanding balance over 30 days?",
+      "ask": "Ask",
+      "thinking": "Looking at your reports…",
+      "sources": "Sources",
+      "openReport": "Open {{title}}"
+    },
+    "report": {
+      "title": "Draft with AI",
+      "notes": "Rough notes",
+      "voice": "Voice note (optional)",
+      "draft": "Draft the report",
+      "drafted": "Draft added to the form. Check and edit it before you submit.",
+      "topics": "Suggested topics: {{topics}}",
+      "homework": "Suggested homework: {{homework}}"
+    },
+    "bio": {
+      "brief": "Tell the AI about your teaching (optional)",
+      "draft": "Draft my bio"
+    },
+    "settings": {
+      "title": "AI assistant",
+      "privacy": "AI features are off until you turn them on. Names, email addresses and phone numbers are replaced with placeholders before anything is sent to Anthropic, our AI sub-processor; safeguarding notes, bank details and passwords are never sent, and nothing is used to train models.",
+      "notAvailable": "Your plan doesn't include the AI assistant.",
+      "features": "Features",
+      "feature": "Feature",
+      "enabled": "On",
+      "turnOn": "Turn on {{feature}}",
+      "tone": "Tone",
+      "toneFor": "Tone for {{feature}}",
+      "language": "Spelling",
+      "languageFor": "Spelling for {{feature}}",
+      "inherit": "Organisation default",
+      "tones": {
+        "friendly": "Friendly",
+        "formal": "Formal"
+      },
+      "languages": {
+        "en-GB": "UK English",
+        "en-US": "US English"
+      },
+      "org": "Organisation defaults",
+      "cap": "Most AI credits to use each month (0: no cap)",
+      "autoClassify": "Classify new inbox messages by intent automatically",
+      "usage": "Usage this month",
+      "totals": "{{requests}} requests, {{credits}} credits",
+      "balance": "{{balance}} AI credits left",
+      "unmetered": "Not metered",
+      "feedback": "Feedback: {{up}} helpful, {{down}} not helpful"
+    }
   }
 }

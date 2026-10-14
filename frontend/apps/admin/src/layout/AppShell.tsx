@@ -7,6 +7,7 @@ import { useEffect } from "react";
 
 import { NotificationBell } from "../comms/NotificationBell";
 import { CommandPalette } from "../crm/CommandPalette";
+import { CommandBar } from "../ai/CommandBar";
 import { api, isAuthError, useMe, useMyOrganisations, useOrganisation } from "../api";
 import { SubscriptionBanner } from "../subscription/SubscriptionBanner";
 import { StatusBanner } from "./StatusBanner";
@@ -34,6 +35,7 @@ const NAV = [
   { to: "/broadcasts", key: "broadcasts.nav", permission: "comms.broadcast.view" },
   { to: "/announcements", key: "nav.announcements", permission: "comms.announcement.manage" },
   { to: "/analytics", key: "nav.analytics", permission: "reporting.dashboard.view" },
+  { to: "/copilot", key: "ai.nav.copilot", permission: "ai.copilot" },
   { to: "/reports", key: "nav.reports", permission: "delivery.report.view" },
   { to: "/unconfirmed", key: "nav.unconfirmed", permission: "scheduling.lesson.complete" },
   { to: "/availability", key: "nav.availability", permission: "scheduling.availability.view" },
@@ -62,6 +64,7 @@ const NAV = [
     permission: "integrations.accounting.view",
   },
   { to: "/settings/messaging", key: "messaging.nav", permission: "comms.channels.manage" },
+  { to: "/settings/ai", key: "ai.nav.settings", permission: "ai.settings.manage" },
   { to: "/data", key: "nav.data", permission: "migration.import.view" },
   { to: "/settings/plan", key: "nav.plan", permission: "subscription.view" },
   { to: "/settings/marketplace", key: "nav.marketplace", permission: "org.settings.view" },
@@ -207,6 +210,7 @@ export function AppShell() {
       >
         <span className="mr-4 px-2 py-1 font-semibold md:mb-4 md:mr-0">{t("app.name")}</span>
         {permissions["crm.search"] ? <CommandPalette /> : null}
+        {permissions["ai.use"] ? <CommandBar /> : null}
         <NotificationBell />
         {NAV.filter((item) => !item.permission || permissions[item.permission]).map((item) => (
           <Link

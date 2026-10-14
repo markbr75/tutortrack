@@ -6,6 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
+import { AiJobAdvert } from "../ai/AiWidgets";
 import { Turnstile } from "../components/Turnstile";
 import { PublicLayout } from "../layout/PublicLayout";
 import { PublicField, type Schema } from "../leads/MorePages";
@@ -31,6 +32,7 @@ function Page({ title, children }: { title: string; children: ReactNode }) {
 /** Applications by stage (FR-18-2). */
 export function ApplicationsPage() {
   const { t } = useTranslation();
+  const canManageOpenings = usePermission("recruitment.pipeline.manage");
   const stages = useQuery({
     queryKey: ["application-stages"],
     queryFn: async () => unwrap(await api.GET("/api/v1/application-stages")),
@@ -86,6 +88,7 @@ export function ApplicationsPage() {
             );
           })}
       </div>
+      {canManageOpenings ? <AiJobAdvert /> : null}
     </Page>
   );
 }

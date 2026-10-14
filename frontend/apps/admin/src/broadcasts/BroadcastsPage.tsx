@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useId, useState, type FormEvent } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
+import { AiContentHelper } from "../ai/AiParts";
 
 type Broadcast = components["schemas"]["Broadcast"];
 type Definition = components["schemas"]["SegmentDefinition"];
@@ -288,6 +289,15 @@ function Composer({ onCreated }: { onCreated: (b: Broadcast) => void }) {
         />
       ) : (
         <div className="space-y-3">
+          <AiContentHelper
+            kind="broadcast"
+            channel={channel === "sms" ? "sms" : "email"}
+            title={name}
+            onUse={(draft) => {
+              if (draft.subject) setSubject(draft.subject);
+              setBody(draft.body);
+            }}
+          />
           {channel === "email" ? (
             <TextField
               label={t("broadcasts.subject")}

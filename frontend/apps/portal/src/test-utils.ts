@@ -22,7 +22,12 @@ export function mockApi(routes: Record<string, Route>): RecordedCall[] {
       const url = new URL(request.url);
       const path = url.pathname;
       const text = request.method === "GET" ? "" : await request.clone().text();
-      const body: unknown = text ? JSON.parse(text) : undefined;
+      let body: unknown;
+      try {
+        body = text ? JSON.parse(text) : undefined;
+      } catch {
+        body = text; // multipart uploads (E31 voice notes)
+      }
       calls.push({ method: request.method, path, search: url.search, body });
       const route = routes[`${request.method} ${path}`];
       const reply = typeof route === "function" ? route(body, url) : route;

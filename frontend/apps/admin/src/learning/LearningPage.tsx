@@ -6,6 +6,9 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api, useOrganisation, usePermission } from "../api";
+import { markAssisted } from "../ai/ai";
+import { AiAssistedBadge, AiFeedback } from "../ai/AiParts";
+import { AiExplainToParent } from "../ai/AiWidgets";
 import { PAGE, localToIso, uploadFile, useStudentOptions } from "./hooks";
 import { Cell, Empty, FormCard, Table, TextArea } from "./shared";
 
@@ -986,13 +989,16 @@ export function ProgressEditor({ report }: { report: ProgressReport }) {
   const canApprove = usePermission("learning.progress.approve");
   const [summary, setSummary] = useState(report.summary);
   const save = useMutation({
-    mutationFn: async () =>
-      unwrap(
+    mutationFn: async () => {
+      const saved = unwrap(
         await api.PATCH("/api/v1/learning/progress-reports/{id}", {
           params: { path: { id: report.id } },
           body: { summary },
         }),
-      ),
+      );
+      if (draft.data) await markAssisted(draft.data.request, "progress_report", report.id);
+      return saved;
+    },
     onSuccess: invalidate,
   });
   const act = useMutation({
@@ -1015,11 +1021,12 @@ export function ProgressEditor({ report }: { report: ProgressReport }) {
     },
     onSuccess: invalidate,
   });
+  // E31: the AI draft comes with a request id for feedback and the AI-assisted flag.
   const draft = useMutation({
     mutationFn: async () =>
       unwrap(
-        await api.POST("/api/v1/learning/progress-reports/{id}/draft-summary", {
-          params: { path: { id: report.id } },
+        await api.POST("/api/v1/ai/progress-reports/{report_id}/draft", {
+          params: { path: { report_id: report.id } },
         }),
       ),
     onSuccess: (body) => setSummary(body.summary),
@@ -1053,6 +1060,17 @@ export function ProgressEditor({ report }: { report: ProgressReport }) {
       ) : (
         <p className="whitespace-pre-wrap text-sm">{report.summary}</p>
       )}
+      <AiAssistedBadge subjectType="progress_report" subjectId={report.id} />
+      {draft.data ? (
+        <AiFeedback
+          request={draft.data.request}
+          draftText={draft.data.summary}
+          finalText={summary}
+        />
+      ) : null}
+      {editable ? (
+        <AiExplainToParent text={summary} student={report.student} onUse={setSummary} />
+      ) : null}
       {save.error || act.error || draft.error ? (
         <Alert tone="danger">{(save.error ?? act.error ?? draft.error)?.message}</Alert>
       ) : null}

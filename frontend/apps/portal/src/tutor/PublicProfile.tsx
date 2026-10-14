@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useState } from "react";
 
 import { api, uploadFile } from "../api";
+import { AiBioHelper } from "./AiDrafts";
 
 const SECTIONS = ["qualifications", "languages", "experience", "location"] as const;
 
@@ -113,6 +114,7 @@ export function PublicProfileSection() {
               {errors.bio.join(" ")}
             </p>
           ) : null}
+          <AiBioHelper tutorId={p.tutor} onUse={(bio) => setDraft({ ...draft, bio })} />
         </div>
         <div className="space-y-1">
           <label htmlFor={photoId} className="text-sm font-medium">

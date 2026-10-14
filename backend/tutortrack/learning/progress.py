@@ -228,16 +228,19 @@ def pdf(report: ProgressReport) -> bytes:
 
 Drafter = Callable[[ProgressReport], str]
 _drafter: Drafter | None = None
+_available: Callable[[], bool] | None = None
 
 
-def register_drafter(drafter: Drafter | None) -> None:
-    """E31 registers its summary writer here; until then drafting is unavailable."""
-    global _drafter
+def register_drafter(drafter: Drafter | None, available: Callable[[], bool] | None = None) -> None:
+    """E31 registers its summary writer here (and whether the organisation has it turned
+    on); until then drafting is unavailable."""
+    global _drafter, _available
     _drafter = drafter
+    _available = available
 
 
 def can_draft() -> bool:
-    return _drafter is not None
+    return _drafter is not None and (_available is None or _available())
 
 
 def draft_summary(report: ProgressReport) -> str:

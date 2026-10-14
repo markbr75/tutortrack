@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useState, type FormEvent } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
+import { AiReplySuggest, AiThreadTools } from "../ai/AiWidgets";
 
 type Thread = components["schemas"]["Thread"];
 type Box = "open" | "mine" | "unassigned" | "snoozed" | "closed" | "flagged";
@@ -167,6 +168,9 @@ function Composer({ thread }: { thread: Thread }) {
           ]}
         />
       </div>
+      {!thread.flagged ? (
+        <AiReplySuggest threadId={thread.id} current={body} onSuggest={setBody} />
+      ) : null}
       <label htmlFor={bodyId} className="text-sm font-medium">
         {t("inbox.message")}
       </label>
@@ -270,6 +274,7 @@ function Conversation({ id }: { id: string }) {
           </p>
         ) : null}
       </header>
+      {!th.flagged ? <AiThreadTools threadId={th.id} /> : null}
       {canAssign ? (
         <div className="flex flex-wrap items-end gap-2">
           <SelectField

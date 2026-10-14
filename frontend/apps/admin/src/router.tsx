@@ -25,6 +25,8 @@ import { StudentLearningPage } from "./learning/StudentLearningPage";
 import { BroadcastsPage } from "./broadcasts/BroadcastsPage";
 import { MessagingSettingsPage } from "./comms/MessagingSettingsPage";
 import { InboxPage } from "./inbox/InboxPage";
+import { AiSettingsPage } from "./ai/AiSettingsPage";
+import { CopilotPage } from "./ai/CopilotPage";
 import { AccountingPage } from "./accounting/AccountingPage";
 import { DataPage } from "./data/DataPage";
 import { ImportPage } from "./data/ImportPage";
@@ -280,6 +282,8 @@ const growthRoute = appPage("/growth", GrowthPage);
 const inboxRoute = appPage("/inbox", InboxPage);
 const broadcastsRoute = appPage("/broadcasts", BroadcastsPage);
 const messagingSettingsRoute = appPage("/settings/messaging", MessagingSettingsPage);
+const copilotRoute = appPage("/copilot", CopilotPage);
+const aiSettingsRoute = appPage("/settings/ai", AiSettingsPage);
 const classRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/classes/$classId",
@@ -452,6 +456,8 @@ const routeTree = rootRoute.addChildren([
     inboxRoute,
     broadcastsRoute,
     messagingSettingsRoute,
+    copilotRoute,
+    aiSettingsRoute,
     classRoute,
     registerRoute,
     learningRoute,

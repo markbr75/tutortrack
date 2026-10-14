@@ -61,7 +61,7 @@ ROLES: dict[str, RoleDef] = {
             "branch_manager", "Branch Manager", "Admin rights within assigned branches.",
             _g("*:branch", "org.settings.view"),
             denies=(*OWNER_ONLY, "subscription.view", "org.settings.manage", "org.branch.manage",
-                    "audit.*", "migration.*"),
+                    "audit.*", "migration.*", "ai.settings.manage"),
         ),
         RoleDef(
             "coordinator", "Coordinator",
@@ -74,6 +74,7 @@ ROLES: dict[str, RoleDef] = {
                "privacy.consent.record", "reporting.dashboard.view",
                "reporting.operations.view", "reporting.sales.view", "reporting.people.view",
                "reporting.export", "reporting.schedule.manage:own", "sites.view",
+               "ai.use", "ai.copilot",
                "sites.profile.moderate", "growth.review.*", "growth.referral.*",
                "growth.tutor_referral.*", "growth.affiliate.view"),
             denies=("people.tutor.view_financial", "scheduling.edit_locked",
@@ -87,7 +88,7 @@ ROLES: dict[str, RoleDef] = {
                "crm.note.view", "crm.search", "catalogue.view", "rates.manage", "courses.view",
                "subscription.view", "growth.affiliate.*", "growth.commission.manage",
                "growth.referral.view", "growth.tutor_referral.*", "learning.library.view",
-               "learning.library.charge"),
+               "learning.library.charge", "ai.use", "ai.copilot", "ai.usage.view"),
         ),
         RoleDef(
             "tutor", "Tutor",
@@ -105,7 +106,7 @@ ROLES: dict[str, RoleDef] = {
                "reporting.payroll.view:own", "integrations.personal",
                "sites.profile.edit:own", "growth.review.view:own",
                "growth.tutor_referral.view:own", "comms.inbox.view:own",
-               "comms.inbox.reply:own"),
+               "comms.inbox.reply:own", "ai.use"),
             # Organisation-wide learning settings and approvals stay with staff (E21).
             denies=("learning.curriculum.manage", "learning.progress.approve",
                     "learning.library.manage", "learning.library.charge"),

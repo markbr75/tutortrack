@@ -2644,6 +2644,1591 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/ai/assists": {
+            "get": {
+                "operationId": "ai_assists_list",
+                "description": "The AI-assisted flag: drafts people applied to records.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "subject_id",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "One or more ids, comma separated."
+                    },
+                    {
+                        "in": "query",
+                        "name": "subject_type",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "e.g. lesson_report"
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAIAssistList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "ai_assists_create",
+                "description": "Record that a person used a draft on a record (marks it AI-assisted).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIAssistInRequest"
+                            },
+                            "examples": {
+                                "AppliedToALessonReport": {
+                                    "value": {
+                                        "request": "0192f5a0-7c1e-7b3a-9d2e-5f4c3b2a1d0e",
+                                        "subject_type": "lesson_report",
+                                        "subject_id": "0192f5a0-0000-7000-8000-000000000001"
+                                    },
+                                    "summary": "Applied to a lesson report"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIAssistInRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIAssistInRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIAssist"
+                                },
+                                "examples": {
+                                    "AppliedToALessonReport": {
+                                        "value": {
+                                            "request": "0192f5a0-7c1e-7b3a-9d2e-5f4c3b2a1d0e",
+                                            "subject_type": "lesson_report",
+                                            "subject_id": "0192f5a0-0000-7000-8000-000000000001"
+                                        },
+                                        "summary": "Applied to a lesson report"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/assists/{id}": {
+            "get": {
+                "operationId": "ai_assists_retrieve",
+                "description": "The AI-assisted flag: drafts people applied to records.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this ai assist.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIAssist"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/command": {
+            "post": {
+                "operationId": "ai_command_create",
+                "description": "FR-31-5: proposed actions (confirm each with ``/ai/proposals/{id}/confirm``)\nand tutor-search filters.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AICommandInRequest"
+                            },
+                            "examples": {
+                                "Reschedule": {
+                                    "value": {
+                                        "text": "Move Sam's Thursday maths to 5pm from next week"
+                                    }
+                                },
+                                "Search": {
+                                    "value": {
+                                        "text": "Find a GCSE chemistry tutor free Tuesday evenings near LS6"
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AICommandInRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AICommandInRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AICommand"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/content": {
+            "post": {
+                "operationId": "ai_content_create",
+                "description": "FR-31-8: draft a broadcast, tutor bio, website page or job advert.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIContentInRequest"
+                            },
+                            "examples": {
+                                "Half-termBroadcast": {
+                                    "value": {
+                                        "kind": "broadcast",
+                                        "brief": "Half-term revision sessions, 20% off"
+                                    },
+                                    "summary": "Half-term broadcast"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIContentInRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIContentInRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIContent"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/copilot": {
+            "post": {
+                "operationId": "ai_copilot_create",
+                "description": "FR-31-7: an answer from the standard reports you may run, citing each report\nand its filters with a link to open it.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AICopilotInRequest"
+                            },
+                            "examples": {
+                                "Debtors": {
+                                    "value": {
+                                        "question": "What's our outstanding balance over 30 days?"
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AICopilotInRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AICopilotInRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AICopilot"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/enquiries/{enquiry_id}/triage": {
+            "post": {
+                "operationId": "ai_enquiries_triage_create",
+                "description": "FR-31-4: next steps, a priority and a draft reply; field changes come back as\na proposal to confirm.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "enquiry_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AITriage"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/enquiries/extract": {
+            "post": {
+                "operationId": "ai_enquiries_extract_create",
+                "description": "FR-31-4: structured fields from a free-text enquiry, to prefill the form.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIExtractInRequest"
+                            },
+                            "examples": {
+                                "AnEmail": {
+                                    "value": {
+                                        "text": "Hi, my son needs GCSE maths help, Tuesdays after 4pm, LS6."
+                                    },
+                                    "summary": "An email"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIExtractInRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIExtractInRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIExtract"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/features": {
+            "get": {
+                "operationId": "ai_features_list",
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AIFeatureSetting"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/features/{feature}": {
+            "patch": {
+                "operationId": "ai_features_partial_update",
+                "description": "Opt the organisation into a feature (or out), with tone and spelling.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "feature",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAIFeatureUpdateRequest"
+                            },
+                            "examples": {
+                                "TurnOn": {
+                                    "value": {
+                                        "enabled": true,
+                                        "tone": "formal"
+                                    },
+                                    "summary": "Turn on"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAIFeatureUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAIFeatureUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AIFeatureSetting"
+                                    }
+                                },
+                                "examples": {
+                                    "TurnOn": {
+                                        "value": [
+                                            {
+                                                "enabled": true,
+                                                "tone": "formal"
+                                            }
+                                        ],
+                                        "summary": "Turn on"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/feedback": {
+            "post": {
+                "operationId": "ai_feedback_create",
+                "description": "Rate a response; with the draft and the final text, only edit statistics are\nkept (the texts are not stored).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIFeedbackInRequest"
+                            },
+                            "examples": {
+                                "ThumbsUpAfterEditing": {
+                                    "value": {
+                                        "request": "0192f5a0-7c1e-7b3a-9d2e-5f4c3b2a1d0e",
+                                        "rating": "up",
+                                        "draft_text": "Sam worked well.",
+                                        "final_text": "Sam worked really well."
+                                    },
+                                    "summary": "Thumbs up after editing"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIFeedbackInRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIFeedbackInRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIFeedbackOut"
+                                },
+                                "examples": {
+                                    "ThumbsUpAfterEditing": {
+                                        "value": {
+                                            "request": "0192f5a0-7c1e-7b3a-9d2e-5f4c3b2a1d0e",
+                                            "rating": "up",
+                                            "draft_text": "Sam worked well.",
+                                            "final_text": "Sam worked really well."
+                                        },
+                                        "summary": "Thumbs up after editing"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/lesson-reports/{report_id}/draft": {
+            "post": {
+                "operationId": "ai_lesson_reports_draft_create",
+                "description": "FR-31-1: draft a lesson report's answers from notes and/or a voice note. The\ndraft is returned, not saved; submit it through the lesson report endpoints.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "report_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AILessonReportDraftInRequest"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AILessonReportDraftInRequest"
+                            },
+                            "examples": {
+                                "RoughNotes": {
+                                    "value": {
+                                        "notes": "fractions - adding with different denominators, good effort"
+                                    },
+                                    "summary": "Rough notes"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AILessonReportDraft"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/matching/explain": {
+            "post": {
+                "operationId": "ai_matching_explain_create",
+                "description": "FR-31-6: why a tutor ranks where they do, and an intro message.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIMatchExplainInRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIMatchExplainInRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIMatchExplainInRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIMatchExplain"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/progress-reports/{report_id}/draft": {
+            "post": {
+                "operationId": "ai_progress_reports_draft_create",
+                "description": "FR-31-2: draft the summary comments of a progress report from its snapshot.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "report_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIProgressDraft"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/proposals": {
+            "get": {
+                "operationId": "ai_proposals_list",
+                "description": "Actions the AI proposed to the requesting person (never anyone else's).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAIProposalList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/proposals/{id}": {
+            "get": {
+                "operationId": "ai_proposals_retrieve",
+                "description": "Actions the AI proposed to the requesting person (never anyone else's).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this ai proposal.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIProposal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/proposals/{id}/confirm": {
+            "post": {
+                "operationId": "ai_proposals_confirm_create",
+                "description": "Carry out the proposal with your permissions (409 if already decided).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this ai proposal.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIProposal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/proposals/{id}/discard": {
+            "post": {
+                "operationId": "ai_proposals_discard_create",
+                "description": "Actions the AI proposed to the requesting person (never anyone else's).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this ai proposal.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIProposal"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/requests": {
+            "get": {
+                "operationId": "ai_requests_list",
+                "description": "The request log: prompts are never stored, only a hash of the redacted input.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "feature",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAIRequestLogList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/requests/{id}": {
+            "get": {
+                "operationId": "ai_requests_retrieve",
+                "description": "The request log: prompts are never stored, only a hash of the redacted input.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this ai request log.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIRequestLog"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/rewrite": {
+            "post": {
+                "operationId": "ai_rewrite_create",
+                "description": "FR-31-2 \"Explain to parent\": plain words, optionally translated (the\ncontact's preferred language when ``contact`` is given).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIRewriteInRequest"
+                            },
+                            "examples": {
+                                "ExplainToAParentInFrench": {
+                                    "value": {
+                                        "text": "Secure at KS3 AO2 problem solving.",
+                                        "language": "fr"
+                                    },
+                                    "summary": "Explain to a parent in French"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIRewriteInRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AIRewriteInRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIRewrite"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/status": {
+            "get": {
+                "operationId": "ai_status",
+                "description": "Whether the plan includes AI, which features the organisation turned on and\n(for ``ai.usage.view``) its AI credits.",
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIStatus"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/thread-insights": {
+            "get": {
+                "operationId": "ai_thread_insights_list",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "thread",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Thread ids, comma separated."
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAIThreadInsightList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/thread-insights/{id}": {
+            "get": {
+                "operationId": "ai_thread_insights_retrieve",
+                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this thread insight.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIThreadInsight"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/threads/{thread_id}/classify": {
+            "post": {
+                "operationId": "ai_threads_classify_create",
+                "description": "FR-31-3: the conversation's intent; routing (if configured) is a proposal.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "thread_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIClassify"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/threads/{thread_id}/reply": {
+            "post": {
+                "operationId": "ai_threads_reply_create",
+                "description": "FR-31-3: a suggested reply (not sent) using the conversation and account.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "thread_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIReply"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/threads/{thread_id}/summary": {
+            "post": {
+                "operationId": "ai_threads_summary_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "thread_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AISummary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/ai/usage": {
+            "get": {
+                "operationId": "ai_usage_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "month",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "YYYY-MM (default: this month)."
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AIUsage"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/announcements": {
             "get": {
                 "operationId": "announcements_list",
@@ -67310,6 +68895,1357 @@
     },
     "components": {
         "schemas": {
+            "AIAssist": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "request": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "user": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "feature": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AIFeatureEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "subject_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "subject_id": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "feature",
+                    "id",
+                    "request",
+                    "subject_id",
+                    "subject_type",
+                    "user"
+                ]
+            },
+            "AIAssistInRequest": {
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "subject_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 40
+                    },
+                    "subject_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                    }
+                },
+                "required": [
+                    "request",
+                    "subject_id",
+                    "subject_type"
+                ]
+            },
+            "AICitation": {
+                "type": "object",
+                "properties": {
+                    "index": {
+                        "type": "integer"
+                    },
+                    "report": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "period": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "link": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "index",
+                    "link",
+                    "params",
+                    "period",
+                    "report",
+                    "title"
+                ]
+            },
+            "AIClassify": {
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "intent": {
+                        "$ref": "#/components/schemas/IntentEnum"
+                    },
+                    "confidence": {
+                        "type": "integer"
+                    },
+                    "reason": {
+                        "type": "string"
+                    },
+                    "proposal": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AIProposal"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "confidence",
+                    "intent",
+                    "proposal",
+                    "reason",
+                    "request"
+                ]
+            },
+            "AICommand": {
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "proposals": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AIProposal"
+                        }
+                    },
+                    "searches": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AITutorSearch"
+                        }
+                    }
+                },
+                "required": [
+                    "message",
+                    "proposals",
+                    "request",
+                    "searches"
+                ]
+            },
+            "AICommandInRequest": {
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2000
+                    }
+                },
+                "required": [
+                    "text"
+                ]
+            },
+            "AIContent": {
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "kind": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "subject": {
+                        "type": "string"
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "meta_description": {
+                        "type": "string"
+                    },
+                    "warnings": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "body",
+                    "kind",
+                    "meta_description",
+                    "request",
+                    "subject",
+                    "title",
+                    "warnings"
+                ]
+            },
+            "AIContentInChannelEnum": {
+                "enum": [
+                    "email",
+                    "sms"
+                ],
+                "type": "string",
+                "description": "* `email` - email\n* `sms` - sms"
+            },
+            "AIContentInKindEnum": {
+                "enum": [
+                    "broadcast",
+                    "bio",
+                    "page",
+                    "job_ad"
+                ],
+                "type": "string",
+                "description": "* `broadcast` - broadcast\n* `bio` - bio\n* `page` - page\n* `job_ad` - job_ad"
+            },
+            "AIContentInRequest": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "$ref": "#/components/schemas/AIContentInKindEnum"
+                    },
+                    "brief": {
+                        "type": "string",
+                        "maxLength": 4000
+                    },
+                    "channel": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AIContentInChannelEnum"
+                            }
+                        ],
+                        "default": "email"
+                    },
+                    "title": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 200
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                        }
+                    },
+                    "location": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 150
+                    }
+                },
+                "required": [
+                    "brief",
+                    "kind"
+                ]
+            },
+            "AICopilot": {
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "answer": {
+                        "type": "string"
+                    },
+                    "citations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AICitation"
+                        }
+                    }
+                },
+                "required": [
+                    "answer",
+                    "citations",
+                    "request"
+                ]
+            },
+            "AICopilotInRequest": {
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2000
+                    },
+                    "history": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AICopilotTurnRequest"
+                        }
+                    }
+                },
+                "required": [
+                    "question"
+                ]
+            },
+            "AICopilotTurnRequest": {
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2000
+                    },
+                    "answer": {
+                        "type": "string",
+                        "maxLength": 8000
+                    }
+                },
+                "required": [
+                    "answer",
+                    "question"
+                ]
+            },
+            "AICredits": {
+                "type": "object",
+                "properties": {
+                    "metered": {
+                        "type": "boolean"
+                    },
+                    "used_this_month": {
+                        "type": "integer"
+                    },
+                    "monthly_cap": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "balance": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "allowance": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "allowance",
+                    "balance",
+                    "metered",
+                    "monthly_cap",
+                    "used_this_month"
+                ]
+            },
+            "AIExtract": {
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "extracted": {
+                        "$ref": "#/components/schemas/AIExtractedEnquiry"
+                    }
+                },
+                "required": [
+                    "extracted",
+                    "request"
+                ]
+            },
+            "AIExtractInRequest": {
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 20000
+                    }
+                },
+                "required": [
+                    "text"
+                ]
+            },
+            "AIExtractedContact": {
+                "type": "object",
+                "properties": {
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "phone"
+                ]
+            },
+            "AIExtractedEnquiry": {
+                "type": "object",
+                "properties": {
+                    "contact": {
+                        "$ref": "#/components/schemas/AIExtractedContact"
+                    },
+                    "students": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AIExtractedStudent"
+                        }
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AIExtractedSubject"
+                        }
+                    },
+                    "availability": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "location": {
+                        "$ref": "#/components/schemas/AIExtractedLocation"
+                    },
+                    "urgency": {
+                        "type": "string"
+                    },
+                    "summary": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "availability",
+                    "contact",
+                    "location",
+                    "students",
+                    "subjects",
+                    "summary",
+                    "urgency"
+                ]
+            },
+            "AIExtractedLocation": {
+                "type": "object",
+                "properties": {
+                    "postcode": {
+                        "type": "string"
+                    },
+                    "area": {
+                        "type": "string"
+                    },
+                    "mode": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "area",
+                    "mode",
+                    "postcode"
+                ]
+            },
+            "AIExtractedStudent": {
+                "type": "object",
+                "properties": {
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    },
+                    "year_group": {
+                        "type": "string"
+                    },
+                    "school": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "first_name",
+                    "last_name",
+                    "school",
+                    "year_group"
+                ]
+            },
+            "AIExtractedSubject": {
+                "type": "object",
+                "properties": {
+                    "subject": {
+                        "type": "string"
+                    },
+                    "level": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "level",
+                    "subject"
+                ]
+            },
+            "AIFeatureEnum": {
+                "enum": [
+                    "lesson_report",
+                    "progress_report",
+                    "parent_rewrite",
+                    "enquiry",
+                    "inbox",
+                    "command_bar",
+                    "copilot",
+                    "content",
+                    "matching"
+                ],
+                "type": "string",
+                "description": "* `lesson_report` - Lesson report drafting\n* `progress_report` - Progress report comments\n* `parent_rewrite` - Explain to parent and translate\n* `enquiry` - Enquiry extraction and triage\n* `inbox` - Inbox replies, intent and summaries\n* `command_bar` - Command bar\n* `copilot` - Business copilot\n* `content` - Content writing\n* `matching` - Matching explanations"
+            },
+            "AIFeatureSetting": {
+                "type": "object",
+                "properties": {
+                    "feature": {
+                        "$ref": "#/components/schemas/AIFeatureEnum"
+                    },
+                    "title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "tone": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/AIToneEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    },
+                    "language": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/AILanguageEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "enabled",
+                    "feature",
+                    "language",
+                    "title",
+                    "tone"
+                ]
+            },
+            "AIFeedbackInRequest": {
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "rating": {
+                        "default": "",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/AIRatingEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    },
+                    "comment": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 500
+                    },
+                    "draft_text": {
+                        "type": "string",
+                        "maxLength": 20000
+                    },
+                    "final_text": {
+                        "type": "string",
+                        "maxLength": 20000
+                    }
+                },
+                "required": [
+                    "request"
+                ]
+            },
+            "AIFeedbackOut": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "rating": {
+                        "type": "string"
+                    },
+                    "similarity_percent": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "id",
+                    "rating",
+                    "similarity_percent"
+                ]
+            },
+            "AILanguageEnum": {
+                "enum": [
+                    "en-GB",
+                    "en-US"
+                ],
+                "type": "string",
+                "description": "* `` - Organisation default\n* `en-GB` - UK English\n* `en-US` - US English"
+            },
+            "AILessonReportDraft": {
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "answers": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "suggested_topics": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AITopic"
+                        }
+                    },
+                    "homework": {
+                        "type": "string"
+                    },
+                    "transcript": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "answers",
+                    "homework",
+                    "request",
+                    "suggested_topics",
+                    "transcript"
+                ]
+            },
+            "AILessonReportDraftInRequest": {
+                "type": "object",
+                "properties": {
+                    "notes": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 20000
+                    },
+                    "audio": {
+                        "type": "string",
+                        "format": "binary",
+                        "nullable": true
+                    }
+                }
+            },
+            "AIMatchExplain": {
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "score": {
+                        "type": "string"
+                    },
+                    "explanation": {
+                        "type": "string"
+                    },
+                    "intro_message": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "explanation",
+                    "intro_message",
+                    "request",
+                    "score"
+                ]
+            },
+            "AIMatchExplainInRequest": {
+                "type": "object",
+                "properties": {
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "job": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "criteria": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "description": "Ad hoc search criteria, as for the matching search."
+                    }
+                },
+                "required": [
+                    "tutor"
+                ]
+            },
+            "AIProgressDraft": {
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "summary": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "request",
+                    "summary"
+                ]
+            },
+            "AIProposal": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "feature": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AIFeatureEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "action": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "params": {
+                        "readOnly": true
+                    },
+                    "summary": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AIProposalStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "result": {
+                        "readOnly": true
+                    },
+                    "error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "decided_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "request": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "action",
+                    "created_at",
+                    "decided_at",
+                    "error",
+                    "feature",
+                    "id",
+                    "params",
+                    "request",
+                    "result",
+                    "status",
+                    "summary"
+                ]
+            },
+            "AIProposalStatusEnum": {
+                "enum": [
+                    "proposed",
+                    "executed",
+                    "failed",
+                    "discarded"
+                ],
+                "type": "string",
+                "description": "* `proposed` - Waiting for confirmation\n* `executed` - Done\n* `failed` - Failed\n* `discarded` - Discarded"
+            },
+            "AIRatingEnum": {
+                "enum": [
+                    "up",
+                    "down"
+                ],
+                "type": "string",
+                "description": "* `up` - Helpful\n* `down` - Not helpful"
+            },
+            "AIReply": {
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "reply": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "reply",
+                    "request"
+                ]
+            },
+            "AIRequestLog": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "user": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "user_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "feature": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AIFeatureEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "prompt_key": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "prompt_version": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "provider": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "model": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AIRequestLogStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "input_tokens": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "output_tokens": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "cache_read_tokens": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "cache_write_tokens": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "credits": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "latency_ms": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "tool_rounds": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "fallback_used": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "redacted_input_hash": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "error_code": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "cache_read_tokens",
+                    "cache_write_tokens",
+                    "created_at",
+                    "credits",
+                    "error_code",
+                    "fallback_used",
+                    "feature",
+                    "id",
+                    "input_tokens",
+                    "latency_ms",
+                    "model",
+                    "output_tokens",
+                    "prompt_key",
+                    "prompt_version",
+                    "provider",
+                    "redacted_input_hash",
+                    "status",
+                    "tool_rounds",
+                    "user",
+                    "user_name"
+                ]
+            },
+            "AIRequestLogStatusEnum": {
+                "enum": [
+                    "ok",
+                    "refused",
+                    "incomplete",
+                    "error"
+                ],
+                "type": "string",
+                "description": "* `ok` - Completed\n* `refused` - Declined by the model\n* `incomplete` - Cut short\n* `error` - Failed"
+            },
+            "AIRewrite": {
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "language",
+                    "request",
+                    "text"
+                ]
+            },
+            "AIRewriteInRequest": {
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 20000
+                    },
+                    "language": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 20
+                    },
+                    "contact": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "student": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "text"
+                ]
+            },
+            "AIStatus": {
+                "type": "object",
+                "properties": {
+                    "available": {
+                        "type": "boolean",
+                        "description": "The plan includes the AI assistant."
+                    },
+                    "provider": {
+                        "type": "string"
+                    },
+                    "features": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "boolean"
+                        }
+                    },
+                    "credits_exhausted": {
+                        "type": "boolean"
+                    },
+                    "credits": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AICredits"
+                            }
+                        ],
+                        "nullable": true,
+                        "description": "Only for ai.usage.view."
+                    }
+                },
+                "required": [
+                    "available",
+                    "credits",
+                    "credits_exhausted",
+                    "features",
+                    "provider"
+                ]
+            },
+            "AISummary": {
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "action_items": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "action_items",
+                    "request",
+                    "summary"
+                ]
+            },
+            "AIThreadInsight": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "thread": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "intent": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "confidence": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "message_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "classified_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "classified_at",
+                    "confidence",
+                    "id",
+                    "intent",
+                    "message_count",
+                    "thread"
+                ]
+            },
+            "AIToneEnum": {
+                "enum": [
+                    "friendly",
+                    "formal"
+                ],
+                "type": "string",
+                "description": "* `` - Organisation default\n* `friendly` - Friendly\n* `formal` - Formal"
+            },
+            "AITopic": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            },
+            "AITriage": {
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "extracted": {
+                        "$ref": "#/components/schemas/AIExtractedEnquiry"
+                    },
+                    "next_steps": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "priority": {
+                        "type": "string"
+                    },
+                    "reply_subject": {
+                        "type": "string"
+                    },
+                    "reply_body": {
+                        "type": "string"
+                    },
+                    "proposal": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AIProposal"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "extracted",
+                    "next_steps",
+                    "priority",
+                    "proposal",
+                    "reply_body",
+                    "reply_subject",
+                    "request"
+                ]
+            },
+            "AITutorSearch": {
+                "type": "object",
+                "properties": {
+                    "subject": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "subject_name": {
+                        "type": "string"
+                    },
+                    "level": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "level_name": {
+                        "type": "string"
+                    },
+                    "mode": {
+                        "type": "string"
+                    },
+                    "postcode": {
+                        "type": "string"
+                    },
+                    "weekday": {
+                        "type": "string"
+                    },
+                    "after_time": {
+                        "type": "string"
+                    },
+                    "before_time": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "after_time",
+                    "before_time",
+                    "level",
+                    "level_name",
+                    "mode",
+                    "postcode",
+                    "subject",
+                    "subject_name",
+                    "weekday"
+                ]
+            },
+            "AIUsage": {
+                "type": "object",
+                "properties": {
+                    "period": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "totals": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "by_feature": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AIUsageFeature"
+                        }
+                    },
+                    "by_user": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AIUsageUser"
+                        }
+                    },
+                    "feedback": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "credits": {
+                        "$ref": "#/components/schemas/AICredits"
+                    }
+                },
+                "required": [
+                    "by_feature",
+                    "by_user",
+                    "credits",
+                    "feedback",
+                    "period",
+                    "totals"
+                ]
+            },
+            "AIUsageFeature": {
+                "type": "object",
+                "properties": {
+                    "feature": {
+                        "type": "string"
+                    },
+                    "requests": {
+                        "type": "integer"
+                    },
+                    "credits": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "credits",
+                    "feature",
+                    "requests"
+                ]
+            },
+            "AIUsageUser": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "requests": {
+                        "type": "integer"
+                    },
+                    "credits": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "credits",
+                    "name",
+                    "requests",
+                    "user"
+                ]
+            },
             "AbsenceRequest": {
                 "type": "object",
                 "properties": {
@@ -84327,6 +87263,19 @@
                 "type": "string",
                 "description": "* `user` - Personal\n* `organisation` - Organisation"
             },
+            "IntentEnum": {
+                "enum": [
+                    "reschedule",
+                    "cancellation",
+                    "billing",
+                    "complaint",
+                    "new_enquiry",
+                    "feedback",
+                    "other"
+                ],
+                "type": "string",
+                "description": "* `reschedule` - reschedule\n* `cancellation` - cancellation\n* `billing` - billing\n* `complaint` - complaint\n* `new_enquiry` - new_enquiry\n* `feedback` - feedback\n* `other` - other"
+            },
             "Interview": {
                 "type": "object",
                 "properties": {
@@ -86802,6 +89751,7 @@
                     "accounting_integrations",
                     "advanced_reports",
                     "ai_assistant",
+                    "ai_credits_monthly",
                     "api_access",
                     "automation",
                     "automation_rules",
@@ -86822,7 +89772,7 @@
                     "white_label"
                 ],
                 "type": "string",
-                "description": "* `accounting_integrations` - accounting_integrations\n* `advanced_reports` - advanced_reports\n* `ai_assistant` - ai_assistant\n* `api_access` - api_access\n* `automation` - automation\n* `automation_rules` - automation_rules\n* `courses` - courses\n* `custom_domain` - custom_domain\n* `matching` - matching\n* `max_active_students` - max_active_students\n* `max_branches` - max_branches\n* `max_tutors` - max_tutors\n* `multi_branch` - multi_branch\n* `payroll` - payroll\n* `pipeline` - pipeline\n* `recruitment` - recruitment\n* `sms_credits_monthly` - sms_credits_monthly\n* `sso_saml` - sso_saml\n* `storage_gb` - storage_gb\n* `webhooks` - webhooks\n* `white_label` - white_label"
+                "description": "* `accounting_integrations` - accounting_integrations\n* `advanced_reports` - advanced_reports\n* `ai_assistant` - ai_assistant\n* `ai_credits_monthly` - ai_credits_monthly\n* `api_access` - api_access\n* `automation` - automation\n* `automation_rules` - automation_rules\n* `courses` - courses\n* `custom_domain` - custom_domain\n* `matching` - matching\n* `max_active_students` - max_active_students\n* `max_branches` - max_branches\n* `max_tutors` - max_tutors\n* `multi_branch` - multi_branch\n* `payroll` - payroll\n* `pipeline` - pipeline\n* `recruitment` - recruitment\n* `sms_credits_monthly` - sms_credits_monthly\n* `sso_saml` - sso_saml\n* `storage_gb` - storage_gb\n* `webhooks` - webhooks\n* `white_label` - white_label"
             },
             "LateFeeRule": {
                 "type": "object",
@@ -93538,6 +96488,110 @@
                     "version"
                 ]
             },
+            "PaginatedAIAssistList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AIAssist"
+                        }
+                    }
+                }
+            },
+            "PaginatedAIProposalList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AIProposal"
+                        }
+                    }
+                }
+            },
+            "PaginatedAIRequestLogList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AIRequestLog"
+                        }
+                    }
+                }
+            },
+            "PaginatedAIThreadInsightList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AIThreadInsight"
+                        }
+                    }
+                }
+            },
             "PaginatedAcademicYearList": {
                 "type": "object",
                 "required": [
@@ -97173,6 +100227,34 @@
                     "token",
                     "uid"
                 ]
+            },
+            "PatchedAIFeatureUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "tone": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/AIToneEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    },
+                    "language": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/AILanguageEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    }
+                }
             },
             "PatchedAcademicYearRequest": {
                 "type": "object",

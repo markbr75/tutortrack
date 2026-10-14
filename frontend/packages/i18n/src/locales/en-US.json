@@ -129,5 +129,18 @@
     "requestStatus": {
       "cancelled": "Canceled"
     }
+  },
+  "ai": {
+    "errors": {
+      "credits": "Your organization has no AI credits left this month. Top up from Billing & plan.",
+      "disabled": "This AI feature is turned off for your organization."
+    },
+    "inbox": {
+      "summarise": "Summarize"
+    },
+    "settings": {
+      "inherit": "Organization default",
+      "org": "Organization defaults"
+    }
   }
 }

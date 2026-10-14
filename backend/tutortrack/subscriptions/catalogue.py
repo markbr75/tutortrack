@@ -38,6 +38,7 @@ LIMITS: dict[str, Any] = {
     "storage_gb": _("Storage (GB)"),
     "sms_credits_monthly": _("SMS credits each month"),
     "automation_rules": _("Automation rules"),
+    "ai_credits_monthly": _("AI credits each month"),  # E31
 }
 
 CURRENCIES = ("GBP", "USD", "EUR", "AUD", "CAD", "NZD")
@@ -83,7 +84,7 @@ AGENCY_FEATURES = TEAM_FEATURES | {
 }  # fmt: skip
 AGENCY_LIMITS: dict[str, int | None] = {
     "max_tutors": None, "max_branches": 10, "max_active_students": None, "storage_gb": 100,
-    "sms_credits_monthly": 1000, "automation_rules": 50,
+    "sms_credits_monthly": 1000, "automation_rules": 50, "ai_credits_monthly": 2000,
 }  # fmt: skip
 
 PLANS: tuple[PlanDef, ...] = (
@@ -100,6 +101,7 @@ PLANS: tuple[PlanDef, ...] = (
             "storage_gb": 5,
             "sms_credits_monthly": 50,
             "automation_rules": 0,
+            "ai_credits_monthly": 0,
         },
         (Component("base_fee", _prices("19", "24", "22", "39", "33", "42")),),
     ),
@@ -116,6 +118,7 @@ PLANS: tuple[PlanDef, ...] = (
             "storage_gb": 25,
             "sms_credits_monthly": 300,
             "automation_rules": 10,
+            "ai_credits_monthly": 0,
         },
         (
             Component("base_fee", _prices("39", "49", "45", "79", "67", "85")),
@@ -154,7 +157,7 @@ PLANS: tuple[PlanDef, ...] = (
         "Large and multi-branch organisations: SSO, data residency and an SLA.",
         40,
         frozenset(FEATURES),
-        {**dict.fromkeys(LIMITS), "sms_credits_monthly": 5000},
+        {**dict.fromkeys(LIMITS), "sms_credits_monthly": 5000, "ai_credits_monthly": 10000},
         visibility="custom",
     ),
 )

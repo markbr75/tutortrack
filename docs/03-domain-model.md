@@ -142,3 +142,4 @@ Naming: `<aggregate>.<past_tense_verb>`. Each epic lists its events; this table 
 | `review.requested/submitted/published`, `referral.created/converted/rewarded`, `commission.earned/clawed_back`, `affiliate_statement.issued` | E25 |
 | `import.submitted/validated/completed/failed/rolled_back/finalised`, `migration_project.started/step_completed/completed`, `export.requested/ready/downloaded/expired`, `invoice.imported` (billing, for imported history) | E28 |
 | `consent.granted`, `consent.withdrawn`, `security.alert` | E29 |
+| `ai_feature.updated`, `ai_proposal.executed`, `thread.intent_classified` | E31 |
