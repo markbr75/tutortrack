@@ -15,6 +15,7 @@ from tutortrack.scheduling.models import Lesson
 from .. import templates
 from ..models import (
     CancellationPolicy,
+    LessonFeedback,
     LessonReport,
     LessonReportComment,
     MakeupCredit,
@@ -263,3 +264,88 @@ class AttendanceStatsSerializer(serializers.Serializer):
     rate_percent = serializers.DecimalField(max_digits=5, decimal_places=1)
     streak = serializers.IntegerField()
     by_outcome = serializers.DictField(child=serializers.IntegerField())
+
+
+# --- client feedback (E09-T09) --------------------------------------------------------------
+
+
+class FeedbackPersonSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+
+
+class LessonFeedbackSerializer(serializers.ModelSerializer):
+    lesson_title = serializers.CharField(source="lesson.title", read_only=True)
+    lesson_start = serializers.DateTimeField(source="lesson.start", read_only=True)
+    student = serializers.SerializerMethodField()
+    tutor = serializers.SerializerMethodField()
+    contact_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LessonFeedback
+        fields = [
+            "id",
+            "lesson",
+            "lesson_title",
+            "lesson_start",
+            "lesson_date",
+            "student",
+            "tutor",
+            "contact_name",
+            "status",
+            "skip_reason",
+            "sent_at",
+            "expires_at",
+            "rating",
+            "comment",
+            "answered_at",
+            "low_score_alerted",
+        ]
+        read_only_fields = fields
+
+    @extend_schema_field(FeedbackPersonSerializer)
+    def get_student(self, obj: LessonFeedback) -> dict[str, str]:
+        return {"id": str(obj.student_id), "name": obj.student.full_name}
+
+    @extend_schema_field(FeedbackPersonSerializer(allow_null=True))
+    def get_tutor(self, obj: LessonFeedback) -> dict[str, str] | None:
+        if obj.tutor is None:
+            return None
+        return {"id": str(obj.tutor_id), "name": obj.tutor.full_name}
+
+    @extend_schema_field(OpenApiTypes.STR)
+    def get_contact_name(self, obj: LessonFeedback) -> str:
+        return obj.contact.full_name if obj.contact is not None else ""
+
+
+class FeedbackTutorRowSerializer(serializers.Serializer):
+    tutor_id = serializers.UUIDField(allow_null=True)
+    tutor = serializers.CharField()
+    average = serializers.CharField()
+    answered = serializers.IntegerField()
+    asked = serializers.IntegerField()
+
+
+class FeedbackSummarySerializer(serializers.Serializer):
+    asked = serializers.IntegerField()
+    answered = serializers.IntegerField()
+    answer_rate = serializers.CharField()
+    average = serializers.CharField(allow_null=True)
+    stars = serializers.DictField(child=serializers.IntegerField())
+    tutors = FeedbackTutorRowSerializer(many=True)
+
+
+class PublicFeedbackSerializer(serializers.Serializer):
+    organisation = serializers.CharField()
+    student = serializers.CharField()
+    tutor = serializers.CharField()
+    lesson = serializers.CharField()
+    lesson_date = serializers.DateField()
+    status = serializers.ChoiceField(choices=LessonFeedback.Status.choices)
+    expires_at = serializers.DateTimeField()
+    rating = serializers.IntegerField(allow_null=True)
+
+
+class FeedbackAnswerSerializer(serializers.Serializer):
+    rating = serializers.IntegerField(min_value=1, max_value=5)
+    comment = serializers.CharField(max_length=2000, required=False, allow_blank=True, default="")

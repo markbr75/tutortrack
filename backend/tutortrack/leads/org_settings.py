@@ -45,3 +45,27 @@ register(
     max_value=168,
     label=_("Remind the owner to record the trial outcome after (hours)"),
 )
+
+register(
+    "leads.proposal_valid_days",
+    type="int",
+    default=14,
+    min_value=1,
+    max_value=90,
+    label=_("Days a proposal can be accepted"),
+)
+register(
+    "leads.proposal_reminder_days",
+    type="int",
+    default=3,
+    min_value=0,
+    max_value=60,
+    label=_("Remind the family this many days before a proposal expires (0: no reminder)"),
+)
+register(
+    "leads.proposal_terms",
+    type="str",
+    default="",
+    max_length=5000,
+    label=_("Standard terms shown on proposals"),
+)

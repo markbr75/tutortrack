@@ -17,4 +17,6 @@ PERMISSIONS = {
     "delivery.template.manage": "Manage lesson report templates",
     "delivery.makeup.view": "See makeup credits",
     "delivery.makeup.manage": "Issue, use and extend makeup credits",
+    "delivery.feedback.view": "See families' feedback on lessons",
+    "delivery.feedback.manage": "Resend or withdraw lesson feedback requests",
 }

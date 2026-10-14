@@ -13,7 +13,7 @@ from tutortrack.core.permissions import permission_scope
 from tutortrack.tenancy.settings_service import get_setting
 
 from . import periods, reports, widgets
-from .models import DashboardLayout, ReportRun, SavedReport, ScheduledReport
+from .models import CustomReport, DashboardLayout, ReportRun, SavedReport, ScheduledReport
 from .reports.base import id_list, invalid
 
 
@@ -111,3 +111,14 @@ def report_runs(user: Any) -> QuerySet[ReportRun]:
     if _manages_all(user):
         return qs
     return qs.filter(Q(requested_by=user) | Q(scheduled_report__saved_report__owner=user))
+
+
+# --- custom reports (T08) -----------------------------------------------------------------------
+
+
+def custom_reports(user: Any) -> QuerySet[CustomReport]:
+    """The user's own custom reports and shared ones on datasets they may build on."""
+    from . import builder
+
+    keys = [ds.key for ds in builder.available(user)]
+    return CustomReport.objects.filter(Q(owner=user) | Q(shared=True), dataset__in=keys)

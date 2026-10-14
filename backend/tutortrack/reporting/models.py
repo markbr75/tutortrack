@@ -337,3 +337,30 @@ class ReportRun(TenantModel):
     @classmethod
     def own_scope_q(cls, user: Any) -> Q:
         return Q(requested_by=user)
+
+
+# --- custom report builder (T08) -----------------------------------------------------------------
+
+
+class CustomReport(TenantModel):
+    """A report built on the semantic layer (FR-26-3): ``definition`` names a dataset, its
+    group-by columns, measures, filters, period and chart (see ``builder.py``). Shared
+    reports are visible to staff who may build reports on that dataset; each viewer runs
+    it with their own data scope."""
+
+    name = models.CharField(max_length=120)
+    description = models.CharField(max_length=500, blank=True, default="")
+    dataset = models.CharField(max_length=40)
+    definition = models.JSONField(default=dict)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    shared = models.BooleanField(default=False)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    @classmethod
+    def own_scope_q(cls, user: Any) -> Q:
+        return Q(owner=user) | Q(shared=True)

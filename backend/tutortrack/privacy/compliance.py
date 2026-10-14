@@ -123,6 +123,14 @@ SUBPROCESSORS: tuple[Subprocessor, ...] = (
         optional=True,
     ),
     Subprocessor(
+        "Google or Mapbox",
+        "Address geocoding for the map view and tutor matching distances",
+        "Postal addresses (no names); positions are stored rounded",
+        "Global (SCCs/UK addendum)",
+        ALL,
+        optional=True,
+    ),
+    Subprocessor(
         "Anthropic",
         "AI drafts, suggestions, command bar and copilot (Claude API; E31)",
         "Pseudonymised text for the AI feature in use (names, emails and phone numbers "

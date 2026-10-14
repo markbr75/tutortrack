@@ -412,8 +412,9 @@ export function Dashboard() {
 
 // --- report library -------------------------------------------------------------------------
 
-function ReportsNav() {
+export function ReportsNav() {
   const { t } = useTranslation();
+  const canBuild = usePermission("reporting.builder.use");
   return (
     <nav aria-label={t("reporting.sections")} className="flex gap-4 text-sm">
       <Link to="/analytics" className={linkClass} activeOptions={{ exact: true }}>
@@ -422,6 +423,11 @@ function ReportsNav() {
       <Link to="/analytics/saved" className={linkClass}>
         {t("reporting.savedTitle")}
       </Link>
+      {canBuild ? (
+        <Link to="/analytics/builder" className={linkClass}>
+          {t("reportBuilder.nav")}
+        </Link>
+      ) : null}
     </nav>
   );
 }
@@ -528,7 +534,13 @@ function FilterSelect({
   );
 }
 
-function ResultTable({ result, caption }: { result: Result; caption: string }) {
+export function ResultTable({
+  result,
+  caption,
+}: {
+  result: Pick<Result, "columns" | "rows" | "totals">;
+  caption: string;
+}) {
   const format = useFormat();
   const rows = result.rows as Cell[];
   const totals = result.totals as Cell[];

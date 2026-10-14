@@ -9,7 +9,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
-from tutortrack.core.models import TenantModel
+from tutortrack.core.models import BranchScopedModel, TenantModel
 
 
 class CancellationPolicy(TenantModel):
@@ -251,3 +251,59 @@ class LessonReportComment(TenantModel):
 
     class Meta(TenantModel.Meta):
         ordering = ["created_at"]
+
+
+class LessonFeedback(BranchScopedModel):
+    """A post-lesson micro-survey (FR-09-9, E09-T09): one per lesson and student, sent to one
+    of the family's contacts some hours after the lesson, answered with 1-5 stars and an
+    optional comment through a signed link. ``LessonFeedbackWorkflow`` sends and expires it."""
+
+    class Status(models.TextChoices):
+        SENT = "sent", _("Sent")
+        ANSWERED = "answered", _("Answered")
+        EXPIRED = "expired", _("Expired")
+        SKIPPED = "skipped", _("Not sent")
+
+    class SkipReason(models.TextChoices):
+        NONE = "", _("None")
+        NO_RECIPIENT = "no_recipient", _("No contact receives lesson updates")
+        NO_CONSENT = "no_consent", _("The family opted out of feedback requests")
+
+    lesson = models.ForeignKey("scheduling.Lesson", on_delete=models.CASCADE, related_name="+")
+    student = models.ForeignKey("people.Student", on_delete=models.CASCADE, related_name="+")
+    client = models.ForeignKey("people.Client", on_delete=models.CASCADE, related_name="+")
+    contact = models.ForeignKey(
+        "people.Contact", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    tutor = models.ForeignKey(
+        "people.TutorProfile", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    lesson_date = models.DateField()  # local date of the lesson (reporting)
+    status = models.CharField(max_length=8, choices=Status.choices, default=Status.SENT)
+    skip_reason = models.CharField(
+        max_length=12, choices=SkipReason.choices, blank=True, default=""
+    )
+    sent_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField()
+    rating = models.PositiveSmallIntegerField(null=True, blank=True)
+    comment = models.TextField(blank=True, default="")
+    answered_at = models.DateTimeField(null=True, blank=True)
+    low_score_alerted = models.BooleanField(default=False)
+
+    class Meta(BranchScopedModel.Meta):
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(fields=["lesson", "student"], name="lesson_feedback_unique"),
+            models.CheckConstraint(
+                condition=Q(rating__isnull=True) | Q(rating__gte=1, rating__lte=5),
+                name="lesson_feedback_rating_range",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["organisation", "tutor", "status"], name="feedback_tutor_idx"),
+            models.Index(fields=["organisation", "lesson_date"], name="feedback_date_idx"),
+        ]
+
+    @classmethod
+    def own_scope_q(cls, user: Any) -> Q:
+        return Q(tutor__membership__user=user)

@@ -8,6 +8,11 @@ router.register(
     "accounting/connections", v.AccountingConnectionViewSet, basename="accounting-connections"
 )
 router.register("accounting/records", v.ExternalRecordViewSet, basename="accounting-records")
+router.register(
+    "accounting/payment-imports",
+    v.LedgerPaymentImportViewSet,
+    basename="accounting-payment-imports",
+)
 
 urlpatterns = [
     path(

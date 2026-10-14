@@ -22,6 +22,7 @@ from typing import Any
 from django.db.models import Count, Exists, OuterRef, Q
 from django.utils.translation import gettext as _
 
+from tutortrack.core.geo import area_of
 from tutortrack.core.time import now
 from tutortrack.people.models import TutorProfile, TutorSubject
 
@@ -97,19 +98,19 @@ class Match:
         return round(float(address.lat), 2), round(float(address.lng), 2)
 
 
+def blend_ratings(
+    *sources: dict[str, tuple[float, int]],
+) -> dict[str, float]:
+    """Average of several (average, count) sources per tutor, weighted by count."""
+    totals: dict[str, tuple[float, int]] = {}
+    for source in sources:
+        for key, (avg, n) in source.items():
+            total, count = totals.get(key, (0.0, 0))
+            totals[key] = (total + avg * n, count + n)
+    return {k: total / count for k, (total, count) in totals.items() if count}
+
+
 # --- criteria -----------------------------------------------------------------------------------
-
-
-def area_of(address: Any) -> str:
-    """A neighbourhood, not an address: the postcode's outward part, else the town."""
-    if address is None:
-        return ""
-    postcode = (address.postcode or "").strip()
-    if postcode:
-        if " " in postcode:
-            return postcode.split()[0].upper()
-        return postcode[:-3].upper() if len(postcode) > 5 else postcode.upper()
-    return address.city or ""
 
 
 def job_place(job: Any) -> Any:
@@ -378,11 +379,13 @@ def search(
     horizon = now()
     booked = scheduled_minutes(ids, horizon, horizon + timedelta(weeks=WEEKS))
     history = completed_in_subject(ids, c.subject_id)
+    from tutortrack.delivery.selectors import tutor_feedback_ratings
     from tutortrack.growth.selectors import tutor_ratings
 
-    # Approved family reviews (E25) outrank referee ratings from the application (E18).
+    # Families' opinions (E25 approved reviews and E09 lesson feedback, weighted by count)
+    # outrank referee ratings from the application (E18).
     ratings = reference_ratings(ids)
-    ratings.update({k: avg for k, (avg, _n) in tutor_ratings(ids).items()})
+    ratings.update(blend_ratings(tutor_ratings(ids), tutor_feedback_ratings(ids)))
     offers = _offer_stats(ids)
     last = last_assignment(ids)
     target_margin = int(get_setting("matching.target_margin_percent")) / 100

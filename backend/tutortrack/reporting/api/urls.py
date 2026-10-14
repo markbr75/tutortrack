@@ -7,6 +7,7 @@ router = SimpleRouter(trailing_slash=False)
 router.register("saved-reports", v.SavedReportViewSet, basename="saved-reports")
 router.register("scheduled-reports", v.ScheduledReportViewSet, basename="scheduled-reports")
 router.register("report-runs", v.ReportRunViewSet, basename="report-runs")
+router.register("custom-reports", v.CustomReportViewSet, basename="custom-reports")
 
 urlpatterns = [
     path("reporting/reports", v.ReportListView.as_view(), name="reporting-reports"),
@@ -16,6 +17,9 @@ urlpatterns = [
         v.ReportExportView.as_view(),
         name="reporting-report-export",
     ),
+    path("reporting/builder/datasets", v.BuilderDatasetsView.as_view(), name="builder-datasets"),
+    path("reporting/builder/run", v.BuilderRunView.as_view(), name="builder-run"),
+    path("reporting/builder/export", v.BuilderExportView.as_view(), name="builder-export"),
     path("reporting/dashboard", v.DashboardView.as_view(), name="reporting-dashboard"),
     path("reporting/widgets", v.WidgetListView.as_view(), name="reporting-widgets"),
     path("reporting/widgets/<slug:key>", v.WidgetDataView.as_view(), name="reporting-widget"),

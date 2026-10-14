@@ -64,7 +64,7 @@ Capture enquiries from websites, widgets, phone, email and marketplaces; work th
 - [x] **E17-T06** Conversion wizard (client/job/series/billing/portal invite).
 - [x] **E17-T07** Waitlist and offers.
 - [x] **E17-T08** Registration forms with fee payment.
-- [ ] **E17-T09** (Phase 2b) Proposals with online acceptance.
+- [x] **E17-T09** (Phase 2b) Proposals with online acceptance.
 - [x] **E17-T10** Funnel reports (E26 widgets).
 
 ## Temporal workflows (E32)
@@ -105,5 +105,13 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
 - **Registration forms (T08):** a `registration` form creates an active client and students directly, skipping the pipeline. A registration fee becomes a payment request whose pay link the form redirects to (E10/E11).
 - **Reports (T10):** `/leads/reports/funnel` shows how many enquiries reached each stage and the rate, win rate, average first response, breakdown by source and owner, lost reasons and won value. It is shown on the Reports tab; E26 dashboard widgets come later.
 - **Workflows (TW1):** `EnquiryFollowUpWorkflow` acknowledges, then watches each stage's SLA. A breach publishes `enquiry.sla_breached` with a staff alert, at most once per stage visit. After a trial lesson completes, it reminds the owner to record the outcome. It ends when the enquiry is won or lost.
-  - `ProposalWorkflow` comes with T09 (Phase 2b).
+  - `ProposalWorkflow` came with T09 (see the Phase 2b notes).
 - **Not built:** proposals (T09, Phase 2b); Facebook and Google Lead Ads (Phase 3); file uploads on public forms.
+
+## Phase 2b implementation notes (as built 2026-10-14)
+- **T09 proposals (FR-17-3).** `leads.Proposal` (RLS, branch-scoped; `PRO-000001` numbers): title, introduction, schedule, terms (default from `leads.proposal_terms`), priced lines (`quantity * unit price` rounded half-up to the minor unit per line; the total is the sum of rounded lines; Hypothesis-tested), suggested tutors (E19 public cards), an optional deposit (not more than the total) and the days it can be accepted (`leads.proposal_valid_days`, 14). Drafts are edited; sent proposals are fixed. Permission `leads.proposal.manage` (coordinators via `leads.*`).
+- **Sending.** `POST /proposals/{id}/send` signs a link (`/proposals/<token>`), emails it (E13 `proposal_sent`, transactional) with the branded PDF attached (WeasyPrint, `leads/proposal.html` on the billing document styles) and moves the enquiry to a stage named "Proposal" when the pipeline has one. The PDF is also `GET /proposals/{id}/pdf` and on the public link.
+- **Acceptance.** The family reads the proposal (no internal fields), picks a tutor when several are suggested, and accepts by typing their name (recorded with the time and IP). Accepting converts the enquiry with the E17-T06 `convert` service (client and students active, one `seeking_tutor` job per service on the lines), shortlists the chosen tutor and starts an E19 offer to them, and with a deposit creates an E10 payment request whose E11 pay link the page opens. Declining records a reason. Staff hear either way (`staff_proposal_response`).
+- **ProposalWorkflow** `proposal:{org}:{proposal}` (TW1 row): started by `proposal.sent`; reminds the family `leads.proposal_reminder_days` (3) before expiry and expires it at the deadline; `responded` (accepted, declined or withdrawn) ends it. Replay history recorded.
+- **Deviations.** Conversion and the deposit happen in the accept request (so the family gets the pay link at once) rather than as workflow steps; the deposit uses the E10 payment request and E11 pay page rather than `PaymentCollectionWorkflow` (which collects invoices by auto-pay). Packages on proposals are plain priced lines.
+- **Events:** `proposal.sent/accepted/declined/expired/withdrawn`. DSAR export and erasure cover proposals (signature, reasons and free text).

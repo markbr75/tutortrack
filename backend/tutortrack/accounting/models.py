@@ -9,6 +9,8 @@
 * ``ExternalRecordLink``: one TutorTrack record (invoice, payment, ...) as pushed to one
   connection: external id, content hash, ``pending|synced|error|skipped``, last error.
 * ``SyncLogEntry``: the attempt history behind the sync dashboard.
+* ``LedgerPaymentImport``: a payment recorded directly in the ledger against a synced
+  invoice, read back and recorded in TutorTrack (E23-T09), or skipped with the reason.
 
 The sync queue itself is Temporal (``AccountingSyncWorkflow``), so there is no
 ``AccountingSyncJob`` table (E23-TW1).
@@ -20,6 +22,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
+from tutortrack.core.fields import CurrencyField, MoneyField
 from tutortrack.core.models import TenantModel
 
 
@@ -53,6 +56,9 @@ class AccountingConnection(TenantModel):
     schedule_id = models.CharField(max_length=255, blank=True, default="")
     backfill = models.JSONField(default=dict, blank=True)  # status, since, counts, checkpoint
     last_digest_at = models.DateTimeField(null=True, blank=True)
+    # E23-T09: read back payments recorded directly in the ledger (daily, and on demand).
+    import_payments = models.BooleanField(default=False)
+    payments_checked_at = models.DateTimeField(null=True, blank=True)
 
     class Meta(TenantModel.Meta):
         ordering = ["-created_at"]
@@ -177,6 +183,7 @@ class SyncLogEntry(TenantModel):
         ERROR = "error", _("Error")
         RETRYING = "retrying", _("Will retry")
         SKIPPED = "skipped", _("Skipped")
+        IMPORTED = "imported", _("Imported from the ledger")
 
     link = models.ForeignKey(ExternalRecordLink, on_delete=models.CASCADE, related_name="log")
     outcome = models.CharField(max_length=10, choices=Outcome.choices)
@@ -185,3 +192,36 @@ class SyncLogEntry(TenantModel):
     class Meta(TenantModel.Meta):
         ordering = ["-created_at"]
         verbose_name_plural = "sync log entries"
+
+
+class LedgerPaymentImport(TenantModel):
+    """One payment found in the ledger that TutorTrack didn't send (E23-T09). Unique per
+    connection and ledger payment, so reading back again never records it twice."""
+
+    class Status(models.TextChoices):
+        IMPORTED = "imported", _("Recorded in TutorTrack")
+        SKIPPED = "skipped", _("Not recorded")
+
+    connection = models.ForeignKey(
+        AccountingConnection, on_delete=models.CASCADE, related_name="payment_imports"
+    )
+    provider = models.CharField(max_length=30)
+    external_id = models.CharField(max_length=100)
+    invoice = models.ForeignKey("billing.Invoice", on_delete=models.PROTECT, related_name="+")
+    payment = models.ForeignKey(
+        "payments.Payment", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
+    )
+    currency = CurrencyField()
+    amount = MoneyField()
+    paid_on = models.DateField(null=True, blank=True)
+    reference = models.CharField(max_length=255, blank=True, default="")
+    status = models.CharField(max_length=8, choices=Status.choices)
+    reason = models.CharField(max_length=300, blank=True, default="")
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["connection", "external_id"], name="ledger_payment_import_unique"
+            )
+        ]

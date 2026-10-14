@@ -119,7 +119,14 @@ def refresh_chart(conn: AccountingConnection) -> AccountingConnection:
     return conn
 
 
-OPTION_FIELDS = ("mode", "start_date", "sync_bills", "attach_pdf", "lock_behaviour")
+OPTION_FIELDS = (
+    "mode",
+    "start_date",
+    "sync_bills",
+    "attach_pdf",
+    "lock_behaviour",
+    "import_payments",
+)
 
 
 @transaction.atomic
@@ -831,6 +838,10 @@ def daily(connection_id: str, day: date | None = None) -> dict[str, Any]:
     day = day or org_today() - timedelta(days=1)
     if conn.mode == AccountingConnection.Mode.SUMMARY:
         result["journal"] = sync("journal", day.isoformat(), conn=conn)
+    if conn.import_payments:
+        from .readback import read_back
+
+        result["imported"] = read_back(conn)["imported"]  # E23-T09, before reconciling
     result["drift"] = reconcile(conn)
     result["errors"] = ExternalRecordLink.objects.filter(
         connection=conn, status=Status.ERROR
@@ -841,7 +852,7 @@ def daily(connection_id: str, day: date | None = None) -> dict[str, Any]:
 
 def reconcile(conn: AccountingConnection, *, limit: int = 50) -> int:
     """Flag synced invoices whose ledger balance differs from ours (e.g. a payment
-    recorded directly in Xero). Importing them is Phase 2b (E23-T09)."""
+    recorded directly in Xero that the read-back couldn't import, E23-T09)."""
     from tutortrack.billing.models import Invoice
 
     since = now() - timedelta(days=30)

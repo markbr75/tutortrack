@@ -72,6 +72,17 @@ class Chart:
     tracking: list[TrackingCategory] = field(default_factory=list)
 
 
+@dataclass(frozen=True)
+class LedgerPayment:
+    """A payment the ledger shows against one invoice (E23-T09 read-back)."""
+
+    id: str
+    amount: str  # applied to this invoice, a decimal string
+    date: str  # YYYY-MM-DD
+    reference: str = ""
+    account: str = ""  # the ledger account it was paid into
+
+
 class AccountingClient(Protocol):
     provider: str
     # Requests per minute we allow ourselves per connected company (Xero: 60).
@@ -94,3 +105,7 @@ class AccountingClient(Protocol):
     def attach(
         self, creds: Credentials, kind: str, external_id: str, filename: str, content: bytes
     ) -> None: ...
+
+    def invoice_payments(self, creds: Credentials, external_id: str) -> list[LedgerPayment]:
+        """Payments applied to an invoice in the ledger, ours or recorded there directly."""
+        ...

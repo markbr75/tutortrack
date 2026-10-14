@@ -6,8 +6,11 @@ from tutortrack.core.events import EventEnvelope, subscribe
 from tutortrack.core.workflows import bridge
 
 from .processes import (
+    FeedbackInput,
+    LessonFeedbackWorkflow,
     LessonReportSlaWorkflow,
     ReportSlaInput,
+    feedback_workflow_id,
     sla_workflow_id,
     unconfirmed_workflow_id,
 )
@@ -52,3 +55,34 @@ for _event_type in ("lesson.completed", "lesson.cancelled"):
         id=lambda e: unconfirmed_workflow_id(e.organisation_id, e.subject["id"]),
         when=lambda e: _running(unconfirmed_workflow_id(e.organisation_id, e.subject["id"])),
     )
+
+
+# --- client feedback micro-surveys (E09-T09) ------------------------------------------------
+
+
+def _feedback_wanted(event: EventEnvelope) -> bool:
+    """Surveys on, and someone attended (the workflow decides who is asked)."""
+    from tutortrack.tenancy.settings_service import get_setting
+
+    if not get_setting("delivery.feedback_enabled"):
+        return False
+    return any(a.get("outcome") in ("present", "late", "") for a in event.data["attendees"])
+
+
+bridge.on(
+    "lesson.completed",
+    start=LessonFeedbackWorkflow,
+    when=_feedback_wanted,
+    id=lambda e: feedback_workflow_id(e.organisation_id, e.subject["id"]),
+    input=lambda e: FeedbackInput(
+        organisation_id=str(e.organisation_id),
+        lesson_id=e.subject["id"],
+        completed_at=e.occurred_at.isoformat(),
+    ),
+)
+bridge.on(
+    "lesson_feedback.received",
+    signal="answered",
+    id=lambda e: feedback_workflow_id(e.organisation_id, e.data["lesson_id"]),
+    when=lambda e: _running(feedback_workflow_id(e.organisation_id, e.data["lesson_id"])),
+)

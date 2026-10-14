@@ -6,6 +6,8 @@ from .views import (
     ClientViewSet,
     ContactViewSet,
     DuplicatesView,
+    PeopleMapGeocodeView,
+    PeopleMapView,
     StudentViewSet,
     TutorViewSet,
 )
@@ -21,5 +23,7 @@ client_contacts = ClientContactViewSet.as_view({"get": "list", "post": "create"}
 urlpatterns = [
     path("clients/<uuid:client_id>/contacts", client_contacts, name="client-contacts"),
     path("people/duplicates", DuplicatesView.as_view(), name="people-duplicates"),
+    path("people/map", PeopleMapView.as_view(), name="people-map"),
+    path("people/map/geocode", PeopleMapGeocodeView.as_view(), name="people-map-geocode"),
     *router.urls,
 ]

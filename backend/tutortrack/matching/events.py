@@ -131,3 +131,25 @@ class CoverRequestUnfilled(DomainEvent):
 class CoverRequestCancelled(DomainEvent):
     event_type: ClassVar[str] = "cover_request.cancelled"
     subject_type: ClassVar[str] = "cover_request"
+
+
+@dataclass(frozen=True, kw_only=True)
+class ShortlistShared(DomainEvent):
+    """A job's shortlist was sent to the family (E19-T08)."""
+
+    event_type: ClassVar[str] = "shortlist.shared"
+    subject_type: ClassVar[str] = "shortlist_share"
+    job_id: str
+    tutor_ids: list[str]
+    expires_at: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class ShortlistTutorChosen(DomainEvent):
+    """The family picked a tutor from a shared shortlist."""
+
+    event_type: ClassVar[str] = "shortlist.tutor_chosen"
+    subject_type: ClassVar[str] = "shortlist_share"
+    job_id: str
+    tutor_id: str
+    offer_batch_id: str | None = None

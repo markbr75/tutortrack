@@ -218,3 +218,37 @@ class DuplicateSerializer(serializers.Serializer):
     name = serializers.CharField()
     client_id = serializers.UUIDField(allow_null=True)
     reason = serializers.CharField()
+
+
+class MapPointSerializer(serializers.Serializer):
+    kind = serializers.ChoiceField(choices=["student", "tutor"])
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+    status = serializers.CharField()
+    area = serializers.CharField()
+    lat = serializers.FloatField()
+    lng = serializers.FloatField()
+    subjects = serializers.ListField(child=serializers.CharField())
+    travel_radius_km = serializers.IntegerField(allow_null=True)
+
+
+class MapMissingSerializer(serializers.Serializer):
+    student = serializers.IntegerField()
+    tutor = serializers.IntegerField()
+
+
+class PeopleMapSerializer(serializers.Serializer):
+    points = MapPointSerializer(many=True)
+    missing = MapMissingSerializer()
+
+
+class GeocodeRequestSerializer(serializers.Serializer):
+    kinds = serializers.ListField(
+        child=serializers.ChoiceField(choices=["student", "tutor"]),
+        required=False,
+        default=["student", "tutor"],
+    )
+
+
+class GeocodeResultSerializer(serializers.Serializer):
+    queued = serializers.IntegerField()

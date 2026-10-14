@@ -9,9 +9,12 @@ from .processes import (
     EnquiryFollowUpWorkflow,
     EnquiryInput,
     OfferInput,
+    ProposalInput,
+    ProposalWorkflow,
     WaitlistOfferWorkflow,
     enquiry_workflow_id,
     offer_workflow_id,
+    proposal_workflow_id,
 )
 
 
@@ -92,4 +95,25 @@ for _responded in ("waitlist.place_accepted", "waitlist.place_declined"):
         signal="responded",
         id=lambda e: offer_workflow_id(e.organisation_id, e.subject["id"]),
         when=lambda e: _running(offer_workflow_id(e.organisation_id, e.subject["id"])),
+    )
+
+
+# --- proposals (E17-T09) --------------------------------------------------------------------
+
+bridge.on(
+    "proposal.sent",
+    start=ProposalWorkflow,
+    id=lambda e: proposal_workflow_id(e.organisation_id, e.subject["id"]),
+    input=lambda e: ProposalInput(
+        organisation_id=str(e.organisation_id),
+        proposal_id=e.subject["id"],
+        expires_at=e.data["expires_at"],
+    ),
+)
+for _answered in ("proposal.accepted", "proposal.declined", "proposal.withdrawn"):
+    bridge.on(
+        _answered,
+        signal="responded",
+        id=lambda e: proposal_workflow_id(e.organisation_id, e.subject["id"]),
+        when=lambda e: _running(proposal_workflow_id(e.organisation_id, e.subject["id"])),
     )

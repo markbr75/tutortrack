@@ -15,6 +15,7 @@ from ..models import (
     JobPostingApplication,
     OfferBatch,
     Shortlist,
+    ShortlistShare,
 )
 
 
@@ -349,3 +350,123 @@ class MatchingAnalyticsSerializer(serializers.Serializer):
     offers = OfferStatsSerializer(many=True)
     unmatched = UnmatchedDemandSerializer(many=True)
     empty_searches = EmptySearchSerializer(many=True)
+
+
+# --- shared shortlists (E19-T08) ------------------------------------------------------------
+
+SHARE_STATES = ["active", "chosen", "revoked", "expired"]
+
+
+class ShortlistShareSerializer(serializers.ModelSerializer):
+    tutors = serializers.ListField(child=serializers.UUIDField(), read_only=True)
+    state = serializers.SerializerMethodField()
+    link = serializers.SerializerMethodField()
+    contact_name = serializers.SerializerMethodField()
+    chosen_tutor_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ShortlistShare
+        fields = [
+            "id",
+            "job",
+            "tutors",
+            "contact",
+            "contact_name",
+            "message",
+            "status",
+            "state",
+            "expires_at",
+            "viewed_at",
+            "chosen_tutor",
+            "chosen_tutor_name",
+            "chosen_at",
+            "client_note",
+            "offer_batch",
+            "link",
+            "created_at",
+        ]
+        read_only_fields = fields
+
+    @extend_schema_field(serializers.ChoiceField(choices=SHARE_STATES))
+    def get_state(self, obj: ShortlistShare) -> str:
+        from tutortrack.core.time import now
+
+        return obj.state(now())
+
+    @extend_schema_field(serializers.CharField())
+    def get_link(self, obj: ShortlistShare) -> str:
+        """The family's link (empty once it is no longer open)."""
+        from tutortrack.comms.catalogue import tenant_link
+        from tutortrack.core.time import now
+
+        from ..sharing import token_for
+
+        if obj.state(now()) != "active":
+            return ""
+        return tenant_link(f"/shortlists/{token_for(obj)}")
+
+    @extend_schema_field(serializers.CharField())
+    def get_contact_name(self, obj: ShortlistShare) -> str:
+        return obj.contact.full_name if obj.contact is not None else ""
+
+    @extend_schema_field(serializers.CharField())
+    def get_chosen_tutor_name(self, obj: ShortlistShare) -> str:
+        return obj.chosen_tutor.full_name if obj.chosen_tutor is not None else ""
+
+
+class ShortlistShareCreateSerializer(serializers.Serializer):
+    job = serializers.UUIDField()
+    tutors = serializers.ListField(child=serializers.UUIDField(), required=False, allow_empty=False)
+    contact = serializers.UUIDField(required=False, allow_null=True)
+    message = serializers.CharField(max_length=2000, required=False, allow_blank=True, default="")
+    days = serializers.IntegerField(min_value=1, max_value=90, required=False, allow_null=True)
+
+
+class PublicTutorSubjectSerializer(serializers.Serializer):
+    subject = serializers.CharField()
+    level = serializers.CharField(allow_blank=True)
+
+
+class PublicTutorQualificationSerializer(serializers.Serializer):
+    title = serializers.CharField()
+    institution = serializers.CharField(allow_blank=True)
+    year = serializers.IntegerField(allow_null=True)
+
+
+class PublicTutorCardSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+    headline = serializers.CharField(allow_blank=True)
+    bio = serializers.CharField(allow_blank=True)
+    photo_url = serializers.CharField(allow_blank=True)
+    subjects = PublicTutorSubjectSerializer(many=True)
+    qualifications = PublicTutorQualificationSerializer(many=True)
+    years_experience = serializers.IntegerField(allow_null=True)
+    languages = serializers.ListField(child=serializers.CharField())
+    online = serializers.BooleanField()
+    in_person = serializers.BooleanField()
+    rating = serializers.FloatField(allow_null=True)
+    rating_count = serializers.IntegerField()
+
+
+class PublicShortlistJobSerializer(serializers.Serializer):
+    subject = serializers.CharField(allow_blank=True)
+    level = serializers.CharField(allow_blank=True)
+    service = serializers.CharField()
+    students = serializers.ListField(child=serializers.CharField())
+    online = serializers.BooleanField()
+
+
+class PublicShortlistSerializer(serializers.Serializer):
+    organisation = serializers.CharField()
+    status = serializers.ChoiceField(choices=SHARE_STATES)
+    expires_at = serializers.DateTimeField()
+    message = serializers.CharField(allow_blank=True)
+    job = PublicShortlistJobSerializer()
+    tutors = PublicTutorCardSerializer(many=True)
+    chosen_tutor = serializers.UUIDField(allow_null=True)
+
+
+class ShortlistChoiceSerializer(serializers.Serializer):
+    tutor = serializers.UUIDField()
+    note = serializers.CharField(max_length=1000, required=False, allow_blank=True, default="")

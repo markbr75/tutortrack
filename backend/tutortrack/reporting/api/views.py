@@ -21,7 +21,7 @@ from tutortrack.core.storage.services import download_url
 from tutortrack.core.time import now
 
 from .. import reports, selectors, services, widgets
-from ..models import ReportRun, SavedReport, ScheduledReport
+from ..models import CustomReport, ReportRun, SavedReport, ScheduledReport
 from . import serializers as s
 
 AUTH = [IsAuthenticated, HasOrganisation]
@@ -375,3 +375,194 @@ class RebuildView(APIView):
     def post(self, request: Request) -> Response:
         """Recompute the reporting facts from the operational records (repair, backfill)."""
         return Response(services.rebuild_facts(request.user))
+
+
+# --- custom report builder (T08) ----------------------------------------------------------------
+
+BUILDER_EXAMPLE = {
+    "dataset": "charges",
+    "group_by": ["service", "date:month"],
+    "measures": ["count", "gross"],
+    "filters": [{"field": "kind", "op": "in", "value": ["lesson"]}],
+    "period": "this_year",
+    "ordering": "-gross",
+    "limit": 100,
+    "chart": "bar",
+}
+
+
+def _custom_body(output: Any) -> dict[str, Any]:
+    spec = output.spec
+    result = output.result
+    return {
+        "definition": spec.clean,
+        "period": spec.period.as_dict() if spec.period else None,
+        "columns": [c.as_dict() for c in result.columns],
+        "rows": result.rows,
+        "totals": result.totals or [],
+        "chart": result.chart,
+        "notes": [str(n) for n in result.notes],
+        "truncated": output.truncated,
+        "generated_at": now(),
+    }
+
+
+def _file(name: str, content_type: str, content: bytes) -> HttpResponse:
+    response = HttpResponse(content, content_type=content_type)
+    response["Content-Disposition"] = f'attachment; filename="{name}"'
+    return response
+
+
+class BuilderDatasetsView(APIView):
+    permission_classes = [*AUTH, HasPermission.for_("reporting.builder.use")]
+
+    @extend_schema(responses=s.BuilderDatasetSerializer(many=True))
+    def get(self, request: Request) -> Response:
+        """The datasets this user may build reports on, with their whitelisted columns
+        (dimensions, incl. client/student custom fields) and measures."""
+        from .. import builder
+
+        return Response([ds.describe() for ds in builder.available(request.user)])
+
+
+class BuilderRunView(APIView):
+    permission_classes = [*AUTH, HasPermission.for_("reporting.builder.use")]
+
+    @extend_schema(
+        request=s.ReportDefinitionInputSerializer,
+        responses=s.CustomResultSerializer,
+        examples=[
+            OpenApiExample("Gross by service and month", request_only=True, value=BUILDER_EXAMPLE)
+        ],
+    )
+    def post(self, request: Request) -> Response:
+        """Run a report definition (nothing is saved). Figures follow the data scope of
+        the dataset's report family."""
+        from .. import builder
+
+        output = builder.run(request.user, s.definition_input(request.data))
+        return Response(s.CustomResultSerializer(_custom_body(output)).data)
+
+
+class BuilderExportView(APIView):
+    permission_classes = [
+        *AUTH,
+        HasPermission.for_("reporting.builder.use"),
+        HasPermission.for_("reporting.export"),
+    ]
+
+    @extend_schema(
+        request=s.BuilderExportSerializer,
+        responses={(200, "application/octet-stream"): OpenApiResponse(OpenApiTypes.BINARY)},
+    )
+    def post(self, request: Request) -> HttpResponse:
+        """Download an unsaved report definition as CSV, Excel or PDF (audited)."""
+        payload = s.BuilderExportSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        definition = s.definition_input(dict(request.data).get("definition"))
+        return _file(
+            *services.export_custom(
+                request.user,
+                definition,
+                payload.validated_data["file_format"],
+                name=payload.validated_data["name"],
+            )
+        )
+
+
+class CustomReportViewSet(
+    TenantScopedViewMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Saved custom reports: your own and those shared with you (``?dataset=``). Only the
+    owner changes or deletes one; everyone runs it with their own data scope."""
+
+    model = CustomReport
+    serializer_class = s.CustomReportSerializer
+    permission_classes = [*AUTH, HasPermission.for_("reporting.builder.use")]
+    http_method_names = ["get", "post", "patch", "delete"]
+
+    def get_tenant_queryset(self) -> Any:
+        qs = selectors.custom_reports(self.request.user).select_related("owner")
+        dataset = self.request.query_params.get("dataset")
+        return qs.filter(dataset=dataset) if dataset else qs
+
+    @extend_schema(parameters=[OpenApiParameter("dataset", str, required=False)])
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    def _write(self, request: Request, report: CustomReport | None) -> CustomReport:
+        payload = s.CustomReportWriteSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        d = payload.validated_data
+        return services.save_custom_report(
+            request.user,
+            name=d["name"],
+            description=d["description"],
+            definition=s.definition_input(dict(request.data).get("definition")),
+            shared=d["shared"],
+            report=report,
+        )
+
+    @extend_schema(
+        request=s.CustomReportWriteSerializer,
+        responses={201: s.CustomReportSerializer},
+        examples=[
+            OpenApiExample(
+                "Save",
+                request_only=True,
+                value={"name": "Lesson revenue by service", "definition": BUILDER_EXAMPLE},
+            )
+        ],
+    )
+    def create(self, request: Request) -> Response:
+        report = self._write(request, None)
+        body = s.CustomReportSerializer(report, context={"request": request}).data
+        return Response(body, status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=s.CustomReportWriteSerializer, responses=s.CustomReportSerializer)
+    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        report = self._write(request, self.get_object())
+        return Response(s.CustomReportSerializer(report, context={"request": request}).data)
+
+    def perform_destroy(self, instance: CustomReport) -> None:
+        services.delete_custom_report(self.request.user, instance)
+
+    @extend_schema(responses=s.CustomResultSerializer)
+    @action(detail=True, methods=["get"], url_path="run")
+    def run_report(self, request: Request, pk: Any = None) -> Response:
+        """Run the saved report now, with the viewer's own data scope."""
+        from .. import builder
+
+        output = builder.run(request.user, self.get_object().definition)
+        return Response(s.CustomResultSerializer(_custom_body(output)).data)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("file_format", str, enum=["csv", "xlsx", "pdf"], required=True)
+        ],
+        responses={(200, "application/octet-stream"): OpenApiResponse(OpenApiTypes.BINARY)},
+    )
+    @action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[
+            *AUTH,
+            HasPermission.for_("reporting.builder.use"),
+            HasPermission.for_("reporting.export"),
+        ],
+    )
+    def export(self, request: Request, pk: Any = None) -> HttpResponse:
+        report = self.get_object()
+        return _file(
+            *services.export_custom(
+                request.user,
+                report.definition,
+                request.query_params.get("file_format", "csv"),
+                name=report.name,
+                key=f"custom:{report.pk}",
+            )
+        )

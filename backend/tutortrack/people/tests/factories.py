@@ -1,7 +1,17 @@
 import factory
 
 from tutortrack.core.tests.factories import TenantFactory
-from tutortrack.people.models import Client, Contact, Student, TutorProfile
+from tutortrack.people.models import Address, Client, Contact, Student, TutorProfile
+
+
+class AddressFactory(TenantFactory):
+    class Meta:
+        model = Address
+
+    line1 = factory.Sequence(lambda n: f"{n} High Street")
+    city = "London"
+    postcode = "SW11 1AA"
+    country = "GB"
 
 
 class ClientFactory(TenantFactory):

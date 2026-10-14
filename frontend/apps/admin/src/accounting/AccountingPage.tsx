@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { api, usePermission } from "../api";
 import { ErrorList } from "../calendar/ErrorList";
+import { ReadBackSection } from "./ReadBackSection";
 import { SyncBadge } from "./SyncBadge";
 
 type Connection = components["schemas"]["AccountingConnection"];
@@ -742,6 +743,7 @@ export function AccountingPage() {
           </section>
           <SyncSwitch conn={conn} canManage={canManage} />
           <SyncDashboard conn={conn} canManage={canManage} />
+          <ReadBackSection conn={conn} canManage={canManage} />
         </>
       ) : null}
       {canExport ? <ExportSection connectedProvider={conn?.provider} /> : null}

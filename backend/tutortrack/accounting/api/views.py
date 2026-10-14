@@ -11,6 +11,7 @@ from typing import Any
 
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import mixins, status, viewsets
@@ -33,6 +34,7 @@ from ..models import (
     AccountingConnection,
     AccountMapping,
     ExternalRecordLink,
+    LedgerPaymentImport,
     TaxMapping,
     TrackingMapping,
 )
@@ -94,6 +96,28 @@ class AccountingConnectionViewSet(
         )
         conn = services.on_connected(connection.pk)
         return Response(s.AccountingConnectionSerializer(conn).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        request=None,
+        responses=s.ReadBackResultSerializer,
+        examples=[
+            OpenApiExample(
+                "Checked", response_only=True, value={"checked": 12, "imported": 1, "skipped": 0}
+            )
+        ],
+    )
+    @action(detail=True, methods=["post"], url_path="read-back")
+    def read_back(self, request: Request, pk: str) -> Response:
+        """Look for payments recorded directly in the ledger against open synced invoices
+        and record them in TutorTrack now (the daily run does the same, E23-T09)."""
+        from ..readback import run_now
+
+        conn: AccountingConnection = self.get_object()
+        if not conn.enabled or not conn.import_payments:
+            raise BusinessRuleViolation(
+                str(_("Switch on sync and payment read-back for this connection first."))
+            )
+        return Response(run_now(conn))
 
     @extend_schema(request=None, responses=s.AccountingConnectionSerializer)
     @action(detail=True, methods=["post"])
@@ -397,3 +421,26 @@ class ExportView(APIView):
         response = HttpResponse(content, content_type=content_type)
         response["Content-Disposition"] = f'attachment; filename="{name}"'
         return response
+
+
+class LedgerPaymentImportViewSet(
+    TenantScopedViewMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Payments read back from the ledger (``?status=imported|skipped``), with the
+    TutorTrack payment created or the reason it wasn't (E23-T09)."""
+
+    model = LedgerPaymentImport
+    serializer_class = s.LedgerPaymentImportSerializer
+    permission_classes = [*AUTH, READ_MANAGE]
+
+    def get_tenant_queryset(self) -> Any:
+        qs = selectors.payment_imports(self.request.user)
+        state = self.request.query_params.get("status")
+        return qs.filter(status=state) if state else qs
+
+    @extend_schema(parameters=[OpenApiParameter("status", str, enum=["imported", "skipped"])])
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)

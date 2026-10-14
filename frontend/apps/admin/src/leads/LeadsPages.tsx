@@ -8,6 +8,7 @@ import { useState, type DragEvent, type ReactNode } from "react";
 import { api, usePermission } from "../api";
 import { AiEnquiryExtract, AiEnquiryTriage } from "../ai/AiWidgets";
 import { RecordActivity } from "../crm/Activity";
+import { ProposalsSection } from "./ProposalPages";
 
 type Enquiry = components["schemas"]["Enquiry"];
 type Stage = components["schemas"]["Stage"];
@@ -345,6 +346,7 @@ export function EnquiryPage({ id }: { id: string }) {
         />
       ) : null}
       {e.status === "open" ? <EnquiryActions enquiry={e} onDone={refresh} /> : null}
+      <ProposalsSection enquiryId={id} />
       <RecordActivity target={{ target_type: "leads.enquiry", target_id: id }} />
     </LeadsPage>
   );

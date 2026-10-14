@@ -68,3 +68,18 @@ register(
     max_value=100,
     label=_("Tutors told about each cover request"),
 )
+
+register(
+    "matching.share_expiry_days",
+    type="int",
+    default=14,
+    min_value=1,
+    max_value=90,
+    label=_("Days a shortlist shared with a family stays open"),
+)
+register(
+    "matching.share_choice_starts_offer",
+    type="bool",
+    default=True,
+    label=_("Offer the job to the tutor a family chooses from a shared shortlist"),
+)

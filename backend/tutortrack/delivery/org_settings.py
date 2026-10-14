@@ -111,3 +111,49 @@ register(
     default=False,
     label=_("Don't invoice lessons until their report is submitted"),
 )
+
+# --- client feedback micro-surveys (FR-09-9, E09-T09) ---------------------------------------
+register(
+    "delivery.feedback_enabled",
+    type="bool",
+    default=False,
+    label=_("Ask families for quick feedback after lessons"),
+)
+register(
+    "delivery.feedback_delay_hours",
+    type="int",
+    default=2,
+    label=_("Send the feedback request this many hours after the lesson"),
+    min_value=0,
+    max_value=72,
+)
+register(
+    "delivery.feedback_every_n_lessons",
+    type="int",
+    default=4,
+    label=_("Ask after every this many lessons with the same tutor"),
+    min_value=1,
+    max_value=52,
+)
+register(
+    "delivery.feedback_expiry_days",
+    type="int",
+    default=7,
+    label=_("Feedback links stop working after this many days"),
+    min_value=1,
+    max_value=60,
+)
+register(
+    "delivery.feedback_alert_at_or_below",
+    type="int",
+    default=2,
+    label=_("Alert staff when a lesson is rated this many stars or fewer"),
+    min_value=1,
+    max_value=5,
+)
+register(
+    "delivery.feedback_invites_review",
+    type="bool",
+    default=False,
+    label=_("Invite families who give 5 stars to write a public review"),
+)

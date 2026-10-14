@@ -9,7 +9,12 @@ from django.db.models import Count, QuerySet
 
 from tutortrack.core.permissions import scope_queryset
 
-from .models import AccountingConnection, ExternalRecordLink, SyncLogEntry
+from .models import (
+    AccountingConnection,
+    ExternalRecordLink,
+    LedgerPaymentImport,
+    SyncLogEntry,
+)
 
 VIEW = "integrations.accounting.view"
 
@@ -23,6 +28,15 @@ def connections(user: Any) -> QuerySet[AccountingConnection]:
 
 def records(user: Any) -> QuerySet[ExternalRecordLink]:
     return scope_queryset(user, ExternalRecordLink.objects.all(), VIEW)
+
+
+def payment_imports(user: Any) -> QuerySet[LedgerPaymentImport]:
+    """Payments read back from the ledger (E23-T09), imported or skipped."""
+    return scope_queryset(
+        user,
+        LedgerPaymentImport.objects.select_related("invoice", "invoice__client", "payment"),
+        VIEW,
+    )
 
 
 def log(link: ExternalRecordLink, limit: int = 50) -> list[SyncLogEntry]:

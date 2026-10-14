@@ -7,6 +7,7 @@ import { useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
 import { AiMatchExplain } from "../ai/AiWidgets";
+import { ShareShortlistSection } from "./SharePages";
 
 type Row = components["schemas"]["MatchRow"];
 type Point = components["schemas"]["Point"];
@@ -358,6 +359,7 @@ export function JobMatchPage({ jobId }: { jobId: string }) {
           ))}
         </Card>
       ) : null}
+      <ShareShortlistSection jobId={jobId} />
     </div>
   );
 }

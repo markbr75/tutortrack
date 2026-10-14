@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from typing import Any
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from tutortrack.core.api.serializers import BaseModelSerializer, MoneySerializerField
+from tutortrack.matching.api.serializers import PublicTutorCardSerializer
 
 from .. import forms
 from ..models import (
@@ -14,6 +16,7 @@ from ..models import (
     Form,
     Pipeline,
     PipelineStage,
+    Proposal,
     WaitlistEntry,
 )
 
@@ -341,3 +344,143 @@ class FunnelSerializer(serializers.Serializer):
     by_owner = BreakdownSerializer(many=True)
     lost_reasons = serializers.ListField(child=serializers.DictField())
     won_value = serializers.DictField(child=serializers.CharField())
+
+
+# --- proposals (E17-T09) --------------------------------------------------------------------
+
+PROPOSAL_STATES = [c for c, _label in Proposal.Status.choices]
+
+
+class ProposalLineSerializer(serializers.Serializer):
+    service = serializers.UUIDField(required=False, allow_null=True)
+    description = serializers.CharField(max_length=300, required=False, allow_blank=True)
+    quantity = serializers.DecimalField(max_digits=8, decimal_places=2, coerce_to_string=True)
+    unit_price = serializers.DecimalField(max_digits=12, decimal_places=2, coerce_to_string=True)
+    amount = serializers.DecimalField(
+        max_digits=14, decimal_places=2, read_only=True, coerce_to_string=True
+    )
+
+
+class ProposalSerializer(serializers.ModelSerializer):
+    lines = ProposalLineSerializer(many=True)
+    tutors = serializers.ListField(child=serializers.UUIDField(), read_only=True)
+    job_ids = serializers.ListField(child=serializers.UUIDField(), read_only=True)
+    total = MoneySerializerField(read_only=True)
+    deposit = MoneySerializerField(read_only=True, allow_null=True)
+    state = serializers.SerializerMethodField()
+    link = serializers.SerializerMethodField()
+    contact_name = serializers.SerializerMethodField()
+    chosen_tutor_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Proposal
+        fields = [
+            "id",
+            "enquiry",
+            "number",
+            "title",
+            "contact",
+            "contact_name",
+            "status",
+            "state",
+            "introduction",
+            "schedule",
+            "terms",
+            "lines",
+            "tutors",
+            "currency",
+            "total",
+            "deposit",
+            "valid_days",
+            "sent_at",
+            "expires_at",
+            "viewed_at",
+            "responded_at",
+            "accepted_name",
+            "chosen_tutor",
+            "chosen_tutor_name",
+            "decline_reason",
+            "payment_request",
+            "job_ids",
+            "link",
+            "created_at",
+        ]
+        read_only_fields = fields
+
+    @extend_schema_field(serializers.ChoiceField(choices=PROPOSAL_STATES))
+    def get_state(self, obj: Proposal) -> str:
+        from ..proposals import state
+
+        return state(obj)
+
+    @extend_schema_field(serializers.CharField())
+    def get_link(self, obj: Proposal) -> str:
+        """The family's link while the proposal is open."""
+        from tutortrack.comms.catalogue import tenant_link
+
+        from ..proposals import state, token_for
+
+        if state(obj) != Proposal.Status.SENT:
+            return ""
+        return tenant_link(f"/proposals/{token_for(obj)}")
+
+    @extend_schema_field(serializers.CharField())
+    def get_contact_name(self, obj: Proposal) -> str:
+        return obj.contact.full_name if obj.contact is not None else ""
+
+    @extend_schema_field(serializers.CharField())
+    def get_chosen_tutor_name(self, obj: Proposal) -> str:
+        return obj.chosen_tutor.full_name if obj.chosen_tutor is not None else ""
+
+
+class ProposalWriteSerializer(serializers.Serializer):
+    enquiry = serializers.UUIDField(required=False)
+    title = serializers.CharField(max_length=200, required=False, allow_blank=True, default="")
+    contact = serializers.UUIDField(required=False, allow_null=True)
+    introduction = serializers.CharField(required=False, allow_blank=True, default="")
+    schedule = serializers.CharField(required=False, allow_blank=True, default="")
+    terms = serializers.CharField(required=False, allow_blank=True, allow_null=True, default=None)
+    lines = ProposalLineSerializer(many=True, required=False, default=list)
+    tutors = serializers.ListField(child=serializers.UUIDField(), required=False, default=list)
+    currency = serializers.CharField(max_length=3, required=False, allow_blank=True, default="")
+    deposit = serializers.DecimalField(
+        max_digits=12, decimal_places=2, required=False, allow_null=True, default=None
+    )
+    valid_days = serializers.IntegerField(
+        min_value=1, max_value=90, required=False, allow_null=True, default=None
+    )
+
+
+class PublicProposalLineSerializer(serializers.Serializer):
+    description = serializers.CharField()
+    quantity = serializers.CharField()
+    unit_price = serializers.CharField()
+    amount = serializers.CharField()
+
+
+class PublicProposalSerializer(serializers.Serializer):
+    organisation = serializers.CharField()
+    number = serializers.CharField()
+    title = serializers.CharField()
+    status = serializers.ChoiceField(choices=PROPOSAL_STATES)
+    introduction = serializers.CharField(allow_blank=True)
+    schedule = serializers.CharField(allow_blank=True)
+    terms = serializers.CharField(allow_blank=True)
+    lines = PublicProposalLineSerializer(many=True)
+    currency = serializers.CharField()
+    total = serializers.CharField()
+    deposit = serializers.CharField(allow_null=True)
+    expires_at = serializers.DateTimeField(allow_null=True)
+    tutors = PublicTutorCardSerializer(many=True)
+    chosen_tutor = serializers.UUIDField(allow_null=True)
+    students = serializers.ListField(child=serializers.CharField())
+    pay_url = serializers.CharField(allow_blank=True)
+
+
+class ProposalAcceptSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=200)
+    tutor = serializers.UUIDField(required=False, allow_null=True)
+
+
+class ProposalDeclineSerializer(serializers.Serializer):
+    reason = serializers.CharField(max_length=500, required=False, allow_blank=True, default="")

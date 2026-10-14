@@ -5,7 +5,7 @@ from typing import Any
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from ..models import ReportRun, SavedReport, ScheduledReport
+from ..models import CustomReport, ReportRun, SavedReport, ScheduledReport
 
 # --- reports ------------------------------------------------------------------------------------
 
@@ -254,3 +254,135 @@ class StaffMemberSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     name = serializers.CharField()
     email = serializers.EmailField()
+
+
+# --- custom report builder (T08) ----------------------------------------------------------------
+
+
+class BuilderChoiceSerializer(serializers.Serializer):
+    value = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+
+
+class BuilderDimensionSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+    type = serializers.ChoiceField(choices=["id", "choice", "text", "date", "bool", "number"])
+    grains = serializers.ListField(child=serializers.CharField())
+    choices = BuilderChoiceSerializer(many=True)
+    operators = serializers.ListField(child=serializers.CharField())
+
+
+class BuilderMeasureSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+    type = serializers.ChoiceField(choices=["count", "number", "money", "hours"])
+
+
+class BuilderDatasetSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+    description = serializers.CharField(allow_blank=True)
+    category = serializers.CharField()
+    category_label = serializers.CharField()
+    date_field = serializers.CharField()
+    dimensions = BuilderDimensionSerializer(many=True)
+    measures = BuilderMeasureSerializer(many=True)
+
+
+class BuilderFilterSerializer(serializers.Serializer):
+    field = serializers.CharField(max_length=80)
+    op = serializers.ChoiceField(
+        choices=["eq", "neq", "in", "gte", "lte", "contains", "empty", "not_empty"]
+    )
+    value = serializers.JSONField(required=False, allow_null=True)
+
+
+class ReportDefinitionInputSerializer(serializers.Serializer):
+    dataset = serializers.CharField(max_length=40)
+    group_by = serializers.ListField(
+        child=serializers.CharField(max_length=80), required=False, default=list
+    )
+    measures = serializers.ListField(
+        child=serializers.CharField(max_length=40), required=False, default=list
+    )
+    filters = BuilderFilterSerializer(many=True, required=False, default=list)
+    period = serializers.CharField(max_length=20, required=False, default="this_month")
+    from_date = serializers.DateField(required=False, allow_null=True, source="from")
+    to_date = serializers.DateField(required=False, allow_null=True, source="to")
+    ordering = serializers.CharField(max_length=80, required=False, allow_blank=True, default="")
+    limit = serializers.IntegerField(min_value=1, max_value=1000, required=False, default=1000)
+    chart = serializers.ChoiceField(
+        choices=["table", "bar", "line", "pie"], required=False, default="table"
+    )
+    currency = serializers.CharField(max_length=3, required=False, allow_blank=True, default="")
+
+
+def definition_input(data: Any) -> dict[str, Any]:
+    """Validated request body → the builder's definition dict."""
+    payload = ReportDefinitionInputSerializer(data=data)
+    payload.is_valid(raise_exception=True)
+    clean = dict(payload.validated_data)
+    clean["filters"] = [dict(f) for f in clean.get("filters", [])]
+    for key in ("from", "to"):
+        value = clean.get(key)
+        clean[key] = value.isoformat() if value else ""
+    return clean
+
+
+class CustomResultSerializer(serializers.Serializer):
+    definition = serializers.DictField()
+    period = serializers.DictField(child=serializers.CharField(), allow_null=True)
+    columns = ReportColumnSerializer(many=True)
+    rows = serializers.ListField(child=serializers.DictField())
+    totals = serializers.ListField(child=serializers.DictField())
+    chart = ReportChartSerializer(allow_null=True)
+    notes = serializers.ListField(child=serializers.CharField())
+    truncated = serializers.BooleanField()
+    generated_at = serializers.DateTimeField()
+
+
+class BuilderExportSerializer(serializers.Serializer):
+    definition = ReportDefinitionInputSerializer()
+    file_format = serializers.ChoiceField(choices=["csv", "xlsx", "pdf"])
+    name = serializers.CharField(max_length=120, required=False, allow_blank=True, default="")
+
+
+class CustomReportSerializer(serializers.ModelSerializer):
+    owner_name = serializers.SerializerMethodField()
+    is_mine = serializers.SerializerMethodField()
+    definition = serializers.DictField()
+
+    class Meta:
+        model = CustomReport
+        fields = [
+            "id",
+            "name",
+            "description",
+            "dataset",
+            "definition",
+            "shared",
+            "owner_name",
+            "is_mine",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "dataset", "owner_name", "is_mine", "created_at", "updated_at"]
+
+    @extend_schema_field(serializers.CharField())
+    def get_owner_name(self, obj: CustomReport) -> str:
+        return str(obj.owner.get_full_name() or obj.owner.email)
+
+    @extend_schema_field(serializers.BooleanField())
+    def get_is_mine(self, obj: CustomReport) -> bool:
+        request = self.context.get("request")
+        return bool(request and obj.owner_id == request.user.pk)
+
+
+class CustomReportWriteSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=120)
+    description = serializers.CharField(
+        max_length=500, required=False, allow_blank=True, default=""
+    )
+    definition = ReportDefinitionInputSerializer()
+    shared = serializers.BooleanField(required=False, default=False)

@@ -200,3 +200,41 @@ class CoverLesson(TenantModel):
         constraints = [
             models.UniqueConstraint(fields=["request", "lesson"], name="cover_lesson_unique")
         ]
+
+
+class ShortlistShare(TenantModel):
+    """A job's shortlist shared with the family through a signed, expiring link
+    (FR-19-5, E19-T08). The family sees tutor cards without contact details, picks one, and
+    the choice feeds the offer flow. Expiry is read from ``expires_at`` (no sweeper)."""
+
+    class Status(models.TextChoices):
+        ACTIVE = "active", _("Waiting for the family")
+        CHOSEN = "chosen", _("Tutor chosen")
+        REVOKED = "revoked", _("Withdrawn")
+
+    job = models.ForeignKey("jobs.Job", on_delete=models.CASCADE, related_name="shortlist_shares")
+    tutors = models.JSONField(default=list)  # tutor ids, in the order shown
+    contact = models.ForeignKey(
+        "people.Contact", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    message = models.TextField(blank=True, default="")
+    status = models.CharField(max_length=7, choices=Status.choices, default=Status.ACTIVE)
+    expires_at = models.DateTimeField()
+    viewed_at = models.DateTimeField(null=True, blank=True)
+    chosen_tutor = models.ForeignKey(
+        "people.TutorProfile", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    chosen_at = models.DateTimeField(null=True, blank=True)
+    client_note = models.CharField(max_length=1000, blank=True, default="")
+    offer_batch = models.ForeignKey(
+        OfferBatch, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-created_at"]
+
+    def state(self, moment: Any) -> str:
+        """``active | chosen | revoked | expired``."""
+        if self.status == self.Status.ACTIVE and self.expires_at <= moment:
+            return "expired"
+        return str(self.status)

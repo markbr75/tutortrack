@@ -99,3 +99,97 @@ def client_summary(client: Client) -> dict[str, Any]:
         "next_lesson_at": None,
         "last_lesson_at": None,
     }
+
+
+# --- map view (E05-T12) -------------------------------------------------------------------------
+
+MAP_KINDS = ("student", "tutor")
+MAP_LIMIT = 2000
+
+
+def student_place(student: Student) -> Any:
+    """Where a student has in-person lessons: their lesson address, else the family's."""
+    for address in (student.lesson_address, student.client.billing_address):
+        if address is not None and (address.lat is not None or address.one_line()):
+            return address
+    return None
+
+
+def _point(kind: str, record: Any, place: Any, subjects: list[str], radius: Any) -> dict[str, Any]:
+    from tutortrack.core.geo import area_of, rounded
+
+    lat, lng = rounded(place.lat, place.lng)
+    return {
+        "kind": kind,
+        "id": str(record.pk),
+        "name": record.full_name,
+        "status": record.status,
+        "area": area_of(place),
+        "lat": lat,
+        "lng": lng,
+        "subjects": subjects,
+        "travel_radius_km": radius,
+    }
+
+
+def map_points(
+    user: Any,
+    *,
+    kinds: Any = MAP_KINDS,
+    status: str = "",
+    branch: str = "",
+    subject: str = "",
+) -> dict[str, Any]:
+    """Geocoded students and tutors the user may see (FR-05-11 map view).
+
+    Points are rounded to about 100 m and carry an area (postcode district), never the
+    street address. People without coordinates are counted so staff can geocode them."""
+    from tutortrack.core.permissions import has_perm, scope_queryset
+
+    points: list[dict[str, Any]] = []
+    missing = {"student": 0, "tutor": 0}
+    wanted = subject.strip().lower()
+    if "student" in kinds and has_perm(user, "people.student.view"):
+        students = scope_queryset(
+            user,
+            Student.objects.filter(archived_at__isnull=True).select_related(
+                "lesson_address", "client__billing_address"
+            ),
+            "people.student.view",
+        )
+        if status:
+            students = students.filter(status=status)
+        if branch:
+            students = students.filter(branch_id=branch)
+        for student in students[:MAP_LIMIT]:
+            subjects = [str(s.get("subject", "")) for s in student.subjects or [] if s]
+            if wanted and wanted not in {s.lower() for s in subjects}:
+                continue
+            place = student_place(student)
+            if place is None or place.lat is None or place.lng is None:
+                missing["student"] += 1
+                continue
+            points.append(_point("student", student, place, subjects, None))
+    if "tutor" in kinds and has_perm(user, "people.tutor.view"):
+        tutors = scope_queryset(
+            user,
+            TutorProfile.objects.filter(archived_at__isnull=True)
+            .select_related("address")
+            .prefetch_related("subjects"),
+            "people.tutor.view",
+        )
+        if status:
+            tutors = tutors.filter(status=status)
+        if branch:
+            tutors = tutors.filter(branches__id=branch)
+        for tutor in tutors.distinct()[:MAP_LIMIT]:
+            subjects = sorted({s.subject for s in tutor.subjects.all() if s.subject})
+            if wanted and wanted not in {s.lower() for s in subjects}:
+                continue
+            place = tutor.address
+            if place is None or place.lat is None or place.lng is None:
+                missing["tutor"] += 1
+                continue
+            radius = tutor.travel_radius_km if tutor.delivers_in_person else None
+            points.append(_point("tutor", tutor, place, subjects, radius))
+    return {"points": points, "missing": missing}

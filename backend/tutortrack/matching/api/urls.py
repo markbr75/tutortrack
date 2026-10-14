@@ -5,12 +5,14 @@ from . import views as v
 
 router = SimpleRouter(trailing_slash=False)
 router.register("shortlists", v.ShortlistViewSet, basename="shortlists")
+router.register("shortlist-shares", v.ShortlistShareViewSet, basename="shortlist-shares")
 router.register("job-offer-batches", v.OfferBatchViewSet, basename="job-offer-batches")
 router.register("job-postings", v.JobPostingViewSet, basename="job-postings")
 router.register("cover-requests", v.CoverRequestViewSet, basename="cover-requests")
 
 urlpatterns = [
     path("matching/search", v.MatchSearchView.as_view(), name="matching-search"),
+    path("public/shortlists/<str:token>", v.PublicShortlistView.as_view(), name="public-shortlist"),
     path("matching/settings", v.MatchingSettingsView.as_view(), name="matching-settings"),
     path("matching/analytics", v.MatchingAnalyticsView.as_view(), name="matching-analytics"),
     path("job-offers/<uuid:pk>/withdraw", v.JobOfferWithdrawView.as_view(), name="offer-withdraw"),

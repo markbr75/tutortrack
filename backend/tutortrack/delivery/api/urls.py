@@ -10,6 +10,7 @@ router.register(
 router.register("report-templates", views.ReportTemplateViewSet, basename="report-templates")
 router.register("lesson-reports", views.LessonReportViewSet, basename="lesson-reports")
 router.register("makeup-credits", views.MakeupCreditViewSet, basename="makeup-credits")
+router.register("lesson-feedback", views.LessonFeedbackViewSet, basename="lesson-feedback")
 
 urlpatterns = [
     path(
@@ -22,6 +23,11 @@ urlpatterns = [
         "students/<uuid:student_id>/attendance",
         views.AttendanceStatsView.as_view(),
         name="student-attendance",
+    ),
+    path(
+        "public/lesson-feedback/<str:token>",
+        views.PublicLessonFeedbackView.as_view(),
+        name="public-lesson-feedback",
     ),
     *router.urls,
 ]

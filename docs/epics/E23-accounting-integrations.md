@@ -64,7 +64,7 @@ Keep the tenant's books accurate without double entry: sync contacts, invoices, 
 - [x] **E23-T06** Summary-journal mode and backfill.
 - [x] **E23-T07** Sync dashboard, error mapping, retry/skip, digests.
 - [x] **E23-T08** GL CSV exports.
-- [ ] **E23-T09** (Phase 2b) Read-back of externally recorded payments.
+- [x] **E23-T09** (Phase 2b) Read-back of externally recorded payments.
 - [ ] **E23-T10** (Phase 3) Sage Business Cloud, FreeAgent, Xero Payroll.
 
 ## Temporal workflows (E32)
@@ -225,3 +225,10 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
 - GL exports leave out self-billing VAT on payroll.
 - The real clients are only tested against request shapes, because there are no credentials.
 - T09 and T10 are later phases.
+
+## Phase 2b implementation notes (as built 2026-10-14)
+- **T09 read-back (FR-23-4).** A connection option `import_payments` (off by default) makes the daily run (`AccountingDailyWorkflow`'s activity, before the reconciliation check; no workflow change) and `POST /accounting/connections/{id}/read-back` ("Check now") ask the ledger for the payments on each synced invoice TutorTrack still shows as owed (up to 200 a run).
+- **Provider interface.** `AccountingClient.invoice_payments(creds, invoice_id) -> [LedgerPayment]`: Xero reads the invoice's `Payments` (deleted ones skipped); QuickBooks reads the invoice's linked `Payment`s and the amount each applies to it; the fake ledger has `FakeLedger.record_payment(...)` to simulate a payment entered in the ledger.
+- **What is imported.** A ledger payment TutorTrack didn't post (not a synced payment's id, a split part or a refund's replacement payment) becomes an E11 manual payment through `payments.services.record_manual_payment`, allocated to that invoice, dated as in the ledger, with the method of the mapped clearing account (else bank transfer). Its `ExternalRecordLink` is created already synced with the ledger id, so the sync engine never pushes it back.
+- **Idempotent with reconciliation logging.** `LedgerPaymentImport` (RLS, unique per connection and ledger payment) records every outcome: `imported` (with the payment) or `skipped` with the reason (more than TutorTrack says is owed, invoice no longer open, no amount). The invoice's sync log gets an `imported` or `skipped` entry, and `accounting.payment_imported` is published. `GET /accounting/payment-imports?status=` lists them on the accounting settings page.
+- **Deviation:** summary-journal mode has no per-invoice ledger records, so read-back only runs in individual mode.

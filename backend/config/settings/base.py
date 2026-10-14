@@ -333,6 +333,14 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "COMPONENT_SPLIT_REQUEST": True,
     "ENUM_NAME_OVERRIDES": {
+        # Phase 2b (E05-T12, E09-T09, E17-T09, E19-T08, E23-T09)
+        "PersonKindEnum": "tutortrack.people.selectors.MAP_KINDS",
+        "LessonFeedbackStatusEnum": "tutortrack.delivery.models.LessonFeedback.Status",
+        "ShortlistShareStatusEnum": "tutortrack.matching.models.ShortlistShare.Status",
+        "ShortlistShareStateEnum": "tutortrack.matching.api.serializers.SHARE_STATES",
+        "ProposalStatusEnum": "tutortrack.leads.models.Proposal.Status",
+        "ProposalStateEnum": "tutortrack.leads.api.serializers.PROPOSAL_STATES",
+        "LedgerPaymentImportStatusEnum": "tutortrack.accounting.models.LedgerPaymentImport.Status",
         # E29 Part 2 (privacy, safeguarding)
         "ConsentTypeCategoryEnum": "tutortrack.privacy.models.ConsentType.Category",
         "ReasonEnum": "tutortrack.subscriptions.services.CANCEL_REASONS",
@@ -637,6 +645,7 @@ MASS_EXPORT_WINDOW_MINUTES = 60
 # --- Geocoding (E05 FR-05-15) ------------------------------------------------------------------
 GEOCODER = env("GEOCODER", default="tutortrack.core.geo.NullGeocoder")
 GOOGLE_MAPS_API_KEY = env("GOOGLE_MAPS_API_KEY", default="")
+MAPBOX_ACCESS_TOKEN = env("MAPBOX_ACCESS_TOKEN", default="")
 
 # --- Reporting (E26): exchange rates for a reporting currency --------------------------------
 # "ecb" (no key), "oxr" (needs OPENEXCHANGERATES_APP_ID) or empty for fixed fake rates.

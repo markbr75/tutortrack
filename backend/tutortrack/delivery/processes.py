@@ -6,6 +6,11 @@
 Signal ``submitted`` (from ``lesson_report.submitted``) ends it; each step also re-checks
 the report, so a missed signal never sends a wrong reminder.
 
+``LessonFeedbackWorkflow`` ``lesson-feedback:{org}:{lesson}`` (E09-T09): started by
+``lesson.completed`` when feedback surveys are on. Waits the delay, sends the requests,
+then waits until every request is answered (signal ``answered`` from
+``lesson_feedback.received``) or the links expire, and expires the rest.
+
 ``UnconfirmedLessonWorkflow`` ``unconfirmed:{org}:{lesson}``: started (by a beat task,
 see ``tasks.py``) when a lesson's end passes while still planned. After N hours it
 auto-completes the lesson or flags it and nudges the tutor (setting). Signal ``resolved``
@@ -31,6 +36,8 @@ from tutortrack.core.workflows.links import report_step
 from tutortrack.core.workflows.timers import SettingsSnapshotInput, snapshot_settings
 
 SLA_PROCESS = "report-sla"
+FEEDBACK_PROCESS = "lesson-feedback"
+FEEDBACK_SETTINGS = ["delivery.feedback_delay_hours", "delivery.feedback_expiry_days"]
 UNCONFIRMED_PROCESS = "unconfirmed-lesson"
 TIMEOUT = timedelta(minutes=5)
 SLA_SETTINGS = ["delivery.report_reminder_hours", "delivery.report_escalate_hours"]
@@ -39,6 +46,10 @@ UNCONFIRMED_SETTINGS = ["delivery.unconfirmed_after_hours"]
 
 def sla_workflow_id(organisation_id: object, report_id: object) -> str:
     return workflow_id(SLA_PROCESS, organisation_id, report_id)
+
+
+def feedback_workflow_id(organisation_id: object, lesson_id: object) -> str:
+    return workflow_id(FEEDBACK_PROCESS, organisation_id, lesson_id)
 
 
 def unconfirmed_workflow_id(organisation_id: object, lesson_id: object) -> str:
@@ -87,6 +98,26 @@ def report_is_written(input: ReportSlaInput) -> bool:
 
     report = LessonReport.objects.filter(pk=input.report_id).first()
     return report is None or report.is_written
+
+
+@dataclass(frozen=True, kw_only=True)
+class FeedbackInput(WorkflowInput):
+    lesson_id: str
+    completed_at: str  # ISO 8601 UTC
+
+
+@tenant_activity
+def send_lesson_feedback(input: FeedbackInput) -> list[str]:
+    from . import feedback
+
+    return feedback.send_for_lesson(input.lesson_id)
+
+
+@tenant_activity
+def expire_lesson_feedback(input: FeedbackInput) -> int:
+    from . import feedback
+
+    return feedback.expire_for_lesson(input.lesson_id)
 
 
 @tenant_activity
@@ -197,4 +228,54 @@ class UnconfirmedLessonWorkflow:
                 handle_unconfirmed_lesson, input, start_to_close_timeout=TIMEOUT
             )
         await report_step(input, self.step, status="completed")
+        return self.step
+
+
+@register_workflow(process=FEEDBACK_PROCESS, task_queue="default", cancel_permission=None)
+@workflow.defn
+class LessonFeedbackWorkflow:
+    def __init__(self) -> None:
+        self.answered = 0
+        self.step = "waiting"
+
+    @workflow.signal(name="answered")
+    def answered_signal(self) -> None:
+        self.answered += 1
+
+    @workflow.query
+    def state(self) -> dict[str, str]:
+        return {"step": self.step}
+
+    @workflow.run
+    async def run(self, input: FeedbackInput) -> str:
+        settings = await workflow.execute_activity(
+            snapshot_settings,
+            SettingsSnapshotInput(organisation_id=input.organisation_id, keys=FEEDBACK_SETTINGS),
+            start_to_close_timeout=TIMEOUT,
+        )
+        send_at = datetime.fromisoformat(input.completed_at) + timedelta(
+            hours=int(settings.get(FEEDBACK_SETTINGS[0], 2))
+        )
+        delay = send_at - workflow.now()
+        if delay > timedelta(0):
+            await workflow.sleep(delay)
+        sent = await workflow.execute_activity(
+            send_lesson_feedback, input, start_to_close_timeout=TIMEOUT
+        )
+        if not sent:
+            self.step = "not_sent"
+            await report_step(input, self.step, status="completed")
+            return self.step
+        self.step = "sent"
+        await report_step(input, self.step)
+        expiry = timedelta(days=int(settings.get(FEEDBACK_SETTINGS[1], 7)))
+        with contextlib.suppress(TimeoutError):
+            await workflow.wait_condition(lambda: self.answered >= len(sent), timeout=expiry)
+        expired = 0
+        if self.answered < len(sent):
+            expired = await workflow.execute_activity(
+                expire_lesson_feedback, input, start_to_close_timeout=TIMEOUT
+            )
+        self.step = f"answered:{len(sent) - expired}/{len(sent)}"
+        await report_step(input, "finished", status="completed")
         return self.step

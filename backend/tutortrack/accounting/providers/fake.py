@@ -33,7 +33,15 @@ from ..documents import (
     Pushed,
     RefundDoc,
 )
-from .base import Chart, LedgerAccount, LedgerInfo, LedgerRejected, LedgerTaxCode, TrackingCategory
+from .base import (
+    Chart,
+    LedgerAccount,
+    LedgerInfo,
+    LedgerPayment,
+    LedgerRejected,
+    LedgerTaxCode,
+    TrackingCategory,
+)
 
 TTL = 60 * 60 * 24 * 30
 PREFIX = "accounting:fake"
@@ -127,6 +135,37 @@ class FakeLedger:
     def calls(self) -> int:
         return int(_load(self.account_id)["calls"])
 
+    def record_payment(
+        self,
+        invoice_id: str,
+        amount: Decimal | str,
+        day: str,
+        *,
+        reference: str = "",
+        account: str = "acc-090",
+    ) -> str:
+        """A payment entered directly in the ledger (not by TutorTrack): E23-T09 tests."""
+        with _lock:
+            state = _load(self.account_id)
+            invoice = state["records"]["invoices"][invoice_id]
+            value = _dec(amount)
+            invoice["paid"] = str(_dec(invoice["paid"]) + value)
+            FakeAccountingClient._recompute(invoice)
+            record = {
+                "id": FakeAccountingClient._new_id("pay"),
+                "contact": invoice["contact"],
+                "account": account,
+                "amount": str(value),
+                "reference": reference,
+                "allocations": [[invoice_id, str(value)]],
+                "unallocated": "0",
+                "date": day,
+                "external": True,
+            }
+            FakeAccountingClient._store(state, "payments", record)
+            _save(self.account_id, state)
+        return str(record["id"])
+
 
 class FakeAccountingClient:
     """Shared by both providers; ``provider`` only changes the names it reports."""
@@ -165,6 +204,26 @@ class FakeAccountingClient:
         collection = "bills" if kind == "bill" else "invoices"
         record = _load(creds.account_id)["records"].get(collection, {}).get(external_id)
         return None if record is None else str(record["amount_due"])
+
+    def invoice_payments(self, creds: Credentials, external_id: str) -> list[LedgerPayment]:
+        _check(self.provider, creds.account_id)
+        state = _load(creds.account_id)
+        if external_id not in state["records"].get("invoices", {}):
+            raise NotFound(f"Invoice {external_id} not found.")
+        out = []
+        for record in state["records"].get("payments", {}).values():
+            for target, amount in record["allocations"]:
+                if target == external_id:
+                    out.append(
+                        LedgerPayment(
+                            id=record["id"],
+                            amount=str(amount),
+                            date=str(record["date"]),
+                            reference=record.get("reference", ""),
+                            account=record.get("account", ""),
+                        )
+                    )
+        return out
 
     # --- writes -----------------------------------------------------------------------------
 

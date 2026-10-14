@@ -115,3 +115,28 @@ class MakeupCreditVoided(DomainEvent):
     event_type: ClassVar[str] = "makeup_credit.voided"
     subject_type: ClassVar[str] = "makeup_credit"
     student_id: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class LessonFeedbackRequested(DomainEvent):
+    """A feedback request went to a family (FR-09-9)."""
+
+    event_type: ClassVar[str] = "lesson_feedback.requested"
+    subject_type: ClassVar[str] = "lesson_feedback"
+    lesson_id: str
+    student_id: str
+    tutor_id: str | None = None
+
+
+@dataclass(frozen=True, kw_only=True)
+class LessonFeedbackReceived(DomainEvent):
+    """A family answered (1-5). ``low`` is true at or below the alert threshold. The comment
+    is never in the event (personal data); read it through the API."""
+
+    event_type: ClassVar[str] = "lesson_feedback.received"
+    subject_type: ClassVar[str] = "lesson_feedback"
+    lesson_id: str
+    student_id: str
+    tutor_id: str | None = None
+    rating: int
+    low: bool = False

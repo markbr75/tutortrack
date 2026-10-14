@@ -43,7 +43,14 @@ from ..documents import (
     Pushed,
     RefundDoc,
 )
-from .base import Chart, LedgerAccount, LedgerInfo, LedgerTaxCode, TrackingCategory
+from .base import (
+    Chart,
+    LedgerAccount,
+    LedgerInfo,
+    LedgerPayment,
+    LedgerTaxCode,
+    TrackingCategory,
+)
 
 API = "https://api.xero.com/api.xro/2.0"
 CONNECTIONS = "https://api.xero.com/connections"
@@ -189,6 +196,25 @@ class XeroClient:
     def balance(self, creds: Credentials, kind: str, external_id: str) -> str | None:
         found = self._call(creds, "GET", f"/Invoices/{external_id}").get("Invoices") or []
         return str(found[0].get("AmountDue")) if found else None
+
+    def invoice_payments(self, creds: Credentials, external_id: str) -> list[LedgerPayment]:
+        """The invoice's ``Payments`` (deleted ones are left out)."""
+        found = self._call(creds, "GET", f"/Invoices/{external_id}").get("Invoices") or []
+        out = []
+        for payment in (found[0].get("Payments") or []) if found else []:
+            if str(payment.get("Status", "")).upper() == "DELETED":
+                continue
+            day = parse_date(payment.get("Date"))
+            out.append(
+                LedgerPayment(
+                    id=str(payment.get("PaymentID", "")),
+                    amount=str(payment.get("Amount", "0")),
+                    date=day.isoformat() if day else "",
+                    reference=str(payment.get("Reference") or ""),
+                    account=str((payment.get("Account") or {}).get("AccountID", "")),
+                )
+            )
+        return out
 
     # --- writes -----------------------------------------------------------------------------
 
