@@ -23,7 +23,8 @@ pytestmark = pytest.mark.django_db
 
 
 def missed_lesson_credit(org, world):  # noqa: F811
-    start = now().replace(second=0, microsecond=0) - timedelta(days=2)
+    # A fixed time of day: lesson times must be in 5-minute steps.
+    start = (now() - timedelta(days=2)).replace(hour=10, minute=0, second=0, microsecond=0)
     with tenant_context(org):
         lesson = scheduling.create_lesson(
             start=start,
