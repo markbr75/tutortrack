@@ -5234,5 +5234,277 @@
       "checkedInAt": "Checked in at {{time}}.",
       "checkedOutAt": "Checked out at {{time}}."
     }
+  },
+  "help": {
+    "open": "Help",
+    "unread_one": "{{count}} new item",
+    "unread_other": "{{count}} new items",
+    "title": "Help",
+    "close": "Close",
+    "tabs": {
+      "articles": "Articles",
+      "whatsNew": "What's new",
+      "tours": "Tours",
+      "support": "Chat with support",
+      "privacy": "Usage data"
+    },
+    "search": "Search help",
+    "forThisPage": "Suggested for this page",
+    "results_one": "{{count}} article found",
+    "results_other": "{{count}} articles found",
+    "noResults": "No articles match. Try other words, or chat with support.",
+    "backToArticles": "Back to articles"
+  },
+  "tours": {
+    "progress": "Step {{current}} of {{total}}",
+    "skip": "Skip tour",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "start": "Start",
+    "again": "Take again",
+    "taken": "Taken",
+    "welcome": {
+      "name": "Welcome to TutorTrack",
+      "intro": {
+        "title": "Welcome to TutorTrack",
+        "body": "This short tour shows you where things are. You can stop it at any time with Escape."
+      },
+      "navigation": {
+        "title": "Find your way around",
+        "body": "The menu has your calendar, people, billing, payroll and settings. You only see the parts your role can use."
+      },
+      "checklist": {
+        "title": "Your first steps",
+        "body": "This checklist shows what to do next. Each step is ticked when you do it."
+      },
+      "help": {
+        "title": "Help is always here",
+        "body": "Select Help to search articles, take a tour again, read what's new or chat with our support team."
+      }
+    },
+    "calendar": {
+      "name": "Schedule lessons",
+      "intro": {
+        "title": "The calendar",
+        "body": "All lessons and events are here. Switch between day, week and month views."
+      },
+      "lessons": {
+        "title": "Add a lesson",
+        "body": "Select a free time to add a lesson. You can make it repeat, for example every week."
+      },
+      "availability": {
+        "title": "Tutor availability",
+        "body": "Tutors' available times help you find a slot that suits everyone."
+      }
+    },
+    "billing": {
+      "name": "Invoices and payments",
+      "intro": {
+        "title": "Billing",
+        "body": "Completed lessons become charges. Invoices group the charges for a period."
+      },
+      "invoices": {
+        "title": "Send invoices",
+        "body": "Make one invoice, or run invoices for every family at the same time. To correct an issued invoice, issue a credit note."
+      },
+      "payments": {
+        "title": "Take payments",
+        "body": "Connect Stripe in the payment settings so that families can pay by card."
+      }
+    }
+  },
+  "setupChecklist": {
+    "title": "Get started",
+    "progress": "{{done}} of {{total}} done",
+    "hide": "Hide checklist",
+    "done": "done",
+    "steps": {
+      "service": "Set up a service",
+      "student": "Add a student",
+      "lesson": "Schedule a lesson",
+      "payments": "Connect Stripe",
+      "invoice": "Send your first invoice"
+    }
+  },
+  "nps": {
+    "question": "How likely are you to recommend TutorTrack to a friend or colleague?",
+    "low": "0: not at all likely",
+    "high": "10: extremely likely",
+    "comment": "What is the main reason for your score? (optional)",
+    "send": "Send",
+    "notNow": "Not now",
+    "thanks": "Thank you for your feedback.",
+    "close": "Close"
+  },
+  "supportChat": {
+    "newTitle": "Ask TutorTrack support",
+    "privacyHint": "Do not send passwords, card numbers or safeguarding details.",
+    "subject": "Subject (optional)",
+    "message": "Your question",
+    "send": "Send",
+    "failed": "We could not send your message. Try again.",
+    "yourChats": "Your conversations",
+    "newReply": "New reply",
+    "back": "Back to conversations",
+    "messages": "Messages",
+    "reply": "Reply",
+    "close": "Close conversation",
+    "rated": "You rated this chat {{score}} out of 5.",
+    "csatQuestion": "How satisfied are you with the help you got?",
+    "csatScore": "{{score}} out of 5",
+    "csatScale": "1: very dissatisfied, 5: very satisfied",
+    "status": {
+      "open": "Waiting for TutorTrack",
+      "answered": "Answered",
+      "closed": "Closed"
+    }
+  },
+  "productAnalytics": {
+    "explain": "If you agree, TutorTrack records which pages and features you use, so we can make the product better. We never record names, email addresses, the records you open or the text you type.",
+    "toggle": "Share anonymous usage data",
+    "offForOrganisation": "Your organisation has turned off usage data for everyone."
+  },
+  "tenantHealth": {
+    "nav": "Health",
+    "title": "Tenant health",
+    "explain": "Scores are recalculated every night from usage, active tutors, payments, errors, support conversations and NPS. Staff get an email when an organisation becomes at risk.",
+    "runNow": "Recalculate now",
+    "runStarted": "Recalculation started. Refresh in a few minutes.",
+    "filter": "Risk",
+    "all": "All",
+    "organisation": "Organisation",
+    "score": "Score",
+    "riskLabel": "Risk",
+    "scoredOn": "Scored on",
+    "cardTitle": "Health",
+    "notScored": "Not scored yet.",
+    "trend": "Last days: {{scores}}",
+    "risk": {
+      "healthy": "Healthy",
+      "watch": "Watch",
+      "at_risk": "At risk"
+    },
+    "components": {
+      "usage": "Usage",
+      "tutors": "Tutors",
+      "payments": "Payments",
+      "reliability": "Reliability",
+      "support": "Support",
+      "nps": "NPS"
+    }
+  },
+  "saasMetrics": {
+    "nav": "SaaS metrics",
+    "title": "SaaS metrics",
+    "explain": "From the nightly subscription snapshots, in one billing currency at a time. Annual plans count as a twelfth per month; revenue share is not included.",
+    "currency": "Currency",
+    "period": "Period",
+    "months_one": "{{count}} month",
+    "months_other": "{{count}} months",
+    "tiles": {
+      "mrr": "MRR",
+      "arr": "ARR",
+      "customers": "Paying customers",
+      "arpa": "ARPA",
+      "nrr": "Net revenue retention",
+      "logoChurn": "Customer churn",
+      "revenueChurn": "Revenue churn",
+      "trialing": "In trial",
+      "pastDue": "MRR past due"
+    },
+    "mrrTrend": "MRR by month",
+    "movements": "MRR movements",
+    "month": "Month",
+    "mrrCol": "MRR",
+    "newCol": "New",
+    "reactivationCol": "Reactivated",
+    "expansionCol": "Expansion",
+    "contractionCol": "Contraction",
+    "churnCol": "Churned",
+    "netNewCol": "Net new",
+    "customersCol": "Customers",
+    "customersMoved": "+{{added}} / −{{lost}}",
+    "nrrCol": "NRR",
+    "trialConversion": "Trial conversion by sign-up month",
+    "signupMonth": "Sign-up month",
+    "trials": "Trials",
+    "converted": "Converted",
+    "rate": "Rate",
+    "cohorts": "Cohort retention",
+    "cohortsExplain": "Customers grouped by their first paying month: the share still paying each month after, and (below) the share of their first month's MRR.",
+    "cohort": "Cohort",
+    "size": "Customers",
+    "monthN": "Month {{n}}",
+    "revenueShort": "MRR {{value}}",
+    "noData": "No data yet.",
+    "asOf": "Figures as of {{date}}."
+  },
+  "productInsights": {
+    "nav": "Feedback and usage",
+    "title": "Feedback and usage",
+    "npsTitle": "NPS and CSAT (last {{days}} days)",
+    "tiles": {
+      "nps": "NPS",
+      "answers": "Answers",
+      "promoters": "Promoters",
+      "passives": "Passives",
+      "detractors": "Detractors",
+      "csat": "Support CSAT (1–5)"
+    },
+    "byPlan": "NPS by plan",
+    "byMonth": "NPS by month",
+    "answers_one": "{{count}} answer",
+    "answers_other": "{{count}} answers",
+    "comments": "Recent comments",
+    "usageTitle": "Product usage",
+    "usageExplain": "Pseudonymous events from staff who agreed to share usage data. People are counted by a one-way code, never by name.",
+    "window": "Window",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "usageSummary": "{{events}} events from {{people}} people in {{organisations}} organisations.",
+    "topEvents": "Top events",
+    "topPages": "Top pages",
+    "event": "Event",
+    "page": "Page",
+    "count": "Count",
+    "people": "People",
+    "funnel": "Onboarding funnel (organisations signed up in the period × 3)",
+    "steps": {
+      "signed_up": "Signed up",
+      "service": "Set up a service",
+      "student": "Added a student",
+      "lesson": "Scheduled a lesson",
+      "payments": "Connected payments",
+      "invoice": "Sent an invoice"
+    }
+  },
+  "supportInbox": {
+    "nav": "Support",
+    "title": "Support conversations",
+    "status": "Show",
+    "search": "Search",
+    "filters": {
+      "open": "Waiting for us",
+      "unread": "Unread",
+      "answered": "Answered",
+      "closed": "Closed",
+      "all": "All"
+    },
+    "statuses": {
+      "open": "Waiting for us",
+      "answered": "Answered",
+      "closed": "Closed"
+    },
+    "unread": "Unread",
+    "assignedTo": "assigned to {{name}}",
+    "empty": "No conversations.",
+    "back": "Back to support",
+    "assignToMe": "Assign to me",
+    "close": "Close conversation",
+    "messages": "Messages",
+    "support": "TutorTrack",
+    "reply": "Reply",
+    "send": "Send reply"
   }
 }

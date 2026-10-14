@@ -259,3 +259,275 @@ class PlanAdminSerializer(serializers.ModelSerializer):
             e.key: (e.bool_value if e.key in FEATURES else e.int_value)
             for e in obj.entitlements.all()
         }
+
+
+# --- Part 2: health (T09) -----------------------------------------------------------------------
+
+
+class HealthComponentsSerializer(serializers.Serializer):
+    usage = serializers.IntegerField(allow_null=True)
+    tutors = serializers.IntegerField(allow_null=True)
+    payments = serializers.IntegerField(allow_null=True)
+    reliability = serializers.IntegerField(allow_null=True)
+    support = serializers.IntegerField(allow_null=True)
+    nps = serializers.IntegerField(allow_null=True)
+
+
+class HealthRowSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+    slug = serializers.CharField()
+    status = serializers.CharField()
+    plan = serializers.CharField(source="plan_key", allow_null=True)
+    last_activity = serializers.DateTimeField(allow_null=True)
+    score = serializers.IntegerField(source="health_score")
+    risk = serializers.CharField(source="health_risk")
+    scored_on = serializers.DateField(source="health_date")
+    components = HealthComponentsSerializer(source="health_components")
+
+
+class HealthPointSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    score = serializers.IntegerField()
+    risk = serializers.CharField()
+    components = HealthComponentsSerializer()
+    inputs = serializers.DictField(child=serializers.IntegerField(allow_null=True))
+    alerted_at = serializers.DateTimeField(allow_null=True)
+
+
+class RiskCountsSerializer(serializers.Serializer):
+    healthy = serializers.IntegerField()
+    watch = serializers.IntegerField()
+    at_risk = serializers.IntegerField()
+
+
+class InsightsRunSerializer(serializers.Serializer):
+    workflow_id = serializers.CharField()
+
+
+# --- Part 2: SaaS metrics (T10) -----------------------------------------------------------------
+
+
+def _money(amount: Any, currency: str) -> dict[str, str]:
+    from ..metrics import as_money
+
+    return as_money(amount, currency)
+
+
+def _rate(value: Any) -> str | None:
+    return None if value is None else str(value)
+
+
+class SaasMonthSerializer(serializers.Serializer):
+    month = serializers.DateField()
+    mrr = MoneyOut()
+    arr = MoneyOut()
+    customers = serializers.IntegerField()
+    arpa = MoneyOut()
+    trialing = serializers.IntegerField()
+    past_due_mrr = MoneyOut()
+    new_mrr = MoneyOut()
+    reactivation_mrr = MoneyOut()
+    expansion_mrr = MoneyOut()
+    contraction_mrr = MoneyOut()
+    churned_mrr = MoneyOut()
+    net_new_mrr = MoneyOut()
+    new_customers = serializers.IntegerField()
+    churned_customers = serializers.IntegerField()
+    logo_churn_rate = serializers.CharField(allow_null=True, help_text="Fraction, e.g. 0.0250")
+    revenue_churn_rate = serializers.CharField(allow_null=True)
+    net_revenue_retention = serializers.CharField(allow_null=True)
+
+    def to_representation(self, row: Any) -> dict[str, Any]:
+        c = self.context["currency"]
+        m = row.movements
+        return {
+            "month": row.month.isoformat(),
+            "mrr": _money(row.mrr, c),
+            "arr": _money(row.arr, c),
+            "customers": row.customers,
+            "arpa": _money(row.arpa, c),
+            "trialing": row.trialing,
+            "past_due_mrr": _money(row.past_due_mrr, c),
+            "new_mrr": _money(m.new, c),
+            "reactivation_mrr": _money(m.reactivation, c),
+            "expansion_mrr": _money(m.expansion, c),
+            "contraction_mrr": _money(m.contraction, c),
+            "churned_mrr": _money(m.churn, c),
+            "net_new_mrr": _money(m.net_new, c),
+            "new_customers": m.customers_new,
+            "churned_customers": m.customers_churned,
+            "logo_churn_rate": _rate(row.logo_churn_rate),
+            "revenue_churn_rate": _rate(row.revenue_churn_rate),
+            "net_revenue_retention": _rate(row.net_revenue_retention),
+        }
+
+
+class TrialCohortSerializer(serializers.Serializer):
+    month = serializers.DateField()
+    trials = serializers.IntegerField()
+    converted = serializers.IntegerField()
+    conversion_rate = serializers.CharField(allow_null=True)
+
+    def to_representation(self, row: Any) -> dict[str, Any]:
+        return {
+            "month": row.month.isoformat(),
+            "trials": row.trials,
+            "converted": row.converted,
+            "conversion_rate": _rate(row.rate),
+        }
+
+
+class RetentionCohortSerializer(serializers.Serializer):
+    month = serializers.DateField()
+    size = serializers.IntegerField()
+    starting_mrr = MoneyOut()
+    logo_retention = serializers.ListField(child=serializers.CharField(allow_null=True))
+    revenue_retention = serializers.ListField(child=serializers.CharField(allow_null=True))
+
+    def to_representation(self, row: Any) -> dict[str, Any]:
+        return {
+            "month": row.month.isoformat(),
+            "size": row.size,
+            "starting_mrr": _money(row.starting_mrr, self.context["currency"]),
+            "logo_retention": [_rate(v) for v in row.logos],
+            "revenue_retention": [_rate(v) for v in row.revenue],
+        }
+
+
+class SaasMetricsSerializer(serializers.Serializer):
+    currency = serializers.CharField()
+    currencies = serializers.ListField(child=serializers.CharField())
+    months = SaasMonthSerializer(many=True)
+    trial_conversion = TrialCohortSerializer(many=True)
+    cohorts = RetentionCohortSerializer(many=True)
+
+    def to_representation(self, data: Any) -> dict[str, Any]:
+        context = {"currency": data["currency"]}
+        return {
+            "currency": data["currency"],
+            "currencies": data["currencies"],
+            "months": SaasMonthSerializer(data["months"], many=True, context=context).data,
+            "trial_conversion": TrialCohortSerializer(data["trial_conversion"], many=True).data,
+            "cohorts": RetentionCohortSerializer(data["cohorts"], many=True, context=context).data,
+        }
+
+
+# --- Part 2: NPS and usage (T09) ----------------------------------------------------------------
+
+
+class NpsBucketSerializer(serializers.Serializer):
+    plan = serializers.CharField(required=False)
+    month = serializers.DateField(required=False)
+    nps = serializers.IntegerField(allow_null=True)
+    answers = serializers.IntegerField()
+
+
+class NpsCommentSerializer(serializers.Serializer):
+    organisation_id = serializers.UUIDField()
+    organisation = serializers.CharField()
+    score = serializers.IntegerField()
+    role = serializers.CharField()
+    comment = serializers.CharField()
+    created_at = serializers.DateTimeField()
+
+
+class NpsSummarySerializer(serializers.Serializer):
+    days = serializers.IntegerField()
+    nps = serializers.IntegerField(allow_null=True)
+    answers = serializers.IntegerField()
+    dismissed = serializers.IntegerField()
+    promoters = serializers.IntegerField()
+    passives = serializers.IntegerField()
+    detractors = serializers.IntegerField()
+    by_plan = NpsBucketSerializer(many=True)
+    by_month = NpsBucketSerializer(many=True)
+    comments = NpsCommentSerializer(many=True)
+    csat_average = serializers.DecimalField(max_digits=4, decimal_places=2, allow_null=True)
+    csat_answers = serializers.IntegerField()
+
+
+class UsageEventSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    count = serializers.IntegerField()
+    organisations = serializers.IntegerField()
+    people = serializers.IntegerField()
+
+
+class UsagePageSerializer(serializers.Serializer):
+    route = serializers.CharField()
+    count = serializers.IntegerField()
+    people = serializers.IntegerField()
+
+
+class UsageDaySerializer(serializers.Serializer):
+    day = serializers.DateField()
+    people = serializers.IntegerField()
+    organisations = serializers.IntegerField()
+
+
+class FunnelStepSerializer(serializers.Serializer):
+    step = serializers.CharField()
+    organisations = serializers.IntegerField()
+
+
+class UsageSummarySerializer(serializers.Serializer):
+    days = serializers.IntegerField()
+    events = serializers.IntegerField()
+    people = serializers.IntegerField()
+    organisations = serializers.IntegerField()
+    top_events = UsageEventSerializer(many=True)
+    top_pages = UsagePageSerializer(many=True)
+    daily = UsageDaySerializer(many=True)
+    funnel = FunnelStepSerializer(many=True)
+
+
+# --- Part 2: support inbox (T08) ----------------------------------------------------------------
+
+
+def _name(user: Any) -> str:
+    if user is None:
+        return ""
+    return " ".join(p for p in (user.first_name, user.last_name) if p) or user.email
+
+
+class PlatformSupportRowSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    organisation_id = serializers.UUIDField()
+    organisation_name = serializers.CharField(source="organisation.name")
+    subject = serializers.CharField()
+    status = serializers.CharField()
+    page = serializers.CharField()
+    opened_by_name = serializers.SerializerMethodField()
+    assignee_name = serializers.SerializerMethodField()
+    support_unread = serializers.BooleanField()
+    last_message_at = serializers.DateTimeField()
+    created_at = serializers.DateTimeField()
+
+    @extend_schema_field(serializers.CharField())
+    def get_opened_by_name(self, obj: Any) -> str:
+        return _name(obj.opened_by)
+
+    @extend_schema_field(serializers.CharField())
+    def get_assignee_name(self, obj: Any) -> str:
+        return _name(obj.assignee)
+
+
+class PlatformSupportMessageSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    from_support = serializers.BooleanField()
+    author_name = serializers.SerializerMethodField()
+    body = serializers.CharField()
+    created_at = serializers.DateTimeField()
+
+    @extend_schema_field(serializers.CharField())
+    def get_author_name(self, obj: Any) -> str:
+        return _name(obj.author)
+
+
+class PlatformSupportDetailSerializer(PlatformSupportRowSerializer):
+    messages = PlatformSupportMessageSerializer(many=True, source="messages.all")
+
+
+class PlatformSupportReplySerializer(serializers.Serializer):
+    body = serializers.CharField(max_length=5000)

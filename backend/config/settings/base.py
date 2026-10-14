@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     "tutortrack.portal",
     "tutortrack.subscriptions",
     "tutortrack.platform_admin",
+    "tutortrack.success",
     "tutortrack.sites",
     "tutortrack.courses",
     "tutortrack.growth",
@@ -346,6 +347,8 @@ SPECTACULAR_SETTINGS = {
         "SafeguardingActionKindEnum": "tutortrack.privacy.models.SafeguardingAction.Kind",
         "SafeguardingFlagStatusEnum": "tutortrack.privacy.models.SafeguardingFlag.Status",
         "LoneWorkingStatusEnum": "tutortrack.privacy.models.LoneWorkingVisit.Status",
+        "SurveyKindEnum": "tutortrack.success.models.SurveyResponse.Kind",
+        "SupportConversationStatusEnum": "tutortrack.success.models.SupportConversation.Status",
         "RelationshipEnum": "tutortrack.people.models.Contact.Relationship",
         "ImportSourceEnum": "tutortrack.migration.models.Source",
         # E13 Phase 2 (broadcasts, inbox, channels)

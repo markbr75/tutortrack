@@ -40,3 +40,39 @@ urlpatterns = [
     path("platform/plans/<slug:key>/prices/<int:price_id>", v.PlanPriceView.as_view(),
          name="platform-plan-price"),
 ]  # fmt: skip
+
+# Part 2: customer success and SaaS metrics.
+urlpatterns += [
+    path("platform/health", v.HealthListView.as_view(), name="platform-health"),
+    path("platform/health/risk-counts", v.RiskCountsView.as_view(), name="platform-risk-counts"),
+    path(
+        "platform/tenants/<uuid:pk>/health",
+        v.TenantHealthView.as_view(),
+        name="platform-tenant-health",
+    ),
+    path("platform/insights/run", v.InsightsRunView.as_view(), name="platform-insights-run"),
+    path("platform/saas-metrics", v.SaasMetricsView.as_view(), name="platform-saas-metrics"),
+    path("platform/nps", v.NpsSummaryView.as_view(), name="platform-nps"),
+    path("platform/usage", v.UsageSummaryView.as_view(), name="platform-usage"),
+    path("platform/support", v.SupportInboxView.as_view(), name="platform-support"),
+    path(
+        "platform/support/<uuid:pk>",
+        v.SupportConversationView.as_view(),
+        name="platform-support-conversation",
+    ),
+    path(
+        "platform/support/<uuid:pk>/reply",
+        v.SupportReplyView.as_view(),
+        name="platform-support-reply",
+    ),
+    path(
+        "platform/support/<uuid:pk>/close",
+        v.SupportCloseView.as_view(),
+        name="platform-support-close",
+    ),
+    path(
+        "platform/support/<uuid:pk>/assign",
+        v.SupportAssignView.as_view(),
+        name="platform-support-assign",
+    ),
+]

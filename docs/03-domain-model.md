@@ -143,3 +143,4 @@ Naming: `<aggregate>.<past_tense_verb>`. Each epic lists its events; this table 
 | `import.submitted/validated/completed/failed/rolled_back/finalised`, `migration_project.started/step_completed/completed`, `export.requested/ready/downloaded/expired`, `invoice.imported` (billing, for imported history) | E28 |
 | `consent.granted`, `consent.withdrawn`, `security.alert` | E29 |
 | `data_request.received/verified/delivered/closed`, `data_subject.erased`, `legal_hold.placed/released`, `retention.run_completed`, `safeguarding.concern_raised/concern_closed/message_flagged`, `lone_working.checked_in/checked_out/overdue`, `dpa.accepted` (internal: ids only, never webhook event types) | E29 Part 2 |
+| `setup_checklist.item_completed/completed`, `survey.answered`, `support_conversation.opened/replied/closed` (internal: ids only, never webhook event types) | E30 Part 2 |

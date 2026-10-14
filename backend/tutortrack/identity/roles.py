@@ -80,7 +80,7 @@ ROLES: dict[str, RoleDef] = {
                "reporting.export", "reporting.schedule.manage:own", "sites.view",
                "sites.profile.moderate", "growth.review.*", "growth.referral.*",
                "growth.tutor_referral.*", "growth.affiliate.view", "safeguarding.raise",
-               "safeguarding.lone_working.monitor"),
+               "safeguarding.lone_working.monitor", "success.support.chat:own"),
             denies=("people.tutor.view_financial", "scheduling.edit_locked",
                     "matching.include_restricted", "matching.settings.manage"),
         ),
@@ -92,7 +92,7 @@ ROLES: dict[str, RoleDef] = {
                "crm.note.view", "crm.search", "catalogue.view", "rates.manage", "courses.view",
                "subscription.view", "growth.affiliate.*", "growth.commission.manage",
                "growth.referral.view", "growth.tutor_referral.*", "learning.library.view",
-               "learning.library.charge"),
+               "learning.library.charge", "success.support.chat:own"),
         ),
         RoleDef(
             "tutor", "Tutor",
