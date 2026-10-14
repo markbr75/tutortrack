@@ -14,6 +14,9 @@ for key, default, label in (
     ("portal.show_tutor_contact", False, _("Show tutors' email and phone")),
     ("portal.show_prices", True, _("Show lesson prices")),
     ("portal.show_package_balances", True, _("Show package balances and sell packages")),
+    ("portal.allow_messaging", True, _("Families can message you")),
+    ("portal.allow_messaging_tutors", False, _("Families and tutors can message each other")),
+    ("portal.allow_student_messaging", False, _("Students can send messages")),
 ):
     register(key, type="bool", default=default, label=label)
 for key, label in (

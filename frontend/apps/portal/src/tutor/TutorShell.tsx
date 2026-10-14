@@ -56,6 +56,7 @@ export function TutorShell() {
     { to: "/tutor/profile", label: t("tutor.nav.profile") },
     { to: "/tutor/notifications", label: t("tutor.nav.notifications") },
     { to: "/tutor/referrals", label: t("referrals.tutorPortal.nav") },
+    { to: "/tutor/messages", label: t("portalMessages.nav") },
   ] as const;
   return (
     <div className="mx-auto min-h-screen max-w-3xl">

@@ -7,7 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field, replace
 from typing import Any
 
-CATEGORIES = ("scheduling", "reports", "billing", "account", "staff")
+CATEGORIES = ("scheduling", "reports", "billing", "account", "staff", "messages", "marketing")
 
 
 @dataclass(frozen=True)
@@ -26,7 +26,7 @@ class Recipient:
         if self.email:
             out.add("email")
         if self.phone:
-            out.add("sms")
+            out.update({"sms", "whatsapp"})  # WhatsApp also needs the person's opt-in
         if self.user_id:
             out.update({"in_app", "push"})  # push needs a subscribed device (checked later)
         return out
@@ -59,6 +59,9 @@ class NotificationType:
     default_timing: tuple[int, ...] = ()  # minutes before (reminders)
     attachments: Callable[[Any], list[tuple[str, bytes, str]]] | None = None
     link: Callable[[Any], str] | None = None
+    # Internal types (broadcasts, inbox replies) send through the pipeline but aren't
+    # configurable notifications: not listed in settings or preferences.
+    hidden: bool = False
 
 
 _types: dict[str, NotificationType] = {}
@@ -82,6 +85,10 @@ PUSH_BY_DEFAULT = frozenset(
 
 
 def register(t: NotificationType) -> NotificationType:
+    if "sms" in t.channels and "whatsapp" not in t.channels and not t.hidden:
+        # E13-T12: anything that can be texted can go by WhatsApp (off by default; needs an
+        # approved template mapped to the type and the recipient's opt-in).
+        t = replace(t, channels=(*t.channels, "whatsapp"))
     if "in_app" in t.channels and "push" not in t.channels:
         defaults = t.default_channels
         if t.key in PUSH_BY_DEFAULT:
@@ -100,3 +107,8 @@ def get(key: str) -> NotificationType:
 
 def all_types() -> list[NotificationType]:
     return list(_types.values())
+
+
+def visible_types() -> list[NotificationType]:
+    """The configurable notification types (settings screen, preferences)."""
+    return [t for t in _types.values() if not t.hidden]

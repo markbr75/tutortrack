@@ -84,15 +84,15 @@ A registry of notification types, each with: key, trigger event, recipients reso
 - [x] **E13-T07** Preferences and unsubscribe.
 - [x] **E13-T08** In-app notifications with realtime feed.
 - [x] **E13-T09** Frontend: notification settings, template editor, message log on timelines.
-- [ ] **E13-T10** (Phase 2) Broadcasts with segments and tracking.
-- [ ] **E13-T11** (Phase 2) Conversations inbox (email/SMS inbound, in-app chat, assignment).
-- [ ] **E13-T12** (Phase 2) WhatsApp channel; custom sender domains; Mailchimp/Brevo sync.
+- [x] **E13-T10** (Phase 2) Broadcasts with segments and tracking.
+- [x] **E13-T11** (Phase 2) Conversations inbox (email/SMS inbound, in-app chat, assignment).
+- [x] **E13-T12** (Phase 2) WhatsApp channel; custom sender domains; Mailchimp/Brevo sync.
 
 ## Temporal workflows (E32)
 
 Implement these processes as Temporal workflows following the rules in [E32](E32-workflow-orchestration-temporal.md) (deterministic workflow code, side effects in tenant-scoped activities that call services, tenant-prefixed workflow IDs, signals for human decisions). Where the requirements above mention sweeper tasks, `next_*_at` / `resume_at` columns or retry schedules, the workflow replaces them.
 
-- [ ] **E13-TW1** Broadcast workflow (requires E32).
+- [x] **E13-TW1** Broadcast workflow (requires E32).
 
 | Workflow | Started by | Steps, timers and signals | Replaces |
 |---|---|---|---|
@@ -108,3 +108,32 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
 - **In-app (T08):** a bell with an unread count, a list and "mark all read". It polls every 30 seconds, instead of the spec's realtime SSE/WebSockets (that needs ASGI). Realtime is a follow-up.
 - **Frontend (T09):** Settings → Notifications (per type: on/off, channels, reminder hours; template editor with variables, preview, SMS part count, test send, revert), the bell in the app shell, and messages on record timelines (`message` kind through a new CRM timeline provider hook).
 - **Deferred (Phase 2):** broadcasts and BroadcastWorkflow (T10, TW1), conversations inbox (T11), WhatsApp, custom sending domains, and Mailchimp/Brevo sync (T12).
+
+## Phase 2 implementation notes (as built 2026-10-14)
+Everything is in the existing `comms` app (models in one migration, RLS on every tenant table); see ADR 0027.
+
+- **Broadcasts (T10):**
+  - `Segment` (saved, reusable) and `Broadcast` hold a segment *definition*: client contacts or tutors, filtered by status, branch, tags, a saved E05 list view (clients, students or tutors), a class (E20 enrolments or teachers), a job, a pipeline stage (open E17 enquiries) and "main contact only". A student audience is reached through student statuses or a saved student view (their families' contacts); students have no channel of their own yet.
+  - Recipients are resolved once, when sending starts, into `BroadcastRecipient` rows with a skip reason: `no_address`, `duplicate` (same address twice), `suppressed` (bounce, complaint, STOP), `no_consent`, `opted_out`, `no_opt_in` (WhatsApp).
+  - **Marketing vs operational:** marketing needs E29 consent (`marketing_email` for email, `marketing_sms` for texts and WhatsApp; the contact's "receives marketing" flag where the organisation has no such consent type) and a marketing preference that allows the channel. Marketing emails carry RFC 8058 unsubscribe headers for the new `marketing` category; marketing texts end with "Reply STOP to opt out". Service announcements skip consent but still respect suppressions.
+  - Each recipient is a normal `Message` (types `broadcast_marketing`/`broadcast_operational`, hidden from the settings screen), so Postmark delivery, open, click and bounce webhooks track them. Statistics are counted live from those messages, plus unsubscribes (the unsubscribe token now carries the message id); a snapshot is stored when the broadcast finishes.
+  - Email attachments (stored files, up to 10 MB together). The audience preview (`/segments/preview`, `/broadcasts/{id}/audience`) shows who it reaches and why others are skipped.
+- **BroadcastWorkflow (TW1):** `broadcast:{org}:{id}`, started by `broadcast.scheduled`. It waits for the scheduled time, resolves recipients, then queues batches of `comms.broadcast_batch_size` every `comms.broadcast_batch_pause_seconds` (each message is sent by the Celery send task after commit) and finishes with `broadcast.sent`. Texts and WhatsApp messages wait for quiet hours to end; the quiet-hours check gets the workflow's clock. Signals `pause`, `resume` and `cancel` come from the API through the services, and the workflow also re-reads the database state when a batch finds the broadcast isn't sending. Recorded histories: sent, paused, cancelled, quiet hours and retried.
+- **Inbox (T11):**
+  - `Thread` (branch-scoped; kind `client`, `tutor`, `tutor_family` or `other`), `ThreadParticipant` and `ThreadMessage` (direction inbound, outbound or internal note; channel email, sms, whatsapp, chat or note). Deviation: the spec's `InboundMessage` is a `ThreadMessage` with direction `inbound`; its unique `provider_ref` makes webhook retries harmless.
+  - **Inbound email:** a separate Postmark inbound server on `COMMS_REPLY_DOMAIN` posts to `/webhooks/inbound/email?token=` (the spec's `/inbound/email`; the E17 `enquiries+` address keeps `/webhooks/inbound-email`). `reply+<subdomain>.<thread>.<hmac>@` goes to that thread (a forged address is dropped); `inbox+<subdomain>@` opens or reuses a thread for the sender, matched to a contact or tutor by email. Attachments are stored and virus-scanned like uploads. Postmark doesn't sign inbound webhooks, so the URL token is compared in constant time.
+  - **Inbound texts and WhatsApp:** the existing signed `/webhooks/twilio/inbound` (the spec's `/inbound/sms`) still handles STOP/START and now passes other messages to the inbox. The organisation is found through the platform table `InboundRoute`: its own number (`PhoneNumber`, kind `number`), or the organisation that last messaged that phone from the shared sender within 30 days (kind `reply`, recorded on every shared-sender text).
+  - **Replies:** by the thread's channel or another one: email with the thread's reply address as Reply-To, text from the organisation's number, WhatsApp free text only within 24 hours of their last WhatsApp message, or portal chat. Internal notes stay with staff. Emails outside threads now reply to `inbox+<subdomain>@` when inbound email is set up and no `comms.reply_to` is chosen.
+  - **Team inbox:** assignment (to people with `comms.inbox.reply`), snooze (a snoozed thread counts as open again once its time passes, worked out when it is read, so there is no sweeper), close and reopen, a new message reopens, box counts, canned replies, unread counts, and an SLA timer: `awaiting_reply_since` plus `comms.inbox_sla_hours`, shown as due or overdue.
+  - **Safeguarding (FR-13-7):** every message is kept and staff see all of them. Messages with email addresses, phone numbers or bad language (a small built-in word list) are flagged on the message and the thread. `comms.block_contact_sharing` refuses contact details in tutor-family messages.
+  - **Notifications:** `message.received` alerts the assignee (else whoever can assign) through `inbox_new_message`. Portal chat replies notify the family (`conversation_message_family`) or the tutor (`conversation_message_tutor`). Dedupe keys allow one per thread and person per hour, a light digest; daily digest emails are not built. The admin inbox polls every 30 seconds (realtime is the E13 MVP follow-up).
+  - **Tutors:** `comms.inbox.view:own` and `comms.inbox.reply:own` in the Tutor role: they see threads they take part in. Admin page: Inbox (`/inbox`).
+- **Channels (T12):**
+  - **WhatsApp:** Twilio WhatsApp Business (`TWILIO_WHATSAPP_FROM`, a fake without it). WhatsApp Cloud API (Meta direct) is not built. Every text-capable notification can also go by WhatsApp (off by default). It needs an approved `WhatsAppTemplate` mapped to the type (Twilio content SID, `{{1}}` placeholders filled by sandboxed Jinja expressions) and the recipient's opt-in: a preference that names WhatsApp, never the default. Template approval is recorded by staff (no Content API sync). STOP to the WhatsApp sender suppresses WhatsApp. WhatsApp isn't metered against SMS credits.
+  - **Custom sending domains:** plan feature `custom_domain` (the E24 one). Postmark's Domains API (a fake without `POSTMARK_ACCOUNT_TOKEN`) returns the DKIM and return-path records; we add SPF and DMARC as recommendations. "Check DNS" verifies, and the verified default domain becomes every email's From address. There is no automatic re-check workflow.
+  - **Numbers:** `PhoneNumber` per channel with a default; a number belongs to one organisation only.
+  - **Mailchimp and Brevo (FR-13-9):** credential providers on the E22 framework (`marketing` capability, fakes in tests). Mailchimp's host comes from the key's data centre, so it is validated and opened through `core.net.safe_urlopen`. Contacts with marketing email consent who haven't unsubscribed from marketing are upserted into the chosen audience, with their family's tags and status (Brevo: a `TAGS` attribute). Everyone else is unsubscribed there. A consent change or contact edit queues a one-contact Celery sync; "Sync now" pages through everyone. Unsubscribes made in Mailchimp or Brevo don't come back yet (no inbound webhook).
+  - Admin pages: Settings → Messaging (domains, numbers, WhatsApp templates, canned replies, Mailchimp and Brevo) and Broadcasts (`/broadcasts`).
+- **Seams for E31:** `selectors.thread_transcript` and `selectors.thread_digest` return plain data for suggested replies, intent and summaries; `broadcasts.render_for` and `broadcasts.preview` render copy for a recipient.
+- **Events:** `broadcast.scheduled/sent/cancelled`, `message.received`, `thread.assigned/closed` and `sender_domain.verified`. They aren't offered as webhook event types yet (not in `developer.catalogue.PUBLIC_AGGREGATES`). `message.queued/sent/delivered...` remain message-log entries.
+- **Shared-file edits:** `identity/roles.py` (tutor inbox grants), `config/settings/base.py` (`COMMS`, `TWILIO["WHATSAPP_FROM"]`, enum names), `config/urls.py` (inbound email webhook) and `scheduling/services.py` (makeup credits in self-booking, E15-T09).

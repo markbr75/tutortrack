@@ -2253,6 +2253,207 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/broadcasts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Bulk email, text and WhatsApp messages to a segment (FR-13-6). Drafts are edited
+     *     freely; ``schedule`` hands them to ``BroadcastWorkflow`` (now or later), which sends
+     *     throttled batches; ``pause``, ``resume`` and ``cancel`` signal it. Statistics come
+     *     from delivery tracking (opens and clicks for email).
+     */
+    get: operations["broadcasts_list"];
+    put?: never;
+    /**
+     * @description Bulk email, text and WhatsApp messages to a segment (FR-13-6). Drafts are edited
+     *     freely; ``schedule`` hands them to ``BroadcastWorkflow`` (now or later), which sends
+     *     throttled batches; ``pause``, ``resume`` and ``cancel`` signal it. Statistics come
+     *     from delivery tracking (opens and clicks for email).
+     */
+    post: operations["broadcasts_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/broadcasts/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Bulk email, text and WhatsApp messages to a segment (FR-13-6). Drafts are edited
+     *     freely; ``schedule`` hands them to ``BroadcastWorkflow`` (now or later), which sends
+     *     throttled batches; ``pause``, ``resume`` and ``cancel`` signal it. Statistics come
+     *     from delivery tracking (opens and clicks for email).
+     */
+    get: operations["broadcasts_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Bulk email, text and WhatsApp messages to a segment (FR-13-6). Drafts are edited
+     *     freely; ``schedule`` hands them to ``BroadcastWorkflow`` (now or later), which sends
+     *     throttled batches; ``pause``, ``resume`` and ``cancel`` signal it. Statistics come
+     *     from delivery tracking (opens and clicks for email).
+     */
+    delete: operations["broadcasts_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Bulk email, text and WhatsApp messages to a segment (FR-13-6). Drafts are edited
+     *     freely; ``schedule`` hands them to ``BroadcastWorkflow`` (now or later), which sends
+     *     throttled batches; ``pause``, ``resume`` and ``cancel`` signal it. Statistics come
+     *     from delivery tracking (opens and clicks for email).
+     */
+    patch: operations["broadcasts_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/broadcasts/{id}/audience": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Who it would reach if sent now. */
+    post: operations["broadcasts_audience_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/broadcasts/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Bulk email, text and WhatsApp messages to a segment (FR-13-6). Drafts are edited
+     *     freely; ``schedule`` hands them to ``BroadcastWorkflow`` (now or later), which sends
+     *     throttled batches; ``pause``, ``resume`` and ``cancel`` signal it. Statistics come
+     *     from delivery tracking (opens and clicks for email).
+     */
+    post: operations["broadcasts_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/broadcasts/{id}/pause": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Bulk email, text and WhatsApp messages to a segment (FR-13-6). Drafts are edited
+     *     freely; ``schedule`` hands them to ``BroadcastWorkflow`` (now or later), which sends
+     *     throttled batches; ``pause``, ``resume`` and ``cancel`` signal it. Statistics come
+     *     from delivery tracking (opens and clicks for email).
+     */
+    post: operations["broadcasts_pause_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/broadcasts/{id}/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description The message as a sample recipient would see it. */
+    post: operations["broadcasts_preview_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/broadcasts/{id}/recipients": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Who it went to (or why not), page by page. */
+    get: operations["broadcasts_recipients_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/broadcasts/{id}/resume": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Bulk email, text and WhatsApp messages to a segment (FR-13-6). Drafts are edited
+     *     freely; ``schedule`` hands them to ``BroadcastWorkflow`` (now or later), which sends
+     *     throttled batches; ``pause``, ``resume`` and ``cancel`` signal it. Statistics come
+     *     from delivery tracking (opens and clicks for email).
+     */
+    post: operations["broadcasts_resume_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/broadcasts/{id}/schedule": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Bulk email, text and WhatsApp messages to a segment (FR-13-6). Drafts are edited
+     *     freely; ``schedule`` hands them to ``BroadcastWorkflow`` (now or later), which sends
+     *     throttled batches; ``pause``, ``resume`` and ``cancel`` signal it. Statistics come
+     *     from delivery tracking (opens and clicks for email).
+     */
+    post: operations["broadcasts_schedule_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/bulk-jobs": {
     parameters: {
       query?: never;
@@ -2475,6 +2676,43 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/api/v1/canned-replies": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Saved replies for the inbox (insert and edit before sending). */
+    get: operations["canned_replies_list"];
+    put?: never;
+    /** @description Saved replies for the inbox (insert and edit before sending). */
+    post: operations["canned_replies_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/canned-replies/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Saved replies for the inbox (insert and edit before sending). */
+    get: operations["canned_replies_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description Saved replies for the inbox (insert and edit before sending). */
+    delete: operations["canned_replies_destroy"];
+    options?: never;
+    head?: never;
+    /** @description Saved replies for the inbox (insert and edit before sending). */
+    patch: operations["canned_replies_partial_update"];
     trace?: never;
   };
   "/api/v1/catalogue/categories": {
@@ -8221,6 +8459,61 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/marketing-sync": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Mailchimp and Brevo (FR-13-9): connect with an API key through
+     *     ``/integrations/connections`` (level ``organisation``), choose the audience, and
+     *     contacts with marketing consent stay in sync.
+     */
+    get: operations["marketing_sync_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/marketing-sync/{provider}/audiences": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The account's audiences (Mailchimp) or lists (Brevo). */
+    get: operations["marketing_sync_audiences_list"];
+    put: operations["marketing_sync_audiences_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/marketing-sync/{provider}/sync": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Send everyone now: consented contacts in, the rest unsubscribed. */
+    post: operations["marketing_sync_sync_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/matching/analytics": {
     parameters: {
       query?: never;
@@ -10436,6 +10729,58 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/phone-numbers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The organisation's own texting/WhatsApp numbers: messages go from them and replies
+     *     come back to the inbox. Point the number's incoming-message webhook at
+     *     ``/webhooks/twilio/inbound``.
+     */
+    get: operations["phone_numbers_list"];
+    put?: never;
+    /**
+     * @description The organisation's own texting/WhatsApp numbers: messages go from them and replies
+     *     come back to the inbox. Point the number's incoming-message webhook at
+     *     ``/webhooks/twilio/inbound``.
+     */
+    post: operations["phone_numbers_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/phone-numbers/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The organisation's own texting/WhatsApp numbers: messages go from them and replies
+     *     come back to the inbox. Point the number's incoming-message webhook at
+     *     ``/webhooks/twilio/inbound``.
+     */
+    get: operations["phone_numbers_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description The organisation's own texting/WhatsApp numbers: messages go from them and replies
+     *     come back to the inbox. Point the number's incoming-message webhook at
+     *     ``/webhooks/twilio/inbound``.
+     */
+    delete: operations["phone_numbers_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/pipelines": {
     parameters: {
       query?: never;
@@ -11007,7 +11352,10 @@ export interface paths {
     };
     get: operations["portal_booking_holds_list"];
     put?: never;
-    /** @description Hold a slot for one of the household's students. */
+    /**
+     * @description Hold a slot for one of the household's students; with ``makeup_credit`` the
+     *     lesson is a free makeup that uses that credit (E15-T09).
+     */
     post: operations["portal_booking_holds_create"];
     delete?: never;
     options?: never;
@@ -11239,6 +11587,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/portal/makeup-credits": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Unused makeup credits the family can book a lesson with (E09, FR-15-5). */
+    get: operations["portal_makeup_credits_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/portal/me": {
     parameters: {
       query?: never;
@@ -11247,6 +11612,23 @@ export interface paths {
       cookie?: never;
     };
     get: operations["portal_me_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/messaging/tutors": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Tutors you can message (empty unless messaging tutors is allowed). */
+    get: operations["portal_messaging_tutors_list"];
     put?: never;
     post?: never;
     delete?: never;
@@ -11484,6 +11866,58 @@ export interface paths {
     get: operations["portal_statement_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/threads": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_threads_list"];
+    put?: never;
+    /**
+     * @description Start a conversation with the business, or with one of your tutors (if your
+     *     tutoring company allows it).
+     */
+    post: operations["portal_threads_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/threads/{thread_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_threads_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/threads/{thread_id}/messages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["portal_threads_messages_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -13167,6 +13601,169 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/segments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Saved broadcast audiences (FR-13-6): client contacts or tutors, narrowed by
+     *     status, branch, tags, a saved list view, a class, a job or a pipeline stage.
+     */
+    get: operations["segments_list"];
+    put?: never;
+    /**
+     * @description Saved broadcast audiences (FR-13-6): client contacts or tutors, narrowed by
+     *     status, branch, tags, a saved list view, a class, a job or a pipeline stage.
+     */
+    post: operations["segments_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/segments/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Saved broadcast audiences (FR-13-6): client contacts or tutors, narrowed by
+     *     status, branch, tags, a saved list view, a class, a job or a pipeline stage.
+     */
+    get: operations["segments_retrieve"];
+    /**
+     * @description Saved broadcast audiences (FR-13-6): client contacts or tutors, narrowed by
+     *     status, branch, tags, a saved list view, a class, a job or a pipeline stage.
+     */
+    put: operations["segments_update"];
+    post?: never;
+    /**
+     * @description Saved broadcast audiences (FR-13-6): client contacts or tutors, narrowed by
+     *     status, branch, tags, a saved list view, a class, a job or a pipeline stage.
+     */
+    delete: operations["segments_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/segments/options": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Choices for the segment builder. */
+    get: operations["segments_options_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/segments/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description How many people a segment reaches now, why others would be skipped (no
+     *     consent, unsubscribed, no address...) and a sample.
+     */
+    post: operations["segments_preview_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sender-domains": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Custom sending domains (FR-13-1, plan feature ``custom_domain``): add a domain,
+     *     publish the DNS records shown, then ``check``. Once verified, the default domain is
+     *     used as the From address of every email.
+     */
+    get: operations["sender_domains_list"];
+    put?: never;
+    /**
+     * @description Custom sending domains (FR-13-1, plan feature ``custom_domain``): add a domain,
+     *     publish the DNS records shown, then ``check``. Once verified, the default domain is
+     *     used as the From address of every email.
+     */
+    post: operations["sender_domains_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sender-domains/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Custom sending domains (FR-13-1, plan feature ``custom_domain``): add a domain,
+     *     publish the DNS records shown, then ``check``. Once verified, the default domain is
+     *     used as the From address of every email.
+     */
+    get: operations["sender_domains_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Custom sending domains (FR-13-1, plan feature ``custom_domain``): add a domain,
+     *     publish the DNS records shown, then ``check``. Once verified, the default domain is
+     *     used as the From address of every email.
+     */
+    delete: operations["sender_domains_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Custom sending domains (FR-13-1, plan feature ``custom_domain``): add a domain,
+     *     publish the DNS records shown, then ``check``. Once verified, the default domain is
+     *     used as the From address of every email.
+     */
+    patch: operations["sender_domains_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/sender-domains/{id}/check": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Ask the email provider to check the DNS records now. */
+    post: operations["sender_domains_check_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/settings/{area}": {
     parameters: {
       query?: never;
@@ -14147,6 +14744,209 @@ export interface paths {
     patch: operations["testimonials_partial_update"];
     trace?: never;
   };
+  "/api/v1/threads": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The shared team inbox (FR-13-7): conversations by email, text, WhatsApp and
+     *     portal chat. ``?box=open|mine|unassigned|snoozed|closed|flagged``. Tutors
+     *     (``comms.inbox.*:own``) see only the conversations they take part in.
+     */
+    get: operations["threads_list"];
+    put?: never;
+    /**
+     * @description The shared team inbox (FR-13-7): conversations by email, text, WhatsApp and
+     *     portal chat. ``?box=open|mine|unassigned|snoozed|closed|flagged``. Tutors
+     *     (``comms.inbox.*:own``) see only the conversations they take part in.
+     */
+    post: operations["threads_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/threads/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The shared team inbox (FR-13-7): conversations by email, text, WhatsApp and
+     *     portal chat. ``?box=open|mine|unassigned|snoozed|closed|flagged``. Tutors
+     *     (``comms.inbox.*:own``) see only the conversations they take part in.
+     */
+    get: operations["threads_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/threads/{id}/assign": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description The shared team inbox (FR-13-7): conversations by email, text, WhatsApp and
+     *     portal chat. ``?box=open|mine|unassigned|snoozed|closed|flagged``. Tutors
+     *     (``comms.inbox.*:own``) see only the conversations they take part in.
+     */
+    post: operations["threads_assign_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/threads/{id}/close": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description The shared team inbox (FR-13-7): conversations by email, text, WhatsApp and
+     *     portal chat. ``?box=open|mine|unassigned|snoozed|closed|flagged``. Tutors
+     *     (``comms.inbox.*:own``) see only the conversations they take part in.
+     */
+    post: operations["threads_close_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/threads/{id}/messages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The conversation (with internal notes), oldest first; marks it read. */
+    get: operations["threads_messages_list"];
+    put?: never;
+    /**
+     * @description Reply by the conversation's channel (or another: email, text, WhatsApp within
+     *     24 hours of their last WhatsApp message, or portal chat).
+     */
+    post: operations["threads_messages_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/threads/{id}/notes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description An internal note: staff only, never sent. */
+    post: operations["threads_notes_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/threads/{id}/reopen": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description The shared team inbox (FR-13-7): conversations by email, text, WhatsApp and
+     *     portal chat. ``?box=open|mine|unassigned|snoozed|closed|flagged``. Tutors
+     *     (``comms.inbox.*:own``) see only the conversations they take part in.
+     */
+    post: operations["threads_reopen_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/threads/{id}/snooze": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Hide it until a time; it reopens by itself then (or when they write). */
+    post: operations["threads_snooze_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/threads/assignees": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Staff who can reply to conversations (for assignment). */
+    get: operations["threads_assignees_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/threads/counts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description The shared team inbox (FR-13-7): conversations by email, text, WhatsApp and
+     *     portal chat. ``?box=open|mine|unassigned|snoozed|closed|flagged``. Tutors
+     *     (``comms.inbox.*:own``) see only the conversations they take part in.
+     */
+    get: operations["threads_counts_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/time-off": {
     parameters: {
       query?: never;
@@ -14326,6 +15126,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/tutor/messaging/families": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Families you can message (empty unless tutor-family messaging is allowed). */
+    get: operations["tutor_messaging_families_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/tutor/offline": {
     parameters: {
       query?: never;
@@ -14356,6 +15173,55 @@ export interface paths {
     get: operations["tutor_students_list"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor/threads": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["tutor_threads_list"];
+    put?: never;
+    /** @description Message the office, or a family you teach (if allowed). */
+    post: operations["tutor_threads_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor/threads/{thread_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["tutor_threads_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor/threads/{thread_id}/messages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["tutor_threads_messages_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -14906,6 +15772,63 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/api/v1/whatsapp-templates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description WhatsApp message templates approved by Meta (through Twilio Content): map one to a
+     *     notification (``type_key``) or use it in WhatsApp broadcasts. ``variables`` fill
+     *     ``{{1}}``, ``{{2}}``... and may use the same variables as the notification.
+     */
+    get: operations["whatsapp_templates_list"];
+    put?: never;
+    /**
+     * @description WhatsApp message templates approved by Meta (through Twilio Content): map one to a
+     *     notification (``type_key``) or use it in WhatsApp broadcasts. ``variables`` fill
+     *     ``{{1}}``, ``{{2}}``... and may use the same variables as the notification.
+     */
+    post: operations["whatsapp_templates_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/whatsapp-templates/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description WhatsApp message templates approved by Meta (through Twilio Content): map one to a
+     *     notification (``type_key``) or use it in WhatsApp broadcasts. ``variables`` fill
+     *     ``{{1}}``, ``{{2}}``... and may use the same variables as the notification.
+     */
+    get: operations["whatsapp_templates_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description WhatsApp message templates approved by Meta (through Twilio Content): map one to a
+     *     notification (``type_key``) or use it in WhatsApp broadcasts. ``variables`` fill
+     *     ``{{1}}``, ``{{2}}``... and may use the same variables as the notification.
+     */
+    delete: operations["whatsapp_templates_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description WhatsApp message templates approved by Meta (through Twilio Content): map one to a
+     *     notification (``type_key``) or use it in WhatsApp broadcasts. ``variables`` fill
+     *     ``{{1}}``, ``{{2}}``... and may use the same variables as the notification.
+     */
+    patch: operations["whatsapp_templates_partial_update"];
     trace?: never;
   };
   "/api/v1/widgets": {
@@ -15487,7 +16410,7 @@ export interface components {
       readonly id: string;
       title: string;
       body: string;
-      audience?: components["schemas"]["AudienceEnum"];
+      audience?: components["schemas"]["AnnouncementAudienceEnum"];
       /** Format: uuid */
       branch?: string | null;
       /** Format: date-time */
@@ -15495,10 +16418,17 @@ export interface components {
       /** Format: date-time */
       expires_at?: string | null;
     };
+    /**
+     * @description * `clients` - Families
+     *     * `tutors` - Tutors
+     *     * `everyone` - Everyone
+     * @enum {string}
+     */
+    AnnouncementAudienceEnum: "clients" | "tutors" | "everyone";
     AnnouncementRequest: {
       title: string;
       body: string;
-      audience?: components["schemas"]["AudienceEnum"];
+      audience?: components["schemas"]["AnnouncementAudienceEnum"];
       /** Format: uuid */
       branch?: string | null;
       /** Format: date-time */
@@ -15811,6 +16741,15 @@ export interface components {
       /** Format: uuid */
       tutor: string;
     };
+    AssignRequest: {
+      /** Format: uuid */
+      assignee: string | null;
+    };
+    Assignee: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
     AssignmentRule: {
       /** Format: uuid */
       readonly id: string;
@@ -15832,6 +16771,13 @@ export interface components {
       owners: string[];
       order?: number;
       active?: boolean;
+    };
+    Attachment: {
+      /** Format: uuid */
+      id: string;
+      filename: string;
+      content_type: string;
+      size_bytes: number;
     };
     /**
      * @description * `present` - Present
@@ -15867,13 +16813,27 @@ export interface components {
         [key: string]: number;
       };
     };
-    /**
-     * @description * `clients` - Families
-     *     * `tutors` - Tutors
-     *     * `everyone` - Everyone
-     * @enum {string}
-     */
-    AudienceEnum: "clients" | "tutors" | "everyone";
+    AudiencePreview: {
+      total: number;
+      sendable: number;
+      skipped: {
+        [key: string]: number;
+      };
+      sample: components["schemas"]["AudienceSample"][];
+    };
+    AudiencePreviewRequestRequest: {
+      audience: components["schemas"]["SegmentAudienceEnum"];
+      definition?: components["schemas"]["SegmentDefinitionRequest"];
+      /** @default email */
+      channel: components["schemas"]["BroadcastChannelEnum"];
+      /** @default operational */
+      purpose: components["schemas"]["BroadcastPurposeEnum"];
+    };
+    AudienceSample: {
+      name: string;
+      address: string;
+      kind: string;
+    };
     Audit: {
       /** Format: uuid */
       id: string;
@@ -16532,6 +17492,13 @@ export interface components {
       booking: components["schemas"]["BookingHold"];
       pay_url: string;
     };
+    BoxCounts: {
+      open: number;
+      mine: number;
+      unassigned: number;
+      snoozed: number;
+      flagged: number;
+    };
     Branch: {
       /** Format: uuid */
       readonly id: string;
@@ -16638,6 +17605,118 @@ export interface components {
       key: string;
       total: number;
       won: number;
+    };
+    Broadcast: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly name: string;
+      readonly channel: components["schemas"]["MessageChannelEnum"];
+      readonly purpose: components["schemas"]["BroadcastPurposeEnum"];
+      readonly subject: string;
+      readonly body: string;
+      /** Format: uuid */
+      readonly whatsapp_template: string | null;
+      /** Format: uuid */
+      readonly segment: string | null;
+      /** @default  */
+      readonly segment_name: string;
+      readonly audience: components["schemas"]["SegmentAudienceEnum"];
+      readonly definition: components["schemas"]["SegmentDefinition"];
+      readonly attachment_ids: string[];
+      readonly status: components["schemas"]["BroadcastStatusEnum"];
+      /** Format: date-time */
+      readonly scheduled_for: string | null;
+      /** Format: date-time */
+      readonly started_at: string | null;
+      /** Format: date-time */
+      readonly finished_at: string | null;
+      /** Format: date-time */
+      readonly cancelled_at: string | null;
+      readonly stats: components["schemas"]["BroadcastStats"];
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    /**
+     * @description * `email` - Email
+     *     * `sms` - Text message
+     *     * `whatsapp` - WhatsApp
+     * @enum {string}
+     */
+    BroadcastChannelEnum: "email" | "sms" | "whatsapp";
+    /**
+     * @description * `marketing` - Marketing (needs consent)
+     *     * `operational` - Service announcement
+     * @enum {string}
+     */
+    BroadcastPurposeEnum: "marketing" | "operational";
+    BroadcastRecipient: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly recipient_type: string;
+      readonly recipient_id: string;
+      readonly name: string;
+      readonly address: string;
+      readonly status: components["schemas"]["BroadcastRecipientStatusEnum"];
+      readonly skip_reason: string;
+      /** Format: uuid */
+      readonly message: string | null;
+      /** @default  */
+      readonly message_status: string;
+      readonly batch: number;
+    };
+    /**
+     * @description * `pending` - Waiting
+     *     * `queued` - Sent to the channel
+     *     * `skipped` - Skipped
+     *     * `failed` - Failed
+     * @enum {string}
+     */
+    BroadcastRecipientStatusEnum: "pending" | "queued" | "skipped" | "failed";
+    BroadcastStats: {
+      recipients: number;
+      pending: number;
+      queued: number;
+      skipped: number;
+      sent: number;
+      delivered: number;
+      opened: number;
+      clicked: number;
+      bounced: number;
+      failed: number;
+      unsubscribed: number;
+    };
+    /**
+     * @description * `draft` - Draft
+     *     * `scheduled` - Scheduled
+     *     * `sending` - Sending
+     *     * `paused` - Paused
+     *     * `sent` - Sent
+     *     * `cancelled` - Cancelled
+     *     * `failed` - Failed
+     * @enum {string}
+     */
+    BroadcastStatusEnum:
+      "draft" | "scheduled" | "sending" | "paused" | "sent" | "cancelled" | "failed";
+    BroadcastWriteRequest: {
+      name: string;
+      /** @default email */
+      channel: components["schemas"]["BroadcastChannelEnum"];
+      /** @default operational */
+      purpose: components["schemas"]["BroadcastPurposeEnum"];
+      /** @default  */
+      subject: string;
+      /** @default  */
+      body: string;
+      /** Format: uuid */
+      whatsapp_template?: string | null;
+      /** Format: uuid */
+      segment?: string | null;
+      /** @default contacts */
+      audience: components["schemas"]["SegmentAudienceEnum"];
+      definition?: components["schemas"]["SegmentDefinitionRequest"];
+      attachment_ids?: string[];
     };
     BulkInviteRequest: {
       emails: string[];
@@ -16943,6 +18022,22 @@ export interface components {
      * @enum {string}
      */
     CancelledByEnum: "client" | "student" | "tutor" | "admin";
+    CannedReply: {
+      /** Format: uuid */
+      readonly id: string;
+      title: string;
+      body: string;
+      shortcut?: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    CannedReplyRequest: {
+      title: string;
+      body: string;
+      shortcut?: string;
+    };
     Card: {
       brand: string;
       last4: string;
@@ -16964,11 +18059,18 @@ export interface components {
     ChangePreview: {
       plan: string;
       interval: string;
-      direction: components["schemas"]["DirectionEnum"];
+      direction: components["schemas"]["ChangePreviewDirectionEnum"];
       effective: components["schemas"]["EffectiveEnum"];
       blockers: string[];
       amount_due_now: components["schemas"]["MoneyOut"] | null;
     };
+    /**
+     * @description * `upgrade` - upgrade
+     *     * `downgrade` - downgrade
+     *     * `same` - same
+     * @enum {string}
+     */
+    ChangePreviewDirectionEnum: "upgrade" | "downgrade" | "same";
     ChangelogEntry: {
       /** Format: date */
       released_on: string;
@@ -17132,6 +18234,9 @@ export interface components {
       employment_type?: string;
       items?: unknown;
       is_default?: boolean;
+    };
+    ChooseAudienceRequest: {
+      audience_id: string;
     };
     ClassCancelRequest: {
       /** @default  */
@@ -17728,6 +18833,11 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    ContactOption: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
     ContactRequest: {
       first_name: string;
       last_name?: string;
@@ -17747,6 +18857,17 @@ export interface components {
       is_emergency_contact?: boolean;
       language?: string;
       custom_fields?: unknown;
+    };
+    /**
+     * @description * `all` - all
+     *     * `primary` - primary
+     * @enum {string}
+     */
+    ContactsEnum: "all" | "primary";
+    ContentPreview: {
+      subject: string;
+      body: string;
+      segments: number;
     };
     Contrast: {
       /** Format: double */
@@ -18359,13 +19480,6 @@ export interface components {
       has_demo_data: boolean;
       records: number;
     };
-    /**
-     * @description * `upgrade` - upgrade
-     *     * `downgrade` - downgrade
-     *     * `same` - same
-     * @enum {string}
-     */
-    DirectionEnum: "upgrade" | "downgrade" | "same";
     DiscountLine: {
       name: string;
       amount: components["schemas"]["MoneyOut"];
@@ -21481,6 +22595,29 @@ export interface components {
     MarkReadRequest: {
       ids?: string[] | null;
     };
+    MarketingAudience: {
+      id: string;
+      name: string;
+      members: number;
+    };
+    MarketingConnection: {
+      provider: string;
+      name: string;
+      /** Format: uuid */
+      connection: string | null;
+      account_name: string;
+      status: string;
+      audience_id: string;
+      audience_name: string;
+      /** Format: date-time */
+      last_sync_at: string | null;
+      error: string;
+    };
+    MarketingSyncResult: {
+      upserted: number;
+      unsubscribed: number;
+      failed: number;
+    };
     MarketplaceEntry: {
       key: string;
       name: string;
@@ -21739,9 +22876,10 @@ export interface components {
      *     * `sms` - Text message
      *     * `in_app` - In the app
      *     * `push` - Push notification
+     *     * `whatsapp` - WhatsApp
      * @enum {string}
      */
-    MessageChannelEnum: "email" | "sms" | "in_app" | "push";
+    MessageChannelEnum: "email" | "sms" | "in_app" | "push" | "whatsapp";
     MessageEvent: {
       readonly type: string;
       /** Format: date-time */
@@ -21957,9 +23095,12 @@ export interface components {
      *     * `billing` - billing
      *     * `account` - account
      *     * `staff` - staff
+     *     * `messages` - messages
+     *     * `marketing` - marketing
      * @enum {string}
      */
-    NotificationCategoryEnum: "scheduling" | "reports" | "billing" | "account" | "staff";
+    NotificationCategoryEnum:
+      "scheduling" | "reports" | "billing" | "account" | "staff" | "messages" | "marketing";
     NotificationSetting: {
       key: string;
       label: string;
@@ -22760,6 +23901,32 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Branch"][];
     };
+    PaginatedBroadcastList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Broadcast"][];
+    };
+    PaginatedBroadcastRecipientList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["BroadcastRecipient"][];
+    };
     PaginatedBulkJobList: {
       /**
        * Format: uri
@@ -22785,6 +23952,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["CalendarEvent"][];
+    };
+    PaginatedCannedReplyList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["CannedReply"][];
     };
     PaginatedChargeList: {
       /**
@@ -23514,6 +24694,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Payout"][];
     };
+    PaginatedPhoneNumberList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PhoneNumber"][];
+    };
     PaginatedPremiumRuleList: {
       /**
        * Format: uri
@@ -23774,6 +24967,32 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["ScheduledReport"][];
     };
+    PaginatedSegmentList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Segment"][];
+    };
+    PaginatedSenderDomainList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["SenderDomain"][];
+    };
     PaginatedServiceList: {
       /**
        * Format: uri
@@ -23878,6 +25097,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["Testimonial"][];
     };
+    PaginatedThreadList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Thread"][];
+    };
     PaginatedTierAssignmentList: {
       /**
        * Format: uri
@@ -23981,6 +25213,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["WebhookEndpoint"][];
+    };
+    PaginatedWhatsAppTemplateList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["WhatsAppTemplate"][];
     };
     PaginatedWidgetList: {
       /**
@@ -24165,6 +25410,25 @@ export interface components {
       };
       hide_powered_by?: boolean;
     };
+    PatchedBroadcastWriteRequest: {
+      name?: string;
+      /** @default email */
+      channel: components["schemas"]["BroadcastChannelEnum"];
+      /** @default operational */
+      purpose: components["schemas"]["BroadcastPurposeEnum"];
+      /** @default  */
+      subject: string;
+      /** @default  */
+      body: string;
+      /** Format: uuid */
+      whatsapp_template?: string | null;
+      /** Format: uuid */
+      segment?: string | null;
+      /** @default contacts */
+      audience: components["schemas"]["SegmentAudienceEnum"];
+      definition?: components["schemas"]["SegmentDefinitionRequest"];
+      attachment_ids?: string[];
+    };
     PatchedCalendarEventRequest: {
       type?: components["schemas"]["CalendarEventTypeEnum"];
       title?: string;
@@ -24188,6 +25452,11 @@ export interface components {
       write_calendar_id?: string;
       two_way?: boolean;
       title_format?: string;
+    };
+    PatchedCannedReplyRequest: {
+      title?: string;
+      body?: string;
+      shortcut?: string;
     };
     PatchedCategoryRequest: {
       name?: string;
@@ -24937,6 +26206,10 @@ export interface components {
       recipients?: string[];
       enabled?: boolean;
     };
+    PatchedSenderDomainUpdateRequest: {
+      local_part?: string;
+      is_default?: boolean;
+    };
     PatchedSeriesUpdateRequest: {
       scope?: components["schemas"]["SeriesUpdateScopeEnum"];
       /** Format: uuid */
@@ -25199,6 +26472,16 @@ export interface components {
       /** Format: uuid */
       branch?: string | null;
       status?: components["schemas"]["WebhookEndpointToggleEnum"];
+    };
+    PatchedWhatsAppTemplateRequest: {
+      name?: string;
+      language?: string;
+      category?: components["schemas"]["WhatsAppTemplateCategoryEnum"];
+      content_sid?: string;
+      body?: string;
+      variables?: string[];
+      type_key?: string;
+      status?: components["schemas"]["WhatsAppTemplateStatusEnum"];
     };
     PatchedWidgetUpdateRequest: {
       kind?: string;
@@ -25776,6 +27059,35 @@ export interface components {
      * @enum {string}
      */
     PersonTypeEnum: "contact" | "tutor" | "user";
+    PhoneNumber: {
+      /** Format: uuid */
+      readonly id: string;
+      /** @default sms */
+      channel: components["schemas"]["PhoneNumberChannelEnum"];
+      number: string;
+      label?: string;
+      /** Format: uuid */
+      branch?: string | null;
+      is_default?: boolean;
+      readonly active: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `sms` - Text message
+     *     * `whatsapp` - WhatsApp
+     * @enum {string}
+     */
+    PhoneNumberChannelEnum: "sms" | "whatsapp";
+    PhoneNumberRequest: {
+      /** @default sms */
+      channel: components["schemas"]["PhoneNumberChannelEnum"];
+      number: string;
+      label?: string;
+      /** Format: uuid */
+      branch?: string | null;
+      is_default?: boolean;
+    };
     Pipeline: {
       /** Format: uuid */
       readonly id: string;
@@ -25971,6 +27283,21 @@ export interface components {
       packages: components["schemas"]["PortalPackage"][];
       package_offers: components["schemas"]["PortalPackageOffer"][];
     };
+    PortalBookingHoldInputRequest: {
+      /** Format: uuid */
+      service: string;
+      /** Format: uuid */
+      tutor?: string | null;
+      /** Format: date-time */
+      start: string;
+      /** Format: uuid */
+      student?: string | null;
+      contact?: components["schemas"]["BookingContactRequest"];
+      /** @default  */
+      promo_code: string;
+      /** Format: uuid */
+      makeup_credit?: string | null;
+    };
     PortalBought: {
       package: string;
       pay_token: string;
@@ -26068,6 +27395,9 @@ export interface components {
       reschedule: boolean;
       classes: boolean;
       referrals: boolean;
+      messages: boolean;
+      message_tutors: boolean;
+      makeups: boolean;
     };
     PortalInvoice: {
       id: string;
@@ -26102,6 +27432,18 @@ export interface components {
       tutors: components["schemas"]["PortalTutor"][];
       students: components["schemas"]["PortalAttendee"][];
     };
+    PortalMakeupCredit: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      student: string;
+      student_name: string;
+      source_lesson: string;
+      /** Format: date-time */
+      source_start: string;
+      /** Format: date-time */
+      expires_at: string;
+    };
     PortalMe: {
       role: components["schemas"]["PortalMeRoleEnum"];
       organisation: components["schemas"]["PortalOrg"];
@@ -26118,6 +27460,18 @@ export interface components {
      * @enum {string}
      */
     PortalMeRoleEnum: "client" | "student";
+    PortalMessage: {
+      /** Format: uuid */
+      id: string;
+      author_name: string;
+      from_business: boolean;
+      mine: boolean;
+      channel: string;
+      body: string;
+      attachments: components["schemas"]["Attachment"][];
+      /** Format: date-time */
+      created_at: string;
+    };
     PortalMethod: {
       id: string;
       type: string;
@@ -26175,6 +27529,10 @@ export interface components {
       quantity: string;
       price: components["schemas"]["MoneyOut"];
       validity_days: number | null;
+    };
+    PortalPostRequest: {
+      body: string;
+      attachments?: string[];
     };
     PortalProfile: {
       contacts: components["schemas"]["PortalContact"][];
@@ -26241,6 +27599,16 @@ export interface components {
     PortalSetup: {
       url: string;
     };
+    PortalStartRequest: {
+      body: string;
+      attachments?: string[];
+      /** @default  */
+      subject: string;
+      /** Format: uuid */
+      tutor?: string | null;
+      /** Format: uuid */
+      client?: string | null;
+    };
     PortalStatement: {
       /** Format: uuid */
       id: string;
@@ -26271,6 +27639,31 @@ export interface components {
       school?: string;
       year_group?: string;
       learning_needs?: string;
+    };
+    PortalThread: {
+      /** Format: uuid */
+      id: string;
+      subject: string;
+      kind: components["schemas"]["ThreadKindEnum"];
+      with_name: string;
+      /** Format: date-time */
+      last_message_at: string | null;
+      last_message_preview: string;
+      unread: number;
+      closed: boolean;
+    };
+    PortalThreadDetail: {
+      /** Format: uuid */
+      id: string;
+      subject: string;
+      kind: components["schemas"]["ThreadKindEnum"];
+      with_name: string;
+      /** Format: date-time */
+      last_message_at: string | null;
+      last_message_preview: string;
+      unread: number;
+      closed: boolean;
+      messages: components["schemas"]["PortalMessage"][];
     };
     PortalTutor: {
       name: string;
@@ -26319,11 +27712,20 @@ export interface components {
       };
     };
     PreferenceRow: {
-      category: components["schemas"]["NotificationCategoryEnum"];
+      category: components["schemas"]["PreferenceRowCategoryEnum"];
       channels: components["schemas"]["MessageChannelEnum"][];
     };
+    /**
+     * @description * `scheduling` - scheduling
+     *     * `reports` - reports
+     *     * `billing` - billing
+     *     * `account` - account
+     *     * `staff` - staff
+     * @enum {string}
+     */
+    PreferenceRowCategoryEnum: "scheduling" | "reports" | "billing" | "account" | "staff";
     PreferenceRowRequest: {
-      category: components["schemas"]["NotificationCategoryEnum"];
+      category: components["schemas"]["PreferenceRowCategoryEnum"];
       channels: components["schemas"]["MessageChannelEnum"][];
     };
     Preferences: {
@@ -27825,6 +29227,22 @@ export interface components {
     ReplayRequest: {
       ids: string[];
     };
+    /**
+     * @description * `email` - Email
+     *     * `sms` - Text message
+     *     * `whatsapp` - WhatsApp
+     *     * `chat` - Portal message
+     * @enum {string}
+     */
+    ReplyChannelEnum: "email" | "sms" | "whatsapp" | "chat";
+    ReplyRequest: {
+      body: string;
+      channel?:
+        (components["schemas"]["ReplyChannelEnum"] | components["schemas"]["NullEnum"]) | null;
+      /** @default  */
+      subject: string;
+      attachments?: string[];
+    };
     ReportAnswersRequest: {
       answers: {
         [key: string]: unknown;
@@ -28481,6 +29899,10 @@ export interface components {
       reason: string;
       confirm_slug: string;
     };
+    ScheduleRequest: {
+      /** Format: date-time */
+      scheduled_for?: string | null;
+    };
     ScheduleSlot: {
       /** @description Monday is 0. */
       weekday: number;
@@ -28611,6 +30033,79 @@ export interface components {
     Secret: {
       secret: string;
     };
+    Segment: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      description?: string;
+      audience: components["schemas"]["SegmentAudienceEnum"];
+      readonly definition: components["schemas"]["SegmentDefinition"];
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    /**
+     * @description * `contacts` - Client contacts
+     *     * `tutors` - Tutors
+     * @enum {string}
+     */
+    SegmentAudienceEnum: "contacts" | "tutors";
+    SegmentDefinition: {
+      branches?: string[];
+      tags?: string[];
+      /** Format: uuid */
+      saved_view?: string | null;
+      client_statuses?: string[];
+      student_statuses?: string[];
+      tutor_statuses?: string[];
+      /** Format: uuid */
+      group_class?: string | null;
+      /** Format: uuid */
+      job?: string | null;
+      /** Format: uuid */
+      pipeline_stage?: string | null;
+      contacts?: components["schemas"]["ContactsEnum"];
+      subject?: string;
+    };
+    SegmentDefinitionRequest: {
+      branches?: string[];
+      tags?: string[];
+      /** Format: uuid */
+      saved_view?: string | null;
+      client_statuses?: string[];
+      student_statuses?: string[];
+      tutor_statuses?: string[];
+      /** Format: uuid */
+      group_class?: string | null;
+      /** Format: uuid */
+      job?: string | null;
+      /** Format: uuid */
+      pipeline_stage?: string | null;
+      contacts?: components["schemas"]["ContactsEnum"];
+      subject?: string;
+    };
+    SegmentOption: {
+      value: string;
+      name: string;
+    };
+    SegmentOptions: {
+      branches: components["schemas"]["SegmentOption"][];
+      tags: components["schemas"]["SegmentOption"][];
+      saved_views: components["schemas"]["SegmentOption"][];
+      group_classes: components["schemas"]["SegmentOption"][];
+      pipeline_stages: components["schemas"]["SegmentOption"][];
+      client_statuses: components["schemas"]["SegmentOption"][];
+      student_statuses: components["schemas"]["SegmentOption"][];
+      tutor_statuses: components["schemas"]["SegmentOption"][];
+    };
+    SegmentWriteRequest: {
+      name: string;
+      /** @default  */
+      description: string;
+      audience: components["schemas"]["SegmentAudienceEnum"];
+      definition?: components["schemas"]["SegmentDefinitionRequest"];
+    };
     SellPackageRequest: {
       /** Format: uuid */
       client: string;
@@ -28619,6 +30114,49 @@ export interface components {
       /** Format: uuid */
       student?: string | null;
     };
+    SenderDnsRecord: {
+      purpose: string;
+      record_type: string;
+      host: string;
+      value: string;
+      verified: boolean;
+    };
+    SenderDnsRecordRequest: {
+      purpose: string;
+      record_type: string;
+      host: string;
+      value: string;
+      verified: boolean;
+    };
+    SenderDomain: {
+      /** Format: uuid */
+      readonly id: string;
+      domain: string;
+      local_part?: string;
+      readonly from_address: string;
+      readonly status: components["schemas"]["SenderDomainStatusEnum"];
+      readonly dns_records: components["schemas"]["SenderDnsRecord"][];
+      /** Format: date-time */
+      readonly verified_at: string | null;
+      /** Format: date-time */
+      readonly last_checked_at: string | null;
+      readonly error: string;
+      is_default?: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    SenderDomainRequest: {
+      domain: string;
+      local_part?: string;
+      is_default?: boolean;
+    };
+    /**
+     * @description * `pending` - Waiting for DNS
+     *     * `verified` - Verified
+     *     * `failed` - Not verified
+     * @enum {string}
+     */
+    SenderDomainStatusEnum: "pending" | "verified" | "failed";
     Series: {
       /** Format: uuid */
       readonly id: string;
@@ -29114,6 +30652,10 @@ export interface components {
       reason: string | null;
       suggestion: string | null;
     };
+    SnoozeRequest: {
+      /** Format: date-time */
+      until: string;
+    };
     SplitMatchRequest: {
       /** @default  */
       payer_name: string;
@@ -29229,6 +30771,25 @@ export interface components {
         /** @example GBP */
         currency: string;
       } | null;
+    };
+    /**
+     * @description * `client` - Family
+     *     * `tutor` - Tutor
+     *     * `tutor_family` - Tutor and family
+     * @enum {string}
+     */
+    StartThreadKindEnum: "client" | "tutor" | "tutor_family";
+    StartThreadRequest: {
+      kind: components["schemas"]["StartThreadKindEnum"];
+      /** Format: uuid */
+      client?: string | null;
+      /** Format: uuid */
+      tutor?: string | null;
+      /** @default  */
+      subject: string;
+      body: string;
+      /** @default chat */
+      channel: components["schemas"]["ReplyChannelEnum"];
     };
     Started: {
       started: number;
@@ -29928,6 +31489,145 @@ export interface components {
       title: string;
       description: string;
     };
+    Thread: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly subject: string;
+      readonly kind: components["schemas"]["ThreadKindEnum"];
+      /** Format: uuid */
+      readonly client: string | null;
+      /** Format: uuid */
+      readonly tutor: string | null;
+      readonly party: string;
+      readonly contact_name: string;
+      readonly contact_email: string;
+      readonly contact_phone: string;
+      readonly status: components["schemas"]["ThreadStatusEnum"];
+      /** Format: date-time */
+      readonly snoozed_until: string | null;
+      /** Format: uuid */
+      readonly assignee: string | null;
+      readonly assignee_name: string;
+      readonly channel: string;
+      /** Format: date-time */
+      readonly last_message_at: string | null;
+      readonly last_message_preview: string;
+      /** Format: date-time */
+      readonly awaiting_reply_since: string | null;
+      /** Format: date-time */
+      readonly sla_due_at: string;
+      readonly sla_breached: boolean;
+      readonly flagged: boolean;
+      readonly unread: number;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ThreadDetail: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly subject: string;
+      readonly kind: components["schemas"]["ThreadKindEnum"];
+      /** Format: uuid */
+      readonly client: string | null;
+      /** Format: uuid */
+      readonly tutor: string | null;
+      readonly party: string;
+      readonly contact_name: string;
+      readonly contact_email: string;
+      readonly contact_phone: string;
+      readonly status: components["schemas"]["ThreadStatusEnum"];
+      /** Format: date-time */
+      readonly snoozed_until: string | null;
+      /** Format: uuid */
+      readonly assignee: string | null;
+      readonly assignee_name: string;
+      readonly channel: string;
+      /** Format: date-time */
+      readonly last_message_at: string | null;
+      readonly last_message_preview: string;
+      /** Format: date-time */
+      readonly awaiting_reply_since: string | null;
+      /** Format: date-time */
+      readonly sla_due_at: string;
+      readonly sla_breached: boolean;
+      readonly flagged: boolean;
+      readonly unread: number;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly participants: components["schemas"]["ThreadParticipant"][];
+      readonly reply_address: string;
+    };
+    /**
+     * @description * `client` - Family
+     *     * `tutor` - Tutor
+     *     * `tutor_family` - Tutor and family
+     *     * `other` - Other
+     * @enum {string}
+     */
+    ThreadKindEnum: "client" | "tutor" | "tutor_family" | "other";
+    ThreadMessage: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly thread: string;
+      readonly direction: components["schemas"]["ThreadMessageDirectionEnum"];
+      readonly channel: components["schemas"]["ThreadMessageChannelEnum"];
+      readonly author_type: string;
+      readonly author_id: string;
+      readonly author_name: string;
+      readonly subject: string;
+      readonly body: string;
+      readonly attachments: components["schemas"]["Attachment"][];
+      readonly flags: string[];
+      /** @default  */
+      readonly delivery_status: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `email` - Email
+     *     * `sms` - Text message
+     *     * `whatsapp` - WhatsApp
+     *     * `chat` - Portal message
+     *     * `note` - Note
+     * @enum {string}
+     */
+    ThreadMessageChannelEnum: "email" | "sms" | "whatsapp" | "chat" | "note";
+    /**
+     * @description * `inbound` - Received
+     *     * `outbound` - Sent
+     *     * `internal` - Internal note
+     * @enum {string}
+     */
+    ThreadMessageDirectionEnum: "inbound" | "outbound" | "internal";
+    ThreadNoteRequest: {
+      body: string;
+    };
+    ThreadParticipant: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly role: components["schemas"]["ThreadParticipantRoleEnum"];
+      readonly person_type: string;
+      readonly person_id: string;
+      readonly name: string;
+      readonly email: string;
+      readonly phone: string;
+    };
+    /**
+     * @description * `family` - Family
+     *     * `tutor` - Tutor
+     *     * `staff` - Staff
+     *     * `external` - Other
+     * @enum {string}
+     */
+    ThreadParticipantRoleEnum: "family" | "tutor" | "staff" | "external";
+    /**
+     * @description * `open` - Open
+     *     * `snoozed` - Snoozed
+     *     * `closed` - Closed
+     * @enum {string}
+     */
+    ThreadStatusEnum: "open" | "snoozed" | "closed";
     TierAssignment: {
       /** Format: uuid */
       readonly id: string;
@@ -30494,6 +32194,14 @@ export interface components {
       /** @default true */
       invite: boolean;
     };
+    TutorStartRequest: {
+      body: string;
+      attachments?: string[];
+      /** @default  */
+      subject: string;
+      /** Format: uuid */
+      client?: string | null;
+    };
     /**
      * @description * `applicant` - Applicant
      *     * `onboarding` - Onboarding
@@ -30857,6 +32565,45 @@ export interface components {
      * @enum {integer}
      */
     WeekStartDayEnum: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+    WhatsAppTemplate: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      language?: string;
+      category?: components["schemas"]["WhatsAppTemplateCategoryEnum"];
+      content_sid?: string;
+      body: string;
+      variables?: string[];
+      type_key?: string;
+      status?: components["schemas"]["WhatsAppTemplateStatusEnum"];
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    /**
+     * @description * `utility` - Utility
+     *     * `marketing` - Marketing
+     * @enum {string}
+     */
+    WhatsAppTemplateCategoryEnum: "utility" | "marketing";
+    WhatsAppTemplateRequest: {
+      name: string;
+      language?: string;
+      category?: components["schemas"]["WhatsAppTemplateCategoryEnum"];
+      content_sid?: string;
+      body: string;
+      variables?: string[];
+      type_key?: string;
+      status?: components["schemas"]["WhatsAppTemplateStatusEnum"];
+    };
+    /**
+     * @description * `pending` - Waiting for approval
+     *     * `approved` - Approved
+     *     * `rejected` - Rejected
+     * @enum {string}
+     */
+    WhatsAppTemplateStatusEnum: "pending" | "approved" | "rejected";
     Widget: {
       /** Format: uuid */
       readonly id: string;
@@ -34953,6 +36700,344 @@ export interface operations {
       };
     };
   };
+  broadcasts_list: {
+    parameters: {
+      query?: {
+        /**
+         * @description * `email` - Email
+         *     * `sms` - Text message
+         *     * `whatsapp` - WhatsApp
+         */
+        channel?: "email" | "sms" | "whatsapp";
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `draft` - Draft
+         *     * `scheduled` - Scheduled
+         *     * `sending` - Sending
+         *     * `paused` - Paused
+         *     * `sent` - Sent
+         *     * `cancelled` - Cancelled
+         *     * `failed` - Failed
+         */
+        status?: ("cancelled" | "draft" | "failed" | "paused" | "scheduled" | "sending" | "sent")[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedBroadcastList"];
+        };
+      };
+    };
+  };
+  broadcasts_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BroadcastWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["BroadcastWriteRequest"];
+        "multipart/form-data": components["schemas"]["BroadcastWriteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Broadcast"];
+        };
+      };
+    };
+  };
+  broadcasts_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this broadcast. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Broadcast"];
+        };
+      };
+    };
+  };
+  broadcasts_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this broadcast. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  broadcasts_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this broadcast. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedBroadcastWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedBroadcastWriteRequest"];
+        "multipart/form-data": components["schemas"]["PatchedBroadcastWriteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Broadcast"];
+        };
+      };
+    };
+  };
+  broadcasts_audience_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this broadcast. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AudiencePreview"];
+        };
+      };
+    };
+  };
+  broadcasts_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this broadcast. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Broadcast"];
+        };
+      };
+    };
+  };
+  broadcasts_pause_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this broadcast. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Broadcast"];
+        };
+      };
+    };
+  };
+  broadcasts_preview_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this broadcast. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ContentPreview"];
+        };
+      };
+    };
+  };
+  broadcasts_recipients_list: {
+    parameters: {
+      query?: {
+        /**
+         * @description * `email` - Email
+         *     * `sms` - Text message
+         *     * `whatsapp` - WhatsApp
+         */
+        channel?: "email" | "sms" | "whatsapp";
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: "failed" | "pending" | "queued" | "skipped";
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this broadcast. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedBroadcastRecipientList"];
+        };
+      };
+    };
+  };
+  broadcasts_resume_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this broadcast. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Broadcast"];
+        };
+      };
+    };
+  };
+  broadcasts_schedule_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this broadcast. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ScheduleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ScheduleRequest"];
+        "multipart/form-data": components["schemas"]["ScheduleRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Broadcast"];
+        };
+      };
+    };
+  };
   bulk_jobs_list: {
     parameters: {
       query?: {
@@ -35342,6 +37427,136 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  canned_replies_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedCannedReplyList"];
+        };
+      };
+    };
+  };
+  canned_replies_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CannedReplyRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CannedReplyRequest"];
+        "multipart/form-data": components["schemas"]["CannedReplyRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CannedReply"];
+        };
+      };
+    };
+  };
+  canned_replies_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this canned reply. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CannedReply"];
+        };
+      };
+    };
+  };
+  canned_replies_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this canned reply. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  canned_replies_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this canned reply. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedCannedReplyRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedCannedReplyRequest"];
+        "multipart/form-data": components["schemas"]["PatchedCannedReplyRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CannedReply"];
+        };
       };
     };
   };
@@ -46428,6 +48643,97 @@ export interface operations {
       };
     };
   };
+  marketing_sync_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MarketingConnection"][];
+        };
+      };
+    };
+  };
+  marketing_sync_audiences_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        provider: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MarketingAudience"][];
+        };
+      };
+    };
+  };
+  marketing_sync_audiences_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        provider: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChooseAudienceRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ChooseAudienceRequest"];
+        "multipart/form-data": components["schemas"]["ChooseAudienceRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MarketingConnection"];
+        };
+      };
+    };
+  };
+  marketing_sync_sync_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        provider: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MarketingSyncResult"];
+        };
+      };
+    };
+  };
   matching_analytics_retrieve: {
     parameters: {
       query?: {
@@ -50173,6 +52479,108 @@ export interface operations {
       };
     };
   };
+  phone_numbers_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPhoneNumberList"];
+        };
+      };
+    };
+  };
+  phone_numbers_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PhoneNumberRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PhoneNumberRequest"];
+        "multipart/form-data": components["schemas"]["PhoneNumberRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PhoneNumber"];
+        };
+      };
+    };
+  };
+  phone_numbers_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this phone number. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PhoneNumber"];
+        };
+      };
+    };
+  };
+  phone_numbers_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this phone number. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   pipelines_list: {
     parameters: {
       query?: {
@@ -51119,9 +53527,9 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["BookingHoldInputRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["BookingHoldInputRequest"];
-        "multipart/form-data": components["schemas"]["BookingHoldInputRequest"];
+        "application/json": components["schemas"]["PortalBookingHoldInputRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PortalBookingHoldInputRequest"];
+        "multipart/form-data": components["schemas"]["PortalBookingHoldInputRequest"];
       };
     };
     responses: {
@@ -51449,6 +53857,25 @@ export interface operations {
       };
     };
   };
+  portal_makeup_credits_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalMakeupCredit"][];
+        };
+      };
+    };
+  };
   portal_me_retrieve: {
     parameters: {
       query?: never;
@@ -51464,6 +53891,25 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PortalMe"];
+        };
+      };
+    };
+  };
+  portal_messaging_tutors_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ContactOption"][];
         };
       };
     };
@@ -51833,6 +54279,104 @@ export interface operations {
         };
         content: {
           "application/pdf": string;
+        };
+      };
+    };
+  };
+  portal_threads_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalThread"][];
+        };
+      };
+    };
+  };
+  portal_threads_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PortalStartRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PortalStartRequest"];
+        "multipart/form-data": components["schemas"]["PortalStartRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalThreadDetail"];
+        };
+      };
+    };
+  };
+  portal_threads_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        thread_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalThreadDetail"];
+        };
+      };
+    };
+  };
+  portal_threads_messages_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        thread_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PortalPostRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PortalPostRequest"];
+        "multipart/form-data": components["schemas"]["PortalPostRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalMessage"];
         };
       };
     };
@@ -54961,6 +57505,338 @@ export interface operations {
       };
     };
   };
+  segments_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedSegmentList"];
+        };
+      };
+    };
+  };
+  segments_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SegmentWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SegmentWriteRequest"];
+        "multipart/form-data": components["schemas"]["SegmentWriteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Segment"];
+        };
+      };
+    };
+  };
+  segments_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this segment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Segment"];
+        };
+      };
+    };
+  };
+  segments_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this segment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SegmentWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SegmentWriteRequest"];
+        "multipart/form-data": components["schemas"]["SegmentWriteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Segment"];
+        };
+      };
+    };
+  };
+  segments_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this segment. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  segments_options_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SegmentOptions"];
+        };
+      };
+    };
+  };
+  segments_preview_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AudiencePreviewRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AudiencePreviewRequestRequest"];
+        "multipart/form-data": components["schemas"]["AudiencePreviewRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AudiencePreview"];
+        };
+      };
+    };
+  };
+  sender_domains_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedSenderDomainList"];
+        };
+      };
+    };
+  };
+  sender_domains_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SenderDomainRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SenderDomainRequest"];
+        "multipart/form-data": components["schemas"]["SenderDomainRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SenderDomain"];
+        };
+      };
+    };
+  };
+  sender_domains_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this sender domain. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SenderDomain"];
+        };
+      };
+    };
+  };
+  sender_domains_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this sender domain. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  sender_domains_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this sender domain. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedSenderDomainUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedSenderDomainUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedSenderDomainUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SenderDomain"];
+        };
+      };
+    };
+  };
+  sender_domains_check_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this sender domain. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SenderDomain"];
+        };
+      };
+    };
+  };
   settings_retrieve: {
     parameters: {
       query?: {
@@ -56808,6 +59684,387 @@ export interface operations {
       };
     };
   };
+  threads_list: {
+    parameters: {
+      query?: {
+        /**
+         * @description * `open` - open
+         *     * `mine` - mine
+         *     * `unassigned` - unassigned
+         *     * `snoozed` - snoozed
+         *     * `closed` - closed
+         *     * `flagged` - flagged
+         *     * `all` - all
+         */
+        box?: "all" | "closed" | "flagged" | "mine" | "open" | "snoozed" | "unassigned";
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /**
+         * @description * `client` - Family
+         *     * `tutor` - Tutor
+         *     * `tutor_family` - Tutor and family
+         *     * `other` - Other
+         */
+        kind?: "client" | "other" | "tutor" | "tutor_family";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        q?: string;
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedThreadList"];
+        };
+      };
+    };
+  };
+  threads_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StartThreadRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["StartThreadRequest"];
+        "multipart/form-data": components["schemas"]["StartThreadRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ThreadDetail"];
+        };
+      };
+    };
+  };
+  threads_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this thread. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ThreadDetail"];
+        };
+      };
+    };
+  };
+  threads_assign_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this thread. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssignRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AssignRequest"];
+        "multipart/form-data": components["schemas"]["AssignRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Thread"];
+        };
+      };
+    };
+  };
+  threads_close_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this thread. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Thread"];
+        };
+      };
+    };
+  };
+  threads_messages_list: {
+    parameters: {
+      query?: {
+        /**
+         * @description * `open` - open
+         *     * `mine` - mine
+         *     * `unassigned` - unassigned
+         *     * `snoozed` - snoozed
+         *     * `closed` - closed
+         *     * `flagged` - flagged
+         *     * `all` - all
+         */
+        box?: "all" | "closed" | "flagged" | "mine" | "open" | "snoozed" | "unassigned";
+        client?: string;
+        /**
+         * @description * `client` - Family
+         *     * `tutor` - Tutor
+         *     * `tutor_family` - Tutor and family
+         *     * `other` - Other
+         */
+        kind?: "client" | "other" | "tutor" | "tutor_family";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        q?: string;
+        tutor?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this thread. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ThreadMessage"][];
+        };
+      };
+    };
+  };
+  threads_messages_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this thread. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReplyRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReplyRequest"];
+        "multipart/form-data": components["schemas"]["ReplyRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ThreadMessage"];
+        };
+      };
+    };
+  };
+  threads_notes_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this thread. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ThreadNoteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ThreadNoteRequest"];
+        "multipart/form-data": components["schemas"]["ThreadNoteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ThreadMessage"];
+        };
+      };
+    };
+  };
+  threads_reopen_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this thread. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Thread"];
+        };
+      };
+    };
+  };
+  threads_snooze_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this thread. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SnoozeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SnoozeRequest"];
+        "multipart/form-data": components["schemas"]["SnoozeRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Thread"];
+        };
+      };
+    };
+  };
+  threads_assignees_list: {
+    parameters: {
+      query?: {
+        /**
+         * @description * `open` - open
+         *     * `mine` - mine
+         *     * `unassigned` - unassigned
+         *     * `snoozed` - snoozed
+         *     * `closed` - closed
+         *     * `flagged` - flagged
+         *     * `all` - all
+         */
+        box?: "all" | "closed" | "flagged" | "mine" | "open" | "snoozed" | "unassigned";
+        client?: string;
+        /**
+         * @description * `client` - Family
+         *     * `tutor` - Tutor
+         *     * `tutor_family` - Tutor and family
+         *     * `other` - Other
+         */
+        kind?: "client" | "other" | "tutor" | "tutor_family";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        q?: string;
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Assignee"][];
+        };
+      };
+    };
+  };
+  threads_counts_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BoxCounts"];
+        };
+      };
+    };
+  };
   time_off_list: {
     parameters: {
       query?: {
@@ -57137,6 +60394,25 @@ export interface operations {
       };
     };
   };
+  tutor_messaging_families_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ContactOption"][];
+        };
+      };
+    };
+  };
   tutor_offline_retrieve: {
     parameters: {
       query?: never;
@@ -57171,6 +60447,104 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TutorStudent"][];
+        };
+      };
+    };
+  };
+  tutor_threads_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalThread"][];
+        };
+      };
+    };
+  };
+  tutor_threads_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TutorStartRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TutorStartRequest"];
+        "multipart/form-data": components["schemas"]["TutorStartRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalThreadDetail"];
+        };
+      };
+    };
+  };
+  tutor_threads_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        thread_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalThreadDetail"];
+        };
+      };
+    };
+  };
+  tutor_threads_messages_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        thread_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PortalPostRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PortalPostRequest"];
+        "multipart/form-data": components["schemas"]["PortalPostRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalMessage"];
         };
       };
     };
@@ -58247,6 +61621,136 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["EventSample"];
+        };
+      };
+    };
+  };
+  whatsapp_templates_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedWhatsAppTemplateList"];
+        };
+      };
+    };
+  };
+  whatsapp_templates_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WhatsAppTemplateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["WhatsAppTemplateRequest"];
+        "multipart/form-data": components["schemas"]["WhatsAppTemplateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WhatsAppTemplate"];
+        };
+      };
+    };
+  };
+  whatsapp_templates_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this whats app template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WhatsAppTemplate"];
+        };
+      };
+    };
+  };
+  whatsapp_templates_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this whats app template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  whatsapp_templates_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this whats app template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedWhatsAppTemplateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedWhatsAppTemplateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedWhatsAppTemplateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WhatsAppTemplate"];
         };
       };
     };

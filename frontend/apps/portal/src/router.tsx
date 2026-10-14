@@ -16,6 +16,7 @@ import { BillingPage } from "./pages/BillingPage";
 import { BookingPage } from "./pages/BookingPage";
 import { ClassesPage } from "./pages/ClassesPage";
 import { HomePage } from "./pages/HomePage";
+import { MessagesPage, TutorMessagesPage } from "./pages/MessagesPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ReferralsPage } from "./pages/ReferralsPage";
 import { ReportsPage } from "./pages/ReportsPage";
@@ -71,6 +72,7 @@ const routeTree = rootRoute.addChildren([
   page("/billing", BillingPage),
   page("/profile", ProfilePage),
   page("/referrals", ReferralsPage),
+  page("/messages", MessagesPage),
   page("/affiliate", AffiliateHomePage),
   page("/affiliate/clients", AffiliateClientsPage),
   page("/affiliate/statements", AffiliateStatementsPage),
@@ -88,6 +90,7 @@ const routeTree = rootRoute.addChildren([
   page("/tutor/profile", TutorProfilePage),
   page("/tutor/notifications", NotificationsPage),
   page("/tutor/referrals", TutorReferralsPage),
+  page("/tutor/messages", TutorMessagesPage),
   lessonRoute,
   offlineReportRoute,
   reportRoute,

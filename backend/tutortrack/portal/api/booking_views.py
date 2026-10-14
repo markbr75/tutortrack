@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 from drf_spectacular.utils import extend_schema
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -27,6 +27,10 @@ from tutortrack.scheduling.models import BookingHold, RescheduleRequest
 
 from ..household import Household
 from .views import PortalView
+
+
+class PortalBookingHoldInput(ss.BookingHoldInput):
+    makeup_credit = serializers.UUIDField(required=False, allow_null=True)
 
 
 class BookingView(PortalView):
@@ -66,14 +70,16 @@ class PortalBookingHoldsView(BookingView):
         )[:50]
         return Response(ss.BookingHoldSerializer(holds, many=True).data)
 
-    @extend_schema(request=ss.BookingHoldInput, responses={201: ss.BookingHoldSerializer})
+    @extend_schema(request=PortalBookingHoldInput, responses={201: ss.BookingHoldSerializer})
     def post(self, request: Request) -> Response:
-        """Hold a slot for one of the household's students."""
+        """Hold a slot for one of the household's students; with ``makeup_credit`` the
+        lesson is a free makeup that uses that credit (E15-T09)."""
         from tutortrack.catalogue.models import Service
+        from tutortrack.delivery.models import MakeupCredit
         from tutortrack.people.models import TutorProfile
 
         household = self.booking_household(request)
-        payload = ss.BookingHoldInput(data=request.data)
+        payload = PortalBookingHoldInput(data=request.data)
         payload.is_valid(raise_exception=True)
         data = payload.validated_data
         student = next((st for st in household.students if st.pk == data.get("student")), None)
@@ -83,6 +89,13 @@ class PortalBookingHoldsView(BookingView):
         if student is None or service is None:
             raise NotFound()
         tutor = TutorProfile.objects.filter(pk=data["tutor"]).first() if data.get("tutor") else None
+        credit = None
+        if data.get("makeup_credit"):
+            credit = MakeupCredit.objects.filter(
+                pk=data["makeup_credit"], student_id__in=household.student_ids
+            ).first()
+            if credit is None:
+                raise NotFound()
         hold, _token = scheduling.hold_slot(
             service=service,
             start=data["start"],
@@ -90,6 +103,7 @@ class PortalBookingHoldsView(BookingView):
             student=student,
             promo_code=data["promo_code"],
             user=request.user,
+            makeup_credit=credit,
         )
         return Response(ss.BookingHoldSerializer(hold).data, status=status.HTTP_201_CREATED)
 

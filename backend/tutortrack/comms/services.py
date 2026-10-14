@@ -222,6 +222,11 @@ def set_preference(person_type: str, person_id: str, category: str, channels: li
 def suppressed(channel: str, address: str) -> bool:
     if channel == Channel.SMS and SmsOptOut.objects.filter(phone=address).exists():
         return True
+    if (
+        channel == Channel.WHATSAPP
+        and SmsOptOut.objects.filter(phone=f"whatsapp:{address}").exists()
+    ):
+        return True  # STOP sent to the WhatsApp sender
     return Suppression.objects.filter(channel=channel, address=address.lower()).exists()
 
 
@@ -234,16 +239,16 @@ def suppress(channel: str, address: str, reason: str) -> None:
 UNSUBSCRIBE_SALT = "comms.unsubscribe"
 
 
-def unsubscribe_token(recipient: registry.Recipient, category: str) -> str:
-    return signing.dumps(
-        {
-            "o": str(require_organisation_id()),
-            "k": recipient.kind,
-            "i": recipient.id,
-            "c": category,
-        },
-        salt=UNSUBSCRIBE_SALT,
-    )
+def unsubscribe_token(recipient: registry.Recipient, category: str, message_id: str = "") -> str:
+    data = {
+        "o": str(require_organisation_id()),
+        "k": recipient.kind,
+        "i": recipient.id,
+        "c": category,
+    }
+    if message_id:
+        data["m"] = message_id  # broadcasts count unsubscribes per message
+    return signing.dumps(data, salt=UNSUBSCRIBE_SALT)
 
 
 def read_unsubscribe(token: str) -> dict[str, str] | None:
@@ -259,9 +264,13 @@ def unsubscribe(data: dict[str, str]) -> None:
     current = CommunicationPreference.objects.filter(
         person_type=data["k"], person_id=data["i"], category=data["c"]
     ).first()
-    channels_left = set(current.channels) if current else set(Channel.values)
+    # No preference yet: every channel except WhatsApp, which needs an explicit opt-in.
+    channels_left = set(current.channels) if current else set(Channel.values) - {Channel.WHATSAPP}
     channels_left.discard(Channel.EMAIL)
     set_preference(data["k"], data["i"], data["c"], sorted(channels_left))
+    message = Message.objects.filter(pk=data["m"]).first() if data.get("m") else None
+    if message is not None and not message.events.filter(type="unsubscribed").exists():
+        _event(message, "unsubscribed", {"category": data["c"]})
 
 
 # --- the pipeline (T05) -------------------------------------------------------------------------
@@ -286,7 +295,7 @@ def _quiet_until(moment: datetime, tz: str) -> datetime | None:
 def _address(recipient: registry.Recipient, channel: str) -> str:
     if channel == Channel.EMAIL:
         return recipient.email.lower()
-    if channel == Channel.SMS:
+    if channel in {Channel.SMS, Channel.WHATSAPP}:
         from tutortrack.tenancy.models import Organisation
 
         org = Organisation.objects.get(pk=require_organisation_id())
@@ -327,6 +336,9 @@ def _deliver(
     recipient = delivery.recipient
     possible = [c for c in wanted if c in recipient.available()]
     allowed = allowed_channels(recipient, t.category)
+    if allowed is None or Channel.WHATSAPP not in allowed:
+        # WhatsApp needs the person's explicit opt-in (a preference naming it).
+        possible = [c for c in possible if c != Channel.WHATSAPP]
     if allowed is not None:
         chosen = [c for c in possible if c in allowed]
         if not chosen and t.transactional and Channel.EMAIL in possible:
@@ -352,10 +364,19 @@ def _create(
     dedupe = f"{t.key}:{key}:{recipient.kind}:{recipient.id}:{channel}"[:255]
     if Message.objects.filter(dedupe_key=dedupe).exists():
         return None
-    try:
-        subject_text, body = render_message(t.key, channel, delivery.context)
-    except render.TemplateInvalid as exc:
-        subject_text, body = "", f"[template error: {exc}]"
+    meta: dict[str, Any] = {}
+    if channel == Channel.WHATSAPP:
+        from . import senders
+
+        rendered = senders.render_whatsapp_for_type(t.key, delivery.context)
+        if rendered is None:
+            return None  # no approved WhatsApp template for this notification
+        subject_text, body, meta = "", rendered.body, rendered.meta
+    else:
+        try:
+            subject_text, body = render_message(t.key, channel, delivery.context)
+        except render.TemplateInvalid as exc:
+            subject_text, body = "", f"[template error: {exc}]"
     address = _address(recipient, channel)
     status = Message.Status.QUEUED
     if not address:
@@ -365,7 +386,7 @@ def _create(
     if channel not in {Channel.IN_APP, Channel.PUSH} and suppressed(channel, address):
         status = Message.Status.SUPPRESSED
     scheduled = None
-    if channel == Channel.SMS and status == Message.Status.QUEUED:
+    if channel in {Channel.SMS, Channel.WHATSAPP} and status == Message.Status.QUEUED:
         tz = str((delivery.context.get("organisation") or {}).get("timezone") or "UTC")
         scheduled = _quiet_until(now(), tz)
     related_id = str(getattr(subject, "pk", "") or "")
@@ -388,6 +409,7 @@ def _create(
                 dedupe_key=dedupe,
                 scheduled_for=scheduled,
                 segments=render.sms_segments(body) if channel == Channel.SMS else 0,
+                meta=meta,
             )
     except IntegrityError:
         return None  # a concurrent delivery got there first
@@ -440,6 +462,8 @@ def send_now(message: Message) -> Message:
             _send_sms(message)
         elif message.channel == Channel.PUSH:
             _send_push(message)
+        elif message.channel == Channel.WHATSAPP:
+            _send_whatsapp(message)
     except channels.ChannelError as exc:
         Message.objects.filter(pk=message.pk).update(
             status=Message.Status.FAILED, error=str(exc)[:500]
@@ -472,12 +496,14 @@ def _send_email(message: Message) -> None:
         recipient = registry.Recipient(
             kind=message.recipient_type, id=message.recipient_id, name="", first_name=""
         )
-        token = unsubscribe_token(recipient, t.category)
+        token = unsubscribe_token(recipient, t.category, message_id=str(message.pk))
         url = f"{settings.PLATFORM_BASE_URL}/api/v1/unsubscribe/{token}"
         headers["List-Unsubscribe"] = f"<{url}>"
         headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
         footer = f'<a href="{url}">{_("Unsubscribe from these emails")}</a>'
     name = _organisation_name()
+    from . import senders
+
     try:
         channels.send_email(
             to=message.to,
@@ -490,9 +516,10 @@ def _send_email(message: Message) -> None:
                 brand=branding.for_email(message.organisation_id),
             ),
             from_name=name,
-            reply_to=str(get_setting("comms.reply_to")),
+            reply_to=senders.reply_to_for(message),
             headers=headers,
             attachments=attachments,
+            from_address=senders.from_address(),
         )
     except Exception as exc:  # SMTP errors, attachment rendering
         raise channels.ChannelError(str(exc)) from exc
@@ -506,13 +533,45 @@ def _send_sms(message: Message) -> None:
     org = Organisation.objects.get(pk=message.organisation_id)
     if not channels.credit_meter().consume(message.segments or 1, country=org.country):
         raise channels.ChannelError("No SMS credits left.")
-    callback = (
+    from . import senders
+
+    sender = senders.sender_number(Channel.SMS)
+    result = channels.sms_provider().send(
+        to=message.to, body=message.body, status_callback=_status_callback(message), sender=sender
+    )
+    if not sender:
+        senders.remember_reply_route(Channel.SMS, message.to)
+    Message.objects.filter(pk=message.pk).update(
+        status=Message.Status.SENT, sent_at=now(), provider_ref=result.ref
+    )
+    _event(message, "sent", {"ref": result.ref})
+
+
+def _status_callback(message: Message) -> str:
+    return (
         f"{settings.PLATFORM_BASE_URL}/webhooks/twilio/status"
         f"?org={message.organisation_id}&message={message.pk}"
     )
-    result = channels.sms_provider().send(
-        to=message.to, body=message.body, status_callback=callback
+
+
+def _send_whatsapp(message: Message) -> None:
+    """Free text inside the 24-hour window (inbox replies), else the approved template
+    recorded in ``meta`` (E13-T12)."""
+    from . import providers, senders
+
+    meta = message.meta or {}
+    content_sid = str(meta.get("content_sid") or "")
+    sender = senders.sender_number(Channel.WHATSAPP)
+    result = providers.whatsapp_provider().send(
+        to=message.to,
+        status_callback=_status_callback(message),
+        body="" if content_sid else message.body,
+        content_sid=content_sid,
+        variables={str(k): str(v) for k, v in (meta.get("variables") or {}).items()},
+        sender=sender,
     )
+    if not sender:
+        senders.remember_reply_route(Channel.WHATSAPP, message.to)
     Message.objects.filter(pk=message.pk).update(
         status=Message.Status.SENT, sent_at=now(), provider_ref=result.ref
     )
@@ -719,7 +778,7 @@ def my_preferences(user: Any) -> list[dict[str, Any]]:
     out = []
     for category in registry.CATEGORIES:
         available: set[str] = set()
-        for t in registry.all_types():
+        for t in registry.visible_types():
             if t.category == category and t.audience == audience:
                 available.update(t.channels)
         if not available:
@@ -846,4 +905,69 @@ def test_send(type_key: str, channel: str, *, user: Any) -> Message:
     if message.status == Message.Status.QUEUED:
         send_now(message)
     message.refresh_from_db()
+    return message
+
+
+# --- free-form messages (E13 Phase 2: broadcasts and inbox replies) -----------------------------
+
+
+def queue_message(
+    *,
+    type_key: str,
+    channel: str,
+    recipient: registry.Recipient,
+    subject: str,
+    body: str,
+    dedupe_key: str,
+    related: tuple[str, str] = ("", ""),
+    thread: Any = None,
+    meta: dict[str, Any] | None = None,
+    respect_quiet_hours: bool = True,
+) -> Message | None:
+    """Queue one message that isn't a templated notification (a broadcast to one person,
+    an inbox reply) through the same channels, suppressions, quiet hours and delivery
+    tracking. ``type_key`` is a hidden registry type; ``dedupe_key`` makes retries
+    harmless (None = already queued, or nowhere to send it)."""
+    from tutortrack.tenancy.models import Organisation
+
+    dedupe_key = dedupe_key[:255]
+    if Message.objects.filter(dedupe_key=dedupe_key).exists():
+        return None
+    address = _address(recipient, channel)
+    if not address:
+        return None
+    status = Message.Status.QUEUED
+    if channel not in {Channel.IN_APP, Channel.PUSH} and suppressed(channel, address):
+        status = Message.Status.SUPPRESSED
+    scheduled = None
+    texting = channel in {Channel.SMS, Channel.WHATSAPP}
+    if respect_quiet_hours and texting and status == Message.Status.QUEUED:
+        tz = Organisation.objects.get(pk=require_organisation_id()).timezone
+        scheduled = _quiet_until(now(), tz)
+    try:
+        with transaction.atomic():
+            message = Message.objects.create(
+                type_key=type_key,
+                channel=channel,
+                recipient_type=recipient.kind,
+                recipient_id=recipient.id,
+                recipient_name=recipient.name[:200],
+                to=address,
+                subject=subject[:300],
+                body=body,
+                status=status,
+                related_type=related[0],
+                related_id=related[1],
+                target_type=recipient.target[0],
+                target_id=recipient.target[1],
+                dedupe_key=dedupe_key,
+                scheduled_for=scheduled,
+                segments=render.sms_segments(body) if channel == Channel.SMS else 0,
+                thread=thread,
+                meta=meta or {},
+            )
+    except IntegrityError:
+        return None
+    if status == Message.Status.QUEUED:
+        _dispatch(message, immediate=False)
     return message

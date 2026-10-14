@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework.routers import SimpleRouter
 
 from . import booking_views as bv
+from . import messaging_views as mv
 from . import tutor_views, views
 
 router = SimpleRouter(trailing_slash=False)
@@ -84,6 +85,28 @@ urlpatterns = [
         "portal/announcements",
         views.PortalAnnouncementsView.as_view(),
         name="portal-announcements",
+    ),
+    # E15-T09: messaging through the E13 inbox, and makeup credits for booking.
+    path("portal/threads", mv.PortalThreadsView.as_view(), name="portal-threads"),
+    path("portal/threads/<uuid:thread_id>", mv.PortalThreadView.as_view(), name="portal-thread"),
+    path(
+        "portal/threads/<uuid:thread_id>/messages",
+        mv.PortalThreadMessagesView.as_view(),
+        name="portal-thread-messages",
+    ),
+    path("portal/messaging/tutors", mv.PortalMessageTutorsView.as_view(), name="portal-msg-tutors"),
+    path("portal/makeup-credits", mv.PortalMakeupCreditsView.as_view(), name="portal-makeups"),
+    path("tutor/threads", mv.TutorThreadsView.as_view(), name="tutor-threads"),
+    path("tutor/threads/<uuid:thread_id>", mv.TutorThreadView.as_view(), name="tutor-thread"),
+    path(
+        "tutor/threads/<uuid:thread_id>/messages",
+        mv.TutorThreadMessagesView.as_view(),
+        name="tutor-thread-messages",
+    ),
+    path(
+        "tutor/messaging/families",
+        mv.TutorMessageFamiliesView.as_view(),
+        name="tutor-msg-families",
     ),
     path("tutor/me", tutor_views.TutorMeView.as_view(), name="tutor-me"),
     path("tutor/today", tutor_views.TutorTodayView.as_view(), name="tutor-today"),

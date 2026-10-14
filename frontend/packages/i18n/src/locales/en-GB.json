@@ -1325,7 +1325,8 @@
       "email": "Email",
       "sms": "Text",
       "in_app": "In the app",
-      "push": "Push"
+      "push": "Push",
+      "whatsapp": "WhatsApp"
     },
     "hoursBefore": "Hours before",
     "hoursHint": "Up to three, e.g. 24, 2",
@@ -1351,7 +1352,9 @@
       "reports": "Lesson reports",
       "billing": "Billing",
       "account": "Account",
-      "staff": "Staff alerts"
+      "staff": "Staff alerts",
+      "messages": "Messages",
+      "marketing": "Marketing"
     }
   },
   "portal": {
@@ -4080,7 +4083,8 @@
       "reports": "Lesson reports",
       "billing": "Pay",
       "account": "Your account",
-      "staff": "Team"
+      "staff": "Team",
+      "messages": "Messages"
     },
     "saved": "Saved."
   },
@@ -4365,5 +4369,266 @@
       "google": "Would you also review us on Google?",
       "closed": "This review link has closed. Thank you anyway!"
     }
+  },
+  "broadcasts": {
+    "nav": "Broadcasts",
+    "title": "Broadcasts",
+    "help": "Send an email, text or WhatsApp message to a group of families or tutors. Marketing messages only go to people who agreed to receive them.",
+    "new": "New broadcast",
+    "none": "No broadcasts yet.",
+    "name": "Name",
+    "channel": "Send by",
+    "purpose": "Kind of message",
+    "purposeHint": {
+      "operational": "Service news everyone should get, e.g. a closure.",
+      "marketing": "Offers and promotions: only people with marketing consent get it."
+    },
+    "purposes": {
+      "operational": "Service announcement",
+      "marketing": "Marketing"
+    },
+    "who": "Who gets it",
+    "segment": "Saved segment",
+    "buildSegment": "Choose people below",
+    "audience": "Audience",
+    "audiences": {
+      "contacts": "Family contacts",
+      "tutors": "Tutors"
+    },
+    "statuses": "Status",
+    "tags": "Tags",
+    "primaryOnly": "Only the main contact of each family",
+    "checkAudience": "Check who it reaches",
+    "reach": "Reaches {{sendable}} of {{total}} people.",
+    "sample": "For example: {{names}}",
+    "skip": {
+      "no_address_one": "{{count}} has no address for this channel",
+      "no_address_other": "{{count}} have no address for this channel",
+      "duplicate_one": "{{count}} shares an address with someone else",
+      "duplicate_other": "{{count}} share an address with someone else",
+      "suppressed_one": "{{count}} can't be reached (bounced, spam report or STOP)",
+      "suppressed_other": "{{count}} can't be reached (bounced, spam report or STOP)",
+      "no_consent_one": "{{count}} hasn't agreed to marketing",
+      "no_consent_other": "{{count}} haven't agreed to marketing",
+      "opted_out_one": "{{count}} unsubscribed",
+      "opted_out_other": "{{count}} unsubscribed",
+      "no_opt_in_one": "{{count}} hasn't chosen WhatsApp",
+      "no_opt_in_other": "{{count}} haven't chosen WhatsApp",
+      "cancelled_one": "{{count}} not sent (cancelled)",
+      "cancelled_other": "{{count}} not sent (cancelled)",
+      "template_one": "{{count}} failed (template error)",
+      "template_other": "{{count}} failed (template error)"
+    },
+    "template": "WhatsApp template",
+    "chooseTemplate": "Choose an approved template",
+    "subject": "Subject",
+    "body": "Message",
+    "variables": "You can use {{list}}.",
+    "saveDraft": "Save draft",
+    "stats": {
+      "recipients": "People",
+      "queued": "Sent",
+      "skipped": "Skipped",
+      "delivered": "Delivered",
+      "opened": "Opened",
+      "clicked": "Clicked",
+      "bounced": "Bounced",
+      "unsubscribed": "Unsubscribed"
+    },
+    "status": {
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "sending": "Sending",
+      "paused": "Paused",
+      "sent": "Sent",
+      "cancelled": "Cancelled",
+      "failed": "Failed"
+    },
+    "statusLabel": "Status",
+    "scheduledFor": "goes out {{when}}",
+    "preview": "Preview",
+    "sendAt": "Send at (optional)",
+    "sendAtHint": "Leave empty to send now.",
+    "schedule": "Schedule",
+    "sendNow": "Send now",
+    "pause": "Pause",
+    "resume": "Resume",
+    "cancel": "Cancel broadcast",
+    "recipients": "Recipients",
+    "person": "Person",
+    "address": "Address",
+    "outcome": "Outcome",
+    "recipientStatus": {
+      "pending": "Waiting",
+      "queued": "Sent",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "when": "When"
+  },
+  "inbox": {
+    "nav": "Inbox",
+    "title": "Inbox",
+    "boxes": "Conversation folders",
+    "box": {
+      "open": "Open",
+      "mine": "Mine",
+      "unassigned": "Unassigned",
+      "snoozed": "Snoozed",
+      "closed": "Closed",
+      "flagged": "Flagged"
+    },
+    "search": "Search conversations",
+    "empty": "Nothing here.",
+    "conversations": "Conversations",
+    "unknown": "Unknown sender",
+    "unread_one": "{{count}} new",
+    "unread_other": "{{count}} new",
+    "chat": "Portal message",
+    "overdue": "Reply overdue",
+    "flagged": "Flagged",
+    "reply": "Reply",
+    "via": "Send by",
+    "cannedReply": "Canned reply",
+    "insertCanned": "Insert a canned reply",
+    "message": "Message",
+    "send": "Send",
+    "addNote": "Add internal note",
+    "kinds": {
+      "client": "Family",
+      "tutor": "Tutor",
+      "tutor_family": "Tutor and family",
+      "other": "Other"
+    },
+    "statuses": {
+      "open": "Open",
+      "snoozed": "Snoozed",
+      "closed": "Closed"
+    },
+    "slaBreached": "reply was due {{when}}",
+    "slaDue": "reply by {{when}}",
+    "replyAddress": "Email replies go to {{address}}",
+    "assignee": "Assigned to",
+    "nobody": "Nobody",
+    "snoozeUntil": "Snooze until",
+    "snooze": "Snooze",
+    "reopen": "Reopen",
+    "close": "Close",
+    "messages": "Messages",
+    "internalNote": "Internal note (staff only)",
+    "flags": "Flagged for review: {{flags}}",
+    "flag": {
+      "contact_details": "contact details",
+      "profanity": "bad language"
+    },
+    "pick": "Choose a conversation."
+  },
+  "messaging": {
+    "nav": "Messaging",
+    "title": "Messaging",
+    "tabs": {
+      "domains": "Sending domain",
+      "numbers": "Numbers",
+      "whatsapp": "WhatsApp templates",
+      "canned": "Canned replies",
+      "marketing": "Mailchimp and Brevo"
+    },
+    "yes": "Yes",
+    "no": "Not yet",
+    "remove": "Remove",
+    "domains": {
+      "help": "Send email from your own domain. Add the DNS records below at your domain provider, then check them.",
+      "status": {
+        "pending": "Waiting for DNS",
+        "verified": "Verified",
+        "failed": "Not verified"
+      },
+      "default": "Default",
+      "checked": "Checked {{when}}",
+      "records": "DNS records",
+      "type": "Type",
+      "host": "Host",
+      "value": "Value",
+      "verified": "Verified",
+      "recommended": "Recommended",
+      "check": "Check DNS",
+      "makeDefault": "Send from this domain",
+      "add": "Add domain",
+      "domain": "Domain",
+      "localPart": "Address before the @"
+    },
+    "numbers": {
+      "help": "Texts and WhatsApp messages go from your own number, and replies come to the inbox.",
+      "add": "Add number",
+      "channel": "Used for",
+      "number": "Number",
+      "numberHint": "International format, e.g. +447700900123",
+      "label": "Label"
+    },
+    "whatsapp": {
+      "help": "WhatsApp only delivers templates approved by Meta outside a 24-hour conversation. Add the approved templates here and map them to notifications.",
+      "status": {
+        "approved": "Approved",
+        "pending": "Waiting for approval",
+        "rejected": "Rejected"
+      },
+      "add": "Add template",
+      "name": "Template name",
+      "sid": "Twilio content ID",
+      "body": "Template text",
+      "bodyHint": "Use {{example}} for the values.",
+      "variables": "Values",
+      "variablesHint": "One per placeholder, separated by semicolons, e.g. {{example}}",
+      "usedFor": "Used for",
+      "broadcastsOnly": "Broadcasts only",
+      "approval": "Approval"
+    },
+    "canned": {
+      "add": "Add canned reply",
+      "title": "Title",
+      "body": "Text"
+    },
+    "marketing": {
+      "help": "Families who agreed to marketing email are kept in your Mailchimp or Brevo audience, with their family's tags. Withdrawing consent unsubscribes them there.",
+      "connected": "Connected",
+      "lastSync": "Last synced {{when}}",
+      "syncNow": "Sync now",
+      "apiKey": "{{name}} API key",
+      "connect": "Connect",
+      "synced": "Synced: {{upserted}} added or updated, {{unsubscribed}} unsubscribed.",
+      "audience": "Audience",
+      "chooseAudience": "Choose an audience",
+      "audienceOption_one": "{{name}} ({{count}} member)",
+      "audienceOption_other": "{{name}} ({{count}} members)"
+    }
+  },
+  "portalMessages": {
+    "nav": "Messages",
+    "title": "Messages",
+    "new": "New message",
+    "none": "No messages yet.",
+    "conversations": "Conversations",
+    "noSubject": "(no subject)",
+    "unread_one": "{{count}} new",
+    "unread_other": "{{count}} new",
+    "messages": "Messages",
+    "you": "You",
+    "attachment": "Attachment: {{name}}",
+    "reply": "Reply",
+    "yourMessage": "Your message",
+    "send": "Send",
+    "attach": "Attach files",
+    "uploading": "Uploading",
+    "uploadFailed": "The file couldn't be uploaded.",
+    "to": "To",
+    "toOffice": "The office",
+    "subject": "Subject",
+    "off": "Messaging isn't available."
+  },
+  "portalMakeups": {
+    "label": "Use a makeup credit",
+    "hint": "A makeup lesson booked with a credit is free.",
+    "none": "Don't use a credit",
+    "option": "For {{lesson}} (use by {{expires}})"
   }
 }
