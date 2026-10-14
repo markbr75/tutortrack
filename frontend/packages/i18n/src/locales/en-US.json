@@ -109,5 +109,25 @@
   "portalCourses": {
     "noneOpen": "No classes are open for enrollment at the moment.",
     "enrol": "Enroll {{student}}"
+  },
+  "referrals": {
+    "status": {
+      "cancelled": "Canceled"
+    },
+    "program": "Referral program",
+    "saveProgram": "Save program",
+    "affiliateKinds": {
+      "organisation": "Organization"
+    },
+    "portal": {
+      "status": {
+        "cancelled": "Canceled"
+      }
+    }
+  },
+  "reviews": {
+    "requestStatus": {
+      "cancelled": "Canceled"
+    }
   }
 }

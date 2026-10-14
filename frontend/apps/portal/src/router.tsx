@@ -6,11 +6,18 @@ import {
   type RouterHistory,
 } from "@tanstack/react-router";
 
+import {
+  AffiliateClientsPage,
+  AffiliateHomePage,
+  AffiliatePayoutPage,
+  AffiliateStatementsPage,
+} from "./affiliate/AffiliatePages";
 import { BillingPage } from "./pages/BillingPage";
 import { BookingPage } from "./pages/BookingPage";
 import { ClassesPage } from "./pages/ClassesPage";
 import { HomePage } from "./pages/HomePage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { ReferralsPage } from "./pages/ReferralsPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { SchedulePage } from "./pages/SchedulePage";
 import { Shell } from "./Shell";
@@ -22,6 +29,7 @@ import { ChecksPage, OnboardingPage } from "./tutor/OnboardingPages";
 import { NotificationsPage } from "./push/NotificationsPage";
 import { OfflineReportPage } from "./tutor/OfflineReportPage";
 import { EarningsPage, ExpensesPage } from "./tutor/PayPages";
+import { TutorReferralsPage } from "./tutor/ReferralsPage";
 import { TutorReportPage } from "./tutor/ReportPage";
 import { TutorSchedulePage } from "./tutor/SchedulePage";
 import { TodayPage } from "./tutor/TodayPage";
@@ -62,6 +70,11 @@ const routeTree = rootRoute.addChildren([
   page("/reports", ReportsPage),
   page("/billing", BillingPage),
   page("/profile", ProfilePage),
+  page("/referrals", ReferralsPage),
+  page("/affiliate", AffiliateHomePage),
+  page("/affiliate/clients", AffiliateClientsPage),
+  page("/affiliate/statements", AffiliateStatementsPage),
+  page("/affiliate/payout", AffiliatePayoutPage),
   page("/tutor", TodayPage),
   page("/tutor/schedule", TutorSchedulePage),
   page("/tutor/students", StudentsPage),
@@ -74,6 +87,7 @@ const routeTree = rootRoute.addChildren([
   page("/tutor/jobs", JobsPage),
   page("/tutor/profile", TutorProfilePage),
   page("/tutor/notifications", NotificationsPage),
+  page("/tutor/referrals", TutorReferralsPage),
   lessonRoute,
   offlineReportRoute,
   reportRoute,

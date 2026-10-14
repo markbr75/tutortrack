@@ -472,6 +472,7 @@ class PublicOpeningView(APIView):
             ip=client_ip(request),
             user_agent=request.headers.get("User-Agent", ""),
             honeypot=d["website"],
+            utm={"ref": d["ref"]} if d["ref"] else None,  # E25 tutor referral code
         )
         return Response(status=status.HTTP_201_CREATED)
 

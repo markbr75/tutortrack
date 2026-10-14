@@ -139,6 +139,6 @@ Naming: `<aggregate>.<past_tense_verb>`. Each epic lists its events; this table 
 | `brand_kit.updated`, `widget.saved`, `public_profile.submitted/approved/rejected/hidden`, `site_page.published`, `site.published`; `custom_domain.added/check_requested/verified/activated/failed/removed` (published by tenancy, which owns `OrganisationDomain`) | E24 |
 | `enrolment.created/confirmed/released/withdrawn/transferred/completed`, `class.full/below_minimum/cancelled/places_freed`, `term.rollover_started/rollover_responded/rollover_finalised` (class waitlist offers use E17 `waitlist.*` with `group_class_id`) | E20 |
 | `homework.assigned/submitted/graded`, `goal.achieved` | E21 |
-| `review.submitted`, `referral.converted`, `commission.earned` | E25 |
+| `review.requested/submitted/published`, `referral.created/converted/rewarded`, `commission.earned/clawed_back`, `affiliate_statement.issued` | E25 |
 | `import.submitted/validated/completed/failed/rolled_back/finalised`, `migration_project.started/step_completed/completed`, `export.requested/ready/downloaded/expired`, `invoice.imported` (billing, for imported history) | E28 |
 | `consent.granted`, `consent.withdrawn`, `security.alert` | E29 |

@@ -311,6 +311,7 @@ class PublicApplySerializer(serializers.Serializer):
     data = serializers.DictField()  # type: ignore[assignment]
     captcha_token = serializers.CharField(required=False, allow_blank=True, default="")
     website = serializers.CharField(required=False, allow_blank=True, default="")
+    ref = serializers.CharField(required=False, allow_blank=True, default="", max_length=40)
 
 
 class PublicInterviewSerializer(serializers.Serializer):

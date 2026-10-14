@@ -10,6 +10,7 @@ import { BrandMark, PoweredBy } from "./branding";
 import { OfflineBanner } from "./offline/OfflineIndicator";
 import { StatusBanner } from "./StatusBanner";
 import { usePortalBranding } from "./useBranding";
+import { AffiliateShell } from "./affiliate/AffiliatePages";
 import { TutorShell } from "./tutor/TutorShell";
 
 export function SignIn() {
@@ -64,6 +65,8 @@ export function Shell() {
       <StatusBanner />
       {who.data?.membership?.role === "tutor" ? (
         <TutorShell />
+      ) : who.data?.membership?.role === "affiliate" ? (
+        <AffiliateShell />
       ) : (
         <>
           <OfflineBanner />
@@ -80,7 +83,9 @@ function FamilyShell() {
   const location = useLocation();
   const navigate = useNavigate();
   useEffect(() => {
-    if (location.pathname.startsWith("/tutor")) void navigate({ to: "/" });
+    if (location.pathname.startsWith("/tutor") || location.pathname.startsWith("/affiliate")) {
+      void navigate({ to: "/" });
+    }
   }, [location.pathname, navigate]);
   const logout = useMutation({
     mutationFn: async () => api.POST("/api/v1/auth/logout"),
@@ -108,6 +113,7 @@ function FamilyShell() {
     ...(f.reports ? [{ to: "/reports", label: t("portal.nav.reports") }] : []),
     ...(f.invoices ? [{ to: "/billing", label: t("portal.nav.billing") }] : []),
     ...(f.profile ? [{ to: "/profile", label: t("portal.nav.profile") }] : []),
+    ...(f.referrals ? [{ to: "/referrals", label: t("referrals.portal.nav") }] : []),
   ] as const;
   return (
     <div className="mx-auto min-h-screen max-w-3xl">

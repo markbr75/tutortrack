@@ -138,7 +138,27 @@ def public_tutor_card(profile: PublicProfile) -> dict[str, Any]:
         "online": tutor.delivers_online,
         "in_person": tutor.delivers_in_person,
         "location": _location(tutor) if "location" in show else "",
+        **_rating(tutor.pk),
     }
+
+
+_rating_providers: list[Any] = []
+
+
+def register_rating_provider(provider: Any) -> Any:
+    """E25 publishes tutors' average review rating: ``provider(tutor_id)`` returns
+    ``(average, count)`` or None (when the organisation doesn't show ratings)."""
+    if provider not in _rating_providers:
+        _rating_providers.append(provider)
+    return provider
+
+
+def _rating(tutor_id: Any) -> dict[str, Any]:
+    for provider in _rating_providers:
+        found = provider(tutor_id)
+        if found is not None:
+            return {"rating": found[0], "review_count": found[1]}
+    return {"rating": None, "review_count": 0}
 
 
 def public_tutor_detail(profile: PublicProfile) -> dict[str, Any]:

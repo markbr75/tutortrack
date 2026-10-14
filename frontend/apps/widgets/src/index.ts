@@ -20,3 +20,9 @@ export { TtReviews } from "./reviews";
 export { TtServices } from "./services";
 export { TtTutorDirectory } from "./tutor-directory";
 export { applyTheme, emit } from "./runtime";
+export { captureReferral, referralCode } from "./referral";
+
+import { captureReferral } from "./referral";
+
+// E25: a visit through a referral or affiliate link (?ref=CODE) is counted and remembered.
+void captureReferral();

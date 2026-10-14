@@ -203,4 +203,13 @@ def portal_features(request: Request) -> dict[str, bool]:
         and has_perm(request.user, "portal.client.reschedule"),
         # E20: classes and re-enrolment (the courses app serves the pages' data).
         "classes": has_perm(request.user, "portal.client.enrol"),
+        # E25: the household's referral link and rewards (the growth app serves the page).
+        "referrals": has_perm(request.user, "portal.client.refer")
+        and _referral_programme_running(),
     }
+
+
+def _referral_programme_running() -> bool:
+    from tutortrack.growth.services import active_program
+
+    return active_program() is not None

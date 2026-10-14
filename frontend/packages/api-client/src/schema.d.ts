@@ -403,6 +403,319 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/affiliate-links": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["affiliate_links_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["affiliate_links_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/affiliate-links/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["affiliate_links_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["affiliate_links_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/affiliate-referrals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Clients attributed to affiliates. */
+    get: operations["affiliate_referrals_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/affiliate-referrals/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Clients attributed to affiliates. */
+    get: operations["affiliate_referrals_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/affiliate-statements": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Affiliate statements: ``issue`` (to a period end), ``pay`` and ``bank-file``
+     *     (financial POSTs honour ``Idempotency-Key``).
+     */
+    get: operations["affiliate_statements_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/affiliate-statements/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Affiliate statements: ``issue`` (to a period end), ``pay`` and ``bank-file``
+     *     (financial POSTs honour ``Idempotency-Key``).
+     */
+    get: operations["affiliate_statements_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/affiliate-statements/{id}/pay": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Affiliate statements: ``issue`` (to a period end), ``pay`` and ``bank-file``
+     *     (financial POSTs honour ``Idempotency-Key``).
+     */
+    post: operations["affiliate_statements_pay_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/affiliate-statements/bank-file": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description An E12 bank payment file for statements of bank-transfer affiliates. */
+    post: operations["affiliate_statements_bank_file_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/affiliate-statements/issue": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Affiliate statements: ``issue`` (to a period end), ``pay`` and ``bank-file``
+     *     (financial POSTs honour ``Idempotency-Key``).
+     */
+    post: operations["affiliate_statements_issue_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/affiliates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Affiliates (FR-25-3) with ``invite`` (portal login), ``summary``, ``assign_client``
+     *     and ``adjust`` (a manual commission correction).
+     */
+    get: operations["affiliates_list"];
+    put?: never;
+    /**
+     * @description Affiliates (FR-25-3) with ``invite`` (portal login), ``summary``, ``assign_client``
+     *     and ``adjust`` (a manual commission correction).
+     */
+    post: operations["affiliates_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/affiliates/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Affiliates (FR-25-3) with ``invite`` (portal login), ``summary``, ``assign_client``
+     *     and ``adjust`` (a manual commission correction).
+     */
+    get: operations["affiliates_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Affiliates (FR-25-3) with ``invite`` (portal login), ``summary``, ``assign_client``
+     *     and ``adjust`` (a manual commission correction).
+     */
+    patch: operations["affiliates_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/affiliates/{id}/adjust": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Financial: a manual commission item for the next statement (``Idempotency-Key``). */
+    post: operations["affiliates_adjust_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/affiliates/{id}/assign-client": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Affiliates (FR-25-3) with ``invite`` (portal login), ``summary``, ``assign_client``
+     *     and ``adjust`` (a manual commission correction).
+     */
+    post: operations["affiliates_assign_client_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/affiliates/{id}/invite": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Email the affiliate an invitation to the partner portal. */
+    post: operations["affiliates_invite_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/affiliates/{id}/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Affiliates (FR-25-3) with ``invite`` (portal login), ``summary``, ``assign_client``
+     *     and ``adjust`` (a manual commission correction).
+     */
+    get: operations["affiliates_summary_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/announcements": {
     parameters: {
       query?: never;
@@ -3749,6 +4062,76 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/api/v1/commission-items": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Commission items: earned, bounties, clawbacks (negative) and adjustments. */
+    get: operations["commission_items_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/commission-items/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Commission items: earned, bounties, clawbacks (negative) and adjustments. */
+    get: operations["commission_items_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/commission-rules": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Commission rules: defaults (no affiliate) and per-affiliate overrides. */
+    get: operations["commission_rules_list"];
+    put?: never;
+    /** @description Commission rules: defaults (no affiliate) and per-affiliate overrides. */
+    post: operations["commission_rules_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/commission-rules/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Commission rules: defaults (no affiliate) and per-affiliate overrides. */
+    get: operations["commission_rules_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Commission rules: defaults (no affiliate) and per-affiliate overrides. */
+    patch: operations["commission_rules_partial_update"];
     trace?: never;
   };
   "/api/v1/communication-preferences": {
@@ -10516,6 +10899,73 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/portal/affiliate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The partner portal home: totals and tracking links. */
+    get: operations["portal_affiliate_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/affiliate/clients": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Referred clients, privacy-limited (shortened names, dates and commission). */
+    get: operations["portal_affiliate_clients_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/affiliate/payout": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** @description The affiliate's bank details for commission payouts (stored encrypted). */
+    put: operations["portal_affiliate_payout_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/affiliate/statements": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["portal_affiliate_statements_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/portal/announcements": {
     parameters: {
       query?: never;
@@ -10893,6 +11343,23 @@ export interface paths {
     patch: operations["portal_profile_students_partial_update"];
     trace?: never;
   };
+  "/api/v1/portal/referrals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The household's referral link, the families it referred and rewards earned. */
+    get: operations["portal_referrals_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/portal/reports": {
     parameters: {
       query?: never;
@@ -11015,6 +11482,23 @@ export interface paths {
       cookie?: never;
     };
     get: operations["portal_statement_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/portal/tutor/referrals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description A tutor's own referral code, share links and bonuses (FR-25-4). */
+    get: operations["portal_tutor_referrals_retrieve"];
     put?: never;
     post?: never;
     delete?: never;
@@ -11541,6 +12025,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/public/ref": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description A visit through a referral or affiliate link: counts the click and tells the
+     *     website how long to remember the code (it is sent with the enquiry as ``utm.ref``).
+     */
+    post: operations["public_ref_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/public/references/{token}": {
     parameters: {
       query?: never;
@@ -11551,6 +12055,24 @@ export interface paths {
     get: operations["public_references_retrieve"];
     put?: never;
     post: operations["public_references_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/review/{token}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The review form behind the link in the review request email. */
+    get: operations["public_review_retrieve"];
+    put?: never;
+    /** @description Submit the review. 4-5 star reviewers get the Google review link back. */
+    post: operations["public_review_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -11743,6 +12265,191 @@ export interface paths {
      *     lines per tutor, each with a trace. You only see the sides your role may see.
      */
     post: operations["rates_quote_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/referral-codes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Clients' and tutors' referral codes. ``POST`` with ``client`` or ``tutor`` returns
+     *     their code (made on first use).
+     */
+    get: operations["referral_codes_list"];
+    put?: never;
+    /**
+     * @description Clients' and tutors' referral codes. ``POST`` with ``client`` or ``tutor`` returns
+     *     their code (made on first use).
+     */
+    post: operations["referral_codes_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/referral-codes/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Clients' and tutors' referral codes. ``POST`` with ``client`` or ``tutor`` returns
+     *     their code (made on first use).
+     */
+    get: operations["referral_codes_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/referral-programs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["referral_programs_list"];
+    put?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    post: operations["referral_programs_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/referral-programs/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["referral_programs_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    patch: operations["referral_programs_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/referrals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Referrals (FR-25-2). ``POST`` records one by hand; ``ReferralRewardWorkflow``
+     *     rewards it at the milestone. ``approve`` rewards a referral held by the fraud checks.
+     */
+    get: operations["referrals_list"];
+    put?: never;
+    /**
+     * @description Referrals (FR-25-2). ``POST`` records one by hand; ``ReferralRewardWorkflow``
+     *     rewards it at the milestone. ``approve`` rewards a referral held by the fraud checks.
+     */
+    post: operations["referrals_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/referrals/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Referrals (FR-25-2). ``POST`` records one by hand; ``ReferralRewardWorkflow``
+     *     rewards it at the milestone. ``approve`` rewards a referral held by the fraud checks.
+     */
+    get: operations["referrals_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/referrals/{id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Financial: gives the rewards despite the fraud flags (``Idempotency-Key``). */
+    post: operations["referrals_approve_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/referrals/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Referrals (FR-25-2). ``POST`` records one by hand; ``ReferralRewardWorkflow``
+     *     rewards it at the milestone. ``approve`` rewards a referral held by the fraud checks.
+     */
+    post: operations["referrals_cancel_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -12053,6 +12760,228 @@ export interface paths {
      *     request for their lesson. Undecided requests are declined at ``deadline``.
      */
     post: operations["reschedule_requests_decide_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/review-requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Review requests (FR-25-1). ``POST`` asks a family now (``ReviewRequestWorkflow``
+     *     sends it and a reminder).
+     */
+    get: operations["review_requests_list"];
+    put?: never;
+    /**
+     * @description Review requests (FR-25-1). ``POST`` asks a family now (``ReviewRequestWorkflow``
+     *     sends it and a reminder).
+     */
+    post: operations["review_requests_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/review-requests/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Review requests (FR-25-1). ``POST`` asks a family now (``ReviewRequestWorkflow``
+     *     sends it and a reminder).
+     */
+    get: operations["review_requests_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/review-requests/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Review requests (FR-25-1). ``POST`` asks a family now (``ReviewRequestWorkflow``
+     *     sends it and a reminder).
+     */
+    post: operations["review_requests_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reviews": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Reviews and the moderation queue (``?status=pending``). Tutors (own scope) see the
+     *     approved reviews about them when ``growth.tutors_see_reviews`` is on.
+     */
+    get: operations["reviews_list"];
+    put?: never;
+    /**
+     * @description Reviews and the moderation queue (``?status=pending``). Tutors (own scope) see the
+     *     approved reviews about them when ``growth.tutors_see_reviews`` is on.
+     */
+    post: operations["reviews_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reviews/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Reviews and the moderation queue (``?status=pending``). Tutors (own scope) see the
+     *     approved reviews about them when ``growth.tutors_see_reviews`` is on.
+     */
+    get: operations["reviews_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reviews/{id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Approve: counts in ratings; 4-5 stars with consent can become a testimonial. */
+    post: operations["reviews_approve_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reviews/{id}/hide": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Reviews and the moderation queue (``?status=pending``). Tutors (own scope) see the
+     *     approved reviews about them when ``growth.tutors_see_reviews`` is on.
+     */
+    post: operations["reviews_hide_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reviews/{id}/publish": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Publish as a website testimonial (E24 ``<tt-reviews>``). */
+    post: operations["reviews_publish_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reviews/{id}/respond": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Reviews and the moderation queue (``?status=pending``). Tutors (own scope) see the
+     *     approved reviews about them when ``growth.tutors_see_reviews`` is on.
+     */
+    post: operations["reviews_respond_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reviews/{id}/unpublish": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Reviews and the moderation queue (``?status=pending``). Tutors (own scope) see the
+     *     approved reviews about them when ``growth.tutors_see_reviews`` is on.
+     */
+    post: operations["reviews_unpublish_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/reviews/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Average rating, count and stars of approved reviews the user can see (the
+     *     organisation's, or one tutor's with ``?tutor=``).
+     */
+    get: operations["reviews_summary_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -13296,6 +14225,75 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/tutor-referrals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Tutor referral bonuses (FR-25-4): ``pay`` adds the bonus to the tutor's pay (E12). */
+    get: operations["tutor_referrals_list"];
+    put?: never;
+    /** @description Tutor referral bonuses (FR-25-4): ``pay`` adds the bonus to the tutor's pay (E12). */
+    post: operations["tutor_referrals_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor-referrals/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Tutor referral bonuses (FR-25-4): ``pay`` adds the bonus to the tutor's pay (E12). */
+    get: operations["tutor_referrals_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor-referrals/{id}/pay": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Financial: pay the bonus now (the configured amount, or ``amount``). */
+    post: operations["tutor_referrals_pay_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutor-referrals/{id}/reject": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Tutor referral bonuses (FR-25-4): ``pay`` adds the bonus to the tutor's pay (E12). */
+    post: operations["tutor_referrals_reject_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/tutor/earnings": {
     parameters: {
       query?: never;
@@ -14221,6 +15219,18 @@ export interface components {
       postcode?: string;
       country?: string;
     };
+    AdjustRequest: {
+      amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      description: string;
+    };
     AdjustmentOut: {
       name: string;
       amount: components["schemas"]["MoneyOut"];
@@ -14251,6 +15261,181 @@ export interface components {
       /** Format: date-time */
       starts_at: string;
       conflict: string;
+    };
+    Affiliate: {
+      /** Format: uuid */
+      readonly id: string;
+      kind?: components["schemas"]["AffiliateKindEnum"];
+      name: string;
+      /** Format: email */
+      email: string;
+      phone?: string;
+      status?: components["schemas"]["AffiliateStatusEnum"];
+      currency?: string;
+      payout_method?: components["schemas"]["AffiliatePayoutMethodEnum"];
+      payee_name?: string;
+      bank_country?: string;
+      readonly bank_hint: string;
+      notes?: string;
+      readonly has_login: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    AffiliateBankDetails: {
+      sort_code?: string;
+      account_number?: string;
+      iban?: string;
+      bic?: string;
+      routing_number?: string;
+      account_type?: string;
+      bsb?: string;
+      bank_code?: string;
+      account_name?: string;
+    };
+    AffiliateBankDetailsRequest: {
+      sort_code?: string;
+      account_number?: string;
+      iban?: string;
+      bic?: string;
+      routing_number?: string;
+      account_type?: string;
+      bsb?: string;
+      bank_code?: string;
+      account_name?: string;
+    };
+    AffiliateBankFile: {
+      filename: string;
+      content: string;
+    };
+    AffiliateBankFileRequestRequest: {
+      statements: string[];
+      file_format?:
+        (components["schemas"]["FileFormatEnum"] | components["schemas"]["NullEnum"]) | null;
+    };
+    /**
+     * @description * `individual` - Individual
+     *     * `organisation` - Organisation
+     * @enum {string}
+     */
+    AffiliateKindEnum: "individual" | "organisation";
+    AffiliateLink: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      affiliate: string;
+      readonly affiliate_name: string;
+      code?: string;
+      name?: string;
+      landing_path?: string;
+      readonly clicks: number;
+      active?: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    AffiliateLinkRequest: {
+      /** Format: uuid */
+      affiliate: string;
+      code?: string;
+      name?: string;
+      landing_path?: string;
+      active?: boolean;
+    };
+    /**
+     * @description * `bank_file` - Bank transfer (payment file)
+     *     * `manual` - Paid manually
+     * @enum {string}
+     */
+    AffiliatePayoutMethodEnum: "bank_file" | "manual";
+    AffiliateReferral: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly affiliate: string;
+      readonly affiliate_name: string;
+      /** Format: uuid */
+      readonly client: string;
+      readonly client_name: string;
+      /** Format: uuid */
+      readonly link: string | null;
+      /** @default  */
+      readonly link_code: string;
+      readonly source: components["schemas"]["AffiliateReferralSourceEnum"];
+      /** Format: date-time */
+      readonly attributed_at: string;
+      /** Format: date-time */
+      readonly converted_at: string | null;
+      readonly enquiry_id: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `link` - Tracking link
+     *     * `staff` - Added by staff
+     * @enum {string}
+     */
+    AffiliateReferralSourceEnum: "link" | "staff";
+    AffiliateRequest: {
+      kind?: components["schemas"]["AffiliateKindEnum"];
+      name: string;
+      /** Format: email */
+      email: string;
+      phone?: string;
+      status?: components["schemas"]["AffiliateStatusEnum"];
+      currency?: string;
+      payout_method?: components["schemas"]["AffiliatePayoutMethodEnum"];
+      payee_name?: string;
+      bank_country?: string;
+      bank?: components["schemas"]["AffiliateBankDetailsRequest"];
+      notes?: string;
+    };
+    AffiliateStatement: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly affiliate: string;
+      readonly affiliate_name: string;
+      readonly number: string;
+      /** Format: date */
+      readonly period_start: string;
+      /** Format: date */
+      readonly period_end: string;
+      readonly total: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly status: components["schemas"]["AffiliateStatementStatusEnum"];
+      /** Format: date-time */
+      readonly issued_at: string;
+      /** Format: date-time */
+      readonly paid_at: string | null;
+      readonly payout_method: string;
+      readonly payout_reference: string;
+      /** @default 0 */
+      readonly item_count: number;
+    };
+    /**
+     * @description * `issued` - Issued
+     *     * `paid` - Paid
+     * @enum {string}
+     */
+    AffiliateStatementStatusEnum: "issued" | "paid";
+    /**
+     * @description * `active` - Active
+     *     * `paused` - Paused (no new commission)
+     *     * `archived` - Archived
+     * @enum {string}
+     */
+    AffiliateStatusEnum: "active" | "paused" | "archived";
+    AffiliateSummary: {
+      clicks: number;
+      referred: number;
+      converted: number;
+      totals: components["schemas"]["SummaryTotals"][];
     };
     Ageing: {
       current: components["schemas"]["MoneyOut"];
@@ -14618,6 +15803,10 @@ export interface components {
      * @enum {string}
      */
     AssessSubjectStatusEnum: "claimed" | "assessed" | "approved" | "rejected";
+    AssignClientRequest: {
+      /** Format: uuid */
+      client: string;
+    };
     AssignCoverRequest: {
       /** Format: uuid */
       tutor: string;
@@ -16160,6 +17349,109 @@ export interface components {
      * @enum {string}
      */
     CollectionsCaseStatusEnum: "open" | "closed";
+    CommissionItem: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly affiliate: string;
+      readonly affiliate_name: string;
+      /** Format: uuid */
+      readonly client: string | null;
+      readonly client_name: string;
+      readonly kind: components["schemas"]["CommissionItemKindEnum"];
+      readonly base: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      /** Format: decimal */
+      readonly rate: string | null;
+      readonly amount: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      readonly description: string;
+      /** Format: date-time */
+      readonly earned_at: string;
+      /** Format: uuid */
+      readonly statement: string | null;
+      /** @default  */
+      readonly statement_number: string;
+      readonly payment_id: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `commission` - Commission
+     *     * `bounty` - Bounty
+     *     * `clawback` - Clawback (refund)
+     *     * `adjustment` - Adjustment
+     * @enum {string}
+     */
+    CommissionItemKindEnum: "commission" | "bounty" | "clawback" | "adjustment";
+    CommissionRule: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      affiliate?: string | null;
+      name: string;
+      kind?: components["schemas"]["CommissionRuleKindEnum"];
+      active?: boolean;
+      /** Format: decimal */
+      percent?: string | null;
+      tiers?: {
+        [key: string]: unknown;
+      }[];
+      bounty?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      duration_months?: number | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `percent` - Percentage of collected revenue
+     *     * `bounty` - Fixed bounty per converted client
+     * @enum {string}
+     */
+    CommissionRuleKindEnum: "percent" | "bounty";
+    CommissionRuleRequest: {
+      /** Format: uuid */
+      affiliate?: string | null;
+      name: string;
+      kind?: components["schemas"]["CommissionRuleKindEnum"];
+      active?: boolean;
+      /** Format: decimal */
+      percent?: string | null;
+      tiers?: {
+        [key: string]: unknown;
+      }[];
+      bounty?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      duration_months?: number | null;
+    };
     CompleteCheckoutRequest: {
       session_id: string;
     };
@@ -18025,6 +19317,15 @@ export interface components {
       subject_id: string;
     };
     /**
+     * @description * `csv` - csv
+     *     * `bacs18` - bacs18
+     *     * `sepa` - sepa
+     *     * `nacha` - nacha
+     *     * `aba` - aba
+     * @enum {string}
+     */
+    FileFormatEnum: "csv" | "bacs18" | "sepa" | "nacha" | "aba";
+    /**
      * @description * `` -
      *     * `csv` - csv
      *     * `ofx` - ofx
@@ -18284,6 +19585,10 @@ export interface components {
      * @enum {string}
      */
     GroupClassStatusEnum: "draft" | "open" | "full" | "running" | "completed" | "cancelled";
+    GrowthReasonRequest: {
+      /** @default  */
+      reason: string;
+    };
     HoldNoteRequest: {
       note: string;
     };
@@ -18634,6 +19939,10 @@ export interface components {
       branch_ids?: unknown;
       title?: string;
     };
+    InvitationSent: {
+      /** Format: email */
+      email: string;
+    };
     /**
      * @description * `pending` - Pending
      *     * `accepted` - Accepted
@@ -18970,6 +20279,10 @@ export interface components {
       created: string;
       pdf_url: string;
       hosted_url: string;
+    };
+    IssueStatementsRequest: {
+      /** Format: date */
+      period_end?: string | null;
     };
     Job: {
       /** Format: uuid */
@@ -20671,6 +21984,8 @@ export interface components {
     NudgeResult: {
       nudged: number;
     };
+    /** @enum {unknown} */
+    NullEnum: null;
     OAuthApplication: {
       /** Format: uuid */
       readonly id: string;
@@ -21263,6 +22578,58 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["AccountingConnection"][];
     };
+    PaginatedAffiliateLinkList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["AffiliateLink"][];
+    };
+    PaginatedAffiliateList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Affiliate"][];
+    };
+    PaginatedAffiliateReferralList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["AffiliateReferral"][];
+    };
+    PaginatedAffiliateStatementList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["AffiliateStatement"][];
+    };
     PaginatedAnnouncementList: {
       /**
        * Format: uri
@@ -21457,6 +22824,32 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["CollectionsCase"][];
+    };
+    PaginatedCommissionItemList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["CommissionItem"][];
+    };
+    PaginatedCommissionRuleList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["CommissionRule"][];
     };
     PaginatedConflictList: {
       /**
@@ -22238,6 +23631,45 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["PushSubscription"][];
     };
+    PaginatedReferralCodeList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ReferralCode"][];
+    };
+    PaginatedReferralList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Referral"][];
+    };
+    PaginatedReferralProgramList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ReferralProgram"][];
+    };
     PaginatedReportRunList: {
       /**
        * Format: uri
@@ -22250,6 +23682,32 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["ReportRun"][];
+    };
+    PaginatedReviewInviteList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ReviewInvite"][];
+    };
+    PaginatedReviewList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["Review"][];
     };
     PaginatedRoomList: {
       /**
@@ -22459,6 +23917,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["TutorRate"][];
     };
+    PaginatedTutorReferralList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["TutorReferral"][];
+    };
     PaginatedTutorSubjectList: {
       /**
        * Format: uri
@@ -22576,6 +24047,28 @@ export interface components {
       sync_bills?: boolean;
       attach_pdf?: boolean;
       lock_behaviour?: components["schemas"]["LockBehaviourEnum"];
+    };
+    PatchedAffiliateLinkRequest: {
+      /** Format: uuid */
+      affiliate?: string;
+      code?: string;
+      name?: string;
+      landing_path?: string;
+      active?: boolean;
+    };
+    PatchedAffiliateRequest: {
+      kind?: components["schemas"]["AffiliateKindEnum"];
+      name?: string;
+      /** Format: email */
+      email?: string;
+      phone?: string;
+      status?: components["schemas"]["AffiliateStatusEnum"];
+      currency?: string;
+      payout_method?: components["schemas"]["AffiliatePayoutMethodEnum"];
+      payee_name?: string;
+      bank_country?: string;
+      bank?: components["schemas"]["AffiliateBankDetailsRequest"];
+      notes?: string;
     };
     PatchedApiKeyUpdateRequest: {
       name?: string;
@@ -22728,6 +24221,28 @@ export interface components {
       /** Format: uuid */
       account_manager?: string | null;
       custom_fields?: unknown;
+    };
+    PatchedCommissionRuleRequest: {
+      /** Format: uuid */
+      affiliate?: string | null;
+      name?: string;
+      kind?: components["schemas"]["CommissionRuleKindEnum"];
+      active?: boolean;
+      /** Format: decimal */
+      percent?: string | null;
+      tiers?: {
+        [key: string]: unknown;
+      }[];
+      bounty?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      duration_months?: number | null;
     };
     PatchedConsentTypeRequest: {
       key?: string;
@@ -23342,6 +24857,29 @@ export interface components {
       listed?: boolean;
       slug?: string;
     };
+    PatchedReferralProgramRequest: {
+      name?: string;
+      active?: boolean;
+      referrer_reward_kind?: components["schemas"]["ReferrerRewardKindEnum"];
+      referrer_reward?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      milestone?: components["schemas"]["ReferralMilestoneEnum"];
+      milestone_lessons?: number;
+      /** Format: decimal */
+      referee_discount_percent?: string | null;
+      referee_discount_days?: number;
+      deadline_days?: number;
+      max_rewards_per_period?: number | null;
+      period_days?: number;
+      terms?: string;
+    };
     PatchedReportTemplateRequest: {
       name?: string;
       description?: string;
@@ -23674,6 +25212,17 @@ export interface components {
       allowed_origins?: string[];
       active?: boolean;
     };
+    PayBonusRequest: {
+      amount?: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+    };
     PayIntent: {
       /** @default stripe */
       provider: string;
@@ -23951,6 +25500,10 @@ export interface components {
      * @enum {string}
      */
     PayStatementKindEnum: "self_billing" | "remittance";
+    PayStatementRequest: {
+      /** @default  */
+      reference: string;
+    };
     PayTier: {
       /** Format: uuid */
       readonly id: string;
@@ -24190,6 +25743,11 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    PayoutDetailsRequest: {
+      payee_name: string;
+      country: string;
+      bank: components["schemas"]["AffiliateBankDetailsRequest"];
+    };
     PercentPair: {
       /** Format: decimal */
       charge_percent: string;
@@ -24376,6 +25934,30 @@ export interface components {
       max_free_per_month?: number | null;
       makeup_credit?: components["schemas"]["MakeupRulesRequest"];
     };
+    PortalAffiliate: {
+      name: string;
+      organisation: string;
+      payout_method: string;
+      bank_hint: string;
+      summary: components["schemas"]["AffiliateSummary"];
+      links: components["schemas"]["PortalAffiliateLink"][];
+    };
+    PortalAffiliateClient: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      /** Format: date-time */
+      attributed_at: string;
+      /** Format: date-time */
+      converted_at: string | null;
+      commission: components["schemas"]["MoneyOut"] | null;
+    };
+    PortalAffiliateLink: {
+      code: string;
+      name: string;
+      url: string;
+      clicks: number;
+    };
     PortalAttendee: {
       id: string;
       name: string;
@@ -24485,6 +26067,7 @@ export interface components {
       booking: boolean;
       reschedule: boolean;
       classes: boolean;
+      referrals: boolean;
     };
     PortalInvoice: {
       id: string;
@@ -24597,6 +26180,34 @@ export interface components {
       contacts: components["schemas"]["PortalContact"][];
       students: components["schemas"]["PortalStudent"][];
     };
+    PortalProgram: {
+      name: string;
+      referrer_reward: components["schemas"]["MoneyOut"];
+      referrer_reward_kind: string;
+      milestone: string;
+      milestone_lessons: number;
+      /** Format: decimal */
+      referee_discount_percent: string | null;
+      terms: string;
+    };
+    PortalReferralRow: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      status: string;
+      /** Format: date-time */
+      created_at: string;
+      /** Format: date-time */
+      rewarded_at: string | null;
+      reward: components["schemas"]["MoneyOut"] | null;
+    };
+    PortalReferrals: {
+      code: string;
+      link: string;
+      program: components["schemas"]["PortalProgram"] | null;
+      referrals: components["schemas"]["PortalReferralRow"][];
+      earned: components["schemas"]["MoneyOut"][];
+    };
     PortalReport: {
       id: string;
       lesson_title: string;
@@ -24629,6 +26240,27 @@ export interface components {
     };
     PortalSetup: {
       url: string;
+    };
+    PortalStatement: {
+      /** Format: uuid */
+      id: string;
+      number: string;
+      /** Format: date */
+      period_start: string;
+      /** Format: date */
+      period_end: string;
+      total: components["schemas"]["MoneyOut"];
+      status: string;
+      /** Format: date-time */
+      paid_at: string | null;
+      items: components["schemas"]["PortalStatementItem"][];
+    };
+    PortalStatementItem: {
+      kind: string;
+      description: string;
+      amount: components["schemas"]["MoneyOut"];
+      /** Format: date-time */
+      earned_at: string;
     };
     PortalStudent: {
       /** Format: uuid */
@@ -25146,6 +26778,8 @@ export interface components {
       captcha_token: string;
       /** @default  */
       website: string;
+      /** @default  */
+      ref: string;
     };
     PublicBranding: {
       name: string;
@@ -25394,6 +27028,16 @@ export interface components {
       listed?: boolean;
       slug?: string;
     };
+    PublicRefRequest: {
+      code: string;
+    };
+    PublicRefResult: {
+      valid: boolean;
+      kind: string;
+      landing_path: string;
+      remember_days: number;
+      offer: string;
+    };
     PublicReference: {
       applicant: string;
       status: string;
@@ -25407,6 +27051,31 @@ export interface components {
       role: string;
       rating: number | null;
       stars: string;
+    };
+    PublicReviewPage: {
+      organisation: string;
+      tutor: string;
+      student: string;
+      reviewer_name: string;
+      criteria: string[];
+      open: boolean;
+      status: string;
+    };
+    PublicReviewSubmitRequest: {
+      rating: number;
+      criteria?: {
+        [key: string]: number;
+      };
+      /** @default  */
+      text: string;
+      /** @default  */
+      reviewer_name: string;
+      /** @default false */
+      publish_consent: boolean;
+    };
+    PublicReviewThanks: {
+      status: string;
+      google_review_url: string;
     };
     PublicService: {
       id: string;
@@ -25458,6 +27127,9 @@ export interface components {
       online: boolean;
       in_person: boolean;
       location: string;
+      /** Format: double */
+      rating: number | null;
+      review_count: number;
     };
     PublicTutorDetail: {
       slug: string;
@@ -25468,6 +27140,9 @@ export interface components {
       online: boolean;
       in_person: boolean;
       location: string;
+      /** Format: double */
+      rating: number | null;
+      review_count: number;
       bio: string;
       qualifications: components["schemas"]["Qualification"][];
       languages: string[];
@@ -25707,6 +27382,14 @@ export interface components {
       charges?: components["schemas"]["ChargeLine"][];
       pay?: components["schemas"]["PayLine"][];
     };
+    RatingSummary: {
+      /** Format: double */
+      average: number | null;
+      count: number;
+      stars: {
+        [key: string]: number;
+      };
+    };
     Reactivate: {
       subscription: components["schemas"]["Subscription"];
       url: string;
@@ -25850,6 +27533,150 @@ export interface components {
      * @enum {string}
      */
     ReferenceStatusEnum: "requested" | "received" | "declined" | "expired";
+    Referral: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly program: string;
+      /** Format: uuid */
+      referrer: string;
+      readonly referrer_name: string;
+      /** Format: uuid */
+      referee: string;
+      readonly referee_name: string;
+      /** @default  */
+      readonly code_value: string;
+      readonly source: components["schemas"]["ReferralSourceEnum"];
+      readonly status: components["schemas"]["ReferralStatusEnum"];
+      /** Format: date-time */
+      readonly deadline: string;
+      /** Format: date-time */
+      readonly converted_at: string | null;
+      /** Format: date-time */
+      readonly rewarded_at: string | null;
+      readonly fraud_flags: unknown;
+      readonly referrer_credit: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      readonly referee_discount_id: string;
+      note?: string;
+      readonly enquiry_id: string;
+      readonly workflow_id: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ReferralCode: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly code: string;
+      /** Format: uuid */
+      client?: string | null;
+      /** Format: uuid */
+      tutor?: string | null;
+      readonly owner_name: string;
+      readonly clicks: number;
+      readonly active: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ReferralCodeRequest: {
+      /** Format: uuid */
+      client?: string | null;
+      /** Format: uuid */
+      tutor?: string | null;
+    };
+    /**
+     * @description * `first_payment` - The new family pays their first invoice
+     *     * `lessons` - The new family completes a number of lessons
+     * @enum {string}
+     */
+    ReferralMilestoneEnum: "first_payment" | "lessons";
+    ReferralProgram: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      active?: boolean;
+      referrer_reward_kind?: components["schemas"]["ReferrerRewardKindEnum"];
+      referrer_reward: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      milestone?: components["schemas"]["ReferralMilestoneEnum"];
+      milestone_lessons?: number;
+      /** Format: decimal */
+      referee_discount_percent?: string | null;
+      referee_discount_days?: number;
+      deadline_days?: number;
+      max_rewards_per_period?: number | null;
+      period_days?: number;
+      terms?: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ReferralProgramRequest: {
+      name: string;
+      active?: boolean;
+      referrer_reward_kind?: components["schemas"]["ReferrerRewardKindEnum"];
+      referrer_reward: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      };
+      milestone?: components["schemas"]["ReferralMilestoneEnum"];
+      milestone_lessons?: number;
+      /** Format: decimal */
+      referee_discount_percent?: string | null;
+      referee_discount_days?: number;
+      deadline_days?: number;
+      max_rewards_per_period?: number | null;
+      period_days?: number;
+      terms?: string;
+    };
+    ReferralRequest: {
+      /** Format: uuid */
+      referrer: string;
+      /** Format: uuid */
+      referee: string;
+      note?: string;
+    };
+    /**
+     * @description * `link` - Referral link
+     *     * `code` - Code entered
+     *     * `staff` - Added by staff
+     * @enum {string}
+     */
+    ReferralSourceEnum: "link" | "code" | "staff";
+    /**
+     * @description * `pending` - Waiting for the milestone
+     *     * `converted` - Milestone reached
+     *     * `rewarded` - Rewarded
+     *     * `blocked` - Held by fraud checks
+     *     * `expired` - Expired
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    ReferralStatusEnum: "pending" | "converted" | "rewarded" | "blocked" | "expired" | "cancelled";
+    /**
+     * @description * `credit` - Account credit
+     *     * `free_lesson` - A free lesson (as credit)
+     * @enum {string}
+     */
+    ReferrerRewardKindEnum: "credit" | "free_lesson";
     Refund: {
       /** Format: uuid */
       readonly id: string;
@@ -26257,6 +28084,121 @@ export interface components {
     RetryResult: {
       retried: number;
     };
+    Review: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      client: string;
+      readonly client_name: string;
+      /** Format: uuid */
+      contact?: string | null;
+      /** Format: uuid */
+      student?: string | null;
+      /** Format: uuid */
+      tutor?: string | null;
+      readonly tutor_name: string;
+      rating: number;
+      criteria?: unknown;
+      text?: string;
+      reviewer_name: string;
+      publish_consent?: boolean;
+      readonly source: components["schemas"]["ReviewSourceEnum"];
+      readonly status: components["schemas"]["ReviewStatusEnum"];
+      /** Format: date-time */
+      readonly moderated_at: string | null;
+      readonly response: string;
+      /** Format: date-time */
+      readonly responded_at: string | null;
+      readonly google_prompted: boolean;
+      readonly published_as_testimonial: boolean;
+      /** Format: uuid */
+      readonly request: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ReviewInvite: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      client: string;
+      readonly client_name: string;
+      /** Format: uuid */
+      student?: string | null;
+      /** Format: uuid */
+      tutor?: string | null;
+      readonly tutor_name: string;
+      readonly trigger: components["schemas"]["ReviewTriggerEnum"];
+      readonly status: components["schemas"]["ReviewInviteStatusEnum"];
+      readonly lesson_count: number;
+      /** Format: date-time */
+      readonly sent_at: string | null;
+      /** Format: date-time */
+      readonly reminded_at: string | null;
+      /** Format: date-time */
+      readonly submitted_at: string | null;
+      /** Format: date-time */
+      readonly expires_at: string;
+      readonly workflow_id: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    ReviewInviteRequest: {
+      /** Format: uuid */
+      client: string;
+      /** Format: uuid */
+      student?: string | null;
+      /** Format: uuid */
+      tutor?: string | null;
+    };
+    /**
+     * @description * `pending` - Sent
+     *     * `reminded` - Reminded
+     *     * `submitted` - Reviewed
+     *     * `expired` - Expired
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    ReviewInviteStatusEnum: "pending" | "reminded" | "submitted" | "expired" | "cancelled";
+    ReviewReplyRequest: {
+      response: string;
+    };
+    ReviewRequest: {
+      /** Format: uuid */
+      client: string;
+      /** Format: uuid */
+      contact?: string | null;
+      /** Format: uuid */
+      student?: string | null;
+      /** Format: uuid */
+      tutor?: string | null;
+      rating: number;
+      criteria?: unknown;
+      text?: string;
+      reviewer_name: string;
+      publish_consent?: boolean;
+    };
+    /**
+     * @description * `request` - Review request
+     *     * `portal` - Portal
+     *     * `staff` - Entered by staff
+     * @enum {string}
+     */
+    ReviewSourceEnum: "request" | "portal" | "staff";
+    /**
+     * @description * `pending` - Waiting for moderation
+     *     * `approved` - Approved
+     *     * `hidden` - Hidden
+     * @enum {string}
+     */
+    ReviewStatusEnum: "pending" | "approved" | "hidden";
+    /**
+     * @description * `lessons` - After N lessons
+     *     * `trial` - After a trial lesson
+     *     * `automation` - Automation
+     *     * `manual` - Sent by staff
+     * @enum {string}
+     */
+    ReviewTriggerEnum: "lessons" | "trial" | "automation" | "manual";
     RevokeRequestRequest: {
       token: string;
       client_id: string;
@@ -27528,6 +29470,12 @@ export interface components {
      * @enum {string}
      */
     SubscriptionStatusEnum: "trialing" | "active" | "past_due" | "suspended" | "cancelled";
+    SummaryTotals: {
+      currency: string;
+      earned: components["schemas"]["MoneyOut"];
+      unpaid: components["schemas"]["MoneyOut"];
+      paid: components["schemas"]["MoneyOut"];
+    };
     SupportAccess: {
       requires_grant: boolean;
       grants: components["schemas"]["SupportGrant"][];
@@ -28443,6 +30391,77 @@ export interface components {
         /** @example GBP */
         currency: string;
       } | null;
+    };
+    TutorReferral: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      referrer: string;
+      readonly referrer_name: string;
+      kind: components["schemas"]["TutorReferralKindEnum"];
+      application_id?: string;
+      /** Format: uuid */
+      referred_tutor?: string | null;
+      /** Format: uuid */
+      client?: string | null;
+      referred_name?: string;
+      readonly status: components["schemas"]["TutorReferralStatusEnum"];
+      readonly bonus: {
+        /**
+         * Format: decimal
+         * @example 40.00
+         */
+        amount: string;
+        /** @example GBP */
+        currency: string;
+      } | null;
+      readonly pay_item_id: string;
+      /** Format: date-time */
+      readonly qualified_at: string | null;
+      note?: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `tutor` - Tutor referral
+     *     * `client` - Client referral
+     * @enum {string}
+     */
+    TutorReferralKindEnum: "tutor" | "client";
+    TutorReferralRequest: {
+      /** Format: uuid */
+      referrer: string;
+      kind: components["schemas"]["TutorReferralKindEnum"];
+      application_id?: string;
+      /** Format: uuid */
+      referred_tutor?: string | null;
+      /** Format: uuid */
+      client?: string | null;
+      referred_name?: string;
+      note?: string;
+    };
+    TutorReferralRow: {
+      /** Format: uuid */
+      id: string;
+      kind: string;
+      referred_name: string;
+      status: string;
+      bonus: components["schemas"]["MoneyOut"] | null;
+      /** Format: date-time */
+      created_at: string;
+    };
+    /**
+     * @description * `pending` - Waiting for the milestone
+     *     * `paid` - Bonus added to pay
+     *     * `rejected` - Rejected
+     * @enum {string}
+     */
+    TutorReferralStatusEnum: "pending" | "paid" | "rejected";
+    TutorReferralsPage: {
+      code: string;
+      client_link: string;
+      tutor_link: string;
+      referrals: components["schemas"]["TutorReferralRow"][];
     };
     TutorRequest: {
       /** Format: email */
@@ -29647,6 +31666,551 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["RetryResult"];
+        };
+      };
+    };
+  };
+  affiliate_links_list: {
+    parameters: {
+      query?: {
+        active?: boolean;
+        affiliate?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAffiliateLinkList"];
+        };
+      };
+    };
+  };
+  affiliate_links_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AffiliateLinkRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AffiliateLinkRequest"];
+        "multipart/form-data": components["schemas"]["AffiliateLinkRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AffiliateLink"];
+        };
+      };
+    };
+  };
+  affiliate_links_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this affiliate link. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AffiliateLink"];
+        };
+      };
+    };
+  };
+  affiliate_links_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this affiliate link. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedAffiliateLinkRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedAffiliateLinkRequest"];
+        "multipart/form-data": components["schemas"]["PatchedAffiliateLinkRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AffiliateLink"];
+        };
+      };
+    };
+  };
+  affiliate_referrals_list: {
+    parameters: {
+      query?: {
+        affiliate?: string;
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAffiliateReferralList"];
+        };
+      };
+    };
+  };
+  affiliate_referrals_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this affiliate referral. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AffiliateReferral"];
+        };
+      };
+    };
+  };
+  affiliate_statements_list: {
+    parameters: {
+      query?: {
+        affiliate?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `issued` - Issued
+         *     * `paid` - Paid
+         */
+        status?: "issued" | "paid";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAffiliateStatementList"];
+        };
+      };
+    };
+  };
+  affiliate_statements_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this affiliate statement. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AffiliateStatement"];
+        };
+      };
+    };
+  };
+  affiliate_statements_pay_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this affiliate statement. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PayStatementRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PayStatementRequest"];
+        "multipart/form-data": components["schemas"]["PayStatementRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AffiliateStatement"];
+        };
+      };
+    };
+  };
+  affiliate_statements_bank_file_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AffiliateBankFileRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AffiliateBankFileRequestRequest"];
+        "multipart/form-data": components["schemas"]["AffiliateBankFileRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AffiliateBankFile"];
+        };
+      };
+    };
+  };
+  affiliate_statements_issue_create: {
+    parameters: {
+      query?: {
+        affiliate?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /**
+         * @description * `issued` - Issued
+         *     * `paid` - Paid
+         */
+        status?: "issued" | "paid";
+      };
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["IssueStatementsRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["IssueStatementsRequest"];
+        "multipart/form-data": components["schemas"]["IssueStatementsRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AffiliateStatement"][];
+        };
+      };
+    };
+  };
+  affiliates_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `active` - Active
+         *     * `paused` - Paused (no new commission)
+         *     * `archived` - Archived
+         */
+        status?: "active" | "archived" | "paused";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAffiliateList"];
+        };
+      };
+    };
+  };
+  affiliates_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AffiliateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AffiliateRequest"];
+        "multipart/form-data": components["schemas"]["AffiliateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Affiliate"];
+        };
+      };
+    };
+  };
+  affiliates_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this affiliate. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Affiliate"];
+        };
+      };
+    };
+  };
+  affiliates_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this affiliate. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedAffiliateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedAffiliateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedAffiliateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Affiliate"];
+        };
+      };
+    };
+  };
+  affiliates_adjust_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this affiliate. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AdjustRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AdjustRequest"];
+        "multipart/form-data": components["schemas"]["AdjustRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CommissionItem"];
+        };
+      };
+    };
+  };
+  affiliates_assign_client_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this affiliate. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssignClientRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AssignClientRequest"];
+        "multipart/form-data": components["schemas"]["AssignClientRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AffiliateReferral"];
+        };
+      };
+    };
+  };
+  affiliates_invite_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this affiliate. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvitationSent"];
+        };
+      };
+    };
+  };
+  affiliates_summary_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this affiliate. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AffiliateSummary"];
         };
       };
     };
@@ -36398,6 +38962,185 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ClientDetail"];
+        };
+      };
+    };
+  };
+  commission_items_list: {
+    parameters: {
+      query?: {
+        affiliate?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /**
+         * @description * `commission` - Commission
+         *     * `bounty` - Bounty
+         *     * `clawback` - Clawback (refund)
+         *     * `adjustment` - Adjustment
+         */
+        kind?: "adjustment" | "bounty" | "clawback" | "commission";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        statement?: string;
+        unstatemented?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedCommissionItemList"];
+        };
+      };
+    };
+  };
+  commission_items_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this commission item. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CommissionItem"];
+        };
+      };
+    };
+  };
+  commission_rules_list: {
+    parameters: {
+      query?: {
+        active?: boolean;
+        affiliate?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /**
+         * @description * `percent` - Percentage of collected revenue
+         *     * `bounty` - Fixed bounty per converted client
+         */
+        kind?: "bounty" | "percent";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedCommissionRuleList"];
+        };
+      };
+    };
+  };
+  commission_rules_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CommissionRuleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CommissionRuleRequest"];
+        "multipart/form-data": components["schemas"]["CommissionRuleRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CommissionRule"];
+        };
+      };
+    };
+  };
+  commission_rules_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this commission rule. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CommissionRule"];
+        };
+      };
+    };
+  };
+  commission_rules_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this commission rule. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedCommissionRuleRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedCommissionRuleRequest"];
+        "multipart/form-data": components["schemas"]["PatchedCommissionRuleRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CommissionRule"];
         };
       };
     };
@@ -48225,6 +50968,88 @@ export interface operations {
       };
     };
   };
+  portal_affiliate_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalAffiliate"];
+        };
+      };
+    };
+  };
+  portal_affiliate_clients_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalAffiliateClient"][];
+        };
+      };
+    };
+  };
+  portal_affiliate_payout_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PayoutDetailsRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PayoutDetailsRequest"];
+        "multipart/form-data": components["schemas"]["PayoutDetailsRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalAffiliate"];
+        };
+      };
+    };
+  };
+  portal_affiliate_statements_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalStatement"][];
+        };
+      };
+    };
+  };
   portal_announcements_list: {
     parameters: {
       query?: never;
@@ -48793,6 +51618,25 @@ export interface operations {
       };
     };
   };
+  portal_referrals_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PortalReferrals"];
+        };
+      };
+    };
+  };
   portal_reports_list: {
     parameters: {
       query?: {
@@ -48989,6 +51833,25 @@ export interface operations {
         };
         content: {
           "application/pdf": string;
+        };
+      };
+    };
+  };
+  portal_tutor_referrals_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorReferralsPage"];
         };
       };
     };
@@ -49948,6 +52811,34 @@ export interface operations {
       };
     };
   };
+  public_ref_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublicRefRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PublicRefRequest"];
+        "multipart/form-data": components["schemas"]["PublicRefRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicRefResult"];
+        };
+      };
+    };
+  };
   public_references_retrieve: {
     parameters: {
       query?: never;
@@ -49995,6 +52886,57 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PublicReference"];
+        };
+      };
+    };
+  };
+  public_review_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicReviewPage"];
+        };
+      };
+    };
+  };
+  public_review_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublicReviewSubmitRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PublicReviewSubmitRequest"];
+        "multipart/form-data": components["schemas"]["PublicReviewSubmitRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicReviewThanks"];
         };
       };
     };
@@ -50277,6 +53219,346 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["RateQuote"];
+        };
+      };
+    };
+  };
+  referral_codes_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedReferralCodeList"];
+        };
+      };
+    };
+  };
+  referral_codes_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["ReferralCodeRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReferralCodeRequest"];
+        "multipart/form-data": components["schemas"]["ReferralCodeRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReferralCode"];
+        };
+      };
+    };
+  };
+  referral_codes_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this referral code. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReferralCode"];
+        };
+      };
+    };
+  };
+  referral_programs_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedReferralProgramList"];
+        };
+      };
+    };
+  };
+  referral_programs_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReferralProgramRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReferralProgramRequest"];
+        "multipart/form-data": components["schemas"]["ReferralProgramRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReferralProgram"];
+        };
+      };
+    };
+  };
+  referral_programs_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this referral program. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReferralProgram"];
+        };
+      };
+    };
+  };
+  referral_programs_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this referral program. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedReferralProgramRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedReferralProgramRequest"];
+        "multipart/form-data": components["schemas"]["PatchedReferralProgramRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReferralProgram"];
+        };
+      };
+    };
+  };
+  referrals_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        referee?: string;
+        referrer?: string;
+        /**
+         * @description * `pending` - Waiting for the milestone
+         *     * `converted` - Milestone reached
+         *     * `rewarded` - Rewarded
+         *     * `blocked` - Held by fraud checks
+         *     * `expired` - Expired
+         *     * `cancelled` - Cancelled
+         */
+        status?: "blocked" | "cancelled" | "converted" | "expired" | "pending" | "rewarded";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedReferralList"];
+        };
+      };
+    };
+  };
+  referrals_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReferralRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReferralRequest"];
+        "multipart/form-data": components["schemas"]["ReferralRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Referral"];
+        };
+      };
+    };
+  };
+  referrals_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this referral. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Referral"];
+        };
+      };
+    };
+  };
+  referrals_approve_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this referral. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Referral"];
+        };
+      };
+    };
+  };
+  referrals_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this referral. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["GrowthReasonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["GrowthReasonRequest"];
+        "multipart/form-data": components["schemas"]["GrowthReasonRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Referral"];
         };
       };
     };
@@ -50832,6 +54114,365 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["LessonChangeRequest"];
+        };
+      };
+    };
+  };
+  review_requests_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `pending` - Sent
+         *     * `reminded` - Reminded
+         *     * `submitted` - Reviewed
+         *     * `expired` - Expired
+         *     * `cancelled` - Cancelled
+         */
+        status?: "cancelled" | "expired" | "pending" | "reminded" | "submitted";
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedReviewInviteList"];
+        };
+      };
+    };
+  };
+  review_requests_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReviewInviteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReviewInviteRequest"];
+        "multipart/form-data": components["schemas"]["ReviewInviteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReviewInvite"];
+        };
+      };
+    };
+  };
+  review_requests_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this review request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReviewInvite"];
+        };
+      };
+    };
+  };
+  review_requests_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this review request. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReviewInvite"];
+        };
+      };
+    };
+  };
+  reviews_list: {
+    parameters: {
+      query?: {
+        client?: string;
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        max_rating?: number;
+        min_rating?: number;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /**
+         * @description * `pending` - Waiting for moderation
+         *     * `approved` - Approved
+         *     * `hidden` - Hidden
+         */
+        status?: "approved" | "hidden" | "pending";
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedReviewList"];
+        };
+      };
+    };
+  };
+  reviews_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReviewRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReviewRequest"];
+        "multipart/form-data": components["schemas"]["ReviewRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Review"];
+        };
+      };
+    };
+  };
+  reviews_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this review. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Review"];
+        };
+      };
+    };
+  };
+  reviews_approve_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this review. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Review"];
+        };
+      };
+    };
+  };
+  reviews_hide_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this review. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Review"];
+        };
+      };
+    };
+  };
+  reviews_publish_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this review. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Review"];
+        };
+      };
+    };
+  };
+  reviews_respond_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this review. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReviewReplyRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ReviewReplyRequest"];
+        "multipart/form-data": components["schemas"]["ReviewReplyRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Review"];
+        };
+      };
+    };
+  };
+  reviews_unpublish_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this review. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Review"];
+        };
+      };
+    };
+  };
+  reviews_summary_retrieve: {
+    parameters: {
+      query?: {
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RatingSummary"];
         };
       };
     };
@@ -53296,6 +56937,161 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TimelineItem"][];
+        };
+      };
+    };
+  };
+  tutor_referrals_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /**
+         * @description * `tutor` - Tutor referral
+         *     * `client` - Client referral
+         */
+        kind?: "client" | "tutor";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        referrer?: string;
+        /**
+         * @description * `pending` - Waiting for the milestone
+         *     * `paid` - Bonus added to pay
+         *     * `rejected` - Rejected
+         */
+        status?: "paid" | "pending" | "rejected";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedTutorReferralList"];
+        };
+      };
+    };
+  };
+  tutor_referrals_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TutorReferralRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TutorReferralRequest"];
+        "multipart/form-data": components["schemas"]["TutorReferralRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorReferral"];
+        };
+      };
+    };
+  };
+  tutor_referrals_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this tutor referral. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorReferral"];
+        };
+      };
+    };
+  };
+  tutor_referrals_pay_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this tutor referral. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PayBonusRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PayBonusRequest"];
+        "multipart/form-data": components["schemas"]["PayBonusRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorReferral"];
+        };
+      };
+    };
+  };
+  tutor_referrals_reject_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this tutor referral. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["GrowthReasonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["GrowthReasonRequest"];
+        "multipart/form-data": components["schemas"]["GrowthReasonRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TutorReferral"];
         };
       };
     };
