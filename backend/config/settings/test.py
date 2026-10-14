@@ -62,3 +62,6 @@ PAYPAL = {**PAYPAL, "CLIENT_ID": "", "WEBHOOK_ID": ""}
 
 # E24: hosted websites resolve at <slug>.tutortrack-site.test.
 CUSTOM_DOMAINS = {**CUSTOM_DOMAINS, "SITE_BASE_DOMAIN": "tutortrack-site.test"}
+
+# E31: always the deterministic fake LLM (the suite never calls the real API).
+AI = {**AI, "PROVIDER": "fake", "API_KEY": ""}

@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useState } from "react";
 
 import { api, usePermission } from "../api";
+import { AiContentHelper } from "../ai/AiParts";
 import { errorText, fieldErrors } from "./helpers";
 import { Card } from "./shared";
 import { uploadImage } from "./upload";
@@ -420,6 +421,22 @@ function PageEditor({ page, onClose }: { page: SitePage; onClose: () => void }) 
           {t("website.pages.showInNav")}
         </label>
       </Card>
+      {canManage ? (
+        <AiContentHelper
+          kind="page"
+          title={meta.title}
+          onUse={(draft) => {
+            setMeta((m) => ({
+              ...m,
+              meta_description: draft.meta_description || m.meta_description,
+            }));
+            setBlocks((all) => [
+              ...all,
+              { id: newId(), type: "text", props: { heading: draft.title, body: draft.body } },
+            ]);
+          }}
+        />
+      ) : null}
       <ol className="space-y-3" aria-label={t("website.pages.blocks")}>
         {blocks.map((block, i) => {
           const type = types.data.find((b) => b.key === block.type);

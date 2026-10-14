@@ -6,6 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { useState, type DragEvent, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
+import { AiEnquiryExtract, AiEnquiryTriage } from "../ai/AiWidgets";
 import { RecordActivity } from "../crm/Activity";
 
 type Enquiry = components["schemas"]["Enquiry"];
@@ -244,6 +245,26 @@ function NewEnquiry() {
       {field("phone", t("leads.phone"))}
       {field("student", t("leads.studentName"))}
       {field("notes", t("leads.notes"))}
+      <AiEnquiryExtract
+        onExtract={(x) =>
+          setForm((f) => ({
+            first_name: x.contact.first_name || f.first_name,
+            last_name: x.contact.last_name || f.last_name,
+            email: x.contact.email || f.email,
+            phone: x.contact.phone || f.phone,
+            student: x.students[0]?.first_name || f.student,
+            notes: [
+              f.notes,
+              x.summary,
+              x.subjects.map((s) => `${s.subject} ${s.level}`.trim()).join(", "),
+              x.availability.join("; "),
+              [x.location.area, x.location.postcode, x.location.mode].filter(Boolean).join(", "),
+            ]
+              .filter(Boolean)
+              .join("\n"),
+          }))
+        }
+      />
       <div className="flex gap-2 sm:col-span-3">
         <Button type="submit" loading={create.isPending}>
           {t("leads.add")}
@@ -317,6 +338,12 @@ export function EnquiryPage({ id }: { id: string }) {
           </ol>
         </section>
       </div>
+      {e.status === "open" ? (
+        <AiEnquiryTriage
+          enquiryId={id}
+          onApplied={() => void queryClient.invalidateQueries({ queryKey: ["enquiry", id] })}
+        />
+      ) : null}
       {e.status === "open" ? <EnquiryActions enquiry={e} onDone={refresh} /> : null}
       <RecordActivity target={{ target_type: "leads.enquiry", target_id: id }} />
     </LeadsPage>

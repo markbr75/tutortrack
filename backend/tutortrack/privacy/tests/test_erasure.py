@@ -78,6 +78,7 @@ def test_every_app_with_personal_data_registers_a_provider():
         "migration",
         "sites",
         "developer",
+        "ai",
     } <= keys
 
 
@@ -267,3 +268,20 @@ def test_scrub_terms_are_encrypted_at_rest(org, family):
             )
             raw = cursor.fetchone()[0]
     assert "Arjun" not in raw
+
+
+def test_erasure_scrubs_the_person_from_ai_proposals(org, family, s3):
+    from tutortrack.ai.models import AIProposal
+
+    with tenant_context(org):
+        proposal = AIProposal.objects.create(
+            feature="command_bar",
+            action="lesson.move",
+            params={"student": "Arjun Patel", "time": "17:00"},
+            summary="Move Arjun Patel's Thursday maths to 5pm",
+        )
+        erasure.erase_now("people.student", str(family.student.pk))
+        proposal.refresh_from_db()
+    assert "Arjun" not in proposal.summary
+    assert "Arjun" not in str(proposal.params)
+    assert proposal.params["time"] == "17:00"

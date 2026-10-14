@@ -6,6 +6,8 @@ import { useEffect, useId, useRef, useState } from "react";
 
 import { api } from "../api";
 import { isNetworkError, isOffline, queueChange } from "../offline/client";
+import { AiReportDrafter } from "./AiDrafts";
+import { markReportAssisted } from "./aiApi";
 
 type Field = components["schemas"]["TemplateField"];
 export type Answers = Record<string, unknown>;
@@ -148,6 +150,7 @@ export function TutorReportPage({ reportId }: { reportId: string }) {
     },
   });
   const [answers, setAnswers] = useState<Answers | null>(null);
+  const [aiRequest, setAiRequest] = useState<string | null>(null);
   useEffect(() => {
     if (report.data && answers === null) setAnswers(report.data.answers as Answers);
   }, [report.data, answers]);
@@ -188,8 +191,12 @@ export function TutorReportPage({ reportId }: { reportId: string }) {
         throw error;
       }
     },
-    onSuccess: (outcome) => {
+    onSuccess: (outcome, kind) => {
       if (outcome === "saved") void report.refetch();
+      // E31: a report written from an AI draft is flagged AI-assisted when submitted.
+      if (outcome === "saved" && kind === "submit" && aiRequest) {
+        void markReportAssisted(aiRequest, reportId).catch(() => undefined);
+      }
     },
   });
   if (report.isPending || answers === null)
@@ -208,6 +215,15 @@ export function TutorReportPage({ reportId }: { reportId: string }) {
     >
       <h1 className="text-xl font-semibold">{t("tutor.reportFor", { title: r.lesson_title })}</h1>
       {r.returned_note ? <Alert tone="warning">{r.returned_note}</Alert> : null}
+      {!written ? (
+        <AiReportDrafter
+          reportId={reportId}
+          onDraft={(draft) => {
+            setAiRequest(draft.request);
+            setAnswers((a) => ({ ...(a ?? {}), ...draft.answers }));
+          }}
+        />
+      ) : null}
       {r.template_fields.map((field) => (
         <ReportFieldInput
           key={field.key}

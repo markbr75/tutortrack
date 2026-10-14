@@ -65,7 +65,8 @@ ROLES: dict[str, RoleDef] = {
             _g("*:branch", "org.settings.view"),
             denies=(*OWNER_ONLY, *NOT_DSL, "subscription.view", "org.settings.manage",
                     "org.branch.manage", "audit.*", "migration.*", "privacy.dsar.manage",
-                    "privacy.retention.manage", "privacy.legal_hold.manage"),
+                    "privacy.retention.manage", "privacy.legal_hold.manage",
+                    "ai.settings.manage"),
         ),
         RoleDef(
             "coordinator", "Coordinator",
@@ -78,6 +79,7 @@ ROLES: dict[str, RoleDef] = {
                "privacy.consent.record", "reporting.dashboard.view",
                "reporting.operations.view", "reporting.sales.view", "reporting.people.view",
                "reporting.export", "reporting.schedule.manage:own", "sites.view",
+               "ai.use", "ai.copilot",
                "sites.profile.moderate", "growth.review.*", "growth.referral.*",
                "growth.tutor_referral.*", "growth.affiliate.view", "safeguarding.raise",
                "safeguarding.lone_working.monitor"),
@@ -92,7 +94,7 @@ ROLES: dict[str, RoleDef] = {
                "crm.note.view", "crm.search", "catalogue.view", "rates.manage", "courses.view",
                "subscription.view", "growth.affiliate.*", "growth.commission.manage",
                "growth.referral.view", "growth.tutor_referral.*", "learning.library.view",
-               "learning.library.charge"),
+               "learning.library.charge", "ai.use", "ai.copilot", "ai.usage.view"),
         ),
         RoleDef(
             "tutor", "Tutor",
@@ -110,7 +112,8 @@ ROLES: dict[str, RoleDef] = {
                "reporting.payroll.view:own", "integrations.personal",
                "sites.profile.edit:own", "growth.review.view:own",
                "growth.tutor_referral.view:own", "comms.inbox.view:own",
-               "comms.inbox.reply:own", "safeguarding.raise", "safeguarding.checkin:own"),
+               "comms.inbox.reply:own", "safeguarding.raise", "safeguarding.checkin:own",
+               "ai.use"),
             # Organisation-wide learning settings and approvals stay with staff (E21).
             denies=("learning.curriculum.manage", "learning.progress.approve",
                     "learning.library.manage", "learning.library.charge"),

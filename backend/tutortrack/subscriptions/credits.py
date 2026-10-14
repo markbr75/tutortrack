@@ -45,7 +45,10 @@ PACKS: dict[str, dict[int, dict[str, str]]] = {
         5000: _prices("40.00", "50.00", "46.00", "80.00", "68.00", "86.00"),
     },
 }
-ALLOWANCE_LIMIT: dict[str, str] = {CreditType.SMS: "sms_credits_monthly"}
+ALLOWANCE_LIMIT: dict[str, str] = {
+    CreditType.SMS: "sms_credits_monthly",
+    CreditType.AI: "ai_credits_monthly",  # E31
+}
 HOME_SMS_COUNTRIES = {"GB", "IE", "US", "CA"}  # 1 credit a segment; elsewhere 2
 
 

@@ -716,6 +716,496 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/ai/assists": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The AI-assisted flag: drafts people applied to records. */
+    get: operations["ai_assists_list"];
+    put?: never;
+    /** @description Record that a person used a draft on a record (marks it AI-assisted). */
+    post: operations["ai_assists_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/assists/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The AI-assisted flag: drafts people applied to records. */
+    get: operations["ai_assists_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/command": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description FR-31-5: proposed actions (confirm each with ``/ai/proposals/{id}/confirm``)
+     *     and tutor-search filters.
+     */
+    post: operations["ai_command_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/content": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description FR-31-8: draft a broadcast, tutor bio, website page or job advert. */
+    post: operations["ai_content_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/copilot": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description FR-31-7: an answer from the standard reports you may run, citing each report
+     *     and its filters with a link to open it.
+     */
+    post: operations["ai_copilot_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/enquiries/{enquiry_id}/triage": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description FR-31-4: next steps, a priority and a draft reply; field changes come back as
+     *     a proposal to confirm.
+     */
+    post: operations["ai_enquiries_triage_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/enquiries/extract": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description FR-31-4: structured fields from a free-text enquiry, to prefill the form. */
+    post: operations["ai_enquiries_extract_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/features": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["ai_features_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/features/{feature}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description Opt the organisation into a feature (or out), with tone and spelling. */
+    patch: operations["ai_features_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/ai/feedback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Rate a response; with the draft and the final text, only edit statistics are
+     *     kept (the texts are not stored).
+     */
+    post: operations["ai_feedback_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/lesson-reports/{report_id}/draft": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description FR-31-1: draft a lesson report's answers from notes and/or a voice note. The
+     *     draft is returned, not saved; submit it through the lesson report endpoints.
+     */
+    post: operations["ai_lesson_reports_draft_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/matching/explain": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description FR-31-6: why a tutor ranks where they do, and an intro message. */
+    post: operations["ai_matching_explain_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/progress-reports/{report_id}/draft": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description FR-31-2: draft the summary comments of a progress report from its snapshot. */
+    post: operations["ai_progress_reports_draft_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/proposals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Actions the AI proposed to the requesting person (never anyone else's). */
+    get: operations["ai_proposals_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/proposals/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Actions the AI proposed to the requesting person (never anyone else's). */
+    get: operations["ai_proposals_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/proposals/{id}/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Carry out the proposal with your permissions (409 if already decided). */
+    post: operations["ai_proposals_confirm_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/proposals/{id}/discard": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Actions the AI proposed to the requesting person (never anyone else's). */
+    post: operations["ai_proposals_discard_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The request log: prompts are never stored, only a hash of the redacted input. */
+    get: operations["ai_requests_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/requests/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The request log: prompts are never stored, only a hash of the redacted input. */
+    get: operations["ai_requests_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/rewrite": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description FR-31-2 "Explain to parent": plain words, optionally translated (the
+     *     contact's preferred language when ``contact`` is given).
+     */
+    post: operations["ai_rewrite_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Whether the plan includes AI, which features the organisation turned on and
+     *     (for ``ai.usage.view``) its AI credits.
+     */
+    get: operations["ai_status"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/thread-insights": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["ai_thread_insights_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/thread-insights/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Base for views over tenant data.
+     *
+     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
+     *     generation there is no request tenant, so an empty unscoped queryset is returned
+     *     instead (it is never evaluated).
+     */
+    get: operations["ai_thread_insights_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/threads/{thread_id}/classify": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description FR-31-3: the conversation's intent; routing (if configured) is a proposal. */
+    post: operations["ai_threads_classify_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/threads/{thread_id}/reply": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description FR-31-3: a suggested reply (not sent) using the conversation and account. */
+    post: operations["ai_threads_reply_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/threads/{thread_id}/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["ai_threads_summary_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/ai/usage": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["ai_usage_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/announcements": {
     parameters: {
       query?: never;
@@ -18421,6 +18911,410 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    AIAssist: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: uuid */
+      readonly request: string;
+      /** Format: uuid */
+      readonly user: string | null;
+      readonly feature: components["schemas"]["AIFeatureEnum"];
+      readonly subject_type: string;
+      readonly subject_id: string;
+    };
+    AIAssistInRequest: {
+      /** Format: uuid */
+      request: string;
+      subject_type: string;
+      subject_id: string;
+    };
+    AICitation: {
+      index: number;
+      report: string;
+      title: string;
+      period: {
+        [key: string]: string;
+      };
+      params: {
+        [key: string]: string;
+      };
+      link: string;
+    };
+    AIClassify: {
+      /** Format: uuid */
+      request: string;
+      intent: components["schemas"]["IntentEnum"];
+      confidence: number;
+      reason: string;
+      proposal: components["schemas"]["AIProposal"] | null;
+    };
+    AICommand: {
+      /** Format: uuid */
+      request: string;
+      message: string;
+      proposals: components["schemas"]["AIProposal"][];
+      searches: components["schemas"]["AITutorSearch"][];
+    };
+    AICommandInRequest: {
+      text: string;
+    };
+    AIContent: {
+      /** Format: uuid */
+      request: string;
+      kind: string;
+      title: string;
+      subject: string;
+      body: string;
+      meta_description: string;
+      warnings: string[];
+    };
+    /**
+     * @description * `email` - email
+     *     * `sms` - sms
+     * @enum {string}
+     */
+    AIContentInChannelEnum: "email" | "sms";
+    /**
+     * @description * `broadcast` - broadcast
+     *     * `bio` - bio
+     *     * `page` - page
+     *     * `job_ad` - job_ad
+     * @enum {string}
+     */
+    AIContentInKindEnum: "broadcast" | "bio" | "page" | "job_ad";
+    AIContentInRequest: {
+      kind: components["schemas"]["AIContentInKindEnum"];
+      brief: string;
+      /** @default email */
+      channel: components["schemas"]["AIContentInChannelEnum"];
+      /** @default  */
+      title: string;
+      /** Format: uuid */
+      tutor?: string | null;
+      subjects?: string[];
+      /** @default  */
+      location: string;
+    };
+    AICopilot: {
+      /** Format: uuid */
+      request: string;
+      answer: string;
+      citations: components["schemas"]["AICitation"][];
+    };
+    AICopilotInRequest: {
+      question: string;
+      history?: components["schemas"]["AICopilotTurnRequest"][];
+    };
+    AICopilotTurnRequest: {
+      question: string;
+      answer: string;
+    };
+    AICredits: {
+      metered: boolean;
+      used_this_month: number;
+      monthly_cap: number | null;
+      balance: number | null;
+      allowance: number | null;
+    };
+    AIExtract: {
+      /** Format: uuid */
+      request: string;
+      extracted: components["schemas"]["AIExtractedEnquiry"];
+    };
+    AIExtractInRequest: {
+      text: string;
+    };
+    AIExtractedContact: {
+      first_name: string;
+      last_name: string;
+      email: string;
+      phone: string;
+    };
+    AIExtractedEnquiry: {
+      contact: components["schemas"]["AIExtractedContact"];
+      students: components["schemas"]["AIExtractedStudent"][];
+      subjects: components["schemas"]["AIExtractedSubject"][];
+      availability: string[];
+      location: components["schemas"]["AIExtractedLocation"];
+      urgency: string;
+      summary: string;
+    };
+    AIExtractedLocation: {
+      postcode: string;
+      area: string;
+      mode: string;
+    };
+    AIExtractedStudent: {
+      first_name: string;
+      last_name: string;
+      year_group: string;
+      school: string;
+    };
+    AIExtractedSubject: {
+      subject: string;
+      level: string;
+    };
+    /**
+     * @description * `lesson_report` - Lesson report drafting
+     *     * `progress_report` - Progress report comments
+     *     * `parent_rewrite` - Explain to parent and translate
+     *     * `enquiry` - Enquiry extraction and triage
+     *     * `inbox` - Inbox replies, intent and summaries
+     *     * `command_bar` - Command bar
+     *     * `copilot` - Business copilot
+     *     * `content` - Content writing
+     *     * `matching` - Matching explanations
+     * @enum {string}
+     */
+    AIFeatureEnum:
+      | "lesson_report"
+      | "progress_report"
+      | "parent_rewrite"
+      | "enquiry"
+      | "inbox"
+      | "command_bar"
+      | "copilot"
+      | "content"
+      | "matching";
+    AIFeatureSetting: {
+      feature: components["schemas"]["AIFeatureEnum"];
+      readonly title: string;
+      enabled: boolean;
+      tone: components["schemas"]["AIToneEnum"] | components["schemas"]["BlankEnum"];
+      language: components["schemas"]["AILanguageEnum"] | components["schemas"]["BlankEnum"];
+    };
+    AIFeedbackInRequest: {
+      /** Format: uuid */
+      request: string;
+      /** @default  */
+      rating: components["schemas"]["AIRatingEnum"] | components["schemas"]["BlankEnum"];
+      /** @default  */
+      comment: string;
+      draft_text?: string;
+      final_text?: string;
+    };
+    AIFeedbackOut: {
+      /** Format: uuid */
+      id: string;
+      rating: string;
+      similarity_percent: number | null;
+    };
+    /**
+     * @description * `` - Organisation default
+     *     * `en-GB` - UK English
+     *     * `en-US` - US English
+     * @enum {string}
+     */
+    AILanguageEnum: "en-GB" | "en-US";
+    AILessonReportDraft: {
+      /** Format: uuid */
+      request: string;
+      answers: {
+        [key: string]: unknown;
+      };
+      suggested_topics: components["schemas"]["AITopic"][];
+      homework: string;
+      transcript: string;
+    };
+    AILessonReportDraftInRequest: {
+      /** @default  */
+      notes: string;
+      /** Format: binary */
+      audio?: string | null;
+    };
+    AIMatchExplain: {
+      /** Format: uuid */
+      request: string;
+      score: string;
+      explanation: string;
+      intro_message: string;
+    };
+    AIMatchExplainInRequest: {
+      /** Format: uuid */
+      tutor: string;
+      /** Format: uuid */
+      job?: string | null;
+      /** @description Ad hoc search criteria, as for the matching search. */
+      criteria?: {
+        [key: string]: unknown;
+      };
+    };
+    AIProgressDraft: {
+      /** Format: uuid */
+      request: string;
+      summary: string;
+    };
+    AIProposal: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly feature: components["schemas"]["AIFeatureEnum"];
+      readonly action: string;
+      readonly params: unknown;
+      readonly summary: string;
+      readonly status: components["schemas"]["AIProposalStatusEnum"];
+      readonly result: unknown;
+      readonly error: string;
+      /** Format: date-time */
+      readonly decided_at: string | null;
+      /** Format: uuid */
+      readonly request: string | null;
+    };
+    /**
+     * @description * `proposed` - Waiting for confirmation
+     *     * `executed` - Done
+     *     * `failed` - Failed
+     *     * `discarded` - Discarded
+     * @enum {string}
+     */
+    AIProposalStatusEnum: "proposed" | "executed" | "failed" | "discarded";
+    /**
+     * @description * `up` - Helpful
+     *     * `down` - Not helpful
+     * @enum {string}
+     */
+    AIRatingEnum: "up" | "down";
+    AIReply: {
+      /** Format: uuid */
+      request: string;
+      reply: string;
+    };
+    AIRequestLog: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: uuid */
+      readonly user: string | null;
+      readonly user_name: string;
+      readonly feature: components["schemas"]["AIFeatureEnum"];
+      readonly prompt_key: string;
+      readonly prompt_version: number;
+      readonly provider: string;
+      readonly model: string;
+      readonly status: components["schemas"]["AIRequestLogStatusEnum"];
+      readonly input_tokens: number;
+      readonly output_tokens: number;
+      readonly cache_read_tokens: number;
+      readonly cache_write_tokens: number;
+      readonly credits: number;
+      readonly latency_ms: number;
+      readonly tool_rounds: number;
+      readonly fallback_used: boolean;
+      readonly redacted_input_hash: string;
+      readonly error_code: string;
+    };
+    /**
+     * @description * `ok` - Completed
+     *     * `refused` - Declined by the model
+     *     * `incomplete` - Cut short
+     *     * `error` - Failed
+     * @enum {string}
+     */
+    AIRequestLogStatusEnum: "ok" | "refused" | "incomplete" | "error";
+    AIRewrite: {
+      /** Format: uuid */
+      request: string;
+      text: string;
+      language: string;
+    };
+    AIRewriteInRequest: {
+      text: string;
+      /** @default  */
+      language: string;
+      /** Format: uuid */
+      contact?: string | null;
+      /** Format: uuid */
+      student?: string | null;
+    };
+    AIStatus: {
+      /** @description The plan includes the AI assistant. */
+      available: boolean;
+      provider: string;
+      features: {
+        [key: string]: boolean;
+      };
+      credits_exhausted: boolean;
+      /** @description Only for ai.usage.view. */
+      credits: components["schemas"]["AICredits"] | null;
+    };
+    AISummary: {
+      /** Format: uuid */
+      request: string;
+      summary: string;
+      action_items: string[];
+    };
+    AIThreadInsight: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly thread: string;
+      readonly intent: string;
+      readonly confidence: number;
+      readonly message_count: number;
+      /** Format: date-time */
+      readonly classified_at: string;
+    };
+    /**
+     * @description * `` - Organisation default
+     *     * `friendly` - Friendly
+     *     * `formal` - Formal
+     * @enum {string}
+     */
+    AIToneEnum: "friendly" | "formal";
+    AITopic: {
+      id: string;
+      name: string;
+    };
+    AITriage: {
+      /** Format: uuid */
+      request: string;
+      extracted: components["schemas"]["AIExtractedEnquiry"];
+      next_steps: string[];
+      priority: string;
+      reply_subject: string;
+      reply_body: string;
+      proposal: components["schemas"]["AIProposal"] | null;
+    };
+    AITutorSearch: {
+      subject: string | null;
+      subject_name: string;
+      level: string | null;
+      level_name: string;
+      mode: string;
+      postcode: string;
+      weekday: string;
+      after_time: string;
+      before_time: string;
+    };
+    AIUsage: {
+      /** Format: date */
+      period: string;
+      totals: {
+        [key: string]: number;
+      };
+      by_feature: components["schemas"]["AIUsageFeature"][];
+      by_user: components["schemas"]["AIUsageUser"][];
+      feedback: {
+        [key: string]: number;
+      };
+      credits: components["schemas"]["AICredits"];
+    };
+    AIUsageFeature: {
+      feature: string;
+      requests: number;
+      credits: number;
+    };
+    AIUsageUser: {
+      /** Format: uuid */
+      user: string | null;
+      name: string;
+      requests: number;
+      credits: number;
+    };
     AbsenceRequest: {
       /** Format: uuid */
       student: string;
@@ -24159,6 +25053,24 @@ export interface components {
      * @enum {string}
      */
     IntegrationLevelEnum: "user" | "organisation";
+    /**
+     * @description * `reschedule` - reschedule
+     *     * `cancellation` - cancellation
+     *     * `billing` - billing
+     *     * `complaint` - complaint
+     *     * `new_enquiry` - new_enquiry
+     *     * `feedback` - feedback
+     *     * `other` - other
+     * @enum {string}
+     */
+    IntentEnum:
+      | "reschedule"
+      | "cancellation"
+      | "billing"
+      | "complaint"
+      | "new_enquiry"
+      | "feedback"
+      | "other";
     Interview: {
       /** Format: uuid */
       readonly id: string;
@@ -25001,6 +25913,7 @@ export interface components {
      * @description * `accounting_integrations` - accounting_integrations
      *     * `advanced_reports` - advanced_reports
      *     * `ai_assistant` - ai_assistant
+     *     * `ai_credits_monthly` - ai_credits_monthly
      *     * `api_access` - api_access
      *     * `automation` - automation
      *     * `automation_rules` - automation_rules
@@ -25025,6 +25938,7 @@ export interface components {
       | "accounting_integrations"
       | "advanced_reports"
       | "ai_assistant"
+      | "ai_credits_monthly"
       | "api_access"
       | "automation"
       | "automation_rules"
@@ -27106,6 +28020,58 @@ export interface components {
     PageRestoreRequest: {
       version: number;
     };
+    PaginatedAIAssistList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["AIAssist"][];
+    };
+    PaginatedAIProposalList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["AIProposal"][];
+    };
+    PaginatedAIRequestLogList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["AIRequestLog"][];
+    };
+    PaginatedAIThreadInsightList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["AIThreadInsight"][];
+    };
     PaginatedAcademicYearList: {
       /**
        * Format: uri
@@ -28999,6 +29965,11 @@ export interface components {
       uid: string;
       token: string;
       new_password: string;
+    };
+    PatchedAIFeatureUpdateRequest: {
+      enabled?: boolean;
+      tone?: components["schemas"]["AIToneEnum"] | components["schemas"]["BlankEnum"];
+      language?: components["schemas"]["AILanguageEnum"] | components["schemas"]["BlankEnum"];
     };
     PatchedAcademicYearRequest: {
       /** Format: uuid */
@@ -38620,6 +39591,736 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AffiliateSummary"];
+        };
+      };
+    };
+  };
+  ai_assists_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /** @description One or more ids, comma separated. */
+        subject_id?: string;
+        /** @description e.g. lesson_report */
+        subject_type?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAIAssistList"];
+        };
+      };
+    };
+  };
+  ai_assists_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AIAssistInRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AIAssistInRequest"];
+        "multipart/form-data": components["schemas"]["AIAssistInRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIAssist"];
+        };
+      };
+    };
+  };
+  ai_assists_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this ai assist. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIAssist"];
+        };
+      };
+    };
+  };
+  ai_command_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AICommandInRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AICommandInRequest"];
+        "multipart/form-data": components["schemas"]["AICommandInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AICommand"];
+        };
+      };
+    };
+  };
+  ai_content_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AIContentInRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AIContentInRequest"];
+        "multipart/form-data": components["schemas"]["AIContentInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIContent"];
+        };
+      };
+    };
+  };
+  ai_copilot_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AICopilotInRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AICopilotInRequest"];
+        "multipart/form-data": components["schemas"]["AICopilotInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AICopilot"];
+        };
+      };
+    };
+  };
+  ai_enquiries_triage_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        enquiry_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AITriage"];
+        };
+      };
+    };
+  };
+  ai_enquiries_extract_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AIExtractInRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AIExtractInRequest"];
+        "multipart/form-data": components["schemas"]["AIExtractInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIExtract"];
+        };
+      };
+    };
+  };
+  ai_features_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIFeatureSetting"][];
+        };
+      };
+    };
+  };
+  ai_features_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        feature: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedAIFeatureUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedAIFeatureUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedAIFeatureUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIFeatureSetting"][];
+        };
+      };
+    };
+  };
+  ai_feedback_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AIFeedbackInRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AIFeedbackInRequest"];
+        "multipart/form-data": components["schemas"]["AIFeedbackInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIFeedbackOut"];
+        };
+      };
+    };
+  };
+  ai_lesson_reports_draft_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        report_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "multipart/form-data": components["schemas"]["AILessonReportDraftInRequest"];
+        "application/json": components["schemas"]["AILessonReportDraftInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AILessonReportDraft"];
+        };
+      };
+    };
+  };
+  ai_matching_explain_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AIMatchExplainInRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AIMatchExplainInRequest"];
+        "multipart/form-data": components["schemas"]["AIMatchExplainInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIMatchExplain"];
+        };
+      };
+    };
+  };
+  ai_progress_reports_draft_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        report_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIProgressDraft"];
+        };
+      };
+    };
+  };
+  ai_proposals_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAIProposalList"];
+        };
+      };
+    };
+  };
+  ai_proposals_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this ai proposal. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIProposal"];
+        };
+      };
+    };
+  };
+  ai_proposals_confirm_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this ai proposal. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIProposal"];
+        };
+      };
+    };
+  };
+  ai_proposals_discard_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this ai proposal. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIProposal"];
+        };
+      };
+    };
+  };
+  ai_requests_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        feature?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAIRequestLogList"];
+        };
+      };
+    };
+  };
+  ai_requests_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this ai request log. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIRequestLog"];
+        };
+      };
+    };
+  };
+  ai_rewrite_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AIRewriteInRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AIRewriteInRequest"];
+        "multipart/form-data": components["schemas"]["AIRewriteInRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIRewrite"];
+        };
+      };
+    };
+  };
+  ai_status: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIStatus"];
+        };
+      };
+    };
+  };
+  ai_thread_insights_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /** @description Thread ids, comma separated. */
+        thread?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAIThreadInsightList"];
+        };
+      };
+    };
+  };
+  ai_thread_insights_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this thread insight. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIThreadInsight"];
+        };
+      };
+    };
+  };
+  ai_threads_classify_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        thread_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIClassify"];
+        };
+      };
+    };
+  };
+  ai_threads_reply_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        thread_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIReply"];
+        };
+      };
+    };
+  };
+  ai_threads_summary_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        thread_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AISummary"];
+        };
+      };
+    };
+  };
+  ai_usage_retrieve: {
+    parameters: {
+      query?: {
+        /** @description YYYY-MM (default: this month). */
+        month?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AIUsage"];
         };
       };
     };

@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { api, usePermission } from "../api";
+import { AiAssistedBadge } from "../ai/AiParts";
 import { ErrorList } from "../calendar/ErrorList";
 import { useTopicSuggestions } from "../learning/hooks";
 
@@ -383,6 +384,7 @@ export function ReportPage({ reportId }: { reportId: string }) {
       <header>
         <h1 className="text-2xl font-semibold">
           {t("delivery.reports.heading", { title: data.lesson_title })}
+          <AiAssistedBadge subjectType="lesson_report" subjectId={reportId} />
         </h1>
         <p className="text-sm text-muted-foreground">
           {formatDateTime(data.lesson_start, i18n.language)} · {data.tutor_name} ·{" "}

@@ -123,6 +123,16 @@ SUBPROCESSORS: tuple[Subprocessor, ...] = (
         optional=True,
     ),
     Subprocessor(
+        "Anthropic",
+        "AI drafts, suggestions, command bar and copilot (Claude API; E31)",
+        "Pseudonymised text for the AI feature in use (names, emails and phone numbers "
+        "replaced where known); never safeguarding notes, encrypted fields, bank details "
+        "or credentials. Not used for model training",
+        "United States (SCCs/UK addendum)",
+        ALL,
+        optional=True,
+    ),
+    Subprocessor(
         "Xero and Intuit QuickBooks",
         "Accounting sync",
         "Client names, invoices, payments",
