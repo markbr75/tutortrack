@@ -16,3 +16,8 @@ class PeopleConfig(AppConfig):
         targets.register("people.contact", Contact, "people.contact.view", "Contact")
         targets.register("people.student", Student, "people.student.view", "Student")
         targets.register("people.tutor", TutorProfile, "people.tutor.view", "Tutor")
+
+        # Every app's merge provider (``<app>/merge.py``, FR-05-13, ADR 0035).
+        from django.utils.module_loading import autodiscover_modules
+
+        autodiscover_modules("merge")

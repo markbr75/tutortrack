@@ -309,10 +309,26 @@ def save_view(view: SavedView | None, *, owner: Any, **data: Any) -> SavedView:
 # --- bulk actions -------------------------------------------------------------------------------
 
 BULK_ACTIONS = {
-    "people.client": {"tag", "untag", "set_status", "assign_manager", "archive"},
-    "people.student": {"tag", "untag", "set_status", "archive"},
-    "people.contact": {"tag", "untag"},
-    "people.tutor": {"tag", "untag", "set_status"},
+    "people.client": {
+        "tag",
+        "untag",
+        "set_status",
+        "assign_manager",
+        "archive",
+        "send_message",
+        "invite_portal",
+    },
+    "people.student": {"tag", "untag", "set_status", "archive", "send_message"},
+    "people.contact": {"tag", "untag", "send_message", "invite_portal"},
+    "people.tutor": {"tag", "untag", "set_status", "send_message"},
+}
+# The permission each bulk action needs besides ``crm.bulk.run`` ({entity} is the record).
+BULK_PERMISSIONS = {
+    "tag": "crm.tag.apply",
+    "untag": "crm.tag.apply",
+    "archive": "people.{entity}.archive",
+    "send_message": "comms.broadcast.send",
+    "invite_portal": "people.{entity}.edit",
 }
 
 
@@ -322,6 +338,10 @@ def start_bulk_job(
 ) -> BulkJob:
     if action not in BULK_ACTIONS.get(entity_type, set()):
         raise BusinessRuleViolation(_("This action isn't available for these records."))
+    if action == "send_message":  # FR-05-12: checked now, sent per person with consent rules
+        from tutortrack.comms.direct import clean
+
+        params = {**params, **clean(params)}
     visible = targets.visible_ids(user, entity_type, [str(i) for i in target_ids])
     job = BulkJob.objects.create(
         entity_type=entity_type,

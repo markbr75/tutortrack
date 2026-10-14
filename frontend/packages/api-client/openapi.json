@@ -11654,7 +11654,7 @@
         "/api/v1/bulk/{entity}/{bulk_action}": {
             "post": {
                 "operationId": "bulk_create",
-                "description": "Run a bulk action in the background: ``POST /bulk/{entity}/{action}``; poll\n``/bulk-jobs/{id}`` for progress and the per-record report (FR-05-12).",
+                "description": "Run a bulk action in the background: ``POST /bulk/{entity}/{action}``; poll\n``/bulk-jobs/{id}`` for progress and the per-record report (FR-05-12).\n\nActions: ``tag``/``untag`` (``params.tag``), ``archive``, ``set_status``\n(``params.status``), ``assign_manager`` (clients), ``invite_portal`` (clients' main\ncontact, contacts), and ``send_message`` (``params``: ``channel`` email|sms,\n``purpose`` service|marketing, ``subject``, ``body``; marketing needs consent, as for\nbroadcasts). Export the selected rows with ``GET /{entity}/export?ids=...``.",
                 "parameters": [
                     {
                         "in": "header",
@@ -11689,6 +11689,22 @@
                         "application/json": {
                             "schema": {
                                 "$ref": "#/components/schemas/StartBulkRequest"
+                            },
+                            "examples": {
+                                "SendAServiceMessageByEmail": {
+                                    "value": {
+                                        "target_ids": [
+                                            "01928d6e-0000-7000-8000-000000000001"
+                                        ],
+                                        "params": {
+                                            "channel": "email",
+                                            "purpose": "service",
+                                            "subject": "Half-term timetable",
+                                            "body": "Hello {{ recipient.first_name }}, lessons pause next week."
+                                        }
+                                    },
+                                    "summary": "Send a service message by email"
+                                }
                             }
                         },
                         "application/x-www-form-urlencoded": {
@@ -19337,6 +19353,16 @@
                     },
                     {
                         "in": "query",
+                        "name": "balance_max",
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
+                        "name": "balance_min",
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
                         "name": "branch",
                         "schema": {
                             "type": "string",
@@ -19370,10 +19396,30 @@
                     },
                     {
                         "in": "query",
+                        "name": "has_upcoming_lesson",
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
+                        "name": "hours_this_term_min",
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
                         "name": "include_archived",
                         "schema": {
                             "type": "boolean"
                         }
+                    },
+                    {
+                        "in": "query",
+                        "name": "last_lesson_after",
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
+                        "name": "last_lesson_before",
+                        "schema": {}
                     },
                     {
                         "in": "query",
@@ -19384,13 +19430,17 @@
                         "description": "Records missing required custom fields."
                     },
                     {
-                        "name": "ordering",
-                        "required": false,
                         "in": "query",
-                        "description": "Which field to use when ordering the results.",
+                        "name": "next_lesson_before",
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
+                        "name": "ordering",
                         "schema": {
                             "type": "string"
-                        }
+                        },
+                        "description": "Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`."
                     },
                     {
                         "name": "page_size",
@@ -20351,6 +20401,26 @@
                     },
                     {
                         "in": "query",
+                        "name": "file_format",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "csv",
+                                "xlsx"
+                            ]
+                        },
+                        "description": "Default csv."
+                    },
+                    {
+                        "in": "query",
+                        "name": "ids",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Only these records (comma-separated ids)."
+                    },
+                    {
+                        "in": "query",
                         "name": "include_archived",
                         "schema": {
                             "type": "boolean"
@@ -20363,6 +20433,14 @@
                             "type": "boolean"
                         },
                         "description": "Records missing required custom fields."
+                    },
+                    {
+                        "in": "query",
+                        "name": "ordering",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`."
                     },
                     {
                         "in": "query",
@@ -20403,6 +20481,12 @@
                             "text/csv": {
                                 "schema": {
                                     "type": "string"
+                                }
+                            },
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
                                 }
                             }
                         },
@@ -22013,13 +22097,12 @@
                         "description": "Records missing required custom fields."
                     },
                     {
-                        "name": "ordering",
-                        "required": false,
                         "in": "query",
-                        "description": "Which field to use when ordering the results.",
+                        "name": "ordering",
                         "schema": {
                             "type": "string"
-                        }
+                        },
+                        "description": "Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`."
                     },
                     {
                         "name": "page_size",
@@ -22235,6 +22318,119 @@
                 "x-visibility": "public",
                 "x-scopes": [
                     "clients:write"
+                ]
+            }
+        },
+        "/api/v1/contacts/export": {
+            "get": {
+                "operationId": "contacts_export_retrieve",
+                "description": "All contacts (search, edit, archive). Create through ``/clients/{id}/contacts``.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "cf_<key>",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by a custom field value."
+                    },
+                    {
+                        "in": "query",
+                        "name": "file_format",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "csv",
+                                "xlsx"
+                            ]
+                        },
+                        "description": "Default csv."
+                    },
+                    {
+                        "in": "query",
+                        "name": "ids",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Only these records (comma-separated ids)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "include_archived",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "missing_required",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Records missing required custom fields."
+                    },
+                    {
+                        "in": "query",
+                        "name": "ordering",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`."
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search names, emails and phones."
+                    },
+                    {
+                        "in": "query",
+                        "name": "tag",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "description": "Tag id (repeatable)."
+                    }
+                ],
+                "tags": [
+                    "contacts"
+                ],
+                "security": [
+                    {
+                        "apiToken": [
+                            "clients:read"
+                        ]
+                    },
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "text/csv": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "public",
+                "x-scopes": [
+                    "clients:read"
                 ]
             }
         },
@@ -47678,6 +47874,205 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/merge/{entity}": {
+            "post": {
+                "operationId": "merge_create",
+                "description": "``POST /merge/{entity}``: merge ``source`` into ``target`` (FR-05-13). Not reversible:\n``confirm`` must be true. ``choices`` picks the surviving value per field\n(``source`` or ``target``; by default the survivor's, or the duplicate's where the\nsurvivor's is empty). Every linked record moves to the survivor; the duplicate is\narchived and points at it.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "entity",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "clients",
+                                "contacts",
+                                "students"
+                            ]
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "merge"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MergeRequestRequest"
+                            },
+                            "examples": {
+                                "KeepTheOlderFamily,TheNewerOne'sAddress": {
+                                    "value": {
+                                        "source": "01928d6e-0000-7000-8000-000000000002",
+                                        "target": "01928d6e-0000-7000-8000-000000000001",
+                                        "choices": {
+                                            "billing_address": "source"
+                                        },
+                                        "confirm": true
+                                    },
+                                    "summary": "Keep the older family, the newer one's address"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MergeRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MergeRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MergeResult"
+                                },
+                                "examples": {
+                                    "Merged": {
+                                        "value": {
+                                            "subject_type": "people.client",
+                                            "target_id": "01928d6e-0000-7000-8000-000000000001",
+                                            "merged_id": "01928d6e-0000-7000-8000-000000000002",
+                                            "moved": {
+                                                "people.students": 1,
+                                                "billing.invoices": 2
+                                            },
+                                            "notes": []
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/merge/{entity}/preview": {
+            "get": {
+                "operationId": "merge_preview_retrieve",
+                "description": "``GET /merge/{entity}/preview?source=&target=``: the two records side by side, what\nwould move to the survivor and anything that stops the merge (FR-05-13).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "entity",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "clients",
+                                "contacts",
+                                "students"
+                            ]
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "source",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "target",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "merge"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MergePreview"
+                                },
+                                "examples": {
+                                    "TwoPatelFamilies": {
+                                        "value": {
+                                            "subject_type": "people.client",
+                                            "source": {
+                                                "id": "01928d6e-0000-7000-8000-000000000002",
+                                                "name": "Patel family"
+                                            },
+                                            "target": {
+                                                "id": "01928d6e-0000-7000-8000-000000000001",
+                                                "name": "The Patel Family"
+                                            },
+                                            "values": [
+                                                {
+                                                    "name": "display_name",
+                                                    "label": "Name",
+                                                    "source": "Patel family",
+                                                    "target": "The Patel Family",
+                                                    "hidden": false,
+                                                    "same": false,
+                                                    "default": "target"
+                                                }
+                                            ],
+                                            "moves": [
+                                                {
+                                                    "key": "people.students",
+                                                    "label": "Students",
+                                                    "count": 1
+                                                },
+                                                {
+                                                    "key": "billing.invoices",
+                                                    "label": "Invoices",
+                                                    "count": 2
+                                                }
+                                            ],
+                                            "problems": [],
+                                            "warnings": [],
+                                            "can_merge": true
+                                        },
+                                        "summary": "Two Patel families"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/message-templates/{key}/{channel}": {
             "get": {
                 "operationId": "message_templates_retrieve",
@@ -53493,6 +53888,51 @@
                                     "type": "array",
                                     "items": {
                                         "$ref": "#/components/schemas/Duplicate"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/people/duplicates/pairs": {
+            "get": {
+                "operationId": "people_duplicates_pairs_list",
+                "description": "``GET /people/duplicates/pairs?type=client|contact|student``: records that look like\nthe same person or family, newest pairs first (FR-05-13), to review and merge.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "type",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "client",
+                                "contact",
+                                "student"
+                            ]
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "merge"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DuplicatePair"
                                     }
                                 }
                             }
@@ -67423,7 +67863,7 @@
         "/api/v1/search": {
             "get": {
                 "operationId": "search_list",
-                "description": "Global search (⌘K) across people; results respect your permissions.",
+                "description": "Global search (⌘K) across people, jobs and invoices; results respect your permissions.",
                 "parameters": [
                     {
                         "in": "query",
@@ -69887,10 +70327,30 @@
                     },
                     {
                         "in": "query",
+                        "name": "has_upcoming_lesson",
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
+                        "name": "hours_this_term_min",
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
                         "name": "include_archived",
                         "schema": {
                             "type": "boolean"
                         }
+                    },
+                    {
+                        "in": "query",
+                        "name": "last_lesson_after",
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
+                        "name": "last_lesson_before",
+                        "schema": {}
                     },
                     {
                         "in": "query",
@@ -69901,13 +70361,17 @@
                         "description": "Records missing required custom fields."
                     },
                     {
-                        "name": "ordering",
-                        "required": false,
                         "in": "query",
-                        "description": "Which field to use when ordering the results.",
+                        "name": "next_lesson_before",
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
+                        "name": "ordering",
                         "schema": {
                             "type": "string"
-                        }
+                        },
+                        "description": "Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`."
                     },
                     {
                         "name": "page_size",
@@ -70382,6 +70846,26 @@
                     },
                     {
                         "in": "query",
+                        "name": "file_format",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "csv",
+                                "xlsx"
+                            ]
+                        },
+                        "description": "Default csv."
+                    },
+                    {
+                        "in": "query",
+                        "name": "ids",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Only these records (comma-separated ids)."
+                    },
+                    {
+                        "in": "query",
                         "name": "include_archived",
                         "schema": {
                             "type": "boolean"
@@ -70394,6 +70878,14 @@
                             "type": "boolean"
                         },
                         "description": "Records missing required custom fields."
+                    },
+                    {
+                        "in": "query",
+                        "name": "ordering",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`."
                     },
                     {
                         "in": "query",
@@ -70434,6 +70926,12 @@
                             "text/csv": {
                                 "schema": {
                                     "type": "string"
+                                }
+                            },
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
                                 }
                             }
                         },
@@ -74603,6 +75101,11 @@
                     },
                     {
                         "in": "query",
+                        "name": "hours_this_month_min",
+                        "schema": {}
+                    },
+                    {
+                        "in": "query",
                         "name": "include_archived",
                         "schema": {
                             "type": "boolean"
@@ -74617,13 +75120,12 @@
                         "description": "Records missing required custom fields."
                     },
                     {
-                        "name": "ordering",
-                        "required": false,
                         "in": "query",
-                        "description": "Which field to use when ordering the results.",
+                        "name": "ordering",
                         "schema": {
                             "type": "string"
-                        }
+                        },
+                        "description": "Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`."
                     },
                     {
                         "name": "page_size",
@@ -74641,6 +75143,11 @@
                             "type": "string"
                         },
                         "description": "Search names, emails and phones."
+                    },
+                    {
+                        "in": "query",
+                        "name": "report_sla_below",
+                        "schema": {}
                     },
                     {
                         "in": "query",
@@ -75444,6 +75951,11 @@
                         }
                     },
                     {
+                        "in": "query",
+                        "name": "hours_this_month_min",
+                        "schema": {}
+                    },
+                    {
                         "in": "path",
                         "name": "id",
                         "schema": {
@@ -75470,6 +75982,11 @@
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "in": "query",
+                        "name": "report_sla_below",
+                        "schema": {}
                     },
                     {
                         "in": "query",
@@ -75807,6 +76324,119 @@
                     }
                 },
                 "x-visibility": "internal"
+            }
+        },
+        "/api/v1/tutors/export": {
+            "get": {
+                "operationId": "tutors_export_retrieve",
+                "description": "Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "cf_<key>",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by a custom field value."
+                    },
+                    {
+                        "in": "query",
+                        "name": "file_format",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "csv",
+                                "xlsx"
+                            ]
+                        },
+                        "description": "Default csv."
+                    },
+                    {
+                        "in": "query",
+                        "name": "ids",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Only these records (comma-separated ids)."
+                    },
+                    {
+                        "in": "query",
+                        "name": "include_archived",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "missing_required",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Records missing required custom fields."
+                    },
+                    {
+                        "in": "query",
+                        "name": "ordering",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`."
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search names, emails and phones."
+                    },
+                    {
+                        "in": "query",
+                        "name": "tag",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "description": "Tag id (repeatable)."
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "security": [
+                    {
+                        "apiToken": [
+                            "tutors:read"
+                        ]
+                    },
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "text/csv": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "public",
+                "x-scopes": [
+                    "tutors:read"
+                ]
             }
         },
         "/api/v1/unconfirmed-lessons": {
@@ -87611,15 +88241,53 @@
                         "type": "string",
                         "format": "date-time",
                         "readOnly": true
+                    },
+                    "balance": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,12}(?:\\.\\d{0,2})?$",
+                        "readOnly": true,
+                        "nullable": true,
+                        "description": "Ledger balance in the client's currency (positive: owes)."
+                    },
+                    "next_lesson_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_lesson_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "hours_this_term": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,12}(?:\\.\\d{0,2})?$",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "merged_into": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
                     }
                 },
                 "required": [
                     "archived_at",
+                    "balance",
                     "billing_address",
                     "billing_contact",
                     "created_at",
                     "display_name",
+                    "hours_this_term",
                     "id",
+                    "last_lesson_at",
+                    "merged_into",
+                    "next_lesson_at",
                     "primary_contact",
                     "status",
                     "students_count"
@@ -87738,6 +88406,39 @@
                         "format": "date-time",
                         "readOnly": true
                     },
+                    "balance": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,12}(?:\\.\\d{0,2})?$",
+                        "readOnly": true,
+                        "nullable": true,
+                        "description": "Ledger balance in the client's currency (positive: owes)."
+                    },
+                    "next_lesson_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_lesson_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "hours_this_term": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,12}(?:\\.\\d{0,2})?$",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "merged_into": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
                     "contacts": {
                         "type": "array",
                         "items": {
@@ -87755,12 +88456,17 @@
                 },
                 "required": [
                     "archived_at",
+                    "balance",
                     "billing_address",
                     "billing_contact",
                     "contacts",
                     "created_at",
                     "display_name",
+                    "hours_this_term",
                     "id",
+                    "last_lesson_at",
+                    "merged_into",
+                    "next_lesson_at",
                     "primary_contact",
                     "status",
                     "students",
@@ -92188,6 +92894,14 @@
                     }
                 }
             },
+            "DefaultEnum": {
+                "enum": [
+                    "source",
+                    "target"
+                ],
+                "type": "string",
+                "description": "* `source` - source\n* `target` - target"
+            },
             "DefaultRoleEnum": {
                 "enum": [
                     "admin",
@@ -92987,6 +93701,73 @@
                     "name",
                     "reason",
                     "type"
+                ]
+            },
+            "DuplicatePair": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "$ref": "#/components/schemas/DuplicatePairTypeEnum"
+                    },
+                    "a": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/DuplicatePerson"
+                            }
+                        ],
+                        "description": "The older record: suggested to keep."
+                    },
+                    "b": {
+                        "$ref": "#/components/schemas/DuplicatePerson"
+                    },
+                    "reason": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "a",
+                    "b",
+                    "reason",
+                    "type"
+                ]
+            },
+            "DuplicatePairTypeEnum": {
+                "enum": [
+                    "client",
+                    "contact",
+                    "student"
+                ],
+                "type": "string",
+                "description": "* `client` - client\n* `contact` - contact\n* `student` - student"
+            },
+            "DuplicatePerson": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "detail": {
+                        "type": "string"
+                    },
+                    "client_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "client_id",
+                    "created_at",
+                    "detail",
+                    "id",
+                    "name"
                 ]
             },
             "DuplicateRequest": {
@@ -105092,6 +105873,197 @@
                 ],
                 "type": "string",
                 "description": "* `active` - active\n* `suspended` - suspended"
+            },
+            "MergeField": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "source": {
+                        "type": "string"
+                    },
+                    "target": {
+                        "type": "string"
+                    },
+                    "hidden": {
+                        "type": "boolean"
+                    },
+                    "same": {
+                        "type": "boolean"
+                    },
+                    "default": {
+                        "$ref": "#/components/schemas/DefaultEnum"
+                    }
+                },
+                "required": [
+                    "default",
+                    "hidden",
+                    "label",
+                    "name",
+                    "same",
+                    "source",
+                    "target"
+                ]
+            },
+            "MergeMove": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "count": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "count",
+                    "key",
+                    "label"
+                ]
+            },
+            "MergePreview": {
+                "type": "object",
+                "properties": {
+                    "subject_type": {
+                        "type": "string"
+                    },
+                    "source": {
+                        "$ref": "#/components/schemas/MergeRecord"
+                    },
+                    "target": {
+                        "$ref": "#/components/schemas/MergeRecord"
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MergeField"
+                        }
+                    },
+                    "moves": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MergeMove"
+                        }
+                    },
+                    "problems": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "warnings": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "can_merge": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "can_merge",
+                    "moves",
+                    "problems",
+                    "source",
+                    "subject_type",
+                    "target",
+                    "values",
+                    "warnings"
+                ]
+            },
+            "MergeRecord": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            },
+            "MergeRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "source": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The duplicate (archived)."
+                    },
+                    "target": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The record that stays."
+                    },
+                    "choices": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "enum": [
+                                "source",
+                                "target"
+                            ],
+                            "type": "string",
+                            "description": "* `source` - source\n* `target` - target"
+                        }
+                    },
+                    "confirm": {
+                        "type": "boolean",
+                        "description": "Must be true: a merge can't be undone."
+                    }
+                },
+                "required": [
+                    "confirm",
+                    "source",
+                    "target"
+                ]
+            },
+            "MergeResult": {
+                "type": "object",
+                "properties": {
+                    "subject_type": {
+                        "type": "string"
+                    },
+                    "target_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "merged_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "moved": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "notes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "merged_id",
+                    "moved",
+                    "notes",
+                    "subject_type",
+                    "target_id"
+                ]
             },
             "Message": {
                 "type": "object",
@@ -135144,6 +136116,31 @@
                         "type": "string",
                         "format": "date-time",
                         "readOnly": true
+                    },
+                    "next_lesson_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_lesson_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "hours_this_term": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,12}(?:\\.\\d{0,2})?$",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "merged_into": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
                     }
                 },
                 "required": [
@@ -135153,8 +136150,12 @@
                     "created_at",
                     "first_name",
                     "full_name",
+                    "hours_this_term",
                     "id",
+                    "last_lesson_at",
                     "lesson_address",
+                    "merged_into",
+                    "next_lesson_at",
                     "status_changed_at",
                     "user"
                 ]
@@ -138527,10 +139528,13 @@
                     "task",
                     "document",
                     "change",
-                    "message"
+                    "message",
+                    "lesson",
+                    "invoice",
+                    "payment"
                 ],
                 "type": "string",
-                "description": "* `note` - note\n* `task` - task\n* `document` - document\n* `change` - change\n* `message` - message"
+                "description": "* `note` - note\n* `task` - task\n* `document` - document\n* `change` - change\n* `message` - message\n* `lesson` - lesson\n* `invoice` - invoice\n* `payment` - payment"
             },
             "TinTypeEnum": {
                 "enum": [
@@ -139137,6 +140141,29 @@
                         "type": "string",
                         "format": "date-time",
                         "readOnly": true
+                    },
+                    "hours_this_month": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,12}(?:\\.\\d{0,2})?$",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "report_sla": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,4}(?:\\.\\d{0,1})?$",
+                        "readOnly": true,
+                        "nullable": true,
+                        "description": "% of lesson reports due in the last 90 days submitted on time."
+                    },
+                    "utilisation": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,5}(?:\\.\\d{0,1})?$",
+                        "readOnly": true,
+                        "nullable": true,
+                        "description": "Booked time this month as a % of weekly availability."
                     }
                 },
                 "required": [
@@ -139147,11 +140174,14 @@
                     "first_name",
                     "full_name",
                     "has_joined",
+                    "hours_this_month",
                     "id",
                     "qualifications",
+                    "report_sla",
                     "status",
                     "status_changed_at",
-                    "subjects"
+                    "subjects",
+                    "utilisation"
                 ]
             },
             "TutorCompliance": {

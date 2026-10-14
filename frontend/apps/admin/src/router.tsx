@@ -96,6 +96,7 @@ import { DeveloperDocsPage, MarketplacePage, OAuthConsentPage } from "./develope
 import { WebsitePage } from "./website/WebsitePage";
 // Phase 2b (E05-T12, E09-T09, E17-T09, E19-T08, E26-T08)
 import { PeopleMapPage } from "./people/MapPage";
+import { DuplicatesPage, MergePage, type MergeEntity } from "./people/MergePages";
 import { LessonFeedbackPage, PublicFeedbackPage } from "./delivery/FeedbackPages";
 import { PublicProposalPage } from "./leads/ProposalPages";
 import { PublicShortlistPage } from "./matching/SharePages";
@@ -407,6 +408,31 @@ const analyticsRoute = appPage("/analytics", ReportsLibraryPage);
 const analyticsSavedRoute = appPage("/analytics/saved", SavedReportsPage);
 const analyticsBuilderRoute = appPage("/analytics/builder", BuilderPage);
 const peopleMapRoute = appPage("/people/map", PeopleMapPage);
+// FR-05-13 merge tool (gap batch G1).
+const duplicatesRoute = appPage("/people/duplicates", DuplicatesPage);
+const mergeRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/people/merge/$entity/$sourceId",
+  component: function MergeRoute() {
+    const { entity, sourceId } = mergeRoute.useParams();
+    return <MergePage key={sourceId} entity={entity as MergeEntity} sourceId={sourceId} />;
+  },
+});
+const mergePairRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/people/merge/$entity/$sourceId/$targetId",
+  component: function MergePairRoute() {
+    const { entity, sourceId, targetId } = mergePairRoute.useParams();
+    return (
+      <MergePage
+        key={`${sourceId}-${targetId}`}
+        entity={entity as MergeEntity}
+        sourceId={sourceId}
+        targetId={targetId}
+      />
+    );
+  },
+});
 const lessonFeedbackRoute = appPage("/lesson-feedback", LessonFeedbackPage);
 const analyticsReportRoute = createRoute({
   getParentRoute: () => appRoute,
@@ -581,6 +607,9 @@ const routeTree = rootRoute.addChildren([
     analyticsBuilderRoute,
     analyticsReportRoute,
     peopleMapRoute,
+    duplicatesRoute,
+    mergeRoute,
+    mergePairRoute,
     lessonFeedbackRoute,
     unconfirmedRoute,
     deliverySettingsRoute,

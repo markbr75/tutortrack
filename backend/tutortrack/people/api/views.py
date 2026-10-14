@@ -11,6 +11,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -24,7 +25,7 @@ from tutortrack.core.permissions import (
     has_perm,
     scope_queryset,
 )
-from tutortrack.crm.listing import apply_crm_filters, csv_export
+from tutortrack.crm.listing import apply_crm_filters, selected_ids, table_export
 
 from .. import selectors, services
 from ..models import Client, Contact, Student, TutorProfile, TutorSubject
@@ -32,9 +33,13 @@ from .serializers import (
     ClientDetailSerializer,
     ClientSerializer,
     ContactSerializer,
+    DuplicatePairSerializer,
     DuplicateSerializer,
     GeocodeRequestSerializer,
     GeocodeResultSerializer,
+    MergePreviewSerializer,
+    MergeRequestSerializer,
+    MergeResultSerializer,
     PeopleMapSerializer,
     QuickAddSerializer,
     StatusSerializer,
@@ -56,11 +61,59 @@ def perms(entity: str) -> type[HasMethodPermission]:
     )
 
 
+def _iso(value: Any) -> str:
+    return value.isoformat() if value is not None else ""
+
+
+ORDERING_PARAM = OpenApiParameter(
+    "ordering",
+    str,
+    description="Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`.",
+)
+EXPORT_RESPONSES = {
+    (200, "text/csv"): OpenApiTypes.STR,
+    (200, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"): (
+        OpenApiTypes.BINARY
+    ),
+}
+
+
 def _pop_address(data: dict[str, Any], key: str) -> dict[str, Any]:
     out = {}
     if f"{key}_data" in data:
         out[key] = data.pop(f"{key}_data")
     return out
+
+
+class AliasOrderingFilter(OrderingFilter):
+    """``?ordering=`` over model fields and the computed list fields the queryset carries
+    (FR-05-11). ``ordering_aliases`` maps a public name to its never-null sort key, so
+    cursor pagination can page over ``next_lesson_at`` and friends."""
+
+    def get_ordering(self, request: Request, queryset: QuerySet[Any], view: Any) -> Any:
+        params = request.query_params.get(self.ordering_param)
+        if not params:
+            return self.get_default_ordering(view)
+        aliases = getattr(view, "ordering_aliases", {})
+        allowed = set(getattr(view, "ordering_fields", ()))
+        available = set(queryset.query.annotations) | {
+            f.name for f in queryset.model._meta.concrete_fields
+        }
+        out = []
+        for term in (p.strip() for p in params.split(",")):
+            name = term.lstrip("-")
+            if name not in allowed:
+                continue
+            field = aliases.get(name, name)
+            if field in available:
+                out.append(("-" if term.startswith("-") else "") + field)
+        return out or self.get_default_ordering(view)
+
+
+EXPORT_PARAMS = [
+    OpenApiParameter("file_format", str, enum=["csv", "xlsx"], description="Default csv."),
+    OpenApiParameter("ids", str, description="Only these records (comma-separated ids)."),
+]
 
 
 class PeopleViewSet(
@@ -73,13 +126,20 @@ class PeopleViewSet(
     viewsets.GenericViewSet,
 ):
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
+    filter_backends = [filters.DjangoFilterBackend, AliasOrderingFilter]
     entity: str = ""
     entity_type: str = ""
     search_fields: tuple[str, ...] = ()
+    ordering_fields: tuple[str, ...] = ("created_at",)
+    ordering_aliases: dict[str, str] = {
+        "next_lesson_at": "next_lesson_sort",
+        "last_lesson_at": "last_lesson_sort",
+        "report_sla": "report_sla_sort",
+    }
 
     def scoped(self, qs: QuerySet[Any]) -> QuerySet[Any]:
         qs = scope_queryset(self.request.user, qs, f"people.{self.entity}.view")
-        if self.action == "list":
+        if self.action in {"list", "export"}:
             qs = apply_crm_filters(qs, self.request.query_params, self.entity_type)
             q = self.request.query_params.get("q", "").strip()
             if q:
@@ -87,14 +147,71 @@ class PeopleViewSet(
                 for field in self.search_fields:
                     condition |= Q(**{f"{field}__icontains": q})
                 qs = qs.filter(condition)
+            ids = selected_ids(self.request.query_params)
+            if ids and self.action == "export":
+                qs = qs.filter(pk__in=ids)
         return qs
 
+    def export_file(self, request: Request, columns: list[Any], filename: str) -> Any:
+        rows = self.filter_queryset(self.get_queryset())
+        return table_export(
+            request,
+            rows,
+            columns,
+            filename=filename,
+            entity_type=self.entity_type,
+            file_format=request.query_params.get("file_format", "csv"),
+        )
 
-class ClientFilter(filters.FilterSet):
+
+COMPUTED_FILTERS = {
+    "balance_min": ("balance", "gte"),
+    "balance_max": ("balance", "lte"),
+    "next_lesson_before": ("next_lesson_at", "lt"),
+    "last_lesson_before": ("last_lesson_at", "lt"),
+    "last_lesson_after": ("last_lesson_at", "gte"),
+    "hours_this_term_min": ("hours_this_term", "gte"),
+    "hours_this_month_min": ("hours_this_month", "gte"),
+    "report_sla_below": ("report_sla", "lt"),
+}
+
+
+class ComputedFilterSet(filters.FilterSet):
+    """Filters on computed list fields; ignored when the viewer can't see that figure
+    (the annotation isn't there)."""
+
+    def computed(self, qs: QuerySet[Any], name: str, value: Any) -> QuerySet[Any]:
+        field, lookup = COMPUTED_FILTERS[name]
+        if value in (None, "") or field not in qs.query.annotations:
+            return qs
+        return qs.filter(**{f"{field}__{lookup}": value})
+
+    def upcoming(self, qs: QuerySet[Any], name: str, value: Any) -> QuerySet[Any]:
+        if value is None or "next_lesson_at" not in qs.query.annotations:
+            return qs
+        return qs.filter(next_lesson_at__isnull=not value)
+
+
+def _computed(kind: str, name: str) -> Any:
+    field = {
+        "number": filters.NumberFilter,
+        "datetime": filters.IsoDateTimeFilter,
+    }[kind]
+    return field(field_name=name, method="computed")
+
+
+class ClientFilter(ComputedFilterSet):
     status = filters.ChoiceFilter(choices=Client.Status.choices)
     type = filters.ChoiceFilter(choices=Client.Type.choices)
     branch = filters.UUIDFilter(field_name="branch_id")
     account_manager = filters.UUIDFilter(field_name="account_manager_id")
+    balance_min = _computed("number", "balance_min")
+    balance_max = _computed("number", "balance_max")
+    next_lesson_before = _computed("datetime", "next_lesson_before")
+    last_lesson_before = _computed("datetime", "last_lesson_before")
+    last_lesson_after = _computed("datetime", "last_lesson_after")
+    hours_this_term_min = _computed("number", "hours_this_term_min")
+    has_upcoming_lesson = filters.BooleanFilter(method="upcoming")
 
     class Meta:
         model = Client
@@ -122,16 +239,31 @@ class ClientViewSet(PeopleViewSet):
     permission_classes = [IsAuthenticated, HasOrganisation, perms("client")]
     filterset_class = ClientFilter
 
+    ordering_fields = (
+        "display_name",
+        "created_at",
+        "students_count",
+        "balance",
+        "next_lesson_at",
+        "last_lesson_at",
+        "hours_this_term",
+    )
+
     def get_serializer_class(self) -> Any:
         return ClientDetailSerializer if self.action == "retrieve" else ClientSerializer
 
     def get_tenant_queryset(self) -> QuerySet[Client]:
         qs = Client.objects.select_related("billing_address").annotate(
-            students_count=Count("students", filter=Q(students__archived_at__isnull=True))
+            students_count=Count(
+                "students", filter=Q(students__archived_at__isnull=True), distinct=True
+            )
         )
-        return self.scoped(qs).distinct()
+        qs = self.scoped(qs)
+        if self.action in {"list", "retrieve", "export"}:
+            qs = selectors.with_client_figures(self.request.user, qs)
+        return qs.distinct()  # searching by contact joins one row per contact
 
-    @extend_schema(parameters=LIST_PARAMS)
+    @extend_schema(parameters=[*LIST_PARAMS, ORDERING_PARAM])
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -158,7 +290,9 @@ class ClientViewSet(PeopleViewSet):
         client = services.restore_client(self.get_object())
         return Response(ClientSerializer(client, context={"request": request}).data)
 
-    @extend_schema(parameters=LIST_PARAMS, responses={(200, "text/csv"): OpenApiTypes.STR})
+    @extend_schema(
+        parameters=[*LIST_PARAMS, *EXPORT_PARAMS, ORDERING_PARAM], responses=EXPORT_RESPONSES
+    )
     @action(
         detail=False,
         methods=["get"],
@@ -169,10 +303,8 @@ class ClientViewSet(PeopleViewSet):
         ],
     )
     def export(self, request: Request) -> Any:
-        rows = self.filter_queryset(self.get_queryset())
-        return csv_export(
+        return self.export_file(
             request,
-            rows,
             [
                 ("id", lambda c: c.pk),
                 ("name", lambda c: c.display_name),
@@ -180,10 +312,13 @@ class ClientViewSet(PeopleViewSet):
                 ("status", lambda c: c.status),
                 ("currency", lambda c: c.currency),
                 ("students", lambda c: c.students_count),
+                ("balance", lambda c: getattr(c, "balance", None)),
+                ("next_lesson_at", lambda c: _iso(getattr(c, "next_lesson_at", None))),
+                ("last_lesson_at", lambda c: _iso(getattr(c, "last_lesson_at", None))),
+                ("hours_this_term", lambda c: getattr(c, "hours_this_term", None)),
                 ("created_at", lambda c: c.created_at.isoformat()),
             ],
-            filename="clients.csv",
-            entity_type=self.entity_type,
+            "clients",
         )
 
     @extend_schema(
@@ -277,13 +412,46 @@ class ContactViewSet(PeopleViewSet):
     permission_classes = [IsAuthenticated, HasOrganisation, perms("contact")]
     http_method_names = ["get", "patch", "delete", "head", "options"]
     filterset_fields: list[str] = []
+    ordering_fields = ("last_name", "first_name", "created_at")
 
     def get_tenant_queryset(self) -> QuerySet[Contact]:
         return self.scoped(Contact.objects.select_related("address", "client"))
 
-    @extend_schema(parameters=LIST_PARAMS)
+    @extend_schema(parameters=[*LIST_PARAMS, ORDERING_PARAM])
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        parameters=[*LIST_PARAMS, *EXPORT_PARAMS, ORDERING_PARAM], responses=EXPORT_RESPONSES
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        permission_classes=[
+            IsAuthenticated,
+            HasOrganisation,
+            HasMethodPermission.for_({"GET": "people.contact.export"}),
+        ],
+    )
+    def export(self, request: Request) -> Any:
+        from tutortrack.core.permissions import has_perm
+
+        details = has_perm(request.user, "people.contact.view_details")
+        phone = has_perm(request.user, "people.contact.view_phone")
+        return self.export_file(
+            request,
+            [
+                ("id", lambda c: c.pk),
+                ("first_name", lambda c: c.first_name),
+                ("last_name", lambda c: c.last_name),
+                ("relationship", lambda c: c.relationship),
+                ("client", lambda c: c.client.display_name),
+                ("email", lambda c: c.email if details else ""),
+                ("phone", lambda c: (c.phone or c.mobile) if phone else ""),
+                ("is_primary", lambda c: "yes" if c.is_primary else "no"),
+            ],
+            "contacts",
+        )
 
     def perform_update(self, serializer: Any) -> None:
         data = dict(serializer.validated_data)
@@ -298,11 +466,16 @@ class ContactViewSet(PeopleViewSet):
             instance.save(update_fields=["archived_at", "updated_at"])
 
 
-class StudentFilter(filters.FilterSet):
+class StudentFilter(ComputedFilterSet):
     status = filters.MultipleChoiceFilter(choices=Student.Status.choices)
     client = filters.UUIDFilter(field_name="client_id")
     branch = filters.UUIDFilter(field_name="branch_id")
     subject = filters.CharFilter(method="by_subject")
+    next_lesson_before = _computed("datetime", "next_lesson_before")
+    last_lesson_before = _computed("datetime", "last_lesson_before")
+    last_lesson_after = _computed("datetime", "last_lesson_after")
+    hours_this_term_min = _computed("number", "hours_this_term_min")
+    has_upcoming_lesson = filters.BooleanFilter(method="upcoming")
 
     class Meta:
         model = Student
@@ -322,11 +495,22 @@ class StudentViewSet(PeopleViewSet):
     search_fields = ("first_name", "last_name", "preferred_name", "school")
     permission_classes = [IsAuthenticated, HasOrganisation, perms("student")]
     filterset_class = StudentFilter
+    ordering_fields = (
+        "last_name",
+        "first_name",
+        "created_at",
+        "next_lesson_at",
+        "last_lesson_at",
+        "hours_this_term",
+    )
 
     def get_tenant_queryset(self) -> QuerySet[Student]:
-        return self.scoped(Student.objects.select_related("lesson_address", "client"))
+        qs = self.scoped(Student.objects.select_related("lesson_address", "client"))
+        if self.action in {"list", "retrieve", "export"}:
+            qs = selectors.with_student_figures(self.request.user, qs)
+        return qs
 
-    @extend_schema(parameters=LIST_PARAMS)
+    @extend_schema(parameters=[*LIST_PARAMS, ORDERING_PARAM])
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -375,7 +559,9 @@ class StudentViewSet(PeopleViewSet):
         )
         return Response(StudentSerializer(student, context={"request": request}).data)
 
-    @extend_schema(parameters=LIST_PARAMS, responses={(200, "text/csv"): OpenApiTypes.STR})
+    @extend_schema(
+        parameters=[*LIST_PARAMS, *EXPORT_PARAMS, ORDERING_PARAM], responses=EXPORT_RESPONSES
+    )
     @action(
         detail=False,
         methods=["get"],
@@ -386,10 +572,8 @@ class StudentViewSet(PeopleViewSet):
         ],
     )
     def export(self, request: Request) -> Any:
-        rows = self.filter_queryset(self.get_queryset())
-        return csv_export(
+        return self.export_file(
             request,
-            rows,
             [
                 ("id", lambda s: s.pk),
                 ("first_name", lambda s: s.first_name),
@@ -403,16 +587,20 @@ class StudentViewSet(PeopleViewSet):
                         f"{x['subject']} {x.get('level', '')}".strip() for x in s.subjects
                     ),
                 ),
+                ("next_lesson_at", lambda s: _iso(getattr(s, "next_lesson_at", None))),
+                ("last_lesson_at", lambda s: _iso(getattr(s, "last_lesson_at", None))),
+                ("hours_this_term", lambda s: getattr(s, "hours_this_term", None)),
             ],
-            filename="students.csv",
-            entity_type=self.entity_type,
+            "students",
         )
 
 
-class TutorFilter(filters.FilterSet):
+class TutorFilter(ComputedFilterSet):
     status = filters.MultipleChoiceFilter(choices=TutorProfile.Status.choices)
     branch = filters.UUIDFilter(field_name="branches")
     subject = filters.CharFilter(field_name="subjects__subject", lookup_expr="iexact")
+    hours_this_month_min = _computed("number", "hours_this_month_min")
+    report_sla_below = _computed("number", "report_sla_below")
 
     class Meta:
         model = TutorProfile
@@ -430,16 +618,66 @@ class TutorViewSet(PeopleViewSet):
     permission_classes = [IsAuthenticated, HasOrganisation, perms("tutor")]
     filterset_class = TutorFilter
     http_method_names = ["get", "post", "patch", "put", "delete", "head", "options"]
+    ordering_fields = ("last_name", "first_name", "created_at", "hours_this_month", "report_sla")
 
     def get_tenant_queryset(self) -> QuerySet[TutorProfile]:
         qs = TutorProfile.objects.select_related("address").prefetch_related(
             "subjects", "qualifications"
         )
-        return self.scoped(qs).distinct()
+        qs = self.scoped(qs)
+        if self.action in {"list", "retrieve", "export"}:
+            qs = selectors.with_tutor_figures(self.request.user, qs)
+        return qs.distinct()
 
-    @extend_schema(parameters=LIST_PARAMS)
+    def _with_utilisation(self, tutors: list[TutorProfile]) -> list[TutorProfile]:
+        """Utilisation needs weekly availability, so it is worked out per page (it can't be
+        sorted or filtered on)."""
+        if has_perm(self.request.user, "scheduling.lesson.view"):
+            figures = selectors.tutor_utilisation(tutors)
+            for tutor in tutors:
+                tutor.utilisation = figures.get(str(tutor.pk))  # type: ignore[attr-defined]
+        return tutors
+
+    def paginate_queryset(self, queryset: Any) -> Any:
+        page = super().paginate_queryset(queryset)
+        return self._with_utilisation(list(page)) if page is not None else None
+
+    def get_object(self) -> TutorProfile:
+        tutor: TutorProfile = super().get_object()
+        if self.action == "retrieve":
+            self._with_utilisation([tutor])
+        return tutor
+
+    @extend_schema(parameters=[*LIST_PARAMS, ORDERING_PARAM])
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        parameters=[*LIST_PARAMS, *EXPORT_PARAMS, ORDERING_PARAM], responses=EXPORT_RESPONSES
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        permission_classes=[
+            IsAuthenticated,
+            HasOrganisation,
+            HasMethodPermission.for_({"GET": "people.tutor.export"}),
+        ],
+    )
+    def export(self, request: Request) -> Any:
+        return self.export_file(
+            request,
+            [
+                ("id", lambda t: t.pk),
+                ("name", lambda t: t.full_name),
+                ("email", lambda t: t.email),
+                ("status", lambda t: t.status),
+                ("subjects", lambda t: "; ".join(sorted({s.subject for s in t.subjects.all()}))),
+                ("hours_this_month", lambda t: getattr(t, "hours_this_month", None)),
+                ("report_sla_percent", lambda t: getattr(t, "report_sla", None)),
+            ],
+            "tutors",
+        )
 
     def perform_create(self, serializer: Any) -> None:
         data = dict(serializer.validated_data)
@@ -634,3 +872,165 @@ class PeopleMapGeocodeView(APIView):
 
             raise PermissionDenied()
         return Response({"queued": services.geocode_missing(request.user, kinds)})
+
+
+# --- duplicates and merge (FR-05-13) ------------------------------------------------------------
+
+MERGE_PERMS: list[Any] = [
+    IsAuthenticated,
+    HasOrganisation,
+    HasMethodPermission.for_({"GET": "people.merge", "POST": "people.merge"}),
+]
+ENTITY_PARAM = OpenApiParameter(
+    "entity", str, OpenApiParameter.PATH, enum=sorted(selectors.MERGE_ENTITIES)
+)
+
+
+def _merge_subject(entity: str) -> str:
+    from rest_framework.exceptions import NotFound
+
+    subject_type = selectors.MERGE_ENTITIES.get(entity)
+    if subject_type is None:
+        raise NotFound()
+    return subject_type
+
+
+def _visible_pair(request: Request, subject_type: str, ids: list[Any]) -> None:
+    """Both records must be ones the user can see (a hidden id is a 404)."""
+    from django.apps import apps
+    from django.core.exceptions import ValidationError
+    from rest_framework.exceptions import NotFound
+
+    model = apps.get_model(subject_type)
+    perm = f"people.{subject_type.split('.')[1]}.view"
+    try:
+        found = scope_queryset(
+            request.user, model._default_manager.filter(pk__in=ids), perm
+        ).count()
+    except (ValidationError, ValueError):
+        found = 0
+    if found != len(set(map(str, ids))):
+        raise NotFound()
+
+
+PREVIEW_EXAMPLE = {
+    "subject_type": "people.client",
+    "source": {"id": "01928d6e-0000-7000-8000-000000000002", "name": "Patel family"},
+    "target": {"id": "01928d6e-0000-7000-8000-000000000001", "name": "The Patel Family"},
+    "values": [
+        {
+            "name": "display_name",
+            "label": "Name",
+            "source": "Patel family",
+            "target": "The Patel Family",
+            "hidden": False,
+            "same": False,
+            "default": "target",
+        }
+    ],
+    "moves": [
+        {"key": "people.students", "label": "Students", "count": 1},
+        {"key": "billing.invoices", "label": "Invoices", "count": 2},
+    ],
+    "problems": [],
+    "warnings": [],
+    "can_merge": True,
+}
+
+
+class MergePreviewView(APIView):
+    """``GET /merge/{entity}/preview?source=&target=``: the two records side by side, what
+    would move to the survivor and anything that stops the merge (FR-05-13)."""
+
+    permission_classes = MERGE_PERMS
+
+    @extend_schema(
+        tags=["merge"],
+        parameters=[
+            ENTITY_PARAM,
+            OpenApiParameter("source", OpenApiTypes.UUID, required=True),
+            OpenApiParameter("target", OpenApiTypes.UUID, required=True),
+        ],
+        responses=MergePreviewSerializer,
+        examples=[OpenApiExample("Two Patel families", response_only=True, value=PREVIEW_EXAMPLE)],
+    )
+    def get(self, request: Request, entity: str) -> Response:
+        subject_type = _merge_subject(entity)
+        source = request.query_params.get("source", "")
+        target = request.query_params.get("target", "")
+        _visible_pair(request, subject_type, [source, target])
+        data = selectors.merge_preview(request.user, subject_type, source, target)
+        return Response(MergePreviewSerializer(data).data)
+
+
+class MergeView(APIView):
+    """``POST /merge/{entity}``: merge ``source`` into ``target`` (FR-05-13). Not reversible:
+    ``confirm`` must be true. ``choices`` picks the surviving value per field
+    (``source`` or ``target``; by default the survivor's, or the duplicate's where the
+    survivor's is empty). Every linked record moves to the survivor; the duplicate is
+    archived and points at it."""
+
+    permission_classes = MERGE_PERMS
+
+    @extend_schema(
+        tags=["merge"],
+        parameters=[ENTITY_PARAM],
+        request=MergeRequestSerializer,
+        responses={200: MergeResultSerializer},
+        examples=[
+            OpenApiExample(
+                "Keep the older family, the newer one's address",
+                request_only=True,
+                value={
+                    "source": "01928d6e-0000-7000-8000-000000000002",
+                    "target": "01928d6e-0000-7000-8000-000000000001",
+                    "choices": {"billing_address": "source"},
+                    "confirm": True,
+                },
+            ),
+            OpenApiExample(
+                "Merged",
+                response_only=True,
+                value={
+                    "subject_type": "people.client",
+                    "target_id": "01928d6e-0000-7000-8000-000000000001",
+                    "merged_id": "01928d6e-0000-7000-8000-000000000002",
+                    "moved": {"people.students": 1, "billing.invoices": 2},
+                    "notes": [],
+                },
+            ),
+        ],
+    )
+    def post(self, request: Request, entity: str) -> Response:
+        subject_type = _merge_subject(entity)
+        payload = MergeRequestSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+        _visible_pair(request, subject_type, [data["source"], data["target"]])
+        result = services.merge_records(
+            subject_type,
+            data["source"],
+            data["target"],
+            choices=data.get("choices") or {},
+            confirm=data["confirm"],
+            user=request.user,
+        )
+        return Response(MergeResultSerializer(result).data)
+
+
+class DuplicatePairsView(APIView):
+    """``GET /people/duplicates/pairs?type=client|contact|student``: records that look like
+    the same person or family, newest pairs first (FR-05-13), to review and merge."""
+
+    permission_classes = MERGE_PERMS
+
+    @extend_schema(
+        tags=["merge"],
+        parameters=[
+            OpenApiParameter("type", str, enum=["client", "contact", "student"], required=True)
+        ],
+        responses=DuplicatePairSerializer(many=True),
+    )
+    def get(self, request: Request) -> Response:
+        rows = selectors.duplicate_pairs(request.user, request.query_params.get("type", ""))
+        return Response(DuplicatePairSerializer(rows, many=True).data)

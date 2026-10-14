@@ -8,7 +8,7 @@ from typing import Any
 
 from django.db.models import Q, QuerySet
 from django_filters import rest_framework as filters
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -455,7 +455,9 @@ class SavedViewViewSet(
 
 
 class TimelineItemSerializer(serializers.Serializer):
-    kind = serializers.ChoiceField(choices=["note", "task", "document", "change", "message"])
+    kind = serializers.ChoiceField(
+        choices=["note", "task", "document", "change", "message", "lesson", "invoice", "payment"]
+    )
     id = serializers.CharField()
     at = serializers.DateTimeField()
     title = serializers.CharField()
@@ -497,7 +499,7 @@ class SearchHitSerializer(serializers.Serializer):
 
 
 class SearchView(APIView):
-    """Global search (⌘K) across people; results respect your permissions."""
+    """Global search (⌘K) across people, jobs and invoices; results respect your permissions."""
 
     permission_classes = AUTH
 
@@ -536,19 +538,41 @@ class StartBulkSerializer(serializers.Serializer):
 
 class BulkView(APIView):
     """Run a bulk action in the background: ``POST /bulk/{entity}/{action}``; poll
-    ``/bulk-jobs/{id}`` for progress and the per-record report (FR-05-12)."""
+    ``/bulk-jobs/{id}`` for progress and the per-record report (FR-05-12).
+
+    Actions: ``tag``/``untag`` (``params.tag``), ``archive``, ``set_status``
+    (``params.status``), ``assign_manager`` (clients), ``invite_portal`` (clients' main
+    contact, contacts), and ``send_message`` (``params``: ``channel`` email|sms,
+    ``purpose`` service|marketing, ``subject``, ``body``; marketing needs consent, as for
+    broadcasts). Export the selected rows with ``GET /{entity}/export?ids=...``."""
 
     permission_classes = method_perms({"POST": "crm.bulk.run"})
 
-    @extend_schema(request=StartBulkSerializer, responses={202: BulkJobSerializer})
+    @extend_schema(
+        request=StartBulkSerializer,
+        responses={202: BulkJobSerializer},
+        examples=[
+            OpenApiExample(
+                "Send a service message by email",
+                request_only=True,
+                value={
+                    "target_ids": ["01928d6e-0000-7000-8000-000000000001"],
+                    "params": {
+                        "channel": "email",
+                        "purpose": "service",
+                        "subject": "Half-term timetable",
+                        "body": "Hello {{ recipient.first_name }}, lessons pause next week.",
+                    },
+                },
+            )
+        ],
+    )
     def post(self, request: Request, entity: str, bulk_action: str) -> Response:
         payload = StartBulkSerializer(data=request.data)
         payload.is_valid(raise_exception=True)
         entity_type = f"people.{entity}"
-        edit_perm = f"people.{entity}.{'archive' if bulk_action == 'archive' else 'edit'}"
-        if bulk_action in {"tag", "untag"}:
-            edit_perm = "crm.tag.apply"
-        if not has_perm(request.user, edit_perm):
+        needed = services.BULK_PERMISSIONS.get(bulk_action, "people.{entity}.edit")
+        if not has_perm(request.user, needed.format(entity=entity)):
             from tutortrack.core.exceptions import PermissionDenied
 
             raise PermissionDenied()

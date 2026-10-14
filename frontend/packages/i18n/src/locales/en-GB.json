@@ -6203,5 +6203,154 @@
     "recordingsTitle": "Lesson recordings",
     "noRecordings": "No recordings have been shared with you.",
     "watch": "Watch"
+  },
+  "peopleTools": {
+    "columns": {
+      "balance": "Balance",
+      "nextLesson": "Next lesson",
+      "lastLesson": "Last lesson",
+      "hoursThisTerm": "Hours this term",
+      "hoursThisMonth": "Hours this month",
+      "utilisation": "Utilisation",
+      "reportSla": "Reports on time",
+      "hours": "{{hours}} h",
+      "percent": "{{value}}%",
+      "none": "—",
+      "select": "Select",
+      "selectAll": "Select all shown",
+      "selectRow": "Select {{name}}"
+    },
+    "sort": {
+      "label": "Sort by",
+      "newest": "Newest first",
+      "name": "Name",
+      "balance": "Balance (highest first)",
+      "nextLesson": "Next lesson (soonest first)",
+      "lastLesson": "Last lesson (longest ago first)",
+      "hoursThisTerm": "Hours this term (most first)",
+      "hoursThisMonth": "Hours this month (most first)",
+      "reportSla": "Reports on time (lowest first)"
+    },
+    "filters": {
+      "upcoming": "Lessons booked",
+      "any": "Any",
+      "yes": "Has a lesson booked",
+      "no": "No lesson booked",
+      "owing": "Only those who owe money"
+    },
+    "export": {
+      "csv": "Export CSV",
+      "xlsx": "Export Excel"
+    },
+    "bulk": {
+      "label": "Bulk actions",
+      "selected_one": "{{count}} selected",
+      "selected_other": "{{count}} selected",
+      "clear": "Clear selection",
+      "sendMessage": "Send a message",
+      "invite": "Invite to the portal",
+      "exportCsv": "Export selected (CSV)",
+      "exportXlsx": "Export selected (Excel)",
+      "merge": "Merge the two selected",
+      "running": "Working on it: {{processed}} of {{total}} done.",
+      "done": "Done: {{succeeded}} of {{total}} succeeded.",
+      "failures_one": "{{count}} record could not be done:",
+      "failures_other": "{{count}} records could not be done:",
+      "reason": {
+        "no_consent": "no marketing consent",
+        "no_address": "no address for this channel",
+        "no_recipient": "no contact to send to",
+        "suppressed": "the address is blocked (bounce or opt-out)",
+        "opted_out": "opted out of this channel",
+        "duplicate": "already sent"
+      }
+    },
+    "message": {
+      "title": "Send a message",
+      "channel": "Send by",
+      "email": "Email",
+      "sms": "Text message",
+      "purpose": "Kind of message",
+      "service": "Service message (about lessons or the account)",
+      "marketing": "Marketing",
+      "marketingHint": "Only people who agreed to marketing receive it.",
+      "subject": "Subject",
+      "body": "Message",
+      "bodyHint": "To use the person's first name, type {{token}}.",
+      "send": "Send",
+      "cancel": "Cancel",
+      "recipients_one": "It goes to {{count}} record's main contact.",
+      "recipients_other": "It goes to the main contact of {{count}} records."
+    },
+    "timeline": {
+      "lesson": "Lesson",
+      "invoice": "Invoice",
+      "payment": "Payment"
+    },
+    "searchType": {
+      "job": "Job",
+      "invoice": "Invoice"
+    },
+    "duplicates": {
+      "nav": "Duplicates",
+      "title": "Possible duplicates",
+      "intro": "Records that look like the same family or person. Review a pair to merge it.",
+      "tabs": "Kind of record",
+      "client": "Families",
+      "contact": "Contacts",
+      "student": "Students",
+      "none": "No possible duplicates found.",
+      "pair": "{{a}} and {{b}}",
+      "older": "Older record",
+      "newer": "Newer record",
+      "reasonLabel": "Why",
+      "reason": {
+        "email": "Same email",
+        "phone": "Same phone number",
+        "name": "Same name",
+        "name and date of birth": "Same name and date of birth"
+      },
+      "review": "Review and merge",
+      "reviewPair": "Review and merge {{a}} and {{b}}"
+    },
+    "merge": {
+      "title": "Merge records",
+      "entity": {
+        "clients": "Merge families",
+        "contacts": "Merge contacts",
+        "students": "Merge students"
+      },
+      "intro": "Everything linked to the duplicate (lessons, invoices, payments, notes, messages…) moves to the record you keep. The duplicate is archived. Merging can't be undone.",
+      "duplicate": "Duplicate (merged away)",
+      "keep": "Record you keep",
+      "chooseTarget": "Find the record to keep",
+      "search": "Search by name",
+      "searchButton": "Search",
+      "pick": "Keep {{name}}",
+      "noMatches": "No matching records.",
+      "swap": "Keep the other record instead",
+      "values": "Choose the values to keep",
+      "field": "Field",
+      "useDuplicate": "Use the duplicate's value for {{field}}",
+      "useKept": "Keep the value for {{field}}",
+      "hidden": "Hidden",
+      "empty": "(empty)",
+      "same": "Same in both",
+      "moves": "What moves to the record you keep",
+      "nothingMoves": "Nothing else is linked to the duplicate.",
+      "problems": "This merge can't go ahead",
+      "warnings": "Before you merge",
+      "confirm": "I understand that merging can't be undone.",
+      "submit": "Merge records",
+      "merging": "Merging…",
+      "merged": "Merged. Everything now belongs to {{name}}.",
+      "notes": "Notes from the merge",
+      "open": "Open {{name}}",
+      "mergeWith": "Merge with another record",
+      "mergedInto": "This record was merged into another one and is archived.",
+      "openSurvivor": "Open the record that was kept",
+      "yes": "Yes",
+      "no": "No"
+    }
   }
 }

@@ -563,6 +563,104 @@ def discard_imported(record: Client | Contact | Student | TutorProfile) -> None:
         raise BusinessRuleViolation(_("It is in use, so it was kept.")) from exc
 
 
+# --- merge (FR-05-13, ADR 0035) -----------------------------------------------------------------
+
+MERGE_EVENTS: dict[str, type[DomainEvent]] = {
+    "people.client": events.ClientMerged,
+    "people.contact": events.ContactMerged,
+    "people.student": events.StudentMerged,
+}
+
+
+@transaction.atomic
+def merge_records(
+    subject_type: str,
+    source_id: Any,
+    target_id: Any,
+    *,
+    choices: dict[str, str] | None = None,
+    confirm: bool = False,
+    user: Any = None,
+) -> dict[str, Any]:
+    """Merge the duplicate ``source`` into ``target`` in one transaction. Every app moves
+    its own records (``<app>/merge.py``); the duplicate stays as an archived tombstone that
+    points at the survivor. Not reversible, so ``confirm`` must be true."""
+    from . import merging
+
+    if not confirm:
+        message = _("Confirm that you want to merge these records. This can't be undone.")
+        raise BusinessRuleViolation(message, extra={"errors": {"confirm": [message]}})
+    if subject_type not in merging.SUBJECT_TYPES:
+        raise BusinessRuleViolation(_("These records can't be merged."))
+    if str(source_id) == str(target_id):
+        raise BusinessRuleViolation(_("Choose two different records."))
+    # Lock in a stable order so two merges of the same pair can't deadlock.
+    first, second = sorted([str(source_id), str(target_id)])
+    locked = {first: merging.load(subject_type, first, lock=True)}
+    locked[second] = merging.load(subject_type, second, lock=True)
+    source, target = locked[str(source_id)], locked[str(target_id)]
+    ctx = merging.MergeContext(subject_type, source, target, user)
+    blocked = merging.problems(ctx)
+    if blocked:
+        raise BusinessRuleViolation(blocked[0], extra={"errors": {"merge": blocked}})
+    changes, resolved = merging.surviving_changes(user, subject_type, source, target, choices or {})
+    source_name = str(source)
+    moved: dict[str, int] = {}
+    for provider in merging.providers(subject_type):
+        for move in provider.merge(ctx):
+            moved[move.key] = moved.get(move.key, 0) + move.count
+    target.refresh_from_db()
+    if changes:
+        update: Any = {
+            "people.client": update_client,
+            "people.contact": update_contact,
+            "people.student": update_student,
+        }[subject_type]
+        update(target, **changes)  # audited and announced like any edit
+    left = merging.references(subject_type, source.pk)
+    if left:
+        raise BusinessRuleViolation(
+            _("Some linked records couldn't be moved, so nothing was merged."),
+            extra={"errors": {"merge": sorted(left)}},
+        )
+    source.refresh_from_db()
+    with audit.track(source, action="merged_into"):
+        source.merged_into = target
+        source.merged_at = now()
+        source.archived_at = source.archived_at or source.merged_at
+        if subject_type == "people.client":
+            source.status = Client.Status.ARCHIVED
+            source.primary_contact = source.billing_contact = None
+        elif subject_type == "people.student":
+            source.status = Student.Status.ARCHIVED
+            source.status_changed_at = source.merged_at
+        source.save()
+    audit.record(
+        target,
+        "merge",
+        {
+            "merged_id": [None, str(source.pk)],
+            "merged_name": [None, source_name],
+            "choices": [None, resolved],
+            "moved": [None, moved],
+        },
+    )
+    payload: dict[str, Any] = {"merged_id": str(source.pk), "moved": moved}
+    if subject_type != "people.client":
+        payload["client_id"] = str(target.client_id)
+    publish(
+        MERGE_EVENTS[subject_type](subject_id=target.pk, **payload),
+        branch_id=getattr(target, "branch_id", None),
+    )
+    return {
+        "subject_type": subject_type,
+        "target_id": str(target.pk),
+        "merged_id": str(source.pk),
+        "moved": moved,
+        "notes": ctx.notes,
+    }
+
+
 # --- map view (E05-T12) -------------------------------------------------------------------------
 
 

@@ -88,3 +88,32 @@ class TutorStatusChanged(DomainEvent):
     subject_type: ClassVar[str] = "tutor"
     old_status: str
     new_status: str
+
+
+# --- merges (FR-05-13): the subject is the record that stays ------------------------------------
+
+
+@dataclass(frozen=True, kw_only=True)
+class ClientMerged(DomainEvent):
+    event_type: ClassVar[str] = "client.merged"
+    subject_type: ClassVar[str] = "client"
+    merged_id: str
+    moved: dict[str, int] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, kw_only=True)
+class ContactMerged(DomainEvent):
+    event_type: ClassVar[str] = "contact.merged"
+    subject_type: ClassVar[str] = "contact"
+    merged_id: str
+    client_id: str
+    moved: dict[str, int] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, kw_only=True)
+class StudentMerged(DomainEvent):
+    event_type: ClassVar[str] = "student.merged"
+    subject_type: ClassVar[str] = "student"
+    merged_id: str
+    client_id: str
+    moved: dict[str, int] = field(default_factory=dict)

@@ -129,6 +129,11 @@ class Client(NoOwnScopeMixin, BranchScopedModel, CustomisableModel):
         "identity.Membership", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
     archived_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    # FR-05-13: a duplicate merged into another client stays as an archived tombstone.
+    merged_into = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    merged_at = models.DateTimeField(null=True, blank=True)
 
     audit_sensitive_fields: ClassVar[frozenset[str]] = frozenset({"tax_id"})
 
@@ -190,6 +195,10 @@ class Contact(NoOwnScopeMixin, TenantModel, CustomisableModel):
         related_name="+",
     )  # fmt: skip
     archived_at = models.DateTimeField(null=True, blank=True)
+    merged_into = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    merged_at = models.DateTimeField(null=True, blank=True)
 
     class Meta(TenantModel.Meta):
         ordering = ["last_name", "first_name"]
@@ -258,6 +267,10 @@ class Student(NoOwnScopeMixin, BranchScopedModel, CustomisableModel):
         related_name="+",
     )  # fmt: skip
     archived_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    merged_into = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    merged_at = models.DateTimeField(null=True, blank=True)
 
     audit_sensitive_fields: ClassVar[frozenset[str]] = frozenset(
         {"learning_needs", "date_of_birth"}

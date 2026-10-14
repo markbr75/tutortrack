@@ -61,6 +61,18 @@ subjects.register_label("people.student", _label(Student))
 
 
 def expand(person: Person) -> None:
+    # Duplicates merged into this person (FR-05-13) are archived tombstones of the same
+    # person: they are exported and erased with them.
+    for model, kind in (
+        (Client, "people.client"),
+        (Contact, "people.contact"),
+        (Student, "people.student"),
+    ):
+        ids = person.of(kind)
+        if ids:
+            person.add(
+                kind, *model.objects.filter(merged_into_id__in=ids).values_list("pk", flat=True)
+            )
     clients = person.of("people.client")
     if clients:
         person.add(

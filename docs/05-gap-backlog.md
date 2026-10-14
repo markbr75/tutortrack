@@ -5,13 +5,13 @@ Every delivery-plan ticket in `docs/epics/` is ticked, but the epics' *Implement
 Tick an item when it is built, and record the as-built details in the owning epic's notes. References are `epic:line` in `docs/epics/`.
 
 ## Batch G1 — People, CRM and search (E05)
-- [ ] **E05 merge tool** for clients, contacts and students: choose surviving values, re-point lessons, invoices, notes, files etc. through each app's services, audited, confirmation required, not reversible (FR-05-13; E05:102, E05:118, E05:125). *L*
-- [ ] XLSX export from list grids (FR-05-11; E05:117). *S*
-- [ ] Computed list fields and filters: client balance, next/last lesson, hours this term; tutor hours, utilisation, SLA (FR-05-1/4/11; E05:110). *S–M*
-- [ ] Record timeline includes lessons, invoices and payments (FR-05-10). *S–M*
-- [ ] Global search covers jobs and invoices (FR-05-11). *S*
-- [ ] Bulk actions: send message, invite to portal, export (FR-05-12). *S–M*
-- [ ] @mentions notify the mentioned staff (FR-05-7/FR-13-2). *S*
+- [x] **E05 merge tool** for clients, contacts and students: choose surviving values, re-point lessons, invoices, notes, files etc. through each app's services, audited, confirmation required, not reversible (FR-05-13; E05:102, E05:118, E05:125). *L*
+- [x] XLSX export from list grids (FR-05-11; E05:117). *S*
+- [x] Computed list fields and filters: client balance, next/last lesson, hours this term; tutor hours, utilisation, SLA (FR-05-1/4/11; E05:110). *S–M*
+- [x] Record timeline includes lessons, invoices and payments (FR-05-10). *S–M*
+- [x] Global search covers jobs and invoices (FR-05-11). *S*
+- [x] Bulk actions: send message, invite to portal, export (FR-05-12). *S–M*
+- [x] @mentions notify the mentioned staff (FR-05-7/FR-13-2). *S*
 
 ## Batch G2 — Identity, portal households and demo data (E02, E03, E15)
 - [ ] In-product demo data: `@demo_provider` sample data for the main apps (people, catalogue, scheduling, delivery, billing, payments, leads, courses, growth…) so "Explore with demo data" and E27 sandboxes have records (FR-02-6, FR-27-6; E02:135, E25:120). *M*

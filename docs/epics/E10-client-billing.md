@@ -168,3 +168,6 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
 - **Accounting (E23):** package sales, plan fees and late fees are ordinary invoices and credit notes, so they sync through the existing `invoice.*`/`credit_note.issued` events with their own revenue mapping keys (product/service category). Package consumption and expiry don't sync (see above).
 - **Portal (E15):** package balances and buying packages sold online; see E15's notes.
 - **Frontend:** Billing gains Packages (sell, extend, cancel), Recurring fees (create, pause/resume/end), Late fees (rule form, clients in collections) and Split billing (per job) tabs; client billing gains a Packages tab.
+
+## Gap backlog (as built 2026-10-14)
+- **Gap G1 (E05 merge, ADR 0035).** `billing/merge.py` re-points charges, invoices, credit notes, payment requests, packages, plans, collections cases and split shares of a merged client or student with amounts untouched. Ledger entries stay on the merged record as history; the balance moves with a pair of `adjustment` entries per currency ("Balance moved to/from …"). Invoices also appear on client and contact timelines (`invoice` timeline provider) and in ⌘K search by number or PO number.

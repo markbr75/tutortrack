@@ -220,3 +220,34 @@ def booking_block(client_id: Any) -> str:
         if level in blocks:
             return level
     return "none"
+
+
+# --- record timelines (E05 FR-05-10) ------------------------------------------------------------
+
+
+def invoice_timeline(user: Any, target_type: str, target_id: str, limit: int) -> list[Any]:
+    """Issued invoices of a client (or a contact's family) for the activity timeline."""
+    from tutortrack.core.permissions import has_perm
+    from tutortrack.crm.selectors import TimelineItem
+    from tutortrack.people.selectors import timeline_scope
+
+    clients = timeline_scope(target_type, target_id)["client"]
+    if not clients or not has_perm(user, "billing.invoice.view"):
+        return []
+    rows = (
+        invoices(user)
+        .filter(client_id__in=clients)
+        .exclude(status=Invoice.Status.DRAFT)
+        .order_by("-issued_at", "-created_at")[:limit]
+    )
+    return [
+        TimelineItem(
+            "invoice",
+            str(i.pk),
+            i.issued_at or i.created_at,
+            i.number,
+            f"{i.status} · {i.total.amount} {i.currency}",
+            None,
+        )
+        for i in rows
+    ]

@@ -21,6 +21,7 @@ const NAV = [
   { to: "/students", key: "nav.students", permission: "people.student.view" },
   { to: "/tutors", key: "nav.tutors", permission: "people.tutor.view" },
   { to: "/people/map", key: "peopleMap.nav", permission: "people.student.view" },
+  { to: "/people/duplicates", key: "peopleTools.duplicates.nav", permission: "people.merge" },
   { to: "/jobs", key: "nav.jobs", permission: "jobs.job.view" },
   { to: "/courses", key: "nav.courses", permission: "courses.view" },
   { to: "/growth", key: "referrals.nav", permission: "growth.affiliate.view" },

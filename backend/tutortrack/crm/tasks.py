@@ -9,13 +9,32 @@ from celery import shared_task
 from tutortrack.core.tasks import TenantTask
 
 
-def _run_one(entity_type: str, action: str, target_id: str, params: dict[str, Any]) -> None:
+def _run_one(
+    entity_type: str, action: str, target_id: str, params: dict[str, Any], job_id: str = ""
+) -> None:
     from tutortrack.people import services as people
-    from tutortrack.people.models import Client, Student, TutorProfile
+    from tutortrack.people.models import Client, Contact, Student, TutorProfile
 
     from . import services
     from .models import Tag
 
+    if action == "send_message":
+        from tutortrack.comms.direct import send
+
+        queued, skipped = send(entity_type, target_id, params, key=job_id)
+        if not queued:
+            raise ValueError(", ".join(sorted(set(skipped))) or "not sent")
+        return
+    if action == "invite_portal":
+        if entity_type == "people.client":
+            client = Client.objects.get(pk=target_id)
+            contact = client.primary_contact or client.billing_contact
+            if contact is None:
+                raise ValueError("no contact")
+        else:
+            contact = Contact.objects.get(pk=target_id)
+        people.invite_to_portal(contact)
+        return
     if action in {"tag", "untag"}:
         tag = Tag.objects.get(pk=params["tag"])
         services.apply_tag(tag, entity_type, [target_id], remove=action == "untag")
@@ -58,7 +77,7 @@ def run_bulk_job(*, job_id: str, organisation_id: str) -> None:
         for index, target_id in enumerate(job.target_ids, start=1):
             try:
                 with transaction.atomic():
-                    _run_one(job.entity_type, job.action, target_id, job.params)
+                    _run_one(job.entity_type, job.action, target_id, job.params, str(job.pk))
                 succeeded += 1
             except (DomainError, ValueError, KeyError, LookupError) as exc:
                 errors[target_id] = str(getattr(exc, "detail", exc))[:300]

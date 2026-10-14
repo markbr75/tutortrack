@@ -45,8 +45,8 @@ def visible_notes(user: Any) -> Any:
 def timeline(
     user: Any, target_type: str, target_id: str, kinds: set[str] | None = None, limit: int = 200
 ) -> list[TimelineItem]:
-    """Notes, tasks, documents and record changes for one record, newest first. Messages,
-    lessons, invoices and payments join as their epics land (E13, E08, E10, E11)."""
+    """Notes, tasks, documents and record changes for one record, newest first, plus what
+    other apps register: messages (E13), lessons (E08), invoices (E10) and payments (E11)."""
     items: list[TimelineItem] = []
     want = kinds or {"note", "task", "document", "change", *_providers}
     if "note" in want and has_perm(user, "crm.note.view"):
@@ -117,8 +117,8 @@ class SearchHit:
 
 
 def search(user: Any, q: str, limit: int = 20) -> list[SearchHit]:
-    """⌘K search across people (jobs and invoices join with E07/E10). Trigram similarity
-    plus substring match; every entity respects the viewer's permission and data scope."""
+    """⌘K search across people, jobs and invoices. Trigram similarity plus substring match;
+    every entity respects the viewer's permission and data scope."""
     from tutortrack.people.models import Client, Contact, Student, TutorProfile
 
     q = q.strip()
@@ -130,6 +130,8 @@ def search(user: Any, q: str, limit: int = 20) -> list[SearchHit]:
         qs = scope_queryset(user, model.objects.all(), perm)
         if hasattr(model, "archived_at"):
             qs = qs.filter(archived_at__isnull=True)
+        if hasattr(model, "client"):
+            qs = qs.select_related("client")
         condition = Q()
         for f in fields:
             condition |= Q(**{f"{f}__icontains": q}) | Q(**{f"{f}__trigram_similar": q})
@@ -171,6 +173,33 @@ def search(user: Any, q: str, limit: int = 20) -> list[SearchHit]:
         ["first_name", "last_name", "email"],
         lambda o: SearchHit("tutor", str(o.pk), o.full_name, o.headline, float(o.score)),
     )
+    # Jobs and invoices (FR-05-11 gap G1): by reference/number and name, permission-scoped.
+    from tutortrack.billing.models import Invoice
+    from tutortrack.jobs.models import Job
+
+    if has_perm(user, "jobs.job.view"):
+        run(
+            Job,
+            "jobs.job.view",
+            ["reference", "name"],
+            lambda o: SearchHit(
+                "job", str(o.pk), str(o), o.client.display_name, float(o.score), str(o.client_id)
+            ),
+        )
+    if has_perm(user, "billing.invoice.view"):
+        run(
+            Invoice,
+            "billing.invoice.view",
+            ["number", "po_number"],
+            lambda o: SearchHit(
+                "invoice",
+                str(o.pk),
+                o.number,
+                f"{o.client.display_name} · {o.get_status_display()}",
+                float(o.score),
+                str(o.client_id),
+            ),
+        )
     hits.sort(key=lambda h: h.score, reverse=True)
     return hits[:limit]
 

@@ -106,6 +106,14 @@
       "missing": "We couldn't find this re-enrollment link."
     }
   },
+  "peopleTools": {
+    "columns": {
+      "utilisation": "Utilization"
+    },
+    "message": {
+      "bodyHint": "To use the person's first name, enter {{token}}."
+    }
+  },
   "portalCourses": {
     "noneOpen": "No classes are open for enrollment at the moment.",
     "enrol": "Enroll {{student}}"
