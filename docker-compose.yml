@@ -39,6 +39,9 @@ x-backend: &backend
 services:
   postgres:
     image: postgres:16-alpine
+    # Test flushes TRUNCATE every table in one statement (a lock each); the default
+    # 64 locks per transaction is too few for this many tables.
+    command: ["postgres", "-c", "max_locks_per_transaction=512"]
     environment:
       POSTGRES_USER: tutortrack
       POSTGRES_PASSWORD: tutortrack

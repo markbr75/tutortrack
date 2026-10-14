@@ -42,6 +42,14 @@ jobs:
       - name: PDF libraries (WeasyPrint)
         run: sudo apt-get update && sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0
       - run: uv sync --frozen
+      # Test flushes TRUNCATE every table in one statement (a lock each); service containers
+      # can't take server flags, so raise the lock table and restart (as docker-compose does).
+      - name: Postgres lock table
+        run: |
+          pg=$(docker ps -qf "ancestor=postgres:16-alpine")
+          docker exec "$pg" psql -U tutortrack -c "ALTER SYSTEM SET max_locks_per_transaction = 512"
+          docker restart "$pg"
+          for i in $(seq 1 30); do docker exec "$pg" pg_isready -U tutortrack && break; sleep 1; done
       - name: Database roles (app role is subject to RLS)
         run: uv run python manage.py ensure_db_roles
       - name: Lint
