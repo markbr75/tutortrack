@@ -445,8 +445,20 @@ MANUAL_KINDS = {
 
 @transaction.atomic
 def create_manual_item(
-    *, tutor: TutorProfile, kind: str, description: str, amount: Money, day: date
+    *,
+    tutor: TutorProfile,
+    kind: str,
+    description: str,
+    amount: Money,
+    day: date,
+    source_key: str | None = None,
 ) -> PayItem:
+    """A bonus, referral, adjustment, deduction or salary line. ``source_key`` makes it
+    idempotent for callers that pay once per record (E25 tutor referral bonuses)."""
+    if source_key:
+        existing = PayItem.objects.filter(source_key=source_key).first()
+        if existing is not None:
+            return existing
     if kind not in MANUAL_KINDS:
         raise BusinessRuleViolation(_("Choose bonus, referral, adjustment, deduction or salary."))
     if amount.is_zero():
@@ -456,7 +468,7 @@ def create_manual_item(
     import secrets
 
     return _create_item(
-        tutor=tutor, kind=kind, source_key=f"manual:{secrets.token_hex(8)}",
+        tutor=tutor, kind=kind, source_key=source_key or f"manual:{secrets.token_hex(8)}",
         description=description, day=day, amount=amount.round_to_minor(),
     )  # fmt: skip
 
@@ -1027,6 +1039,30 @@ def remind_approvers(pay_run_id: Any) -> bool:
 
 
 # --- bank files (T08) -----------------------------------------------------------------------
+
+
+def external_bank_file(
+    payees: list[tuple[str, dict[str, str], Money, str]], *, file_id: str, fmt: str | None = None
+) -> tuple[str, str]:
+    """A bank payment file for payees who aren't tutors (E25 affiliate payouts), from the
+    organisation's paying account: ``payees`` = ``[(name, bank details, amount, ref)]``.
+    Returns ``(filename, content)``."""
+    from . import bankfiles
+
+    fmt = fmt or str(get_setting("payroll.bank_file_format"))
+    originator = PayrollOriginator.objects.first()
+    if fmt != "csv" and originator is None:
+        raise BusinessRuleViolation(_("Add the account you pay from in pay settings."))
+    if not payees:
+        raise BusinessRuleViolation(_("Nothing to pay."))
+    lines = [bankfiles.Line(name, details, amount, ref) for name, details, amount, ref in payees]
+    origin_details = banking.loads(originator.bank_details) if originator else {}
+    extra_keys = ("company_id", "immediate_destination", "destination_name", "apca_id", "bank")
+    extra = {k: origin_details.pop(k) for k in list(origin_details) if k in extra_keys}
+    payer = bankfiles.Originator(
+        originator.name if originator else _org().name, origin_details, extra
+    )
+    return bankfiles.write(fmt, payer, lines, when=now(), file_id=file_id)
 
 
 @transaction.atomic

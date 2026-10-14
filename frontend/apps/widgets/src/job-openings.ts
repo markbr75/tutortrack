@@ -1,6 +1,7 @@
 import { html, nothing } from "lit";
 
 import { TtWidget } from "./base";
+import { referralCode } from "./referral";
 import { cached } from "./runtime";
 import { t } from "./strings";
 
@@ -37,7 +38,8 @@ export class TtJobOpenings extends TtWidget {
   private href(slug: string): string {
     if (this.applyUrl) return this.applyUrl.replace("{slug}", encodeURIComponent(slug));
     const app = (this.brand?.login_url ?? "/login").replace(/\/login$/, "");
-    return `${app}/vacancies/${encodeURIComponent(slug)}`;
+    const ref = referralCode(); // E25: a tutor's referral code follows the applicant
+    return `${app}/vacancies/${encodeURIComponent(slug)}${ref ? `?ref=${ref}` : ""}`;
   }
 
   render() {

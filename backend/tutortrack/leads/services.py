@@ -338,6 +338,7 @@ def submit_form(
             "landing_page",
             "gclid",
             "fbclid",
+            "ref",  # E25 referral / affiliate code
         )
     }
     submission = FormSubmission.objects.create(

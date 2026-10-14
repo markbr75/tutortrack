@@ -443,7 +443,13 @@ export function VacancyPage({ slug }: { slug: string }) {
       unwrap(
         await api.POST("/api/v1/public/job-openings/{slug}", {
           params: { path: { slug } },
-          body: { data: answers as Record<string, never>, captcha_token: token, website: "" },
+          body: {
+            data: answers as Record<string, never>,
+            captcha_token: token,
+            website: "",
+            // E25: a tutor's referral code from the shared link (?ref=CODE).
+            ref: new URLSearchParams(window.location.search).get("ref") ?? "",
+          },
         }),
       ),
   });

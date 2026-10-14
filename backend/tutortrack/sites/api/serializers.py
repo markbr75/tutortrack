@@ -461,6 +461,8 @@ class PublicTutorSerializer(serializers.Serializer):
     online = serializers.BooleanField()
     in_person = serializers.BooleanField()
     location = serializers.CharField()
+    rating = serializers.FloatField(allow_null=True)  # E25, when shown publicly
+    review_count = serializers.IntegerField()
 
 
 class QualificationSerializer(serializers.Serializer):

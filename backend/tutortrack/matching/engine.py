@@ -378,7 +378,11 @@ def search(
     horizon = now()
     booked = scheduled_minutes(ids, horizon, horizon + timedelta(weeks=WEEKS))
     history = completed_in_subject(ids, c.subject_id)
+    from tutortrack.growth.selectors import tutor_ratings
+
+    # Approved family reviews (E25) outrank referee ratings from the application (E18).
     ratings = reference_ratings(ids)
+    ratings.update({k: avg for k, (avg, _n) in tutor_ratings(ids).items()})
     offers = _offer_stats(ids)
     last = last_assignment(ids)
     target_margin = int(get_setting("matching.target_margin_percent")) / 100

@@ -19,6 +19,7 @@ import { RolesPage } from "./routes/RolesPage";
 import { SsoSettingsPage } from "./routes/SsoSettingsPage";
 import { CataloguePage } from "./catalogue/CataloguePage";
 import { ClassPage, CoursesPage, ReEnrolPage, RegisterPage } from "./courses/CoursesPages";
+import { GrowthPage, ReviewPage } from "./growth/GrowthPages";
 import { AccountingPage } from "./accounting/AccountingPage";
 import { DataPage } from "./data/DataPage";
 import { ImportPage } from "./data/ImportPage";
@@ -134,6 +135,14 @@ const publicFormRoute = createRoute({
   path: "/f/$slug",
   component: function PublicFormRoute() {
     return <PublicFormPage slug={publicFormRoute.useParams().slug} />;
+  },
+});
+// E25: the review page behind the review request email.
+const reviewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/review/$token",
+  component: function ReviewRoute() {
+    return <ReviewPage token={reviewRoute.useParams().token} />;
   },
 });
 const reEnrolRoute = createRoute({
@@ -262,6 +271,7 @@ const tutorRoute = createRoute({
 const tasksRoute = appPage("/tasks", TasksPage);
 const catalogueRoute = appPage("/catalogue", CataloguePage);
 const coursesRoute = appPage("/courses", CoursesPage);
+const growthRoute = appPage("/growth", GrowthPage);
 const classRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/classes/$classId",
@@ -403,6 +413,7 @@ const routeTree = rootRoute.addChildren([
   interviewRoute,
   referenceRoute,
   reEnrolRoute,
+  reviewRoute,
   platformRoute.addChildren([
     platformTenantsRoute,
     platformTenantRoute,
@@ -421,6 +432,7 @@ const routeTree = rootRoute.addChildren([
     tasksRoute,
     catalogueRoute,
     coursesRoute,
+    growthRoute,
     classRoute,
     registerRoute,
     jobsRoute,

@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "tutortrack.platform_admin",
     "tutortrack.sites",
     "tutortrack.courses",
+    "tutortrack.growth",
     # Last: subscribes webhooks to the event types every other app registers (E27).
     "tutortrack.developer",
 ]
@@ -405,6 +406,9 @@ SPECTACULAR_SETTINGS = {
         "ClassTeacherRoleEnum": "tutortrack.courses.models.ClassTeacher.Role",
         "EnrolmentStatusEnum": "tutortrack.courses.models.Enrolment.Status",
         "EnrolmentSourceEnum": "tutortrack.courses.models.Enrolment.Source",
+        "ReviewTriggerEnum": "tutortrack.growth.models.ReviewRequest.Trigger",
+        "ReferralMilestoneEnum": "tutortrack.growth.models.ReferralProgram.Milestone",
+        "AffiliatePayoutMethodEnum": "tutortrack.growth.models.Affiliate.PayoutMethod",
         "EnrolmentPaymentEnum": "tutortrack.courses.models.Enrolment.Payment",
         "CoursePricingModelEnum": "tutortrack.courses.models.Course.PricingModel",
         "MakeupBookingStatusEnum": "tutortrack.courses.models.MakeupBooking.Status",

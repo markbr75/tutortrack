@@ -1,6 +1,7 @@
 import { css, html, nothing } from "lit";
 
 import { TtWidget } from "./base";
+import { referralCode } from "./referral";
 import { api, ApiError, emit } from "./runtime";
 import { t } from "./strings";
 
@@ -164,7 +165,12 @@ export class TtEnquiryForm extends TtWidget {
         method: "POST",
         body: JSON.stringify({
           data: this.answers,
-          utm: { ...utm, referrer: document.referrer, landing_page: window.location.href },
+          utm: {
+            ...utm,
+            referrer: document.referrer,
+            landing_page: window.location.href,
+            ...(referralCode() ? { ref: referralCode() } : {}),
+          },
           captcha_token: this.token,
           website: this.honeypot,
         }),

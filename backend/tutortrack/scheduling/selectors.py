@@ -135,6 +135,17 @@ def completed_in_subject(tutor_ids: list[str], subject_id: object | None) -> dic
     return {str(r["tutor_id"]): r["n"] for r in qs.values("tutor_id").annotate(n=Count("id"))}
 
 
+def completed_lesson_count(*, client_id: object = None, tutor_id: object = None) -> int:
+    """Completed lessons of a client, a tutor, or a client with a tutor (E25 review
+    requests, referral and tutor-referral milestones)."""
+    qs = Lesson.objects.filter(status=Lesson.Status.COMPLETED)
+    if client_id is not None:
+        qs = qs.filter(attendees__client_id=client_id)
+    if tutor_id is not None:
+        qs = qs.filter(tutors__tutor_id=tutor_id)
+    return qs.distinct().count()
+
+
 # --- Phase 2 reads (E06 promo codes, E08-T12..T15) ----------------------------------------------
 
 
