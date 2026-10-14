@@ -112,3 +112,34 @@ def connection_error(event: EventEnvelope) -> None:
         services.on_connection_error(
             event.subject["id"], str(event.data.get("status", "")), str(event.data.get("error", ""))
         )
+
+
+# --- E23-T10: Xero Payroll timesheets for employed tutors --------------------------------------
+
+
+def _payroll_wanted(e: EventEnvelope) -> bool:
+    from .payroll_sync import should_sync
+
+    return should_sync(e.subject["id"])
+
+
+def _payroll_bridge() -> None:
+    from .payroll_processes import (
+        PayrollSyncInput,
+        XeroPayrollSyncWorkflow,
+        payroll_sync_workflow_id,
+    )
+
+    bridge.on(
+        "pay_run.approved",
+        start=XeroPayrollSyncWorkflow,
+        id=lambda e: payroll_sync_workflow_id(e.organisation_id, e.subject["id"]),
+        input=lambda e: PayrollSyncInput(
+            organisation_id=str(e.organisation_id), pay_run_id=e.subject["id"]
+        ),
+        subject=lambda e: ("pay_run", e.subject["id"]),
+        when=_payroll_wanted,
+    )
+
+
+_payroll_bridge()

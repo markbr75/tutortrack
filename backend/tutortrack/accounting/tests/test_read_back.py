@@ -290,3 +290,17 @@ def test_quickbooks_reads_linked_payments_and_the_amount_applied(monkeypatch):
         "CHQ 5",
         "35",
     )
+
+
+def test_read_back_is_only_offered_for_ledgers_that_support_it(org, world):
+    """Sage and FreeAgent (Phase 3) can't list an invoice's payments yet."""
+    assert readback.supported("xero")
+    assert readback.supported("quickbooks")
+    assert not readback.supported("sage")
+    assert not readback.supported("freeagent")
+    conn = enabled(org, world)
+    with tenant_context(org):
+        type(conn).objects.filter(pk=conn.pk).update(provider="sage")
+        conn.refresh_from_db()
+        with pytest.raises(services.BusinessRuleViolation):
+            services.update_options(conn, import_payments=True)

@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, uploadFile } from "../api";
+import { MyBackgroundChecks } from "./Phase3";
 
 /** The onboarding checklist (FR-18-5). */
 export function OnboardingPage() {
@@ -63,6 +64,7 @@ export function ChecksPage() {
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">{t("onboard.checksTitle")}</h1>
       {data.data.restricted ? <Alert tone="warning">{t("onboard.restricted")}</Alert> : null}
+      <MyBackgroundChecks />
       <ul className="space-y-3">
         {data.data.requirements.map((req) => (
           <CheckItem key={req.id} requirement={req} record={records.get(req.id)} />

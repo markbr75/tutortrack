@@ -341,6 +341,12 @@ SPECTACULAR_SETTINGS = {
         "ProposalStatusEnum": "tutortrack.leads.models.Proposal.Status",
         "ProposalStateEnum": "tutortrack.leads.api.serializers.PROPOSAL_STATES",
         "LedgerPaymentImportStatusEnum": "tutortrack.accounting.models.LedgerPaymentImport.Status",
+        # Phase 3 (ADR 0032)
+        "BackgroundCheckStatusEnum": "tutortrack.recruitment.models.BackgroundCheck.Status",
+        "BackgroundCheckResultEnum": "tutortrack.recruitment.models.BackgroundCheck.Result",
+        "WarehouseDestinationKindEnum": (
+            "tutortrack.reporting.warehouse.models.WarehouseDestination.Kind"
+        ),
         # E29 Part 2 (privacy, safeguarding)
         "ConsentTypeCategoryEnum": "tutortrack.privacy.models.ConsentType.Category",
         "ReasonEnum": "tutortrack.subscriptions.services.CANCEL_REASONS",
@@ -544,6 +550,29 @@ INBOUND_EMAIL_TOKEN = env("INBOUND_EMAIL_TOKEN", default="")
 
 # Payroll (E12): Stripe Express payouts to tutors need the account set up as a Connect platform.
 PAYROLL_STRIPE_PAYOUTS = env.bool("PAYROLL_STRIPE_PAYOUTS", default=False)
+# Wise Business payouts (E12-T12). Each organisation connects its own Wise account with an
+# API token (stored encrypted on the integration connection). WISE_WEBHOOK_PUBLIC_KEY is
+# Wise's published RSA key (PEM) for verifying transfer webhooks; empty = webhooks refused
+# (the pay run's daily check still polls transfer status).
+WISE = {
+    "API_URL": env("WISE_API_URL", default="https://api.wise.com"),
+    "WEBHOOK_PUBLIC_KEY": env("WISE_WEBHOOK_PUBLIC_KEY", default="").replace("\\n", "\n"),
+}
+# Data warehouse export (E26-T09, Enterprise). LIVE=false sends customer-hosted
+# destinations (S3, BigQuery, Snowflake) to an in-memory fake (development, tests).
+WAREHOUSE_EXPORT = {
+    "LIVE": env.bool("WAREHOUSE_EXPORT_LIVE", default=True),
+    "MAX_ROWS": env.int("WAREHOUSE_EXPORT_MAX_ROWS", default=200000),
+}
+# Background check providers (E18-T11). uCheck and Checkr keys are the organisation's own
+# (integration connections, encrypted); these are the API hosts.
+BACKGROUND_CHECKS = {
+    "CHECKR_API_URL": env("CHECKR_API_URL", default="https://api.checkr.com/v1"),
+    "UCHECK_API_URL": env("UCHECK_API_URL", default="https://api.ucheck.co.uk/v1"),
+    "DBS_UPDATE_SERVICE_URL": env(
+        "DBS_UPDATE_SERVICE_URL", default="https://secure.crbonline.gov.uk/crsc/api/status"
+    ),
+}
 
 # Platform console (E30): staff need 2FA, and the console only answers from these networks
 # (comma-separated CIDRs; empty = anywhere, for development).
@@ -722,6 +751,8 @@ INTEGRATIONS = {
     ),
     "ZOOM_CLIENT_ID": env("ZOOM_CLIENT_ID", default=""),
     "ZOOM_CLIENT_SECRET": env("ZOOM_CLIENT_SECRET", default=""),
+    # E22-T10: the Zoom app's webhook secret token (participant and recording events).
+    "ZOOM_WEBHOOK_SECRET": env("ZOOM_WEBHOOK_SECRET", default=""),
     "DAILY_API_KEY": env("DAILY_API_KEY", default=""),
     "WHEREBY_API_KEY": env("WHEREBY_API_KEY", default=""),
     # Built-in rooms that need no tutor account: "daily" or "whereby".
@@ -737,6 +768,12 @@ INTEGRATIONS = {
     "QUICKBOOKS_CLIENT_ID": env("QUICKBOOKS_CLIENT_ID", default=""),
     "QUICKBOOKS_CLIENT_SECRET": env("QUICKBOOKS_CLIENT_SECRET", default=""),
     "QUICKBOOKS_SANDBOX": env.bool("QUICKBOOKS_SANDBOX", default=False),
+    # E23-T10: Sage Business Cloud Accounting, FreeAgent (empty = the fake ledger).
+    "SAGE_CLIENT_ID": env("SAGE_CLIENT_ID", default=""),
+    "SAGE_CLIENT_SECRET": env("SAGE_CLIENT_SECRET", default=""),
+    "FREEAGENT_CLIENT_ID": env("FREEAGENT_CLIENT_ID", default=""),
+    "FREEAGENT_CLIENT_SECRET": env("FREEAGENT_CLIENT_SECRET", default=""),
+    "FREEAGENT_SANDBOX": env.bool("FREEAGENT_SANDBOX", default=False),
 }
 
 # --- Websites, widgets and custom domains (E24) ---------------------------------------------

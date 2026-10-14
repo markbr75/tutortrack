@@ -67,6 +67,7 @@ Tick an item when it is built, and record the as-built details in the owning epi
 - [ ] Matching criteria: gender preference, SEN tags, exam board (FR-19-1; E19:77). *S–M*
 - [ ] Automatic termly/monthly progress-report generation on a schedule (FR-21-6; E21:95). *S*
 - [ ] Send shared resources into video rooms (FR-21-8; E21:113) — check against the E22-T10 build. *M*
+- [ ] Payment read-back (E23-T09) for Sage and FreeAgent; today it is Xero and QuickBooks only, and the option is refused for other ledgers. *S–M*
 - [ ] Per-branch ledgers (FR-23-1; E23:216). *M–L*
 - [ ] Payment reallocations and lost disputes after sync (FR-23-2/3; E23:217-219). *M*
 - [ ] Summary journals in non-base currencies; bad-debt VAT adjustment; self-billing VAT in GL exports (FR-23-2/5; E23:220-225). *M*

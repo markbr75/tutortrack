@@ -179,3 +179,75 @@ register_retention(
         order=12,
     )
 )
+
+
+# --- E18-T11 background checks ------------------------------------------------------------------
+
+
+def _check_export(person: Person) -> list[Section]:
+    from .models import BackgroundCheck
+
+    rows = [
+        {
+            "id": str(c.pk),
+            "provider": c.provider,
+            "package": c.package,
+            "status": c.status,
+            "result": c.result,
+            "requested_at": c.created_at,
+            "consent_at": c.consent_at,
+            "completed_at": c.completed_at,
+            "certificate_issue_date": c.certificate_issue_date,
+        }
+        for c in BackgroundCheck.objects.filter(tutor_id__in=person.of("people.tutor"))
+    ]
+    return [Section("recruitment.background_checks", _("Background checks"), rows)]
+
+
+def _check_erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
+    """Checks are evidence that vetting happened (kept, like compliance records); their
+    results, certificate numbers and links are cleared."""
+    from tutortrack.core.time import now
+
+    from .models import BackgroundCheck
+
+    out = ErasureOutcome()
+    tutors = person.of("people.tutor")
+    if tutors:
+        out.retained += BackgroundCheck.objects.filter(tutor_id__in=tutors).update(
+            result_details="",
+            report_url="",
+            invite_url="",
+            certificate_number="",
+            candidate_ref="",
+            details_purged_at=now(),
+        )
+        if out.retained:
+            out.notes.append("background checks kept as evidence; results and numbers cleared")
+    return out
+
+
+def _purge_check_details(cutoff: datetime, dry_run: bool, limit: int) -> int:
+    from .background_checks import purge_details
+
+    return purge_details(cutoff, dry_run, limit)
+
+
+register(
+    Provider(
+        key="background_checks",
+        label="Background checks",
+        export=_check_export,
+        erase=_check_erase,
+        order=36,
+    )
+)
+register_retention(
+    RetentionCategory(
+        key="background_check_details",
+        label=gettext_lazy("Background check results and certificate details"),
+        default_days=183,
+        purge=_purge_check_details,
+        order=13,
+    )
+)

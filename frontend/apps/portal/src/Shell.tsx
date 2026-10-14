@@ -116,6 +116,7 @@ function FamilyShell() {
     ...(f.profile ? [{ to: "/profile", label: t("portal.nav.profile") }] : []),
     ...(f.referrals ? [{ to: "/referrals", label: t("referrals.portal.nav") }] : []),
     ...(f.messages ? [{ to: "/messages", label: t("portalMessages.nav") }] : []),
+    { to: "/recordings", label: t("classroom.recordingsNav") },
     { to: "/privacy", label: t("privacyCentre.portal.nav") },
   ] as const;
   return (

@@ -9,7 +9,7 @@ class CalendarSyncConfig(AppConfig):
     def ready(self) -> None:
         from tutortrack.scheduling import external
 
-        from . import handlers  # noqa: F401
+        from . import handlers, org_settings  # noqa: F401
         from .meetings import join_resolver
         from .selectors import tutor_busy
 

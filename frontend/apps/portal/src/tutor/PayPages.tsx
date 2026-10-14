@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
 import { api, uploadFile } from "../api";
+import { MyUsTaxInfo } from "./Phase3";
 
 type Totals = Record<string, string>;
 
@@ -28,6 +29,7 @@ export function EarningsPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">{t("tutor.nav.earnings")}</h1>
+      <MyUsTaxInfo />
       <dl className="grid grid-cols-2 gap-3 text-sm">
         <div className="rounded-lg border border-border p-3">
           <dt className="text-muted-foreground">{t("pay.upcoming")}</dt>

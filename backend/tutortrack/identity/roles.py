@@ -83,7 +83,8 @@ ROLES: dict[str, RoleDef] = {
                "ai.use", "ai.copilot",
                "sites.profile.moderate", "growth.review.*", "growth.referral.*",
                "growth.tutor_referral.*", "growth.affiliate.view", "safeguarding.raise",
-               "safeguarding.lone_working.monitor", "success.support.chat:own"),
+               "safeguarding.lone_working.monitor", "success.support.chat:own",
+               "video.recording.view"),
             denies=("people.tutor.view_financial", "scheduling.edit_locked",
                     "matching.include_restricted", "matching.settings.manage"),
         ),
@@ -115,7 +116,7 @@ ROLES: dict[str, RoleDef] = {
                "sites.profile.edit:own", "growth.review.view:own",
                "growth.tutor_referral.view:own", "comms.inbox.view:own",
                "comms.inbox.reply:own", "safeguarding.raise", "safeguarding.checkin:own",
-               "ai.use"),
+               "ai.use", "video.recording.view:own"),
             # Organisation-wide learning settings and approvals stay with staff (E21).
             denies=("learning.curriculum.manage", "learning.progress.approve",
                     "learning.library.manage", "learning.library.charge"),

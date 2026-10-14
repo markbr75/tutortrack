@@ -2,21 +2,23 @@ import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
 import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 import { api, usePermission } from "../api";
 import { ErrorList } from "../calendar/ErrorList";
 import { ReadBackSection } from "./ReadBackSection";
 import { SyncBadge } from "./SyncBadge";
+import { providerName } from "./providerName";
 
 type Connection = components["schemas"]["AccountingConnection"];
 type MappingSet = components["schemas"]["MappingSet"];
 type Chart = components["schemas"]["Chart"];
 type Option = { value: string; label: string };
-type MappingProvider = "xero" | "quickbooks" | "export";
+type MappingProvider = "xero" | "quickbooks" | "sage" | "freeagent" | "export";
 
 const RETURN_PATH = "/settings/accounting";
-const PROVIDERS = ["xero", "quickbooks"] as const;
+const PROVIDERS = ["xero", "quickbooks", "sage", "freeagent"] as const;
 const FORMATS = ["generic", "sage50", "myob", "iif"] as const;
 
 /** Finishes connecting Xero/QuickBooks when the provider sends the browser back here
@@ -71,7 +73,7 @@ function ConnectButtons() {
       <div className="flex flex-wrap gap-2">
         {PROVIDERS.map((p) => (
           <Button key={p} variant="secondary" onClick={() => start.mutate(p)}>
-            {t("accounting.connect", { provider: t(`accounting.providers.${p}`) })}
+            {t("accounting.connect", { provider: providerName(t, p) })}
           </Button>
         ))}
       </div>
@@ -343,7 +345,7 @@ export function MappingsForm({
   return (
     <form
       className="space-y-4"
-      aria-label={t("accounting.mappingsFor", { provider: t(`accounting.providers.${provider}`) })}
+      aria-label={t("accounting.mappingsFor", { provider: providerName(t, provider) })}
       onSubmit={(e) => {
         e.preventDefault();
         save.mutate();
@@ -651,7 +653,7 @@ function ExportSection({ connectedProvider }: { connectedProvider?: string }) {
               ? [
                   {
                     value: connectedProvider,
-                    label: t(`accounting.providers.${connectedProvider}`),
+                    label: providerName(t, connectedProvider),
                   },
                 ]
               : []),
@@ -707,6 +709,11 @@ export function AccountingPage() {
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold">{t("accounting.title")}</h1>
         <p className="text-sm text-muted-foreground">{t("accounting.help")}</p>
+        <p className="text-sm">
+          <Link to="/settings/accounting/payroll" className="underline">
+            {t("accountingPhase3.payrollLink")}
+          </Link>
+        </p>
       </header>
       {conn?.simulated ? <Alert>{t("accounting.simulated")}</Alert> : null}
       {complete.isPending ? (

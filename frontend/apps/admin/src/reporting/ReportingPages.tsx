@@ -428,6 +428,9 @@ export function ReportsNav() {
           {t("reportBuilder.nav")}
         </Link>
       ) : null}
+      <Link to="/analytics/warehouse" className={linkClass}>
+        {t("warehouse.navLink")}
+      </Link>
     </nav>
   );
 }

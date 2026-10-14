@@ -36,6 +36,7 @@ from .base import (
     NotFound,
     ProviderError,
     PushedEvent,
+    RecordingInfo,
     SyncTokenExpired,
     TokenSet,
 )
@@ -380,6 +381,36 @@ class FakeMeetings:
     def delete_meeting(self, creds: Credentials, external_id: str) -> None:
         _check(self.provider, creds.account_id)
         cache.delete(f"{PREFIX}:meeting:{self.provider}:{external_id}")
+
+    # E22-T10 recordings: ``add_recording`` puts one in place for tests and development.
+    def list_recordings(self, creds: Credentials, external_id: str) -> list[RecordingInfo]:
+        _check(self.provider, creds.account_id)
+        rows = cache.get(f"{PREFIX}:recordings:{self.provider}:{external_id}") or []
+        return [RecordingInfo(**row) for row in rows]
+
+    def delete_recording(self, creds: Credentials, external_id: str, recording_id: str) -> None:
+        _check(self.provider, creds.account_id)
+        key = f"{PREFIX}:recordings:{self.provider}:{external_id}"
+        rows = cache.get(key) or []
+        cache.set(key, [r for r in rows if r["external_id"] != recording_id], TTL)
+
+
+def add_recording(provider: str, meeting_external_id: str, recording_id: str, **extra: Any) -> None:
+    key = f"{PREFIX}:recordings:{provider}:{meeting_external_id}"
+    rows = [r for r in cache.get(key) or [] if r["external_id"] != recording_id]
+    base = f"https://{provider}.fake-meetings.test/recordings/{recording_id}"
+    rows.append(
+        {
+            "external_id": recording_id,
+            "duration_seconds": 3000,
+            "size_bytes": 1048576,
+            "file_type": "MP4",
+            "play_url": f"{base}/play",
+            "download_url": f"{base}/download",
+            **extra,
+        }
+    )
+    cache.set(key, rows, TTL)
 
 
 def meeting_state(provider: str, external_id: str) -> dict[str, Any] | None:

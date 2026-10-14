@@ -15,6 +15,39 @@ from tutortrack.people.models import TutorProfile
 from .models import Expense, PayItem, Payout, PayRun, PayStatement
 
 
+def employee_timesheets(pay_run_id: Any) -> list[dict[str, Any]]:
+    """Employed tutors' hours per day in a pay run, plus their other pay (E23-T10 Xero
+    Payroll sync): ``[{tutor_id, email, name, period, days: {date: hours}, other}]``."""
+    from .models import PayMethod
+
+    run = PayRun.objects.get(pk=pay_run_id)
+    rows: dict[Any, dict[str, Any]] = {}
+    items = (
+        run.items.select_related("tutor")
+        .filter(payout__method=PayMethod.EXTERNAL_PAYROLL)
+        .exclude(status=PayItem.Status.VOID)
+        .order_by("date")
+    )
+    for item in items:
+        row = rows.setdefault(
+            item.tutor_id,
+            {
+                "tutor_id": str(item.tutor_id),
+                "email": item.tutor.email,
+                "name": item.tutor.full_name,
+                "days": defaultdict(Decimal),
+                "other": Decimal(0),
+                "currency": item.currency,
+                "period": (run.period_start.isoformat(), run.period_end.isoformat()),
+            },
+        )
+        if item.unit == "hour" and item.quantity > 0:
+            row["days"][item.date.isoformat()] += Decimal(item.quantity)
+        else:
+            row["other"] += item.amount.amount
+    return [{**row, "days": dict(row["days"])} for row in rows.values()]
+
+
 def pay_items(user: Any) -> QuerySet[PayItem]:
     return scope_queryset(user, PayItem.objects.select_related("tutor", "pay_run"), "payroll.view")
 

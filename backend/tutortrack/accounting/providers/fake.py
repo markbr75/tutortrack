@@ -180,7 +180,9 @@ class FakeAccountingClient:
         _check(self.provider, creds.account_id)
         state = _load(creds.account_id)
         lock = state.get("lock_date")
-        label = "Xero" if self.provider == "xero" else "QuickBooks"
+        from ..errors import LABELS
+
+        label = LABELS.get(self.provider, self.provider)
         return LedgerInfo(
             name=f"Bright Minds Ltd ({label} demo company)",
             base_currency="GBP",

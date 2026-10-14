@@ -55,7 +55,7 @@ Connect tutors' and staff's personal calendars (two-way, near-real-time) and aut
 - [x] **E22-T07** Google Meet and Teams providers.
 - [x] **E22-T08** Lessonspace provider; Daily.co/Whereby built-in rooms.
 - [x] **E22-T09** Join links in portals/reminders with timed enablement.
-- [ ] **E22-T10** (Phase 3) Video attendance ingestion, recordings, embedded classroom.
+- [x] **E22-T10** (Phase 3) Video attendance ingestion, recordings, embedded classroom.
 
 ## Temporal workflows (E32)
 
@@ -126,3 +126,19 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
   - OAuth returns to the page, which completes the connection.
 - **Events:** `integration.connected`, `integration.disconnected`, `integration.error`, `calendar.busy_updated`, `calendar.settings_changed`, `calendar.reschedule_proposed`, `online_meeting.created`, `online_meeting.updated`, `online_meeting.deleted` and `online_meeting.failed`.
 - **Not built:** T10 is Phase 3: video attendance ingestion (`online_meeting.participant_joined/left`), recordings (`recording.available`) and the embedded classroom (FR-22-5).
+
+## Phase 3 implementation notes (as built 2026-10-14)
+See ADR 0032.
+
+- **Attendance from video (FR-22-4):** `MeetingParticipantEvent` (RLS) stores each join/leave once (unique per provider event id), matched to the lesson's tutor (Lessonspace user id we set at launch, or the tutor's email) or students (Lessonspace `student:<id>`, else the name). Only names are kept: no emails or IP addresses.
+  - Zoom: `/webhooks/zoom` checks `x-zm-signature` (`v0=` HMAC-SHA256 of `v0:{timestamp}:{body}` with `ZOOM_WEBHOOK_SECRET`), refuses requests older than 5 minutes, answers the `endpoint.url_validation` challenge, and routes by meeting id (`integrations.WebhookRoute`, recorded when the meeting is provisioned).
+  - Lessonspace: each space is launched with per-lesson webhook URLs (`/webhooks/lessonspace/<signed token>?event=user.join|user.leave|session.*`); the HMAC token names the organisation and lesson, so it is verified before any lookup.
+  - `GET /lessons/{id}/video-attendance` suggests the register (present, late with minutes after a 5-minute grace, no-show), minutes attended and the actual length (tutor and students together). The admin register and the tutor's portal register offer "Fill in the register from this"; nothing is recorded until the register is submitted. `online_meeting.participant_joined/left` are published.
+- **Recordings (FR-22-4):** `LessonRecording` (RLS) keeps references, never copies: provider id, times, size, and the play/download links and password encrypted. Recordings arrive from Zoom's `recording.completed` webhook or `RecordingFetchWorkflow` (`recordings:{org}:{lesson}`, started on `lesson.completed` for online lessons whose provider keeps recordings: Zoom cloud recording, Daily, Lessonspace), which asks after 15 minutes, 1, 6 and 24 hours and stops early when one arrives or the webhook stored it (signal `stored`). Histories `RecordingFetchWorkflow-found/none.json` are replayed.
+  - Consent (E29): if any student on the lesson lacks the `lesson-recording` consent, the recording is `restricted` (hidden from tutors and families) until staff release it after consent is given (`integrations.recording_requires_consent`, on by default).
+  - Access: `GET /recordings/{id}/play` checks access (new `video.recording.manage`; `video.recording.view` with tutors limited to their own lessons; families only when staff shared it) and records an audited read; Daily links are fetched fresh because they expire. Staff release, share with the family or delete (deleting also deletes at the provider).
+  - Retention: the existing E29 `recordings` category now also deletes `LessonRecording`s (at the provider too); a new `video_attendance` category (180 days) deletes join/leave logs. Erasure deletes an erased student's recordings and anonymises their join events. Zoom, Daily.co and Lessonspace recordings are listed as an optional sub-processor entry.
+  - Zoom now asks for the cloud recording scopes; existing Zoom connections need reconnecting to fetch recordings.
+- **Embedded classroom (FR-22-5):** `GET /lessons/{id}/classroom` for the lesson's tutor, its families or staff: the role's room link, whether it can be embedded (built-in Daily/Whereby rooms and Lessonspace; Zoom, Teams and Meet open in their own app), when it opens, the safeguarding banner (`integrations.classroom_banner`), whether the lesson is recorded (`integrations.classroom_recording` or Zoom's recording setting), which of the viewer's students still need recording consent, and the lesson's shared E21 resources. The portal page `/portal/classroom/<lesson>` embeds the room (camera and microphone allowed), shows the banner and offers "I agree to recording" (an E29 consent record, method `portal`). Families also get a Recordings page for recordings shared with them.
+- **Settings (new module `calendar_sync/org_settings.py`):** `integrations.video_attendance`, `integrations.recording_requires_consent`, `integrations.classroom_recording`, `integrations.classroom_banner`.
+- **Deviations:** Teams and Google Meet attendance and recordings are not ingested (no webhooks we can subscribe per meeting without extra admin consent); Lessonspace's webhook payload shape is read defensively (user id, name, timestamp) and its recordings API is not called (Daily and Zoom are).

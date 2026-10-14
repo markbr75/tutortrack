@@ -132,6 +132,13 @@ OPTION_FIELDS = (
 @transaction.atomic
 def update_options(conn: AccountingConnection, **values: Any) -> AccountingConnection:
     conn = AccountingConnection.objects.select_for_update().get(pk=conn.pk)
+    if values.get("import_payments"):
+        from .readback import supported
+
+        if not supported(conn.provider):
+            raise BusinessRuleViolation(
+                str(_("Reading payments back isn't available for this ledger yet."))
+            )
     with audit.track(conn):
         for name in OPTION_FIELDS:
             if name in values:

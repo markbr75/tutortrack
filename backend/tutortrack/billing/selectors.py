@@ -114,6 +114,23 @@ def lesson_paid(lesson_id: Any) -> bool:
     return not charges.exclude(invoice__status=Invoice.Status.PAID).exists()
 
 
+def lesson_collection_lines(lesson_id: Any) -> list[tuple[Decimal, Decimal, Decimal, str]]:
+    """``[(charge net, invoice total, invoice amount paid, currency)]`` for the lesson's
+    charges on issued invoices (E12-T12 commission pay works out what was collected)."""
+    from .models import Charge
+
+    charges = (
+        Charge.objects.filter(lesson_id=lesson_id, invoice__isnull=False)
+        .exclude(status=Charge.Status.VOID)
+        .exclude(invoice__status__in=[Invoice.Status.DRAFT, Invoice.Status.VOID])
+        .select_related("invoice")
+    )
+    return [
+        (c.net.amount, c.invoice.total.amount, c.invoice.amount_paid.amount, c.currency)
+        for c in charges
+    ]
+
+
 def lessons_on_invoice(invoice_id: Any) -> list[Any]:
     from .models import Charge
 

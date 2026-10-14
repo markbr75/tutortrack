@@ -15,7 +15,7 @@ from tutortrack.privacy.registry import (
     register,
 )
 
-from .models import Expense, PayItem, Payout, PayStatement, TutorPayProfile
+from .models import Expense, PayItem, Payout, PayStatement, TaxFormFiling, TutorPayProfile
 
 
 def export(person: Person) -> list[Section]:
@@ -30,6 +30,9 @@ def export(person: Person) -> list[Section]:
             "bank": p.bank_hint,
             "vat_registered": p.vat_registered,
             "vat_number": p.vat_number,
+            "pay_basis": p.pay_basis,
+            "tax_id": f"{p.tin_type} ending {p.tin_hint}" if p.tin_hint else "",
+            "wise_recipient": bool(p.wise_recipient_id),
         }
         for p in TutorPayProfile.objects.filter(tutor_id__in=tutors)
     ]
@@ -67,6 +70,20 @@ def export(person: Person) -> list[Section]:
         Section("payroll.payouts", _("Payouts"), payouts),
         Section("payroll.statements", _("Pay statements"), statements),
         Section("payroll.expenses", _("Expenses"), expenses),
+        Section(
+            "payroll.tax_forms",
+            _("US tax forms (1099-NEC)"),
+            [
+                {
+                    "id": str(f.pk),
+                    "form": f.form,
+                    "tax_year": f.tax_year,
+                    "box1": str(f.box1),
+                    "tin": f"{f.tin_type} ending {f.tin_hint}" if f.tin_hint else "",
+                }
+                for f in TaxFormFiling.objects.filter(tutor_id__in=tutors, superseded=False)
+            ],
+        ),
     ]
 
 
@@ -81,6 +98,9 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
             bank_details="",
             bank_hint="",
             stripe_account_id="",
+            wise_recipient_id="",
+            wise_recipient_key="",
+            tin="",  # E12-T12: filed 1099 records keep only the type and last four digits
         )
         out.anonymised += 1
     for expense in Expense.objects.filter(tutor_id__in=tutors):
@@ -88,6 +108,7 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
             Expense.objects.filter(pk=expense.pk).update(description=ctx.scrub(expense.description))
             out.anonymised += 1
     out.retained += PayStatement.objects.filter(tutor_id__in=tutors).count()
+    out.retained += TaxFormFiling.objects.filter(tutor_id__in=tutors).count()
     return out
 
 

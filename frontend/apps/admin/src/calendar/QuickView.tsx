@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { api, usePermission } from "../api";
 import { CancelForm } from "../delivery/CancelForm";
 import { CompleteForm } from "../delivery/CompleteForm";
+import { LessonRecordings } from "./VideoLessonPanel";
 import { fromInputs, toDateInput, toTimeInput, viewerTimeZone } from "./dates";
 import { ErrorList } from "./ErrorList";
 import { type CalendarItem, conflictsOf } from "./types";
@@ -170,6 +171,7 @@ export function QuickView({ item, onClose }: { item: CalendarItem | null; onClos
           ) : null}
           {lesson && canPrice ? <Pricing id={item.id} /> : null}
           {item.locked ? <Alert className="mt-3">{t("calendar.locked")}</Alert> : null}
+          {lesson ? <LessonRecordings lessonId={item.id} /> : null}
 
           {mode === "cancel" ? (
             <CancelForm lessonId={item.id} inSeries={Boolean(item.series)} onDone={done} />

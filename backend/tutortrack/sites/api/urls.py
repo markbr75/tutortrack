@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework.routers import SimpleRouter
 
 from . import views as v
+from .mobile_views import PublicMobileAppView
 
 router = SimpleRouter(trailing_slash=False)
 router.register("brand-kits", v.BrandKitViewSet, basename="brand-kits")
@@ -19,6 +20,7 @@ urlpatterns = [
     path("sites/blocks", v.SiteBlocksView.as_view(), name="site-blocks"),
     path("public/branding", v.PublicBrandingView.as_view(), name="public-branding"),
     path("public/manifest", v.PublicManifestView.as_view(), name="public-manifest"),
+    path("public/mobile-app", PublicMobileAppView.as_view(), name="public-mobile-app"),
     path("public/tutors", v.PublicTutorsView.as_view(), name="public-tutors"),
     path("public/tutors/<slug:slug>", v.PublicTutorView.as_view(), name="public-tutor"),
     path("public/services", v.PublicServicesView.as_view(), name="public-services"),

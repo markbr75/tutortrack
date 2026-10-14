@@ -26,7 +26,7 @@ from .models import DPAAcceptance, SubprocessorNotice
 DPA_VERSION = "2026-10"
 DPA_EFFECTIVE = "2026-10-14"
 DPA_URL = "https://tutortrack.app/legal/dpa/2026-10"
-SUBPROCESSORS_VERSION = "2026-10-14"
+SUBPROCESSORS_VERSION = "2026-10-14.2"  # Phase 3 integrations (ADR 0032)
 
 
 @dataclass(frozen=True)
@@ -145,6 +145,63 @@ SUBPROCESSORS: tuple[Subprocessor, ...] = (
         "Accounting sync",
         "Client names, invoices, payments",
         "Global (SCCs/UK addendum)",
+        ALL,
+        optional=True,
+    ),
+    # --- Phase 3 integrations (ADR 0032); all optional ----------------------------------------
+    Subprocessor(
+        "Sage and FreeAgent",
+        "Accounting sync (E23)",
+        "Client names, invoices, payments",
+        "United Kingdom, EU and United States (SCCs/UK addendum)",
+        ALL,
+        optional=True,
+    ),
+    Subprocessor(
+        "Xero Payroll",
+        "Employed tutors' timesheets (E23)",
+        "Tutor names, hours worked",
+        "Global (SCCs/UK addendum)",
+        ("uk",),
+        optional=True,
+    ),
+    Subprocessor(
+        "Wise Payments",
+        "Tutor payouts (E12)",
+        "Tutor names, bank details, payout amounts",
+        "United Kingdom, EU and United States (SCCs/UK addendum)",
+        ALL,
+        optional=True,
+    ),
+    Subprocessor(
+        "uCheck (Atlantic Data)",
+        "DBS background checks (E18)",
+        "Tutor identity details, check results",
+        "United Kingdom",
+        ("uk",),
+        optional=True,
+    ),
+    Subprocessor(
+        "Checkr",
+        "US background checks (E18)",
+        "Tutor identity details, check results",
+        "United States",
+        ("us",),
+        optional=True,
+    ),
+    Subprocessor(
+        "Zoom, Daily.co and Lessonspace recordings",
+        "Online lesson attendance and recordings (E22)",
+        "Participant names, join and leave times, lesson recordings",
+        "Global (SCCs/UK addendum)",
+        ALL,
+        optional=True,
+    ),
+    Subprocessor(
+        "Google BigQuery and Snowflake",
+        "Data warehouse export to the organisation's own warehouse (E26, Enterprise)",
+        "Reporting data (lessons, charges, payments, pay; names of clients, students, tutors)",
+        "The organisation's chosen region",
         ALL,
         optional=True,
     ),

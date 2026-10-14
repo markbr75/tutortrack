@@ -7,6 +7,7 @@ import { useState } from "react";
 import { api, usePermission } from "../api";
 import { ErrorList } from "../calendar/ErrorList";
 import { fromInputs, toDateInput, toTimeInput } from "../calendar/dates";
+import { VideoAttendanceHint, type VideoAttendance } from "../calendar/VideoLessonPanel";
 
 type Outcome = components["schemas"]["AttendanceOutcomeEnum"];
 const OUTCOMES: Outcome[] = ["present", "late", "absent_notified", "no_show"];
@@ -41,6 +42,18 @@ export function CompleteForm({ lessonId, onDone }: { lessonId: string; onDone: (
   const rowOf = (id: string): Row => rows[id] ?? { outcome: "present", late: "" };
   const setRow = (id: string, change: Partial<Row>) =>
     setRows((current) => ({ ...current, [id]: { ...rowOf(id), ...change } }));
+  // E22-T10: pre-fill the register from the online lesson's join/leave events.
+  const applyVideo = (suggestion: VideoAttendance) =>
+    setRows((current) => {
+      const next = { ...current };
+      for (const row of suggestion.students) {
+        next[row.attendee_id] = {
+          outcome: row.suggested_outcome as Outcome,
+          late: row.late_minutes ? String(row.late_minutes) : "",
+        };
+      }
+      return next;
+    });
 
   const save = useMutation({
     mutationFn: async () => {
@@ -80,6 +93,7 @@ export function CompleteForm({ lessonId, onDone }: { lessonId: string; onDone: (
     >
       <fieldset>
         <legend className="text-sm font-semibold">{t("delivery.complete.title")}</legend>
+        <VideoAttendanceHint lessonId={lessonId} onApply={applyVideo} />
         <ul className="mt-2 space-y-2">
           {attendees.map((a) => (
             <li key={a.id} className="grid grid-cols-[1fr_auto] items-end gap-2">

@@ -4,8 +4,9 @@ import { Alert } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api, usePermission } from "../api";
+import { PayPhase3Fields } from "./PayPhase3";
 
-const METHODS = ["manual", "bank_file", "stripe_connect", "external_payroll"] as const;
+const METHODS = ["manual", "bank_file", "stripe_connect", "wise", "external_payroll"] as const;
 
 /** How the tutor is paid (FR-12-2); bank details stay masked. */
 export function PayProfileCard({ tutorId }: { tutorId: string }) {
@@ -48,7 +49,7 @@ export function PayProfileCard({ tutorId }: { tutorId: string }) {
         >
           {METHODS.map((m) => (
             <option key={m} value={m}>
-              {t(`payroll.methods.${m}`)}
+              {m === "wise" ? t("payrollPhase3.methodWise") : t(`payroll.methods.${m}`)}
             </option>
           ))}
         </select>
@@ -62,6 +63,10 @@ export function PayProfileCard({ tutorId }: { tutorId: string }) {
       {p.method === "stripe_connect" && !p.stripe_payouts_enabled ? (
         <p className="mt-2 text-sm text-muted-foreground">{t("payroll.stripePending")}</p>
       ) : null}
+      {p.method === "wise" && !p.wise_ready ? (
+        <p className="mt-2 text-sm text-muted-foreground">{t("payrollPhase3.wiseNeedsBank")}</p>
+      ) : null}
+      <PayPhase3Fields tutorId={tutorId} />
     </section>
   );
 }

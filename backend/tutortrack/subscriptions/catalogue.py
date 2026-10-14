@@ -29,6 +29,7 @@ FEATURES: dict[str, Any] = {
     "accounting_integrations": _("Accounting integrations"),
     "advanced_reports": _("Advanced reports"),
     "ai_assistant": _("AI assistant"),
+    "warehouse_export": _("Data warehouse export"),  # E26-T09 (Enterprise only)
 }
 
 LIMITS: dict[str, Any] = {

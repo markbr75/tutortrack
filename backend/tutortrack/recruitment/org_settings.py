@@ -17,6 +17,28 @@ register(
     label=_("Remind before a check expires (days)"),
 )
 register(
+    "compliance.checks_auto_verify",
+    type="bool",
+    default=True,
+    label=_("Verify a compliance record automatically when an online check comes back clear"),
+)
+register(
+    "compliance.check_invite_days",
+    type="int",
+    default=30,
+    min_value=3,
+    max_value=90,
+    label=_("Days a tutor has to complete an online background check"),
+)
+register(
+    "compliance.dbs_update_recheck_days",
+    type="int",
+    default=90,
+    min_value=0,
+    max_value=365,
+    label=_("Re-run DBS Update Service status checks every (days; 0 = never)"),
+)
+register(
     "recruitment.reference_days",
     type="int",
     default=14,

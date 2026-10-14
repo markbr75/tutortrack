@@ -1,4 +1,4 @@
-# Sub-processors (list of 2026-10-14)
+# Sub-processors (list of 2026-10-14, version 2026-10-14.2)
 
 The source of truth is `tutortrack/privacy/compliance.py`; the public page is
 `GET /api/v1/subprocessors` (filter with `?region=uk|eu|us|au`), shown in the Privacy centre
@@ -19,5 +19,12 @@ version (`manage.py notify_subprocessor_changes`) and may object within 30 days.
 | Google, Microsoft (optional) | Calendar and video connections | Lesson times, attendee emails | Global (SCCs) | all |
 | Zoom, Lessonspace (optional) | Online lesson rooms | Participant names, times | Global (SCCs) | all |
 | Xero, QuickBooks (optional) | Accounting sync | Client names, invoices, payments | Global (SCCs) | all |
+| Sage, FreeAgent (optional) | Accounting sync | Client names, invoices, payments | UK, EU, US (SCCs) | all |
+| Xero Payroll (optional) | Employed tutors' timesheets | Tutor names, hours | Global (SCCs) | uk |
+| Wise Payments (optional) | Tutor payouts | Tutor names, bank details, amounts | UK, EU, US (SCCs) | all |
+| uCheck (optional) | DBS background checks | Tutor identity, check results | United Kingdom | uk |
+| Checkr (optional) | US background checks | Tutor identity, check results | United States | us |
+| Zoom, Daily.co, Lessonspace recordings (optional) | Attendance and recordings | Participant names, join/leave times, recordings | Global (SCCs) | all |
+| Google BigQuery, Snowflake (optional, Enterprise) | Data warehouse export | Reporting data | The organisation's chosen region | all |
 
 "Optional" sub-processors only receive data when the organisation connects that integration.

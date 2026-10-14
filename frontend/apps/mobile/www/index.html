@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src https:; img-src 'self' https: data:"
+    />
+    <title>TutorTrack</title>
+    <link rel="stylesheet" href="picker.css" />
+  </head>
+  <body>
+    <main id="main" aria-labelledby="title">
+      <h1 id="title" data-i18n="title">Sign in to your tutoring organisation</h1>
+      <p id="last" hidden>
+        <button type="button" id="continue" class="primary"></button>
+      </p>
+      <form id="picker" novalidate>
+        <label for="org" data-i18n="label">Your organisation's TutorTrack address</label>
+        <p id="hint" class="hint" data-i18n="hint">
+          For example brightminds or brightminds.tutortrack.app
+        </p>
+        <input
+          id="org"
+          name="org"
+          type="text"
+          inputmode="url"
+          autocomplete="url"
+          autocapitalize="none"
+          spellcheck="false"
+          required
+          aria-describedby="hint error"
+        />
+        <p id="error" class="error" role="alert" aria-live="assertive"></p>
+        <button type="submit" class="primary" data-i18n="submit">Continue</button>
+      </form>
+    </main>
+    <script src="picker.js"></script>
+  </body>
+</html>

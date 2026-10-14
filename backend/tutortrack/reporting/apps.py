@@ -9,5 +9,6 @@ class ReportingConfig(AppConfig):
     def ready(self) -> None:
         from . import handlers, notifications, org_settings  # noqa: F401
         from .reports import load_all
+        from .warehouse import handlers as warehouse_handlers  # noqa: F401
 
         load_all()

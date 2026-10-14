@@ -7,4 +7,4 @@ class PayrollConfig(AppConfig):
     verbose_name = "Payroll"
 
     def ready(self) -> None:
-        from . import handlers, org_settings  # noqa: F401
+        from . import handlers, org_settings, payouts  # noqa: F401

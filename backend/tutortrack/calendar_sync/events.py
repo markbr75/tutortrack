@@ -66,3 +66,29 @@ class OnlineMeetingFailed(_MeetingEvent):
 
     event_type: ClassVar[str] = "online_meeting.failed"
     error: str = ""
+
+
+# --- E22-T10: video attendance and recordings ---------------------------------------------------
+
+
+@dataclass(frozen=True, kw_only=True)
+class ParticipantJoined(_MeetingEvent):
+    event_type: ClassVar[str] = "online_meeting.participant_joined"
+    role: str
+    student_id: str | None = None
+
+
+@dataclass(frozen=True, kw_only=True)
+class ParticipantLeft(_MeetingEvent):
+    event_type: ClassVar[str] = "online_meeting.participant_left"
+    role: str
+    student_id: str | None = None
+
+
+@dataclass(frozen=True, kw_only=True)
+class RecordingAvailable(_MeetingEvent):
+    """A recording reference was stored (``restricted`` when consent is missing)."""
+
+    event_type: ClassVar[str] = "recording.available"
+    recording_id: str
+    restricted: bool = False

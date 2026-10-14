@@ -225,3 +225,59 @@ class LedgerPaymentImport(TenantModel):
                 fields=["connection", "external_id"], name="ledger_payment_import_unique"
             )
         ]
+
+
+# --- E23-T10: Xero Payroll ----------------------------------------------------------------------
+
+
+class PayrollEmployeeLink(TenantModel):
+    """An employed tutor ↔ their employee record in Xero Payroll (matched by email, or
+    chosen by finance)."""
+
+    tutor = models.ForeignKey("people.TutorProfile", on_delete=models.CASCADE, related_name="+")
+    provider = models.CharField(max_length=30, default="xero_payroll")
+    employee_id = models.CharField(max_length=100)
+    calendar_id = models.CharField(max_length=100, blank=True, default="")
+    name = models.CharField(max_length=200, blank=True, default="")
+    matched_by = models.CharField(max_length=10, default="email")  # email | manual
+
+    class Meta(TenantModel.Meta):
+        ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "provider", "tutor"], name="payroll_employee_link_unique"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.tutor_id} → {self.employee_id}"
+
+
+class PayrollTimesheetSync(TenantModel):
+    """One approved pay run sent to Xero Payroll as timesheets (``XeroPayrollSyncWorkflow``).
+    ``results`` lists each employed tutor: the timesheet id, or why they were skipped."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Sending")
+        SYNCED = "synced", _("Sent")
+        PARTIAL = "partial", _("Sent with problems")
+        ERROR = "error", _("Failed")
+
+    pay_run = models.ForeignKey("payroll.PayRun", on_delete=models.CASCADE, related_name="+")
+    provider = models.CharField(max_length=30, default="xero_payroll")
+    status = models.CharField(max_length=8, choices=Status.choices, default=Status.PENDING)
+    results = models.JSONField(default=list, blank=True)
+    attempts = models.PositiveIntegerField(default=0)
+    error = models.CharField(max_length=500, blank=True, default="")
+    synced_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "provider", "pay_run"], name="payroll_timesheet_sync_once"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.provider} timesheets for {self.pay_run_id}"

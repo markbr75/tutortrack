@@ -269,7 +269,13 @@ class ExportQuerySerializer(serializers.Serializer):
     start = serializers.DateField()
     end = serializers.DateField()
     mapping_set = serializers.ChoiceField(
-        choices=[("export", "export"), ("xero", "xero"), ("quickbooks", "quickbooks")],
+        choices=[
+            ("export", "export"),
+            ("xero", "xero"),
+            ("quickbooks", "quickbooks"),
+            ("sage", "sage"),
+            ("freeagent", "freeagent"),
+        ],
         default="export",
     )
 

@@ -19,7 +19,7 @@ from tutortrack.integrations.providers import (
 
 from .providers.base import LedgerRejected
 
-LABELS = {"xero": "Xero", "quickbooks": "QuickBooks"}
+LABELS = {"xero": "Xero", "quickbooks": "QuickBooks", "sage": "Sage", "freeagent": "FreeAgent"}
 
 
 class MappingMissing(ProviderError):

@@ -6,6 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
+import { WiseConnectionCard } from "./PayPhase3";
 
 type Totals = Record<string, string>;
 
@@ -16,12 +17,13 @@ function totals(values: Totals | undefined): string {
     : "–";
 }
 
-function PayrollNav() {
+export function PayrollNav() {
   const { t } = useTranslation();
   const links = [
     { to: "/payroll", label: t("payroll.runs") },
     { to: "/payroll/expenses", label: t("payroll.expenses") },
     { to: "/payroll/items", label: t("payroll.items") },
+    { to: "/payroll/tax-forms", label: t("payrollPhase3.taxFormsNav") },
   ] as const;
   return (
     <nav aria-label={t("payroll.title")} className="mb-4 flex gap-3 text-sm">
@@ -126,6 +128,7 @@ export function PayRunsPage() {
           </tbody>
         </table>
       </div>
+      <WiseConnectionCard />
     </Page>
   );
 }

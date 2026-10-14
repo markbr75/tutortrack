@@ -41,6 +41,14 @@ LIMIT = 200
 OPEN_INVOICE = ("issued", "partially_paid")
 
 
+# Ledgers whose client can list an invoice's payments; Sage and FreeAgent are a follow-up.
+READ_BACK_PROVIDERS = frozenset({"xero", "quickbooks"})
+
+
+def supported(provider: str) -> bool:
+    return provider in READ_BACK_PROVIDERS
+
+
 def our_payment_ids(conn: AccountingConnection) -> set[str]:
     """Ledger ids of everything TutorTrack itself posted as payments (including the parts
     of split payments and the replacement payments a refund creates in Xero)."""
@@ -86,6 +94,8 @@ def read_back(conn: AccountingConnection, *, limit: int = LIMIT) -> dict[str, in
 
     result = {"checked": 0, "imported": 0, "skipped": 0}
     if not conn.enabled or not conn.import_payments or conn.mode != conn.Mode.INDIVIDUAL:
+        return result
+    if not supported(conn.provider):
         return result
     try:
         creds = integrations.credentials(conn.connection)

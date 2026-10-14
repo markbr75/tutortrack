@@ -284,6 +284,86 @@ class ComplianceRecord(TenantModel):
         return f"{self.tutor_id}: {self.requirement_id} ({self.status})"
 
 
+class BackgroundCheck(TenantModel):
+    """An online background check at a provider (E18-T11, FR-18-7): uCheck DBS, a DBS
+    Update Service status check, Checkr, or an AU WWCC verification. Results, certificate
+    numbers and links are encrypted; reading them is audited."""
+
+    class Status(models.TextChoices):
+        REQUESTED = "requested", _("Requested")
+        INVITED = "invited", _("Waiting for the tutor")
+        IN_PROGRESS = "in_progress", _("In progress")
+        COMPLETED = "completed", _("Completed")
+        CANCELLED = "cancelled", _("Cancelled")
+        EXPIRED = "expired", _("Expired")
+        FAILED = "failed", _("Couldn't start")
+
+    class Result(models.TextChoices):
+        NONE = "", _("No result yet")
+        CLEAR = "clear", _("Clear")
+        CONSIDER = "consider", _("Needs review")
+        UNABLE = "unable", _("Couldn't be completed")
+
+    tutor = models.ForeignKey(
+        "people.TutorProfile", on_delete=models.CASCADE, related_name="background_checks"
+    )
+    requirement = models.ForeignKey(
+        RequirementType, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    record = models.ForeignKey(
+        ComplianceRecord, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    provider = models.CharField(max_length=20)
+    package = models.CharField(max_length=40, blank=True, default="")
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.REQUESTED)
+    result = models.CharField(max_length=10, choices=Result.choices, blank=True, default="")
+    external_id = models.CharField(max_length=120, blank=True, default="", db_index=True)
+    candidate_ref = models.CharField(max_length=120, blank=True, default="", db_index=True)
+    invite_url = EncryptedField(blank=True, default="")
+    result_details = EncryptedField(blank=True, default="")  # JSON from the provider
+    certificate_number = EncryptedField(blank=True, default="")
+    certificate_issue_date = models.DateField(null=True, blank=True)
+    certificate_expiry_date = models.DateField(null=True, blank=True)
+    report_url = EncryptedField(blank=True, default="")
+    state_code = models.CharField(max_length=3, blank=True, default="")  # AU state / US state
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    consent_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    last_checked_at = models.DateTimeField(null=True, blank=True)
+    checks_run = models.PositiveIntegerField(default=0)
+    error = models.CharField(max_length=500, blank=True, default="")
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    details_purged_at = models.DateTimeField(null=True, blank=True)
+
+    audit_sensitive_fields: ClassVar[frozenset[str]] = frozenset(
+        {"invite_url", "result_details", "certificate_number", "report_url"}
+    )
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["organisation", "tutor", "status"], name="bgcheck_tutor")]
+
+    @classmethod
+    def own_scope_q(cls, user: object) -> models.Q:
+        return models.Q(tutor__membership__user=user)
+
+    def __str__(self) -> str:
+        return f"{self.provider} check for {self.tutor_id} ({self.status})"
+
+
 class TutorComplianceState(TenantModel):
     """Whether compliance (rather than a person) restricted the tutor, and why."""
 

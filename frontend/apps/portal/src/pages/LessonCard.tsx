@@ -2,6 +2,7 @@ import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
 import { Alert, Button, SelectField, TextField } from "@tutortrack/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api, usePortalMe } from "../api";
@@ -114,6 +115,15 @@ export function LessonCard({
             opensAt={lesson.join_opens_at}
             className="py-1.5"
           />
+        ) : null}
+        {lesson.online && lesson.status === "planned" ? (
+          <Link
+            to="/classroom/$lessonId"
+            params={{ lessonId: lesson.id }}
+            className="rounded-md border border-border px-3 py-1.5"
+          >
+            {t("classroom.open")}
+          </Link>
         ) : null}
         <a
           className="rounded-md border border-border px-3 py-1.5"
