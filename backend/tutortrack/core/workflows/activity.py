@@ -19,7 +19,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
-from django.db import close_old_connections
+from django.conf import settings
+from django.db import close_old_connections, connections
 from temporalio import activity
 
 from ..context import request_context, tenant_context
@@ -39,6 +40,15 @@ def idempotency_key() -> str:
     """Stable across retries of the current activity: ``workflow_id/activity_id``."""
     info = activity.info()
     return f"{info.workflow_id}/{info.activity_id}"
+
+
+def _release_connections() -> None:
+    """Workers keep each activity thread's connection for CONN_MAX_AGE; the test harness
+    starts a fresh worker pool per test, so it closes them instead of piling them up."""
+    if settings.TEMPORAL.get("CLOSE_CONNECTIONS_AFTER_ACTIVITY"):
+        connections.close_all()
+    else:
+        close_old_connections()
 
 
 def tenant_activity(
@@ -66,7 +76,7 @@ def tenant_activity(
                 ):
                     return func(input, *args)
             finally:
-                close_old_connections()
+                _release_connections()
 
         defined = activity.defn(name=name or func.__name__)(wrapper)
         register_activity(defined, task_queue)
@@ -88,7 +98,7 @@ def platform_activity(
                 with request_context(workflow_id=activity.info().workflow_id):
                     return func(*args)
             finally:
-                close_old_connections()
+                _release_connections()
 
         defined = activity.defn(name=name or func.__name__)(wrapper)
         register_activity(defined, task_queue)

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Any
@@ -144,8 +145,10 @@ def temporal_test_env(
     use_client(client)
     queues = task_queues or list(settings.TEMPORAL["TASK_QUEUES"])
 
+    executor = ThreadPoolExecutor(max_workers=20)
+
     async def _build() -> list[Any]:  # workers must be created on a running loop
-        return build_workers(client, queues)
+        return build_workers(client, queues, executor=executor)
 
     workers = runtime.run(_build())
     futures = [asyncio.run_coroutine_threadsafe(w.run(), runtime.loop()) for w in workers]
@@ -157,6 +160,7 @@ def temporal_test_env(
             runtime.run(worker.shutdown(), timeout=60)
         for future in futures:
             future.result(timeout=60)
+        executor.shutdown(wait=True)
         use_client(None)
         if fresh:
             runtime.run(env.shutdown(), timeout=60)

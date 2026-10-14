@@ -45,7 +45,14 @@ ROOT_URLCONF = "tutortrack.core.tests.testapp.api"
 PWNED_PASSWORDS_CHECK = False  # no network in tests
 # The time-skipping test server has no search attributes; tests that need Temporal use the
 # temporal_env fixture, anything else fails fast instead of reaching a local dev server.
-TEMPORAL = {**TEMPORAL, "SEARCH_ATTRIBUTES": False, "ADDRESS": "127.0.0.1:1"}
+# Each test starts a fresh activity thread pool, so activities close their connections
+# rather than keeping them for CONN_MAX_AGE (which exhausted Postgres under xdist).
+TEMPORAL = {
+    **TEMPORAL,
+    "SEARCH_ATTRIBUTES": False,
+    "ADDRESS": "127.0.0.1:1",
+    "CLOSE_CONNECTIONS_AFTER_ACTIVITY": True,
+}
 
 # E22: CalDAV/Lessonspace use their fakes in tests (no network).
 INTEGRATIONS = {**INTEGRATIONS, "CREDENTIAL_PROVIDERS_LIVE": False}

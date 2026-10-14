@@ -10,8 +10,9 @@ afterEach(() => {
   window.history.pushState(null, "", "/portal/");
 });
 
-const soon = new Date(Date.now() + 3 * 86_400_000).toISOString();
-const later = new Date(Date.now() + 3 * 86_400_000 + 3600_000).toISOString();
+const base = Date.now() + 3 * 86_400_000;
+const soon = new Date(base).toISOString();
+const later = new Date(base + 3600_000).toISOString();
 
 const ME = {
   role: "client",

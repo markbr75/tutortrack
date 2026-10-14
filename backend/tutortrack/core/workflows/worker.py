@@ -24,10 +24,14 @@ def sandbox_runner() -> SandboxedWorkflowRunner:
 
 
 def build_workers(
-    client: Client, task_queues: list[str], *, max_activity_threads: int = 20
+    client: Client,
+    task_queues: list[str],
+    *,
+    max_activity_threads: int = 20,
+    executor: ThreadPoolExecutor | None = None,
 ) -> list[Worker]:
     registry = discover()
-    executor = ThreadPoolExecutor(max_workers=max_activity_threads)
+    executor = executor or ThreadPoolExecutor(max_workers=max_activity_threads)
     workers = []
     for queue in task_queues:
         workflows = registry.workflows.get(queue, [])

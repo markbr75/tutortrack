@@ -6,8 +6,8 @@ import { mockApi } from "../test-utils";
 
 type Routes = Parameters<typeof mockApi>[0];
 
-const KEY =
-  "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U";
+// A dummy 65-byte uncompressed P-256 public key in base64url (shape only; not a real key).
+const KEY = `B${"A".repeat(86)}`;
 
 function routes(extra: Routes = {}): Routes {
   return {
