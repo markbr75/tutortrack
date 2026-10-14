@@ -66,7 +66,7 @@ ROLES: dict[str, RoleDef] = {
             denies=(*OWNER_ONLY, *NOT_DSL, "subscription.view", "org.settings.manage",
                     "org.branch.manage", "audit.*", "migration.*", "privacy.dsar.manage",
                     "privacy.retention.manage", "privacy.legal_hold.manage",
-                    "ai.settings.manage"),
+                    "ai.settings.manage", "people.merge"),
         ),
         RoleDef(
             "coordinator", "Coordinator",
@@ -86,7 +86,7 @@ ROLES: dict[str, RoleDef] = {
                "safeguarding.lone_working.monitor", "success.support.chat:own",
                "video.recording.view"),
             denies=("people.tutor.view_financial", "scheduling.edit_locked",
-                    "matching.include_restricted", "matching.settings.manage"),
+                    "matching.include_restricted", "matching.settings.manage", "people.merge"),
         ),
         RoleDef(
             "finance", "Finance",

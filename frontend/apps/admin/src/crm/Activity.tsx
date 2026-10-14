@@ -229,7 +229,12 @@ function Timeline({ target }: { target: TargetRef }) {
       {timeline.data.map((item) => (
         <li key={`${item.kind}-${item.id}`}>
           <p className="text-xs text-muted-foreground">
-            {formatDateTime(item.at, i18n.language)} · {t(`crm.timeline.${item.kind}`)}
+            {formatDateTime(item.at, i18n.language)} ·{" "}
+            {t(
+              ["lesson", "invoice", "payment"].includes(item.kind)
+                ? `peopleTools.timeline.${item.kind}`
+                : `crm.timeline.${item.kind}`,
+            )}
           </p>
           <p className="text-sm">
             {item.kind === "note" ? stripTags(item.body) : item.title || item.body}

@@ -61,6 +61,9 @@ export function CommandPalette() {
       void navigate({ to: "/students/$studentId", params: { studentId: hit.id } });
     else if (hit.type === "tutor")
       void navigate({ to: "/tutors/$tutorId", params: { tutorId: hit.id } });
+    else if (hit.type === "job") void navigate({ to: "/jobs/$jobId", params: { jobId: hit.id } });
+    else if (hit.type === "invoice")
+      void navigate({ to: "/invoices/$invoiceId", params: { invoiceId: hit.id } });
     else if (hit.client_id)
       void navigate({ to: "/clients/$clientId", params: { clientId: hit.client_id } });
   };
@@ -129,7 +132,11 @@ export function CommandPalette() {
             >
               <span className="font-medium">{hit.title}</span>{" "}
               <span className="text-sm text-muted-foreground">
-                {t(`search.type.${hit.type}`)}
+                {t(
+                  hit.type === "job" || hit.type === "invoice"
+                    ? `peopleTools.searchType.${hit.type}`
+                    : `search.type.${hit.type}`,
+                )}
                 {hit.subtitle ? ` · ${hit.subtitle}` : ""}
               </span>
             </li>

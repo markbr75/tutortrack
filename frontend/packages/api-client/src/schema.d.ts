@@ -3347,6 +3347,12 @@ export interface paths {
     /**
      * @description Run a bulk action in the background: ``POST /bulk/{entity}/{action}``; poll
      *     ``/bulk-jobs/{id}`` for progress and the per-record report (FR-05-12).
+     *
+     *     Actions: ``tag``/``untag`` (``params.tag``), ``archive``, ``set_status``
+     *     (``params.status``), ``assign_manager`` (clients), ``invite_portal`` (clients' main
+     *     contact, contacts), and ``send_message`` (``params``: ``channel`` email|sms,
+     *     ``purpose`` service|marketing, ``subject``, ``body``; marketing needs consent, as for
+     *     broadcasts). Export the selected rows with ``GET /{entity}/export?ids=...``.
      */
     post: operations["bulk_create"];
     delete?: never;
@@ -5502,6 +5508,23 @@ export interface paths {
     head?: never;
     /** @description All contacts (search, edit, archive). Create through ``/clients/{id}/contacts``. */
     patch: operations["contacts_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/contacts/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description All contacts (search, edit, archive). Create through ``/clients/{id}/contacts``. */
+    get: operations["contacts_export_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/courses": {
@@ -12366,6 +12389,49 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/merge/{entity}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description ``POST /merge/{entity}``: merge ``source`` into ``target`` (FR-05-13). Not reversible:
+     *     ``confirm`` must be true. ``choices`` picks the surviving value per field
+     *     (``source`` or ``target``; by default the survivor's, or the duplicate's where the
+     *     survivor's is empty). Every linked record moves to the survivor; the duplicate is
+     *     archived and points at it.
+     */
+    post: operations["merge_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/merge/{entity}/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``GET /merge/{entity}/preview?source=&target=``: the two records side by side, what
+     *     would move to the survivor and anything that stops the merge (FR-05-13).
+     */
+    get: operations["merge_preview_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/message-templates/{key}/{channel}": {
     parameters: {
       query?: never;
@@ -14038,6 +14104,26 @@ export interface paths {
      *     name and date of birth.
      */
     get: operations["people_duplicates_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/people/duplicates/pairs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``GET /people/duplicates/pairs?type=client|contact|student``: records that look like
+     *     the same person or family, newest pairs first (FR-05-13), to review and merge.
+     */
+    get: operations["people_duplicates_pairs_list"];
     put?: never;
     post?: never;
     delete?: never;
@@ -18049,7 +18135,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** @description Global search (⌘K) across people; results respect your permissions. */
+    /** @description Global search (⌘K) across people, jobs and invoices; results respect your permissions. */
     get: operations["search_list"];
     put?: never;
     post?: never;
@@ -20139,6 +20225,23 @@ export interface paths {
      *     encrypted; masked unless ``?full=true`` with ``payroll.tax.view`` (audited).
      */
     put: operations["tutors_tax_identity_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutors/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false. */
+    get: operations["tutors_export_retrieve"];
+    put?: never;
     post?: never;
     delete?: never;
     options?: never;
@@ -23834,6 +23937,19 @@ export interface components {
       readonly archived_at: string | null;
       /** Format: date-time */
       readonly created_at: string;
+      /**
+       * Format: decimal
+       * @description Ledger balance in the client's currency (positive: owes).
+       */
+      readonly balance: string | null;
+      /** Format: date-time */
+      readonly next_lesson_at: string | null;
+      /** Format: date-time */
+      readonly last_lesson_at: string | null;
+      /** Format: decimal */
+      readonly hours_this_term: string | null;
+      /** Format: uuid */
+      readonly merged_into: string | null;
     };
     ClientDetail: {
       /** Format: uuid */
@@ -23869,6 +23985,19 @@ export interface components {
       readonly archived_at: string | null;
       /** Format: date-time */
       readonly created_at: string;
+      /**
+       * Format: decimal
+       * @description Ledger balance in the client's currency (positive: owes).
+       */
+      readonly balance: string | null;
+      /** Format: date-time */
+      readonly next_lesson_at: string | null;
+      /** Format: date-time */
+      readonly last_lesson_at: string | null;
+      /** Format: decimal */
+      readonly hours_this_term: string | null;
+      /** Format: uuid */
+      readonly merged_into: string | null;
       readonly contacts: components["schemas"]["Contact"][];
       readonly students: components["schemas"]["Student"][];
     };
@@ -25281,6 +25410,12 @@ export interface components {
       reason: string;
     };
     /**
+     * @description * `source` - source
+     *     * `target` - target
+     * @enum {string}
+     */
+    DefaultEnum: "source" | "target";
+    /**
      * @description * `admin` - Admin
      *     * `branch_manager` - Branch Manager
      *     * `coordinator` - Coordinator
@@ -25556,6 +25691,30 @@ export interface components {
       /** Format: uuid */
       client_id: string | null;
       reason: string;
+    };
+    DuplicatePair: {
+      type: components["schemas"]["DuplicatePairTypeEnum"];
+      /** @description The older record: suggested to keep. */
+      a: components["schemas"]["DuplicatePerson"];
+      b: components["schemas"]["DuplicatePerson"];
+      reason: string;
+    };
+    /**
+     * @description * `client` - client
+     *     * `contact` - contact
+     *     * `student` - student
+     * @enum {string}
+     */
+    DuplicatePairTypeEnum: "client" | "contact" | "student";
+    DuplicatePerson: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      detail: string;
+      /** Format: uuid */
+      client_id: string;
+      /** Format: date-time */
+      created_at: string;
     };
     DuplicateRequest: {
       /** Format: date-time */
@@ -29446,6 +29605,63 @@ export interface components {
      * @enum {string}
      */
     MembershipUpdateStatusEnum: "active" | "suspended";
+    MergeField: {
+      name: string;
+      label: string;
+      source: string;
+      target: string;
+      hidden: boolean;
+      same: boolean;
+      default: components["schemas"]["DefaultEnum"];
+    };
+    MergeMove: {
+      key: string;
+      label: string;
+      count: number;
+    };
+    MergePreview: {
+      subject_type: string;
+      source: components["schemas"]["MergeRecord"];
+      target: components["schemas"]["MergeRecord"];
+      values: components["schemas"]["MergeField"][];
+      moves: components["schemas"]["MergeMove"][];
+      problems: string[];
+      warnings: string[];
+      can_merge: boolean;
+    };
+    MergeRecord: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    MergeRequestRequest: {
+      /**
+       * Format: uuid
+       * @description The duplicate (archived).
+       */
+      source: string;
+      /**
+       * Format: uuid
+       * @description The record that stays.
+       */
+      target: string;
+      choices?: {
+        [key: string]: "source" | "target";
+      };
+      /** @description Must be true: a merge can't be undone. */
+      confirm: boolean;
+    };
+    MergeResult: {
+      subject_type: string;
+      /** Format: uuid */
+      target_id: string;
+      /** Format: uuid */
+      merged_id: string;
+      moved: {
+        [key: string]: number;
+      };
+      notes: string[];
+    };
     Message: {
       /** Format: uuid */
       readonly id: string;
@@ -39492,6 +39708,14 @@ export interface components {
       readonly archived_at: string | null;
       /** Format: date-time */
       readonly created_at: string;
+      /** Format: date-time */
+      readonly next_lesson_at: string | null;
+      /** Format: date-time */
+      readonly last_lesson_at: string | null;
+      /** Format: decimal */
+      readonly hours_this_term: string | null;
+      /** Format: uuid */
+      readonly merged_into: string | null;
     };
     StudentInRequest: {
       first_name: string;
@@ -40542,9 +40766,13 @@ export interface components {
      *     * `document` - document
      *     * `change` - change
      *     * `message` - message
+     *     * `lesson` - lesson
+     *     * `invoice` - invoice
+     *     * `payment` - payment
      * @enum {string}
      */
-    TimelineItemKindEnum: "note" | "task" | "document" | "change" | "message";
+    TimelineItemKindEnum:
+      "note" | "task" | "document" | "change" | "message" | "lesson" | "invoice" | "payment";
     /**
      * @description * `ssn` - Social Security number
      *     * `itin` - Individual taxpayer identification number
@@ -40746,6 +40974,18 @@ export interface components {
       readonly archived_at: string | null;
       /** Format: date-time */
       readonly created_at: string;
+      /** Format: decimal */
+      readonly hours_this_month: string | null;
+      /**
+       * Format: decimal
+       * @description % of lesson reports due in the last 90 days submitted on time.
+       */
+      readonly report_sla: string | null;
+      /**
+       * Format: decimal
+       * @description Booked time this month as a % of weekly availability.
+       */
+      readonly utilisation: string | null;
     };
     TutorCompliance: {
       restricted: boolean;
@@ -50943,6 +51183,8 @@ export interface operations {
     parameters: {
       query?: {
         account_manager?: string;
+        balance_max?: unknown;
+        balance_min?: unknown;
         branch?: string;
         /** @description Filter by a custom field value. */
         "cf_<key>"?: string;
@@ -50950,10 +51192,15 @@ export interface operations {
         cursor?: string;
         /** @description Comma-separated fields to return (sparse). */
         fields?: string;
+        has_upcoming_lesson?: unknown;
+        hours_this_term_min?: unknown;
         include_archived?: boolean;
+        last_lesson_after?: unknown;
+        last_lesson_before?: unknown;
         /** @description Records missing required custom fields. */
         missing_required?: boolean;
-        /** @description Which field to use when ordering the results. */
+        next_lesson_before?: unknown;
+        /** @description Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`. */
         ordering?: string;
         /** @description Number of results to return per page. */
         page_size?: number;
@@ -51388,9 +51635,15 @@ export interface operations {
       query?: {
         /** @description Filter by a custom field value. */
         "cf_<key>"?: string;
+        /** @description Default csv. */
+        file_format?: "csv" | "xlsx";
+        /** @description Only these records (comma-separated ids). */
+        ids?: string;
         include_archived?: boolean;
         /** @description Records missing required custom fields. */
         missing_required?: boolean;
+        /** @description Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`. */
+        ordering?: string;
         /** @description Search names, emails and phones. */
         q?: string;
         /** @description Tag id (repeatable). */
@@ -51408,6 +51661,7 @@ export interface operations {
         };
         content: {
           "text/csv": string;
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
         };
       };
     };
@@ -52145,7 +52399,7 @@ export interface operations {
         include_archived?: boolean;
         /** @description Records missing required custom fields. */
         missing_required?: boolean;
-        /** @description Which field to use when ordering the results. */
+        /** @description Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`. */
         ordering?: string;
         /** @description Number of results to return per page. */
         page_size?: number;
@@ -52240,6 +52494,42 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Contact"];
+        };
+      };
+    };
+  };
+  contacts_export_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Filter by a custom field value. */
+        "cf_<key>"?: string;
+        /** @description Default csv. */
+        file_format?: "csv" | "xlsx";
+        /** @description Only these records (comma-separated ids). */
+        ids?: string;
+        include_archived?: boolean;
+        /** @description Records missing required custom fields. */
+        missing_required?: boolean;
+        /** @description Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`. */
+        ordering?: string;
+        /** @description Search names, emails and phones. */
+        q?: string;
+        /** @description Tag id (repeatable). */
+        tag?: string[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv": string;
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
         };
       };
     };
@@ -64326,6 +64616,60 @@ export interface operations {
       };
     };
   };
+  merge_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        entity: "clients" | "contacts" | "students";
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MergeRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["MergeRequestRequest"];
+        "multipart/form-data": components["schemas"]["MergeRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MergeResult"];
+        };
+      };
+    };
+  };
+  merge_preview_retrieve: {
+    parameters: {
+      query: {
+        source: string;
+        target: string;
+      };
+      header?: never;
+      path: {
+        entity: "clients" | "contacts" | "students";
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MergePreview"];
+        };
+      };
+    };
+  };
   message_templates_retrieve: {
     parameters: {
       query?: never;
@@ -67064,6 +67408,27 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Duplicate"][];
+        };
+      };
+    };
+  };
+  people_duplicates_pairs_list: {
+    parameters: {
+      query: {
+        type: "client" | "contact" | "student";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DuplicatePair"][];
         };
       };
     };
@@ -75245,10 +75610,15 @@ export interface operations {
         cursor?: string;
         /** @description Comma-separated fields to return (sparse). */
         fields?: string;
+        has_upcoming_lesson?: unknown;
+        hours_this_term_min?: unknown;
         include_archived?: boolean;
+        last_lesson_after?: unknown;
+        last_lesson_before?: unknown;
         /** @description Records missing required custom fields. */
         missing_required?: boolean;
-        /** @description Which field to use when ordering the results. */
+        next_lesson_before?: unknown;
+        /** @description Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`. */
         ordering?: string;
         /** @description Number of results to return per page. */
         page_size?: number;
@@ -75464,9 +75834,15 @@ export interface operations {
       query?: {
         /** @description Filter by a custom field value. */
         "cf_<key>"?: string;
+        /** @description Default csv. */
+        file_format?: "csv" | "xlsx";
+        /** @description Only these records (comma-separated ids). */
+        ids?: string;
         include_archived?: boolean;
         /** @description Records missing required custom fields. */
         missing_required?: boolean;
+        /** @description Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`. */
+        ordering?: string;
         /** @description Search names, emails and phones. */
         q?: string;
         /** @description Tag id (repeatable). */
@@ -75484,6 +75860,7 @@ export interface operations {
         };
         content: {
           "text/csv": string;
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
         };
       };
     };
@@ -77514,15 +77891,17 @@ export interface operations {
         cursor?: string;
         /** @description Comma-separated fields to return (sparse). */
         fields?: string;
+        hours_this_month_min?: unknown;
         include_archived?: boolean;
         /** @description Records missing required custom fields. */
         missing_required?: boolean;
-        /** @description Which field to use when ordering the results. */
+        /** @description Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`. */
         ordering?: string;
         /** @description Number of results to return per page. */
         page_size?: number;
         /** @description Search names, emails and phones. */
         q?: string;
+        report_sla_below?: unknown;
         /**
          * @description * `applicant` - Applicant
          *     * `onboarding` - Onboarding
@@ -77893,10 +78272,12 @@ export interface operations {
         branch?: string;
         /** @description The pagination cursor value. */
         cursor?: string;
+        hours_this_month_min?: unknown;
         /** @description Which field to use when ordering the results. */
         ordering?: string;
         /** @description Number of results to return per page. */
         page_size?: number;
+        report_sla_below?: unknown;
         /**
          * @description * `applicant` - Applicant
          *     * `onboarding` - Onboarding
@@ -78035,6 +78416,42 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TaxIdentityOut"];
+        };
+      };
+    };
+  };
+  tutors_export_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Filter by a custom field value. */
+        "cf_<key>"?: string;
+        /** @description Default csv. */
+        file_format?: "csv" | "xlsx";
+        /** @description Only these records (comma-separated ids). */
+        ids?: string;
+        include_archived?: boolean;
+        /** @description Records missing required custom fields. */
+        missing_required?: boolean;
+        /** @description Sort by a list column, e.g. `-balance`, `next_lesson_at`, `hours_this_term`. */
+        ordering?: string;
+        /** @description Search names, emails and phones. */
+        q?: string;
+        /** @description Tag id (repeatable). */
+        tag?: string[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv": string;
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
         };
       };
     };

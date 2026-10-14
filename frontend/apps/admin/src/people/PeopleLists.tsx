@@ -13,6 +13,8 @@ import { useMemo, useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
 import { useCursorList } from "../lists";
+import { actionLink, selectionColumn, useFigures, useSelection } from "./listHelpers";
+import { BulkBar, ExportLinks } from "./listTools";
 import { CLIENT_STATUSES, STUDENT_STATUSES, TUTOR_STATUSES } from "./statuses";
 
 type Client = components["schemas"]["Client"];
@@ -22,29 +24,38 @@ type Tutor = components["schemas"]["Tutor"];
 interface ListFilters {
   q: string;
   status: string;
+  ordering: string;
+  upcoming: string;
+  owing: boolean;
 }
 
-/** Search box + status filter shared by the people lists. */
+const EMPTY: ListFilters = { q: "", status: "", ordering: "", upcoming: "", owing: false };
+
+/** Search box, status filter, sort order and the computed-field filters (FR-05-11). */
 function Filters({
   label,
   statuses,
   statusPrefix,
+  sorts,
+  computed,
   onApply,
   actions,
 }: {
   label: string;
   statuses: readonly string[];
   statusPrefix: string;
+  sorts: [string, string][];
+  computed?: { upcoming?: boolean; owing?: boolean };
   onApply: (filters: ListFilters) => void;
   actions?: ReactNode;
 }) {
   const { t } = useTranslation();
-  const [draft, setDraft] = useState<ListFilters>({ q: "", status: "" });
+  const [draft, setDraft] = useState<ListFilters>(EMPTY);
   return (
     <form
       role="search"
       aria-label={label}
-      className="mb-6 grid gap-3 sm:grid-cols-[1fr_12rem_auto] sm:items-end"
+      className="mb-6 grid gap-3 sm:grid-cols-[1fr_12rem_12rem] sm:items-end"
       onSubmit={(e) => {
         e.preventDefault();
         onApply(draft);
@@ -65,7 +76,39 @@ function Filters({
           ...statuses.map((s) => ({ value: s, label: t(`${statusPrefix}.${s}`) })),
         ]}
       />
-      <div className="flex flex-wrap gap-2">
+      <SelectField
+        label={t("peopleTools.sort.label")}
+        value={draft.ordering}
+        onChange={(e) => setDraft((d) => ({ ...d, ordering: e.target.value }))}
+        options={[
+          { value: "", label: t("peopleTools.sort.newest") },
+          ...sorts.map(([value, key]) => ({ value, label: t(`peopleTools.sort.${key}`) })),
+        ]}
+      />
+      {computed?.upcoming ? (
+        <SelectField
+          label={t("peopleTools.filters.upcoming")}
+          value={draft.upcoming}
+          onChange={(e) => setDraft((d) => ({ ...d, upcoming: e.target.value }))}
+          options={[
+            { value: "", label: t("peopleTools.filters.any") },
+            { value: "true", label: t("peopleTools.filters.yes") },
+            { value: "false", label: t("peopleTools.filters.no") },
+          ]}
+        />
+      ) : null}
+      {computed?.owing ? (
+        <label className="flex items-center gap-2 text-sm sm:pb-2">
+          <input
+            type="checkbox"
+            className="size-4"
+            checked={draft.owing}
+            onChange={(e) => setDraft((d) => ({ ...d, owing: e.target.checked }))}
+          />
+          {t("peopleTools.filters.owing")}
+        </label>
+      ) : null}
+      <div className="flex flex-wrap gap-2 sm:col-span-3">
         <Button type="submit">{t("people.apply")}</Button>
         {actions}
       </div>
@@ -73,10 +116,14 @@ function Filters({
   );
 }
 
-function clean<S extends string>(filters: ListFilters): { q?: string; status?: S } {
+/** Query parameters for the list and its exports. */
+function clean(filters: ListFilters): Record<string, string> {
   return {
     ...(filters.q ? { q: filters.q } : {}),
-    ...(filters.status ? { status: filters.status as S } : {}),
+    ...(filters.status ? { status: filters.status } : {}),
+    ...(filters.ordering ? { ordering: filters.ordering } : {}),
+    ...(filters.upcoming ? { has_upcoming_lesson: filters.upcoming } : {}),
+    ...(filters.owing ? { balance_min: "0.01" } : {}),
   };
 }
 
@@ -128,20 +175,47 @@ function ListShell<T>({
 }
 
 const linkClass = "font-medium underline-offset-2 hover:underline";
-const actionLink =
-  "inline-flex h-10 items-center rounded-md border border-border px-4 text-sm hover:bg-muted";
+
+function useSelectionLabels() {
+  const { t } = useTranslation();
+  return {
+    all: t("peopleTools.columns.selectAll"),
+    row: (name: string) => t("peopleTools.columns.selectRow", { name }),
+  };
+}
 
 export function ClientsPage() {
   const { t } = useTranslation();
+  const figures = useFigures();
+  const labels = useSelectionLabels();
   const canCreate = usePermission("people.client.create");
   const canExport = usePermission("people.client.export");
-  const [filters, setFilters] = useState<ListFilters>({ q: "", status: "" });
-  const params = clean<(typeof CLIENT_STATUSES)[number]>(filters);
+  const canMerge = usePermission("people.merge");
+  const selection = useSelection();
+  const [filters, setFilters] = useState<ListFilters>(EMPTY);
+  const params = clean(filters);
   const { query, rows } = useCursorList<Client>(["clients", params], async (cursor) =>
-    unwrap(await api.GET("/api/v1/clients", { params: { query: { ...params, cursor } } })),
+    unwrap(
+      await api.GET("/api/v1/clients", {
+        params: {
+          query: {
+            ...params,
+            status: params.status as (typeof CLIENT_STATUSES)[number] | undefined,
+            cursor,
+          },
+        },
+      }),
+    ),
   );
   const columns = useMemo<ColumnDef<Client, unknown>[]>(
     () => [
+      selectionColumn(
+        selection,
+        rows,
+        (r) => r.id,
+        (r) => r.display_name,
+        labels,
+      ),
       {
         header: t("people.name"),
         accessorKey: "display_name",
@@ -156,18 +230,33 @@ export function ClientsPage() {
         ),
       },
       {
-        header: t("people.type"),
-        accessorKey: "type",
-        cell: ({ getValue }) => t(`people.clientType.${String(getValue())}`),
-      },
-      {
         header: t("people.status"),
         accessorKey: "status",
         cell: ({ getValue }) => t(`people.clientStatus.${String(getValue())}`),
       },
       { header: t("people.students"), accessorKey: "students_count" },
+      {
+        header: t("peopleTools.columns.balance"),
+        id: "balance",
+        cell: ({ row }) => figures.money(row.original.balance, row.original.currency),
+      },
+      {
+        header: t("peopleTools.columns.nextLesson"),
+        id: "next",
+        cell: ({ row }) => figures.date(row.original.next_lesson_at),
+      },
+      {
+        header: t("peopleTools.columns.lastLesson"),
+        id: "last",
+        cell: ({ row }) => figures.date(row.original.last_lesson_at),
+      },
+      {
+        header: t("peopleTools.columns.hoursThisTerm"),
+        id: "hours",
+        cell: ({ row }) => figures.hours(row.original.hours_this_term),
+      },
     ],
-    [t],
+    [t, figures, rows, selection, labels],
   );
   return (
     <ListShell
@@ -181,6 +270,14 @@ export function ClientsPage() {
         label={t("people.clients")}
         statuses={CLIENT_STATUSES}
         statusPrefix="people.clientStatus"
+        sorts={[
+          ["display_name", "name"],
+          ["-balance", "balance"],
+          ["next_lesson_at", "nextLesson"],
+          ["last_lesson_at", "lastLesson"],
+          ["-hours_this_term", "hoursThisTerm"],
+        ]}
+        computed={{ upcoming: true, owing: true }}
         onApply={setFilters}
         actions={
           <>
@@ -189,36 +286,52 @@ export function ClientsPage() {
                 {t("people.quickAdd.title")}
               </Link>
             ) : null}
-            {canExport ? (
-              <a
-                className={actionLink}
-                href={`/api/v1/clients/export?${new URLSearchParams(params).toString()}`}
-              >
-                {t("people.export")}
-              </a>
+            {canExport ? <ExportLinks path="/api/v1/clients/export" params={params} /> : null}
+            {canMerge ? (
+              <Link className={actionLink} to="/people/duplicates">
+                {t("peopleTools.duplicates.nav")}
+              </Link>
             ) : null}
           </>
         }
       />
+      <BulkBar entity="client" selection={selection} mergeEntity="clients" />
     </ListShell>
   );
 }
 
 export function StudentsPage() {
   const { t } = useTranslation();
-  const [filters, setFilters] = useState<ListFilters>({ q: "", status: "" });
-  const params = clean<(typeof STUDENT_STATUSES)[number]>(filters);
+  const figures = useFigures();
+  const labels = useSelectionLabels();
+  const canExport = usePermission("people.student.export");
+  const selection = useSelection();
+  const [filters, setFilters] = useState<ListFilters>(EMPTY);
+  const params = clean(filters);
   const { query, rows } = useCursorList<Student>(["students", params], async (cursor) =>
     unwrap(
       await api.GET("/api/v1/students", {
         params: {
-          query: { q: params.q, status: params.status ? [params.status] : undefined, cursor },
+          query: {
+            ...params,
+            status: params.status
+              ? [params.status as (typeof STUDENT_STATUSES)[number]]
+              : undefined,
+            cursor,
+          },
         },
       }),
     ),
   );
   const columns = useMemo<ColumnDef<Student, unknown>[]>(
     () => [
+      selectionColumn(
+        selection,
+        rows,
+        (r) => r.id,
+        (r) => r.full_name ?? "",
+        labels,
+      ),
       {
         header: t("people.name"),
         accessorKey: "full_name",
@@ -246,8 +359,18 @@ export function StudentsPage() {
         accessorKey: "status",
         cell: ({ getValue }) => t(`people.studentStatus.${String(getValue())}`),
       },
+      {
+        header: t("peopleTools.columns.nextLesson"),
+        id: "next",
+        cell: ({ row }) => figures.date(row.original.next_lesson_at),
+      },
+      {
+        header: t("peopleTools.columns.hoursThisTerm"),
+        id: "hours",
+        cell: ({ row }) => figures.hours(row.original.hours_this_term),
+      },
     ],
-    [t],
+    [t, figures, rows, selection, labels],
   );
   return (
     <ListShell
@@ -261,27 +384,51 @@ export function StudentsPage() {
         label={t("people.studentsTitle")}
         statuses={STUDENT_STATUSES}
         statusPrefix="people.studentStatus"
+        sorts={[
+          ["last_name", "name"],
+          ["next_lesson_at", "nextLesson"],
+          ["last_lesson_at", "lastLesson"],
+          ["-hours_this_term", "hoursThisTerm"],
+        ]}
+        computed={{ upcoming: true }}
         onApply={setFilters}
+        actions={canExport ? <ExportLinks path="/api/v1/students/export" params={params} /> : null}
       />
+      <BulkBar entity="student" selection={selection} mergeEntity="students" />
     </ListShell>
   );
 }
 
 export function TutorsPage() {
   const { t } = useTranslation();
-  const [filters, setFilters] = useState<ListFilters>({ q: "", status: "" });
-  const params = clean<(typeof TUTOR_STATUSES)[number]>(filters);
+  const figures = useFigures();
+  const labels = useSelectionLabels();
+  const canExport = usePermission("people.tutor.export");
+  const selection = useSelection();
+  const [filters, setFilters] = useState<ListFilters>(EMPTY);
+  const params = clean(filters);
   const { query, rows } = useCursorList<Tutor>(["tutors", params], async (cursor) =>
     unwrap(
       await api.GET("/api/v1/tutors", {
         params: {
-          query: { q: params.q, status: params.status ? [params.status] : undefined, cursor },
+          query: {
+            ...params,
+            status: params.status ? [params.status as (typeof TUTOR_STATUSES)[number]] : undefined,
+            cursor,
+          },
         },
       }),
     ),
   );
   const columns = useMemo<ColumnDef<Tutor, unknown>[]>(
     () => [
+      selectionColumn(
+        selection,
+        rows,
+        (r) => r.id,
+        (r) => r.full_name,
+        labels,
+      ),
       {
         header: t("people.name"),
         accessorKey: "full_name",
@@ -291,7 +438,6 @@ export function TutorsPage() {
           </Link>
         ),
       },
-      { header: t("people.email"), accessorKey: "email" },
       {
         header: t("people.subjects"),
         id: "subjects",
@@ -302,8 +448,23 @@ export function TutorsPage() {
         accessorKey: "status",
         cell: ({ getValue }) => t(`people.tutorStatus.${String(getValue())}`),
       },
+      {
+        header: t("peopleTools.columns.hoursThisMonth"),
+        id: "hours",
+        cell: ({ row }) => figures.hours(row.original.hours_this_month),
+      },
+      {
+        header: t("peopleTools.columns.utilisation"),
+        id: "utilisation",
+        cell: ({ row }) => figures.percent(row.original.utilisation),
+      },
+      {
+        header: t("peopleTools.columns.reportSla"),
+        id: "sla",
+        cell: ({ row }) => figures.percent(row.original.report_sla),
+      },
     ],
-    [t],
+    [t, figures, rows, selection, labels],
   );
   return (
     <ListShell
@@ -317,8 +478,15 @@ export function TutorsPage() {
         label={t("people.tutorsTitle")}
         statuses={TUTOR_STATUSES}
         statusPrefix="people.tutorStatus"
+        sorts={[
+          ["last_name", "name"],
+          ["-hours_this_month", "hoursThisMonth"],
+          ["report_sla", "reportSla"],
+        ]}
         onApply={setFilters}
+        actions={canExport ? <ExportLinks path="/api/v1/tutors/export" params={params} /> : null}
       />
+      <BulkBar entity="tutor" selection={selection} />
     </ListShell>
   );
 }

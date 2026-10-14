@@ -36,3 +36,31 @@ def similar_payment_exists(client: Any, amount: Decimal, day: Any, reference: st
     if reference:
         qs = qs.filter(reference=reference[:120])
     return qs.exists()
+
+
+# --- record timelines (E05 FR-05-10) ------------------------------------------------------------
+
+
+def payment_timeline(user: Any, target_type: str, target_id: str, limit: int) -> list[Any]:
+    """Payments from a client (or a contact's family) for the activity timeline."""
+    from tutortrack.core.permissions import has_perm, scope_queryset
+    from tutortrack.crm.selectors import TimelineItem
+    from tutortrack.people.selectors import timeline_scope
+
+    clients = timeline_scope(target_type, target_id)["client"]
+    if not clients or not has_perm(user, "payments.payment.view"):
+        return []
+    rows = scope_queryset(
+        user, Payment.objects.filter(client_id__in=clients), "payments.payment.view"
+    ).order_by("-received_at", "-created_at")[:limit]
+    return [
+        TimelineItem(
+            "payment",
+            str(p.pk),
+            p.received_at or p.created_at,
+            f"{p.amount.amount} {p.currency}",
+            f"{p.method} · {p.status}",
+            None,
+        )
+        for p in rows
+    ]

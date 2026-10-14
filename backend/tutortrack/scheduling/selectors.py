@@ -196,3 +196,32 @@ def pending_reschedule_requests(user: Any) -> QuerySet[Any]:
         .select_related("lesson")
         .order_by("deadline")
     )
+
+
+# --- record timelines (E05 FR-05-10) ------------------------------------------------------------
+
+
+def lesson_timeline(user: Any, target_type: str, target_id: str, limit: int) -> list[Any]:
+    """Lessons of a client, contact (their family), student or tutor, for the record's
+    activity timeline; only lessons the viewer may see."""
+    from tutortrack.crm.selectors import TimelineItem
+    from tutortrack.people.selectors import timeline_scope
+
+    if not has_perm(user, "scheduling.lesson.view"):
+        return []
+    scope = timeline_scope(target_type, target_id)
+    condition = Q()
+    if scope["client"]:
+        condition |= Q(attendees__client_id__in=scope["client"])
+    if scope["student"]:
+        condition |= Q(attendees__student_id__in=scope["student"])
+    if scope["tutor"]:
+        condition |= Q(tutors__tutor_id__in=scope["tutor"])
+    if not condition:
+        return []
+    ids = Lesson.objects.filter(condition).values("pk")
+    lessons = scope_queryset(user, Lesson.objects.filter(pk__in=ids), "scheduling.lesson.view")
+    return [
+        TimelineItem("lesson", str(lesson.pk), lesson.start, lesson.title, lesson.status, None)
+        for lesson in lessons.order_by("-start")[:limit]
+    ]

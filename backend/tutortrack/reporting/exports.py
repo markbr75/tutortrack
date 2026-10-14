@@ -92,6 +92,12 @@ def _xlsx_cell(ref: str, value: Any, numeric: bool) -> str:
 def to_xlsx(result: Result, title: str) -> bytes:
     header, rows = _table(result)
     numeric = [c.type in NUMERIC or c.type == "percent" for c in result.columns]
+    return xlsx_bytes(header, rows, numeric, title)
+
+
+def xlsx_bytes(header: list[str], rows: list[list[Any]], numeric: list[bool], title: str) -> bytes:
+    """A one-sheet workbook: a header row, then ``rows``; ``numeric`` columns are number
+    cells. Callers neutralise formula-like text first (E05 list exports reuse this)."""
     lines = [
         '<row r="1">'
         + "".join(_xlsx_cell(f"{_col(i)}1", h, False) for i, h in enumerate(header))

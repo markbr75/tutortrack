@@ -17,6 +17,50 @@ import { StudentPrivacyPanel } from "../safeguarding/SafeguardingPages";
 import { STUDENT_STATUSES, TUTOR_STATUSES } from "./statuses";
 
 const linkClass = "font-medium underline-offset-2 hover:underline";
+const actionLink =
+  "inline-flex h-10 items-center rounded-md border border-border px-4 text-sm hover:bg-muted";
+
+/** FR-05-13: "Merge with another record", and the banner on a merged (archived) record. */
+function MergeActions({
+  entity,
+  id,
+  mergedInto,
+}: {
+  entity: "clients" | "students";
+  id: string;
+  mergedInto?: string | null;
+}) {
+  const { t } = useTranslation();
+  const canMerge = usePermission("people.merge");
+  if (mergedInto) {
+    return (
+      <Alert tone="info" className="mb-4">
+        {t("peopleTools.merge.mergedInto")}{" "}
+        {entity === "clients" ? (
+          <Link className={linkClass} to="/clients/$clientId" params={{ clientId: mergedInto }}>
+            {t("peopleTools.merge.openSurvivor")}
+          </Link>
+        ) : (
+          <Link className={linkClass} to="/students/$studentId" params={{ studentId: mergedInto }}>
+            {t("peopleTools.merge.openSurvivor")}
+          </Link>
+        )}
+      </Alert>
+    );
+  }
+  if (!canMerge) return null;
+  return (
+    <p className="mb-4">
+      <Link
+        className={actionLink}
+        to="/people/merge/$entity/$sourceId"
+        params={{ entity, sourceId: id }}
+      >
+        {t("peopleTools.merge.mergeWith")}
+      </Link>
+    </p>
+  );
+}
 
 function Loading({
   query,
@@ -86,6 +130,7 @@ export function ClientPage({ clientId }: { clientId: string }) {
           ? ` · ${t("people.archivedOn", { when: formatDate(c.archived_at, i18n.language) })}`
           : ""}
       </p>
+      <MergeActions entity="clients" id={c.id} mergedInto={c.merged_into} />
       <div className="grid gap-4 lg:grid-cols-3">
         <Card title={t("people.contacts")}>
           <ul className="space-y-3">
@@ -234,6 +279,7 @@ export function StudentPage({ studentId }: { studentId: string }) {
       <p className="mb-6 text-sm text-muted-foreground">
         {t(`people.studentStatus.${s.status ?? "active"}`)}
       </p>
+      <MergeActions entity="students" id={s.id} mergedInto={s.merged_into} />
       <div className="grid gap-4 lg:grid-cols-2">
         <Card title={t("people.details")}>
           <Facts

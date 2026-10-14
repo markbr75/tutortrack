@@ -71,6 +71,17 @@ class ContactSerializer(BaseModelSerializer):
         }
 
 
+def _figure(**kwargs: Any) -> Any:
+    """A computed list field (FR-05-11): ``None`` when the viewer can't see that area."""
+    return serializers.DecimalField(
+        max_digits=14, decimal_places=2, read_only=True, allow_null=True, **kwargs
+    )
+
+
+def _moment() -> Any:
+    return serializers.DateTimeField(read_only=True, allow_null=True)
+
+
 class StudentSerializer(BaseModelSerializer):
     lesson_address = AddressSerializer(read_only=True)
     lesson_address_input = AddressInput(
@@ -78,6 +89,10 @@ class StudentSerializer(BaseModelSerializer):
     )
     full_name = serializers.CharField(read_only=True)
     subjects = SubjectInput(many=True, required=False)
+    next_lesson_at = _moment()
+    last_lesson_at = _moment()
+    hours_this_term = _figure()
+    merged_into = serializers.UUIDField(source="merged_into_id", read_only=True, allow_null=True)
 
     class Meta:
         model = Student
@@ -86,7 +101,8 @@ class StudentSerializer(BaseModelSerializer):
             "date_of_birth", "year_group", "school", "status", "status_changed_at", "subjects",
             "goals", "learning_needs", "exam_boards", "target_grades", "availability",
             "lesson_address", "lesson_address_input", "contact", "user", "custom_fields",
-            "archived_at", "created_at",
+            "archived_at", "created_at", "next_lesson_at", "last_lesson_at", "hours_this_term",
+            "merged_into",
         ]  # fmt: skip
         read_only_fields = [
             "id", "status_changed_at", "contact", "user", "archived_at", "created_at",
@@ -110,6 +126,11 @@ class ClientSerializer(BaseModelSerializer):
     )
     primary_contact = serializers.UUIDField(source="primary_contact_id", read_only=True)
     students_count = serializers.IntegerField(read_only=True, required=False)
+    balance = _figure(help_text="Ledger balance in the client's currency (positive: owes).")
+    next_lesson_at = _moment()
+    last_lesson_at = _moment()
+    hours_this_term = _figure()
+    merged_into = serializers.UUIDField(source="merged_into_id", read_only=True, allow_null=True)
 
     class Meta:
         model = Client
@@ -120,7 +141,8 @@ class ClientSerializer(BaseModelSerializer):
             "preferred_payment_method", "auto_pay", "credit_limit_amount",
             "prevent_negative_balance", "tax_exempt", "tax_id", "po_number",
             "referral_source", "account_manager", "custom_fields", "students_count",
-            "archived_at", "created_at",
+            "archived_at", "created_at", "balance", "next_lesson_at", "last_lesson_at",
+            "hours_this_term", "merged_into",
         ]  # fmt: skip
         read_only_fields = ["id", "status", "billing_contact", "archived_at", "created_at"]
         field_permissions = {"tax_id": "billing.client.view_tax"}
@@ -184,6 +206,21 @@ class TutorSerializer(BaseModelSerializer):
     full_name = serializers.CharField(read_only=True)
     has_joined = serializers.SerializerMethodField()
     invite = serializers.BooleanField(write_only=True, default=True)
+    hours_this_month = _figure()
+    report_sla = serializers.DecimalField(
+        max_digits=5,
+        decimal_places=1,
+        read_only=True,
+        allow_null=True,
+        help_text="% of lesson reports due in the last 90 days submitted on time.",
+    )
+    utilisation = serializers.DecimalField(
+        max_digits=6,
+        decimal_places=1,
+        read_only=True,
+        allow_null=True,
+        help_text="Booked time this month as a % of weekly availability.",
+    )
 
     class Meta:
         model = TutorProfile
@@ -195,7 +232,7 @@ class TutorSerializer(BaseModelSerializer):
             "min_lesson_minutes", "branches", "status", "status_changed_at",
             "public_profile", "tax_reference", "date_of_birth", "emergency_contact",
             "subjects", "qualifications", "custom_fields", "has_joined", "invite",
-            "archived_at", "created_at",
+            "archived_at", "created_at", "hours_this_month", "report_sla", "utilisation",
         ]  # fmt: skip
         read_only_fields = ["id", "status", "status_changed_at", "archived_at", "created_at"]
         field_permissions = {
@@ -217,6 +254,73 @@ class DuplicateSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     name = serializers.CharField()
     client_id = serializers.UUIDField(allow_null=True)
+    reason = serializers.CharField()
+
+
+# --- merge (FR-05-13) ---------------------------------------------------------------------------
+
+
+class MergeRecordSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+
+
+class MergeFieldSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+    source = serializers.CharField(allow_blank=True)  # type: ignore[assignment]
+    target = serializers.CharField(allow_blank=True)
+    hidden = serializers.BooleanField()
+    same = serializers.BooleanField()
+    default = serializers.ChoiceField(choices=["source", "target"])
+
+
+class MergeMoveSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+    count = serializers.IntegerField()
+
+
+class MergePreviewSerializer(serializers.Serializer):
+    subject_type = serializers.CharField()
+    source = MergeRecordSerializer()  # type: ignore[assignment]
+    target = MergeRecordSerializer()
+    values = MergeFieldSerializer(many=True)
+    moves = MergeMoveSerializer(many=True)
+    problems = serializers.ListField(child=serializers.CharField())
+    warnings = serializers.ListField(child=serializers.CharField())
+    can_merge = serializers.BooleanField()
+
+
+class MergeRequestSerializer(serializers.Serializer):
+    source = serializers.UUIDField(help_text="The duplicate (archived).")  # type: ignore[assignment]
+    target = serializers.UUIDField(help_text="The record that stays.")
+    choices = serializers.DictField(
+        child=serializers.ChoiceField(choices=["source", "target"]), required=False
+    )
+    confirm = serializers.BooleanField(help_text="Must be true: a merge can't be undone.")
+
+
+class MergeResultSerializer(serializers.Serializer):
+    subject_type = serializers.CharField()
+    target_id = serializers.UUIDField()
+    merged_id = serializers.UUIDField()
+    moved = serializers.DictField(child=serializers.IntegerField())
+    notes = serializers.ListField(child=serializers.CharField())
+
+
+class DuplicatePersonSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+    detail = serializers.CharField(allow_blank=True)
+    client_id = serializers.UUIDField()
+    created_at = serializers.DateTimeField()
+
+
+class DuplicatePairSerializer(serializers.Serializer):
+    type = serializers.ChoiceField(choices=["client", "contact", "student"])
+    a = DuplicatePersonSerializer(help_text="The older record: suggested to keep.")
+    b = DuplicatePersonSerializer()
     reason = serializers.CharField()
 
 

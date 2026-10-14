@@ -6,6 +6,7 @@ from __future__ import annotations
 import csv
 import io
 from collections.abc import Callable, Iterable
+from decimal import Decimal
 from typing import Any
 
 from django.db import transaction
@@ -50,6 +51,70 @@ def _safe(value: Any) -> str:
     return "'" + text if text[:1] in {"=", "+", "-", "@", "\t"} else text
 
 
+XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+EXPORT_FORMATS = ("csv", "xlsx")
+
+
+def _numeric(value: Any) -> bool:
+    return isinstance(value, int | float | Decimal) and not isinstance(value, bool)
+
+
+def selected_ids(params: Any) -> list[str]:
+    """``?ids=a,b,c``: export only the selected rows (bulk "export", FR-05-12)."""
+    raw = params.get("ids", "") if hasattr(params, "get") else ""
+    return [i.strip() for i in str(raw).split(",") if i.strip()][:EXPORT_LIMIT]
+
+
+def table_export(
+    request: Any,
+    rows: Iterable[Any],
+    columns: list[tuple[str, Callable[[Any], Any]]],
+    *,
+    filename: str,
+    entity_type: str,
+    file_format: str = "csv",
+) -> HttpResponse:
+    """Write a CSV or an Excel workbook (≤ 50,000 rows), formula-injection safe; the export
+    itself is audited and counts towards mass-export alerts (FR-05-11, FR-29-2)."""
+    file_format = file_format if file_format in EXPORT_FORMATS else "csv"
+    header = [name for name, _ in columns]
+    table: list[list[Any]] = []
+    for row in rows:
+        if len(table) >= EXPORT_LIMIT:
+            break
+        values = [getter(row) for _, getter in columns]
+        table.append([v if _numeric(v) else _safe(v) for v in values])
+    with transaction.atomic():
+        from tutortrack.core.security_alerts import check_mass_export
+
+        audit.record(
+            request.organisation,
+            "export",
+            {
+                "entity": [None, entity_type],
+                "rows": [None, len(table)],
+                "format": [None, file_format],
+            },
+            object_repr=f"{entity_type} export",
+        )
+        check_mass_export(request.user, request.organisation.pk)
+    stem = filename.rsplit(".", 1)[0]
+    if file_format == "xlsx":
+        from tutortrack.reporting.exports import xlsx_bytes
+
+        numeric = [any(_numeric(r[i]) for r in table) for i in range(len(header))]
+        content: Any = xlsx_bytes(header, table, numeric, stem)
+        response = HttpResponse(content, content_type=XLSX)
+    else:
+        buffer = io.StringIO()
+        writer = csv.writer(buffer)
+        writer.writerow(header)
+        writer.writerows(table)
+        response = HttpResponse(buffer.getvalue(), content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="{stem}.{file_format}"'
+    return response
+
+
 def csv_export(
     request: Any,
     rows: Iterable[Any],
@@ -59,25 +124,4 @@ def csv_export(
     entity_type: str,
 ) -> HttpResponse:
     """Write a CSV (≤ 50,000 rows); the export itself is audited (FR-05-11, FR-29-2)."""
-    buffer = io.StringIO()
-    writer = csv.writer(buffer)
-    writer.writerow([name for name, _ in columns])
-    count = 0
-    for row in rows:
-        if count >= EXPORT_LIMIT:
-            break
-        writer.writerow([_safe(getter(row)) for _, getter in columns])
-        count += 1
-    with transaction.atomic():
-        from tutortrack.core.security_alerts import check_mass_export
-
-        audit.record(
-            request.organisation,
-            "export",
-            {"entity": [None, entity_type], "rows": [None, count]},
-            object_repr=f"{entity_type} export",
-        )
-        check_mass_export(request.user, request.organisation.pk)
-    response = HttpResponse(buffer.getvalue(), content_type="text/csv; charset=utf-8")
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
-    return response
+    return table_export(request, rows, columns, filename=filename, entity_type=entity_type)
