@@ -1,0 +1,17 @@
+{% load i18n %}<section aria-labelledby="{{ block.id }}-h"><div class="wrap">
+  <h2 id="{{ block.id }}-h">{{ p.heading|default:_("Classes and courses") }}</h2>
+  <tt-class-catalogue{% if p.subject %} subject="{{ p.subject }}"{% endif %}></tt-class-catalogue>
+  <noscript>
+  {% if d.classes %}
+  <ul class="grid">{% for c in d.classes %}
+    <li><article class="card">
+      <h3>{{ c.course.name }}</h3>
+      <p>{{ c.name }} · {{ c.term }} · {{ c.start_time }}</p>
+      {% if c.course.description %}<p class="muted">{{ c.course.description }}</p>{% endif %}
+      <p>{{ c.price }} <span class="muted">{{ c.pricing_label|lower }}</span></p>
+      <p class="muted">{% if c.full %}{% trans "Full" %}{% else %}{% blocktrans count n=c.places_left %}{{ n }} place left{% plural %}{{ n }} places left{% endblocktrans %}{% endif %}</p>
+    </article></li>
+  {% endfor %}</ul>
+  {% else %}<p class="muted">{% trans "New classes are coming soon." %}</p>{% endif %}
+  </noscript>
+</div></section>

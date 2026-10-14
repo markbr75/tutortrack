@@ -201,4 +201,6 @@ def portal_features(request: Request) -> dict[str, bool]:
         and has_perm(request.user, "portal.client.book"),
         "reschedule": bool(get_setting("scheduling.reschedule_requests"))
         and has_perm(request.user, "portal.client.reschedule"),
+        # E20: classes and re-enrolment (the courses app serves the pages' data).
+        "classes": has_perm(request.user, "portal.client.enrol"),
     }

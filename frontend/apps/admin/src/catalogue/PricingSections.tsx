@@ -571,14 +571,30 @@ function HolidaysSection() {
 
 // --- discounts, promo codes and price lists -------------------------------------------------------
 
-const KINDS = ["sibling", "volume", "first_lesson", "client", "scholarship", "promo"] as const;
+const KINDS = [
+  "sibling",
+  "volume",
+  "multi_class",
+  "first_lesson",
+  "client",
+  "scholarship",
+  "promo",
+] as const;
 
 export function DiscountsSection() {
   const { t, i18n } = useTranslation();
   const { data: org } = useOrganisation();
   const currency = org?.default_currency ?? "GBP";
   const canManage = usePermission("rates.manage");
-  const empty = { name: "", kind: "sibling", percent: "", fixed_price: "", volume: "", code: "" };
+  const empty = {
+    name: "",
+    kind: "sibling",
+    percent: "",
+    fixed_price: "",
+    volume: "",
+    classes: "",
+    code: "",
+  };
   const [draft, setDraft] = useState(empty);
   const discounts = useQuery({
     queryKey: ["pricing", "discounts"],
@@ -601,6 +617,7 @@ export function DiscountsSection() {
             percent: draft.percent || null,
             fixed_price: money(draft.fixed_price, currency),
             volume_min_lessons: draft.volume ? Number(draft.volume) : null,
+            min_classes: draft.classes ? Number(draft.classes) : null,
           },
         }),
       );
@@ -708,6 +725,15 @@ export function DiscountsSection() {
               min={1}
               value={draft.volume}
               onChange={(e) => setDraft({ ...draft, volume: e.target.value })}
+            />
+          ) : null}
+          {draft.kind === "multi_class" ? (
+            <TextField
+              label={t("pricing.discounts.classes")}
+              type="number"
+              min={2}
+              value={draft.classes}
+              onChange={(e) => setDraft({ ...draft, classes: e.target.value })}
             />
           ) : null}
           {draft.kind === "promo" ? (

@@ -403,7 +403,7 @@ class DiscountRuleSerializer(BaseModelSerializer):
         model = DiscountRule
         fields = [
             *RULE_FIELDS, "kind", "percent", "currency", "fixed_amount", "fixed_price",
-            "sibling_from", "volume_min_lessons", "client", "student",
+            "sibling_from", "volume_min_lessons", "min_classes", "client", "student",
         ]  # fmt: skip
         read_only_fields = ["id", "currency"]
 

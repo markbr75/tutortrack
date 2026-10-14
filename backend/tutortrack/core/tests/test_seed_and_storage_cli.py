@@ -39,8 +39,12 @@ def test_seed_demo_is_idempotent(settings, django_capture_on_commit_callbacks):
         assert sorted(Job.objects.values_list("status", flat=True)) == ["active", "seeking_tutor"]
         from tutortrack.scheduling.models import Lesson, LessonSeries
 
-        assert LessonSeries.objects.count() == 1
+        assert LessonSeries.objects.filter(job__isnull=False).count() == 1
         assert Lesson.objects.filter(status="planned").exists()
+        from tutortrack.courses.models import Course, GroupClass
+
+        assert Course.objects.count() == 1  # E20 demo course, once
+        assert GroupClass.objects.get().sessions.exists()
 
 
 @pytest.mark.django_db

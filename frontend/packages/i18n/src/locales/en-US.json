@@ -75,5 +75,39 @@
     "status": {
       "cancelled": "Canceled."
     }
+  },
+  "courses": {
+    "status": {
+      "open": "Open for enrollment",
+      "cancelled": "Canceled"
+    },
+    "rolloverStatus": {
+      "cancelled": "Canceled"
+    },
+    "offerStatus": {
+      "failed": "Couldn't enroll"
+    },
+    "startRollover": "Start re-enrollment",
+    "openClass": "Open for enrollment",
+    "cancelled": "Canceled",
+    "enrolStudent": "Enroll a student",
+    "enrol": "Enroll",
+    "overrideCapacity": "Enroll even though the class is full",
+    "dueNow": "Due at enrollment: {{amount}}",
+    "lessonStatus": {
+      "cancelled": "Canceled"
+    },
+    "outcomes": {
+      "cancelled_client": "Canceled by the family",
+      "cancelled_tutor": "Canceled by the teacher",
+      "cancelled_admin": "Canceled by us"
+    },
+    "reEnrol": {
+      "missing": "We couldn't find this re-enrollment link."
+    }
+  },
+  "portalCourses": {
+    "noneOpen": "No classes are open for enrollment at the moment.",
+    "enrol": "Enroll {{student}}"
   }
 }

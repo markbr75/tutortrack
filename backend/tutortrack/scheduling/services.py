@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import secrets
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
@@ -106,9 +106,15 @@ def _people_inputs(
 
 
 def _validate_people(
-    service: Service, attendees: list[dict[str, Any]], tutors: list[dict[str, Any]]
+    service: Service,
+    attendees: list[dict[str, Any]],
+    tutors: list[dict[str, Any]],
+    *,
+    allow_empty: bool = False,
 ) -> None:
-    if not attendees:
+    """``allow_empty``: group-class sessions (E20) start without students; the class
+    roster fills them."""
+    if not attendees and not allow_empty:
         raise _invalid("attendees", _("Add at least one student."))
     students = [a["student"] for a in attendees]
     if len({s.pk for s in students}) != len(students):
@@ -792,6 +798,86 @@ def set_lock(lessons: Iterable[Lesson], state: str) -> int:
     return Lesson.objects.filter(pk__in=ids).update(lock_state=state)
 
 
+@transaction.atomic
+def sync_group_roster(
+    lesson: Lesson,
+    *,
+    attendees: Iterable[dict[str, Any]] | None = None,
+    tutors: Iterable[dict[str, Any]] | None = None,
+) -> bool:
+    """Make a planned group-class session's people match its class (E20-T02/T03).
+
+    ``attendees``: ``[{"student", "client_id"?, "charge_rate_override"?}]``; ``tutors``:
+    ``[{"tutor", "pay_rate_override"?}]`` (``None`` leaves that side alone). People who
+    stay are not touched, so absence notices given beforehand survive; people who left are
+    removed and newcomers added. Re-prices and publishes ``lesson.updated`` (without
+    notifications) when something changed. Delivered, cancelled and locked lessons never
+    change. Returns whether anything changed."""
+    lesson = Lesson.objects.select_for_update().select_related("service").get(pk=lesson.pk)
+    if lesson.status != Lesson.Status.PLANNED or lesson.is_locked:
+        return False
+    currency = pricing.lesson_currency(lesson)
+    changed: set[str] = set()
+    if attendees is not None:
+        wanted = {str(r["student"].pk): r for r in attendees}
+        if len(wanted) > lesson.service.max_students:
+            raise _invalid(
+                "attendees",
+                _("%(service)s takes at most %(n)s students.")
+                % {"service": lesson.service.name, "n": lesson.service.max_students},
+            )
+        _check_rates(currency, wanted.values(), "charge_rate_override")
+        current = {str(a.student_id): a for a in lesson.attendees.all()}
+        for student_id, row in current.items():
+            if student_id not in wanted:
+                row.delete()
+                changed.add("attendees")
+        for student_id, want in wanted.items():
+            client_id = want.get("client_id") or want["student"].client_id
+            rate = want.get("charge_rate_override")
+            have = current.get(student_id)
+            if have is None:
+                a = LessonAttendee(
+                    lesson=lesson, student=want["student"], client_id=client_id, currency=currency
+                )
+                a.charge_rate_override = rate
+                a.save()
+                changed.add("attendees")
+            elif str(have.client_id) != str(client_id) or have.charge_rate_override != rate:
+                have.client_id = client_id
+                have.charge_rate_override = rate
+                have.save()
+                changed.add("attendees")
+    if tutors is not None:
+        wanted_t = {str(r["tutor"].pk): r for r in tutors}
+        _check_rates(currency, wanted_t.values(), "pay_rate_override")
+        current_t = {str(t.tutor_id): t for t in lesson.tutors.all()}
+        for tutor_id, row_t in current_t.items():
+            if tutor_id not in wanted_t:
+                row_t.delete()
+                changed.add("tutors")
+        from tutortrack.people.assignability import check_assignable
+
+        for tutor_id, want_t in wanted_t.items():
+            rate = want_t.get("pay_rate_override")
+            have_t = current_t.get(tutor_id)
+            if have_t is None:
+                check_assignable(want_t["tutor"], "tutors")
+                t = LessonTutor(lesson=lesson, tutor=want_t["tutor"], currency=currency)
+                t.pay_rate_override = rate
+                t.save()
+                changed.add("tutors")
+            elif have_t.pay_rate_override != rate:
+                have_t.pay_rate_override = rate
+                have_t.save()
+                changed.add("tutors")
+    if not changed:
+        return False
+    pricing.price_lesson(lesson)
+    publish(events.LessonUpdated(subject_id=lesson.pk, fields=sorted(changed), notify=False))
+    return True
+
+
 # --- series -------------------------------------------------------------------------------------
 
 
@@ -831,6 +917,24 @@ def holiday_dates(branch_id: Any, start: date, end: date, tz: str) -> set[date]:
         while day <= last:
             days.add(day)
             day += timedelta(days=1)
+    return days
+
+
+SkipDateProvider = Callable[[LessonSeries, date, date], set[date]]
+_skip_date_providers: list[SkipDateProvider] = []
+
+
+def register_skip_dates(provider: SkipDateProvider) -> SkipDateProvider:
+    """Other apps add dates a series skips (E20: term breaks skip class sessions)."""
+    if provider not in _skip_date_providers:
+        _skip_date_providers.append(provider)
+    return provider
+
+
+def extra_skip_dates(series: LessonSeries, start: date, end: date) -> set[date]:
+    days: set[date] = set()
+    for provider in _skip_date_providers:
+        days |= provider(series, start, end)
     return days
 
 
@@ -923,6 +1027,7 @@ def _materialise(
     result = result or SeriesResult(series)
     skip = (
         holiday_dates(series.branch_id, window_start, window_end, series.timezone)
+        | extra_skip_dates(series, window_start, window_end)
         if series.skip_holidays
         else set()
     )
@@ -1108,9 +1213,14 @@ def create_series(
     branch: Any = None,
     notify: bool = True,
     room: Any = None,
+    title: str = "",
+    extra_template: dict[str, Any] | None = None,
+    allow_empty_roster: bool = False,
 ) -> SeriesResult:
     """A recurring lesson (FR-08-2). ``conflict_mode``: ``skip`` occurrences where a tutor
-    is busy, ``create`` them anyway (needs override permission), or ``fail``."""
+    is busy, ``create`` them anyway (needs override permission), or ``fail``.
+    ``allow_empty_roster`` and ``title``: group-class sessions (E20) whose attendees come
+    from the class roster."""
     service = service or (job.service if job is not None else None)
     if service is None:
         raise _invalid("service", _("Choose a service."))
@@ -1121,7 +1231,9 @@ def create_series(
     if not (MIN_MINUTES <= duration_minutes <= MAX_MINUTES) or duration_minutes % _increment():
         raise _invalid("duration_minutes", _("Lessons last between 5 minutes and 12 hours."))
     attendee_rows, tutor_rows = _people_inputs(job, attendees, tutors)
-    _validate_people(service, attendee_rows, tutor_rows)
+    _validate_people(service, attendee_rows, tutor_rows, allow_empty=allow_empty_roster)
+    if not attendee_rows and branch is None and job is None:
+        raise _invalid("branch", _("Choose a branch."))
     tz = timezone or _default_tz(job, branch)
     if location is None and job is not None:
         location, online = job.location, online or job.online
@@ -1148,6 +1260,8 @@ def create_series(
             online=online,
             notes_for_tutor=notes_for_tutor,
             room=room,
+            **({"title": title[:200]} if title else {}),
+            **(extra_template or {}),
         ),
     )
     audit.record_create(series)
@@ -1200,6 +1314,7 @@ def edit_series(
     scope: str,
     from_lesson: Lesson | None = None,
     overwrite_exceptions: bool = False,
+    allow_empty_roster: bool = False,
     **changes: Any,
 ) -> SeriesResult:
     """Change a series: ``following`` (from ``from_lesson``, splitting the series) or ``all``
@@ -1224,7 +1339,7 @@ def edit_series(
     old_attendees, old_tutors = _template_people(series)
     attendees = list(attendee_rows) if attendee_rows is not None else old_attendees
     tutors = list(tutor_rows) if tutor_rows is not None else old_tutors
-    _validate_people(series.service, attendees, tutors)
+    _validate_people(series.service, attendees, tutors, allow_empty=allow_empty_roster)
     tpl = dict(series.template or {})
     for key in ("location", "online", "notes_for_tutor"):
         if key in changes:

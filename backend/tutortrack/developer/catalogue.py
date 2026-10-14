@@ -28,8 +28,8 @@ logger = structlog.get_logger(__name__)
 
 PUBLIC_AGGREGATES = frozenset(
     {
-        "application", "attendance", "availability", "branch", "charge", "client",
-        "compliance", "contact", "cover_request", "credit_note", "document", "enquiry",
+        "application", "attendance", "availability", "branch", "charge", "class", "client",
+        "compliance", "contact", "cover_request", "credit_note", "document", "enquiry", "enrolment",
         "expense", "form", "invoice", "job", "job_offer", "job_posting", "lesson",
         "lesson_report", "lesson_series", "makeup_credit", "note", "online_meeting",
         "pay_item", "pay_run", "payment", "payment_request", "payout", "reference", "service",
@@ -118,6 +118,10 @@ REPRESENTATIONS: dict[str, tuple[str, str, tuple[str, ...], tuple[str, ...]]] = 
     "note": ("crm.models.Note", "crm.api.views.NoteSerializer", (), ()),
     "task": ("crm.models.Task", "crm.api.views.TaskSerializer", (), ()),
     "branch": ("tenancy.models.Branch", "tenancy.api.serializers.BranchSerializer", (), ()),
+    "enrolment": ("courses.models.Enrolment", "courses.api.serializers.EnrolmentSerializer",
+                  ("group_class__course", "student", "client"), ()),
+    "group_class": ("courses.models.GroupClass", "courses.api.serializers.GroupClassSerializer",
+                    ("course", "term"), ("teachers__tutor",)),
 }  # fmt: skip
 
 

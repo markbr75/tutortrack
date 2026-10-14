@@ -10,12 +10,15 @@ pricing rules (tiers, price lists, premiums, discounts) through
 from __future__ import annotations
 
 from datetime import datetime, time, timedelta
+from decimal import Decimal
 from typing import Any
 from zoneinfo import ZoneInfo
 
 from tutortrack.catalogue import pricing_rules, rates
 
 from .models import Lesson, LessonAttendee, LessonTutor
+
+HOUR = Decimal(60)
 
 
 def student_history(lesson: Lesson, attendees: list[LessonAttendee]) -> dict[str, tuple[bool, int]]:
@@ -112,6 +115,33 @@ def build_context(
     )
 
 
+def _price_tutors_only(
+    lesson: Lesson, tutors: list[LessonTutor], minutes: int | None
+) -> rates.RateQuote:
+    """A group-class session nobody has joined yet (E20): the engine needs students, so
+    only explicit pay overrides are priced (the class sets them); others wait for a roster."""
+    from tutortrack.catalogue.models import Service
+
+    currency = lesson_currency(lesson)
+    duration = Decimal(minutes or lesson.duration_minutes)
+    per_hour = lesson.service.pay_unit == Service.PayUnit.PER_HOUR
+    for t in tutors:
+        rate = t.pay_rate_override
+        t.currency = currency
+        t.pay_amount = (
+            (rate * (duration / HOUR) if per_hour else rate).round_to_minor()
+            if rate is not None
+            else None
+        )
+        t.pay_snapshot = (
+            {"tutor_id": str(t.tutor_id), "rate": rate.to_dict(), "source": "class_override"}
+            if rate is not None
+            else {}
+        )
+        t.save(update_fields=["currency", "pay_amount_amount", "pay_snapshot", "updated_at"])
+    return rates.RateQuote(currency=currency, duration_minutes=int(duration), charges=[], pay=[])
+
+
 def lesson_currency(lesson: Lesson) -> str:
     return lesson.job.currency if lesson.job_id and lesson.job else lesson.service.currency
 
@@ -121,6 +151,8 @@ def price_lesson(lesson: Lesson, *, minutes: int | None = None) -> rates.RateQuo
     ``minutes`` prices the actual duration instead of the scheduled one (E09)."""
     attendees = list(lesson.attendees.select_related("promo_code__discount"))
     tutors = list(lesson.tutors.all())
+    if not attendees:
+        return _price_tutors_only(lesson, tutors, minutes)
     quote = rates.resolve_rates(build_context(lesson, attendees, tutors, minutes))
     snapshot = quote.as_dict()
     by_student = {line["student_id"]: line for line in snapshot["charges"]}

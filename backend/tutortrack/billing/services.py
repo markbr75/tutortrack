@@ -380,6 +380,158 @@ def create_ad_hoc_charge(
     return charge
 
 
+# --- fees owned by other apps (E20 course fees) ---------------------------------------------------
+
+
+def _fee_charges(source_key: str) -> QuerySet[Charge]:
+    from django.db.models import Q
+
+    return Charge.objects.filter(
+        Q(source_key=source_key) | Q(source_key__startswith=f"{source_key}:")
+    ).exclude(status=Charge.Status.VOID)
+
+
+@transaction.atomic
+def charge_fee(
+    *,
+    client: Client,
+    source_key: str,
+    description: str,
+    price: Money,
+    day: date,
+    student: Student | None = None,
+    tax_rate: TaxRate | None = None,
+    kind: str = Charge.Kind.COURSE,
+    category: str = "",
+    invoice_now: bool = False,
+    user: Any = None,
+) -> list[Charge]:
+    """A fee another app sells (E20 term, course, registration and materials fees).
+
+    Idempotent per ``source_key`` (live charges already there are returned). The price is
+    split between the student's payers (E10-T15). With ``invoice_now`` the charges are
+    invoiced and issued at once (credit applies by the usual setting); otherwise the next
+    invoice run picks them up from ``day``."""
+    existing = list(_fee_charges(source_key))
+    if existing:
+        return existing
+    price = price.round_to_minor()
+    if price.is_negative():
+        raise _invalid("price", _("A fee can't be negative."))
+    if price.is_zero():
+        return []
+    if student is not None and student.client_id != client.pk:
+        raise _invalid("student", _("That student isn't in this client's account."))
+    from .splits import payers_for
+
+    payers = payers_for(student=student, client=client)
+    shares = price.allocate([p for _c, p in payers]) if len(payers) > 1 else [price]
+    created = [
+        _create_charge(
+            client=payer,
+            kind=kind,
+            source_key=source_key if len(payers) == 1 else f"{source_key}:{index}",
+            description=description,
+            day=day,
+            price=share,
+            quantity=Decimal(1),
+            unit="item",
+            tax_percent=tax_rate.percent if tax_rate else Decimal(0),
+            tax_rate_id=tax_rate.pk if tax_rate else None,
+            student=student,
+            category=category,
+            user=user,
+        )
+        for index, ((payer, _p), share) in enumerate(zip(payers, shares, strict=True))
+        if not share.is_zero()
+    ]
+    for charge in created:
+        audit.record_create(charge)
+    if created and invoice_now:
+        for draft in build_drafts(
+            Charge.objects.filter(pk__in=[c.pk for c in created]), skip_small=False
+        ):
+            issue_invoice(draft, user=user)
+    return created
+
+
+def fee_billed(source_key: str, currency: str) -> Money:
+    """What a fee has put on invoices so far, less credit notes."""
+    total = Money.zero(currency)
+    for line in InvoiceLine.objects.filter(charge__in=_fee_charges(source_key)).exclude(
+        invoice__status=Invoice.Status.VOID
+    ):
+        total = total + line.gross - line.credited
+    return total
+
+
+@transaction.atomic
+def adjust_fee(
+    *,
+    source_key: str,
+    keep: Money,
+    reason: str,
+    client: Client,
+    student: Student | None = None,
+    description: str = "",
+    user: Any = None,
+) -> Money:
+    """Make a fee's total equal ``keep`` (E20 withdrawals and transfers): charges not yet
+    invoiced are voided; what was invoiced above ``keep`` is credited back as client credit
+    (credit notes on the fee's lines, newest first); a shortfall becomes a new charge.
+    Returns the amount credited."""
+    keep = keep.round_to_minor()
+    currency = keep.currency
+    live = list(_fee_charges(source_key).select_for_update())
+    for charge in live:
+        if charge.status == Charge.Status.UNINVOICED and charge.invoice_id is None:
+            void_charge(charge, reason=reason[:60])
+    billed = fee_billed(source_key, currency)
+    if keep > billed:
+        extra = keep - billed
+        count = len(live)
+        charge_fee(
+            client=client,
+            student=student,
+            source_key=f"{source_key}:adj{count}",
+            description=description or reason,
+            price=extra,
+            day=org_today(),
+            user=user,
+        )
+        return Money.zero(currency)
+    to_credit = billed - keep
+    credited = Money.zero(currency)
+    lines = (
+        InvoiceLine.objects.filter(charge__in=_fee_charges(source_key))
+        .exclude(invoice__status__in=[Invoice.Status.VOID, Invoice.Status.DRAFT])
+        .select_related("invoice")
+        .order_by("-invoice__issued_at", "-position")
+    )
+    for line in lines:
+        if not to_credit.is_positive():
+            break
+        room = line.gross - line.credited
+        amount = room if room < to_credit else to_credit
+        if not amount.is_positive():
+            continue
+        create_credit_note(
+            line.invoice,
+            reason=reason or _("Fee adjusted"),
+            # Unpaid: owe less on the invoice; paid: keep the money as client credit.
+            application=(
+                CreditNote.Application.INVOICE
+                if line.invoice.is_open
+                else CreditNote.Application.CREDIT
+            ),
+            lines=[{"line": line, "amount": amount}],
+            user=user,
+        )
+        credited = credited + amount
+        to_credit = to_credit - amount
+    return credited
+
+
 # --- invoices: drafts (T03/T04) -----------------------------------------------------------------
 
 

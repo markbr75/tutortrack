@@ -8,6 +8,7 @@ import {
 
 import { BillingPage } from "./pages/BillingPage";
 import { BookingPage } from "./pages/BookingPage";
+import { ClassesPage } from "./pages/ClassesPage";
 import { HomePage } from "./pages/HomePage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ReportsPage } from "./pages/ReportsPage";
@@ -48,6 +49,7 @@ const routeTree = rootRoute.addChildren([
   page("/", HomePage),
   page("/schedule", SchedulePage),
   page("/book", BookingPage),
+  page("/classes", ClassesPage),
   page("/reports", ReportsPage),
   page("/billing", BillingPage),
   page("/profile", ProfilePage),

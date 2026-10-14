@@ -155,6 +155,33 @@ function OptionsEditor({
       </div>
     );
   }
+  if (kind === "class_catalogue") {
+    return (
+      <div className="grid gap-3 sm:grid-cols-2">
+        <TextField
+          label={t("courses.widgetSubject")}
+          value={String(value.subject ?? "")}
+          onChange={(e) => set("subject", e.target.value)}
+        />
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={value.show_prices !== false}
+            onChange={(e) => set("show_prices", e.target.checked)}
+          />
+          {t("website.widgets.showPrices")}
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={value.show_filters !== false}
+            onChange={(e) => set("show_filters", e.target.checked)}
+          />
+          {t("website.widgets.showFilters")}
+        </label>
+      </div>
+    );
+  }
   if (kind === "reviews") {
     return (
       <div className="grid gap-3 sm:grid-cols-2">

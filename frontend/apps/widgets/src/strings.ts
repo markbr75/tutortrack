@@ -68,13 +68,36 @@ const enGB = {
   bookingTaken:
     "Sorry, that time has just been taken, or the code isn't valid. Please check and try again.",
   bookingExpired: "The time we held has run out. Please choose again.",
+  classesTitle: "Classes",
+  classesNone: "No classes are open for enrolment at the moment.",
+  classesAge: "Child's age",
+  classesDay: "Day",
+  classesAnyDay: "Any day",
+  classesFull: "Full",
+  classesPlacesLeft: "{n} places left",
+  classesEnrol: "Enrol",
+  classesEnrolIn: "Enrol in {name}",
+  classesJoinWaitlist: "Join the waitlist",
+  classesJoinWaitlistFor: "Join the waitlist for {name}",
+  classesBirthday: "Child's date of birth",
+  classesYearGroup: "School year",
+  classesTerms: "Terms",
+  classesAccept: "I accept the terms",
+  classesBack: "Back to classes",
+  classesEnrolled: "{name} is enrolled. We've sent you the details.",
+  classesWaitlisted: "You're on the waitlist (number {n}). We'll email you if a place comes up.",
 };
 
 export type MessageKey = keyof typeof enGB;
 type Messages = Record<MessageKey, string>;
 
 const overrides: Record<string, Partial<Messages>> = {
-  "en-US": {},
+  "en-US": {
+    classesNone: "No classes are open for enrollment at the moment.",
+    classesEnrol: "Enroll",
+    classesEnrolIn: "Enroll in {name}",
+    classesYearGroup: "Grade",
+  },
 };
 
 declare global {

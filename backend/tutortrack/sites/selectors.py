@@ -223,9 +223,20 @@ def public_testimonials(limit: int, min_rating: int | None = None) -> list[dict[
     ]
 
 
+_asset_providers: list[Any] = []
+
+
+def register_public_assets(provider: Any) -> Any:
+    """Other apps publish files too (E20: images of public courses). ``provider()``
+    returns the ids of files anyone may fetch."""
+    if provider not in _asset_providers:
+        _asset_providers.append(provider)
+    return provider
+
+
 def public_asset_ids(organisation: Any) -> set[str]:
     """Files anyone may fetch: brand kit images, listed tutors' photos, published pages'
-    images and the site's sharing image."""
+    images, the site's sharing image and files other apps publish (course images)."""
     from . import brand as brand_mod
 
     ids = set(brand_mod.resolve(organisation).asset_ids())
@@ -243,6 +254,8 @@ def public_asset_ids(organisation: Any) -> set[str]:
     site = Site.objects.first()
     if site is not None and site.og_image_id:
         ids.add(str(site.og_image_id))
+    for provider in _asset_providers:
+        ids.update(str(v) for v in provider())
     return ids
 
 
