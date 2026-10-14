@@ -10,6 +10,7 @@ import { CommandPalette } from "../crm/CommandPalette";
 import { CommandBar } from "../ai/CommandBar";
 import { api, isAuthError, useMe, useMyOrganisations, useOrganisation } from "../api";
 import { SubscriptionBanner } from "../subscription/SubscriptionBanner";
+import { SuccessLayer } from "../success/SuccessLayer";
 import { StatusBanner } from "./StatusBanner";
 import { UpgradeDialog } from "../subscription/UpgradePrompts";
 
@@ -214,6 +215,7 @@ export function AppShell() {
         {permissions["crm.search"] ? <CommandPalette /> : null}
         {permissions["ai.use"] ? <CommandBar /> : null}
         <NotificationBell />
+        <SuccessLayer />
         {NAV.filter((item) => !item.permission || permissions[item.permission]).map((item) => (
           <Link
             key={item.to}

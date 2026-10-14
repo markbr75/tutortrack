@@ -84,6 +84,18 @@ def ensure_schedule(
     return sid
 
 
+def ensure_platform_schedule(
+    *, process: str, workflow: type, input: Any, cron: list[str], timezone: str = "UTC"
+) -> str:
+    """A schedule that belongs to no organisation (platform housekeeping such as the E30
+    nightly tenant health scoring). Not tracked as a ``ScheduleLink``, so organisation
+    suspension or closure never touches it."""
+    sid = f"schedule:{process}:platform"
+    spec = ScheduleSpec(cron_expressions=cron, time_zone_name=timezone)
+    runtime.run(_ensure(sid, workflow, input, spec, f"{process}:platform"))
+    return sid
+
+
 async def _each(sids: list[str], action: str, note: str) -> list[str]:
     client = await get_client()
     done = []

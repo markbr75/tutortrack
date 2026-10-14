@@ -4229,6 +4229,79 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/analytics/events": {
+            "post": {
+                "operationId": "analytics_events_create",
+                "description": "Usage events from the admin app. Accepted only with the person's analytics consent\n(``tt_consent`` cookie), the organisation's permission and a staff role; otherwise the\nbatch is dropped and ``accepted`` is 0. Properties that could identify anyone are\nremoved (see ``success.analytics``).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "analytics"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProductEventBatchRequest"
+                            },
+                            "examples": {
+                                "PageView": {
+                                    "value": {
+                                        "events": [
+                                            {
+                                                "name": "page.viewed",
+                                                "route": "/clients/$id",
+                                                "properties": {
+                                                    "tab": "billing"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "summary": "Page view"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProductEventBatchRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProductEventBatchRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Accepted"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/announcements": {
             "get": {
                 "operationId": "announcements_list",
@@ -28142,6 +28215,156 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/help/articles": {
+            "get": {
+                "operationId": "help_articles_list",
+                "description": "Search the help articles, or list those for the page the person is on.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search words"
+                    },
+                    {
+                        "in": "query",
+                        "name": "route",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Current page, e.g. /billing"
+                    }
+                ],
+                "tags": [
+                    "help"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/HelpArticleRow"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/help/articles/{slug}": {
+            "get": {
+                "operationId": "help_articles_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "slug",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "help"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HelpArticle"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/help/changelog": {
+            "get": {
+                "operationId": "help_changelog_list",
+                "description": "What's new in TutorTrack, newest first.",
+                "tags": [
+                    "help"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/HelpChangelogEntry"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/help/changelog/seen": {
+            "post": {
+                "operationId": "help_changelog_seen_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "help"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Guidance"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/ical-feeds": {
             "get": {
                 "operationId": "ical_feeds_list",
@@ -44054,6 +44277,104 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/me/guidance": {
+            "get": {
+                "operationId": "me_guidance_retrieve",
+                "description": "What the help layer needs on every page: finished tours, unread \"What's new\" entries\nand support replies, whether to ask for NPS and whether usage analytics may run.",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Guidance"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/me/guidance/tours/{key}": {
+            "post": {
+                "operationId": "me_guidance_tours_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TourStatusRequest"
+                            },
+                            "examples": {
+                                "Finished": {
+                                    "value": {
+                                        "status": "completed"
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TourStatusRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TourStatusRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Guidance"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/me/job-offers": {
             "get": {
                 "operationId": "me_job_offers_list",
@@ -51787,6 +52108,151 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/platform/health": {
+            "get": {
+                "operationId": "platform_health_list",
+                "description": "Organisations by health score, lowest first (customer success worklist).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "plan",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "risk",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "at_risk",
+                                "healthy",
+                                "watch"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedHealthRowList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/health/risk-counts": {
+            "get": {
+                "operationId": "platform_health_risk_counts_retrieve",
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RiskCounts"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/insights/run": {
+            "post": {
+                "operationId": "platform_insights_run_create",
+                "description": "Start the nightly insights run now (health scores and subscription snapshots).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InsightsRun"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/platform/me": {
             "get": {
                 "operationId": "platform_me_retrieve",
@@ -51944,6 +52410,42 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Notice"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/nps": {
+            "get": {
+                "operationId": "platform_nps_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "days",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Window, default 90"
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NpsSummary"
                                 }
                             }
                         },
@@ -52117,6 +52619,400 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/PlanAdminPrice"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/saas-metrics": {
+            "get": {
+                "operationId": "platform_saas_metrics_retrieve",
+                "description": "MRR/ARR, MRR movements, churn, NRR, ARPA, trial conversion and cohort retention per\nbilling currency, from the nightly subscription snapshots (FR-30-7).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "currency",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ISO code; default GBP"
+                    },
+                    {
+                        "in": "query",
+                        "name": "months",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "1-36, default 12"
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SaasMetrics"
+                                },
+                                "examples": {
+                                    "OneMonth": {
+                                        "value": {
+                                            "currency": "GBP",
+                                            "currencies": [
+                                                "GBP",
+                                                "USD"
+                                            ],
+                                            "months": [
+                                                {
+                                                    "month": "2026-10-14",
+                                                    "mrr": {
+                                                        "amount": "1250.00",
+                                                        "currency": "GBP"
+                                                    },
+                                                    "arr": {
+                                                        "amount": "15000.00",
+                                                        "currency": "GBP"
+                                                    },
+                                                    "customers": 25,
+                                                    "arpa": {
+                                                        "amount": "50.00",
+                                                        "currency": "GBP"
+                                                    },
+                                                    "trialing": 8,
+                                                    "past_due_mrr": {
+                                                        "amount": "49.00",
+                                                        "currency": "GBP"
+                                                    },
+                                                    "new_mrr": {
+                                                        "amount": "98.00",
+                                                        "currency": "GBP"
+                                                    },
+                                                    "reactivation_mrr": {
+                                                        "amount": "0.00",
+                                                        "currency": "GBP"
+                                                    },
+                                                    "expansion_mrr": {
+                                                        "amount": "30.00",
+                                                        "currency": "GBP"
+                                                    },
+                                                    "contraction_mrr": {
+                                                        "amount": "0.00",
+                                                        "currency": "GBP"
+                                                    },
+                                                    "churned_mrr": {
+                                                        "amount": "49.00",
+                                                        "currency": "GBP"
+                                                    },
+                                                    "net_new_mrr": {
+                                                        "amount": "79.00",
+                                                        "currency": "GBP"
+                                                    },
+                                                    "new_customers": 2,
+                                                    "churned_customers": 1,
+                                                    "logo_churn_rate": "0.0417",
+                                                    "revenue_churn_rate": "0.0418",
+                                                    "net_revenue_retention": "0.9838"
+                                                }
+                                            ],
+                                            "trial_conversion": [
+                                                {
+                                                    "month": "2026-09-01",
+                                                    "trials": 10,
+                                                    "converted": 3,
+                                                    "conversion_rate": "0.3000"
+                                                }
+                                            ],
+                                            "cohorts": []
+                                        },
+                                        "summary": "One month"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/support": {
+            "get": {
+                "operationId": "platform_support_list",
+                "description": "Support conversations from every organisation, newest activity first.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "answered",
+                                "closed",
+                                "open",
+                                "unread"
+                            ]
+                        }
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedPlatformSupportRowList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/support/{id}": {
+            "get": {
+                "operationId": "platform_support_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlatformSupportDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/support/{id}/assign": {
+            "post": {
+                "operationId": "platform_support_assign_create",
+                "description": "Assign the conversation to the signed-in staff member.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlatformSupportDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/support/{id}/close": {
+            "post": {
+                "operationId": "platform_support_close_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlatformSupportDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/support/{id}/reply": {
+            "post": {
+                "operationId": "platform_support_reply_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformSupportReplyRequest"
+                            },
+                            "examples": {
+                                "Answer": {
+                                    "value": {
+                                        "body": "Go to Billing and select 'Invoice run'."
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformSupportReplyRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlatformSupportReplyRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlatformSupportDetail"
                                 }
                             }
                         },
@@ -52450,6 +53346,47 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/TenantDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/tenants/{id}/health": {
+            "get": {
+                "operationId": "platform_tenants_health_list",
+                "description": "One organisation's daily health scores (last 90 days, newest first).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/HealthPoint"
+                                    }
                                 }
                             }
                         },
@@ -52831,6 +53768,43 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/TenantDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/platform/usage": {
+            "get": {
+                "operationId": "platform_usage_retrieve",
+                "description": "Feature usage (consented, pseudonymous events) and the onboarding funnel.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "days",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Window, default 30"
+                    }
+                ],
+                "tags": [
+                    "platform"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UsageSummary"
                                 }
                             }
                         },
@@ -63315,6 +64289,84 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/setup-checklist": {
+            "get": {
+                "operationId": "setup_checklist_retrieve",
+                "description": "The dashboard checklist; staff may hide it (``success.checklist.manage``).",
+                "tags": [
+                    "setup-checklist"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SetupChecklist"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "patch": {
+                "operationId": "setup_checklist_partial_update",
+                "description": "The dashboard checklist; staff may hide it (``success.checklist.manage``).",
+                "tags": [
+                    "setup-checklist"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSetupChecklistUpdateRequest"
+                            },
+                            "examples": {
+                                "Hide": {
+                                    "value": {
+                                        "dismissed": true
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSetupChecklistUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedSetupChecklistUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SetupChecklist"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/shortlists": {
             "get": {
                 "operationId": "shortlists_list",
@@ -65885,6 +66937,295 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/support-conversations": {
+            "get": {
+                "operationId": "support_conversations_list",
+                "description": "Chat with TutorTrack support. Opening a conversation marks its replies as read.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "support-conversations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedSupportConversationList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "support_conversations_create",
+                "description": "Chat with TutorTrack support. Opening a conversation marks its replies as read.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "support-conversations"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SupportConversationCreateRequest"
+                            },
+                            "examples": {
+                                "Question": {
+                                    "value": {
+                                        "subject": "Invoice run",
+                                        "body": "How do I invoice every family at the end of the month?",
+                                        "page": "/billing"
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SupportConversationCreateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SupportConversationCreateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SupportConversationDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/support-conversations/{id}": {
+            "get": {
+                "operationId": "support_conversations_retrieve",
+                "description": "Chat with TutorTrack support. Opening a conversation marks its replies as read.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this support conversation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "support-conversations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SupportConversationDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/support-conversations/{id}/close": {
+            "post": {
+                "operationId": "support_conversations_close_create",
+                "description": "Chat with TutorTrack support. Opening a conversation marks its replies as read.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this support conversation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "support-conversations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SupportConversationDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/support-conversations/{id}/messages": {
+            "post": {
+                "operationId": "support_conversations_messages_create",
+                "description": "Chat with TutorTrack support. Opening a conversation marks its replies as read.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this support conversation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "support-conversations"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SupportMessageCreateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SupportMessageCreateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SupportMessageCreateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SupportConversationDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/support/enter": {
             "get": {
                 "operationId": "support_enter_retrieve",
@@ -65908,6 +67249,79 @@
                 "responses": {
                     "302": {
                         "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/surveys/responses": {
+            "post": {
+                "operationId": "surveys_responses_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "surveys"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SurveyAnswerRequest"
+                            },
+                            "examples": {
+                                "NPSAnswer": {
+                                    "value": {
+                                        "kind": "nps",
+                                        "score": 9,
+                                        "comment": "The calendar saves me hours."
+                                    },
+                                    "summary": "NPS answer"
+                                },
+                                "NotNow": {
+                                    "value": {
+                                        "kind": "nps",
+                                        "score": null
+                                    },
+                                    "summary": "Not now"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SurveyAnswerRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SurveyAnswerRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SurveyResponse"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 },
                 "x-visibility": "internal"
@@ -73260,6 +74674,17 @@
                 },
                 "required": [
                     "token"
+                ]
+            },
+            "Accepted": {
+                "type": "object",
+                "properties": {
+                    "accepted": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "accepted"
                 ]
             },
             "Account": {
@@ -89060,6 +90485,21 @@
                     "stage"
                 ]
             },
+            "FunnelStep": {
+                "type": "object",
+                "properties": {
+                    "step": {
+                        "type": "string"
+                    },
+                    "organisations": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "organisations",
+                    "step"
+                ]
+            },
             "FutureLessonsEnum": {
                 "enum": [
                     "keep",
@@ -89806,6 +91246,264 @@
                         "maxLength": 300
                     }
                 }
+            },
+            "Guidance": {
+                "type": "object",
+                "properties": {
+                    "completed_tours": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "dismissed_tours": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "changelog_unread": {
+                        "type": "integer"
+                    },
+                    "nps_due": {
+                        "type": "boolean"
+                    },
+                    "support_unread": {
+                        "type": "integer"
+                    },
+                    "analytics_allowed": {
+                        "type": "boolean",
+                        "description": "The organisation allows usage analytics for this member; the browser still needs the person's analytics consent."
+                    }
+                },
+                "required": [
+                    "analytics_allowed",
+                    "changelog_unread",
+                    "completed_tours",
+                    "dismissed_tours",
+                    "nps_due",
+                    "support_unread"
+                ]
+            },
+            "HealthComponents": {
+                "type": "object",
+                "properties": {
+                    "usage": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "tutors": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "payments": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "reliability": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "support": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "nps": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "nps",
+                    "payments",
+                    "reliability",
+                    "support",
+                    "tutors",
+                    "usage"
+                ]
+            },
+            "HealthPoint": {
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "score": {
+                        "type": "integer"
+                    },
+                    "risk": {
+                        "type": "string"
+                    },
+                    "components": {
+                        "$ref": "#/components/schemas/HealthComponents"
+                    },
+                    "inputs": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer",
+                            "nullable": true
+                        }
+                    },
+                    "alerted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "alerted_at",
+                    "components",
+                    "date",
+                    "inputs",
+                    "risk",
+                    "score"
+                ]
+            },
+            "HealthRow": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "plan": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "last_activity": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "score": {
+                        "type": "integer"
+                    },
+                    "risk": {
+                        "type": "string"
+                    },
+                    "scored_on": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "components": {
+                        "$ref": "#/components/schemas/HealthComponents"
+                    }
+                },
+                "required": [
+                    "components",
+                    "id",
+                    "last_activity",
+                    "name",
+                    "plan",
+                    "risk",
+                    "score",
+                    "scored_on",
+                    "slug",
+                    "status"
+                ]
+            },
+            "HelpArticle": {
+                "type": "object",
+                "properties": {
+                    "slug": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "tour": {
+                        "type": "string"
+                    },
+                    "body": {
+                        "type": "string",
+                        "description": "Markdown (headings, lists, bold, links)"
+                    },
+                    "routes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "body",
+                    "routes",
+                    "slug",
+                    "summary",
+                    "tags",
+                    "title",
+                    "tour"
+                ]
+            },
+            "HelpArticleRow": {
+                "type": "object",
+                "properties": {
+                    "slug": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "tour": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "slug",
+                    "summary",
+                    "title",
+                    "tour"
+                ]
+            },
+            "HelpChangelogEntry": {
+                "type": "object",
+                "properties": {
+                    "slug": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "published_on": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                },
+                "required": [
+                    "body",
+                    "published_on",
+                    "slug",
+                    "summary",
+                    "title"
+                ]
             },
             "HoldNoteRequest": {
                 "type": "object",
@@ -90895,6 +92593,17 @@
                     "read_at",
                     "title",
                     "type_key"
+                ]
+            },
+            "InsightsRun": {
+                "type": "object",
+                "properties": {
+                    "workflow_id": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "workflow_id"
                 ]
             },
             "InstallBuiltinRequest": {
@@ -98426,6 +100135,130 @@
                     "enabled"
                 ]
             },
+            "NpsBucket": {
+                "type": "object",
+                "properties": {
+                    "plan": {
+                        "type": "string"
+                    },
+                    "month": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "nps": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "answers": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "answers",
+                    "nps"
+                ]
+            },
+            "NpsComment": {
+                "type": "object",
+                "properties": {
+                    "organisation_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "organisation": {
+                        "type": "string"
+                    },
+                    "score": {
+                        "type": "integer"
+                    },
+                    "role": {
+                        "type": "string"
+                    },
+                    "comment": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "comment",
+                    "created_at",
+                    "organisation",
+                    "organisation_id",
+                    "role",
+                    "score"
+                ]
+            },
+            "NpsSummary": {
+                "type": "object",
+                "properties": {
+                    "days": {
+                        "type": "integer"
+                    },
+                    "nps": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "answers": {
+                        "type": "integer"
+                    },
+                    "dismissed": {
+                        "type": "integer"
+                    },
+                    "promoters": {
+                        "type": "integer"
+                    },
+                    "passives": {
+                        "type": "integer"
+                    },
+                    "detractors": {
+                        "type": "integer"
+                    },
+                    "by_plan": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NpsBucket"
+                        }
+                    },
+                    "by_month": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NpsBucket"
+                        }
+                    },
+                    "comments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NpsComment"
+                        }
+                    },
+                    "csat_average": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,2}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "csat_answers": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "answers",
+                    "by_month",
+                    "by_plan",
+                    "comments",
+                    "csat_answers",
+                    "csat_average",
+                    "days",
+                    "detractors",
+                    "dismissed",
+                    "nps",
+                    "passives",
+                    "promoters"
+                ]
+            },
             "NudgeRequest": {
                 "type": "object",
                 "properties": {
@@ -102025,6 +103858,32 @@
                     }
                 }
             },
+            "PaginatedHealthRowList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/HealthRow"
+                        }
+                    }
+                }
+            },
             "PaginatedHomeworkList": {
                 "type": "object",
                 "required": [
@@ -102987,6 +104846,32 @@
                     }
                 }
             },
+            "PaginatedPlatformSupportRowList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PlatformSupportRow"
+                        }
+                    }
+                }
+            },
             "PaginatedPremiumRuleList": {
                 "type": "object",
                 "required": [
@@ -103867,6 +105752,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Student"
+                        }
+                    }
+                }
+            },
+            "PaginatedSupportConversationList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SupportConversation"
                         }
                     }
                 }
@@ -108244,6 +110155,14 @@
                     }
                 }
             },
+            "PatchedSetupChecklistUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "dismissed": {
+                        "type": "boolean"
+                    }
+                }
+            },
             "PatchedSitePageRequest": {
                 "type": "object",
                 "properties": {
@@ -111156,6 +113075,170 @@
                 "required": [
                     "notices",
                     "status_page_url"
+                ]
+            },
+            "PlatformSupportDetail": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "organisation_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "organisation_name": {
+                        "type": "string"
+                    },
+                    "subject": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "page": {
+                        "type": "string"
+                    },
+                    "opened_by_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "assignee_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "support_unread": {
+                        "type": "boolean"
+                    },
+                    "last_message_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "messages": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PlatformSupportMessage"
+                        }
+                    }
+                },
+                "required": [
+                    "assignee_name",
+                    "created_at",
+                    "id",
+                    "last_message_at",
+                    "messages",
+                    "opened_by_name",
+                    "organisation_id",
+                    "organisation_name",
+                    "page",
+                    "status",
+                    "subject",
+                    "support_unread"
+                ]
+            },
+            "PlatformSupportMessage": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "from_support": {
+                        "type": "boolean"
+                    },
+                    "author_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "author_name",
+                    "body",
+                    "created_at",
+                    "from_support",
+                    "id"
+                ]
+            },
+            "PlatformSupportReplyRequest": {
+                "type": "object",
+                "properties": {
+                    "body": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 5000
+                    }
+                },
+                "required": [
+                    "body"
+                ]
+            },
+            "PlatformSupportRow": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "organisation_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "organisation_name": {
+                        "type": "string"
+                    },
+                    "subject": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "page": {
+                        "type": "string"
+                    },
+                    "opened_by_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "assignee_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "support_unread": {
+                        "type": "boolean"
+                    },
+                    "last_message_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "assignee_name",
+                    "created_at",
+                    "id",
+                    "last_message_at",
+                    "opened_by_name",
+                    "organisation_id",
+                    "organisation_name",
+                    "page",
+                    "status",
+                    "subject",
+                    "support_unread"
                 ]
             },
             "Point": {
@@ -114357,6 +116440,45 @@
                 ],
                 "type": "string",
                 "description": "* `registration` - Registration fee\n* `materials` - Materials\n* `books` - Books\n* `exam_entry` - Exam entry\n* `late_cancel` - Late cancellation fee\n* `travel` - Travel fee\n* `other` - Other"
+            },
+            "ProductEventBatchRequest": {
+                "type": "object",
+                "properties": {
+                    "events": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProductEventInRequest"
+                        }
+                    }
+                },
+                "required": [
+                    "events"
+                ]
+            },
+            "ProductEventInRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "e.g. page.viewed, invoice.sent",
+                        "maxLength": 60
+                    },
+                    "route": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "properties": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "occurred_at": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "name"
+                ]
             },
             "ProductRequest": {
                 "type": "object",
@@ -120130,6 +122252,42 @@
                     "student"
                 ]
             },
+            "RetentionCohort": {
+                "type": "object",
+                "properties": {
+                    "month": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "size": {
+                        "type": "integer"
+                    },
+                    "starting_mrr": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "logo_retention": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "nullable": true
+                        }
+                    },
+                    "revenue_retention": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "nullable": true
+                        }
+                    }
+                },
+                "required": [
+                    "logo_retention",
+                    "month",
+                    "revenue_retention",
+                    "size",
+                    "starting_mrr"
+                ]
+            },
             "RetentionPolicy": {
                 "type": "object",
                 "properties": {
@@ -120632,6 +122790,25 @@
                 "required": [
                     "client_id",
                     "token"
+                ]
+            },
+            "RiskCounts": {
+                "type": "object",
+                "properties": {
+                    "healthy": {
+                        "type": "integer"
+                    },
+                    "watch": {
+                        "type": "integer"
+                    },
+                    "at_risk": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "at_risk",
+                    "healthy",
+                    "watch"
                 ]
             },
             "Role": {
@@ -121220,6 +123397,129 @@
                 "required": [
                     "key",
                     "start_url"
+                ]
+            },
+            "SaasMetrics": {
+                "type": "object",
+                "properties": {
+                    "currency": {
+                        "type": "string"
+                    },
+                    "currencies": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "months": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SaasMonth"
+                        }
+                    },
+                    "trial_conversion": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TrialCohort"
+                        }
+                    },
+                    "cohorts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RetentionCohort"
+                        }
+                    }
+                },
+                "required": [
+                    "cohorts",
+                    "currencies",
+                    "currency",
+                    "months",
+                    "trial_conversion"
+                ]
+            },
+            "SaasMonth": {
+                "type": "object",
+                "properties": {
+                    "month": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "mrr": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "arr": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "customers": {
+                        "type": "integer"
+                    },
+                    "arpa": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "trialing": {
+                        "type": "integer"
+                    },
+                    "past_due_mrr": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "new_mrr": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "reactivation_mrr": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "expansion_mrr": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "contraction_mrr": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "churned_mrr": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "net_new_mrr": {
+                        "$ref": "#/components/schemas/MoneyOut"
+                    },
+                    "new_customers": {
+                        "type": "integer"
+                    },
+                    "churned_customers": {
+                        "type": "integer"
+                    },
+                    "logo_churn_rate": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Fraction, e.g. 0.0250"
+                    },
+                    "revenue_churn_rate": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "net_revenue_retention": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "arpa",
+                    "arr",
+                    "churned_customers",
+                    "churned_mrr",
+                    "contraction_mrr",
+                    "customers",
+                    "expansion_mrr",
+                    "logo_churn_rate",
+                    "month",
+                    "mrr",
+                    "net_new_mrr",
+                    "net_revenue_retention",
+                    "new_customers",
+                    "new_mrr",
+                    "past_due_mrr",
+                    "reactivation_mrr",
+                    "revenue_churn_rate",
+                    "trialing"
                 ]
             },
             "SafeguardingAction": {
@@ -123497,6 +125797,40 @@
                     "values"
                 ]
             },
+            "SetupChecklist": {
+                "type": "object",
+                "properties": {
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SetupStep"
+                        }
+                    },
+                    "done": {
+                        "type": "integer"
+                    },
+                    "total": {
+                        "type": "integer"
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "dismissed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "completed_at",
+                    "dismissed_at",
+                    "done",
+                    "steps",
+                    "total"
+                ]
+            },
             "SetupCompleteRequest": {
                 "type": "object",
                 "properties": {
@@ -123600,6 +125934,35 @@
                     "providers",
                     "publishable_key",
                     "redirect_url"
+                ]
+            },
+            "SetupStep": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "link": {
+                        "type": "string"
+                    },
+                    "done": {
+                        "type": "boolean"
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "completed_at",
+                    "done",
+                    "key",
+                    "link",
+                    "title"
                 ]
             },
             "ShareRequestRequest": {
@@ -125669,6 +128032,178 @@
                     "sessions"
                 ]
             },
+            "SupportConversation": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "subject": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SupportConversationStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "page": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "opened_by_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "last_message_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "customer_unread": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "closed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "csat_score": {
+                        "type": "integer",
+                        "nullable": true,
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "closed_at",
+                    "created_at",
+                    "csat_score",
+                    "customer_unread",
+                    "id",
+                    "last_message_at",
+                    "opened_by_name",
+                    "page",
+                    "status",
+                    "subject"
+                ]
+            },
+            "SupportConversationCreateRequest": {
+                "type": "object",
+                "properties": {
+                    "subject": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "body": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 5000
+                    },
+                    "page": {
+                        "type": "string",
+                        "maxLength": 200
+                    }
+                },
+                "required": [
+                    "body"
+                ]
+            },
+            "SupportConversationDetail": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "subject": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SupportConversationStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "page": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "opened_by_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "last_message_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "customer_unread": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "closed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "csat_score": {
+                        "type": "integer",
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "messages": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SupportMessage"
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "closed_at",
+                    "created_at",
+                    "csat_score",
+                    "customer_unread",
+                    "id",
+                    "last_message_at",
+                    "messages",
+                    "opened_by_name",
+                    "page",
+                    "status",
+                    "subject"
+                ]
+            },
+            "SupportConversationStatusEnum": {
+                "enum": [
+                    "open",
+                    "answered",
+                    "closed"
+                ],
+                "type": "string",
+                "description": "* `open` - Waiting for TutorTrack\n* `answered` - Answered\n* `closed` - Closed"
+            },
             "SupportGrant": {
                 "type": "object",
                 "properties": {
@@ -125713,6 +128248,53 @@
                     "expires_at",
                     "granted_by_name",
                     "id"
+                ]
+            },
+            "SupportMessage": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "from_support": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "author_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "body": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "author_name",
+                    "body",
+                    "created_at",
+                    "from_support",
+                    "id"
+                ]
+            },
+            "SupportMessageCreateRequest": {
+                "type": "object",
+                "properties": {
+                    "body": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 5000
+                    }
+                },
+                "required": [
+                    "body"
                 ]
             },
             "SupportSession": {
@@ -125791,6 +128373,85 @@
                 "required": [
                     "membership_id",
                     "reason"
+                ]
+            },
+            "SurveyAnswerRequest": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "$ref": "#/components/schemas/SurveyKindEnum"
+                    },
+                    "score": {
+                        "type": "integer",
+                        "maximum": 10,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "comment": {
+                        "type": "string",
+                        "maxLength": 2000
+                    },
+                    "topic": {
+                        "type": "string",
+                        "description": "e.g. support:<chat id>",
+                        "maxLength": 80
+                    }
+                },
+                "required": [
+                    "kind",
+                    "score"
+                ]
+            },
+            "SurveyKindEnum": {
+                "enum": [
+                    "nps",
+                    "csat"
+                ],
+                "type": "string",
+                "description": "* `nps` - Net Promoter Score\n* `csat` - Customer satisfaction"
+            },
+            "SurveyResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "kind": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SurveyKindEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "score": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "comment": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "topic": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "comment",
+                    "created_at",
+                    "id",
+                    "kind",
+                    "score",
+                    "topic"
                 ]
             },
             "SyncLogEntry": {
@@ -128133,6 +130794,26 @@
                     "unit"
                 ]
             },
+            "TourStatusRequest": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "$ref": "#/components/schemas/TourStatusStatusEnum"
+                    }
+                },
+                "required": [
+                    "status"
+                ]
+            },
+            "TourStatusStatusEnum": {
+                "enum": [
+                    "completed",
+                    "dismissed",
+                    "restart"
+                ],
+                "type": "string",
+                "description": "* `completed` - completed\n* `dismissed` - dismissed\n* `restart` - restart"
+            },
             "TrackingMappingRow": {
                 "type": "object",
                 "properties": {
@@ -128298,6 +130979,31 @@
                     "name",
                     "percent",
                     "subject"
+                ]
+            },
+            "TrialCohort": {
+                "type": "object",
+                "properties": {
+                    "month": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "trials": {
+                        "type": "integer"
+                    },
+                    "converted": {
+                        "type": "integer"
+                    },
+                    "conversion_rate": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "conversion_rate",
+                    "converted",
+                    "month",
+                    "trials"
                 ]
             },
             "TrialOutcomeEnum": {
@@ -129807,6 +132513,119 @@
                     "included_tutors",
                     "limits",
                     "next_invoice"
+                ]
+            },
+            "UsageDay": {
+                "type": "object",
+                "properties": {
+                    "day": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "people": {
+                        "type": "integer"
+                    },
+                    "organisations": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "day",
+                    "organisations",
+                    "people"
+                ]
+            },
+            "UsageEvent": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "count": {
+                        "type": "integer"
+                    },
+                    "organisations": {
+                        "type": "integer"
+                    },
+                    "people": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "count",
+                    "name",
+                    "organisations",
+                    "people"
+                ]
+            },
+            "UsagePage": {
+                "type": "object",
+                "properties": {
+                    "route": {
+                        "type": "string"
+                    },
+                    "count": {
+                        "type": "integer"
+                    },
+                    "people": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "count",
+                    "people",
+                    "route"
+                ]
+            },
+            "UsageSummary": {
+                "type": "object",
+                "properties": {
+                    "days": {
+                        "type": "integer"
+                    },
+                    "events": {
+                        "type": "integer"
+                    },
+                    "people": {
+                        "type": "integer"
+                    },
+                    "organisations": {
+                        "type": "integer"
+                    },
+                    "top_events": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UsageEvent"
+                        }
+                    },
+                    "top_pages": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UsagePage"
+                        }
+                    },
+                    "daily": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UsageDay"
+                        }
+                    },
+                    "funnel": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FunnelStep"
+                        }
+                    }
+                },
+                "required": [
+                    "daily",
+                    "days",
+                    "events",
+                    "funnel",
+                    "organisations",
+                    "people",
+                    "top_events",
+                    "top_pages"
                 ]
             },
             "User": {

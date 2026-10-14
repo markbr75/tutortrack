@@ -11,6 +11,10 @@ const NAV = [
   { to: "/platform", key: "platform.nav.tenants" },
   { to: "/platform/flags", key: "platform.nav.flags" },
   { to: "/platform/operations", key: "platform.nav.operations" },
+  { to: "/platform/health", key: "tenantHealth.nav" },
+  { to: "/platform/metrics", key: "saasMetrics.nav" },
+  { to: "/platform/feedback", key: "productInsights.nav" },
+  { to: "/platform/support", key: "supportInbox.nav" },
 ] as const;
 
 /** The TutorTrack staff console (E30): platform staff with 2FA, from allowed networks. */

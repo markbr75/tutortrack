@@ -1,11 +1,12 @@
-"""Platform console API (E30 part 1): ``/api/v1/platform/...`` for TutorTrack staff only."""
+"""Platform console API (E30): ``/api/v1/platform/...`` for TutorTrack staff only. Part 2
+adds tenant health, SaaS metrics, NPS, product usage and the support inbox."""
 
 from __future__ import annotations
 
 from typing import Any
 
 from django.utils.dateparse import parse_datetime
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import filters, generics
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
@@ -400,3 +401,239 @@ class PlanPriceView(APIView):
         payload.is_valid(raise_exception=True)
         payload.save()
         return Response(payload.data)
+
+
+# --- Part 2: health, SaaS metrics, NPS and usage (T09, T10) -------------------------------------
+
+
+class HealthPagination(CursorPagination):
+    ordering = "health_score"
+
+
+class HealthListView(generics.ListAPIView):
+    """Organisations by health score, lowest first (customer success worklist)."""
+
+    permission_classes = STAFF
+    serializer_class = s.HealthRowSerializer
+    pagination_class = HealthPagination
+
+    def get_queryset(self) -> Any:
+        q = self.request.query_params
+        return selectors.health_rows(
+            risk=q.get("risk", ""), search=q.get("search", ""), plan=q.get("plan", "")
+        )
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("risk", str, enum=["healthy", "watch", "at_risk"]),
+            OpenApiParameter("search", str),
+            OpenApiParameter("plan", str),
+        ]
+    )
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().get(request, *args, **kwargs)
+
+
+class RiskCountsView(APIView):
+    permission_classes = STAFF
+
+    @extend_schema(responses=s.RiskCountsSerializer)
+    def get(self, request: Request) -> Response:
+        return Response(s.RiskCountsSerializer(selectors.risk_counts()).data)
+
+
+class TenantHealthView(APIView):
+    """One organisation's daily health scores (last 90 days, newest first)."""
+
+    permission_classes = STAFF
+
+    @extend_schema(responses=s.HealthPointSerializer(many=True))
+    def get(self, request: Request, pk: str) -> Response:
+        rows = selectors.health_history(services.organisation(pk))
+        return Response(s.HealthPointSerializer(rows, many=True).data)
+
+
+class InsightsRunView(APIView):
+    """Start the nightly insights run now (health scores and subscription snapshots)."""
+
+    permission_classes = STAFF
+
+    @extend_schema(request=None, responses={202: s.InsightsRunSerializer})
+    def post(self, request: Request) -> Response:
+        return Response({"workflow_id": services.run_insights_now()}, status=202)
+
+
+class SaasMetricsView(APIView):
+    """MRR/ARR, MRR movements, churn, NRR, ARPA, trial conversion and cohort retention per
+    billing currency, from the nightly subscription snapshots (FR-30-7)."""
+
+    permission_classes = STAFF
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("currency", str, description="ISO code; default GBP"),
+            OpenApiParameter("months", int, description="1-36, default 12"),
+        ],
+        responses=s.SaasMetricsSerializer,
+        examples=[
+            OpenApiExample(
+                "One month",
+                response_only=True,
+                value={
+                    "currency": "GBP",
+                    "currencies": ["GBP", "USD"],
+                    "months": [
+                        {
+                            "month": "2026-10-14",
+                            "mrr": {"amount": "1250.00", "currency": "GBP"},
+                            "arr": {"amount": "15000.00", "currency": "GBP"},
+                            "customers": 25,
+                            "arpa": {"amount": "50.00", "currency": "GBP"},
+                            "trialing": 8,
+                            "past_due_mrr": {"amount": "49.00", "currency": "GBP"},
+                            "new_mrr": {"amount": "98.00", "currency": "GBP"},
+                            "reactivation_mrr": {"amount": "0.00", "currency": "GBP"},
+                            "expansion_mrr": {"amount": "30.00", "currency": "GBP"},
+                            "contraction_mrr": {"amount": "0.00", "currency": "GBP"},
+                            "churned_mrr": {"amount": "49.00", "currency": "GBP"},
+                            "net_new_mrr": {"amount": "79.00", "currency": "GBP"},
+                            "new_customers": 2,
+                            "churned_customers": 1,
+                            "logo_churn_rate": "0.0417",
+                            "revenue_churn_rate": "0.0418",
+                            "net_revenue_retention": "0.9838",
+                        }
+                    ],
+                    "trial_conversion": [
+                        {
+                            "month": "2026-09-01",
+                            "trials": 10,
+                            "converted": 3,
+                            "conversion_rate": "0.3000",
+                        }
+                    ],
+                    "cohorts": [],
+                },
+            )
+        ],
+    )
+    def get(self, request: Request) -> Response:
+        q = request.query_params
+        try:
+            months = int(q.get("months", "12"))
+        except ValueError:
+            months = 12
+        data = selectors.saas_metrics(currency=q.get("currency", "").upper(), months=months)
+        return Response(s.SaasMetricsSerializer(data).data)
+
+
+class NpsSummaryView(APIView):
+    permission_classes = STAFF
+
+    @extend_schema(
+        parameters=[OpenApiParameter("days", int, description="Window, default 90")],
+        responses=s.NpsSummarySerializer,
+    )
+    def get(self, request: Request) -> Response:
+        days = _days(request, 90)
+        return Response(s.NpsSummarySerializer(selectors.nps_summary(days)).data)
+
+
+class UsageSummaryView(APIView):
+    """Feature usage (consented, pseudonymous events) and the onboarding funnel."""
+
+    permission_classes = STAFF
+
+    @extend_schema(
+        parameters=[OpenApiParameter("days", int, description="Window, default 30")],
+        responses=s.UsageSummarySerializer,
+    )
+    def get(self, request: Request) -> Response:
+        days = _days(request, 30)
+        return Response(s.UsageSummarySerializer(selectors.usage_summary(days)).data)
+
+
+def _days(request: Request, default: int) -> int:
+    try:
+        return max(1, min(int(request.query_params.get("days", default)), 365))
+    except ValueError:
+        return default
+
+
+# --- Part 2: support inbox (T08) ----------------------------------------------------------------
+
+
+class SupportInboxPagination(CursorPagination):
+    ordering = "-last_message_at"
+
+
+class SupportInboxView(generics.ListAPIView):
+    """Support conversations from every organisation, newest activity first."""
+
+    permission_classes = STAFF
+    serializer_class = s.PlatformSupportRowSerializer
+    pagination_class = SupportInboxPagination
+
+    def get_queryset(self) -> Any:
+        q = self.request.query_params
+        return selectors.support_inbox(status=q.get("status", ""), search=q.get("search", ""))
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("status", str, enum=["open", "answered", "closed", "unread"]),
+            OpenApiParameter("search", str),
+        ]
+    )
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().get(request, *args, **kwargs)
+
+
+class SupportConversationView(APIView):
+    permission_classes = STAFF
+
+    @extend_schema(responses=s.PlatformSupportDetailSerializer)
+    def get(self, request: Request, pk: str) -> Response:
+        conversation = services.support_conversation(pk)
+        return Response(s.PlatformSupportDetailSerializer(conversation).data)
+
+
+class SupportReplyView(APIView):
+    permission_classes = STAFF
+
+    @extend_schema(
+        request=s.PlatformSupportReplySerializer,
+        responses={201: s.PlatformSupportDetailSerializer},
+        examples=[
+            OpenApiExample(
+                "Answer",
+                value={"body": "Go to Billing and select 'Invoice run'."},
+                request_only=True,
+            )
+        ],
+    )
+    def post(self, request: Request, pk: str) -> Response:
+        payload = s.PlatformSupportReplySerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        conversation = services.support_reply(
+            pk, staff=request.user, body=payload.validated_data["body"]
+        )
+        return Response(s.PlatformSupportDetailSerializer(conversation).data, status=201)
+
+
+class SupportCloseView(APIView):
+    permission_classes = STAFF
+
+    @extend_schema(request=None, responses=s.PlatformSupportDetailSerializer)
+    def post(self, request: Request, pk: str) -> Response:
+        return Response(s.PlatformSupportDetailSerializer(services.support_close(pk)).data)
+
+
+class SupportAssignView(APIView):
+    """Assign the conversation to the signed-in staff member."""
+
+    permission_classes = STAFF
+
+    @extend_schema(request=None, responses=s.PlatformSupportDetailSerializer)
+    def post(self, request: Request, pk: str) -> Response:
+        conversation = services.support_assign(pk, staff=request.user)
+        return Response(s.PlatformSupportDetailSerializer(conversation).data)

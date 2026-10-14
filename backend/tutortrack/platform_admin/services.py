@@ -181,3 +181,67 @@ def replay(event_ids: list[Any]) -> int:
             replay_dead_letter(event)
         count += 1
     return count
+
+
+# --- support inbox (Part 2, T08) ----------------------------------------------------------------
+# Support answers in the organisation's tenant context through the success app's services,
+# so the reply is audited in the organisation's log with the staff member as the actor.
+
+
+def _conversation_org(conversation_id: Any) -> Any:
+    from . import selectors
+
+    org_id = selectors.support_organisation_id(conversation_id)
+    if org_id is None:
+        raise NotFound()
+    return org_id
+
+
+def support_conversation(conversation_id: Any, *, mark_read: bool = True) -> Any:
+    from tutortrack.success import services as success
+    from tutortrack.success.models import SupportConversation
+
+    with tenant_context(_conversation_org(conversation_id)):
+        conversation = (
+            SupportConversation.objects.select_related("opened_by", "assignee", "organisation")
+            .prefetch_related("messages__author")
+            .get(pk=conversation_id)
+        )
+        if mark_read:
+            success.mark_read(conversation, by_support=True)
+        return conversation
+
+
+def support_reply(conversation_id: Any, *, staff: Any, body: str) -> Any:
+    from tutortrack.success import services as success
+
+    with tenant_context(_conversation_org(conversation_id)):
+        conversation = support_conversation(conversation_id, mark_read=False)
+        success.post_message(conversation, staff, body=body, from_support=True)
+    return support_conversation(conversation_id, mark_read=False)
+
+
+def support_close(conversation_id: Any) -> Any:
+    from tutortrack.success import services as success
+
+    with tenant_context(_conversation_org(conversation_id)):
+        success.close_conversation(support_conversation(conversation_id, mark_read=False))
+    return support_conversation(conversation_id, mark_read=False)
+
+
+def support_assign(conversation_id: Any, *, staff: Any) -> Any:
+    from tutortrack.success import services as success
+
+    with tenant_context(_conversation_org(conversation_id)):
+        success.assign(support_conversation(conversation_id, mark_read=False), staff)
+    return support_conversation(conversation_id, mark_read=False)
+
+
+# --- insights (Part 2, T09/T10) -----------------------------------------------------------------
+
+
+def run_insights_now() -> str:
+    """Score every organisation and snapshot subscriptions now (normally nightly)."""
+    from .schedules import run_now
+
+    return run_now()

@@ -1206,6 +1206,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/analytics/events": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Usage events from the admin app. Accepted only with the person's analytics consent
+     *     (``tt_consent`` cookie), the organisation's permission and a staff role; otherwise the
+     *     batch is dropped and ``accepted`` is 0. Properties that could identify anyone are
+     *     removed (see ``success.analytics``).
+     */
+    post: operations["analytics_events_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/announcements": {
     parameters: {
       query?: never;
@@ -7112,6 +7134,72 @@ export interface paths {
     patch: operations["forms_partial_update"];
     trace?: never;
   };
+  "/api/v1/help/articles": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Search the help articles, or list those for the page the person is on. */
+    get: operations["help_articles_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/help/articles/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["help_articles_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/help/changelog": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description What's new in TutorTrack, newest first. */
+    get: operations["help_changelog_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/help/changelog/seen": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["help_changelog_seen_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/ical-feeds": {
     parameters: {
       query?: never;
@@ -11168,6 +11256,42 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/me/guidance": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description What the help layer needs on every page: finished tours, unread "What's new" entries
+     *     and support replies, whether to ask for NPS and whether usage analytics may run.
+     */
+    get: operations["me_guidance_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/guidance/tours/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["me_guidance_tours_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/me/job-offers": {
     parameters: {
       query?: never;
@@ -13435,6 +13559,56 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/platform/health": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Organisations by health score, lowest first (customer success worklist). */
+    get: operations["platform_health_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/health/risk-counts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["platform_health_risk_counts_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/insights/run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Start the nightly insights run now (health scores and subscription snapshots). */
+    post: operations["platform_insights_run_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/platform/me": {
     parameters: {
       query?: never;
@@ -13482,6 +13656,22 @@ export interface paths {
     options?: never;
     head?: never;
     patch: operations["platform_notices_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/platform/nps": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["platform_nps_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/platform/operations": {
@@ -13546,6 +13736,108 @@ export interface paths {
     options?: never;
     head?: never;
     patch: operations["platform_plans_prices_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/platform/saas-metrics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description MRR/ARR, MRR movements, churn, NRR, ARPA, trial conversion and cohort retention per
+     *     billing currency, from the nightly subscription snapshots (FR-30-7).
+     */
+    get: operations["platform_saas_metrics_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/support": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Support conversations from every organisation, newest activity first. */
+    get: operations["platform_support_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/support/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["platform_support_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/support/{id}/assign": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Assign the conversation to the signed-in staff member. */
+    post: operations["platform_support_assign_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/support/{id}/close": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["platform_support_close_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/support/{id}/reply": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["platform_support_reply_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/platform/tenants": {
@@ -13623,6 +13915,23 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations["platform_tenants_extend_trial_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/tenants/{id}/health": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description One organisation's daily health scores (last 90 days, newest first). */
+    get: operations["platform_tenants_health_list"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -13736,6 +14045,23 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations["platform_tenants_unsuspend_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/platform/usage": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Feature usage (consented, pseudonymous events) and the onboarding funnel. */
+    get: operations["platform_usage_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -16726,6 +17052,24 @@ export interface paths {
     patch: operations["settings_partial_update"];
     trace?: never;
   };
+  "/api/v1/setup-checklist": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The dashboard checklist; staff may hide it (``success.checklist.manage``). */
+    get: operations["setup_checklist_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** @description The dashboard checklist; staff may hide it (``success.checklist.manage``). */
+    patch: operations["setup_checklist_partial_update"];
+    trace?: never;
+  };
   "/api/v1/shortlists": {
     parameters: {
       query?: never;
@@ -17504,6 +17848,75 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/support-conversations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Chat with TutorTrack support. Opening a conversation marks its replies as read. */
+    get: operations["support_conversations_list"];
+    put?: never;
+    /** @description Chat with TutorTrack support. Opening a conversation marks its replies as read. */
+    post: operations["support_conversations_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/support-conversations/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Chat with TutorTrack support. Opening a conversation marks its replies as read. */
+    get: operations["support_conversations_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/support-conversations/{id}/close": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Chat with TutorTrack support. Opening a conversation marks its replies as read. */
+    post: operations["support_conversations_close_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/support-conversations/{id}/messages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Chat with TutorTrack support. Opening a conversation marks its replies as read. */
+    post: operations["support_conversations_messages_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/support/enter": {
     parameters: {
       query?: never;
@@ -17515,6 +17928,22 @@ export interface paths {
     get: operations["support_enter_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/surveys/responses": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["surveys_responses_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -19354,6 +19783,9 @@ export interface components {
       first_name?: string;
       last_name?: string;
       password?: string;
+    };
+    Accepted: {
+      accepted: number;
     };
     Account: {
       client: string;
@@ -24409,6 +24841,10 @@ export interface components {
       /** Format: double */
       rate: number;
     };
+    FunnelStep: {
+      step: string;
+      organisations: number;
+    };
     /**
      * @description * `keep` - keep
      *     * `cancel` - cancel
@@ -24643,6 +25079,74 @@ export interface components {
     GrowthReasonRequest: {
       /** @default  */
       reason: string;
+    };
+    Guidance: {
+      completed_tours: string[];
+      dismissed_tours: string[];
+      changelog_unread: number;
+      nps_due: boolean;
+      support_unread: number;
+      /** @description The organisation allows usage analytics for this member; the browser still needs the person's analytics consent. */
+      analytics_allowed: boolean;
+    };
+    HealthComponents: {
+      usage: number | null;
+      tutors: number | null;
+      payments: number | null;
+      reliability: number | null;
+      support: number | null;
+      nps: number | null;
+    };
+    HealthPoint: {
+      /** Format: date */
+      date: string;
+      score: number;
+      risk: string;
+      components: components["schemas"]["HealthComponents"];
+      inputs: {
+        [key: string]: number | null;
+      };
+      /** Format: date-time */
+      alerted_at: string | null;
+    };
+    HealthRow: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      slug: string;
+      status: string;
+      plan: string | null;
+      /** Format: date-time */
+      last_activity: string | null;
+      score: number;
+      risk: string;
+      /** Format: date */
+      scored_on: string;
+      components: components["schemas"]["HealthComponents"];
+    };
+    HelpArticle: {
+      slug: string;
+      title: string;
+      summary: string;
+      tour: string;
+      /** @description Markdown (headings, lists, bold, links) */
+      body: string;
+      routes: string[];
+      tags: string[];
+    };
+    HelpArticleRow: {
+      slug: string;
+      title: string;
+      summary: string;
+      tour: string;
+    };
+    HelpChangelogEntry: {
+      slug: string;
+      title: string;
+      summary: string;
+      body: string;
+      /** Format: date */
+      published_on: string;
     };
     HoldNoteRequest: {
       note: string;
@@ -25001,6 +25505,9 @@ export interface components {
       readonly read_at: string | null;
       /** Format: date-time */
       readonly created_at: string;
+    };
+    InsightsRun: {
+      workflow_id: string;
     };
     InstallBuiltinRequest: {
       /** @description A key from /learning/curricula/builtins */
@@ -27441,6 +27948,38 @@ export interface components {
       channels: components["schemas"]["MessageChannelEnum"][];
       timing?: number[] | null;
     };
+    NpsBucket: {
+      plan?: string;
+      /** Format: date */
+      month?: string;
+      nps: number | null;
+      answers: number;
+    };
+    NpsComment: {
+      /** Format: uuid */
+      organisation_id: string;
+      organisation: string;
+      score: number;
+      role: string;
+      comment: string;
+      /** Format: date-time */
+      created_at: string;
+    };
+    NpsSummary: {
+      days: number;
+      nps: number | null;
+      answers: number;
+      dismissed: number;
+      promoters: number;
+      passives: number;
+      detractors: number;
+      by_plan: components["schemas"]["NpsBucket"][];
+      by_month: components["schemas"]["NpsBucket"][];
+      comments: components["schemas"]["NpsComment"][];
+      /** Format: decimal */
+      csat_average: string | null;
+      csat_answers: number;
+    };
     NudgeRequest: {
       ids: string[];
     };
@@ -28787,6 +29326,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["GroupClass"][];
     };
+    PaginatedHealthRowList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["HealthRow"][];
+    };
     PaginatedHomeworkList: {
       /**
        * Format: uri
@@ -29268,6 +29820,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["PhoneNumber"][];
     };
+    PaginatedPlatformSupportRowList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PlatformSupportRow"][];
+    };
     PaginatedPremiumRuleList: {
       /**
        * Format: uri
@@ -29709,6 +30274,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["Student"][];
+    };
+    PaginatedSupportConversationList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["SupportConversation"][];
     };
     PaginatedTaskList: {
       /**
@@ -31130,6 +31708,9 @@ export interface components {
         [key: string]: unknown;
       };
     };
+    PatchedSetupChecklistUpdateRequest: {
+      dismissed?: boolean;
+    };
     PatchedSitePageRequest: {
       path?: string;
       title?: string;
@@ -32060,6 +32641,53 @@ export interface components {
     PlatformStatus: {
       notices: components["schemas"]["PlatformNotice"][];
       status_page_url: string;
+    };
+    PlatformSupportDetail: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      organisation_id: string;
+      organisation_name: string;
+      subject: string;
+      status: string;
+      page: string;
+      readonly opened_by_name: string;
+      readonly assignee_name: string;
+      support_unread: boolean;
+      /** Format: date-time */
+      last_message_at: string;
+      /** Format: date-time */
+      created_at: string;
+      messages: components["schemas"]["PlatformSupportMessage"][];
+    };
+    PlatformSupportMessage: {
+      /** Format: uuid */
+      id: string;
+      from_support: boolean;
+      readonly author_name: string;
+      body: string;
+      /** Format: date-time */
+      created_at: string;
+    };
+    PlatformSupportReplyRequest: {
+      body: string;
+    };
+    PlatformSupportRow: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      organisation_id: string;
+      organisation_name: string;
+      subject: string;
+      status: string;
+      page: string;
+      readonly opened_by_name: string;
+      readonly assignee_name: string;
+      support_unread: boolean;
+      /** Format: date-time */
+      last_message_at: string;
+      /** Format: date-time */
+      created_at: string;
     };
     Point: {
       /** Format: double */
@@ -33004,6 +33632,18 @@ export interface components {
      */
     ProductCategoryEnum:
       "registration" | "materials" | "books" | "exam_entry" | "late_cancel" | "travel" | "other";
+    ProductEventBatchRequest: {
+      events: components["schemas"]["ProductEventInRequest"][];
+    };
+    ProductEventInRequest: {
+      /** @description e.g. page.viewed, invoice.sent */
+      name: string;
+      route?: string;
+      properties?: {
+        [key: string]: unknown;
+      };
+      occurred_at?: string;
+    };
     ProductRequest: {
       name: string;
       description?: string;
@@ -34860,6 +35500,14 @@ export interface components {
       taken_on?: string;
       visible_to_family?: boolean;
     };
+    RetentionCohort: {
+      /** Format: date */
+      month: string;
+      size: number;
+      starting_mrr: components["schemas"]["MoneyOut"];
+      logo_retention: (string | null)[];
+      revenue_retention: (string | null)[];
+    };
     RetentionPolicy: {
       /** Format: uuid */
       readonly id: string;
@@ -35023,6 +35671,11 @@ export interface components {
       client_id: string;
       /** @default  */
       client_secret: string;
+    };
+    RiskCounts: {
+      healthy: number;
+      watch: number;
+      at_risk: number;
     };
     Role: {
       id: string | null;
@@ -35208,6 +35861,35 @@ export interface components {
     SSOProvider: {
       key: string;
       start_url: string;
+    };
+    SaasMetrics: {
+      currency: string;
+      currencies: string[];
+      months: components["schemas"]["SaasMonth"][];
+      trial_conversion: components["schemas"]["TrialCohort"][];
+      cohorts: components["schemas"]["RetentionCohort"][];
+    };
+    SaasMonth: {
+      /** Format: date */
+      month: string;
+      mrr: components["schemas"]["MoneyOut"];
+      arr: components["schemas"]["MoneyOut"];
+      customers: number;
+      arpa: components["schemas"]["MoneyOut"];
+      trialing: number;
+      past_due_mrr: components["schemas"]["MoneyOut"];
+      new_mrr: components["schemas"]["MoneyOut"];
+      reactivation_mrr: components["schemas"]["MoneyOut"];
+      expansion_mrr: components["schemas"]["MoneyOut"];
+      contraction_mrr: components["schemas"]["MoneyOut"];
+      churned_mrr: components["schemas"]["MoneyOut"];
+      net_new_mrr: components["schemas"]["MoneyOut"];
+      new_customers: number;
+      churned_customers: number;
+      /** @description Fraction, e.g. 0.0250 */
+      logo_churn_rate: string | null;
+      revenue_churn_rate: string | null;
+      net_revenue_retention: string | null;
     };
     SafeguardingAction: {
       /** Format: uuid */
@@ -35940,6 +36622,15 @@ export interface components {
       overrides: string[];
       schema: components["schemas"]["SettingDescription"][];
     };
+    SetupChecklist: {
+      steps: components["schemas"]["SetupStep"][];
+      done: number;
+      total: number;
+      /** Format: date-time */
+      completed_at: string | null;
+      /** Format: date-time */
+      dismissed_at: string | null;
+    };
     SetupCompleteRequest: {
       intent: string;
       /** @default false */
@@ -35966,6 +36657,14 @@ export interface components {
       intent: string;
       redirect_url: string;
       consent_text: string;
+    };
+    SetupStep: {
+      key: string;
+      title: string;
+      link: string;
+      done: boolean;
+      /** Format: date-time */
+      completed_at: string | null;
     };
     ShareRequestRequest: {
       students?: string[];
@@ -36589,6 +37288,51 @@ export interface components {
       grants: components["schemas"]["SupportGrant"][];
       sessions: components["schemas"]["SupportSession"][];
     };
+    SupportConversation: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly subject: string;
+      readonly status: components["schemas"]["SupportConversationStatusEnum"];
+      readonly page: string;
+      readonly opened_by_name: string;
+      /** Format: date-time */
+      readonly last_message_at: string;
+      readonly customer_unread: boolean;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly csat_score: number | null;
+    };
+    SupportConversationCreateRequest: {
+      subject?: string;
+      body: string;
+      page?: string;
+    };
+    SupportConversationDetail: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly subject: string;
+      readonly status: components["schemas"]["SupportConversationStatusEnum"];
+      readonly page: string;
+      readonly opened_by_name: string;
+      /** Format: date-time */
+      readonly last_message_at: string;
+      readonly customer_unread: boolean;
+      /** Format: date-time */
+      readonly closed_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+      readonly csat_score: number | null;
+      readonly messages: components["schemas"]["SupportMessage"][];
+    };
+    /**
+     * @description * `open` - Waiting for TutorTrack
+     *     * `answered` - Answered
+     *     * `closed` - Closed
+     * @enum {string}
+     */
+    SupportConversationStatusEnum: "open" | "answered" | "closed";
     SupportGrant: {
       /** Format: uuid */
       readonly id: string;
@@ -36602,6 +37346,18 @@ export interface components {
       revoked_at?: string | null;
       readonly granted_by_name: string;
       readonly active: boolean;
+    };
+    SupportMessage: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly from_support: boolean;
+      readonly author_name: string;
+      readonly body: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    SupportMessageCreateRequest: {
+      body: string;
     };
     SupportSession: {
       /** Format: uuid */
@@ -36627,6 +37383,29 @@ export interface components {
       ticket: string;
       /** @default false */
       write: boolean;
+    };
+    SurveyAnswerRequest: {
+      kind: components["schemas"]["SurveyKindEnum"];
+      score: number | null;
+      comment?: string;
+      /** @description e.g. support:<chat id> */
+      topic?: string;
+    };
+    /**
+     * @description * `nps` - Net Promoter Score
+     *     * `csat` - Customer satisfaction
+     * @enum {string}
+     */
+    SurveyKindEnum: "nps" | "csat";
+    SurveyResponse: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly kind: components["schemas"]["SurveyKindEnum"];
+      readonly score: number | null;
+      readonly comment: string;
+      readonly topic: string;
+      /** Format: date-time */
+      readonly created_at: string;
     };
     SyncLogEntry: {
       /** Format: uuid */
@@ -37379,6 +38158,16 @@ export interface components {
       /** Format: uuid */
       curriculum_id: string;
     };
+    TourStatusRequest: {
+      status: components["schemas"]["TourStatusStatusEnum"];
+    };
+    /**
+     * @description * `completed` - completed
+     *     * `dismissed` - dismissed
+     *     * `restart` - restart
+     * @enum {string}
+     */
+    TourStatusStatusEnum: "completed" | "dismissed" | "restart";
     TrackingMappingRow: {
       /** Format: uuid */
       branch: string;
@@ -37427,6 +38216,13 @@ export interface components {
       name: string;
       kind: components["schemas"]["AssessmentKindEnum"];
       subject: string;
+    };
+    TrialCohort: {
+      /** Format: date */
+      month: string;
+      trials: number;
+      converted: number;
+      conversion_rate: string | null;
     };
     /**
      * @description * `continuing` - Continuing
@@ -37903,6 +38699,33 @@ export interface components {
       included_tutors: number;
       next_invoice: components["schemas"]["MoneyOut"] | null;
       credits: components["schemas"]["CreditAccount"][];
+    };
+    UsageDay: {
+      /** Format: date */
+      day: string;
+      people: number;
+      organisations: number;
+    };
+    UsageEvent: {
+      name: string;
+      count: number;
+      organisations: number;
+      people: number;
+    };
+    UsagePage: {
+      route: string;
+      count: number;
+      people: number;
+    };
+    UsageSummary: {
+      days: number;
+      events: number;
+      people: number;
+      organisations: number;
+      top_events: components["schemas"]["UsageEvent"][];
+      top_pages: components["schemas"]["UsagePage"][];
+      daily: components["schemas"]["UsageDay"][];
+      funnel: components["schemas"]["FunnelStep"][];
     };
     User: {
       /** Format: uuid */
@@ -40321,6 +41144,34 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AIUsage"];
+        };
+      };
+    };
+  };
+  analytics_events_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProductEventBatchRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ProductEventBatchRequest"];
+        "multipart/form-data": components["schemas"]["ProductEventBatchRequest"];
+      };
+    };
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Accepted"];
         };
       };
     };
@@ -51775,6 +52626,92 @@ export interface operations {
       };
     };
   };
+  help_articles_list: {
+    parameters: {
+      query?: {
+        /** @description Search words */
+        q?: string;
+        /** @description Current page, e.g. /billing */
+        route?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HelpArticleRow"][];
+        };
+      };
+    };
+  };
+  help_articles_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HelpArticle"];
+        };
+      };
+    };
+  };
+  help_changelog_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HelpChangelogEntry"][];
+        };
+      };
+    };
+  };
+  help_changelog_seen_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Guidance"];
+        };
+      };
+    };
+  };
   ical_feeds_list: {
     parameters: {
       query?: {
@@ -59060,6 +59997,55 @@ export interface operations {
       };
     };
   };
+  me_guidance_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Guidance"];
+        };
+      };
+    };
+  };
+  me_guidance_tours_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TourStatusRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TourStatusRequest"];
+        "multipart/form-data": components["schemas"]["TourStatusRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Guidance"];
+        };
+      };
+    };
+  };
   me_job_offers_list: {
     parameters: {
       query?: never;
@@ -62863,6 +63849,76 @@ export interface operations {
       };
     };
   };
+  platform_health_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        plan?: string;
+        risk?: "at_risk" | "healthy" | "watch";
+        search?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedHealthRowList"];
+        };
+      };
+    };
+  };
+  platform_health_risk_counts_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RiskCounts"];
+        };
+      };
+    };
+  };
+  platform_insights_run_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InsightsRun"];
+        };
+      };
+    };
+  };
   platform_me_retrieve: {
     parameters: {
       query?: never;
@@ -62956,6 +64012,28 @@ export interface operations {
       };
     };
   };
+  platform_nps_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Window, default 90 */
+        days?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["NpsSummary"];
+        };
+      };
+    };
+  };
   platform_operations_retrieve: {
     parameters: {
       query?: never;
@@ -63045,6 +64123,157 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PlanAdminPrice"];
+        };
+      };
+    };
+  };
+  platform_saas_metrics_retrieve: {
+    parameters: {
+      query?: {
+        /** @description ISO code; default GBP */
+        currency?: string;
+        /** @description 1-36, default 12 */
+        months?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SaasMetrics"];
+        };
+      };
+    };
+  };
+  platform_support_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        search?: string;
+        status?: "answered" | "closed" | "open" | "unread";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPlatformSupportRowList"];
+        };
+      };
+    };
+  };
+  platform_support_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PlatformSupportDetail"];
+        };
+      };
+    };
+  };
+  platform_support_assign_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PlatformSupportDetail"];
+        };
+      };
+    };
+  };
+  platform_support_close_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PlatformSupportDetail"];
+        };
+      };
+    };
+  };
+  platform_support_reply_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlatformSupportReplyRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PlatformSupportReplyRequest"];
+        "multipart/form-data": components["schemas"]["PlatformSupportReplyRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PlatformSupportDetail"];
         };
       };
     };
@@ -63191,6 +64420,27 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TenantDetail"];
+        };
+      };
+    };
+  };
+  platform_tenants_health_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HealthPoint"][];
         };
       };
     };
@@ -63377,6 +64627,28 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TenantDetail"];
+        };
+      };
+    };
+  };
+  platform_usage_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Window, default 30 */
+        days?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["UsageSummary"];
         };
       };
     };
@@ -68659,6 +69931,50 @@ export interface operations {
       };
     };
   };
+  setup_checklist_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SetupChecklist"];
+        };
+      };
+    };
+  };
+  setup_checklist_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedSetupChecklistUpdateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedSetupChecklistUpdateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedSetupChecklistUpdateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SetupChecklist"];
+        };
+      };
+    };
+  };
   shortlists_list: {
     parameters: {
       query?: {
@@ -69962,6 +71278,143 @@ export interface operations {
       };
     };
   };
+  support_conversations_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedSupportConversationList"];
+        };
+      };
+    };
+  };
+  support_conversations_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SupportConversationCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SupportConversationCreateRequest"];
+        "multipart/form-data": components["schemas"]["SupportConversationCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SupportConversationDetail"];
+        };
+      };
+    };
+  };
+  support_conversations_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this support conversation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SupportConversationDetail"];
+        };
+      };
+    };
+  };
+  support_conversations_close_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this support conversation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SupportConversationDetail"];
+        };
+      };
+    };
+  };
+  support_conversations_messages_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this support conversation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SupportMessageCreateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SupportMessageCreateRequest"];
+        "multipart/form-data": components["schemas"]["SupportMessageCreateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SupportConversationDetail"];
+        };
+      };
+    };
+  };
   support_enter_retrieve: {
     parameters: {
       query: {
@@ -69979,6 +71432,34 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  surveys_responses_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SurveyAnswerRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SurveyAnswerRequest"];
+        "multipart/form-data": components["schemas"]["SurveyAnswerRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SurveyResponse"];
+        };
       };
     };
   };

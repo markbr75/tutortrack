@@ -51,9 +51,9 @@ Internal tooling for the TutorTrack team: a super-admin console for tenants, pla
 - [x] **E30-T05** Support impersonation with tenant-granted access and tenant-visible audit.
 - [x] **E30-T06** Observability dashboards, SLO alerts, status page and outage banner.
 - [x] **E30-T07** Backup/restore drills and per-tenant restore tool; runbooks.
-- [ ] **E30-T08** (Scale) Help panel, product tours, onboarding checklist, support chat.
-- [ ] **E30-T09** (Scale) Product analytics, tenant health scoring, NPS.
-- [ ] **E30-T10** (Scale) SaaS metrics dashboards.
+- [x] **E30-T08** (Scale) Help panel, product tours, onboarding checklist, support chat.
+- [x] **E30-T09** (Scale) Product analytics, tenant health scoring, NPS.
+- [x] **E30-T10** (Scale) SaaS metrics dashboards.
 
 ## Implementation notes (part 1, as built 2026-10-10)
 - **Console and access (T01):** the console is part of the admin SPA at `/platform` on the root host. Its API is `/api/v1/platform/...`, which skips tenant resolution. Access needs four things (ADR 0010): platform staff, a 2FA-verified session, an address in `PLATFORM_IP_ALLOWLIST`, and no active impersonation.
@@ -84,3 +84,68 @@ Internal tooling for the TutorTrack team: a super-admin console for tenants, pla
 - **Backups and DR (T07):** RDS has 35-day PITR. AWS Backup takes daily snapshots of RDS and the uploads bucket and copies them to the backup account's vault (365 days). `manage.py tenant_dump <slug>` writes one organisation's rows from a point-in-time copy. The runbooks in `docs/runbooks/` cover deploy, rollback, database restore, single-organisation restore, alerts, provider outage, incident comms and the quarterly drill.
   - Deviation: daily *logical* (pg_dump) exports are replaced by cross-account snapshot copies.
 - **Follow-ups:** a plans and prices screen; integration status on tenant detail (E23); Temporal-specific alarms (workflow task failures); a status page provider integration; Part 2 (T08–T10).
+
+## Part 2 implementation notes (as built 2026-10-14)
+ADR 0030 records the main decisions. Tenant-facing parts are in a new `success` app; parts that span organisations are in `platform_admin`, which is still the only app that may use the BYPASSRLS connection.
+
+- **Help panel (T08):** the admin shell has a **Help** button (a dot shows unread "What's new" entries and support replies). It opens a side panel (`<dialog>`: focus moves in, Escape closes it, focus returns to the button) with five tabs: articles, What's new, tours, chat with support and usage data.
+  - Articles are markdown files in the repository (`success/help/<locale>/*.md`, en-GB fallback) with front matter (title, summary, routes, tags, tour). An in-process index searches them; every word must match, and titles rank above tags, summaries and body text. With no search words, the panel suggests the articles for the current page. The frontend renders a safe markdown subset (headings, lists, bold, same-site or https links) as React elements.
+  - "What's new" entries are files in `success/help/changelog/`. Opening the tab marks them as read (`GuidanceState.changelog_seen_at`).
+  - API: `/help/articles` (`?q=&route=`), `/help/articles/{slug}`, `/help/changelog`, `/help/changelog/seen` and `/me/guidance`.
+  - Deviation: no headless CMS or Intercom/Help Scout. Content is reviewed like code and can be moved to a CMS later behind `success.help`.
+- **Product tours (T08):** `Tour` is a non-modal dialog. It moves focus to each step's heading, announces "Step n of m", closes on Escape and returns focus to where the person was. It outlines the step's element and scrolls it into view (no smooth scrolling when reduced motion is preferred). A step whose element is not on the page is shown without a highlight.
+  - There are three tours: welcome, calendar and billing. New staff are offered the welcome tour once on the dashboard. Finished and dismissed tours are stored per person (`/me/guidance/tours/{key}`).
+- **Setup checklist (T08):** the dashboard card has five steps: set up a service, add a student, schedule a lesson, connect Stripe and send the first invoice. It has a progress bar and links to the steps still to do.
+  - Steps tick themselves from domain events (`service.created`, `student.created`, `lesson.scheduled`, `provider_account.connected`, `invoice.issued`/`invoice.sent`), idempotently (unique per organisation and key). Steps already done when the checklist is first opened are found from existing data.
+  - Events: `setup_checklist.item_completed`, then `setup_checklist.completed`. Holders of `success.checklist.manage` (owners and admins) can hide the checklist.
+  - Deviations: "connect Stripe" counts any connected payment provider. The E02 onboarding wizard (`onboarding.*` events) is unchanged; the checklist is the after-signup guide.
+- **Support chat (T08):** built-in messaging between an organisation's staff and TutorTrack support (`SupportConversation`/`SupportMessage`, tenant data with RLS). No third-party widget.
+  - Staff with `success.support.chat` open conversations from the help panel. The conversation records the page as a route pattern. Coordinators and finance have the `own` scope; owners and admins see every conversation in their organisation.
+  - Platform staff answer at `/platform/support` (inbox across organisations: unread, open, answered and closed). Replies, assignment and closing run in the organisation's tenant context through `success.services`, so they appear in the organisation's audit log with the staff member as the actor.
+  - The person who asked can rate an answered chat (CSAT 1-5).
+  - Deviation: E13 inbox threads were not reused, because they belong to an organisation's families and contacts and run on comms channels. Support replies are shown as a dot on the Help button, not as a comms notification.
+- **Product analytics (T09):** first-party capture to `POST /analytics/events`, with no third-party SDK. Nothing is recorded unless four conditions are all met:
+  1. The person chose analytics in the E29 cookie banner, or with the "Share anonymous usage data" switch in the help panel. Both write the same `tt_consent` cookie, and the browser sends nothing without it.
+  2. The organisation allows it (new setting `privacy.product_analytics`, default on).
+  3. The person is staff. Families and students are never tracked (AADC: no profiling of children).
+  4. Support is not viewing as the person.
+  - Events are pseudonymous. The actor is a keyed hash of the organisation and user, and routes are patterns with ids replaced by `$id`. Properties are short scalars: the filter drops keys such as name, email and phone, and values that look like emails, phone numbers, UUIDs, tokens or free text.
+  - Sinks are the provider seam (`PRODUCT_ANALYTICS_SINKS`). The default `DatabaseSink` stores `ProductEvent` rows; an exporter for PostHog or Segment would be another sink.
+  - E29 registry: DSAR export includes a count of a person's events, erasure deletes them, and a new retention category `product_usage` (395 days) purges old ones.
+  - The console's "Feedback and usage" page shows top events and pages, and an onboarding funnel built from setup checklists.
+  - Deviation: the cookie banner itself still appears only on public pages (E29). Inside the admin app, consent is given in the help panel.
+- **Tenant health (T09):** the platform Temporal Schedule `schedule:platform-insights:platform` (03:30 UTC) runs `PlatformInsightsWorkflow` on the `default` queue, with no sweeper columns.
+  1. A platform activity lists the organisations that are not cancelled.
+  2. Batches of 25 organisations are scored, each in its own tenant context.
+  3. Platform staff get one email about organisations that became at risk (`alerted_at`, at most once per organisation and day).
+  - Each organisation gets a `TenantHealthScore` per day. Its components (0-100) are usage depth, active tutor trend, payments trend, reliability (failed messages, webhooks and dead letters), support conversations and NPS, weighted 30/20/20/10/10/10. A component with no data is left out and the others are rescaled. Risk is healthy (70+), watch (40-69) or at risk (under 40).
+  - The console has a health worklist (lowest scores first, filter by risk, "Recalculate now"), risk counts and a health card on the organisation page.
+  - The schedule is created by `manage.py ensure_platform_schedules`, which the Temporal worker runs before it starts polling (docker-compose and `ecs.tf`). It uses the new `core.workflows.schedules.ensure_platform_schedule` helper (no `ScheduleLink`, so suspending an organisation never pauses it).
+  - Deviation: the scores, snapshots and alerts are computed facts, so they aren't written to the audit log.
+- **NPS/CSAT (T09):** a non-modal corner prompt (radio group 0-10 and an optional comment). It never takes focus.
+  - It appears for staff who joined at least 14 days ago, at most every 90 days, and rests for 30 days after "Not now". Organisations can turn it off (`privacy.satisfaction_surveys`).
+  - Answers are `SurveyResponse` rows (`survey.answered`). The console shows NPS, promoters, passives and detractors, NPS by plan and by month, recent comments (organisation and role, never the respondent) and the support CSAT average.
+- **SaaS metrics (T10):** the same nightly run snapshots each organisation's subscription (`SubscriptionSnapshot`: plan, status, seats, MRR). MRR is calculated from E04 list prices: the base fee, active tutors and extra branches above the included quantity, with annual prices divided by 12 and rounded half-up with `core.money`. `/platform/saas-metrics` derives everything from month-end snapshots, one billing currency at a time:
+  - MRR, ARR, paying customers, ARPA, customers in trial and MRR past due (dunning oversight);
+  - MRR movements: new, reactivation, expansion, contraction and churn, with `end = start + net new` (a Hypothesis test checks it);
+  - customer and revenue churn and NRR;
+  - trial conversion by sign-up month;
+  - cohort retention by first paying month (customers and revenue).
+  
+  The maths is in `platform_admin.metrics`, with Hypothesis tests for MRR rounding, movements, ARPA, trial conversion and the health score bounds.
+  - Deviations:
+    - Revenue share (a percentage of payments) is not counted in MRR, and revenue-share reconciliation is a follow-up.
+    - Currencies are never converted.
+    - History starts with the first nightly run; there is no backfill from Stripe.
+    - A closed organisation's snapshots are deleted with it, after the E02 retention period.
+    - The Part 1 tenant list still shows its list-price MRR estimate.
+- **Shared files touched:**
+  - `config/settings/base.py`: `INSTALLED_APPS` gets `tutortrack.success`, and two `ENUM_NAME_OVERRIDES`;
+  - `config/urls.py`;
+  - `identity/roles.py`: `success.support.chat:own` for coordinator and finance;
+  - `core/workflows/schedules.py`: `ensure_platform_schedule`;
+  - frontend: `AppShell.tsx` (one `<SuccessLayer />`), `HomePage.tsx`, `router.tsx`, and `PlatformShell`/`TenantPage`;
+  - `docker-compose.yml` and `infra/terraform/ecs.tf` (the worker command).
+  
+  The new i18n namespaces are `help`, `tours`, `setupChecklist`, `nps`, `supportChat`, `productAnalytics`, `tenantHealth`, `saasMetrics`, `productInsights` and `supportInbox`.
+- **Follow-ups:** support reply notifications through comms (email and push), a CMS for help content, translated help articles, an exporter sink for an external analytics tool, revenue-share MRR and reconciliation, and MRR filters on the tenant list.

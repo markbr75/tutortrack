@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent, type ReactNode } from "react";
 
 import { api } from "../api";
+import { TenantHealthCard } from "./HealthPage";
 
 type Detail = components["schemas"]["TenantDetail"];
 type Member = components["schemas"]["Member"];
@@ -40,6 +41,9 @@ export function TenantPage({ id }: { id: string }) {
         {t("platform.createdOn", { date: formatDate(org.created_at) })}
         {org.suspension_reason ? ` · ${org.suspension_reason}` : ""}
       </p>
+      <div className="rounded-md border border-border p-4">
+        <TenantHealthCard id={id} />
+      </div>
       <div className="grid gap-4 lg:grid-cols-2">
         <Section title={t("platform.subscription")}>
           {d.subscription ? (

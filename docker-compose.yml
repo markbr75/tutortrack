@@ -132,7 +132,7 @@ services:
 
   temporal-worker:
     <<: *backend
-    command: uv run python manage.py temporal_worker --task-queue all
+    command: sh -c "uv run python manage.py ensure_platform_schedules && uv run python manage.py temporal_worker --task-queue all"
     depends_on:
       postgres:
         condition: service_healthy

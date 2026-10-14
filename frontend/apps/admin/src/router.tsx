@@ -64,6 +64,10 @@ import { OnboardingPage } from "./routes/OnboardingPage";
 import { SettingsPage } from "./routes/SettingsPage";
 import { SignupPage } from "./routes/SignupPage";
 import { FlagsPage } from "./platform/FlagsPage";
+import { HealthPage } from "./platform/HealthPage";
+import { InsightsPage } from "./platform/InsightsPage";
+import { SaasMetricsPage } from "./platform/SaasMetricsPage";
+import { SupportConversationPage, SupportInboxPage } from "./platform/SupportInboxPage";
 import { OperationsPage } from "./platform/OperationsPage";
 import { PlatformShell } from "./platform/PlatformShell";
 import { TenantPage } from "./platform/TenantPage";
@@ -224,6 +228,34 @@ const platformOpsRoute = createRoute({
   getParentRoute: () => platformRoute,
   path: "/operations",
   component: OperationsPage,
+});
+// E30 Part 2: customer success and SaaS metrics.
+const platformHealthRoute = createRoute({
+  getParentRoute: () => platformRoute,
+  path: "/health",
+  component: HealthPage,
+});
+const platformMetricsRoute = createRoute({
+  getParentRoute: () => platformRoute,
+  path: "/metrics",
+  component: SaasMetricsPage,
+});
+const platformInsightsRoute = createRoute({
+  getParentRoute: () => platformRoute,
+  path: "/feedback",
+  component: InsightsPage,
+});
+const platformSupportRoute = createRoute({
+  getParentRoute: () => platformRoute,
+  path: "/support",
+  component: SupportInboxPage,
+});
+const platformSupportConversationRoute = createRoute({
+  getParentRoute: () => platformRoute,
+  path: "/support/$id",
+  component: function PlatformSupportConversationRoute() {
+    return <SupportConversationPage id={platformSupportConversationRoute.useParams().id} />;
+  },
 });
 
 // Signed-in app.
@@ -457,6 +489,11 @@ const routeTree = rootRoute.addChildren([
     platformTenantRoute,
     platformFlagsRoute,
     platformOpsRoute,
+    platformHealthRoute,
+    platformMetricsRoute,
+    platformInsightsRoute,
+    platformSupportRoute,
+    platformSupportConversationRoute,
   ]),
   appRoute.addChildren([
     homeRoute,
