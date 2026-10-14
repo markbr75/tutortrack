@@ -6,6 +6,7 @@ from .signup import (
     HandoffView,
     ResendVerificationView,
     SignupConfigView,
+    SignupRegionView,
     SignupView,
     SlugCheckView,
     VerifyEmailView,
@@ -28,6 +29,7 @@ urlpatterns = [
     path("settings/<slug:area>", SettingsView.as_view(), name="settings"),
     path("signup", SignupView.as_view(), name="signup"),
     path("signup/config", SignupConfigView.as_view(), name="signup-config"),
+    path("signup/region", SignupRegionView.as_view(), name="signup-region"),
     path("signup/slug-check", SlugCheckView.as_view(), name="signup-slug-check"),
     path("signup/verify-email", VerifyEmailView.as_view(), name="signup-verify-email"),
     path(

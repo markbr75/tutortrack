@@ -35,6 +35,8 @@ DEFAULT_TYPES: list[dict[str, Any]] = [
      "applies_to": ["people.student"]},
     {"key": "lesson-recording", "name": "Recording online lessons", "category": "lesson_recording",
      "applies_to": ["people.student", "people.contact"]},
+    {"key": "parental-consent", "name": "Parental consent for a child's login",
+     "category": "parental_consent", "applies_to": ["people.student"]},
 ]  # fmt: skip
 
 
@@ -118,6 +120,8 @@ def record_consent(
     given_by_name: str = "",
     on_behalf_of_child: bool = False,
 ) -> ConsentRecord:
+    if key == "parental-consent":
+        ensure_default_types()  # organisations created before E29 Part 2
     consent_type = ConsentType.objects.filter(key=key, is_active=True).first()
     if consent_type is None:
         raise NotFound(_("Unknown consent type."))
@@ -125,6 +129,9 @@ def record_consent(
         raise BusinessRuleViolation(_("This consent does not apply to this person."))
     if not subjects.is_valid(subject_type, str(subject_id)):
         raise NotFound(_("Person not found."))
+    from .children import check_consent_allowed
+
+    check_consent_allowed(subject_type, str(subject_id), consent_type.category, granted)
     ctx = get_request_context()
     record = ConsentRecord.objects.create(
         consent_type=consent_type,

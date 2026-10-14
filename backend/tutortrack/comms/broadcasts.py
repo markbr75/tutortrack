@@ -571,11 +571,16 @@ def send_batch(broadcast_id: str, batch: int) -> dict[str, int]:
                 dedupe_key=dedupe,
                 related=("comms.broadcast", str(broadcast.pk)),
                 meta=meta,
+                category=(
+                    "marketing" if broadcast.purpose == Broadcast.Purpose.MARKETING else "service"
+                ),
             )
             if message is None:
                 message = Message.objects.filter(dedupe_key=dedupe).first()
             if message is None:
                 row.status, row.skip_reason = BroadcastRecipient.Status.SKIPPED, "no_address"
+            elif message.status == Message.Status.SUPPRESSED and message.error:
+                row.status, row.skip_reason = BroadcastRecipient.Status.SKIPPED, "safeguarding"
             elif message.status == Message.Status.SUPPRESSED:
                 row.status, row.skip_reason = BroadcastRecipient.Status.SKIPPED, "suppressed"
             else:

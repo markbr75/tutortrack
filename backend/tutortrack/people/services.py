@@ -531,6 +531,10 @@ def invite_to_portal(record: Contact | Student, *, email: str = "") -> Any:
         )
     if record.user_id is not None:
         raise BusinessRuleViolation(_("They already have a portal login."))
+    if not is_contact:
+        from tutortrack.privacy.children import require_login_allowed
+
+        require_login_allowed(record)  # COPPA: verifiable parental consent for under-13s
     pending = Invitation.objects.filter(email=address, status=Invitation.Status.PENDING).first()
     if pending is not None:
         return pending

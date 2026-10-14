@@ -8,6 +8,7 @@ from tutortrack.comms.api.views import postmark_webhook, twilio_inbound, twilio_
 from tutortrack.core.api.health import healthz, readyz
 from tutortrack.leads.api.views import inbound_email
 from tutortrack.payments.api.views import gocardless_webhook, paypal_webhook, stripe_webhook
+from tutortrack.privacy.api.compliance_views import security_txt
 from tutortrack.scheduling.api.views import ical_feed
 from tutortrack.sites.internal import tls_ask
 from tutortrack.subscriptions.api.views import stripe_billing_webhook
@@ -52,6 +53,7 @@ api_v1: list[URLPattern | URLResolver] = [
 ]
 
 urlpatterns = [
+    path(".well-known/security.txt", security_txt, name="security-txt"),
     path("healthz", healthz, name="healthz"),
     path("readyz", readyz, name="readyz"),
     path("api/v1/", include(api_v1)),

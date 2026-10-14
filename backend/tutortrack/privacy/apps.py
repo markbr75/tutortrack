@@ -7,4 +7,18 @@ class PrivacyConfig(AppConfig):
     verbose_name = "Privacy"
 
     def ready(self) -> None:
-        from . import subjects  # noqa: F401 - registers built-in consent subjects
+        from django.utils.module_loading import autodiscover_modules
+
+        from . import (  # noqa: F401 - registrations
+            handlers,
+            notifications,
+            org_settings,
+            own_data,
+            retention,
+            safeguarding,
+            safeguards,
+            subjects,
+        )
+
+        # Every app's privacy provider (``<app>/privacy.py``, ADR 0028).
+        autodiscover_modules("privacy")

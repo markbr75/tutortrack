@@ -130,7 +130,7 @@ def test_families_and_tutors_message_each_other_when_allowed(org, world):  # noq
 
 def test_students_message_only_when_allowed(org):
     from tutortrack.people import services as people
-    from tutortrack.people.tests.factories import ClientFactory, StudentFactory
+    from tutortrack.people.tests.factories import ClientFactory, ContactFactory, StudentFactory
 
     client = ClientFactory(organisation=org)
     student = StudentFactory(organisation=org, client=client, first_name="Maya")
@@ -140,6 +140,10 @@ def test_students_message_only_when_allowed(org):
     api = client_for(org, member.user)
     assert api.get("/api/v1/portal/me").json()["features"]["messages"] is False
     set_portal(org, allow_student_messaging=True)
+    # E29: a parent must be on every conversation with a student under 18.
+    no_parent = api.post("/api/v1/portal/threads", {"body": "Can I get extra help?"}, format="json")
+    assert no_parent.status_code == 422
+    ContactFactory(organisation=org, client=client)
     started = api.post("/api/v1/portal/threads", {"body": "Can I get extra help?"}, format="json")
     assert started.status_code == 201, started.json()
     assert len(api.get("/api/v1/portal/threads").json()) == 1

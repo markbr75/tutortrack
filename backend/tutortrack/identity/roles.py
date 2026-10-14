@@ -47,8 +47,11 @@ def _g(*raw: str) -> tuple[Grant, ...]:
 # Codenames an Admin never gets (ownership and the SaaS subscription, FR-03-5).
 OWNER_ONLY = (
     "org.close", "subscription.manage", "membership.transfer_ownership", "support.access.manage",
-    "migration.export.full",
+    "migration.export.full", "privacy.dpa.manage",
 )  # fmt: skip
+# Safeguarding cases go only to Designated Safeguarding Leads (E29 FR-29-6): the owner, or
+# members given a custom role that grants ``safeguarding.dsl``. Admins are not DSLs by default.
+NOT_DSL = ("safeguarding.dsl",)
 
 ROLES: dict[str, RoleDef] = {
     r.key: r
@@ -56,12 +59,13 @@ ROLES: dict[str, RoleDef] = {
         RoleDef("owner", "Owner", "Everything, including subscription and closing the account.",
                 _g("*")),
         RoleDef("admin", "Admin", "Everything except changing the subscription and ownership.",
-                _g("*"), denies=(*OWNER_ONLY, "impersonation.write")),
+                _g("*"), denies=(*OWNER_ONLY, *NOT_DSL, "impersonation.write")),
         RoleDef(
             "branch_manager", "Branch Manager", "Admin rights within assigned branches.",
             _g("*:branch", "org.settings.view"),
-            denies=(*OWNER_ONLY, "subscription.view", "org.settings.manage", "org.branch.manage",
-                    "audit.*", "migration.*"),
+            denies=(*OWNER_ONLY, *NOT_DSL, "subscription.view", "org.settings.manage",
+                    "org.branch.manage", "audit.*", "migration.*", "privacy.dsar.manage",
+                    "privacy.retention.manage", "privacy.legal_hold.manage"),
         ),
         RoleDef(
             "coordinator", "Coordinator",
@@ -75,7 +79,8 @@ ROLES: dict[str, RoleDef] = {
                "reporting.operations.view", "reporting.sales.view", "reporting.people.view",
                "reporting.export", "reporting.schedule.manage:own", "sites.view",
                "sites.profile.moderate", "growth.review.*", "growth.referral.*",
-               "growth.tutor_referral.*", "growth.affiliate.view"),
+               "growth.tutor_referral.*", "growth.affiliate.view", "safeguarding.raise",
+               "safeguarding.lone_working.monitor"),
             denies=("people.tutor.view_financial", "scheduling.edit_locked",
                     "matching.include_restricted", "matching.settings.manage"),
         ),
@@ -105,7 +110,7 @@ ROLES: dict[str, RoleDef] = {
                "reporting.payroll.view:own", "integrations.personal",
                "sites.profile.edit:own", "growth.review.view:own",
                "growth.tutor_referral.view:own", "comms.inbox.view:own",
-               "comms.inbox.reply:own"),
+               "comms.inbox.reply:own", "safeguarding.raise", "safeguarding.checkin:own"),
             # Organisation-wide learning settings and approvals stay with staff (E21).
             denies=("learning.curriculum.manage", "learning.progress.approve",
                     "learning.library.manage", "learning.library.charge"),

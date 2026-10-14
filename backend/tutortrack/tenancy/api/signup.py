@@ -170,6 +170,49 @@ class SignupView(APIView):
         )
 
 
+class SignupRegionSerializer(serializers.Serializer):
+    country = serializers.CharField()
+    region = serializers.CharField()
+    region_name = serializers.CharField()
+    serves_here = serializers.BooleanField()
+    signup_url = serializers.CharField(allow_blank=True)
+
+
+class SignupRegionView(APIView):
+    """Which regional stack hosts organisations from a country (E29-T11 data residency).
+    When ``serves_here`` is false the signup page sends people to ``signup_url``."""
+
+    permission_classes = [AllowAny]
+    authentication_classes: list[Any] = []
+
+    @extend_schema(
+        parameters=[OpenApiParameter("country", str, required=True, description="ISO 3166-1")],
+        responses=SignupRegionSerializer,
+        examples=[
+            OpenApiExample(
+                "US organisation on the UK stack",
+                value={
+                    "country": "US",
+                    "region": "us",
+                    "region_name": "United States",
+                    "serves_here": False,
+                    "signup_url": "https://us.tutortrack.app/signup?country=US",
+                },
+                response_only=True,
+            )
+        ],
+    )
+    def get(self, request: Request) -> Response:
+        from ..regions import describe
+
+        country = str(request.query_params.get("country", "")).strip()
+        if len(country) != 2 or not country.isalpha():
+            raise BusinessRuleViolation(
+                _("Choose a country."), extra={"errors": {"country": [_("Choose a country.")]}}
+            )
+        return Response(SignupRegionSerializer(describe(country)).data)
+
+
 class SignupConfigSerializer(serializers.Serializer):
     turnstile_site_key = serializers.CharField(allow_blank=True)
 

@@ -31,7 +31,7 @@ from tutortrack.core.exceptions import BusinessRuleViolation
 from tutortrack.core.time import now
 from tutortrack.tenancy.settings_service import get_setting
 
-from . import channels, defaults, events, registry, render
+from . import channels, defaults, events, hooks, registry, render
 from .models import (
     Channel,
     CommunicationPreference,
@@ -385,6 +385,22 @@ def _create(
         return None  # no device has push switched on
     if channel not in {Channel.IN_APP, Channel.PUSH} and suppressed(channel, address):
         status = Message.Status.SUPPRESSED
+    blocked = hooks.run_pre_send(
+        hooks.OutgoingMessage(
+            type_key=t.key,
+            category=t.category,
+            channel=channel,
+            recipient_kind=recipient.kind,
+            recipient_id=recipient.id,
+            recipient_user_id=recipient.user_id,
+            subject=subject_text,
+            body=body,
+        )
+    )
+    if blocked:
+        if channel in {Channel.IN_APP, Channel.PUSH}:
+            return None
+        status = Message.Status.SUPPRESSED
     scheduled = None
     if channel in {Channel.SMS, Channel.WHATSAPP} and status == Message.Status.QUEUED:
         tz = str((delivery.context.get("organisation") or {}).get("timezone") or "UTC")
@@ -402,6 +418,7 @@ def _create(
                 subject=subject_text[:300],
                 body=body,
                 status=status,
+                error=blocked[:500],
                 related_type=t.related_type,
                 related_id=related_id,
                 target_type=recipient.target[0],
@@ -923,6 +940,7 @@ def queue_message(
     thread: Any = None,
     meta: dict[str, Any] | None = None,
     respect_quiet_hours: bool = True,
+    category: str = "",
 ) -> Message | None:
     """Queue one message that isn't a templated notification (a broadcast to one person,
     an inbox reply) through the same channels, suppressions, quiet hours and delivery
@@ -938,6 +956,26 @@ def queue_message(
         return None
     status = Message.Status.QUEUED
     if channel not in {Channel.IN_APP, Channel.PUSH} and suppressed(channel, address):
+        status = Message.Status.SUPPRESSED
+    # E29 pre-send hooks (e.g. no marketing to children). People's own words are screened
+    # where they write them (the inbox), so this carries no sender.
+    blocked = hooks.run_pre_send(
+        hooks.OutgoingMessage(
+            type_key=type_key,
+            category=category,
+            channel=channel,
+            recipient_kind=recipient.kind,
+            recipient_id=recipient.id,
+            recipient_user_id=recipient.user_id,
+            subject=subject,
+            body=body,
+            source_type=related[0] or "comms.message",
+            source_id=related[1],
+        )
+    )
+    if blocked:
+        if channel in {Channel.IN_APP, Channel.PUSH}:
+            return None
         status = Message.Status.SUPPRESSED
     scheduled = None
     texting = channel in {Channel.SMS, Channel.WHATSAPP}
@@ -956,6 +994,7 @@ def queue_message(
                 subject=subject[:300],
                 body=body,
                 status=status,
+                error=blocked[:500],
                 related_type=related[0],
                 related_id=related[1],
                 target_type=recipient.target[0],

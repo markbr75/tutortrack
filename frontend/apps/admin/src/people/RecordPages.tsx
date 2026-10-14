@@ -12,6 +12,7 @@ import { ClientBilling } from "../billing/ClientBilling";
 import { InviteButton } from "../portal/InviteButton";
 import { RecordActivity } from "../crm/Activity";
 import { StudentJobs } from "../jobs/StudentJobs";
+import { StudentPrivacyPanel } from "../safeguarding/SafeguardingPages";
 import { STUDENT_STATUSES, TUTOR_STATUSES } from "./statuses";
 
 const linkClass = "font-medium underline-offset-2 hover:underline";
@@ -269,6 +270,7 @@ export function StudentPage({ studentId }: { studentId: string }) {
       <div className="mt-4">
         <StudentJobs studentId={s.id} />
       </div>
+      <StudentPrivacyPanel studentId={s.id} />
       <RecordActivity target={{ target_type: "people.student", target_id: s.id }} />
     </article>
   );

@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import functools
 import hashlib
 import re
 import uuid
@@ -41,7 +42,7 @@ from tutortrack.core.exceptions import BusinessRuleViolation
 from tutortrack.core.time import now
 from tutortrack.tenancy.settings_service import get_setting
 
-from . import events
+from . import events, hooks
 from .models import CannedReply, Channel, Message, Thread, ThreadMessage, ThreadParticipant
 from .registry import Recipient
 
@@ -392,7 +393,32 @@ def _link_files(entry: ThreadMessage) -> None:
         attach(stored, entry)
 
 
-@transaction.atomic
+class _Blocked(Exception):
+    def __init__(self, message: hooks.OutgoingMessage) -> None:
+        super().__init__(message.type_key)
+        self.message = message
+
+
+def _safeguarded(fn: Any) -> Any:
+    """Run ``fn`` in a transaction; if the safeguards block the message, keep the DSL's
+    flag (it would roll back with the message) and refuse with a readable error."""
+
+    @functools.wraps(fn)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        try:
+            with transaction.atomic():
+                return fn(*args, **kwargs)
+        except _Blocked as blocked:
+            hooks.run_pre_send(blocked.message)  # records the flag outside the rolled-back work
+            raise _invalid(
+                "body",
+                _("This message can't be sent under your organisation's safeguarding policy."),
+            ) from None
+
+    return wrapper
+
+
+@_safeguarded
 def reply(
     thread: Thread,
     user: Any,
@@ -420,6 +446,7 @@ def reply(
     recipients = _external_recipients(thread, channel) if channel != Via.CHAT else []
     if channel != Via.CHAT and not recipients:
         raise _invalid("channel", _("We don't have an address for them on that channel."))
+    _run_safeguards(thread, user, body=body, subject=subject)
     entry = _record(
         thread,
         direction=Direction.OUTBOUND,
@@ -600,15 +627,47 @@ def _check_safeguarding(thread: Thread, body: str) -> None:
         )
 
 
-@transaction.atomic
+def _run_safeguards(thread: Thread, sender: Any, *, body: str, subject: str = "") -> None:
+    """E29 messaging safeguards for a message a person writes, before it is stored."""
+    if sender is None:
+        return
+    participants = tuple(
+        (p.person_type, p.person_id) for p in thread.participants.exclude(person_type="external")
+    )
+    message = hooks.OutgoingMessage(
+        type_key="inbox_message",
+        category="service",
+        channel=Via.CHAT,
+        recipient_kind="thread",
+        recipient_id=str(thread.pk),
+        recipient_user_id=None,
+        subject=subject,
+        body=body,
+        sender_user_id=str(sender.pk),
+        participants=participants,
+        source_type="comms.thread",
+    )
+    blocked = hooks.run_pre_send(message)
+    if blocked:
+        raise _Blocked(message)
+
+
+@_safeguarded
 def post_from_portal(
     thread: Thread, author: Author, *, body: str, attachments: list[Any] | None = None
 ) -> ThreadMessage:
     """A family member, student or tutor writes in the portal."""
+    return _post(thread, author, body=body, attachments=attachments)
+
+
+def _post(
+    thread: Thread, author: Author, *, body: str, attachments: list[Any] | None = None
+) -> ThreadMessage:
     body = body.strip()
     if not body:
         raise _invalid("body", _("Write a message."))
     _check_safeguarding(thread, body)
+    _run_safeguards(thread, author.user, body=body)
     files = _attachments(attachments or [], user=author.user)
     entry = _record(
         thread,
@@ -627,7 +686,7 @@ def post_from_portal(
     return entry
 
 
-@transaction.atomic
+@_safeguarded
 def start_from_portal(
     author: Author,
     *,
@@ -650,7 +709,7 @@ def start_from_portal(
             name=student.full_name,
         )
     _check_safeguarding(thread, body)
-    post_from_portal(thread, author, body=body, attachments=attachments)
+    _post(thread, author, body=body, attachments=attachments)
     return thread
 
 

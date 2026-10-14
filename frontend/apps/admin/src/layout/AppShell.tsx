@@ -43,6 +43,8 @@ const NAV = [
   { to: "/team", key: "nav.team", permission: "team.view" },
   { to: "/team/roles", key: "nav.roles", permission: "team.view" },
   { to: "/audit", key: "nav.audit", permission: "audit.view" },
+  { to: "/privacy", key: "privacyCentre.nav", permission: "privacy.dsar.manage" },
+  { to: "/safeguarding", key: "safeguarding.nav", permission: "safeguarding.dsl" },
   { to: "/settings/payments", key: "nav.payments", permission: "payments.provider.manage" },
   { to: "/settings/booking", key: "nav.booking", permission: "scheduling.booking.settings" },
   { to: "/settings/sso", key: "nav.sso", permission: "security.sso.manage" },

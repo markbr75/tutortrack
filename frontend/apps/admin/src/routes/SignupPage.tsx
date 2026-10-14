@@ -28,6 +28,16 @@ export function SignupPage() {
     queryFn: async () => unwrap(await api.GET("/api/v1/signup/config")),
   });
   const siteKey = config.data?.turnstile_site_key ?? "";
+  // E29-T11: organisations are hosted in their country's region.
+  const region = useQuery({
+    queryKey: ["signup-region", form.country],
+    queryFn: async () =>
+      unwrap(
+        await api.GET("/api/v1/signup/region", { params: { query: { country: form.country } } }),
+      ),
+    retry: false,
+  });
+  const elsewhere = region.data && !region.data.serves_here ? region.data : null;
 
   const signup = useMutation({
     mutationFn: async () =>
@@ -55,8 +65,16 @@ export function SignupPage() {
   return (
     <PublicLayout title={t("signup.title")} subtitle={t("signup.subtitle")}>
       <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
-        {signup.isError && Object.keys(errors).length === 0 ? (
+        {signup.isError && Object.keys(errors).length === 0 && !elsewhere ? (
           <Alert tone="danger">{signup.error.message}</Alert>
+        ) : null}
+        {elsewhere ? (
+          <Alert tone="info">
+            {t("privacyCentre.region.elsewhere", { region: elsewhere.region_name })}{" "}
+            <a className="underline" href={elsewhere.signup_url}>
+              {t("privacyCentre.region.continue", { region: elsewhere.region_name })}
+            </a>
+          </Alert>
         ) : null}
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField
