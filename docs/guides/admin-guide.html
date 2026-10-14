@@ -1,0 +1,2007 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TutorTrack admin guide</title>
+  <meta name="description" content="Setting up and configuring a TutorTrack organisation, and running the TutorTrack service.">
+  <link rel="stylesheet" href="guide.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="product" href="README.md">TutorTrack</a>
+      <span class="guide-title">Admin guide</span>
+      <nav aria-label="Guides">
+        <a href="user-guide.html">User guide</a>
+        <a href="admin-guide.html" aria-current="page">Admin guide</a>
+        <a href="api-guide.html">API guide</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Contents">
+      <details open>
+        <summary>Introduction</summary>
+        <ol>
+          <li><a href="#overview-h">About this guide</a>
+            <ol>
+              <li><a href="#overview-basics">Basics worth knowing first</a></li>
+              <li><a href="#overview-checklist">Setup checklist for going live</a></li>
+            </ol>
+          </li>
+        </ol>
+      </details>
+      <details open>
+        <summary>Part A · Organisation administrators</summary>
+        <ol>
+          <li><a href="#signup-h">Signing up and onboarding</a>
+            <ol>
+              <li><a href="#signup-account">Create the organisation</a></li>
+              <li><a href="#signup-wizard">The onboarding wizard</a></li>
+              <li><a href="#signup-demo">Demo data</a></li>
+              <li><a href="#signup-checklist">The Get started checklist</a></li>
+            </ol>
+          </li>
+          <li><a href="#settings-h">Organisation settings</a>
+            <ol>
+              <li><a href="#settings-profile">Organisation profile</a></li>
+              <li><a href="#settings-general">General and terminology</a></li>
+              <li><a href="#settings-branches">Branches</a></li>
+              <li><a href="#settings-registry">Settings that have no screen yet</a></li>
+              <li><a href="#support-access">TutorTrack support access</a></li>
+              <li><a href="#settings-close">Close the account</a></li>
+            </ol>
+          </li>
+          <li><a href="#team-h">Team and invitations</a>
+            <ol>
+              <li><a href="#team-invite">Invite someone</a></li>
+              <li><a href="#team-manage">Change a role or remove someone</a></li>
+              <li><a href="#team-view-as">View as another member</a></li>
+            </ol>
+          </li>
+          <li><a href="#roles-h">Roles and permissions</a>
+            <ol>
+              <li><a href="#roles-builtin">Built-in roles</a></li>
+              <li><a href="#roles-custom">Custom roles</a></li>
+              <li><a href="#roles-fields">Sensitive fields</a></li>
+            </ol>
+          </li>
+          <li><a href="#sso-h">Single sign-on and sign-in security</a>
+            <ol>
+              <li><a href="#sso-setup">Organisation single sign-on</a></li>
+              <li><a href="#sso-mfa">Two-factor authentication and sessions</a></li>
+            </ol>
+          </li>
+          <li><a href="#audit-h">Audit log</a></li>
+          <li><a href="#plan-h">Billing &amp; plan</a>
+            <ol>
+              <li><a href="#plan-plans">Plans and what they include</a></li>
+              <li><a href="#plan-trial">Trial, payment and plan changes</a></li>
+            </ol>
+          </li>
+          <li><a href="#payments-h">Payments setup</a>
+            <ol>
+              <li><a href="#payments-providers">Connect a payment provider</a></li>
+              <li><a href="#payments-options">Auto-pay, payment methods and surcharges</a></li>
+            </ol>
+          </li>
+          <li><a href="#billing-options-h">Billing and payroll options</a>
+            <ol>
+              <li><a href="#billing-options-billing">Billing options</a></li>
+              <li><a href="#billing-options-payroll">Payroll options</a></li>
+            </ol>
+          </li>
+          <li><a href="#catalogue-h">Catalogue and pricing</a>
+            <ol>
+              <li><a href="#catalogue-tabs">What each tab holds</a></li>
+              <li><a href="#catalogue-precedence">Which price wins</a></li>
+            </ol>
+          </li>
+          <li><a href="#policies-h">Lesson policies</a>
+            <ol>
+              <li><a href="#policies-cancellation">Cancellation policy</a></li>
+              <li><a href="#policies-overrides">Overrides</a></li>
+              <li><a href="#policies-reports">Report templates</a></li>
+            </ol>
+          </li>
+          <li><a href="#booking-h">Online booking</a></li>
+          <li><a href="#accounting-h">Accounting</a>
+            <ol>
+              <li><a href="#accounting-connect">Connect and map</a></li>
+              <li><a href="#accounting-xero-payroll">Xero Payroll for employed tutors</a></li>
+            </ol>
+          </li>
+          <li><a href="#marketplace-h">Integrations directory</a></li>
+          <li><a href="#notifications-h">Notifications and templates</a>
+            <ol>
+              <li><a href="#notifications-types">Turn messages on and choose channels</a></li>
+              <li><a href="#notifications-wording">Edit the wording</a></li>
+            </ol>
+          </li>
+          <li><a href="#messaging-h">Messaging channels</a>
+            <ol>
+              <li><a href="#messaging-domain">Sending domain</a></li>
+              <li><a href="#messaging-numbers">Numbers and WhatsApp</a></li>
+              <li><a href="#messaging-marketing">Mailchimp and Brevo</a></li>
+            </ol>
+          </li>
+          <li><a href="#integrations-h">Calendar, video and other integrations</a>
+            <ol>
+              <li><a href="#integrations-calendars">Calendars</a></li>
+              <li><a href="#integrations-video">Online lessons</a></li>
+              <li><a href="#integrations-org">Organisation integrations</a></li>
+              <li><a href="#integrations-warehouse">Warehouse export</a></li>
+            </ol>
+          </li>
+          <li><a href="#ai-h">AI assistant</a></li>
+          <li><a href="#automations-h">Automations</a>
+            <ol>
+              <li><a href="#automations-build">Build an automation</a></li>
+              <li><a href="#automations-catalogue">Triggers, actions and recipes</a></li>
+              <li><a href="#automations-safety">Safety limits</a></li>
+            </ol>
+          </li>
+          <li><a href="#portal-config-h">Portal configuration</a></li>
+          <li><a href="#data-h">Import, export and migration</a>
+            <ol>
+              <li><a href="#data-import">Import a spreadsheet</a></li>
+              <li><a href="#data-migration">Move from another system</a></li>
+              <li><a href="#data-export">Export all your data</a></li>
+            </ol>
+          </li>
+          <li><a href="#website-h">Website, widgets, domains and branding</a>
+            <ol>
+              <li><a href="#website-branding">Branding</a></li>
+              <li><a href="#website-domains">Custom domains</a></li>
+              <li><a href="#website-widgets">Widgets</a></li>
+              <li><a href="#website-builder">Website builder and blog</a></li>
+            </ol>
+          </li>
+          <li><a href="#developer-h">Developer area</a></li>
+          <li><a href="#privacy-h">Privacy centre</a>
+            <ol>
+              <li><a href="#privacy-dsar">Data subject requests</a></li>
+              <li><a href="#privacy-erasure">Erasure and legal holds</a></li>
+              <li><a href="#privacy-retention">Retention</a></li>
+              <li><a href="#privacy-consent">Consent and children</a></li>
+              <li><a href="#privacy-dpa">Agreement and sub-processors</a></li>
+              <li><a href="#privacy-residency">Data residency</a></li>
+            </ol>
+          </li>
+          <li><a href="#safeguarding-h">Safeguarding</a>
+            <ol>
+              <li><a href="#safeguarding-concerns">Concerns and cases</a></li>
+              <li><a href="#safeguarding-messages">Flagged messages and lone working</a></li>
+              <li><a href="#safeguarding-settings">Safeguarding settings</a></li>
+            </ol>
+          </li>
+        </ol>
+      </details>
+      <details open>
+        <summary>Part B · Platform operators</summary>
+        <ol>
+          <li><a href="#platform-h">The TutorTrack console</a>
+            <ol>
+              <li><a href="#p-access">Who can use the console</a></li>
+              <li><a href="#p-tenants-h">Organisations</a></li>
+              <li><a href="#p-flags-h">Feature flags</a></li>
+              <li><a href="#p-operations-h">Operations</a></li>
+              <li><a href="#p-health-h">Tenant health</a></li>
+              <li><a href="#p-metrics-h">SaaS metrics</a></li>
+              <li><a href="#p-feedback-h">Feedback and usage</a></li>
+              <li><a href="#p-support-h">Support inbox</a></li>
+              <li><a href="#p-plans-h">Plans and prices</a></li>
+              <li><a href="#p-revenue-share-h">Revenue share</a></li>
+              <li><a href="#p-workflows-h">Workflows</a></li>
+              <li><a href="#p-notices-h">Customer notices</a></li>
+            </ol>
+          </li>
+          <li><a href="#running-h">Running TutorTrack</a>
+            <ol>
+              <li><a href="#run-architecture">Architecture for operators</a></li>
+              <li><a href="#run-config">Configuration</a></li>
+              <li><a href="#run-deploy">Deploying</a></li>
+              <li><a href="#run-backups">Backups and restore</a></li>
+              <li><a href="#run-monitoring">Monitoring and alerts</a></li>
+              <li><a href="#run-keys">Encryption keys and rotation</a></li>
+              <li><a href="#run-commands">Useful management commands</a></li>
+              <li><a href="#run-runbooks">Runbooks</a></li>
+            </ol>
+          </li>
+        </ol>
+      </details>
+    </nav>
+
+    <main id="content">
+      <header>
+        <h1>TutorTrack admin guide</h1>
+        <p class="lead">How to set up and configure a tutoring business on TutorTrack, and how
+          the TutorTrack service itself is operated.</p>
+        <p class="meta">Last updated: 2026-10-14</p>
+      </header>
+
+      <section id="overview" aria-labelledby="overview-h">
+        <h2 id="overview-h">About this guide</h2>
+        <p>This guide has two parts:</p>
+        <div class="cards">
+          <div class="card">
+            <h3 id="overview-part-a">Part A: organisation administrators</h3>
+            <p>Owners and admins of a tutoring business: sign-up, settings, team and roles,
+              payments, pricing, policies, communications, integrations, data, website, privacy
+              and safeguarding.</p>
+          </div>
+          <div class="card">
+            <h3 id="overview-part-b">Part B: platform operators</h3>
+            <p>The people who run the TutorTrack service: the TutorTrack console, configuration,
+              deployment, backups, monitoring and key rotation.</p>
+          </div>
+        </div>
+        <p>Day-to-day work (the calendar, clients, invoicing, payroll runs, the tutor app and the
+          client portal) is in the <a href="user-guide.html">user guide</a>. The public REST API,
+          OAuth apps and webhooks are in the <a href="api-guide.html">API guide</a>.</p>
+
+        <h3 id="overview-basics">Basics worth knowing first</h3>
+        <ul>
+          <li><strong>Your organisation is your subdomain.</strong> Each business lives at its own address, such as <code>brightminds.tutortrack.app</code>. Data from different organisations is kept apart at every level, down to the database. If you belong to several organisations, the switcher at the bottom of the menu moves between them.</li>
+          <li><strong>What you see depends on your role.</strong> Menu items appear only if you have the permission they need. Each chapter names that permission (for example <code>payments.provider.manage</code>) and any plan the feature needs.</li>
+          <li><strong>Everything is audited.</strong> Every change is recorded in the <a href="#audit">audit log</a> with who made it.</li>
+          <li><strong>Money is never edited after the fact.</strong> Issued invoices, credit notes, payments and approved pay items are permanent; mistakes are corrected with credit notes and adjustments.</li>
+          <li><strong>Times are stored in UTC and shown in local time.</strong> Organisations, branches, people and lessons each carry a timezone; recurring lessons keep their local time when the clocks change.</li>
+          <li><strong>Some options have no screen yet.</strong> Where this guide says "API only", an owner or admin changes the option through the settings API (see <a href="#settings-registry">settings without a screen</a>).</li>
+        </ul>
+
+        <h3 id="overview-checklist">Setup checklist for going live</h3>
+        <ol class="steps">
+          <li>Sign up and complete the <a href="#signup-wizard">onboarding wizard</a>; set the currency and language carefully. Load <a href="#signup-demo">demo data</a> if you want to explore, and wipe it before you go live.</li>
+          <li>Complete the <a href="#settings-profile">organisation profile</a>: legal name, timezone, contact details and, if you have several locations, <a href="#settings-branches">branches</a>.</li>
+          <li>Set up the <a href="#catalogue">catalogue</a>: subjects, services, tax rates, pay rates or tiers, discounts and packages. Use <span class="ui">Price check</span> to test.</li>
+          <li>Set your <a href="#lesson-policies">cancellation policy</a> and lesson report templates.</li>
+          <li>Connect <a href="#payments">payments</a> (Stripe, GoCardless or PayPal) and choose auto-pay timing and the payment methods each branch accepts. Review the <a href="#billing-options">billing options</a>.</li>
+          <li>Review <a href="#notifications">notifications</a> and reword the messages families receive. On Enterprise or with the add-on, set up a <a href="#messaging-domain">sending domain</a>.</li>
+          <li>Add your <a href="#website-branding">branding</a> (logo, colours, email and invoice footers) and, if you have one, a <a href="#website-domains">custom domain</a>.</li>
+          <li>Import your existing data, or use <a href="#data-migration">Move from another system</a>. Check the dry run before every import.</li>
+          <li>Invite your <a href="#team">team</a>, give each person the right <a href="#roles">role</a>, and decide whether to require two-factor authentication or <a href="#sso">single sign-on</a>.</li>
+          <li>Connect <a href="#accounting">accounting</a> and <a href="#integrations">calendars and video</a>, and turn on <a href="#booking">online booking</a> or <a href="#automations">automations</a> if you want them.</li>
+          <li>Review the <a href="#privacy">privacy centre</a>: accept the data processing agreement, choose retention and children's privacy settings, and appoint your <a href="#safeguarding">safeguarding leads</a>.</li>
+          <li>Add a payment method on <a href="#plan">Billing &amp; plan</a> before the 30-day trial ends.</li>
+        </ol>
+      </section>
+
+      <section id="signup" aria-labelledby="signup-h">
+        <p class="badge">Part A · Organisation administrators</p>
+        <h2 id="signup-h">Signing up and onboarding</h2>
+
+        <h3 id="signup-account">Create the organisation</h3>
+        <p>Go to the sign-up page (<span class="ui">Create your TutorTrack account</span>, "Free
+          trial. No card needed."). Enter your name, email and password, the
+          <span class="ui">Business name</span>, the <span class="ui">Country</span> and the
+          <span class="ui">Type of business</span> (Sole trader, Small team, Agency, Tuition centre
+          or Online school), accept the Terms of Service and select
+          <span class="ui">Create account</span>.</p>
+        <ul>
+          <li><strong>Web address.</strong> Your organisation gets its own subdomain, made from the business name (for example <code>bright-minds.tutortrack.app</code>; <code>-2</code> is added if the name is taken). The subdomain is how TutorTrack knows which organisation you are working in: every bookmark, invitation and portal link uses it.</li>
+          <li><strong>Region.</strong> The country decides where your data is hosted. If it belongs to another region (UK, EU, US or Australia), the page links you to that region's sign-up. See <a href="#privacy-residency">data residency</a>.</li>
+          <li><strong>Password.</strong> At least 8 characters, not easy to guess and not found in known breaches.</li>
+          <li><strong>Timezone.</strong> Taken from your browser; change it later in <a href="#settings">Settings</a>.</li>
+        </ul>
+        <p>After sign-up you land on the onboarding wizard on your new subdomain, and a
+          <span class="ui">Confirm your email</span> message goes to your inbox.</p>
+
+        <h3 id="signup-wizard">The onboarding wizard</h3>
+        <p><span class="ui">Set up your business</span> walks through up to eight steps. Each step
+          has <span class="ui">Back</span>, <span class="ui">Skip</span> and
+          <span class="ui">Next</span>, progress is saved after each one, and
+          <span class="ui">Finish setup</span> ends the wizard at any point.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Step</th><th scope="col">What you set</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ui">Your business</span></td><td>Type of business and team size.</td></tr>
+              <tr><td><span class="ui">Language, currency and timezone</span></td><td>English (UK) or English (US); currency (GBP, EUR, USD, AUD, CAD, NZD; default GBP); timezone.</td></tr>
+              <tr><td><span class="ui">Logo and colour</span></td><td>Brand colour (default <code>#2563eb</code>). Upload a logo later under <a href="#website-branding">Website &amp; branding</a>.</td></tr>
+              <tr><td><span class="ui">Your first service</span></td><td>Subject, level, lesson length (60 minutes) and price per lesson.</td></tr>
+              <tr><td><span class="ui">Invite your tutors</span></td><td>Up to 50 email addresses, one per line. Only shown for Small team, Agency and Tuition centre.</td></tr>
+              <tr><td><span class="ui">Your first student</span></td><td>A student and, optionally, their parent or guardian.</td></tr>
+              <tr><td><span class="ui">Take card payments</span></td><td><span class="ui">Connect Stripe</span> or <span class="ui">Decide later</span>.</td></tr>
+              <tr><td><span class="ui">How you invoice</span></td><td>Pay as you go (invoiced after lessons, the default), monthly in advance, or prepaid packages.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout warn">
+          <strong>Choose currency and language carefully</strong>
+          <p>The wizard is the only screen that sets the organisation's currency and language.
+            Prices, invoices and payments are recorded in that currency, and financial records
+            cannot be edited after they are issued. Change them before you issue the first
+            invoice, if at all.</p>
+        </div>
+        <p>Agency and Tuition centre switch multiple branches on by default (if the plan allows
+          it). The business type also decides which plan you move to after the trial (see
+          <a href="#plan">Billing &amp; plan</a>).</p>
+
+        <h3 id="signup-demo">Demo data</h3>
+        <p>To explore before you add real records, select <span class="ui">Explore with demo
+          data</span> at the bottom of the wizard. TutorTrack adds two services, three sample
+          families with four students, two tutors, weekly lessons (three weeks past and four
+          ahead, with reports), invoices in different states, payments, enquiries, a course, a
+          class, homework and a review. Every sample record is tagged
+          <span class="ui">Sample data</span>.</p>
+        <ul>
+          <li>Sample data never sends emails or texts, runs automations, syncs to accounting or fires webhooks, and uses its own invoice numbers (<code>DEMO-INV-…</code>), so your real numbering is untouched.</li>
+          <li>Remove it from <span class="path">Settings › Demo data › Wipe demo data</span>. The section only appears while sample data exists.</li>
+          <li>Wiping keeps any sample record that real data now points to (for example a real invoice for a sample family).</li>
+          <li>Loading and wiping need <code>org.settings.manage</code> and are both audited.</li>
+        </ul>
+
+        <h3 id="signup-checklist">The Get started checklist</h3>
+        <p>The home dashboard shows a <span class="ui">Get started</span> card with five steps:
+          set up a service, add a student, schedule a lesson, connect Stripe (any payment provider
+          counts) and send your first invoice. Steps tick themselves as you do them. Owners and
+          admins can select <span class="ui">Hide checklist</span>.</p>
+      </section>
+
+      <section id="settings" data-route="admin:/settings" aria-labelledby="settings-h">
+        <h2 id="settings-h">Organisation settings</h2>
+        <p><span class="path">Settings</span> holds the organisation's profile and general
+          options. Anyone with <code>org.settings.view</code> (owner, admin, branch manager,
+          coordinator, finance) can open it; saving needs <code>org.settings.manage</code> (owner
+          and admin).</p>
+
+        <h3 id="settings-profile">Organisation profile</h3>
+        <dl>
+          <dt><span class="ui">Business name</span> and <span class="ui">Legal name</span></dt>
+          <dd>The legal name appears on invoices and documents.</dd>
+          <dt><span class="ui">Web address</span></dt>
+          <dd>Your subdomain. 3–63 lowercase letters, numbers and single hyphens; reserved words
+            such as <code>admin</code>, <code>api</code>, <code>app</code>, <code>portal</code> and
+            <code>www</code> are refused. Changing it keeps the old address working for 90 days
+            (old links redirect).</dd>
+          <dt><span class="ui">Timezone</span></dt>
+          <dd>The organisation's IANA timezone, used for invoice runs, pay-run cut-offs and
+            anything without a more specific timezone. Branches, people and lessons carry their
+            own timezones; recurring lessons keep their local wall-clock time across daylight
+            saving changes.</dd>
+          <dt><span class="ui">Contact email</span>, <span class="ui">Contact phone</span>,
+            <span class="ui">Brand colour</span></dt>
+          <dd>Shown to families and used in emails.</dd>
+        </dl>
+        <p>Address, company number, VAT or tax number, fiscal year start, week start, date and
+          time formats are part of the organisation record and can be set through the API. The
+          tax number is encrypted and each read is logged.</p>
+
+        <h3 id="settings-general">General and terminology</h3>
+        <p><span class="ui">Default lesson length (minutes)</span> (default 60, 5–480) is used
+          when you create jobs and lessons. <span class="ui">Terminology</span> renames the key
+          words across the app: singular and plural for Tutor, Student, Client, Lesson and Job
+          (for example "Teacher" and "Pupil").</p>
+
+        <h3 id="settings-branches">Branches</h3>
+        <p>Branches split a business into locations or divisions. Branch-scoped people only see
+          the records in their branches, and some settings (lesson length, travel buffer,
+          payment methods, pay period) can be overridden per branch.</p>
+        <ul>
+          <li>Add a branch with <span class="ui">Branch name</span>, <span class="ui">Code</span> and <span class="ui">Add branch</span>. <span class="ui">Archive</span> works on every branch except the default.</li>
+          <li><span class="badge">Plan</span> Multiple branches need the Agency plan or above, and the plan's branch limit applies (10 on Agency). Extra branches above those included are charged per branch.</li>
+        </ul>
+
+        <h3 id="settings-registry">Settings that have no screen yet</h3>
+        <p>Every configurable option is registered in a settings registry, grouped by area, with
+          a default. Most areas have a screen (described in the chapters below), but some
+          options can only be changed through the API (<code>PATCH /api/v1/settings/{area}</code>
+          with <code>org.settings.manage</code>; branch-scoped options take
+          <code>?branch=</code>). The lookup order is branch value, then organisation value,
+          then the default.</p>
+        <details class="ref">
+          <summary>Options without a screen, with defaults</summary>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Area</th><th scope="col">Options (default)</th></tr></thead>
+              <tbody>
+                <tr><td>General</td><td>Business hours (Mon–Fri 09:00–20:00, Sat 09:00–17:00, Sun closed)</td></tr>
+                <tr><td>Security</td><td>Require 2FA for all staff roles, including tutors (off); staff idle sign-out (8 hours, 1–72); portal "remember me" (30 days, 1–90); support access only with a grant (off)</td></tr>
+                <tr><td>Tutor access</td><td>Client contact details tutors see (phone; none, phone or full); tutors may message clients directly (off), create lessons (off), reschedule lessons (on), cancel lessons (off), edit rates (off), view other calendars (off), add students (off)</td></tr>
+                <tr><td>Billing</td><td>Invoice prefix (<code>INV-</code>), credit note prefix (<code>CN-</code>), payment request prefix (<code>PR-</code>); invoice schedule (manual; or weekly, monthly) and day (1); review days (2); auto-issue, auto-send, auto-apply credit (on); minimum invoice amount (0); skip zero invoices (on); show tutor names (on); payment instructions and invoice footer (empty); reminders (on, at −3, 0, 3, 7, 14 and 30 days); prevent negative balance (on); prepaid top-ups (threshold 0, amount 200); package and plan invoicing; collections (after 0 days, soft block)</td></tr>
+                <tr><td>Payments</td><td>Manual methods (bank transfer, cash, cheque, other); allow partial payments (off); send receipts (on); card retries after 3 and 5 days; direct-debit retry after 3 days; pause auto-pay after failure (off); bank auto-match (off)</td></tr>
+                <tr><td>Payroll</td><td>Pay period (monthly) and cut-off day (28); pay only when the client paid (off); hold pay for overdue reports (on); include paid cancellations (on); minimum payout (0); dual approval threshold (never); bank file format (CSV); expense markup (0%); mileage from home (off); self-billing VAT (20%)</td></tr>
+                <tr><td>Communications</td><td>Sender name (organisation name); reply-to; quiet hours 21:00–08:00 (no texts); broadcast batches of 200 every 60 seconds; inbox reply target (24 hours); block contact sharing (off); digest times; student direct messaging (off)</td></tr>
+                <tr><td>Client portal</td><td>See <a href="#portal-config">Portal configuration</a></td></tr>
+                <tr><td>Courses</td><td>Proration basis (sessions); prorate mid-term joins (on); fee timing (at enrolment); withdrawal refunds (unused sessions); waitlist auto-offer (on, 48 hours); make-up credit (60 days)</td></tr>
+                <tr><td>Data migration</td><td>Import rollback window (7 days); export link lifetime (7 days)</td></tr>
+                <tr><td>Developer</td><td>API key rotation overlap (24 hours)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <h3 id="support-access">TutorTrack support access</h3>
+        <p>This section of <span class="path">Settings</span> controls when TutorTrack's own
+          support staff may look at your account. By default, support can view your account
+          read-only when you raise a ticket; every visit is listed here and you are notified
+          (<span class="ui">TutorTrack support accessed your account</span>, with their reason).</p>
+        <ol class="steps">
+          <li>To let support make changes, or to allow access when your organisation requires a grant, enter the number of <span class="ui">Days</span> (1–30, default 7).</li>
+          <li>Tick <span class="ui">Allow changes</span> only if support needs to fix something for you.</li>
+          <li>Select <span class="ui">Grant access</span>. The grant shows its end date; select <span class="ui">Revoke</span> to end it early.</li>
+        </ol>
+        <p>Only the owner can grant or revoke access (<code>support.access.manage</code>); admins
+          can see the list. To require a grant for every support visit, turn on
+          <code>security.support_access_requires_grant</code> (API only).</p>
+
+        <h3 id="settings-close">Close the account</h3>
+        <p>The owner can close the organisation from <span class="path">Settings › Close
+          account</span>: give a reason, type the subdomain and your password, and select
+          <span class="ui">Close account permanently</span>. The subscription is cancelled, you get
+          a full export by email, and the data is kept for 30 days and then deleted.</p>
+      </section>
+
+      <section id="team" data-route="admin:/team" aria-labelledby="team-h">
+        <h2 id="team-h">Team and invitations</h2>
+        <p><span class="path">Team</span> lists every member of the organisation with their role.
+          Viewing needs <code>team.view</code>; inviting needs <code>team.invite</code>; changing
+          roles and removing people needs <code>team.manage</code>.</p>
+
+        <h3 id="team-invite">Invite someone</h3>
+        <ol class="steps">
+          <li>Under <span class="ui">Invite someone</span>, enter the <span class="ui">Email</span>.</li>
+          <li>Choose the <span class="ui">Role</span> (default Tutor). Only an owner can invite another owner.</li>
+          <li>Select <span class="ui">Send invitation</span>. The link is valid for 7 days and opens on your subdomain; people who already have a TutorTrack account sign in with the invited email.</li>
+          <li>Manage open invitations under <span class="ui">Pending invitations</span>: <span class="ui">Resend</span> creates a new link (the old one stops working) and <span class="ui">Revoke</span> cancels it.</li>
+        </ol>
+        <p>Tutors, clients and students are usually invited from their records (see the
+          <a href="user-guide.html">user guide</a>); the Team page is mostly for staff.</p>
+
+        <h3 id="team-manage">Change a role or remove someone</h3>
+        <ul>
+          <li>Change a member's role from the drop-down next to their name (Owner, Admin, Branch manager, Coordinator, Finance, Tutor, Client, Student). For a mix of permissions, use <a href="#roles">custom roles</a>.</li>
+          <li><span class="ui">Remove</span> ends their access straight away. Their history and audit trail stay.</li>
+          <li>Nobody can change or remove themselves, and the organisation must always keep at least one owner.</li>
+          <li>Branch membership, job titles and suspending (rather than removing) a member are available through the API only.</li>
+        </ul>
+        <div class="callout">
+          <strong>Plan limits</strong>
+          <p>Tutors (onboarding, active and restricted) count against the plan's tutor limit:
+            1 on Solo, 15 on Team, unlimited on Agency and Enterprise.</p>
+        </div>
+
+        <h3 id="team-view-as">View as another member</h3>
+        <p>To see exactly what a tutor, client or student sees, select <span class="ui">View
+          as</span> on their row (needs <code>impersonation.start</code>). A banner shows
+          <span class="ui">You're viewing as {name}.</span> and <span class="ui">Read-only.</span>;
+          select <span class="ui">Stop viewing as</span> to return. Everything you do is audited
+          with you recorded as the impersonator. Making changes while viewing as someone needs
+          <code>impersonation.write</code>, which only the owner has by default.</p>
+      </section>
+
+      <section id="roles" data-route="admin:/team/roles" aria-labelledby="roles-h">
+        <h2 id="roles-h">Roles and permissions</h2>
+        <p>Every member has one built-in role. Built-in roles are defined by TutorTrack and pick
+          up new permissions automatically when features are added. If they do not fit, make
+          custom roles on <span class="path">Team › Roles</span> (<span class="ui">Roles and
+          permissions</span>).</p>
+
+        <h3 id="roles-builtin">Built-in roles</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Role</th><th scope="col">What it can do</th><th scope="col">Cannot</th></tr></thead>
+            <tbody>
+              <tr><td>Owner</td><td>Everything, including the subscription, closing the account, ownership transfer, support access grants, full data export, the DPA and safeguarding cases (the owner is a Designated Safeguarding Lead).</td><td>—</td></tr>
+              <tr><td>Admin</td><td>Everything else in the organisation.</td><td>Change the subscription, transfer ownership, close the account, grant support access, run a full data export, manage the DPA, open safeguarding cases, make changes while viewing as someone.</td></tr>
+              <tr><td>Branch manager</td><td>Admin rights over records in their branches, and view settings.</td><td>See the plan, change organisation settings or branches, see the audit log, import or export data, manage data requests, retention or legal holds, change AI settings, merge duplicates.</td></tr>
+              <tr><td>Coordinator</td><td>Day-to-day operations in full: people, notes and tasks, jobs, scheduling, lesson delivery, communications, leads, courses, learning and matching. Views invoices, charge rates, the catalogue, settings, team, dashboards and most reports; moderates reviews and runs referrals; uses the AI assistant; raises safeguarding concerns.</td><td>See tutor financial details, edit locked lessons, change matching settings, merge duplicates, manage billing or payroll.</td></tr>
+              <tr><td>Finance</td><td>Billing, payments, payroll, accounting integrations and all reports; manages rates; views clients, settings, team, notes, catalogue, courses and the plan; affiliates and commission; AI usage.</td><td>Manage people, scheduling or communications.</td></tr>
+              <tr><td>Tutor</td><td>Their own lessons, availability, profile, jobs, students, lesson reports and attendance, feedback, pay and expenses, learning tools, class registers, dashboards, inbox, website profile and reviews. Raises safeguarding concerns and uses the AI assistant. Uses the tutor app, not the admin app.</td><td>See other tutors' records, curriculum, approvals or the resource library settings. Some actions can be switched on with the tutor access options (see <a href="#settings-registry">settings without a screen</a>).</td></tr>
+              <tr><td>Client, Student, Affiliate</td><td>Their own records in the client portal or affiliate portal.</td><td>Use the admin app.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout warn">
+          <strong>Branch managers and organisation-wide actions</strong>
+          <p>Branch scope limits records that belong to a branch. Actions that have no branch,
+            such as inviting team members, editing roles, single sign-on and
+            <span class="ui">View as</span>, are not limited by it today, so give the Branch
+            manager role only to people you would trust with those.</p>
+        </div>
+
+        <h3 id="roles-custom">Custom roles</h3>
+        <ol class="steps">
+          <li>Enter a <span class="ui">Role name</span> and choose what to <span class="ui">Start from</span> (Admin, Branch manager, Coordinator, Finance or Tutor), then select <span class="ui">Create role</span>.</li>
+          <li>In the matrix, set each permission to <span class="ui">No</span>, <span class="ui">Their own</span>, <span class="ui">Their branches</span> or <span class="ui">Everyone</span>, and select <span class="ui">Save changes</span>.</li>
+          <li>Under <span class="ui">Team members with this role</span>, tick the staff and tutors who should have it.</li>
+        </ol>
+        <ul>
+          <li>Someone with custom roles gets everything those roles allow <em>instead of</em> their built-in role's permissions. The built-in role still decides whether they are staff or a portal user and whether the staff 2FA rule applies.</li>
+          <li>Owners and portal users cannot have custom roles, owner-only permissions cannot be granted, and nobody can change their own roles.</li>
+          <li><span class="ui">Archive</span> removes a role from everyone who has it.</li>
+          <li>A custom role is a copy: it does <strong>not</strong> get permissions added in later releases. Review your custom roles after new features ship.</li>
+          <li>The only way to make someone other than the owner a Designated Safeguarding Lead is a custom role that allows <code>safeguarding.dsl</code>.</li>
+        </ul>
+
+        <h3 id="roles-fields">Sensitive fields</h3>
+        <p>Some fields are hidden, and cannot be changed, unless the person has a specific
+          permission. They disappear from screens, exports and the API alike.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Fields</th><th scope="col">Permission needed</th></tr></thead>
+            <tbody>
+              <tr><td>Contact phone numbers</td><td><code>people.contact.view_phone</code></td></tr>
+              <tr><td>Contact email and address</td><td><code>people.contact.view_details</code></td></tr>
+              <tr><td>Student date of birth and learning needs (reads are audited)</td><td><code>people.student.view_sensitive</code></td></tr>
+              <tr><td>Client tax ID</td><td><code>billing.client.view_tax</code></td></tr>
+              <tr><td>Charge rates and amounts on jobs, lessons, services and prices</td><td><code>billing.rates.view_charge</code></td></tr>
+              <tr><td>Tutor pay rates and amounts</td><td><code>billing.rates.view_pay</code></td></tr>
+              <tr><td>Tutor tax reference and date of birth, course teacher pay</td><td><code>people.tutor.view_financial</code></td></tr>
+              <tr><td>Job internal notes, bill-to and PO number</td><td><code>jobs.job.edit</code></td></tr>
+              <tr><td>Lesson internal notes</td><td><code>scheduling.lesson.edit</code></td></tr>
+              <tr><td>Organisation tax number</td><td><code>org.settings.manage</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Permission names follow <code>app.resource.action</code> (for example
+          <code>billing.invoice.view</code>). The navigation item for each area in this guide
+          names the permission it needs.</p>
+      </section>
+
+      <section id="sso" data-route="admin:/settings/sso" aria-labelledby="sso-h">
+        <h2 id="sso-h">Single sign-on and sign-in security</h2>
+
+        <h3 id="sso-setup">Organisation single sign-on</h3>
+        <p><span class="path">Settings › Single sign-on</span> lets your team sign in with your
+          own identity provider (Microsoft Entra ID, Okta, Google Workspace and others) over
+          OpenID Connect or SAML 2.0. Needs <code>security.sso.manage</code>.</p>
+        <p><span class="badge">Plan</span> Turning it on needs the Enterprise plan ("Single
+          sign-on is part of the Enterprise plan."), for both protocols.</p>
+        <ol class="steps">
+          <li>Choose the <span class="ui">Protocol</span> and a <span class="ui">Sign-in button label</span>.</li>
+          <li>Enter your <span class="ui">Email domains</span>, separated by commas (up to 20).</li>
+          <li>For SAML, copy the <span class="ui">Entity ID (audience)</span> and <span class="ui">Reply URL (ACS)</span> into your identity provider, then enter its entity ID, sign-in URL and signing certificate (PEM). For OpenID Connect, give the provider the callback URL shown, then enter the <span class="ui">Issuer URL</span>, <span class="ui">Client ID</span> and <span class="ui">Client secret</span>.</li>
+          <li>Optionally tick <span class="ui">Add new people automatically</span> (new people join as Tutor unless you change the default role through the API) and <span class="ui">Require single sign-on for these domains (no passwords or email links)</span>.</li>
+          <li>Tick <span class="ui">Turn on single sign-on</span> and select <span class="ui">Save</span>. Test with a second browser before you require it.</li>
+        </ol>
+        <p>Enforcement applies only to the listed domains on your organisation's address.
+          Encrypted assertions, identity-provider-initiated SAML, single logout and SCIM are not
+          supported. Separately, anyone can use the Google, Microsoft and Apple buttons on the
+          sign-in page.</p>
+
+        <h3 id="sso-mfa">Two-factor authentication and sessions</h3>
+        <ul>
+          <li>Each person sets up 2FA (authenticator app or passkey, with 10 one-time recovery codes) on their <span class="ui">Account</span> page. Passkeys do not work on custom domains.</li>
+          <li>To require 2FA for every staff role, including tutors, turn on <code>security.require_mfa_for_staff</code> (API only). People without 2FA are then asked to enrol before they can do anything else.</li>
+          <li>Idle staff are signed out after 8 hours; portal users stay signed in for 30 days with "remember me". Both are adjustable (see <a href="#settings-registry">settings without a screen</a>).</li>
+          <li>After 5 failed sign-ins in 15 minutes, each further attempt is delayed. A password reset signs out every session.</li>
+          <li>Each person gets an alert email when they sign in from a new device, and when a sign-in comes from a different country within 2 hours of the last one (impossible travel).</li>
+        </ul>
+      </section>
+
+      <section id="audit" data-route="admin:/audit" aria-labelledby="audit-h">
+        <h2 id="audit-h">Audit log</h2>
+        <p><span class="path">Audit log</span> records every change made through TutorTrack:
+          who did it (and who they were viewing as), when, from which IP address and device, the
+          record and the field-level changes. It is append-only: nobody, including TutorTrack
+          staff, can edit or delete entries. Needs <code>audit.view</code> (owner and admin).</p>
+        <ul>
+          <li><strong>Filter</strong> by <span class="ui">Search</span> (record description), <span class="ui">Who</span> (email), <span class="ui">Action</span>, <span class="ui">From</span> and <span class="ui">To</span>, then <span class="ui">Apply</span>.</li>
+          <li><strong>Export</strong> with <span class="ui">Export CSV</span> (needs <code>audit.export</code>; up to 50,000 rows). Exports are audited too, and five exports by one person in an hour sends the owners a security alert.</li>
+          <li><strong>Sensitive values</strong> such as bank details are shown as <code>[REDACTED]</code>.</li>
+          <li><strong>Reads</strong> of sensitive data are logged with the action <code>read</code>: tax IDs, login history, student sensitive data, tutor bank and tax details, payment files, background-check results, data-request exports, safeguarding cases, data exports, webhook secrets and lesson recordings.</li>
+          <li>Safeguarding entries are only shown to Designated Safeguarding Leads.</li>
+          <li>Entries are kept for at least 7 years.</li>
+        </ul>
+      </section>
+
+      <section id="plan" data-route="admin:/settings/plan" aria-labelledby="plan-h">
+        <h2 id="plan-h">Billing &amp; plan</h2>
+        <p><span class="path">Settings › Billing &amp; plan</span> is your subscription to
+          TutorTrack itself (not the invoices you send families). Owners, admins and finance can
+          view it (<code>subscription.view</code>); only the owner can change it
+          (<code>subscription.manage</code>).</p>
+
+        <h3 id="plan-plans">Plans and what they include</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th scope="col">Plan</th><th scope="col">Adds</th><th scope="col">Main limits</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Solo</td><td>Scheduling, billing, payments, portal, courses</td><td>1 tutor, 40 active students, 5 GB, 50 texts a month, no automations or AI</td></tr>
+              <tr><td>Team</td><td>Payroll, enquiry pipeline, automations, API access, accounting integrations</td><td>15 tutors, 300 active students, 25 GB, 300 texts, 10 automation rules</td></tr>
+              <tr><td>Agency (monthly or annual, or pay as you go as a share of payments)</td><td>Multiple branches, recruitment, matching, webhooks, advanced reports, AI assistant</td><td>Unlimited tutors and students, 10 branches, 100 GB, 1,000 texts, 50 automation rules, 2,000 AI credits</td></tr>
+              <tr><td>Enterprise (contact sales)</td><td>Single sign-on, custom domain, white-label apps, warehouse export, priority support</td><td>Unlimited; 5,000 texts and 10,000 AI credits</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Prices are shown on the page in your currency. Annual billing gives two months free.
+          Add-ons can be bought on lower plans: <span class="ui">Add-ons</span> offers a custom
+          domain, white-label apps and priority support (prorated; owner only). Features your plan
+          does not include show "Available on {plan} and above." with a
+          <span class="ui">See plans</span> link, and actions over a limit open an
+          <span class="ui">Upgrade to {plan}</span> dialog.</p>
+
+        <h3 id="plan-trial">Trial, payment and plan changes</h3>
+        <ul>
+          <li><strong>Trial.</strong> 30 days with Agency features from sign-up. Afterwards you continue on the plan that fits your business type (sole trader: Solo; small team: Team; others: Agency) if you added a payment method. Without one, the account becomes read-only until you choose a plan. A card added during the trial keeps the remaining days.</li>
+          <li><strong>Payment.</strong> <span class="ui">Add payment method</span> and <span class="ui">Payment details and invoices</span> open Stripe's secure pages. Your TutorTrack invoices are listed under <span class="ui">Invoices</span>.</li>
+          <li><strong>Upgrades</strong> (and monthly to annual) apply at once with a prorated charge. <strong>Downgrades</strong> and annual to monthly apply at the end of the billing period. If you are over the smaller plan's limits (tutors, branches, active students, storage), the dialog lists what to change first.</li>
+          <li><strong>Usage</strong> shows each limit as "{used} of {allowed}", the billable tutors this period and an estimate of the next invoice.</li>
+          <li><strong>SMS and AI credits.</strong> Buy packs of texts or AI credits, and choose whether to top up automatically or keep sending when credits run out (charged next period).</li>
+          <li><strong>Cancel.</strong> <span class="ui">Cancel at the end of the period</span> keeps everything running until then; <span class="ui">Keep my subscription</span> undoes it.</li>
+        </ul>
+        <div class="callout warn">
+          <strong>Failed payments make the account read-only</strong>
+          <p>When a TutorTrack payment fails the status becomes <span class="ui">Payment
+            overdue</span> and reminders go out on days 0, 3, 7 and 14. On day 21 the account
+            becomes read-only: owners and admins can still read and fix billing, but nobody can
+            make changes, the portals pause and background jobs stop. Paying restores everything
+            at once.</p>
+        </div>
+      </section>
+      <section id="payments" data-route="admin:/settings/payments" aria-labelledby="payments-h">
+        <h2 id="payments-h">Payments setup</h2>
+        <p><span class="path">Settings › Payments setup</span> connects the accounts that
+          families pay into. The money goes straight to your own provider account; TutorTrack
+          never holds it. Needs <code>payments.provider.manage</code> (owner, admin, finance,
+          branch manager). Payments are available on every plan.</p>
+
+        <h3 id="payments-providers">Connect a payment provider</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Provider</th><th scope="col">Used for</th><th scope="col">How to connect</th></tr></thead>
+            <tbody>
+              <tr><td>Stripe</td><td>Cards and wallets, auto-pay from saved cards, card refunds and disputes</td><td><span class="ui">Connect Stripe</span> opens Stripe's onboarding for your own Stripe account. When you return, select <span class="ui">Check status</span>. The card shows <span class="ui">Ready to take payments</span> when Stripe has everything it needs; if it says <span class="ui">Stripe needs more information</span>, use <span class="ui">Finish setup in Stripe</span>.</td></tr>
+              <tr><td>GoCardless</td><td>Direct Debit: a client sets up a mandate once and invoices are collected automatically</td><td><span class="ui">Connect GoCardless</span> under <span class="ui">More ways to get paid</span>, sign in or sign up at GoCardless, and you are returned connected.</td></tr>
+              <tr><td>PayPal</td><td>Paying invoices with PayPal on the payment page (not auto-pay)</td><td><span class="ui">Connect PayPal</span>, the same way.</td></tr>
+              <tr><td>Manual methods</td><td>Bank transfer, cash, cheque and other, recorded by staff</td><td>Nothing to connect.</td></tr>
+              <tr><td>Open Banking bank feed</td><td>Pulling bank transactions into <span class="path">Billing › Bank</span> for matching</td><td>Connected with your own GoCardless Bank Account Data credentials; the bank consent is given in GoCardless's portal.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout warn">
+          <strong>Disconnecting a provider</strong>
+          <p>You cannot disconnect an account while clients pay automatically through it ("N
+            clients pay automatically with this account; move them first."). Move those clients
+            to the other provider from their records first.</p>
+        </div>
+
+        <h3 id="payments-options">Auto-pay, payment methods and surcharges</h3>
+        <dl>
+          <dt><span class="ui">When auto-pay collects</span></dt>
+          <dd><span class="ui">When the invoice is issued</span> (default) or a number of days
+            before it is due (default 3, up to 30).</dd>
+          <dt><span class="ui">Tell clients when a saved card is about to expire</span></dt>
+          <dd>On by default; the emails go out on the 1st of each month.</dd>
+          <dt><span class="ui">Ways this branch takes payment</span></dt>
+          <dd>Per branch: card and wallets, direct debit, PayPal, bank transfer, cash, cheque,
+            other (all on by default). The payment page offers only these, and staff can only
+            record these.</dd>
+          <dt><span class="ui">Card surcharge (%) on online card payments</span></dt>
+          <dd>Default 0. Refused for UK and EEA organisations, where surcharges are not lawful;
+            capped at 3% (2.4% in Canada) elsewhere. A surcharge is issued on its own invoice so
+            the paid invoice never changes, and it never applies to auto-pay or top-ups.</dd>
+        </dl>
+        <p>Auto-pay is set up per client: staff send a secure setup link (valid 14 days) and the
+          family enters their card or mandate themselves, giving recorded consent. Staff never
+          type card numbers. Failed card collections are retried after 3 and 5 days, direct debits
+          after 3 days, and staff are told after the final failure. Retry timing, partial
+          payments (off), receipts (on) and the consent wording are API-only settings.</p>
+        <p>Saving these option panels needs <code>org.settings.manage</code>, so finance users
+          can see them but only owners and admins can change them.</p>
+        <div class="callout">
+          <strong>Providers on test servers</strong>
+          <p>If TutorTrack's own Stripe, GoCardless or PayPal platform keys are not configured (on
+            a test or demo server), a simulated provider stands in and no real money moves.</p>
+        </div>
+      </section>
+
+      <section id="billing-options" aria-labelledby="billing-options-h">
+        <h2 id="billing-options-h">Billing and payroll options</h2>
+        <p>Day-to-day billing and payroll are covered in the <a href="user-guide.html">user
+          guide</a>. These are the options an administrator sets once.</p>
+        <h3 id="billing-options-billing">Billing options</h3>
+        <ul>
+          <li><span class="path">Billing › Options</span>: <span class="ui">Tutors check draft invoices</span> (off; 2 days to review), <span class="ui">Monthly statements</span> (don't send, or every month on a chosen day) and <span class="ui">Discounts on invoices</span> (netted into the lesson price, or shown as separate negative lines). Needs <code>billing.settings.manage</code> to see and <code>org.settings.manage</code> to save.</li>
+          <li><span class="path">Billing › Late fees</span>: a fixed amount or a percentage after a number of days overdue, once or monthly up to a maximum, billed on the next invoice or on its own invoice. Needs <code>billing.late_fee.manage</code>.</li>
+          <li>Through the API only: invoice, credit note and payment request prefixes (<code>INV-</code>, <code>CN-</code>, <code>PR-</code>), the automatic invoice schedule (manual by default; weekly or monthly), auto-issue and auto-send, payment instructions, invoice footer, payment reminders (3 days before, on the day, and 3, 7, 14 and 30 days after the due date, at 09:00 local time) and collections.</li>
+        </ul>
+        <div class="callout warn">
+          <strong>Financial records are permanent</strong>
+          <p>Invoice and credit note numbers are gap-free and given at issue. An issued invoice is
+            never edited or deleted: correct it with a credit note (full or per line), void it if
+            nothing has been paid or credited, or write it off. The same applies to payments,
+            refunds and approved pay items, which are corrected with adjustments.</p>
+        </div>
+        <h3 id="billing-options-payroll">Payroll options</h3>
+        <p>Payroll options are set through the API (<code>/api/v1/settings/payroll</code>): pay
+          period (monthly by default; weekly, fortnightly, twice a month or manual) and cut-off day
+          (28), pay only when the client has paid (off), hold pay for overdue lesson reports (on),
+          include paid cancellations (on), minimum payout, a second approver above an amount
+          (never by default), the bank file format (CSV, BACS Standard 18, SEPA, NACHA or ABA),
+          expense markup, mileage and self-billing VAT (20%). Approving a pay run needs
+          <code>payroll.payrun.approve</code>; showing full bank details needs
+          <code>payroll.bank_details.view</code> and a fresh password check.</p>
+        <p>Paying tutors through Stripe Connect needs a Stripe Connect platform set up by
+          TutorTrack (<code>PAYROLL_STRIPE_PAYOUTS</code>); Wise payouts use your own Wise token
+          from <a href="#integrations">Integrations</a>.</p>
+      </section>
+
+      <section id="catalogue" data-route="admin:/catalogue" aria-labelledby="catalogue-h">
+        <h2 id="catalogue-h">Catalogue and pricing</h2>
+        <p><span class="path">Catalogue</span> holds what you sell and what you pay for it. Every
+          staff role and tutors can view it (<code>catalogue.view</code>). Services, subjects,
+          locations, rooms, products and packages need <code>catalogue.manage</code> (owner,
+          admin, branch manager); tax rates, pay tiers, premiums, discounts and price lists need
+          <code>rates.manage</code> (also finance). People without
+          <code>billing.rates.view_charge</code> or <code>billing.rates.view_pay</code> do not see
+          those amounts.</p>
+
+        <h3 id="catalogue-tabs">What each tab holds</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Tab</th><th scope="col">Contents</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ui">Services</span></td><td>What you sell: format (one to one, small group, class), maximum students, lesson length, charge rate and unit (per hour, lesson, student per lesson, month or term), tutor pay (a fixed rate or a percentage of the charge), group pricing (each student pays, or the rate is split) and tax rate.</td></tr>
+              <tr><td><span class="ui">Subjects</span></td><td>Subjects, levels and exam boards, seeded for your country.</td></tr>
+              <tr><td><span class="ui">Tax rates</span></td><td>Rates with an optional exemption reason; one is the default. In the UK the default is "Exempt (education)".</td></tr>
+              <tr><td><span class="ui">Locations</span> and <span class="ui">Rooms</span></td><td>Centres, client's home, tutor's home, school, online; rooms with capacity and resources.</td></tr>
+              <tr><td><span class="ui">Pay tiers</span></td><td>A grid of pay by service and tier, with CSV download and import (all rows are checked first; nothing is saved if any row fails).</td></tr>
+              <tr><td><span class="ui">Premiums and holidays</span></td><td>Extra charge or pay for evenings, weekends, public holidays or short notice; public holiday calendars (England and Wales and US federal can be added automatically; others by hand).</td></tr>
+              <tr><td><span class="ui">Discounts</span></td><td>Sibling, volume, first lesson or trial, client, scholarship, promo code and multi-class discounts, with promo codes and usage.</td></tr>
+              <tr><td><span class="ui">Price lists</span></td><td>Contract prices for particular clients, such as a school.</td></tr>
+              <tr><td><span class="ui">Fees and products</span></td><td>Registration fees, materials, books, exam entries, late cancellation and travel fees, with an optional tutor share.</td></tr>
+              <tr><td><span class="ui">Packages</span></td><td>Prepaid bundles of hours, lessons or credit, with a validity period.</td></tr>
+              <tr><td><span class="ui">Price check</span></td><td>Pick a service, tutor and students to see what the client is charged and the tutor paid, with the rule that produced each figure.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="catalogue-precedence">Which price wins</h3>
+        <ul>
+          <li><strong>Charge:</strong> a lesson override, then the job's rate for that student, then the job rate, then the client's price list, then the service rate. (A tier can change the charge too if <code>pricing.tier_affects_charge</code> is on; API only.)</li>
+          <li><strong>Pay:</strong> a lesson override, then the job's rate for that tutor, then the tutor's own rate for the service, then their pay tier, then the service.</li>
+          <li><strong>Premiums</strong> apply first, then <strong>discounts</strong> (charge only), in priority order. A lesson-level manual price is final.</li>
+          <li>Changing a rate does not re-price existing lessons until they are re-priced, and invoiced lessons are never re-priced.</li>
+          <li>Amounts are rounded half-up to the currency's smallest unit on each line; totals are the sum of the rounded lines.</li>
+          <li>Whether prices include tax and whether you are tax-registered are API-only settings (both off by default).</li>
+        </ul>
+        <div class="callout warn">
+          <strong>Online booking needs bookable services</strong>
+          <p>A service is only offered for <a href="#booking">online booking</a> when it is marked
+            bookable online. There is no switch for this in the catalogue screens yet: set
+            <code>bookable_online</code> on the service through the API.</p>
+        </div>
+      </section>
+
+      <section id="lesson-policies" data-route="admin:/lesson-policies" aria-labelledby="policies-h">
+        <h2 id="policies-h">Lesson policies</h2>
+        <p><span class="path">Lesson policies</span> decides what clients are charged and tutors
+          paid when lessons do not go ahead, and what tutors write in lesson reports. Needs
+          <code>delivery.policy.manage</code> (owner, admin, branch manager, coordinator).</p>
+
+        <h3 id="policies-cancellation">Cancellation policy</h3>
+        <p><span class="ui">Free cancellation with at least this much notice (hours)</span>
+          defaults to 24. For each outcome, set the percentage the client is charged and the tutor
+          paid:</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Outcome</th><th scope="col">Client charged (default)</th><th scope="col">Tutor paid (default)</th></tr></thead>
+            <tbody>
+              <tr><td>Late cancellation</td><td>100%</td><td>50%</td></tr>
+              <tr><td>No-show</td><td>100%</td><td>100%</td></tr>
+              <tr><td>Absent (told us)</td><td>0%</td><td>0%</td></tr>
+              <tr><td>Arrived late</td><td>100%</td><td>100%</td></tr>
+              <tr><td>Tutor cancels</td><td>0%</td><td>0%</td></tr>
+              <tr><td>We cancel</td><td>0%</td><td>0%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>You can also limit free cancellations per month or per term, give make-up lesson
+          credits for free or tutor cancellations (off by default; credits last 60 days), and then
+          select <span class="ui">Save policy</span>. Each save is a new version, so lessons
+          cancelled earlier keep the rules that applied then. When staff cancel a lesson they see
+          the outcome before confirming; overriding it needs
+          <code>delivery.cancel.override_policy</code> and is audited.</p>
+
+        <h3 id="policies-overrides">Overrides</h3>
+        <p>Set different rules for a branch, service, job or client. The most specific rule wins:
+          client, then job, then service, then branch, then the organisation policy. A client rule
+          applies only when every student in the lesson belongs to that client.</p>
+
+        <h3 id="policies-reports">Report templates</h3>
+        <p>Build the forms tutors fill in after lessons (<code>delivery.template.manage</code>):
+          select <span class="ui">New template</span>, <span class="ui">Add a question</span>
+          (long or short text, 1–5 rating, choose one or several, checklist, topics covered,
+          homework, next steps, attachments), choose who sees each answer (staff, client or
+          student) and select <span class="ui">Save template</span>. Assign templates to jobs,
+          services or subjects; a job's template beats a service's, which beats a subject's.</p>
+        <p>Report deadlines, reminders and escalation (due 24 hours after the lesson; edits
+          allowed for 48 hours), approval before sharing (off), unconfirmed-lesson handling and
+          billing by actual duration are API-only delivery settings. Lesson feedback surveys are
+          set up on the <span class="ui">Lesson feedback</span> page (see the user guide).</p>
+      </section>
+
+      <section id="booking" data-route="admin:/settings/booking" aria-labelledby="booking-h">
+        <h2 id="booking-h">Online booking</h2>
+        <p><span class="path">Settings › Online booking</span> lets families book lessons from the
+          client portal and the website booking widget. Needs
+          <code>scheduling.booking.settings</code> (owner, admin, branch manager, coordinator).</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Setting</th><th scope="col">Default</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ui">Turn on online booking</span></td><td>Off</td></tr>
+              <tr><td><span class="ui">New families can book from the website</span></td><td>On</td></tr>
+              <tr><td><span class="ui">Bookings need our approval</span></td><td>Off</td></tr>
+              <tr><td>Payment: <span class="ui">Pay later (invoice as usual)</span> or <span class="ui">Pay when booking</span></td><td>Pay later</td></tr>
+              <tr><td><span class="ui">Minimum notice (hours)</span></td><td>24</td></tr>
+              <tr><td><span class="ui">Book up to (days ahead)</span></td><td>60</td></tr>
+              <tr><td><span class="ui">Start times every (minutes)</span></td><td>30</td></tr>
+              <tr><td><span class="ui">Gap between lessons (minutes)</span></td><td>0</td></tr>
+              <tr><td><span class="ui">Hold a time while booking (minutes)</span></td><td>10</td></tr>
+              <tr><td><span class="ui">Free cancellation until (hours before)</span></td><td>24</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li>Only services marked bookable online are offered (see the note under <a href="#catalogue">Catalogue</a>). Which tutors are offered (default: every active tutor), the default location and booking terms are API-only.</li>
+          <li>With approval on, bookings wait under <span class="path">Requests</span>; undecided bookings are declined after 48 hours or at the lesson start.</li>
+          <li>"Pay when booking" sends a payment link; the money becomes the client's credit.</li>
+          <li>The free-cancellation window only covers lessons booked online and cancelled in the portal. The <a href="#lesson-policies">cancellation policy</a> still decides any fee.</li>
+          <li>A hard collections block on a client stops them booking online.</li>
+        </ul>
+      </section>
+
+      <section id="accounting" data-route="admin:/settings/accounting" aria-labelledby="accounting-h">
+        <h2 id="accounting-h">Accounting</h2>
+        <p><span class="path">Settings › Accounting</span> sends invoices, credit notes,
+          payments, refunds, payouts and tutor bills to your accounting software, so nobody types
+          them twice. Needs <code>integrations.accounting.view</code> to see and
+          <code>integrations.accounting.manage</code> to change (owner, admin, branch manager,
+          finance).</p>
+        <p><span class="badge">Plan</span> Switching sync on needs a plan with accounting
+          integrations (Team and above).</p>
+
+        <h3 id="accounting-connect">Connect and map</h3>
+        <ol class="steps">
+          <li>Select <span class="ui">Connect Xero</span>, <span class="ui">Connect QuickBooks Online</span>, <span class="ui">Connect Sage Business Cloud Accounting</span> or <span class="ui">Connect FreeAgent</span> and authorise TutorTrack.</li>
+          <li>Under <span class="ui">What syncs</span>, choose each invoice, payment and credit note or a daily summary journal; the date to sync from; whether to send tutor bills and payouts (on) and attach the invoice PDF (on); and what to do when a period is locked (post on the first open date with a note, or hold).</li>
+          <li>Under <span class="ui">Mappings</span>, choose the ledger accounts: sales, payments received into, the payout bank account, provider fees, tutor costs, tutor expenses, bad debts, rounding, receivables, payables, sales tax and deferred revenue. Map tax codes per tax rate (including self-billing VAT) and branches to tracking categories or classes, then select <span class="ui">Save mappings</span>. <span class="ui">Before sync can start:</span> lists anything missing.</li>
+          <li>Optionally enter <span class="ui">Also send history from (optional)</span> to back-fill, then select <span class="ui">Switch sync on</span>.</li>
+          <li>Watch <span class="ui">Sync status</span>. Items in <span class="ui">Needs attention</span> are explained in plain finance terms and wait up to 30 days for <span class="ui">Retry</span> or <span class="ui">Skip</span>. An error digest is emailed daily.</li>
+        </ol>
+        <ul>
+          <li><strong>Payments recorded in the ledger:</strong> optionally import payments entered directly in Xero or QuickBooks (checked nightly). Not available for Sage or FreeAgent, or in summary mode.</li>
+          <li><strong>Package sales:</strong> optionally post prepaid packages to deferred revenue (needs a deferred revenue mapping).</li>
+          <li><strong>General ledger export:</strong> download a journal for a date range as generic CSV, Sage 50, MYOB or QuickBooks Desktop (IIF), with or without a connection.</li>
+          <li>One ledger per organisation; branches become tracking categories. Drafts are never sent, and synced records are final in the ledger.</li>
+        </ul>
+        <div class="callout">
+          <strong>Not built yet</strong>
+          <p>Per-branch ledgers, syncing payment reallocations or lost disputes after a payment has
+            synced, bad-debt VAT adjustments, summary journals in other currencies and self-billing
+            VAT in GL exports. Live testing against Xero and QuickBooks needs real credentials; if
+            the server has no keys, a simulated ledger is used and the page says so.</p>
+        </div>
+
+        <h3 id="accounting-xero-payroll">Xero Payroll for employed tutors</h3>
+        <p>From the <span class="ui">Xero Payroll for employed tutors</span> link: select
+          <span class="ui">Connect Xero Payroll</span> (a separate connection with payroll access
+          only), <span class="ui">Match tutors by email</span> or link them by hand, and choose the
+          <span class="ui">Earnings rate for tutors' hours</span>. When a pay run is approved,
+          employed tutors' hours go to Xero Payroll as draft timesheets; <span class="ui">Send
+          again</span> retries. Bonuses and reimbursements are not sent; they stay in the pay run
+          export.</p>
+      </section>
+
+      <section id="marketplace" data-route="admin:/settings/marketplace" aria-labelledby="marketplace-h">
+        <h2 id="marketplace-h">Integrations directory</h2>
+        <p>The second <span class="ui">Integrations</span> item in the menu
+          (<span class="path">/settings/marketplace</span>) is a directory of everything TutorTrack
+          connects to, grouped by category, with a live status on each card:
+          <span class="ui">Connected</span>, <span class="ui">Available</span>,
+          <span class="ui">Coming soon</span> or <span class="ui">Needs attention</span>. It is
+          read-only: <span class="ui">Connect {name}</span> or <span class="ui">Manage
+          {name}</span> takes you to the real settings page. Anyone with
+          <code>org.settings.view</code> can open it.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Category</th><th scope="col">Entries</th><th scope="col">Set up in</th></tr></thead>
+            <tbody>
+              <tr><td>Payments and banking</td><td>Stripe, GoCardless, PayPal, Open Banking</td><td><a href="#payments">Payments setup</a></td></tr>
+              <tr><td>Accounting and payroll</td><td>Xero, QuickBooks Online, Sage, FreeAgent, Xero Payroll</td><td><a href="#accounting">Accounting</a></td></tr>
+              <tr><td>Payouts</td><td>Wise Business</td><td><a href="#integrations">Integrations</a></td></tr>
+              <tr><td>Calendars and video</td><td>Google, Outlook, CalDAV (iCloud), Google Meet, Microsoft Teams (personal); Zoom, Lessonspace (organisation)</td><td>Your account page, or <a href="#integrations">Integrations</a></td></tr>
+              <tr><td>Messaging and marketing</td><td>Email and SMS (always on), WhatsApp, Mailchimp, Brevo</td><td><a href="#messaging">Messaging</a></td></tr>
+              <tr><td>Background checks</td><td>uCheck, Checkr</td><td>Compliance (see the user guide)</td></tr>
+              <tr><td>Automation and partner apps</td><td>Zapier, Make and other OAuth apps</td><td><a href="#developer">Developer</a> and <a href="api-guide.html">API guide</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Do not confuse this with tutor matching (the <span class="ui">Matching</span> page),
+          which is described in the user guide.</p>
+      </section>
+      <section id="notifications" data-route="admin:/settings/notifications" aria-labelledby="notifications-h">
+        <h2 id="notifications-h">Notifications and templates</h2>
+        <p><span class="path">Settings › Notifications</span> chooses which automatic messages go
+          out, by which channels, and in what words. Needs <code>comms.settings.manage</code>;
+          editing wording needs <code>comms.template.manage</code> (owner, admin, branch manager,
+          coordinator).</p>
+
+        <h3 id="notifications-types">Turn messages on and choose channels</h3>
+        <p>Messages are grouped under <span class="ui">Lessons</span>, <span class="ui">Lesson
+          reports</span>, <span class="ui">Billing</span>, <span class="ui">Account</span>,
+          <span class="ui">Messages</span> and <span class="ui">Staff alerts</span>. For each one,
+          tick it on or off, tick the channels (<span class="ui">Email</span>,
+          <span class="ui">Text</span>, <span class="ui">In the app</span>,
+          <span class="ui">Push</span>, <span class="ui">WhatsApp</span>) and, for reminders, enter
+          up to three <span class="ui">Hours before</span> values (for example <code>24, 2</code>,
+          the default for lesson reminders). Select <span class="ui">Save</span>.</p>
+        <ul>
+          <li>Account emails (invitations, password resets, sign-in alerts) can be reworded but not switched off.</li>
+          <li>Transactional messages fall back to email rather than going silent. Monthly statements and the digest emails are off until you switch them on.</li>
+          <li>Digests (tutor daily agenda, client weekly schedule, message digest) must also be chosen by each person on their account or portal page.</li>
+          <li>Texts are not sent in quiet hours (21:00–08:00 in your timezone by default) and use SMS credits from your plan (50 to 5,000 a month; buy more on <a href="#plan">Billing &amp; plan</a>).</li>
+          <li>WhatsApp is never on by default and only reaches people who opted in to it.</li>
+          <li>Non-transactional email carries a one-click unsubscribe; marketing texts end with "Reply STOP to opt out". Bounces, complaints and STOP replies are suppressed automatically.</li>
+        </ul>
+
+        <h3 id="notifications-wording">Edit the wording</h3>
+        <ol class="steps">
+          <li>Select <span class="ui">Edit wording</span> on the message and choose the <span class="ui">Channel</span>.</li>
+          <li>To make a version for one language or one branch, set <span class="ui">Language</span> (for example <code>fr</code>) or <span class="ui">Branch</span>; leave both blank for the version everyone gets.</li>
+          <li>Edit the <span class="ui">Subject</span> and <span class="ui">Message</span>, inserting the variables listed under <span class="ui">You can use:</span>.</li>
+          <li>Select <span class="ui">Preview</span>, then <span class="ui">Save wording</span>, then <span class="ui">Send me a test</span>.</li>
+        </ol>
+        <p>Every save is a new version. <span class="ui">Use the standard wording</span> goes back
+          to TutorTrack's text. The version used is the most specific match: the recipient's
+          language for their branch, then for the organisation, then any language for the branch,
+          then for the organisation, then the standard wording.</p>
+        <p>Sender name, reply-to address, quiet hours, broadcast pacing, digest times and whether
+          students may message directly are API-only settings in the <code>comms</code> area.</p>
+      </section>
+
+      <section id="messaging" data-route="admin:/settings/messaging" aria-labelledby="messaging-h">
+        <h2 id="messaging-h">Messaging channels</h2>
+        <p><span class="path">Settings › Messaging</span> sets where your emails and texts come
+          from and connects email marketing tools. Needs <code>comms.channels.manage</code> (owner,
+          admin, branch manager, coordinator).</p>
+
+        <h3 id="messaging-domain">Sending domain</h3>
+        <p><span class="badge">Plan</span> Needs the custom domain feature (Enterprise, or the
+          custom domain add-on).</p>
+        <ol class="steps">
+          <li>Enter the <span class="ui">Domain</span> and the <span class="ui">Address before the @</span> (default <code>hello</code>), then select <span class="ui">Add domain</span>.</li>
+          <li>Add the records in the <span class="ui">DNS records</span> table at your domain provider. DKIM and return-path records are required; SPF and DMARC are recommended.</li>
+          <li>Select <span class="ui">Check DNS</span> (there is no automatic re-check). When the status is <span class="ui">Verified</span>, select <span class="ui">Send from this domain</span>; every email then comes from that address.</li>
+        </ol>
+
+        <h3 id="messaging-numbers">Numbers and WhatsApp</h3>
+        <ul>
+          <li><span class="ui">Numbers</span>: record the number texts and WhatsApp messages come from, in international format. Replies arrive in the inbox. TutorTrack records a number you already have with the messaging provider; it does not buy one. Without a number, the shared platform sender is used.</li>
+          <li><span class="ui">WhatsApp templates</span>: WhatsApp only delivers Meta-approved templates outside a 24-hour conversation. Add each template's name, Twilio content ID, text with <code>{{1}}</code> placeholders, the values for them, what it is used for and its approval status. Approval is recorded by hand; nothing syncs from Twilio.</li>
+          <li><span class="ui">Canned replies</span>: saved texts for the inbox and the automation action "Send a saved message".</li>
+        </ul>
+
+        <h3 id="messaging-marketing">Mailchimp and Brevo</h3>
+        <ol class="steps">
+          <li>Enter your Mailchimp or Brevo API key and select <span class="ui">Connect</span>.</li>
+          <li>Choose the <span class="ui">Audience</span>, then select <span class="ui">Sync now</span>. Families who agreed to marketing email are added with their tags.</li>
+          <li>Copy the webhook address shown into Mailchimp or Brevo, so unsubscribes, cleaned addresses and spam reports come back to TutorTrack.</li>
+        </ol>
+        <p>An unsubscribe there withdraws marketing consent only; service emails still go.</p>
+      </section>
+
+      <section id="integrations" data-route="admin:/settings/integrations" aria-labelledby="integrations-h">
+        <h2 id="integrations-h">Calendar, video and other integrations</h2>
+        <p><span class="path">Settings › Integrations</span> connects calendars and video
+          accounts. Anyone with <code>integrations.personal</code> can connect their own accounts;
+          organisation-wide connections need <code>integrations.manage</code>; the online lesson
+          defaults need <code>org.settings.manage</code>. Tutors connect theirs in the tutor
+          app.</p>
+
+        <h3 id="integrations-calendars">Calendars</h3>
+        <ol class="steps">
+          <li>Under <span class="ui">Your calendars and video accounts</span>, connect Google, Microsoft 365 or Apple iCloud (CalDAV, with an app-specific password).</li>
+          <li>Open <span class="ui">Sync settings</span>. Choose the <span class="ui">Calendars that make you busy</span> (only times are copied, never titles), whether to <span class="ui">Add my lessons to a calendar</span> (a separate "TutorTrack" calendar by default), <span class="ui">Two-way sync</span> and the lesson title format.</li>
+          <li>Save and select <span class="ui">Sync now</span>.</li>
+        </ol>
+        <p>With two-way sync, moving a lesson in your calendar asks the office to reschedule;
+          deleting it never cancels the lesson.</p>
+
+        <h3 id="integrations-video">Online lessons</h3>
+        <dl>
+          <dt><span class="ui">Default video provider</span></dt>
+          <dd>Built-in room (default), Zoom, Microsoft Teams, Google Meet, Lessonspace or no
+            meeting. Built-in rooms need no tutor account.</dd>
+          <dt><span class="ui">Create meeting rooms automatically for online lessons</span></dt>
+          <dd>On.</dd>
+          <dt><span class="ui">Join buttons open this many minutes before the lesson</span></dt>
+          <dd>10 (0–120).</dd>
+          <dt><span class="ui">Let tutors turn on two-way calendar sync</span></dt>
+          <dd>On.</dd>
+        </dl>
+        <p>The provider used for a meeting is the lesson's, then the job's, then the tutor's
+          preference, then a per-service choice, then this default; if the tutor has no connected
+          account, the built-in room is used. Zoom waiting room, passcode and recording options,
+          per-service providers and recording consent are API-only settings.</p>
+
+        <h3 id="integrations-org">Organisation integrations</h3>
+        <p>Organisation-level connections are listed under <span class="ui">Organisation
+          integrations</span>: Zoom, Lessonspace (API key) and Wise Business payouts, plus the
+          accounting, background-check, marketing, bank feed and migration connections, which are
+          better managed from their own pages. If the server has no provider keys, a simulated
+          provider stands in and the page says so.</p>
+
+        <h3 id="integrations-warehouse">Warehouse export</h3>
+        <p><span class="badge">Plan</span> Enterprise. From the reports pages, <span class="ui">Data
+          warehouse export</span> (<code>reporting.warehouse.manage</code>) sends your reporting
+          data every night to TutorTrack storage for download, Amazon S3, Google BigQuery or
+          Snowflake. Select <span class="ui">Add a destination</span>, enter the connection
+          details and time, select <span class="ui">Check connection</span> and save. Exports are
+          gzipped CSV, incremental, with a weekly full refresh: lesson, charge, payment and pay item
+          facts, a daily aggregate and client, student, tutor and service dimensions.</p>
+      </section>
+
+      <section id="ai" data-route="admin:/settings/ai" aria-labelledby="ai-h">
+        <h2 id="ai-h">AI assistant</h2>
+        <p><span class="path">Settings › AI assistant</span> turns AI features on and limits
+          their use. Needs <code>ai.settings.manage</code> (owner and admin).</p>
+        <p><span class="badge">Plan</span> Agency and Enterprise (2,000 and 10,000 AI credits a
+          month). Extra credits can be bought on <a href="#plan">Billing &amp; plan</a>.</p>
+        <ul>
+          <li><strong>Every feature is off until you turn it on:</strong> lesson report drafting, progress report comments, explain to parent and translate, enquiry extraction and triage, inbox replies and summaries, the command bar, the business copilot, content writing and matching explanations. Each can have its own tone and spelling.</li>
+          <li><strong>Organisation defaults:</strong> tone (Friendly or Formal), spelling (UK or US English), the most AI credits to use each month (0 means no cap), and automatic classification of new inbox messages (off).</li>
+          <li><strong>Usage this month</strong> shows requests, credits used and credits left (<code>ai.usage.view</code>; finance has it too).</li>
+          <li><strong>Privacy:</strong> names, email addresses and phone numbers are replaced with placeholders before text is sent to Anthropic; safeguarding notes, bank details and passwords are never sent; nothing is used to train models.</li>
+          <li><strong>People stay in control:</strong> nothing client-facing is sent without a person, and actions proposed by the command bar run only after someone confirms them.</li>
+          <li>Each person is limited to 20 AI requests a minute. Voice notes are not available yet (no speech-to-text provider is configured).</li>
+        </ul>
+      </section>
+
+      <section id="automations" data-route="admin:/automations" aria-labelledby="automations-h">
+        <h2 id="automations-h">Automations</h2>
+        <p><span class="path">Automations</span> runs steps for you when something happens: send
+          a message, create a task, tag a record, add a charge, and more. Viewing needs
+          <code>automation.view</code>; building, switching on and testing need
+          <code>automation.manage</code> (owner, admin, branch manager). Automations run on the
+          durable workflow engine, so waits of days or weeks survive restarts.</p>
+        <p><span class="badge">Plan</span> Automations are a Team, Agency and Enterprise feature
+          (10, 50 and unlimited rules).</p>
+
+        <h3 id="automations-build">Build an automation</h3>
+        <ol class="steps">
+          <li>Start from the <span class="ui">Recipes</span> tab and select <span class="ui">Install</span>, or select <span class="ui">New automation</span>.</li>
+          <li><strong>When:</strong> choose the <span class="ui">Trigger</span>: <span class="ui">When something happens</span> (an event), <span class="ui">On a schedule</span>, <span class="ui">Relative to a date</span> (for example 7 days before a check expires, or every year on a birthday) or <span class="ui">Run by hand</span>.</li>
+          <li><strong>If:</strong> add conditions on the record's fields and choose whether all or any must match.</li>
+          <li><strong>Then:</strong> add actions, waits (hours, days, or until a date) and if/else branches. Use <span class="ui">Insert a variable</span> in messages.</li>
+          <li>Select <span class="ui">Create</span>. New automations are off.</li>
+          <li>Use <span class="ui">Test with a record</span> with a record ID to see whether it matches and what it would do. Nothing is sent.</li>
+          <li>Switch it <span class="ui">On</span> in the list. Watch the <span class="ui">Runs</span> tab; a failed run can be retried from the failed step.</li>
+        </ol>
+
+        <h3 id="automations-catalogue">Triggers, actions and recipes</h3>
+        <details class="ref">
+          <summary>Event triggers</summary>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Record</th><th scope="col">Events</th></tr></thead>
+              <tbody>
+                <tr><td>Client</td><td>Client added; prepaid balance low</td></tr>
+                <tr><td>Student</td><td>Student added; status changed</td></tr>
+                <tr><td>Tutor</td><td>Tutor added; status changed; restricted (compliance)</td></tr>
+                <tr><td>Lesson</td><td>Scheduled, rescheduled, cancelled, completed, missed; absence notified</td></tr>
+                <tr><td>Lesson report</td><td>Overdue, submitted, approved</td></tr>
+                <tr><td>Enquiry</td><td>Received, moved stage, waiting too long, won, lost; trial lesson booked, trial lesson completed</td></tr>
+                <tr><td>Invoice</td><td>Issued, overdue, paid; payment failed</td></tr>
+                <tr><td>Job</td><td>Created, status changed, tutor assigned, hours cap reached</td></tr>
+                <tr><td>Tutor application</td><td>Received, approved</td></tr>
+                <tr><td>Compliance record</td><td>Check expiring, check expired</td></tr>
+                <tr><td>Package</td><td>Running low, used up, about to expire, expired</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <details class="ref">
+          <summary>Actions</summary>
+          <ul>
+            <li>Send a message (email, text or in-app, to the family, tutor or owner); send a saved message; send a WhatsApp message (approved templates only); send the lesson feedback survey; ask for a review</li>
+            <li>Create a task (to the record owner, a named person, or round-robin within a role)</li>
+            <li>Change a field; add or remove a tag; move to a pipeline stage (enquiries and applications)</li>
+            <li>Add to a mailing list (broadcasts, Mailchimp or Brevo)</li>
+            <li>Call a webhook (HTTPS, signed)</li>
+            <li>Add a one-off charge, apply a late fee, request a payment, offer the job to the best tutors. These need the author to hold the matching billing or matching permission, both when saving and when the automation runs.</li>
+          </ul>
+        </details>
+        <details class="ref">
+          <summary>Recipes</summary>
+          <ul>
+            <li>New enquiry: reply and follow up</li>
+            <li>Trial lesson: feedback, then chase</li>
+            <li>No lesson for 30 days: tag and re-engage</li>
+            <li>Overdue lesson report: nudge, then escalate</li>
+            <li>Prepaid balance low: ask for a top-up</li>
+            <li>Overdue invoice: remind, task, then pause bookings</li>
+            <li>Check expiring in 60 days: tell the tutor</li>
+            <li>Birthday messages (opt-in)</li>
+            <li>Tutor approved: onboarding tasks</li>
+            <li>Package under 2 hours: offer more (set the package low threshold to 2 or more)</li>
+          </ul>
+        </details>
+
+        <h3 id="automations-safety">Safety limits</h3>
+        <ul>
+          <li>Saving changes to the trigger, conditions or steps creates a new version; runs already in progress finish on their own version.</li>
+          <li>Each automation runs at most once per record per 24 hours by default, and once per event or schedule slot.</li>
+          <li>Automations never react to other automations' events, and chains deeper than three are skipped.</li>
+          <li>The organisation is limited to 500 runs an hour, and a scheduled run handles up to 2,000 records a day.</li>
+          <li>To stop all automations at once, turn off <code>automations.enabled</code> (API only).</li>
+          <li>Running a "Run by hand" automation on chosen records is done through the API.</li>
+          <li>Sample (demo) data never triggers automations.</li>
+        </ul>
+      </section>
+
+      <section id="portal-config" aria-labelledby="portal-config-h">
+        <h2 id="portal-config-h">Portal configuration</h2>
+        <p>The client portal and the tutor app are described in the
+          <a href="user-guide.html">user guide</a>. What families and tutors can do there is set
+          by organisation settings. There is no screen for them yet: an owner or admin changes
+          them through <code>PATCH /api/v1/settings/portal</code> and
+          <code>/api/v1/settings/tutor_access</code> (see the <a href="api-guide.html">API
+          guide</a>).</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Client portal option</th><th scope="col">Default</th></tr></thead>
+            <tbody>
+              <tr><td>Families can use the portal</td><td>On</td></tr>
+              <tr><td>Families can cancel lessons; report absences</td><td>On</td></tr>
+              <tr><td>Show invoices and payments; lesson reports; lesson prices; package balances (and sell packages)</td><td>On</td></tr>
+              <tr><td>Families can edit their details; message you; invite another guardian</td><td>On</td></tr>
+              <tr><td>Guardians can give children under 13 a username and PIN login</td><td>On</td></tr>
+              <tr><td>Show tutors' email and phone</td><td>Off</td></tr>
+              <tr><td>Families and tutors can message each other; students can send messages</td><td>Off</td></tr>
+              <tr><td>Welcome message, help page link, terms page link</td><td>Empty</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Tutor app option</th><th scope="col">Default</th></tr></thead>
+            <tbody>
+              <tr><td>Tutors can see client contact details (hidden, phone only, full)</td><td>Phone only</td></tr>
+              <tr><td>Tutors can reschedule lessons (otherwise they can only ask to move them)</td><td>On</td></tr>
+              <tr><td>Tutors can message clients directly; create lessons; cancel lessons; edit rates; see other tutors' calendars; add new students</td><td>Off</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Branding for the portal is set under <a href="#website-branding">Website &amp;
+          branding</a>, online booking under <a href="#booking">Online booking</a>, and safeguarding
+          rules that restrict messaging with under-18s under <a href="#safeguarding">Safeguarding</a>.
+          News posts for families are published from <span class="ui">News</span> (see the user
+          guide).</p>
+      </section>
+      <section id="data" data-route="admin:/data" aria-labelledby="data-h">
+        <h2 id="data-h">Import, export and migration</h2>
+        <p><span class="path">Import and export</span> brings data in from spreadsheets or your
+          old system and takes a full copy out. Viewing imports needs
+          <code>migration.import.view</code> and running them <code>migration.import.manage</code>
+          (owner and admin); <span class="ui">Move from another system</span> needs
+          <code>migration.project.manage</code>; <span class="ui">Export all data</span> is owner
+          only (<code>migration.export.full</code>). You also need permission to create the kind of
+          record you import.</p>
+
+        <h3 id="data-import">Import a spreadsheet</h3>
+        <ol class="steps">
+          <li>Choose <span class="ui">What are you importing?</span> (clients and contacts, students, tutors, services and rates, jobs, lessons, invoices, payments, opening balances, package balances, tutor availability, enquiries, tags, notes, one-off charges, payment requests, affiliates or reviews).</li>
+          <li>Choose the source (a CSV or Excel file, or a Google Sheet after connecting Google under <a href="#integrations">Integrations</a>) and, if the file came from TutorBird, TutorCruncher or Teachworks, the matching preset. A template with the columns TutorTrack understands is available to download. Select <span class="ui">Upload and match columns</span>.</li>
+          <li><span class="ui">Match your columns</span> to fields (or <span class="ui">Don't import</span>), then <span class="ui">Match the values</span> such as status words.</li>
+          <li>Choose what to do with <span class="ui">Records that already exist</span> (match by ID, email or name and update; skip numbers you already have; or always add new), the date format and an optional <span class="ui">Cutover date</span>: lessons before it are kept as history without charges or pay.</li>
+          <li>Select <span class="ui">Check the rows</span>. This dry run shows what will be created and updated and lists every error and warning. Nothing is saved yet.</li>
+          <li>Select <span class="ui">Import {count} rows</span>. Rows with errors are left out; <span class="ui">Download the rows that weren't imported</span> gives them back with the reasons.</li>
+        </ol>
+        <ul>
+          <li>Limits: 30 MB, 50,000 rows, 200 columns. Files are virus-scanned first.</li>
+          <li>Imports never send messages, and imported tutors are not invited until you choose to.</li>
+          <li>Imported invoices keep their original numbers; opening balances become one adjustment per client.</li>
+          <li>Consent columns on client and student imports are recorded as consent records.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>Rolling back</strong>
+          <p><span class="ui">Roll back (until {date})</span> undoes an import for 7 days
+            (<code>migration.rollback_days</code>, 1–30). Records changed since the import are
+            kept; money is reversed rather than deleted (invoices voided, payments refunded,
+            adjustments reversed).</p>
+        </div>
+
+        <h3 id="data-migration">Move from another system</h3>
+        <p>The cutover assistant moves you from <strong>TutorCruncher</strong>,
+          <strong>TutorBird</strong> or <strong>Teachworks</strong>, or from spreadsheets. For
+          TutorCruncher and Teachworks enter an API key from your current system and TutorTrack
+          reads the data directly; TutorBird and spreadsheets use exported files. Set the
+          <span class="ui">Cutover date</span> and select <span class="ui">Start</span>, then work
+          through the steps in order:</p>
+        <ol class="steps">
+          <li>People</li>
+          <li>Services and rates</li>
+          <li>Jobs and future schedule</li>
+          <li>Opening balances, with invoice history, payments, packages, charges and payment requests</li>
+          <li>Affiliates and reviews</li>
+          <li>Payment methods (guidance: saved cards must be authorised again)</li>
+          <li>Invite users (send invitations to the imported tutors)</li>
+          <li>Switch reminders on (guidance)</li>
+        </ol>
+        <p>Mark each step <span class="ui">This step is done</span> or <span class="ui">Skip this
+          step</span>. The <span class="ui">Reconciliation</span> table compares counts of clients,
+          students, tutors, jobs and invoices, the total of balances and future lessons between
+          the old system and TutorTrack. A migration project expires after 60 days without a
+          decision.</p>
+
+        <h3 id="data-export">Export all your data</h3>
+        <ol class="steps">
+          <li>As the owner, open the <span class="ui">Export all data</span> tab and select <span class="ui">Export all data</span>.</li>
+          <li>You get an email when the archive is ready.</li>
+          <li>Select download and <span class="ui">Confirm your password</span>. The download link lasts 5 minutes and is audited.</li>
+        </ol>
+        <p>The ZIP holds CSV and JSON for every record type, a relationships file and a README,
+          your uploaded files (up to 2 GB) and invoice PDFs (up to 5,000). Secrets such as API keys
+          and tokens are left out; encrypted personal data is included in readable form, so keep
+          the file safe. The archive expires after 7 days. An export is also made automatically
+          when the account is closed.</p>
+      </section>
+
+      <section id="website" data-route="admin:/website" aria-labelledby="website-h">
+        <h2 id="website-h">Website, widgets, domains and branding</h2>
+        <p><span class="path">Website &amp; branding</span> has the tabs
+          <span class="ui">Branding</span>, <span class="ui">Domains</span>,
+          <span class="ui">Widgets</span>, <span class="ui">Reviews</span>,
+          <span class="ui">Website</span>, <span class="ui">Blog</span> and
+          <span class="ui">Tutor profiles</span>. Viewing needs <code>sites.view</code>; each part
+          has its own manage permission (<code>sites.branding.manage</code>,
+          <code>sites.domain.manage</code>, <code>sites.widget.manage</code>,
+          <code>sites.site.manage</code>, <code>sites.site.publish</code>,
+          <code>sites.profile.moderate</code>). Owners and admins have them all; coordinators can
+          view and moderate tutor profiles.</p>
+
+        <h3 id="website-branding">Branding</h3>
+        <p>The brand kit applies to the portals (full theme and the home-screen app), emails
+          (logo, accent and footer), invoices, statements, receipts and pay statements, and
+          subtly to the admin app (buttons). Set it for <span class="ui">The whole
+          organisation</span> or override it per branch (blank fields use the organisation's
+          kit).</p>
+        <ul>
+          <li><span class="ui">Logos and icons</span>: logo, logo for dark backgrounds, favicon, app icon.</li>
+          <li><span class="ui">Colours and font</span>: main and second colour and a font. Colours are never rejected: the <span class="ui">Colour contrast</span> panel warns and TutorTrack uses darker or lighter variants where needed to stay readable.</li>
+          <li><span class="ui">Emails and documents</span>: email header line and footer, invoice and statement footer.</li>
+          <li>App name, and social media links.</li>
+          <li>Hiding "Powered by TutorTrack" needs white-labelling (Enterprise, or the white-label add-on). If you lose the feature, the footer comes back automatically.</li>
+        </ul>
+
+        <h3 id="website-domains">Custom domains</h3>
+        <p><span class="badge">Plan</span> Enterprise, or the custom domain add-on. Up to 5
+          domains.</p>
+        <ol class="steps">
+          <li>Enter the <span class="ui">Domain</span> (for example <code>portal.yourname.co.uk</code>), choose <span class="ui">Use it for</span>: <span class="ui">Portals and app</span> or <span class="ui">Website</span>, and select <span class="ui">Add domain</span>.</li>
+          <li>At your DNS provider, add the records shown: a CNAME from your host to <code>custom.tutortrack.app</code>, and a TXT record <code>_tutortrack-challenge.&lt;host&gt;</code> for verification.</li>
+          <li>Wait, or select <span class="ui">Check now</span>. TutorTrack keeps checking for up to 72 hours. When DNS shows <span class="ui">Verified</span>, the certificate is issued automatically and becomes <span class="ui">Active</span>.</li>
+        </ol>
+        <ul>
+          <li>Once an app domain is active, emails and links use it. Single sign-on and provider connections still pass through the TutorTrack address and hand you back.</li>
+          <li>Removing a domain breaks links that use it. Your <code>tutortrack.app</code> subdomain always keeps working.</li>
+          <li>Email sending domains are separate: see <a href="#messaging-domain">Sending domain</a>.</li>
+        </ul>
+
+        <h3 id="website-widgets">Widgets</h3>
+        <p>Widgets put live TutorTrack content on any website. Select <span class="ui">New
+          widget</span> and choose: tutor directory, enquiry form, services and prices, reviews,
+          portal login, tutor vacancies (needs recruitment: Agency and above), online booking (when
+          online booking is on) or class catalogue (needs a public course). Set its options and the
+          <span class="ui">Websites allowed to show it</span>, then copy the
+          <span class="ui">Embed code</span> or the <span class="ui">WordPress shortcode</span>
+          (with the TutorTrack Widgets plugin); instructions for Wix and Squarespace are shown.
+          <span class="ui">Switch off</span> hides a widget without removing the code.</p>
+        <p>The <span class="ui">Reviews</span> tab holds testimonials you enter yourself, shown by
+          the reviews widget and website blocks.</p>
+
+        <h3 id="website-builder">Website builder and blog</h3>
+        <ol class="steps">
+          <li>Select <span class="ui">Create my website</span>. Home, About, Tutors and Contact pages are created.</li>
+          <li>In <span class="ui">Website settings</span>, set the name, theme (Classic, Modern, Playful, Academic, Minimal), search engine title and description, business type, and optional Google Analytics 4 or Tag Manager IDs (loaded only after cookie consent).</li>
+          <li>Edit pages: <span class="ui">Add block</span> (hero, text, image, tutor grid, subject list, pricing table, testimonials, FAQ, enquiry form, call to action, map, latest blog posts, booking, class catalogue) and move blocks up or down.</li>
+          <li><span class="ui">Save draft</span>, <span class="ui">Preview</span>, then <span class="ui">Publish</span> (needs <code>sites.site.publish</code>). <span class="ui">Published versions</span> lets you restore an earlier version.</li>
+          <li><span class="ui">Publish website</span> puts it live at <code>&lt;subdomain&gt;.tutortrack.site</code> or your website domain; <span class="ui">Take website offline</span> removes it.</li>
+        </ol>
+        <p>A sitemap, robots file, structured data and a profile page for each published tutor are
+          generated automatically. The <span class="ui">Blog</span> tab publishes plain-text posts
+          (a future date schedules them) at <code>/blog</code> with an RSS feed.</p>
+        <p><span class="ui">Tutor profiles</span> is the approval queue for tutors' public
+          profiles: <span class="ui">Approve and publish</span>, <span class="ui">Reject</span> with
+          a note, or <span class="ui">Hide from the directory</span>. Public profiles never show a
+          tutor's surname, email, rates or address.</p>
+      </section>
+
+      <section id="developer" data-route="admin:/developer" aria-labelledby="developer-h">
+        <h2 id="developer-h">Developer area</h2>
+        <p><span class="path">Developer</span> is for people who connect other software to
+          TutorTrack. It has the tabs <span class="ui">Overview</span>, <span class="ui">API
+          keys</span>, <span class="ui">Webhooks</span>, <span class="ui">Apps</span> and
+          <span class="ui">Sandboxes</span>. The menu item needs
+          <code>developer.webhook.view</code>; each tab has its own manage permission (owners and
+          admins have them all).</p>
+        <ul>
+          <li><strong>API keys</strong> act as the person who created them, can be limited by scope and IP address and given an expiry date. The secret is shown once; rotating keeps the old key valid for 24 hours.</li>
+          <li><strong>Webhooks</strong> send signed event notifications to your endpoint. An endpoint that fails for three days is switched off and its managers are emailed.</li>
+          <li><strong>Apps</strong> lists OAuth apps you have registered and apps connected to your organisation.</li>
+          <li><strong>Sandboxes</strong> are test copies of your organisation (up to 3).</li>
+        </ul>
+        <p>Everything about the API, scopes, OAuth and webhook events is in the
+          <a href="api-guide.html">API guide</a>.</p>
+      </section>
+
+      <section id="privacy" data-route="admin:/privacy" aria-labelledby="privacy-h">
+        <h2 id="privacy-h">Privacy centre</h2>
+        <p><span class="path">Privacy</span> (<span class="ui">Privacy centre</span>) is where you
+          handle data protection requests and decide how long data is kept. The menu item needs
+          <code>privacy.dsar.manage</code> (owner and admin). Tabs:</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Tab</th><th scope="col">Permission</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ui">Data requests</span>, <span class="ui">Erasures</span></td><td><code>privacy.dsar.manage</code></td></tr>
+              <tr><td><span class="ui">Legal holds</span></td><td><code>privacy.legal_hold.manage</code></td></tr>
+              <tr><td><span class="ui">Retention</span></td><td><code>privacy.retention.manage</code></td></tr>
+              <tr><td><span class="ui">Agreement &amp; sub-processors</span></td><td><code>privacy.dpa.manage</code> (owner only)</td></tr>
+              <tr><td><span class="ui">Settings</span></td><td><code>org.settings.view</code> to see, <code>org.settings.manage</code> to save</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="privacy-dsar">Data subject requests</h3>
+        <p>Families can ask from the portal (<span class="ui">Your data</span>); you log requests
+          that arrive by email, phone, letter or in person.</p>
+        <ol class="steps">
+          <li>Select <span class="ui">Log a request</span>, find the person, choose the kind (<span class="ui">Access (copy of their data)</span>, <span class="ui">Portability (machine-readable copy)</span> or <span class="ui">Erasure</span>), how it arrived, who is asking (the person, a parent or guardian, or a representative) and the requester's email.</li>
+          <li>Select <span class="ui">Log request and start the deadline</span>. The deadline is 30 days (<code>privacy.dsar_deadline_days</code>); reminders come 7 days and 2 days before and on the day.</li>
+          <li>Complete the <span class="ui">Identity verification</span> checklist. A request made while signed in to the portal counts as verified.</li>
+          <li>For access or portability, the export is compiled automatically. <span class="ui">Review the export</span>, tick anything to leave out, then <span class="ui">Approve and send</span>. The requester gets a secure link (valid 7 days) to a JSON file, a PDF summary and their files. Safeguarding records are never included.</li>
+          <li>For erasure, check what it covers and select <span class="ui">Approve the erasure</span>.</li>
+          <li>If needed, <span class="ui">Extend the deadline</span> (up to 60 extra days in total, with a reason) or <span class="ui">Reject the request</span> (the reason is emailed to the requester).</li>
+        </ol>
+        <p>Corrections (rectification) are not a request type: edit the record directly.</p>
+
+        <h3 id="privacy-erasure">Erasure and legal holds</h3>
+        <p>Erasure replaces names with tokens such as "Erased Student #4", clears dates of birth,
+          notes, school, learning needs, custom fields and addresses, deletes notes, documents,
+          tasks, files and learning records, archives the records and removes the person's access
+          to your organisation.</p>
+        <div class="callout warn">
+          <strong>Financial records are kept</strong>
+          <p>Invoices and payments keep their amounts and numbers; names on them become the token.
+            The bill payer's details are kept for the financial retention period (6 years by
+            default, <code>privacy.financial_retention_years</code>) and then anonymised. Bank
+            details are removed straight away.</p>
+        </div>
+        <p>A <span class="ui">legal hold</span> on a person (<span class="ui">Place a legal
+          hold</span>, with a reason) blocks erasure and every retention purge for them until it is
+          released.</p>
+        <p>When someone deletes their own TutorTrack account, their records in your organisation
+          are erased straight away by default (financial records kept), or logged as an erasure
+          request for you to review (<code>privacy.account_deletion</code>).</p>
+
+        <h3 id="privacy-retention">Retention</h3>
+        <p>The <span class="ui">Retention</span> tab (<span class="ui">How long data is
+          kept</span>) sets a period for each category of data. <span class="ui">Report what's due
+          (dry run)</span> shows what would be removed; <span class="ui">Purge now</span> removes
+          it after a confirmation.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Category</th><th scope="col">Default</th></tr></thead>
+            <tbody>
+              <tr><td>Archived students; archived clients and their contacts</td><td>6 years</td></tr>
+              <tr><td>Lesson report notes and comments</td><td>6 years</td></tr>
+              <tr><td>Rejected or withdrawn tutor applications; background check results</td><td>183 days</td></tr>
+              <tr><td>Online lesson recordings</td><td>1 year</td></tr>
+              <tr><td>Online lesson join and leave logs</td><td>180 days</td></tr>
+              <tr><td>Message log and in-app notifications</td><td>2 years</td></tr>
+              <tr><td>Form submissions that did not become an enquiry</td><td>1 year</td></tr>
+              <tr><td>Product usage events</td><td>395 days</td></tr>
+              <tr><td>Audit log entries</td><td>7 years (also the minimum)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The nightly purge (<code>privacy.retention_purge</code>) is <strong>off by
+          default</strong>; switch it to a nightly report (dry run) or a nightly purge at 02:00 in
+          your timezone. Admins are told after each run. Safeguarding records (until the child is
+          25), consent evidence and suppression lists are never purged automatically.</p>
+
+        <h3 id="privacy-consent">Consent and children</h3>
+        <ul>
+          <li>Consent is recorded, with the wording version, time, IP address and who gave it, on public forms, class enrolments, reviews, imports and sign-up. Records cannot be edited; a withdrawal is a new record. Consent types and history are available through the API only.</li>
+          <li>Website cookie consent covers necessary, analytics and marketing cookies and lasts 180 days.</li>
+          <li><strong>Children's privacy</strong> (<span class="ui">Settings</span> tab): the children's privacy rules (COPPA) apply when the organisation is in the US (default), always or never; under-13s then need a parental consent record before they get a login, and an unknown date of birth counts as a child. With child defaults on (default), no marketing goes to under-18s.</li>
+        </ul>
+
+        <h3 id="privacy-dpa">Agreement and sub-processors</h3>
+        <p>The owner accepts TutorTrack's data processing agreement here (name, role and the
+          organisation's legal name; the time, IP address and browser are recorded) and can see the
+          sub-processor list with what each one does, which data it handles and where. Owners are
+          told when the list changes.</p>
+
+        <h3 id="privacy-residency">Data residency</h3>
+        <p>Each organisation belongs to one region: United Kingdom, European Union, United States
+          or Australia, chosen from the country at sign-up. Data is not replicated between regions;
+          moving region means exporting and importing again. Separate regional stacks need to be
+          deployed by TutorTrack before they are available.</p>
+      </section>
+
+      <section id="safeguarding" data-route="admin:/safeguarding" aria-labelledby="safeguarding-h">
+        <h2 id="safeguarding-h">Safeguarding</h2>
+        <p><span class="path">Safeguarding</span> is the confidential case list for Designated
+          Safeguarding Leads (DSLs). It needs <code>safeguarding.dsl</code>, which only the owner
+          has by default; admins and branch managers do not. Make other DSLs with a
+          <a href="#roles-custom">custom role</a> that allows it. Every view of a case is
+          recorded.</p>
+
+        <h3 id="safeguarding-concerns">Concerns and cases</h3>
+        <ul>
+          <li>Owners, admins, coordinators and tutors raise concerns from a student's record or a lesson (<span class="ui">Raise a safeguarding concern</span>): a category, what happened, and whether the child is at immediate risk. The person who raised it only sees the reference (<code>SG-00001</code>).</li>
+          <li>Every DSL gets an alert with the reference and category only; urgent concerns are sent immediately.</li>
+          <li>On the case, <span class="ui">Record an action</span>: a note, contacted the family, referred to children's social care, the LADO or the police. Move the case through <span class="ui">Mark in review</span> and <span class="ui">Mark referred</span>, and <span class="ui">Close the case</span> with an outcome.</li>
+          <li>Case text, outcomes and action notes are encrypted. Cases are hidden from the general audit search and never included in data request exports.</li>
+        </ul>
+
+        <h3 id="safeguarding-messages">Flagged messages and lone working</h3>
+        <ul>
+          <li><span class="ui">Flagged messages</span> lists messages caught by flagged words, personal contact details, messaging rules or children's privacy rules. <span class="ui">Dismiss</span> or <span class="ui">Raise a concern</span>.</li>
+          <li><span class="ui">Lone working</span> tracks tutors' check-ins at in-person lessons when it is on (off by default; for lessons at a client's home or all in-person lessons). After 30 minutes without a check-out an alert goes out, and 30 minutes later it escalates to the DSLs. <span class="ui">Confirm safe</span> records how you confirmed it.</li>
+        </ul>
+
+        <h3 id="safeguarding-settings">Safeguarding settings</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Setting</th><th scope="col">Default</th></tr></thead>
+            <tbody>
+              <tr><td>Tutors cannot message under-18s directly</td><td>On</td></tr>
+              <tr><td>A parent must be on every conversation with an under-18</td><td>On</td></tr>
+              <tr><td>Contact details in messages</td><td>Block and flag for review (or allow, or flag only)</td></tr>
+              <tr><td>Flagged keywords</td><td>A starter list ("meet up", "our secret", "don't tell"…)</td></tr>
+              <tr><td>Lone working</td><td>Off; alert after 30 minutes, escalate after 30 more</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section id="platform" aria-labelledby="platform-h">
+        <p class="badge">Part B · Platform operators</p>
+        <h2 id="platform-h">The TutorTrack console</h2>
+        <p>The <span class="ui">TutorTrack console</span> is for the people who run the service,
+          not for customers. It is part of the admin app at <span class="path">/platform</span> on
+          the root host, and staff sign in with their normal account. It lists every organisation
+          and gives the tools to support them, change their plan, watch the platform and send
+          notices.</p>
+
+        <h3 id="p-access">Who can use the console</h3>
+        <p>Four conditions must all be true. If one fails, the console shows a red alert instead of
+          the page:</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Condition</th><th scope="col">How it is met</th><th scope="col">Message when it is not</th></tr></thead>
+            <tbody>
+              <tr><td>Platform staff</td><td>The user's <code>is_platform_staff</code> flag is on. Set it in Django admin (<span class="path">/django-admin/</span>); <code>manage.py createsuperuser</code> sets it automatically. It is separate from Django's <code>is_staff</code>.</td><td>The console is for TutorTrack staff.</td></tr>
+              <tr><td>Two-factor authentication</td><td>The session was verified with 2FA (<code>PLATFORM_REQUIRE_MFA</code>, default on).</td><td>Sign in with two-factor authentication to use the console.</td></tr>
+              <tr><td>Allowed network</td><td>The client IP is in <code>PLATFORM_IP_ALLOWLIST</code> (comma-separated CIDRs; empty allows any address, for development only).</td><td>The console is only available from the office network or VPN.</td></tr>
+              <tr><td>Not viewing as a customer</td><td>Stop any <span class="ui">View as</span> session first.</td><td>(Access refused.)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">
+          <strong>Everything you do lands in the customer's audit log</strong>
+          <p>Only cross-organisation lists read through the BYPASSRLS platform database role.
+            Every read or action on one organisation runs inside that organisation's context
+            through the normal services, so its own <a href="#audit">audit log</a> records you as
+            the actor, usually with the reason you typed.</p>
+        </div>
+
+        <section id="p-tenants" data-route="admin:/platform">
+          <h3 id="p-tenants-h">Organisations</h3>
+          <p><span class="path">Console › Organisations</span> lists every tenant, newest first, up
+            to 100 rows. Filter by <span class="ui">Search</span> (name, subdomain or contact
+            email), <span class="ui">Status</span> (Trial, Active, Past due, Suspended, Closed),
+            <span class="ui">Plan</span> and <span class="ui">MRR at least</span> /
+            <span class="ui">MRR at most</span>, and sort by newest, highest MRR or name. Columns:
+            organisation and slug, status, plan, MRR (from the latest nightly snapshot, or a
+            list-price estimate), members, last active and created.</p>
+          <h4 id="p-tenant-detail">Organisation detail</h4>
+          <p>Select an organisation to see its <span class="ui">Health</span> score and the last 14
+            days of scores, its <span class="ui">Subscription</span> (plan, status, trial end,
+            Stripe customer and usage against limits), <span class="ui">Integrations</span>
+            (add-ons and the status of each provider connection), <span class="ui">Entitlement
+            overrides</span>, <span class="ui">Members</span> (role, last active, email verified,
+            2FA), <span class="ui">Recent errors</span> (dead-lettered events, failed webhooks,
+            billing events and messages) and the last 25 audit entries.</p>
+          <p>The <span class="ui">Actions</span> section shares one <span class="ui">Reason</span>
+            field, which is written to the organisation's audit log:</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Action</th><th scope="col">What it does</th></tr></thead>
+              <tbody>
+                <tr><td><span class="ui">Extend trial</span></td><td>Adds 1–90 days (default 14). Only for organisations still in trial. Reason required.</td></tr>
+                <tr><td><span class="ui">Set plan</span></td><td>Moves the organisation to any plan key (monthly) and activates a manually billed account. Reason required.</td></tr>
+                <tr><td><span class="ui">Suspend</span> / <span class="ui">Lift suspension</span></td><td>Suspension makes the organisation read-only for its owners and admins and shows them a banner. Reason required to suspend. Lifting returns it to Trial or Active according to the subscription. Closed organisations cannot be suspended.</td></tr>
+                <tr><td><span class="ui">Resend owner verification</span></td><td>Emails active owners whose email address is not verified.</td></tr>
+                <tr><td><span class="ui">Request data export</span></td><td>Starts a full organisation export (the same as the customer's own export). Reason required.</td></tr>
+                <tr><td><span class="ui">Schedule deletion</span></td><td>Type the organisation's subdomain to confirm and give a reason (5 characters or more). The status becomes Closed, an export is requested, and data is deleted after the grace period (<code>privacy.closure_grace_days</code>, default 30 days).</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout warn">
+            <strong>No undo button for deletion</strong>
+            <p>Reopening a closed organisation exists as a service but not as a console button.
+              Usage credits and billing-interval changes are not in the console either.</p>
+          </div>
+          <h4 id="p-overrides">Entitlement overrides</h4>
+          <p>Grant a feature or limit outside the plan: enter the <span class="ui">Entitlement</span>
+            key, a <span class="ui">Value</span> (on, off, a number or unlimited), an optional
+            <span class="ui">Expires</span> date and a <span class="ui">Reason</span>, then select
+            <span class="ui">Grant</span>. This is how sales grants add-ons such as a custom domain
+            or white-label branding by hand. <span class="ui">Remove</span> ends an override.</p>
+          <h4 id="p-view-as">Support access (View as)</h4>
+          <ol class="steps">
+            <li>On the organisation's <span class="ui">Members</span> list, select <span class="ui">View as</span> next to the person whose view you need.</li>
+            <li>Enter a <span class="ui">Reason</span> (5 characters or more) and, optionally, the <span class="ui">Ticket</span> reference.</li>
+            <li>Select <span class="ui">Open account</span>. A new tab opens on the organisation's subdomain through a single-use link that is valid for 5 minutes.</li>
+            <li>A banner shows <span class="ui">You're viewing as {name}.</span> Changes are refused unless the organisation granted write access. Select <span class="ui">Stop viewing as</span> when you are done.</li>
+          </ol>
+          <p>The console always asks for read-only access. The owner and anyone with
+            <code>support.access.view</code> get the in-app notice <span class="ui">TutorTrack
+            support accessed your account</span> with your reason, the session is listed in the
+            customer's settings, and every request is audited with you as impersonator. If the
+            organisation requires a grant (<code>security.support_access_requires_grant</code>)
+            and none is active, access is refused. Customers manage grants under
+            <a href="#support-access">TutorTrack support access</a>. Product analytics are not
+            recorded while you view as someone.</p>
+        </section>
+
+        <section id="p-flags" data-route="admin:/platform/flags">
+          <h3 id="p-flags-h">Feature flags</h3>
+          <p>Flags turn unfinished or staged features on for some organisations. Add a flag with
+            <span class="ui">New flag key</span> and <span class="ui">Add</span>. For each flag you
+            can set <span class="ui">On for everyone</span>, a <span class="ui">Rollout %</span>
+            (0–100), a list of <span class="ui">Plans</span>, and per-organisation overrides
+            (<span class="ui">Organisation ID</span> › <span class="ui">Turn on for
+            organisation</span>).</p>
+          <p>A flag resolves in this order: an unexpired organisation override, then the plan
+            list, then the percentage rollout, then the global default. Rollout uses a stable hash
+            of flag and organisation, so raising the percentage only adds organisations. Changes
+            reach every server within 60 seconds (cache lifetime). Flag changes are audited;
+            override changes are not.</p>
+        </section>
+
+        <section id="p-operations" data-route="admin:/platform/operations">
+          <h3 id="p-operations-h">Operations</h3>
+          <p>A live view (refreshes every 30 seconds) of the background machinery:
+            <span class="ui">Events waiting</span>, <span class="ui">Outbox lag (s)</span>,
+            <span class="ui">Dead letters</span>, <span class="ui">Payment webhooks waiting</span>,
+            <span class="ui">Billing webhooks waiting</span> and the depth of each Celery queue.</p>
+          <h4 id="p-dead-letters">Replay dead letters</h4>
+          <p>A dead letter is a domain event that failed every retry (8 attempts by default). Read
+            the error in the <span class="ui">Dead letters</span> table, fix the cause, select up
+            to 500 events and choose <span class="ui">Replay {n} events</span> to put them back in
+            the outbox. Handlers are idempotent, so a replay is safe.</p>
+          <h4 id="p-status-notices">Status notices</h4>
+          <p>Post a banner to every customer's admin app and portal: enter the
+            <span class="ui">Message</span>, choose a <span class="ui">Severity</span>
+            (Information, Degraded or Outage) and select <span class="ui">Post notice</span>. It
+            starts immediately and shows a link to the status page (<code>STATUS_PAGE_URL</code>).
+            Select <span class="ui">End</span> when the incident is over. Follow the
+            <a href="../runbooks/incident-comms.md">incident communications runbook</a> for timing
+            and wording.</p>
+          <p>There is no maintenance-mode switch and no way to schedule a future notice from the
+            console.</p>
+        </section>
+
+        <section id="p-health" data-route="admin:/platform/health">
+          <h3 id="p-health-h">Tenant health</h3>
+          <p>Each night (03:30 UTC) every organisation gets a score from 0 to 100, built from
+            usage depth (30%), the active-tutor trend (20%), the payments trend (20%), reliability
+            (10%), support conversations (10%) and NPS (10%). A component without data is left out
+            and the rest rescaled. Bands: <span class="ui">Healthy</span> 70 and above,
+            <span class="ui">Watch</span> 40–69, <span class="ui">At risk</span> below 40.
+            Platform staff get an email when an organisation becomes at risk.</p>
+          <p>The page lists organisations lowest score first, with counts per band and a
+            <span class="ui">Risk</span> filter. <span class="ui">Recalculate now</span> runs the
+            scoring straight away; refresh after a few minutes.</p>
+        </section>
+
+        <section id="p-metrics" data-route="admin:/platform/metrics">
+          <h3 id="p-metrics-h">SaaS metrics</h3>
+          <p>Subscription figures for one billing currency at a time (never converted) over 3 to
+            36 months: MRR, ARR, paying customers, ARPA, net revenue retention, customer and
+            revenue churn, organisations in trial and MRR past due. Below them: MRR by month with
+            new, reactivated, expansion, contraction and churned MRR; trial conversion by sign-up
+            month; and cohort retention.</p>
+          <p>Figures come from nightly month-end snapshots priced from the plan list prices (base
+            fee, active tutors and extra branches above the included quantity; annual prices
+            divided by 12). History starts with the first nightly run; there is no backfill from
+            Stripe.</p>
+          <div class="callout">
+            <strong>Revenue share and MRR</strong>
+            <p>The page text says revenue share is not included, but since gap batch G6 the
+              snapshots add revenue-share MRR into MRR. Treat the page text as out of date.</p>
+          </div>
+        </section>
+
+        <section id="p-feedback" data-route="admin:/platform/feedback">
+          <h3 id="p-feedback-h">Feedback and usage</h3>
+          <p><span class="ui">NPS and CSAT (last 90 days)</span> shows the NPS score, promoters,
+            passives and detractors, support satisfaction (1–5), NPS by plan and by month, and
+            recent comments (never with the respondent's name). <span class="ui">Product
+            usage</span> shows top events and pages over 7, 30 or 90 days and the onboarding
+            funnel: signed up › set up a service › added a student › scheduled a lesson ›
+            connected payments › sent an invoice.</p>
+          <p>Usage events are pseudonymous and come only from consenting staff in organisations
+            that allow it (<code>privacy.product_analytics</code>). Families and students are never
+            tracked. Organisations can turn the NPS prompt off
+            (<code>privacy.satisfaction_surveys</code>).</p>
+        </section>
+
+        <section id="p-support" data-route="admin:/platform/support">
+          <h3 id="p-support-h">Support inbox</h3>
+          <p>Customers open support chats from the help panel in the admin app. The inbox lists
+            them with a <span class="ui">Show</span> filter (<span class="ui">Waiting for us</span>
+            by default, Unread, Answered, Closed, All) and a search on subject and organisation.</p>
+          <ol class="steps">
+            <li>Open a conversation. Opening marks it read for support; the page also shows the screen the customer was on.</li>
+            <li>Select <span class="ui">Assign to me</span> so colleagues know you have it.</li>
+            <li>Type in <span class="ui">Reply</span> (up to 5,000 characters) and select <span class="ui">Send reply</span>. The customer is notified in the app, by email and by push.</li>
+            <li>Select <span class="ui">Close conversation</span> when it is resolved. Customers can rate answered chats from 1 to 5; the ratings feed the CSAT figure.</li>
+          </ol>
+          <p>Replies, assignment and closing are audited in the organisation's log.</p>
+        </section>
+
+        <section id="p-plans" data-route="admin:/platform/plans">
+          <h3 id="p-plans-h">Plans and prices</h3>
+          <p>Change each plan's <span class="ui">Name</span>, <span class="ui">Visibility</span>
+            (Public, Legacy, or Custom (contact sales)), <span class="ui">Description</span> and
+            <span class="ui">Trial days</span>, and per currency the price rows: base fee, per
+            active tutor, share of payments (%) and per extra branch, monthly or annual, with the
+            included quantity and the <span class="ui">Stripe price ID</span>. Changes apply to new
+            subscriptions and plan changes, not to existing subscriptions.</p>
+          <div class="callout warn">
+            <strong>The code catalogue wins</strong>
+            <p>You cannot create or delete plans or price rows here, and entitlements can only be
+              changed through the API. <code>manage.py sync_plans</code> overwrites names,
+              descriptions, visibility, trial days, entitlements, amounts and included quantities
+              from the catalogue in code (it keeps Stripe price IDs), so make lasting changes in
+              the catalogue. Plan and price edits are not audited.</p>
+          </div>
+        </section>
+
+        <section id="p-revenue-share" data-route="admin:/platform/revenue-share">
+          <h3 id="p-revenue-share-h">Revenue share</h3>
+          <p>Some plans charge a percentage of the card and direct-debit payments an organisation
+            takes through TutorTrack. For a chosen <span class="ui">Month</span>, this page compares
+            the payments processed with what was reported to the Stripe usage meter, per
+            organisation and per currency, and shows the expected fee. Rows read
+            <span class="ui">Matches</span>, or say how many days were not reported or changed
+            after reporting.</p>
+          <p><span class="ui">Report missing days</span> sends unreported days to Stripe (audited).
+            Days that changed after reporting, for example because of a refund, cannot be sent
+            because meter events cannot be negative: issue a manual credit in Stripe instead.</p>
+          <p>This is not affiliate commission; affiliates are described in the user guide.</p>
+        </section>
+
+        <section id="p-workflows" data-route="admin:/platform/workflows">
+          <h3 id="p-workflows-h">Workflows</h3>
+          <p><span class="ui">Failed and stuck workflows</span> lists Temporal workflows across all
+            organisations that need attention. A workflow is stuck when an activity keeps retrying
+            with an error, or when it has made no progress for 14 days. Filter by
+            <span class="ui">Show</span> (Failed and stuck, Failed, Stuck) and search by workflow ID
+            or organisation. Each entry shows the process, status, organisation, current step and
+            last error, with an <span class="ui">Open in Temporal</span> link
+            (<code>TEMPORAL_UI_URL</code>).</p>
+          <ol class="steps">
+            <li>Read the last error and fix the cause first (a provider outage, bad data, a code fix).</li>
+            <li>Choose an <span class="ui">Action</span>: for a running workflow, <span class="ui">Terminate</span> or <span class="ui">Reset to the last step</span>; for a finished one, <span class="ui">Start again</span> with its stored input.</li>
+            <li>Enter a <span class="ui">Reason</span> (required) and select <span class="ui">Apply</span>. The action is written to the organisation's audit log.</li>
+          </ol>
+          <p>Platform-wide scheduled workflows (such as nightly insights) do not appear here; use the
+            Temporal UI for them. There are no signal or cancel actions in the console.</p>
+        </section>
+
+        <section id="p-notices" data-route="admin:/platform/customer-notices">
+          <h3 id="p-notices-h">Customer notices</h3>
+          <p><span class="ui">Notify customers</span> sends an email and an in-app notice to the
+            owners and admins of chosen organisations. Use it for formal notices; use
+            <a href="#p-status-notices">status notices</a> for an outage banner.</p>
+          <ol class="steps">
+            <li>Choose a template: <span class="ui">Personal data breach (72-hour notice)</span>, <span class="ui">Security incident (no personal data breach found)</span>, <span class="ui">Service incident</span>, or <span class="ui">Change to our terms, DPA or sub-processors</span>.</li>
+            <li>Fill in the template fields (what happened, when, data involved, what we have done, what customers may need to do, contact).</li>
+            <li>Enter <span class="ui">Organisation IDs</span> separated by commas, or leave it empty to send to every open organisation.</li>
+            <li>Select <span class="ui">Preview</span> and check the number of organisations, the subject and the body.</li>
+            <li>Enter a <span class="ui">Reason</span> such as the incident reference and select <span class="ui">Send notice</span>.</li>
+          </ol>
+          <p>A notice can be sent only once. Each organisation's audit log records it, and
+            <span class="ui">Sent notices</span> shows how many organisations and people it
+            reached. For personal data breaches, follow <code>docs/compliance/breach-notification.md</code>.</p>
+        </section>
+      </section>
+      <section id="running" aria-labelledby="running-h">
+        <h2 id="running-h">Running TutorTrack</h2>
+        <p>This chapter is for the engineers who deploy and operate the service. It summarises the
+          moving parts, the configuration and the routine procedures, and links to the runbooks
+          that hold the detailed steps.</p>
+
+        <h3 id="run-architecture">Architecture for operators</h3>
+        <div class="table-wrap">
+          <table>
+            <caption class="meta">Production components (AWS, one stack per region)</caption>
+            <thead>
+              <tr><th scope="col">Component</th><th scope="col">Runs as</th><th scope="col">What it does</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Web API</td><td>ECS Fargate service <code>web</code> (gunicorn, Django 5 + DRF)</td><td>Serves <code>/api/v1/</code>, provider webhooks (<code>/webhooks/…</code>), <code>/healthz</code> and <code>/readyz</code> (checks the database and Redis).</td></tr>
+              <tr><td>Background jobs</td><td>ECS service <code>worker</code> (Celery) on the queues <code>default</code>, <code>outbox</code>, <code>notifications</code>, <code>billing</code>, <code>integrations</code>, <code>imports</code>, <code>reports</code></td><td>Short, stateless tasks: dispatching the event outbox, sending messages, webhook deliveries, syncs.</td></tr>
+              <tr><td>Scheduler</td><td>ECS service <code>beat</code> (Celery Beat)</td><td>Global housekeeping crons (fan out one task per organisation). It also writes the application metrics that the alarms read.</td></tr>
+              <tr><td>Workflow workers</td><td>ECS service <code>temporal-worker</code></td><td>Runs every Temporal task queue: dunning, invoice runs, reminders, automations, imports, erasure and other long-running processes. Runs <code>ensure_platform_schedules</code> at start.</td></tr>
+              <tr><td>Migrations</td><td>One-off ECS task <code>migrate</code></td><td>Runs <code>ensure_db_roles</code> then <code>migrate</code> as the table owner.</td></tr>
+              <tr><td>Database</td><td>RDS PostgreSQL 16 (encrypted, 35-day point-in-time recovery)</td><td>Shared schema; every tenant row carries <code>organisation_id</code> and row-level security (RLS) policies enforce isolation.</td></tr>
+              <tr><td>Cache and broker</td><td>ElastiCache Redis 7 (TLS)</td><td>Cache, Celery broker, locks and the pub/sub channel for the realtime notification bell.</td></tr>
+              <tr><td>Temporal</td><td>Temporal Cloud (one namespace per environment)</td><td>Durable workflow engine. Payloads are encrypted with <code>TEMPORAL_PAYLOAD_KEYS</code>.</td></tr>
+              <tr><td>File storage</td><td>S3 uploads bucket (KMS, versioned, private)</td><td>Documents, imports, exports. Browsers get presigned URLs. Uploads are virus-scanned by ClamAV when <code>CLAMAV_ENABLED</code> is true.</td></tr>
+              <tr><td>Front ends</td><td>CloudFront + private S3</td><td>The admin app, the portal (client, student, tutor and affiliate PWA) and the website widgets.</td></tr>
+              <tr><td>Email and SMS</td><td>Postmark (or SES) and Twilio</td><td>Outbound mail and texts, inbound replies and delivery webhooks.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4 id="run-db-roles">The three database roles</h4>
+        <p>Tenant isolation is enforced twice: in the application (a tenant-scoped default
+          manager) and in PostgreSQL (RLS policies keyed on the organisation set for each
+          transaction). The second layer only works if the application cannot bypass it, so
+          TutorTrack connects with three roles (ADR 0003):</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th scope="col">Variable</th><th scope="col">Role</th><th scope="col">Used by</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>DATABASE_URL</code></td><td><code>tutortrack_app</code>: not the table owner, <code>NOBYPASSRLS</code></td><td><code>web</code>, <code>worker</code>, <code>beat</code>, <code>temporal-worker</code>. RLS applies to every query.</td></tr>
+              <tr><td><code>DATABASE_OWNER_URL</code></td><td>The table owner (RDS master user)</td><td>Only the <code>migrate</code> task. <code>migrate</code> picks it up automatically.</td></tr>
+              <tr><td><code>DATABASE_PLATFORM_URL</code></td><td><code>tutortrack_platform</code>: <code>BYPASSRLS</code></td><td>Platform console code only (cross-tenant lists, metrics, <code>tenant_dump</code>, <code>rotate_encryption_keys</code>).</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout warn">
+          <strong>Never point DATABASE_URL at the owner or a superuser</strong>
+          <p>At start-up the app checks that its default role cannot bypass RLS
+            (<code>DB_RLS_ROLE_CHECK</code>, default <code>error</code>: refuse to start). Creating a
+            <code>BYPASSRLS</code> role on RDS needs a superuser-equivalent; check this on the first
+            apply, and create <code>tutortrack_platform</code> by hand once if the master user
+            cannot.</p>
+        </div>
+
+        <h4 id="run-background">Celery or Temporal</h4>
+        <p>Domain events are written to an outbox table inside the same transaction as the change
+          and dispatched by the <code>worker</code> to handlers, notifications, automations, webhooks
+          and integrations. Multi-step, timer-based or approval-based processes run as Temporal
+          workflows with tenant-prefixed IDs; per-organisation recurring processes (invoice runs,
+          pay-run cut-offs, retention purges) are Temporal Schedules. If Temporal is unavailable,
+          starts and signals fail and the outbox retries them, so nothing is lost. Failed or stuck
+          workflows are handled from the <a href="#p-workflows">workflow console</a>.</p>
+
+        <h3 id="run-config">Configuration</h3>
+        <p>All configuration is environment variables (12-factor, <code>django-environ</code>); in
+          AWS, secrets live in Secrets Manager. <code>.env.example</code> at the repository root
+          documents every variable the settings read. Settings modules are in
+          <code>backend/config/settings/</code>: <code>base.py</code>, <code>dev.py</code>,
+          <code>test.py</code> and <code>prod.py</code>.</p>
+        <div class="callout">
+          <strong>Fakes when keys are empty</strong>
+          <p>Almost every external provider falls back to an in-memory fake when its keys are
+            empty: payments, SMS, calendar and video, accounting, warehouse export, the AI
+            assistant, geocoding and custom-domain certificates. That keeps local development and
+            tests offline, but it also means a production stack with a missing key silently uses a
+            fake. Check the list below before go-live.</p>
+        </div>
+        <details class="ref">
+          <summary>Required in production</summary>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Variable</th><th scope="col">Notes</th></tr></thead>
+              <tbody>
+                <tr><td><code>DJANGO_SETTINGS_MODULE</code></td><td><code>config.settings.prod</code> (HSTS, secure cookies, SSL redirect, structured logging).</td></tr>
+                <tr><td><code>DJANGO_SECRET_KEY</code></td><td>No default in production.</td></tr>
+                <tr><td><code>DJANGO_ALLOWED_HOSTS</code>, <code>CSRF_TRUSTED_ORIGINS</code>, <code>CORS_ALLOWED_ORIGINS</code></td><td>With custom domains, set <code>DJANGO_ALLOWED_HOSTS=*</code> and <code>CUSTOM_DOMAINS_STRICT_HOSTS=true</code> so unknown hosts are refused.</td></tr>
+                <tr><td><code>TENANT_BASE_DOMAIN</code>, <code>TENANT_URL_TEMPLATE</code>, <code>APP_URL</code>, <code>SESSION_COOKIE_DOMAIN</code></td><td>Organisations live at <code>&lt;slug&gt;.&lt;TENANT_BASE_DOMAIN&gt;</code>; <code>APP_URL</code> is the root app for sign-up and the organisation picker. Share the session cookie across subdomains so the organisation switcher needs no new sign-in.</td></tr>
+                <tr><td><code>DATABASE_URL</code>, <code>DATABASE_OWNER_URL</code>, <code>DATABASE_PLATFORM_URL</code></td><td>See <a href="#run-db-roles">the three database roles</a>. <code>DB_CONN_MAX_AGE</code> defaults to 60 seconds in production.</td></tr>
+                <tr><td><code>REDIS_URL</code>, <code>CELERY_BROKER_URL</code></td><td>The web service and workers must share <code>REDIS_URL</code> for realtime notifications.</td></tr>
+                <tr><td><code>AWS_STORAGE_BUCKET_NAME</code>, <code>AWS_S3_REGION_NAME</code> (plus endpoint variables outside AWS)</td><td><code>ensure_storage_bucket</code> creates the bucket locally.</td></tr>
+                <tr><td><code>FIELD_ENCRYPTION_KEYS</code> (and <code>FIELD_ENCRYPTION_KMS_KEY_ID</code>, <code>AWS_KMS_REGION</code>)</td><td>Fernet keys for encrypted fields, newest first. No development default in production. See <a href="#run-keys">key rotation</a>.</td></tr>
+                <tr><td><code>TEMPORAL_ADDRESS</code>, <code>TEMPORAL_NAMESPACE</code>, <code>TEMPORAL_API_KEY</code> (or <code>TEMPORAL_TLS_CERT</code>/<code>TEMPORAL_TLS_KEY</code>), <code>TEMPORAL_PAYLOAD_KEYS</code></td><td>Payload keys have no production default. <code>TEMPORAL_UI_URL</code> powers the links in the workflow console.</td></tr>
+                <tr><td><code>TURNSTILE_SITE_KEY</code>, <code>TURNSTILE_SECRET_KEY</code></td><td>The sign-up captcha is mandatory in production; the app refuses to start without the secret.</td></tr>
+                <tr><td><code>EMAIL_URL</code>, <code>DEFAULT_FROM_EMAIL</code>, <code>POSTMARK_WEBHOOK_TOKEN</code>, <code>POSTMARK_ACCOUNT_TOKEN</code>, <code>COMMS_REPLY_DOMAIN</code>, <code>COMMS_INBOUND_TOKEN</code></td><td>Outbound mail, delivery webhooks, custom sending domains (Postmark Domains API) and inbound inbox replies.</td></tr>
+                <tr><td><code>SENTRY_DSN</code>, <code>SENTRY_ENVIRONMENT</code>, <code>OTEL_EXPORTER_OTLP_ENDPOINT</code>, <code>LOG_LEVEL</code>, <code>LOG_JSON</code></td><td>Observability. Logs never contain personal data or tokens.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <details class="ref">
+          <summary>Provider keys (empty means a fake)</summary>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Area</th><th scope="col">Variables</th></tr></thead>
+              <tbody>
+                <tr><td>Sign in with Google, Microsoft, Apple</td><td><code>GOOGLE_CLIENT_ID/SECRET</code>, <code>MICROSOFT_CLIENT_ID/SECRET</code>, <code>APPLE_CLIENT_ID</code>, <code>APPLE_TEAM_ID</code>, <code>APPLE_KEY_ID</code>, <code>APPLE_PRIVATE_KEY</code> (Apple needs an https <code>APP_URL</code>)</td></tr>
+                <tr><td>Client payments (Stripe Connect, GoCardless, PayPal)</td><td><code>STRIPE_SECRET_KEY</code>, <code>STRIPE_PUBLISHABLE_KEY</code>, <code>STRIPE_WEBHOOK_SECRET</code>, <code>STRIPE_APPLICATION_FEE_PERCENT</code>; <code>GOCARDLESS_*</code>; <code>PAYPAL_*</code></td></tr>
+                <tr><td>TutorTrack's own subscription billing</td><td><code>STRIPE_BILLING_WEBHOOK_SECRET</code>, <code>SUBSCRIPTION_TRIAL_DAYS</code> (default 30)</td></tr>
+                <tr><td>SMS and WhatsApp</td><td><code>TWILIO_ACCOUNT_SID</code>, <code>TWILIO_AUTH_TOKEN</code>, <code>TWILIO_FROM</code>, <code>TWILIO_WHATSAPP_FROM</code> (empty: texts are recorded, not sent)</td></tr>
+                <tr><td>Web push</td><td><code>VAPID_PUBLIC_KEY</code>, <code>VAPID_PRIVATE_KEY</code>, <code>VAPID_SUBJECT</code> (generate with <code>manage.py generate_vapid_keys</code>)</td></tr>
+                <tr><td>Calendar and video</td><td><code>INTEGRATIONS_GOOGLE_*</code>, <code>INTEGRATIONS_MICROSOFT_*</code>, <code>ZOOM_*</code>, <code>DAILY_API_KEY</code>, <code>WHEREBY_API_KEY</code>, <code>INTEGRATIONS_BUILTIN_ROOMS</code>, <code>INTEGRATIONS_CREDENTIAL_PROVIDERS_LIVE</code>, <code>INTEGRATIONS_WEBHOOK_BASE_URL</code></td></tr>
+                <tr><td>Accounting</td><td><code>XERO_*</code>, <code>QUICKBOOKS_*</code>, <code>SAGE_*</code>, <code>FREEAGENT_*</code></td></tr>
+                <tr><td>Payouts and background checks</td><td><code>WISE_API_URL</code>, <code>WISE_WEBHOOK_PUBLIC_KEY</code>, <code>PAYROLL_STRIPE_PAYOUTS</code>, <code>CHECKR_API_URL</code>, <code>UCHECK_API_URL</code>, <code>DBS_UPDATE_SERVICE_URL</code></td></tr>
+                <tr><td>Warehouse export</td><td><code>WAREHOUSE_EXPORT_LIVE</code>, <code>WAREHOUSE_EXPORT_MAX_ROWS</code> (default 200,000)</td></tr>
+                <tr><td>Websites and custom domains</td><td><code>SITE_BASE_DOMAIN</code>, <code>CUSTOM_DOMAINS_CNAME_TARGET</code>, <code>CUSTOM_DOMAINS_DNS_RESOLVER</code> (production default <code>doh</code>), <code>CUSTOM_DOMAINS_CERT_PROVIDER</code> (<code>cloudflare</code>, <code>caddy</code> or <code>fake</code>), <code>CLOUDFLARE_API_TOKEN</code>, <code>CLOUDFLARE_ZONE_ID</code>, <code>WIDGETS_SCRIPT_URL</code></td></tr>
+                <tr><td>AI assistant</td><td><code>ANTHROPIC_API_KEY</code>, <code>AI_PROVIDER</code>, <code>AI_MODEL_DEFAULT</code>, <code>AI_MODEL_FAST</code>, <code>AI_USER_REQUESTS_PER_MINUTE</code> (default 20), <code>AI_TIMEOUT_SECONDS</code>, <code>AI_MAX_RETRIES</code></td></tr>
+                <tr><td>Maps and exchange rates</td><td><code>GEOCODER</code>, <code>GOOGLE_MAPS_API_KEY</code>, <code>MAPBOX_ACCESS_TOKEN</code>, <code>FX_RATES_PROVIDER</code>, <code>OPENEXCHANGERATES_APP_ID</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <details class="ref">
+          <summary>Platform, security and limits</summary>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Variable</th><th scope="col">Default and meaning</th></tr></thead>
+              <tbody>
+                <tr><td><code>PLATFORM_REQUIRE_MFA</code></td><td><code>true</code>: console staff must have two-factor authentication.</td></tr>
+                <tr><td><code>PLATFORM_IP_ALLOWLIST</code></td><td>Empty: any network. Set it to the office or VPN ranges.</td></tr>
+                <tr><td><code>TT_REGION</code>, <code>REGION_UK_APP_URL</code>, <code>REGION_EU_APP_URL</code>, <code>REGION_US_APP_URL</code>, <code>REGION_AU_APP_URL</code></td><td>Data residency: the region this stack serves (empty: all, single stack) and each region's sign-up app.</td></tr>
+                <tr><td><code>THROTTLE_SIGNUP</code>, <code>THROTTLE_LOGIN</code>, <code>THROTTLE_PUBLIC_FORM</code>, <code>THROTTLE_PUBLIC_WIDGET</code></td><td>10/hour, 30/minute, 20/hour, 600/hour.</td></tr>
+                <tr><td><code>API_RATE_LIMIT_PER_MINUTE</code>, <code>API_BURST_PER_SECOND</code></td><td>Public API limits per token: 600 per minute, 100 per second.</td></tr>
+                <tr><td><code>FILE_UPLOAD_MAX_BYTES</code></td><td>25 MB.</td></tr>
+                <tr><td><code>CLAMAV_ENABLED</code>, <code>CLAMAV_HOST</code>, <code>CLAMAV_PORT</code></td><td>When false, uploads are marked clean without a scan. Turn it on in production.</td></tr>
+                <tr><td><code>PWNED_PASSWORDS_CHECK</code></td><td><code>true</code>: reject breached passwords.</td></tr>
+                <tr><td><code>GEOIP_COUNTRY_HEADER</code>, <code>GEOIP_LOOKUP</code>, <code>IMPOSSIBLE_TRAVEL_HOURS</code></td><td>Impossible-travel sign-in alerts (CDN header <code>CF-IPCountry</code>, 2 hours).</td></tr>
+                <tr><td><code>LOGIN_HISTORY_RETENTION_DAYS</code>, <code>OUTBOX_RETENTION_DAYS</code>, <code>OUTBOX_MAX_ATTEMPTS</code></td><td>400 days, 90 days, 8 attempts before an event becomes a dead letter.</td></tr>
+                <tr><td><code>STATUS_PAGE_URL</code>, <code>SECURITY_CONTACT_EMAIL</code>, <code>SECURITY_POLICY_URL</code></td><td>Linked from the app and <code>/.well-known/security.txt</code>.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <h3 id="run-deploy">Deploying</h3>
+        <p>The baseline AWS stack is described in Terraform under <code>infra/terraform/</code>
+          (VPC, RDS, ElastiCache, S3, ECS Fargate, ALB, CloudFront, Secrets Manager, ECR, KMS and
+          monitoring). Initialise it with an environment backend file and plan with the matching
+          variables file (<code>env/staging.s3.tfbackend</code>, <code>env/staging.tfvars</code>).</p>
+        <ol class="steps">
+          <li>Merge to <code>main</code> with CI green. CI runs the same checks as <code>make check</code>, including the guide coverage check.</li>
+          <li>The deploy workflow builds the image, pushes it to ECR and runs the <code>migrate</code> task (<code>ensure_db_roles</code>, then <code>migrate</code>). Migrations are expand/contract, so the running version keeps working against the new schema.</li>
+          <li>New task definitions roll out to <code>web</code>, <code>worker</code>, <code>beat</code> and <code>temporal-worker</code>. Old Temporal workers drain before they stop.</li>
+          <li>Watch the CloudWatch dashboard for 15 minutes (5xx rate, p95 latency, outbox lag) and check Sentry for new issues tagged with the release.</li>
+          <li>If an alarm fires, roll back the services. Never roll back a migration: write a forward fix.</li>
+        </ol>
+        <p>Full steps: <a href="../runbooks/deploy.md">deploy runbook</a> and
+          <a href="../runbooks/rollback.md">rollback runbook</a>.</p>
+        <div class="callout warn">
+          <strong>Not yet proven against real infrastructure</strong>
+          <p>The Terraform has not been applied to a live account. Per-region stacks for data
+            residency, tenant custom-domain DNS, a ClamAV service, a status page provider,
+            alarms on workflow failures and an ASGI web service (needed for the realtime
+            notification stream; see the <a href="../runbooks/realtime-notifications.md">realtime
+            notifications runbook</a>) all still need real accounts or infrastructure work.</p>
+        </div>
+
+        <h3 id="run-backups">Backups and restore</h3>
+        <ul>
+          <li><strong>Point-in-time recovery:</strong> RDS keeps 35 days (RPO 5 minutes or less).</li>
+          <li><strong>Snapshots:</strong> AWS Backup takes daily snapshots of RDS and the uploads bucket (35 days) and copies them to a vault in a separate backup account (365 days).</li>
+          <li><strong>Target:</strong> RTO 4 hours or less. Prove it every quarter with the restore drill.</li>
+          <li><strong>One organisation:</strong> restore a scratch copy, then export that organisation with <code>python manage.py tenant_dump &lt;slug&gt; --output &lt;file&gt;</code> (it reads through the BYPASSRLS role) and recreate the lost records through the app's services or API so audit, events and invoices stay consistent.</li>
+        </ul>
+        <div class="callout warn">
+          <strong>Do not edit financial records during a restore</strong>
+          <p>Issued invoices, payments and credit notes are immutable. Recreate missing records
+            through the services, and correct mistakes with credit notes. After a full restore,
+            replay provider webhooks for the lost window; payments are idempotent by provider
+            reference.</p>
+        </div>
+        <ul>
+          <li><a href="../runbooks/database-restore.md">Restore the whole database</a></li>
+          <li><a href="../runbooks/restore-one-organisation.md">Restore one organisation's data</a></li>
+          <li><a href="../runbooks/backup-drill.md">Quarterly restore drill</a></li>
+        </ul>
+
+        <h3 id="run-monitoring">Monitoring and alerts</h3>
+        <p>Alarms go to an email SNS topic, and paging alarms to PagerDuty. The <code>beat</code>
+          service publishes application metrics (outbox lag, dead letters, webhook backlogs,
+          Celery queue depth); missing metrics count as breaching, so if every
+          <code>TutorTrack/*</code> alarm fires at once, check that <code>beat</code> is running.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Alarm</th><th scope="col">Meaning</th><th scope="col">Pages?</th></tr></thead>
+            <tbody>
+              <tr><td><code>api-5xx-rate</code></td><td>More than 1% of requests fail for 5 minutes</td><td>Yes</td></tr>
+              <tr><td><code>api-latency-p95</code></td><td>p95 above 1.5 seconds for 10 minutes</td><td>No</td></tr>
+              <tr><td><code>unhealthy-web</code></td><td>Web tasks fail health checks</td><td>Yes</td></tr>
+              <tr><td><code>outbox-lag</code></td><td>Domain events more than 60 seconds behind</td><td>Yes</td></tr>
+              <tr><td><code>dead-letters</code></td><td>An event failed every retry; replay it from <a href="#p-operations">Operations</a></td><td>No</td></tr>
+              <tr><td><code>payment-webhooks</code></td><td>Stripe Connect webhooks not processed</td><td>Yes</td></tr>
+              <tr><td><code>billing-webhooks</code></td><td>Stripe Billing (our subscriptions) webhooks not processed</td><td>No</td></tr>
+              <tr><td><code>celery-queue-depth</code></td><td>More than 1,000 jobs waiting</td><td>No</td></tr>
+              <tr><td><code>db-cpu</code>, <code>db-free-storage</code></td><td>Database under pressure</td><td>No</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>First steps for each alarm are in the <a href="../runbooks/alerts.md">alerts runbook</a>.
+          When a provider such as Stripe, Twilio, Postmark or Temporal Cloud is down, follow the
+          <a href="../runbooks/provider-outage.md">provider outage runbook</a>, and tell customers
+          with a customer notice and the status page as described in the
+          <a href="../runbooks/incident-comms.md">incident communications runbook</a>.</p>
+
+        <h3 id="run-keys">Encryption keys and rotation</h3>
+        <p>Secrets and the most sensitive personal data (MFA secrets, OAuth and provider tokens,
+          bank details, tax IDs, safeguarding notes, SEN and medical notes, DBS numbers) are
+          encrypted in the application with Fernet keys from <code>FIELD_ENCRYPTION_KEYS</code>,
+          newest first. With <code>FIELD_ENCRYPTION_KMS_KEY_ID</code> set, the keys are AWS KMS
+          data keys stored in wrapped form (envelope encryption). Temporal workflow payloads use
+          separate AES-256-GCM keys in <code>TEMPORAL_PAYLOAD_KEYS</code>.</p>
+        <ol class="steps">
+          <li>Generate a new key: <code>python manage.py generate_encryption_key</code> (add <code>--temporal --key-id k2</code> for a Temporal payload key). With KMS configured, only the wrapped key is printed.</li>
+          <li>Put the new key <strong>first</strong> in the variable and keep the old keys after it, then deploy. New values are written with the new key; old values still decrypt.</li>
+          <li>Re-encrypt existing data: <code>python manage.py rotate_encryption_keys</code>. It runs on the platform (BYPASSRLS) connection so every organisation's rows are included, and prints a count per field.</li>
+          <li>When the count is complete and nothing has failed, remove the old field key from <code>FIELD_ENCRYPTION_KEYS</code> and deploy again. Keep old Temporal payload keys until no running workflow history still uses them.</li>
+        </ol>
+        <div class="callout warn">
+          <strong>Losing a key loses the data</strong>
+          <p>A value encrypted with a key that is no longer listed cannot be read. Never remove a
+            key before <code>rotate_encryption_keys</code> has finished. Rotate keys after any
+            suspected compromise as part of incident response
+            (<code>docs/compliance/incident-response.md</code>).</p>
+        </div>
+
+        <h3 id="run-commands">Useful management commands</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Command</th><th scope="col">Use</th></tr></thead>
+            <tbody>
+              <tr><td><code>ensure_db_roles</code></td><td>Create or update the app and platform roles and grant privileges (idempotent; runs before every migrate).</td></tr>
+              <tr><td><code>ensure_storage_bucket</code></td><td>Create the storage bucket (local and test stacks).</td></tr>
+              <tr><td><code>ensure_platform_schedules</code></td><td>Create the platform-wide Temporal Schedules (nightly insights). Runs when <code>temporal-worker</code> starts.</td></tr>
+              <tr><td><code>temporal_worker --task-queue all</code></td><td>Run the Temporal workers.</td></tr>
+              <tr><td><code>sync_plans [--stripe]</code></td><td>Write the plan catalogue to the database and, with <code>--stripe</code>, create missing Stripe products, prices and the revenue-share meter.</td></tr>
+              <tr><td><code>tenant_dump &lt;slug&gt;</code></td><td>Export every row of one organisation (restores, investigations).</td></tr>
+              <tr><td><code>generate_encryption_key</code>, <code>rotate_encryption_keys</code></td><td>Field and payload key management (above).</td></tr>
+              <tr><td><code>generate_vapid_keys</code></td><td>Keys for web push notifications.</td></tr>
+              <tr><td><code>rebuild_reporting_facts</code>, <code>fetch_fx_rates</code></td><td>Rebuild reporting facts and daily aggregates (all organisations, or <code>--org slug</code>); fetch the latest exchange rates.</td></tr>
+              <tr><td><code>notify_subprocessor_changes</code></td><td>Tell every operational organisation about the current sub-processor list (once per version). Run after a deploy that changes the list.</td></tr>
+              <tr><td><code>ensure_partner_apps</code></td><td>Create the platform partner OAuth apps (Zapier, Make) if they do not exist.</td></tr>
+              <tr><td><code>mobile_app_config [--org slug]</code></td><td>Write the white-label mobile app configuration for an organisation.</td></tr>
+              <tr><td><code>seed_demo</code></td><td>Development seed data. Refuses to run with <code>DEBUG</code> off; never use it in production.</td></tr>
+              <tr><td><code>guides --check</code></td><td>The guide coverage check behind <code>make docs-check</code>.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="run-runbooks">Runbooks</h3>
+        <ul>
+          <li><a href="../runbooks/deploy.md">Deploy a new version</a></li>
+          <li><a href="../runbooks/rollback.md">Roll back a release</a></li>
+          <li><a href="../runbooks/database-restore.md">Restore the database</a></li>
+          <li><a href="../runbooks/restore-one-organisation.md">Restore one organisation's data</a></li>
+          <li><a href="../runbooks/alerts.md">What each alarm means and first steps</a></li>
+          <li><a href="../runbooks/provider-outage.md">A provider (Stripe, Twilio, Postmark, Temporal Cloud) is down</a></li>
+          <li><a href="../runbooks/incident-comms.md">Tell customers about an incident</a></li>
+          <li><a href="../runbooks/backup-drill.md">Quarterly restore drill</a></li>
+          <li><a href="../runbooks/realtime-notifications.md">Realtime notifications (Server-Sent Events) in production</a></li>
+        </ul>
+        <p>Policies behind these procedures (incident response, breach notification, business
+          continuity, access control, data retention, sub-processors) are in
+          <code>docs/compliance/</code>; the security verification checklist is
+          <code>docs/security/asvs.md</code>.</p>
+      </section>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    <p>TutorTrack admin guide · Last updated: 2026-10-14 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
+  </footer>
+</body>
+</html>

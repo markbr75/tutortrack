@@ -16,8 +16,8 @@ Python 3.12 · Django 5 · DRF + drf-spectacular · PostgreSQL 16 · Celery + Re
 ## Commands
 - `make dev`: start the full stack (docker-compose)
 - `make test`: backend and frontend tests
-- `make check`: ruff, mypy, eslint, tsc, tests, `makemigrations --check`, OpenAPI drift check. **Must pass before a ticket is done.**
-- `make api-client`: regenerate the TS client from OpenAPI
+- `make check`: ruff, mypy, eslint, tsc, tests, `makemigrations --check`, OpenAPI drift check, guides check. **Must pass before a ticket is done.**
+- `make api-client`: regenerate the TS client from OpenAPI; then `make docs` to regenerate the API guide reference
 
 ## Non-negotiables
 1. **Tenancy:** every tenant-owned model subclasses `core.models.TenantModel` (`BranchScopedModel` for branch-scoped data) and its migration calls `enable_rls()`. Never query with `all_tenants` outside `platform_admin`. Every new list/detail endpoint gets a cross-tenant isolation test (`TenantIsolationTestMixin`).
@@ -40,3 +40,4 @@ Python 3.12 · Django 5 · DRF + drf-spectacular · PostgreSQL 16 · Celery + Re
 2. Write or extend models, migrations, services, selectors, API and tests; then frontend.
 3. Run `make check`.
 4. Tick the ticket in the epic, record any deviation from the spec in the epic's *Implementation notes* section, update `docs/04-roadmap.md` when an epic completes, and add an ADR in `docs/adr/` for any significant decision.
+5. **Keep the README and guides current** in the same change: `README.md` (status, setup, backend app table, commands) and the HTML guides in `docs/guides/` — `user-guide.html` (day-to-day use), `admin-guide.html` (configuration and platform operations), `api-guide.html` (public API, OAuth, webhooks). Document every new or changed screen, setting, permission, API behaviour or webhook event, and bump the guide's "Last updated" date. New nav items need a section with `data-route="<app>:<path>"`; never hand-edit inside `BEGIN/END GENERATED` markers (run `make docs`). `make docs-check` enforces the mechanical parts; conventions are in `docs/guides/README.md`.

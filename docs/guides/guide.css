@@ -1,0 +1,198 @@
+/* Shared stylesheet for the TutorTrack HTML guides (docs/guides/*.html).
+   No external dependencies: the guides open straight from the repo or file://. */
+
+:root {
+  --bg: #ffffff;
+  --surface: #f6f7f9;
+  --surface-2: #eef1f5;
+  --border: #d9dee6;
+  --text: #1b2330;
+  --muted: #5b6676;
+  --accent: #2459c9;
+  --accent-soft: #e8effc;
+  --code-bg: #f1f3f7;
+  --note: #2459c9;
+  --tip: #1f7a4d;
+  --warn: #9a5b00;
+  --get: #1f7a4d;
+  --post: #2459c9;
+  --put: #7a4ec2;
+  --patch: #7a4ec2;
+  --delete: #b3261e;
+  --radius: 8px;
+  --sidebar: 280px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161d;
+    --surface: #1a1f28;
+    --surface-2: #222937;
+    --border: #2f3746;
+    --text: #e6e9ef;
+    --muted: #9aa4b5;
+    --accent: #7aa5ff;
+    --accent-soft: #1d2a45;
+    --code-bg: #1d232e;
+    --note: #7aa5ff;
+    --tip: #5fcf98;
+    --warn: #f0b34a;
+    --get: #5fcf98;
+    --post: #7aa5ff;
+    --put: #c3a2ff;
+    --patch: #c3a2ff;
+    --delete: #ff8a80;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #12161d;
+  --surface: #1a1f28;
+  --surface-2: #222937;
+  --border: #2f3746;
+  --text: #e6e9ef;
+  --muted: #9aa4b5;
+  --accent: #7aa5ff;
+  --accent-soft: #1d2a45;
+  --code-bg: #1d232e;
+  --note: #7aa5ff;
+  --tip: #5fcf98;
+  --warn: #f0b34a;
+  --get: #5fcf98;
+  --post: #7aa5ff;
+  --put: #c3a2ff;
+  --patch: #c3a2ff;
+  --delete: #ff8a80;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 16px; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+a { color: var(--accent); }
+a:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.skip-link {
+  position: absolute; left: -9999px; top: 8px;
+  background: var(--accent); color: #fff; padding: 8px 12px; border-radius: var(--radius); z-index: 10;
+}
+.skip-link:focus { left: 8px; }
+
+/* ---------- Layout ---------- */
+.site-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  padding: 16px;
+}
+.site-header .inner { max-width: 1280px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline; }
+.site-header .product { font-weight: 700; font-size: 1.1rem; color: var(--text); text-decoration: none; }
+.site-header .guide-title { color: var(--muted); }
+.site-header nav { margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.95rem; }
+.site-header nav a[aria-current="page"] { font-weight: 600; text-decoration: none; color: var(--text); }
+
+.layout { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); gap: 40px; padding: 24px 16px 64px; }
+
+.toc { position: sticky; top: 16px; align-self: start; max-height: calc(100vh - 32px); overflow: auto; font-size: 0.92rem; }
+.toc details { border: 0; }
+.toc summary { font-weight: 600; cursor: pointer; padding: 4px 0; }
+.toc ol { list-style: none; margin: 0; padding: 0 0 0 4px; }
+.toc ol ol { padding-left: 14px; }
+.toc li { margin: 2px 0; }
+.toc a { color: var(--muted); text-decoration: none; display: block; padding: 2px 6px; border-radius: 4px; }
+.toc a:hover { color: var(--text); background: var(--surface-2); }
+
+main { min-width: 0; }
+main > header { margin-bottom: 32px; }
+.meta { color: var(--muted); font-size: 0.9rem; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .toc { position: static; max-height: none; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; background: var(--surface); }
+  .site-header nav { margin-left: 0; }
+}
+
+/* ---------- Typography ---------- */
+h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 8px; }
+h2 { font-size: 1.5rem; margin: 48px 0 12px; padding-top: 16px; border-top: 1px solid var(--border); }
+h3 { font-size: 1.2rem; margin: 32px 0 8px; }
+h4 { font-size: 1rem; margin: 24px 0 4px; }
+section > h2:first-child { margin-top: 32px; }
+p, ul, ol, dl, table, pre, .callout { margin: 0 0 16px; }
+li { margin: 4px 0; }
+dt { font-weight: 600; }
+dd { margin: 0 0 8px 16px; }
+.lead { font-size: 1.1rem; color: var(--muted); }
+
+code, kbd, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size: 0.88em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); padding: 12px 16px; border-radius: var(--radius); overflow-x: auto; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+kbd { border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--surface); }
+
+/* UI labels: <span class="ui">Save</span> */
+.ui { font-weight: 600; white-space: nowrap; }
+.path { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.88em; color: var(--muted); }
+
+/* ---------- Components ---------- */
+.callout { border-left: 4px solid var(--note); background: var(--surface); padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0; }
+.callout > :last-child { margin-bottom: 0; }
+.callout.tip { border-color: var(--tip); }
+.callout.warn { border-color: var(--warn); }
+.callout strong:first-child { display: block; margin-bottom: 2px; }
+
+.table-wrap { overflow-x: auto; margin-bottom: 16px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+.table-wrap table { margin: 0; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+th { background: var(--surface); font-weight: 600; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.card { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; background: var(--surface); }
+.card h3, .card h4 { margin: 0 0 4px; font-size: 1rem; }
+.card p { margin: 0; color: var(--muted); font-size: 0.93rem; }
+
+ol.steps { counter-reset: step; list-style: none; padding-left: 0; }
+ol.steps > li { counter-increment: step; position: relative; padding-left: 36px; margin: 8px 0; }
+ol.steps > li::before {
+  content: counter(step); position: absolute; left: 0; top: 1px;
+  width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent);
+  font-weight: 700; font-size: 0.85rem; display: grid; place-items: center;
+}
+
+.badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); vertical-align: middle; }
+
+/* API reference */
+.method { display: inline-block; min-width: 58px; font: 700 0.75rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-transform: uppercase; }
+.method.get { color: var(--get); }
+.method.post { color: var(--post); }
+.method.put { color: var(--put); }
+.method.patch { color: var(--patch); }
+.method.delete { color: var(--delete); }
+.endpoints td:first-child { white-space: nowrap; }
+.endpoints td:nth-child(2) code { background: none; padding: 0; }
+.scopes code { font-size: 0.8em; }
+
+details.ref { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; background: var(--bg); }
+details.ref > summary { cursor: pointer; padding: 10px 14px; font-weight: 600; background: var(--surface); border-radius: var(--radius); }
+details.ref[open] > summary { border-bottom: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0; }
+details.ref > .table-wrap { margin: 0; }
+
+footer.site-footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.88rem; padding: 16px; text-align: center; }
+
+@media print {
+  .toc, .site-header nav, .skip-link { display: none; }
+  .layout { display: block; padding: 0; }
+  details.ref { break-inside: avoid; }
+  details.ref:not([open]) > *:not(summary) { display: block; }
+  a { color: inherit; }
+}

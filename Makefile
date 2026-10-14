@@ -11,7 +11,8 @@ PYTEST_WORKERS ?= auto
 FE_CONCURRENCY ?= 2
 
 .PHONY: help dev infra down logs install test test-be test-fe e2e lint fmt typecheck check \
-        migrate db-roles makemigrations migrations-check shell seed openapi api-client api-client-check
+        migrate db-roles makemigrations migrations-check shell seed openapi api-client api-client-check \
+        docs docs-check
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -65,7 +66,7 @@ typecheck: ## mypy + tsc
 migrations-check: ## Fail if model changes are missing migrations
 	$(BE) $(UV) python manage.py makemigrations --check --dry-run
 
-check: lint typecheck migrations-check test api-client-check ## Everything CI runs. Must pass before a ticket is done.
+check: lint typecheck migrations-check test api-client-check docs-check ## Everything CI runs. Must pass before a ticket is done.
 
 db-roles: ## Create/update the app (RLS) and platform database roles
 	$(BE) $(UV) python manage.py ensure_db_roles
@@ -90,3 +91,9 @@ api-client: openapi ## Regenerate the TypeScript API client from OpenAPI
 
 api-client-check: api-client ## Fail if the committed API client is out of date
 	git diff --exit-code -- frontend/packages/api-client/
+
+docs: ## Regenerate the API guide reference (run after `make api-client`)
+	$(BE) $(UV) python manage.py guides
+
+docs-check: ## Fail if the HTML guides or README are out of date (docs/guides/README.md)
+	$(BE) $(UV) python manage.py guides --check
