@@ -17,9 +17,10 @@ from tutortrack.identity.tests.factories import MembershipFactory
 from tutortrack.integrations.providers import AuthError
 from tutortrack.people.tests.factories import ClientFactory, ContactFactory
 from tutortrack.privacy import services as privacy
+from tutortrack.tenancy import settings_service
 
 from .factories import PhoneNumberFactory, SenderDomainFactory, WhatsAppTemplateFactory
-from .test_comms import family, lesson_at, run  # noqa: F401  (fixtures)
+from .test_comms import family, lesson_at, quiet_window, run  # noqa: F401  (fixtures)
 
 pytestmark = pytest.mark.django_db
 
@@ -143,6 +144,8 @@ def test_notifications_go_by_whatsapp_with_opt_in_and_a_template(org, family, fa
     from tutortrack.core.time import now
 
     with tenant_context(org):
+        # Outside quiet hours whatever time the suite runs, or the message is only queued.
+        settings_service.update_settings("comms", quiet_window(now_is_quiet=False))
         OrgNotificationSetting.objects.create(
             type_key="lesson_booked", enabled=True, channels=["whatsapp"]
         )
