@@ -1,0 +1,1661 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TutorTrack API Guide</title>
+  <meta name="description" content="How to integrate with TutorTrack: authentication, scopes, pagination, errors, idempotency, rate limits, webhooks and the public endpoint reference.">
+  <link rel="stylesheet" href="guide.css">
+</head>
+<body>
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="inner">
+    <a class="product" href="../../README.md">TutorTrack</a>
+    <span class="guide-title">API guide</span>
+    <nav aria-label="Guides">
+      <a href="user-guide.html">User guide</a>
+      <a href="admin-guide.html">Admin guide</a>
+      <a href="api-guide.html" aria-current="page">API guide</a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="toc" aria-label="On this page">
+    <details open>
+      <summary>Contents</summary>
+      <ol>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#quick-start">Quick start</a></li>
+        <li><a href="#authentication">Authentication</a>
+          <ol>
+            <li><a href="#api-keys">API keys</a></li>
+            <li><a href="#oauth">OAuth 2 apps</a></li>
+            <li><a href="#scopes">Scopes</a></li>
+          </ol>
+        </li>
+        <li><a href="#conventions">Requests and responses</a>
+          <ol>
+            <li><a href="#data-types">Data types</a></li>
+            <li><a href="#pagination">Pagination</a></li>
+            <li><a href="#errors">Errors</a></li>
+            <li><a href="#idempotency">Idempotency</a></li>
+            <li><a href="#concurrency">Concurrent updates</a></li>
+            <li><a href="#rate-limits">Rate limits</a></li>
+            <li><a href="#versioning">Versioning and deprecation</a></li>
+          </ol>
+        </li>
+        <li><a href="#webhooks">Webhooks</a>
+          <ol>
+            <li><a href="#webhook-setup">Setting up an endpoint</a></li>
+            <li><a href="#webhook-payload">Payload</a></li>
+            <li><a href="#webhook-signatures">Verifying signatures</a></li>
+            <li><a href="#webhook-delivery">Delivery and retries</a></li>
+            <li><a href="#webhook-events">Event catalogue</a></li>
+          </ol>
+        </li>
+        <li><a href="#no-code">Zapier, Make and sandboxes</a></li>
+        <li><a href="#reference">Endpoint reference</a></li>
+      </ol>
+    </details>
+  </nav>
+
+  <main id="content">
+    <header>
+      <h1>TutorTrack API guide</h1>
+      <p class="lead">Connect your own systems to TutorTrack with the REST API and webhooks.</p>
+      <p class="meta">Last updated: 2026-10-14 · API version v1</p>
+    </header>
+
+    <section id="overview">
+      <h2>Overview</h2>
+      <p>The TutorTrack API is the same REST API that the TutorTrack apps use. A subset of it is
+        <strong>public</strong>: those endpoints accept API keys and OAuth access tokens and are
+        listed in the <a href="#reference">endpoint reference</a>. Everything else is internal to
+        the first-party apps and refuses tokens.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th scope="col">What</th><th scope="col">Where</th></tr></thead>
+        <tbody>
+          <tr><td>Base URL</td><td><code>https://app.tutortrack.app/api/v1/</code> (local development: <code>http://localhost:8010/api/v1/</code>). The token identifies your organisation, so any TutorTrack host works.</td></tr>
+          <tr><td>Interactive reference</td><td><code>/api/v1/docs/</code></td></tr>
+          <tr><td>Public OpenAPI document</td><td><code>GET /api/v1/developer/openapi.json</code>, or <span class="ui">Download OpenAPI</span> in <span class="path">Developer › API documentation</span></td></tr>
+          <tr><td>Postman collection</td><td><code>GET /api/v1/developer/postman.json</code>, or <span class="ui">Download Postman collection</span></td></tr>
+          <tr><td>Changelog</td><td><code>GET /api/v1/developer/changelog</code>, and the <span class="ui">Changelog</span> on the documentation page</td></tr>
+        </tbody>
+      </table></div>
+      <p>All requests and responses use JSON over HTTPS. Requests without a token, or with a
+        token for the wrong organisation, never see another organisation's data: every query
+        runs inside the token's organisation, enforced by the database.</p>
+    </section>
+
+    <section id="quick-start">
+      <h2>Quick start</h2>
+      <ol class="steps">
+        <li>In the admin app open <span class="path">Developer › API keys</span> and select
+          <span class="ui">Create key</span>. You need the <code>developer.apikey.manage</code>
+          permission (owners and admins have it).</li>
+        <li>Give the key a name, choose its <a href="#scopes">scopes</a> (for example
+          <code>clients:read</code>), and optionally a branch, an expiry date and an IP allowlist.</li>
+        <li>Copy the key. It starts with <code>ttk_</code> and is shown <strong>once</strong>;
+          TutorTrack stores only a hash.</li>
+        <li>Call the API with the key as a bearer token:</li>
+      </ol>
+      <pre><code>curl https://app.tutortrack.app/api/v1/clients \
+  -H "Authorization: Bearer $TUTORTRACK_API_KEY"</code></pre>
+      <pre><code>import requests
+
+r = requests.get(
+    "https://app.tutortrack.app/api/v1/clients",
+    headers={"Authorization": f"Bearer {api_key}"},
+    params={"page_size": 100},
+)
+r.raise_for_status()
+for client in r.json()["results"]:
+    print(client["display_name"])</code></pre>
+      <pre><code>const res = await fetch("https://app.tutortrack.app/api/v1/clients", {
+  headers: { Authorization: `Bearer ${apiKey}` },
+});
+const { results, next } = await res.json();</code></pre>
+    </section>
+
+    <section id="authentication">
+      <h2>Authentication</h2>
+      <p>Send <code>Authorization: Bearer &lt;token&gt;</code> on every request. There are two
+        kinds of token:</p>
+      <div class="cards">
+        <div class="card"><h3>API key <code>ttk_…</code></h3><p>For your own scripts and back-office integrations in one organisation.</p></div>
+        <div class="card"><h3>OAuth access token <code>tta_…</code></h3><p>For apps that other organisations connect, through the OAuth 2 authorisation code flow.</p></div>
+      </div>
+      <p>A token acts as the person who created it (an API key) or who approved the app (an
+        OAuth grant). A request is allowed only when <strong>both</strong> hold:</p>
+      <ul>
+        <li>the endpoint is public and the token has a scope for its resource
+          (<code>read</code> for <code>GET</code>, <code>write</code> otherwise; <code>write</code>
+          implies <code>read</code>); and</li>
+        <li>the person still has the permission the endpoint needs, and is still an active
+          member of the organisation.</li>
+      </ul>
+      <p>So a token can never do more than its owner. Field-level permissions apply too: a key
+        made by someone who cannot see contact phone numbers gets responses without them.</p>
+
+      <h3 id="api-keys">API keys</h3>
+      <ul>
+        <li><strong>Format:</strong> <code>ttk_&lt;12-character prefix&gt;_&lt;48 hex characters&gt;</code>.
+          The prefix is shown in the key list so you can tell keys apart.</li>
+        <li><strong>Branch:</strong> a key can be limited to one branch; it then sees only that
+          branch's records.</li>
+        <li><strong>IP allowlist:</strong> optional list of addresses or CIDR ranges. Requests
+          from other addresses get <code>401</code>.</li>
+        <li><strong>Expiry:</strong> optional. Expired keys get <code>401</code>.</li>
+        <li><strong>Rotation:</strong> <span class="ui">Rotate</span> issues a new key with the
+          same settings. The old key keeps working for an overlap period (organisation setting
+          <code>developer.api_key_rotation_overlap_hours</code>) so you can deploy the new one.</li>
+        <li><strong>Revocation:</strong> takes effect immediately.</li>
+      </ul>
+      <div class="callout warn"><strong>Keep keys secret</strong>
+        <p>Never put an API key in a browser or mobile app. Use OAuth with PKCE for public
+          clients instead.</p></div>
+
+      <h3 id="oauth">OAuth 2 apps</h3>
+      <p>Register an app in <span class="path">Developer › Apps</span>. A
+        <strong>confidential</strong> app (a server) gets a client secret; a
+        <strong>public</strong> app (a single-page or mobile app) has none and must use PKCE.
+        TutorTrack supports the authorisation code grant with PKCE (<code>S256</code>) and
+        refresh tokens.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th scope="col">Endpoint</th><th scope="col">Use</th></tr></thead>
+        <tbody>
+          <tr><td><code>/api/v1/oauth/authorize</code></td><td>Send the user here with <code>client_id</code>, <code>redirect_uri</code>, <code>response_type=code</code>, <code>scope</code> (space-separated), <code>state</code>, <code>code_challenge</code> and <code>code_challenge_method=S256</code>. The user signs in and approves the scopes on a consent screen; TutorTrack then redirects to <code>redirect_uri</code> with <code>code</code> and <code>state</code>.</td></tr>
+          <tr><td><code>POST /api/v1/oauth/token</code></td><td><code>grant_type=authorization_code</code> (with <code>code</code>, <code>redirect_uri</code>, <code>code_verifier</code>) or <code>grant_type=refresh_token</code>. Confidential clients also send <code>client_secret</code>.</td></tr>
+          <tr><td><code>POST /api/v1/oauth/revoke</code></td><td>Revoke an access or refresh token.</td></tr>
+        </tbody>
+      </table></div>
+      <ul>
+        <li>Authorisation codes last 10 minutes and work once.</li>
+        <li>Access tokens (<code>tta_…</code>) last one hour by default (<code>expires_in</code> in the token response).</li>
+        <li>Refresh tokens (<code>ttr_…</code>) last 90 days and rotate on every use. If a used
+          code or refresh token is presented again, TutorTrack treats it as stolen and revokes
+          every token of that grant.</li>
+        <li>Admins see connected apps under <span class="ui">Connected apps</span> in <span class="path">Developer › Apps</span>
+          and can disconnect them; every token of the app then stops working.</li>
+        <li>PKCE is mandatory for public clients and recommended for confidential ones.</li>
+      </ul>
+
+      <h3 id="scopes">Scopes</h3>
+      <p>A scope is <code>&lt;resource&gt;:read</code> or <code>&lt;resource&gt;:write</code>.
+        Ask for the fewest scopes you need. Each operation in the
+        <a href="#reference">endpoint reference</a> lists the scope it requires.</p>
+      <!-- BEGIN GENERATED: scopes -->
+<div class="table-wrap"><table>
+  <thead><tr><th scope="col">Resource</th><th scope="col">Read scope</th><th scope="col">Write scope</th></tr></thead>
+  <tbody>
+    <tr><td>Clients and contacts</td><td><code>clients:read</code></td><td><code>clients:write</code></td></tr>
+    <tr><td>Students</td><td><code>students:read</code></td><td><code>students:write</code></td></tr>
+    <tr><td>Tutors</td><td><code>tutors:read</code></td><td><code>tutors:write</code></td></tr>
+    <tr><td>Services and catalogue</td><td><code>services:read</code></td><td><code>services:write</code></td></tr>
+    <tr><td>Jobs</td><td><code>jobs:read</code></td><td><code>jobs:write</code></td></tr>
+    <tr><td>Lessons, attendance and lesson reports</td><td><code>lessons:read</code></td><td><code>lessons:write</code></td></tr>
+    <tr><td>Availability and free slots</td><td><code>availability:read</code></td><td><code>availability:write</code></td></tr>
+    <tr><td>Invoices, charges and payment requests</td><td><code>invoices:read</code></td><td><code>invoices:write</code></td></tr>
+    <tr><td>Payments</td><td><code>payments:read</code></td><td><code>payments:write</code></td></tr>
+    <tr><td>Tutor pay items</td><td><code>payroll:read</code></td><td>—</td></tr>
+    <tr><td>Enquiries and form submissions</td><td><code>enquiries:read</code></td><td><code>enquiries:write</code></td></tr>
+    <tr><td>Tags, custom fields, notes and tasks</td><td><code>crm:read</code></td><td><code>crm:write</code></td></tr>
+    <tr><td>Reviews</td><td><code>reviews:read</code></td><td><code>reviews:write</code></td></tr>
+    <tr><td>Branches</td><td><code>branches:read</code></td><td>—</td></tr>
+    <tr><td>Webhook endpoints</td><td><code>webhooks:read</code></td><td><code>webhooks:write</code></td></tr>
+  </tbody>
+</table></div>
+      <!-- END GENERATED: scopes -->
+    </section>
+
+    <section id="conventions">
+      <h2>Requests and responses</h2>
+
+      <h3 id="data-types">Data types</h3>
+      <ul>
+        <li><strong>IDs</strong> are UUIDs (time-ordered UUIDv7).</li>
+        <li><strong>Timestamps</strong> are ISO 8601 in UTC, for example
+          <code>2026-10-14T09:30:00Z</code>. Lessons, users, branches and the organisation also
+          carry an IANA <code>timezone</code>; recurring lessons repeat in the lesson's local time.</li>
+        <li><strong>Money</strong> is an object with a decimal string and an ISO 4217 currency:
+          <code>{"amount": "40.00", "currency": "GBP"}</code>. Never send money as a float.</li>
+        <li><strong>Financial records</strong> (invoices, payments, credit notes) cannot be edited
+          or deleted once issued. Correct them with credit notes and adjustments.</li>
+      </ul>
+
+      <h3 id="pagination">Pagination</h3>
+      <p>Lists use cursor pagination, newest first. The response has <code>results</code>,
+        <code>next</code> and <code>previous</code>; follow <code>next</code> until it is
+        <code>null</code>. Use <code>page_size</code> to change the page length (default 50,
+        maximum 200). Cursors are opaque: do not build them yourself.</p>
+      <pre><code>{
+  "next": "https://app.tutortrack.app/api/v1/clients?cursor=cD0yMDI2LTEw...",
+  "previous": null,
+  "results": [ { "id": "0192…", "display_name": "The Patel family", … } ]
+}</code></pre>
+
+      <h3 id="errors">Errors</h3>
+      <p>Errors are RFC 7807 problem details with content type
+        <code>application/problem+json</code>. Validation errors list messages per field under
+        <code>errors</code>. Quote <code>request_id</code> when you contact support.</p>
+      <pre><code>{
+  "type": "https://docs.tutortrack.app/problems/validation-error",
+  "title": "Invalid input.",
+  "status": 422,
+  "detail": "…",
+  "errors": { "email": ["Enter a valid email address."] },
+  "request_id": "01J…"
+}</code></pre>
+      <div class="table-wrap"><table>
+        <thead><tr><th scope="col">Status</th><th scope="col">Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>400</code> / <code>422</code></td><td>The request is malformed or fails validation or a business rule.</td></tr>
+          <tr><td><code>401</code></td><td>The token is missing, invalid, expired, revoked, or used from an address outside its allowlist.</td></tr>
+          <tr><td><code>403</code></td><td>The token lacks the scope, or its owner lacks the permission, or the endpoint is internal.</td></tr>
+          <tr><td><code>404</code></td><td>The record does not exist in your organisation (or branch, for a branch key).</td></tr>
+          <tr><td><code>409</code></td><td>A conflict, for example a request with the same <code>Idempotency-Key</code> is still running.</td></tr>
+          <tr><td><code>412</code> / <code>428</code></td><td>The <code>If-Match</code> ETag is stale, or the endpoint requires one.</td></tr>
+          <tr><td><code>429</code></td><td>Rate limit exceeded; wait for <code>Retry-After</code> seconds.</td></tr>
+          <tr><td><code>5xx</code></td><td>Our fault. Retry with backoff; POSTs are safe to retry with an <code>Idempotency-Key</code>.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3 id="idempotency">Idempotency</h3>
+      <p>Send an <code>Idempotency-Key</code> header (a UUID works well) on <code>POST</code>
+        requests to make them safe to retry for 24 hours. Financial POSTs (payments, invoices,
+        charges, payment requests) should always send one.</p>
+      <ul>
+        <li>Same key, same request: the stored response comes back with
+          <code>Idempotent-Replayed: true</code>.</li>
+        <li>Same key, different body: <code>422</code> <code>idempotency-key-reused</code>.</li>
+        <li>Same key while the first request is still running: <code>409</code>
+          <code>idempotency-request-in-progress</code>.</li>
+        <li>Server errors (<code>5xx</code>) are not stored, so a retry runs the request again.</li>
+      </ul>
+      <p>Keys are scoped to your organisation and token.</p>
+
+      <h3 id="concurrency">Concurrent updates</h3>
+      <p>Some resources return an <code>ETag</code>. Send it back in <code>If-Match</code> on
+        <code>PUT</code>/<code>PATCH</code> to make sure nobody changed the record since you read
+        it. A stale ETag gets <code>412</code>; endpoints marked <span class="badge">If-Match</span>
+        in the reference accept it, and some require it (<code>428</code> without it).</p>
+
+      <h3 id="rate-limits">Rate limits</h3>
+      <p>Each token may make 600 requests a minute, with bursts of up to 100 a second. Every
+        response carries <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code> and
+        <code>X-RateLimit-Reset</code> (Unix seconds). Over the limit you get <code>429</code>
+        with <code>Retry-After</code>. Need more? Ask your TutorTrack contact: limits can be raised
+        per organisation.</p>
+
+      <h3 id="versioning">Versioning and deprecation</h3>
+      <p>The major version is in the URL (<code>/api/v1/</code>). Within v1 we only
+        <strong>add</strong> fields, endpoints and event types, so ignore fields you do not know.
+        An endpoint that is going away sends <code>Deprecation</code> (RFC 9745),
+        <code>Sunset</code> (RFC 8594) and a <code>Link</code> to its changelog entry on every
+        response, months before removal.</p>
+    </section>
+
+    <section id="webhooks">
+      <h2>Webhooks</h2>
+      <p>Webhooks tell your system when something happens in TutorTrack, so you do not have to
+        poll. TutorTrack sends an HTTPS <code>POST</code> with a JSON body to your endpoint for
+        each event it is subscribed to.</p>
+
+      <h3 id="webhook-setup">Setting up an endpoint</h3>
+      <ol class="steps">
+        <li>Open <span class="path">Developer › Webhooks</span> and select
+          <span class="ui">Add endpoint</span> (permission <code>developer.webhook.manage</code>).</li>
+        <li>Enter the HTTPS URL. Private and internal addresses are refused.</li>
+        <li>Choose the events: individual types such as <code>lesson.completed</code>, or every
+          event of an aggregate with a wildcard such as <code>lesson.*</code>. There is no global
+          wildcard.</li>
+        <li>Copy the signing secret (<code>whsec_…</code>, shown once) into your receiver.</li>
+        <li>Select <span class="ui">Send test event</span> to deliver a
+          <code>webhook.test</code> event and check your receiver.</li>
+      </ol>
+      <p>You can also manage endpoints through the API with the <code>webhooks:write</code>
+        scope (see <a href="#ref-webhooks">Webhooks</a> in the reference).
+        <code>GET /api/v1/webhook-event-types</code> lists every event type with its payload
+        fields, and <code>/api/v1/webhook-event-types/{type}/sample</code> returns an example.</p>
+
+      <h3 id="webhook-payload">Payload</h3>
+      <p>Each delivery has these headers:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th scope="col">Header</th><th scope="col">Value</th></tr></thead>
+        <tbody>
+          <tr><td><code>Webhook-Id</code></td><td>The event ID. Stays the same across retries and redeliveries: use it to drop duplicates.</td></tr>
+          <tr><td><code>Webhook-Event</code></td><td>The event type, for example <code>invoice.issued</code>.</td></tr>
+          <tr><td><code>Webhook-Attempt</code></td><td>1 for the first attempt, then 2, 3, …</td></tr>
+          <tr><td><code>Webhook-Signature</code></td><td><code>t=&lt;unix seconds&gt;,v1=&lt;hex HMAC&gt;</code> (see below).</td></tr>
+          <tr><td><code>User-Agent</code></td><td><code>TutorTrack-Webhooks/1</code></td></tr>
+        </tbody>
+      </table></div>
+      <pre><code>{
+  "id": "0192f0c4-…",
+  "type": "lesson.completed",
+  "version": 1,
+  "api_version": "v1",
+  "occurred_at": "2026-10-14T16:00:00Z",
+  "organisation_id": "0191…",
+  "branch_id": "0191…",
+  "actor": { "type": "user", "id": "0191…" },
+  "subject": { "type": "lesson", "id": "0192…" },
+  "data": { … the lesson as GET /api/v1/lessons/{id} returns it … },
+  "event_data": { … the event's own fields … },
+  "changes": { … for update events, the changed fields … }
+}</code></pre>
+      <ul>
+        <li><code>data</code> is the current public API representation of the subject, as the
+          person who created the endpoint may see it (field permissions apply). If the subject
+          has no public representation or no longer exists, it holds the event's own data.</li>
+        <li>For sensitive aggregates (<code>message</code>, <code>thread</code>,
+          <code>recording</code>, <code>background_check</code>) the payload carries IDs and
+          status only. Fetch the record through the API if your token may see it.</li>
+        <li>Safeguarding, privacy casework, security and AI internals never produce webhooks.</li>
+      </ul>
+
+      <h3 id="webhook-signatures">Verifying signatures</h3>
+      <p>Compute HMAC-SHA256 with your endpoint secret over the timestamp, a full stop and the
+        <strong>raw</strong> request body, compare it with each <code>v1</code> value in constant
+        time, and reject timestamps more than five minutes from your clock. While a rotated
+        secret overlaps (24 hours), the header has a second <code>v1</code> for the old secret.</p>
+      <pre><code>import hashlib, hmac, time
+
+def verify(secret: str, header: str, body: bytes, tolerance: int = 300) -> bool:
+    parts = [p.split("=", 1) for p in header.split(",")]
+    t = next(int(v) for k, v in parts if k == "t")
+    if abs(time.time() - t) > tolerance:
+        return False  # outside the replay window
+    expected = hmac.new(secret.encode(), f"{t}.".encode() + body, hashlib.sha256).hexdigest()
+    return any(hmac.compare_digest(expected, v) for k, v in parts if k == "v1")</code></pre>
+      <pre><code>import { createHmac, timingSafeEqual } from "node:crypto";
+
+export function verify(secret, header, rawBody, tolerance = 300) {
+  const parts = header.split(",").map((p) => p.split("="));
+  const t = Number(parts.find(([k]) => k === "t")[1]);
+  if (Math.abs(Date.now() / 1000 - t) > tolerance) return false;
+  const expected = createHmac("sha256", secret).update(`${t}.`).update(rawBody).digest("hex");
+  return parts.some(([k, v]) => k === "v1" &amp;&amp;
+    timingSafeEqual(Buffer.from(v), Buffer.from(expected)));
+}</code></pre>
+
+      <h3 id="webhook-delivery">Delivery and retries</h3>
+      <ul>
+        <li>Reply with any <code>2xx</code> within 10 seconds. Do slow work after you reply.</li>
+        <li>Failed deliveries are retried with exponential backoff: 15 attempts over about 72 hours.</li>
+        <li>An endpoint that keeps failing for three days is disabled and the organisation's
+          admins are notified. Fix the receiver, then select <span class="ui">Enable</span> in
+          <span class="path">Developer › Webhooks</span>.</li>
+        <li>Events can arrive out of order and more than once. Order by <code>occurred_at</code>
+          and de-duplicate on <code>Webhook-Id</code>.</li>
+        <li>The delivery log keeps every attempt (request, response status, timing) for 30 days.
+          Select <span class="ui">Redeliver</span> on any delivery to send it again with the same
+          <code>Webhook-Id</code>.</li>
+        <li><span class="ui">Rotate secret</span> issues a new secret; the old one stays valid
+          for 24 hours.</li>
+      </ul>
+
+      <h3 id="webhook-events">Event catalogue</h3>
+      <p>Subscribe to individual types or to <code>&lt;aggregate&gt;.*</code>.</p>
+      <!-- BEGIN GENERATED: webhook-events -->
+<p class="meta">249 event types on 70 aggregates, generated from the webhook event catalogue.</p>
+<details class="ref" id="events-affiliate_statement">
+  <summary><code>affiliate_statement.*</code> <span class="badge">1</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>affiliate_statement.issued</code></td><td>Affiliate statement issued.</td><td><code>affiliate_id</code>, <code>number</code>, <code>total</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-application">
+  <summary><code>application.*</code> <span class="badge">5</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>application.approved</code></td><td>Application approved.</td><td><code>tutor_id</code></td></tr>
+      <tr><td><code>application.interview_booked</code></td><td>Application interview booked.</td><td><code>interview_id</code></td></tr>
+      <tr><td><code>application.rejected</code></td><td>Application rejected.</td><td><code>reason</code></td></tr>
+      <tr><td><code>application.stage_changed</code></td><td>Application stage changed.</td><td><code>to_stage</code></td></tr>
+      <tr><td><code>application.submitted</code></td><td>Starts <code>TutorApplicationWorkflow</code>.</td><td><code>opening_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-assessment">
+  <summary><code>assessment.*</code> <span class="badge">1</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>assessment.recorded</code></td><td>Assessment recorded.</td><td><code>assessment_id</code>, <code>student_id</code>, <code>kind</code>, <code>percent</code>, <code>grade</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-attendance">
+  <summary><code>attendance.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>attendance.absence_notified</code></td><td>A family told us a student will miss a (group) lesson; the tutor is told.</td><td><code>student_id</code>, <code>note</code></td></tr>
+      <tr><td><code>attendance.recorded</code></td><td>Attendance recorded.</td><td><code>attendees</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-availability">
+  <summary><code>availability.*</code> <span class="badge">1</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>availability.updated</code></td><td>Availability updated.</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-background_check">
+  <summary><code>background_check.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>background_check.completed</code></td><td>Background check completed.</td><td><code>tutor_id</code>, <code>provider</code></td></tr>
+      <tr><td><code>background_check.failed</code></td><td>Couldn&#x27;t start, expired before the tutor finished, or was cancelled.</td><td><code>tutor_id</code>, <code>provider</code>, <code>status</code></td></tr>
+      <tr><td><code>background_check.requested</code></td><td>Starts <code>BackgroundCheckWorkflow</code>.</td><td><code>tutor_id</code>, <code>provider</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-billing_plan">
+  <summary><code>billing_plan.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>billing_plan.created</code></td><td>Billing plan created.</td><td><code>client_id</code>, <code>amount</code></td></tr>
+      <tr><td><code>billing_plan.period_skipped</code></td><td>A period with no lessons on a plan that isn&#x27;t attendance-independent.</td><td><code>client_id</code>, <code>start</code></td></tr>
+      <tr><td><code>billing_plan.status_changed</code></td><td>Billing plan status changed.</td><td><code>client_id</code>, <code>status</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-booking">
+  <summary><code>booking.*</code> <span class="badge">5</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>booking.confirmed</code></td><td>Booking confirmed.</td><td><code>lesson_id</code>, <code>client_id</code>, <code>new_client</code></td></tr>
+      <tr><td><code>booking.declined</code></td><td>Booking declined.</td><td><code>reason</code></td></tr>
+      <tr><td><code>booking.held</code></td><td>A slot is held for an online booking; starts <code>BookingHoldWorkflow</code>.</td><td><code>tutor_id</code>, <code>start</code>, <code>expires_at</code></td></tr>
+      <tr><td><code>booking.requested</code></td><td>An online booking waits for staff approval.</td><td><code>tutor_id</code>, <code>start</code></td></tr>
+      <tr><td><code>booking.submitted</code></td><td>The person pressed Book: <code>status</code> is awaiting_payment, awaiting_approval or</td><td><code>status</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-branch">
+  <summary><code>branch.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>branch.archived</code></td><td>Branch archived.</td><td>—</td></tr>
+      <tr><td><code>branch.created</code></td><td>Branch created.</td><td><code>name</code>, <code>code</code>, <code>is_default</code></td></tr>
+      <tr><td><code>branch.updated</code></td><td>Branch updated.</td><td><code>fields</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-broadcast">
+  <summary><code>broadcast.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>broadcast.cancelled</code></td><td>Broadcast cancelled.</td><td><code>channel</code>, <code>purpose</code></td></tr>
+      <tr><td><code>broadcast.scheduled</code></td><td>Starts <code>BroadcastWorkflow</code> (wait, resolve the segment, send in batches).</td><td><code>channel</code>, <code>purpose</code>, <code>scheduled_for</code></td></tr>
+      <tr><td><code>broadcast.sent</code></td><td>Broadcast sent.</td><td><code>channel</code>, <code>purpose</code>, <code>recipients</code>, <code>queued</code>, <code>skipped</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-charge">
+  <summary><code>charge.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>charge.created</code></td><td>Charge created.</td><td><code>client_id</code>, <code>kind</code>, <code>gross</code>, <code>lesson_id</code></td></tr>
+      <tr><td><code>charge.voided</code></td><td>Charge voided.</td><td><code>client_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-class">
+  <summary><code>class.*</code> <span class="badge">4</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>class.below_minimum</code></td><td>Class below minimum.</td><td><code>course_id</code>, <code>enrolled</code>, <code>min_size</code></td></tr>
+      <tr><td><code>class.cancelled</code></td><td>Class cancelled.</td><td><code>course_id</code>, <code>reason</code>, <code>enrolments_withdrawn</code></td></tr>
+      <tr><td><code>class.full</code></td><td>Class full.</td><td><code>course_id</code>, <code>capacity</code></td></tr>
+      <tr><td><code>class.places_freed</code></td><td>Places may be free (withdrawal, transfer, more capacity, an offer ran out): the</td><td><code>course_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-client">
+  <summary><code>client.*</code> <span class="badge">8</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>client.archived</code></td><td>Client archived.</td><td>—</td></tr>
+      <tr><td><code>client.balance_low</code></td><td>Client balance low.</td><td><code>available</code></td></tr>
+      <tr><td><code>client.collections_closed</code></td><td>Client collections closed.</td><td><code>invoice_id</code>, <code>case_id</code></td></tr>
+      <tr><td><code>client.collections_opened</code></td><td>Client collections opened.</td><td><code>invoice_id</code>, <code>case_id</code>, <code>block</code>, <code>balance_due</code></td></tr>
+      <tr><td><code>client.created</code></td><td>Client created.</td><td><code>display_name</code></td></tr>
+      <tr><td><code>client.merged</code></td><td>Client merged.</td><td><code>merged_id</code>, <code>moved</code></td></tr>
+      <tr><td><code>client.statement_sent</code></td><td>A scheduled monthly statement was emailed to a client.</td><td><code>currency</code>, <code>period_start</code>, <code>period_end</code></td></tr>
+      <tr><td><code>client.updated</code></td><td>Client updated.</td><td><code>fields</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-commission">
+  <summary><code>commission.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>commission.clawed_back</code></td><td>Commission clawed back.</td><td><code>affiliate_id</code>, <code>client_id</code>, <code>amount</code>, <code>kind</code></td></tr>
+      <tr><td><code>commission.earned</code></td><td>Commission earned.</td><td><code>affiliate_id</code>, <code>client_id</code>, <code>amount</code>, <code>kind</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-compliance">
+  <summary><code>compliance.*</code> <span class="badge">5</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>compliance.expired</code></td><td>Compliance expired.</td><td><code>tutor_id</code>, <code>requirement</code></td></tr>
+      <tr><td><code>compliance.expiring</code></td><td>Compliance expiring.</td><td><code>tutor_id</code>, <code>requirement</code>, <code>days</code></td></tr>
+      <tr><td><code>compliance.record_rejected</code></td><td>Compliance record rejected.</td><td><code>tutor_id</code>, <code>requirement</code>, <code>reason</code></td></tr>
+      <tr><td><code>compliance.record_submitted</code></td><td>Compliance record submitted.</td><td><code>tutor_id</code>, <code>requirement</code></td></tr>
+      <tr><td><code>compliance.record_verified</code></td><td>With an expiry date, starts <code>ComplianceRecordWorkflow</code>.</td><td><code>tutor_id</code>, <code>requirement</code>, <code>expiry_date</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-contact">
+  <summary><code>contact.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>contact.created</code></td><td>Contact created.</td><td><code>client_id</code></td></tr>
+      <tr><td><code>contact.merged</code></td><td>Contact merged.</td><td><code>merged_id</code>, <code>client_id</code>, <code>moved</code></td></tr>
+      <tr><td><code>contact.updated</code></td><td>Contact updated.</td><td><code>client_id</code>, <code>fields</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-cover_request">
+  <summary><code>cover_request.*</code> <span class="badge">5</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>cover_request.accepted</code></td><td>Cover request accepted.</td><td><code>tutor_id</code></td></tr>
+      <tr><td><code>cover_request.cancelled</code></td><td>Cover request cancelled.</td><td>—</td></tr>
+      <tr><td><code>cover_request.created</code></td><td>Starts <code>CoverRequestWorkflow</code>.</td><td><code>tutor_id</code>, <code>lessons</code>, <code>deadline</code></td></tr>
+      <tr><td><code>cover_request.filled</code></td><td>Cover request filled.</td><td><code>tutor_id</code>, <code>lessons</code></td></tr>
+      <tr><td><code>cover_request.unfilled</code></td><td>Cover request unfilled.</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-credit_note">
+  <summary><code>credit_note.*</code> <span class="badge">1</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>credit_note.issued</code></td><td>Credit note issued.</td><td><code>client_id</code>, <code>invoice_id</code>, <code>total</code>, <code>application</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-document">
+  <summary><code>document.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>document.signed</code></td><td>A family member or tutor signed a document.</td><td><code>signature_id</code>, <code>target_type</code>, <code>target_id</code></td></tr>
+      <tr><td><code>document.uploaded</code></td><td>Document uploaded.</td><td><code>target_type</code>, <code>target_id</code>, <code>category</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-enquiry">
+  <summary><code>enquiry.*</code> <span class="badge">6</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>enquiry.assigned</code></td><td>Enquiry assigned.</td><td><code>client_id</code>, <code>owner_id</code></td></tr>
+      <tr><td><code>enquiry.lost</code></td><td>Enquiry lost.</td><td><code>client_id</code>, <code>reason</code></td></tr>
+      <tr><td><code>enquiry.received</code></td><td>Starts <code>EnquiryFollowUpWorkflow</code> (auto-acknowledgement, SLA timers).</td><td><code>client_id</code>, <code>source</code>, <code>owner_id</code></td></tr>
+      <tr><td><code>enquiry.sla_breached</code></td><td>Enquiry sla breached.</td><td><code>client_id</code>, <code>stage</code></td></tr>
+      <tr><td><code>enquiry.stage_changed</code></td><td>Enquiry stage changed.</td><td><code>client_id</code>, <code>from_stage</code>, <code>to_stage</code></td></tr>
+      <tr><td><code>enquiry.won</code></td><td>Enquiry won.</td><td><code>client_id</code>, <code>job_ids</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-enrolment">
+  <summary><code>enrolment.*</code> <span class="badge">6</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>enrolment.completed</code></td><td>Enrolment completed.</td><td><code>class_id</code>, <code>student_id</code>, <code>client_id</code></td></tr>
+      <tr><td><code>enrolment.confirmed</code></td><td>A place held for payment (or a trial) became a full enrolment.</td><td><code>class_id</code>, <code>student_id</code>, <code>client_id</code></td></tr>
+      <tr><td><code>enrolment.created</code></td><td>A student was enrolled (or holds a place while paying: starts</td><td><code>class_id</code>, <code>student_id</code>, <code>client_id</code>, <code>status</code>, <code>source</code>, <code>start_date</code></td></tr>
+      <tr><td><code>enrolment.released</code></td><td>A place held for payment was released (not paid in time, or cancelled).</td><td><code>class_id</code>, <code>student_id</code>, <code>client_id</code>, <code>reason</code></td></tr>
+      <tr><td><code>enrolment.transferred</code></td><td>Enrolment transferred.</td><td><code>class_id</code>, <code>student_id</code>, <code>client_id</code>, <code>to_class_id</code>, <code>to_enrolment_id</code>, <code>effective_date</code></td></tr>
+      <tr><td><code>enrolment.withdrawn</code></td><td>Enrolment withdrawn.</td><td><code>class_id</code>, <code>student_id</code>, <code>client_id</code>, <code>effective_date</code>, <code>reason</code>, <code>credited</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-expense">
+  <summary><code>expense.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>expense.approved</code></td><td>Expense approved.</td><td><code>tutor_id</code>, <code>amount</code></td></tr>
+      <tr><td><code>expense.rejected</code></td><td>Expense rejected.</td><td><code>tutor_id</code>, <code>amount</code>, <code>comment</code></td></tr>
+      <tr><td><code>expense.submitted</code></td><td>Starts <code>ExpenseApprovalWorkflow</code>.</td><td><code>tutor_id</code>, <code>amount</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-form">
+  <summary><code>form.*</code> <span class="badge">1</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>form.submitted</code></td><td>Form submitted.</td><td><code>form_id</code>, <code>form_type</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-goal">
+  <summary><code>goal.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>goal.achieved</code></td><td>Goal achieved.</td><td><code>student_id</code>, <code>title</code></td></tr>
+      <tr><td><code>goal.created</code></td><td>Goal created.</td><td><code>student_id</code>, <code>title</code>, <code>kind</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-homework">
+  <summary><code>homework.*</code> <span class="badge">6</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>homework.assigned</code></td><td>Starts <code>HomeworkReminderWorkflow</code> (reminder before due, overdue at due).</td><td><code>homework_id</code>, <code>student_id</code>, <code>round</code>, <code>title</code>, <code>due_at</code></td></tr>
+      <tr><td><code>homework.cancelled</code></td><td>Homework cancelled.</td><td><code>assignments</code></td></tr>
+      <tr><td><code>homework.graded</code></td><td>Homework graded.</td><td><code>homework_id</code>, <code>student_id</code>, <code>round</code>, <code>grade</code>, <code>score_percent</code></td></tr>
+      <tr><td><code>homework.overdue</code></td><td>Homework overdue.</td><td><code>homework_id</code>, <code>student_id</code>, <code>round</code>, <code>due_at</code></td></tr>
+      <tr><td><code>homework.returned</code></td><td>Returned for resubmission: a new reminder round starts with the new due date.</td><td><code>homework_id</code>, <code>student_id</code>, <code>round</code>, <code>due_at</code></td></tr>
+      <tr><td><code>homework.submitted</code></td><td>Homework submitted.</td><td><code>homework_id</code>, <code>student_id</code>, <code>round</code>, <code>is_late</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-invoice">
+  <summary><code>invoice.*</code> <span class="badge">10</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>invoice.drafted</code></td><td>Invoice drafted.</td><td><code>client_id</code>, <code>run_id</code></td></tr>
+      <tr><td><code>invoice.imported</code></td><td>A historic invoice brought over by an import: no ledger entry, no dunning.</td><td><code>client_id</code>, <code>number</code>, <code>status</code>, <code>total</code></td></tr>
+      <tr><td><code>invoice.issued</code></td><td>Invoice issued.</td><td><code>client_id</code>, <code>number</code>, <code>total</code>, <code>balance_due</code>, <code>due_date</code></td></tr>
+      <tr><td><code>invoice.overdue</code></td><td>Invoice overdue.</td><td><code>client_id</code></td></tr>
+      <tr><td><code>invoice.paid</code></td><td>Invoice paid.</td><td><code>client_id</code></td></tr>
+      <tr><td><code>invoice.partially_paid</code></td><td>Invoice partially paid.</td><td><code>client_id</code>, <code>balance_due</code></td></tr>
+      <tr><td><code>invoice.reminder</code></td><td>Invoice reminder.</td><td><code>client_id</code>, <code>offset_days</code>, <code>balance_due</code></td></tr>
+      <tr><td><code>invoice.sent</code></td><td>Invoice sent.</td><td><code>client_id</code>, <code>to</code></td></tr>
+      <tr><td><code>invoice.voided</code></td><td>Invoice voided.</td><td><code>client_id</code>, <code>reason</code></td></tr>
+      <tr><td><code>invoice.written_off</code></td><td>Invoice written off.</td><td><code>client_id</code>, <code>reason</code>, <code>amount</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-job">
+  <summary><code>job.*</code> <span class="badge">7</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>job.created</code></td><td>Job created.</td><td><code>reference</code>, <code>client_id</code>, <code>status</code></td></tr>
+      <tr><td><code>job.hours_cap_reached</code></td><td>Job hours cap reached.</td><td><code>used_hours</code>, <code>cap_hours</code>, <code>level</code></td></tr>
+      <tr><td><code>job.status_changed</code></td><td>Job status changed.</td><td><code>from_status</code>, <code>to_status</code>, <code>reason</code>, <code>future_lessons</code></td></tr>
+      <tr><td><code>job.tutor_assigned</code></td><td>Job tutor assigned.</td><td><code>tutor_id</code>, <code>role</code>, <code>offered</code></td></tr>
+      <tr><td><code>job.tutor_removed</code></td><td>Job tutor removed.</td><td><code>tutor_id</code>, <code>end_date</code></td></tr>
+      <tr><td><code>job.tutor_replaced</code></td><td>Job tutor replaced.</td><td><code>old_tutor_id</code>, <code>new_tutor_id</code>, <code>effective_date</code></td></tr>
+      <tr><td><code>job.updated</code></td><td>Job updated.</td><td><code>fields</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-job_offer">
+  <summary><code>job_offer.*</code> <span class="badge">8</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>job_offer.accepted</code></td><td>Job offer accepted.</td><td><code>batch_id</code>, <code>job_id</code>, <code>tutor_id</code></td></tr>
+      <tr><td><code>job_offer.batch_closed</code></td><td>Job offer batch closed.</td><td><code>job_id</code>, <code>status</code></td></tr>
+      <tr><td><code>job_offer.batch_started</code></td><td>Starts <code>JobOfferCascadeWorkflow</code>.</td><td><code>job_id</code>, <code>mode</code>, <code>tutors</code></td></tr>
+      <tr><td><code>job_offer.decided</code></td><td>A coordinator confirmed or rejected an accepted offer (signals the cascade).</td><td><code>batch_id</code>, <code>approved</code></td></tr>
+      <tr><td><code>job_offer.declined</code></td><td>Job offer declined.</td><td><code>batch_id</code>, <code>job_id</code>, <code>tutor_id</code>, <code>reason</code></td></tr>
+      <tr><td><code>job_offer.expired</code></td><td>Job offer expired.</td><td><code>batch_id</code>, <code>job_id</code>, <code>tutor_id</code></td></tr>
+      <tr><td><code>job_offer.sent</code></td><td>Job offer sent.</td><td><code>batch_id</code>, <code>job_id</code>, <code>tutor_id</code></td></tr>
+      <tr><td><code>job_offer.withdrawn</code></td><td>Job offer withdrawn.</td><td><code>batch_id</code>, <code>job_id</code>, <code>tutor_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-job_posting">
+  <summary><code>job_posting.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>job_posting.application_received</code></td><td>Job posting application received.</td><td><code>tutor_id</code>, <code>application_id</code></td></tr>
+      <tr><td><code>job_posting.filled</code></td><td>Job posting filled.</td><td><code>job_id</code>, <code>tutor_id</code></td></tr>
+      <tr><td><code>job_posting.published</code></td><td>Job posting published.</td><td><code>job_id</code>, <code>eligible</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-late_fee">
+  <summary><code>late_fee.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>late_fee.applied</code></td><td>Late fee applied.</td><td><code>client_id</code>, <code>charge_id</code>, <code>amount</code>, <code>number</code></td></tr>
+      <tr><td><code>late_fee.waived</code></td><td>Late fee waived.</td><td><code>client_id</code>, <code>reason</code>, <code>amount</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-lesson">
+  <summary><code>lesson.*</code> <span class="badge">9</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>lesson.cancelled</code></td><td><code>attendees</code>/<code>tutors</code> carry the policy outcome: per attendee</td><td><code>reason</code>, <code>chargeable</code>, <code>notify</code>, <code>cancelled_by</code>, <code>policy_kind</code>, <code>attendees</code>, <code>tutors</code></td></tr>
+      <tr><td><code>lesson.completed</code></td><td>Lesson completed.</td><td><code>job_id</code>, <code>auto</code>, <code>attendees</code>, <code>tutors</code></td></tr>
+      <tr><td><code>lesson.completion_blocked</code></td><td>A tutor could not complete a lesson: a prepaid client needs to top up.</td><td><code>client_ids</code></td></tr>
+      <tr><td><code>lesson.locked_edited</code></td><td>Lesson locked edited.</td><td><code>lock_state</code>, <code>before</code>, <code>after</code></td></tr>
+      <tr><td><code>lesson.missed</code></td><td>Lesson missed.</td><td>—</td></tr>
+      <tr><td><code>lesson.rescheduled</code></td><td>Lesson rescheduled.</td><td><code>old_start</code>, <code>new_start</code>, <code>new_end</code>, <code>reason</code>, <code>notify</code></td></tr>
+      <tr><td><code>lesson.scheduled</code></td><td>Lesson scheduled.</td><td><code>start</code>, <code>end</code>, <code>job_id</code>, <code>series_id</code>, <code>tutor_ids</code>, <code>student_ids</code>, <code>notify</code></td></tr>
+      <tr><td><code>lesson.unconfirmed</code></td><td>Lesson unconfirmed.</td><td><code>tutor_ids</code></td></tr>
+      <tr><td><code>lesson.updated</code></td><td>Lesson updated.</td><td><code>fields</code>, <code>notify</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-lesson_feedback">
+  <summary><code>lesson_feedback.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>lesson_feedback.received</code></td><td>A family answered (1-5).</td><td><code>lesson_id</code>, <code>student_id</code>, <code>tutor_id</code>, <code>rating</code>, <code>low</code></td></tr>
+      <tr><td><code>lesson_feedback.requested</code></td><td>A feedback request went to a family.</td><td><code>lesson_id</code>, <code>student_id</code>, <code>tutor_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-lesson_report">
+  <summary><code>lesson_report.*</code> <span class="badge">9</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>lesson_report.approved</code></td><td>Lesson report approved.</td><td><code>lesson_id</code>, <code>tutor_id</code></td></tr>
+      <tr><td><code>lesson_report.commented</code></td><td>Lesson report commented.</td><td><code>lesson_id</code>, <code>tutor_id</code>, <code>comment_id</code>, <code>visibility</code></td></tr>
+      <tr><td><code>lesson_report.due</code></td><td>Lesson report due.</td><td><code>lesson_id</code>, <code>tutor_id</code>, <code>due_at</code></td></tr>
+      <tr><td><code>lesson_report.escalated</code></td><td>Lesson report escalated.</td><td><code>lesson_id</code>, <code>tutor_id</code></td></tr>
+      <tr><td><code>lesson_report.overdue</code></td><td>Lesson report overdue.</td><td><code>lesson_id</code>, <code>tutor_id</code>, <code>pay_held</code></td></tr>
+      <tr><td><code>lesson_report.requested</code></td><td>Lesson report requested.</td><td><code>lesson_id</code>, <code>tutor_id</code>, <code>due_at</code></td></tr>
+      <tr><td><code>lesson_report.returned</code></td><td>Lesson report returned.</td><td><code>lesson_id</code>, <code>tutor_id</code>, <code>note</code></td></tr>
+      <tr><td><code>lesson_report.shared</code></td><td>Lesson report shared.</td><td><code>lesson_id</code>, <code>tutor_id</code>, <code>client_ids</code></td></tr>
+      <tr><td><code>lesson_report.submitted</code></td><td>Lesson report submitted.</td><td><code>lesson_id</code>, <code>tutor_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-lesson_series">
+  <summary><code>lesson_series.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>lesson_series.created</code></td><td>Lesson series created.</td><td><code>job_id</code>, <code>lessons_created</code>, <code>notify</code></td></tr>
+      <tr><td><code>lesson_series.ended</code></td><td>Lesson series ended.</td><td>—</td></tr>
+      <tr><td><code>lesson_series.updated</code></td><td>Lesson series updated.</td><td><code>scope</code>, <code>lessons_changed</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-loan">
+  <summary><code>loan.*</code> <span class="badge">4</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>loan.created</code></td><td>Starts <code>LoanReminderWorkflow</code> (due reminder, overdue notices).</td><td><code>item_id</code>, <code>student_id</code>, <code>due_date</code></td></tr>
+      <tr><td><code>loan.lost</code></td><td>Loan lost.</td><td><code>item_id</code>, <code>student_id</code>, <code>charged</code></td></tr>
+      <tr><td><code>loan.overdue</code></td><td>Loan overdue.</td><td><code>item_id</code>, <code>student_id</code>, <code>due_date</code></td></tr>
+      <tr><td><code>loan.returned</code></td><td>Loan returned.</td><td><code>item_id</code>, <code>student_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-makeup_credit">
+  <summary><code>makeup_credit.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>makeup_credit.consumed</code></td><td>Makeup credit consumed.</td><td><code>student_id</code>, <code>lesson_id</code></td></tr>
+      <tr><td><code>makeup_credit.issued</code></td><td>Makeup credit issued.</td><td><code>student_id</code>, <code>source_lesson_id</code>, <code>expires_at</code></td></tr>
+      <tr><td><code>makeup_credit.voided</code></td><td>Makeup credit voided.</td><td><code>student_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-mandate">
+  <summary><code>mandate.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>mandate.active</code></td><td>Mandate active.</td><td><code>client_id</code>, <code>provider</code>, <code>status</code></td></tr>
+      <tr><td><code>mandate.cancelled</code></td><td>The mandate was cancelled, failed or expired at the provider.</td><td><code>client_id</code>, <code>provider</code>, <code>status</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-message">
+  <summary><code>message.*</code> <span class="badge">1</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>message.received</code></td><td>A message arrived in the inbox (email, text, WhatsApp or portal chat).</td><td><code>thread_id</code>, <code>channel</code>, <code>author_type</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-note">
+  <summary><code>note.*</code> <span class="badge">1</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>note.created</code></td><td>Note created.</td><td><code>target_type</code>, <code>target_id</code>, <code>visibility</code>, <code>mentions</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-onboarding">
+  <summary><code>onboarding.*</code> <span class="badge">4</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>onboarding.completed</code></td><td>Onboarding completed.</td><td><code>skipped_steps</code></td></tr>
+      <tr><td><code>onboarding.item_done</code></td><td>Onboarding item done.</td><td><code>item</code></td></tr>
+      <tr><td><code>onboarding.started</code></td><td>Starts <code>TutorOnboardingWorkflow</code>.</td><td>—</td></tr>
+      <tr><td><code>onboarding.step_completed</code></td><td>Onboarding step completed.</td><td><code>step</code>, <code>skipped</code>, <code>answers</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-online_meeting">
+  <summary><code>online_meeting.*</code> <span class="badge">6</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>online_meeting.created</code></td><td>Online meeting created.</td><td><code>provider</code>, <code>meeting_id</code></td></tr>
+      <tr><td><code>online_meeting.deleted</code></td><td>Online meeting deleted.</td><td><code>provider</code>, <code>meeting_id</code></td></tr>
+      <tr><td><code>online_meeting.failed</code></td><td>Provisioning failed after retries; staff were told.</td><td><code>provider</code>, <code>meeting_id</code>, <code>error</code></td></tr>
+      <tr><td><code>online_meeting.participant_joined</code></td><td>Online meeting participant joined.</td><td><code>provider</code>, <code>meeting_id</code>, <code>role</code>, <code>student_id</code></td></tr>
+      <tr><td><code>online_meeting.participant_left</code></td><td>Online meeting participant left.</td><td><code>provider</code>, <code>meeting_id</code>, <code>role</code>, <code>student_id</code></td></tr>
+      <tr><td><code>online_meeting.updated</code></td><td>Online meeting updated.</td><td><code>provider</code>, <code>meeting_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-package">
+  <summary><code>package.*</code> <span class="badge">8</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>package.activated</code></td><td>Package activated.</td><td><code>client_id</code>, <code>units_remaining</code>, <code>expires_at</code></td></tr>
+      <tr><td><code>package.cancelled</code></td><td>Package cancelled.</td><td><code>client_id</code>, <code>units_remaining</code>, <code>reason</code>, <code>credit_note_id</code></td></tr>
+      <tr><td><code>package.depleted</code></td><td>Auto-renewing packages are sold again (<code>auto_renew</code>).</td><td><code>client_id</code>, <code>units_remaining</code>, <code>auto_renew</code></td></tr>
+      <tr><td><code>package.expired</code></td><td>Unused units written off; <code>value</code> is the revenue released (recognised).</td><td><code>client_id</code>, <code>units_remaining</code>, <code>units_expired</code>, <code>value</code></td></tr>
+      <tr><td><code>package.expiring</code></td><td>Package expiring.</td><td><code>client_id</code>, <code>units_remaining</code>, <code>expires_at</code></td></tr>
+      <tr><td><code>package.extended</code></td><td>Package extended.</td><td><code>client_id</code>, <code>units_remaining</code>, <code>expires_at</code></td></tr>
+      <tr><td><code>package.low</code></td><td>Package low.</td><td><code>client_id</code>, <code>units_remaining</code></td></tr>
+      <tr><td><code>package.purchased</code></td><td>Package purchased.</td><td><code>client_id</code>, <code>units_remaining</code>, <code>name</code>, <code>price</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-pay_item">
+  <summary><code>pay_item.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>pay_item.created</code></td><td>Pay item created.</td><td><code>tutor_id</code>, <code>kind</code>, <code>amount</code></td></tr>
+      <tr><td><code>pay_item.held</code></td><td>Pay item held.</td><td><code>tutor_id</code>, <code>kind</code>, <code>amount</code>, <code>reasons</code></td></tr>
+      <tr><td><code>pay_item.released</code></td><td>Pay item released.</td><td><code>tutor_id</code>, <code>kind</code>, <code>amount</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-pay_run">
+  <summary><code>pay_run.*</code> <span class="badge">4</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>pay_run.approved</code></td><td>Pay run approved.</td><td><code>number</code></td></tr>
+      <tr><td><code>pay_run.created</code></td><td>Pay run created.</td><td><code>number</code></td></tr>
+      <tr><td><code>pay_run.paid</code></td><td>Pay run paid.</td><td><code>number</code></td></tr>
+      <tr><td><code>pay_run.partially_failed</code></td><td>Pay run partially failed.</td><td><code>number</code>, <code>failed</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-payment">
+  <summary><code>payment.*</code> <span class="badge">7</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>payment.dispute_closed</code></td><td>Payment dispute closed.</td><td><code>client_id</code>, <code>amount</code>, <code>dispute_id</code>, <code>outcome</code></td></tr>
+      <tr><td><code>payment.dispute_evidence_due</code></td><td>Reminder: the evidence deadline for a dispute is close.</td><td><code>client_id</code>, <code>amount</code>, <code>dispute_id</code>, <code>evidence_due_by</code></td></tr>
+      <tr><td><code>payment.disputed</code></td><td>Payment disputed.</td><td><code>client_id</code>, <code>amount</code>, <code>dispute_id</code>, <code>evidence_due_by</code></td></tr>
+      <tr><td><code>payment.failed</code></td><td>Payment failed.</td><td><code>client_id</code>, <code>attempt</code>, <code>failure_code</code>, <code>final</code></td></tr>
+      <tr><td><code>payment.pending</code></td><td>Payment pending.</td><td><code>client_id</code>, <code>amount</code></td></tr>
+      <tr><td><code>payment.refunded</code></td><td>Payment refunded.</td><td><code>client_id</code>, <code>amount</code>, <code>refund_id</code></td></tr>
+      <tr><td><code>payment.succeeded</code></td><td>Payment succeeded.</td><td><code>client_id</code>, <code>amount</code>, <code>method</code>, <code>invoice_ids</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-payment_method">
+  <summary><code>payment_method.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>payment_method.added</code></td><td>Payment method added.</td><td><code>client_id</code>, <code>type</code>, <code>provider</code></td></tr>
+      <tr><td><code>payment_method.expiring</code></td><td>A saved card expires at the end of this month.</td><td><code>client_id</code>, <code>exp_month</code>, <code>exp_year</code>, <code>is_default</code></td></tr>
+      <tr><td><code>payment_method.removed</code></td><td>Payment method removed.</td><td><code>client_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-payment_request">
+  <summary><code>payment_request.*</code> <span class="badge">4</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>payment_request.cancelled</code></td><td>Payment request cancelled.</td><td><code>client_id</code></td></tr>
+      <tr><td><code>payment_request.created</code></td><td>Payment request created.</td><td><code>client_id</code>, <code>amount</code>, <code>source</code></td></tr>
+      <tr><td><code>payment_request.paid</code></td><td>Payment request paid.</td><td><code>client_id</code>, <code>amount</code></td></tr>
+      <tr><td><code>payment_request.sent</code></td><td>Payment request sent.</td><td><code>client_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-payout">
+  <summary><code>payout.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>payout.failed</code></td><td>Payout failed.</td><td><code>tutor_id</code>, <code>pay_run_id</code>, <code>amount</code>, <code>reason</code></td></tr>
+      <tr><td><code>payout.paid</code></td><td>Payout paid.</td><td><code>tutor_id</code>, <code>pay_run_id</code>, <code>amount</code></td></tr>
+      <tr><td><code>payout.received</code></td><td>Payout received.</td><td><code>amount</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-progress_report">
+  <summary><code>progress_report.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>progress_report.approved</code></td><td>Progress report approved.</td><td><code>student_id</code>, <code>period_start</code>, <code>period_end</code></td></tr>
+      <tr><td><code>progress_report.shared</code></td><td>Progress report shared.</td><td><code>student_id</code>, <code>period_start</code>, <code>period_end</code>, <code>client_id</code></td></tr>
+      <tr><td><code>progress_report.submitted</code></td><td>Progress report submitted.</td><td><code>student_id</code>, <code>period_start</code>, <code>period_end</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-proposal">
+  <summary><code>proposal.*</code> <span class="badge">5</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>proposal.accepted</code></td><td>Proposal accepted.</td><td><code>enquiry_id</code>, <code>client_id</code>, <code>job_ids</code>, <code>tutor_id</code>, <code>payment_request_id</code></td></tr>
+      <tr><td><code>proposal.declined</code></td><td>Proposal declined.</td><td><code>enquiry_id</code></td></tr>
+      <tr><td><code>proposal.expired</code></td><td>Proposal expired.</td><td><code>enquiry_id</code></td></tr>
+      <tr><td><code>proposal.sent</code></td><td>Starts <code>ProposalWorkflow</code> (reminder, expiry).</td><td><code>enquiry_id</code>, <code>expires_at</code></td></tr>
+      <tr><td><code>proposal.withdrawn</code></td><td>Proposal withdrawn.</td><td><code>enquiry_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-public_profile">
+  <summary><code>public_profile.*</code> <span class="badge">4</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>public_profile.approved</code></td><td>Public profile approved.</td><td><code>tutor_id</code>, <code>slug</code></td></tr>
+      <tr><td><code>public_profile.hidden</code></td><td>Public profile hidden.</td><td><code>tutor_id</code></td></tr>
+      <tr><td><code>public_profile.rejected</code></td><td>Public profile rejected.</td><td><code>tutor_id</code>, <code>reason</code></td></tr>
+      <tr><td><code>public_profile.submitted</code></td><td>A tutor&#x27;s public profile changes wait for approval.</td><td><code>tutor_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-quiz">
+  <summary><code>quiz.*</code> <span class="badge">1</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>quiz.submitted</code></td><td>Quiz submitted.</td><td><code>quiz_id</code>, <code>student_id</code>, <code>percent</code>, <code>passed</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-recording">
+  <summary><code>recording.*</code> <span class="badge">1</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>recording.available</code></td><td>A recording reference was stored (<code>restricted</code> when consent is missing).</td><td><code>provider</code>, <code>restricted</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-reference">
+  <summary><code>reference.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>reference.received</code></td><td>Reference received.</td><td><code>application_id</code>, <code>concerns</code></td></tr>
+      <tr><td><code>reference.requested</code></td><td>Starts <code>ReferenceRequestWorkflow</code>.</td><td><code>application_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-referral">
+  <summary><code>referral.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>referral.converted</code></td><td>Referral converted.</td><td><code>referrer_id</code>, <code>referee_id</code></td></tr>
+      <tr><td><code>referral.created</code></td><td>Starts <code>ReferralRewardWorkflow</code>.</td><td><code>referrer_id</code>, <code>referee_id</code>, <code>source</code></td></tr>
+      <tr><td><code>referral.rewarded</code></td><td>Referral rewarded.</td><td><code>referrer_id</code>, <code>referee_id</code>, <code>credit</code>, <code>referee_discount</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-reschedule">
+  <summary><code>reschedule.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>reschedule.approved</code></td><td>Reschedule approved.</td><td><code>lesson_id</code>, <code>new_start</code></td></tr>
+      <tr><td><code>reschedule.declined</code></td><td>Reschedule declined.</td><td><code>lesson_id</code>, <code>reason</code></td></tr>
+      <tr><td><code>reschedule.requested</code></td><td>Starts <code>RescheduleRequestWorkflow</code>.</td><td><code>lesson_id</code>, <code>requester</code>, <code>deadline</code>, <code>options</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-resource">
+  <summary><code>resource.*</code> <span class="badge">1</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>resource.shared</code></td><td>A resource was shared with a student, job, lesson or class (<code>target</code>).</td><td><code>share_id</code>, <code>target</code>, <code>target_id</code>, <code>student_ids</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-review">
+  <summary><code>review.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>review.published</code></td><td>Review published.</td><td><code>client_id</code>, <code>tutor_id</code>, <code>rating</code></td></tr>
+      <tr><td><code>review.requested</code></td><td>Starts <code>ReviewRequestWorkflow</code> (send, remind, expire).</td><td><code>client_id</code>, <code>tutor_id</code>, <code>trigger</code></td></tr>
+      <tr><td><code>review.submitted</code></td><td>Signals <code>ReviewRequestWorkflow</code> (<code>submitted</code>) when it came from a request.</td><td><code>client_id</code>, <code>tutor_id</code>, <code>rating</code>, <code>request_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-self_billing_statement">
+  <summary><code>self_billing_statement.*</code> <span class="badge">1</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>self_billing_statement.issued</code></td><td>Self billing statement issued.</td><td><code>tutor_id</code>, <code>number</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-service">
+  <summary><code>service.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>service.created</code></td><td>Service created.</td><td>—</td></tr>
+      <tr><td><code>service.updated</code></td><td><code>rate_changed</code> is true when a default charge or pay rate changed.</td><td><code>fields</code>, <code>rate_changed</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-shortlist">
+  <summary><code>shortlist.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>shortlist.shared</code></td><td>A job&#x27;s shortlist was sent to the family.</td><td><code>job_id</code>, <code>tutor_ids</code>, <code>expires_at</code></td></tr>
+      <tr><td><code>shortlist.tutor_chosen</code></td><td>The family picked a tutor from a shared shortlist.</td><td><code>job_id</code>, <code>tutor_id</code>, <code>offer_batch_id</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-student">
+  <summary><code>student.*</code> <span class="badge">4</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>student.created</code></td><td>Student created.</td><td><code>client_id</code>, <code>status</code></td></tr>
+      <tr><td><code>student.merged</code></td><td>Student merged.</td><td><code>merged_id</code>, <code>client_id</code>, <code>moved</code></td></tr>
+      <tr><td><code>student.status_changed</code></td><td><code>waiting</code> feeds the waitlist.</td><td><code>old_status</code>, <code>new_status</code></td></tr>
+      <tr><td><code>student.updated</code></td><td>Student updated.</td><td><code>fields</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-task">
+  <summary><code>task.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>task.assigned</code></td><td>Task assigned.</td><td><code>assignee_id</code></td></tr>
+      <tr><td><code>task.completed</code></td><td>Task completed.</td><td>—</td></tr>
+      <tr><td><code>task.created</code></td><td>Task created.</td><td><code>assignee_id</code>, <code>due_at</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-term">
+  <summary><code>term.*</code> <span class="badge">3</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>term.rollover_finalised</code></td><td>Term rollover finalised.</td><td><code>enrolled</code>, <code>released</code></td></tr>
+      <tr><td><code>term.rollover_responded</code></td><td>A family confirmed or declined next term&#x27;s place (signals the rollover).</td><td><code>offer_id</code>, <code>confirmed</code></td></tr>
+      <tr><td><code>term.rollover_started</code></td><td>Starts <code>TermRolloverWorkflow</code>.</td><td><code>from_term_id</code>, <code>to_term_id</code>, <code>offers</code>, <code>deadline</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-thread">
+  <summary><code>thread.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>thread.assigned</code></td><td>Thread assigned.</td><td><code>assignee_id</code></td></tr>
+      <tr><td><code>thread.closed</code></td><td>Thread closed.</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-time_off">
+  <summary><code>time_off.*</code> <span class="badge">4</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>time_off.approved</code></td><td>Time off approved.</td><td><code>tutor_id</code>, <code>automatic</code></td></tr>
+      <tr><td><code>time_off.cover_flagged</code></td><td>Time off cover flagged.</td><td><code>tutor_id</code>, <code>lesson_ids</code>, <code>cover_request_id</code></td></tr>
+      <tr><td><code>time_off.declined</code></td><td>Time off declined.</td><td><code>tutor_id</code>, <code>expired</code></td></tr>
+      <tr><td><code>time_off.requested</code></td><td>Starts <code>TimeOffApprovalWorkflow</code>.</td><td><code>tutor_id</code>, <code>start</code>, <code>end</code>, <code>clashes</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-topic_mastery">
+  <summary><code>topic_mastery.*</code> <span class="badge">1</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>topic_mastery.changed</code></td><td>Topic mastery changed.</td><td><code>student_id</code>, <code>node_id</code>, <code>level</code>, <code>previous</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-trial_lesson">
+  <summary><code>trial_lesson.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>trial_lesson.booked</code></td><td>Trial lesson booked.</td><td><code>lesson_id</code></td></tr>
+      <tr><td><code>trial_lesson.completed</code></td><td>Trial lesson completed.</td><td><code>outcome</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-tutor">
+  <summary><code>tutor.*</code> <span class="badge">6</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>tutor.created</code></td><td>Tutor created.</td><td><code>email</code></td></tr>
+      <tr><td><code>tutor.restricted</code></td><td>Tutor restricted.</td><td><code>problems</code></td></tr>
+      <tr><td><code>tutor.status_changed</code></td><td>Tutor status changed.</td><td><code>old_status</code>, <code>new_status</code></td></tr>
+      <tr><td><code>tutor.tier_assigned</code></td><td>A tutor moved to a pay tier from <code>effective_from</code>.</td><td><code>tutor_id</code>, <code>tier_id</code>, <code>effective_from</code>, <code>recalculate</code></td></tr>
+      <tr><td><code>tutor.unrestricted</code></td><td>Tutor unrestricted.</td><td>—</td></tr>
+      <tr><td><code>tutor.updated</code></td><td>Tutor updated.</td><td><code>fields</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-waitlist">
+  <summary><code>waitlist.*</code> <span class="badge">4</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>waitlist.expired</code></td><td>Waitlist expired.</td><td><code>student_id</code>, <code>group_class_id</code></td></tr>
+      <tr><td><code>waitlist.place_accepted</code></td><td>Waitlist place accepted.</td><td><code>student_id</code>, <code>group_class_id</code></td></tr>
+      <tr><td><code>waitlist.place_declined</code></td><td>Waitlist place declined.</td><td><code>student_id</code>, <code>group_class_id</code></td></tr>
+      <tr><td><code>waitlist.place_offered</code></td><td>Starts <code>WaitlistOfferWorkflow</code>.</td><td><code>student_id</code>, <code>group_class_id</code>, <code>expires_at</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+      <!-- END GENERATED: webhook-events -->
+    </section>
+
+    <section id="no-code">
+      <h2>Zapier, Make and sandboxes</h2>
+      <ul>
+        <li><strong>Zapier and Make:</strong> TutorTrack publishes app definitions for both
+          platforms (<code>/api/v1/developer/connectors/zapier</code> and <code>…/make</code>).
+          They use OAuth, trigger on webhook events and act through the public API.</li>
+        <li><strong>Sandboxes:</strong> <span class="path">Developer › Sandboxes</span> creates
+          up to three sandbox organisations filled with sample data. Build and test against a
+          sandbox, then switch the key or OAuth connection to your live organisation.</li>
+        <li><strong>Marketplace:</strong> published integrations are listed in
+          <span class="path">Settings › Marketplace</span>, where admins connect them.</li>
+      </ul>
+    </section>
+
+    <section id="reference">
+      <h2>Endpoint reference</h2>
+      <p>Every public operation, grouped by resource. Paths are relative to the host; all
+        start with <code>/api/v1/</code>. Use the interactive reference or the OpenAPI document
+        for request and response schemas and examples.</p>
+      <!-- BEGIN GENERATED: endpoints -->
+<p class="meta">201 public operations in 23 groups, generated from <code>openapi.json</code>.</p>
+<details class="ref" id="ref-availability">
+  <summary>Availability <span class="badge">3</span></summary>
+  <p>A tutor&#x27;s weekly availability (GET current template and windows, PUT a new one).</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/availability/{tutor_id}</code></td><td>Get one</td><td class="scopes"><code>availability:read</code></td></tr>
+      <tr><td><span class="method put">PUT</span></td><td><code>/api/v1/availability/{tutor_id}</code></td><td>Replace</td><td class="scopes"><code>availability:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/availability/{tutor_id}/slots</code></td><td>List slots — Free start times for a tutor.</td><td class="scopes"><code>availability:read</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-branches">
+  <summary>Branches <span class="badge">5</span></summary>
+  <p>Branches.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/branches</code></td><td>List</td><td class="scopes"><code>branches:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/branches</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>branches:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/branches/{id}</code></td><td>Get one</td><td class="scopes"><code>branches:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/branches/{id}</code></td><td>Update</td><td class="scopes"><code>branches:write</code></td></tr>
+      <tr><td><span class="method delete">DELETE</span></td><td><code>/api/v1/branches/{id}</code></td><td>Delete — Archives the branch (the default branch cannot be).</td><td class="scopes"><code>branches:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-catalogue">
+  <summary>Catalogue <span class="badge">29</span></summary>
+  <p>Optional grouping of subjects and services.</p>
+  <p>Create and edit through <code>save</code>; nothing is deleted (archive or deactivate).</p>
+  <p>Where lessons happen.</p>
+  <p>What you sell.</p>
+  <p>Subjects with their (active) levels.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/catalogue/categories</code></td><td>List categories</td><td class="scopes"><code>services:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/catalogue/categories</code></td><td>Add categories <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/catalogue/categories/{id}</code></td><td>Get one</td><td class="scopes"><code>services:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/catalogue/categories/{id}</code></td><td>Update</td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/catalogue/categories/{id}/archive</code></td><td>Archive <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/catalogue/categories/{id}/restore</code></td><td>Restore <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/catalogue/levels</code></td><td>List levels</td><td class="scopes"><code>services:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/catalogue/levels</code></td><td>Add levels <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/catalogue/levels/{id}</code></td><td>Get one</td><td class="scopes"><code>services:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/catalogue/levels/{id}</code></td><td>Update</td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/catalogue/levels/{id}/archive</code></td><td>Archive <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/catalogue/levels/{id}/restore</code></td><td>Restore <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/catalogue/locations</code></td><td>List locations</td><td class="scopes"><code>services:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/catalogue/locations</code></td><td>Add locations <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/catalogue/locations/{id}</code></td><td>Get one</td><td class="scopes"><code>services:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/catalogue/locations/{id}</code></td><td>Update</td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/catalogue/locations/{id}/archive</code></td><td>Archive <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/catalogue/locations/{id}/restore</code></td><td>Restore <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/catalogue/services</code></td><td>List services</td><td class="scopes"><code>services:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/catalogue/services</code></td><td>Add services <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/catalogue/services/{id}</code></td><td>Get one</td><td class="scopes"><code>services:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/catalogue/services/{id}</code></td><td>Update</td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/catalogue/services/{id}/prices</code></td><td>Prices — Set the price in another currency. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/catalogue/subjects</code></td><td>List subjects</td><td class="scopes"><code>services:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/catalogue/subjects</code></td><td>Add subjects <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/catalogue/subjects/{id}</code></td><td>Get one</td><td class="scopes"><code>services:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/catalogue/subjects/{id}</code></td><td>Update</td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/catalogue/subjects/{id}/archive</code></td><td>Archive <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>services:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/catalogue/subjects/{id}/restore</code></td><td>Restore <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>services:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-charges">
+  <summary>Charges <span class="badge">4</span></summary>
+  <p>Charges awaiting (or on) invoices.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/charges</code></td><td>List</td><td class="scopes"><code>invoices:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/charges</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>invoices:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/charges/{id}</code></td><td>Get one</td><td class="scopes"><code>invoices:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/charges/{id}/void</code></td><td>Void <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>invoices:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-clients">
+  <summary>Clients <span class="badge">10</span></summary>
+  <p>Clients (billing accounts).</p>
+  <p>Contacts of one client: <code>/clients/{client_id}/contacts</code>.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/clients</code></td><td>List</td><td class="scopes"><code>clients:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/clients</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>clients:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/clients/{client_id}/contacts</code></td><td>List contacts</td><td class="scopes"><code>clients:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/clients/{client_id}/contacts</code></td><td>Add contacts <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>clients:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/clients/{id}</code></td><td>Get one</td><td class="scopes"><code>clients:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/clients/{id}</code></td><td>Update</td><td class="scopes"><code>clients:write</code></td></tr>
+      <tr><td><span class="method delete">DELETE</span></td><td><code>/api/v1/clients/{id}</code></td><td>Delete</td><td class="scopes"><code>clients:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/clients/{id}/restore</code></td><td>Restore <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>clients:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/clients/export</code></td><td>Get export</td><td class="scopes"><code>clients:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/clients/quick-add</code></td><td>Quick add — Client + primary contact + students in one step. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>clients:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-contacts">
+  <summary>Contacts <span class="badge">5</span></summary>
+  <p>All contacts (search, edit, archive).</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/contacts</code></td><td>List</td><td class="scopes"><code>clients:read</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/contacts/{id}</code></td><td>Get one</td><td class="scopes"><code>clients:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/contacts/{id}</code></td><td>Update</td><td class="scopes"><code>clients:write</code></td></tr>
+      <tr><td><span class="method delete">DELETE</span></td><td><code>/api/v1/contacts/{id}</code></td><td>Delete</td><td class="scopes"><code>clients:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/contacts/export</code></td><td>Get export</td><td class="scopes"><code>clients:read</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-custom-fields">
+  <summary>Custom fields <span class="badge">4</span></summary>
+  <p>Custom field definitions per record type.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/custom-fields</code></td><td>List</td><td class="scopes"><code>crm:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/custom-fields</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>crm:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/custom-fields/{id}</code></td><td>Get one</td><td class="scopes"><code>crm:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/custom-fields/{id}</code></td><td>Update</td><td class="scopes"><code>crm:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-enquiries">
+  <summary>Enquiries <span class="badge">11</span></summary>
+  <p>Base for views over tenant data.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/enquiries</code></td><td>List</td><td class="scopes"><code>enquiries:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/enquiries</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>enquiries:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/enquiries/{id}</code></td><td>Get one</td><td class="scopes"><code>enquiries:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/enquiries/{id}</code></td><td>Update</td><td class="scopes"><code>enquiries:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/enquiries/{id}/convert</code></td><td>Convert <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>enquiries:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/enquiries/{id}/history</code></td><td>List history</td><td class="scopes"><code>enquiries:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/enquiries/{id}/lose</code></td><td>Lose <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>enquiries:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/enquiries/{id}/move</code></td><td>Move <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>enquiries:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/enquiries/{id}/trial</code></td><td>Trial <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>enquiries:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/enquiries/{id}/trial-outcome</code></td><td>Trial outcome <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>enquiries:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/enquiries/board</code></td><td>List board — Open enquiries by stage for the Kanban board.</td><td class="scopes"><code>enquiries:read</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-form-submissions">
+  <summary>Form submissions <span class="badge">2</span></summary>
+  <p>Form submissions, newest first (G6, public API).</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/form-submissions</code></td><td>List</td><td class="scopes"><code>enquiries:read</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/form-submissions/{id}</code></td><td>Get one</td><td class="scopes"><code>enquiries:read</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-invoices">
+  <summary>Invoices <span class="badge">14</span></summary>
+  <p>Invoices.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/invoices</code></td><td>List</td><td class="scopes"><code>invoices:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/invoices</code></td><td>Create — A draft now from the client&#x27;s uninvoiced charges. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>invoices:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/invoices/{id}</code></td><td>Get one</td><td class="scopes"><code>invoices:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/invoices/{id}</code></td><td>Update</td><td class="scopes"><code>invoices:write</code></td></tr>
+      <tr><td><span class="method delete">DELETE</span></td><td><code>/api/v1/invoices/{id}</code></td><td>Delete</td><td class="scopes"><code>invoices:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/invoices/{id}/add-line</code></td><td>Add line <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>invoices:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/invoices/{id}/apply-credit</code></td><td>Apply credit <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>invoices:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/invoices/{id}/credit-note</code></td><td>Credit note <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>invoices:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/invoices/{id}/issue</code></td><td>Issue <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>invoices:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/invoices/{id}/pdf</code></td><td>Get pdf</td><td class="scopes"><code>invoices:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/invoices/{id}/remove-line</code></td><td>Remove line <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>invoices:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/invoices/{id}/send</code></td><td>Send — Email the invoice (with its PDF) to the billing contact now. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>invoices:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/invoices/{id}/void</code></td><td>Void <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>invoices:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/invoices/{id}/write-off</code></td><td>Write off <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>invoices:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-jobs">
+  <summary>Jobs <span class="badge">18</span></summary>
+  <p>Jobs.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/jobs</code></td><td>List</td><td class="scopes"><code>jobs:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/jobs</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>jobs:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/jobs/{id}</code></td><td>Get one</td><td class="scopes"><code>jobs:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/jobs/{id}</code></td><td>Update</td><td class="scopes"><code>jobs:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/jobs/{id}/duplicate</code></td><td>Duplicate <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>jobs:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/jobs/{id}/hours-check</code></td><td>Get hours check — Whether more hours fit within the job&#x27;s cap (warn at 80%, block at 100%).</td><td class="scopes"><code>jobs:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/jobs/{id}/status</code></td><td>Status <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>jobs:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/jobs/{id}/status-history</code></td><td>List status history</td><td class="scopes"><code>jobs:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/jobs/{id}/students</code></td><td>Students <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>jobs:write</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/jobs/{id}/students/{link_id}</code></td><td>Update</td><td class="scopes"><code>jobs:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/jobs/{id}/students/{link_id}/end</code></td><td>End <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>jobs:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/jobs/{id}/summary</code></td><td>Get summary — Expected per-lesson economics and delivered totals.</td><td class="scopes"><code>jobs:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/jobs/{id}/tutors</code></td><td>Tutors <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>jobs:write</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/jobs/{id}/tutors/{link_id}</code></td><td>Update</td><td class="scopes"><code>jobs:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/jobs/{id}/tutors/{link_id}/remove</code></td><td>Remove <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>jobs:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/jobs/{id}/tutors/{link_id}/replace</code></td><td>Replace — Replace a tutor from a date. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>jobs:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/jobs/{id}/tutors/{link_id}/respond</code></td><td>Respond — The offered tutor (or a coordinator) accepts or declines the job. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>jobs:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/jobs/quick-setup</code></td><td>Quick setup — &quot;Set up lessons&quot; for a student: service, rate, tutor and weekly times in one step. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>jobs:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-lesson-reports">
+  <summary>Lesson reports <span class="badge">9</span></summary>
+  <p>Lesson reports.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/lesson-reports</code></td><td>List</td><td class="scopes"><code>lessons:read</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/lesson-reports/{id}</code></td><td>Get one</td><td class="scopes"><code>lessons:read</code></td></tr>
+      <tr><td><span class="method put">PUT</span></td><td><code>/api/v1/lesson-reports/{id}</code></td><td>Replace <span class="badge">If-Match</span></td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/lesson-reports/{id}/approve</code></td><td>Approve <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/lesson-reports/{id}/comments</code></td><td>List comments</td><td class="scopes"><code>lessons:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/lesson-reports/{id}/comments</code></td><td>Add comments <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/lesson-reports/{id}/return</code></td><td>Return <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/lesson-reports/{id}/share</code></td><td>Share <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/lesson-reports/{id}/submit</code></td><td>Submit <span class="badge">Idempotency-Key</span> <span class="badge">If-Match</span></td><td class="scopes"><code>lessons:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-lessons">
+  <summary>Lessons <span class="badge">15</span></summary>
+  <p>Lessons.</p>
+  <p>A lesson&#x27;s reports (one per tutor).</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/lessons</code></td><td>List</td><td class="scopes"><code>lessons:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/lessons</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/lessons/{lesson_id}/reports</code></td><td>List reports</td><td class="scopes"><code>lessons:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/lessons/{lesson_id}/reports</code></td><td>Add reports <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/lessons/{id}</code></td><td>Get one</td><td class="scopes"><code>lessons:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/lessons/{id}</code></td><td>Update — <code>scope</code> = <code>this</code> (just this lesson), <code>following</code> or <code>all</code> (its series).</td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method delete">DELETE</span></td><td><code>/api/v1/lessons/{id}</code></td><td>Delete</td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/lessons/{id}/attendance</code></td><td>Update attendance — Correct attendance after completion (unlocked lessons).</td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/lessons/{id}/cancel</code></td><td>Cancel — Cancel under the cancellation policy. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/lessons/{id}/complete</code></td><td>Complete — Complete with attendance. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/lessons/{id}/duplicate</code></td><td>Duplicate <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/lessons/{id}/missed</code></td><td>Missed <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/lessons/{id}/pricing</code></td><td>List pricing — The pricing trace stored on the lesson.</td><td class="scopes"><code>lessons:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/lessons/{id}/reschedule</code></td><td>Reschedule <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>lessons:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/lessons/bulk</code></td><td>Bulk — Bulk actions on up to 200 lessons; each lesson succeeds or fails on its own. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>lessons:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-notes">
+  <summary>Notes <span class="badge">5</span></summary>
+  <p>Notes on a record (<code>?target_type=&amp;target_id=</code>).</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/notes</code></td><td>List</td><td class="scopes"><code>crm:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/notes</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>crm:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/notes/{id}</code></td><td>Get one</td><td class="scopes"><code>crm:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/notes/{id}</code></td><td>Update</td><td class="scopes"><code>crm:write</code></td></tr>
+      <tr><td><span class="method delete">DELETE</span></td><td><code>/api/v1/notes/{id}</code></td><td>Delete</td><td class="scopes"><code>crm:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-pay-items">
+  <summary>Pay items <span class="badge">5</span></summary>
+  <p>Base for views over tenant data.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/pay-items</code></td><td>List</td><td class="scopes"><code>payroll:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/pay-items</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>payroll:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/pay-items/{id}/hold</code></td><td>Hold <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>payroll:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/pay-items/{id}/release</code></td><td>Release <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>payroll:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/pay-items/{id}/void</code></td><td>Void <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>payroll:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-payment-requests">
+  <summary>Payment requests <span class="badge">5</span></summary>
+  <p>Payment requests: top-ups for prepaid credit.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/payment-requests</code></td><td>List</td><td class="scopes"><code>invoices:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/payment-requests</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>invoices:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/payment-requests/{id}</code></td><td>Get one</td><td class="scopes"><code>invoices:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/payment-requests/{id}/cancel</code></td><td>Cancel <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>invoices:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/payment-requests/bulk</code></td><td>Bulk <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>invoices:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-payments">
+  <summary>Payments <span class="badge">7</span></summary>
+  <p>Payments.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/payments</code></td><td>List</td><td class="scopes"><code>payments:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/payments</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>payments:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/payments/{id}</code></td><td>Get one</td><td class="scopes"><code>payments:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/payments/{id}/allocate</code></td><td>Allocate — Replace the payment&#x27;s allocations (re-allocation is audited). <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>payments:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/payments/{id}/receipt</code></td><td>Get receipt</td><td class="scopes"><code>payments:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/payments/{id}/refund</code></td><td>Refund <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>payments:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/payments/bulk</code></td><td>Bulk — Record many manual payments at once. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>payments:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-reviews">
+  <summary>Reviews <span class="badge">9</span></summary>
+  <p>Reviews and the moderation queue (<code>?status=pending</code>).</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/reviews</code></td><td>List</td><td class="scopes"><code>reviews:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/reviews</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>reviews:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/reviews/{id}</code></td><td>Get one</td><td class="scopes"><code>reviews:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/reviews/{id}/approve</code></td><td>Approve — Approve: counts in ratings; 4-5 stars with consent can become a testimonial. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>reviews:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/reviews/{id}/hide</code></td><td>Hide <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>reviews:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/reviews/{id}/publish</code></td><td>Publish — Publish as a website testimonial. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>reviews:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/reviews/{id}/respond</code></td><td>Respond <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>reviews:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/reviews/{id}/unpublish</code></td><td>Unpublish <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>reviews:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/reviews/summary</code></td><td>Get summary — Average rating, count and stars of approved reviews the user can see (the organisation&#x27;s, or one tutor&#x27;s with <code>?tutor=</code>).</td><td class="scopes"><code>reviews:read</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-students">
+  <summary>Students <span class="badge">7</span></summary>
+  <p>Students.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/students</code></td><td>List</td><td class="scopes"><code>students:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/students</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>students:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/students/{id}</code></td><td>Get one</td><td class="scopes"><code>students:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/students/{id}</code></td><td>Update</td><td class="scopes"><code>students:write</code></td></tr>
+      <tr><td><span class="method delete">DELETE</span></td><td><code>/api/v1/students/{id}</code></td><td>Delete</td><td class="scopes"><code>students:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/students/{id}/status</code></td><td>Status <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>students:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/students/export</code></td><td>Get export</td><td class="scopes"><code>students:read</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-tags">
+  <summary>Tags <span class="badge">6</span></summary>
+  <p>Organisation tags.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/tags</code></td><td>List</td><td class="scopes"><code>crm:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/tags</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>crm:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/tags/{id}</code></td><td>Get one</td><td class="scopes"><code>crm:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/tags/{id}</code></td><td>Update</td><td class="scopes"><code>crm:write</code></td></tr>
+      <tr><td><span class="method delete">DELETE</span></td><td><code>/api/v1/tags/{id}</code></td><td>Delete</td><td class="scopes"><code>crm:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/tags/{id}/apply</code></td><td>Apply <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>crm:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-tasks">
+  <summary>Tasks <span class="badge">4</span></summary>
+  <p>Tasks.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/tasks</code></td><td>List</td><td class="scopes"><code>crm:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/tasks</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>crm:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/tasks/{id}</code></td><td>Get one</td><td class="scopes"><code>crm:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/tasks/{id}</code></td><td>Update</td><td class="scopes"><code>crm:write</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-tutors">
+  <summary>Tutors <span class="badge">10</span></summary>
+  <p>Tutors.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/tutors</code></td><td>List</td><td class="scopes"><code>tutors:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/tutors</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>tutors:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/tutors/{id}</code></td><td>Get one</td><td class="scopes"><code>tutors:read</code></td></tr>
+      <tr><td><span class="method put">PUT</span></td><td><code>/api/v1/tutors/{id}</code></td><td>Replace</td><td class="scopes"><code>tutors:write</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/tutors/{id}</code></td><td>Update</td><td class="scopes"><code>tutors:write</code></td></tr>
+      <tr><td><span class="method delete">DELETE</span></td><td><code>/api/v1/tutors/{id}</code></td><td>Delete</td><td class="scopes"><code>tutors:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/tutors/{id}/status</code></td><td>Status <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>tutors:write</code></td></tr>
+      <tr><td><span class="method put">PUT</span></td><td><code>/api/v1/tutors/{id}/subjects</code></td><td>Update subjects</td><td class="scopes"><code>tutors:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/tutors/{id}/subjects/{subject_id}/approve</code></td><td>Approve <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>tutors:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/tutors/export</code></td><td>Get export</td><td class="scopes"><code>tutors:read</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="ref-webhooks">
+  <summary>Webhooks <span class="badge">14</span></summary>
+  <p>The delivery log (30 days): each delivery with its attempts.</p>
+  <p>Webhook endpoints: HTTPS URLs that receive signed event notifications.</p>
+  <div class="table-wrap"><table class="endpoints">
+    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/webhook-deliveries</code></td><td>List</td><td class="scopes"><code>webhooks:read</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/webhook-deliveries/{id}</code></td><td>Get one</td><td class="scopes"><code>webhooks:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/webhook-deliveries/{id}/redeliver</code></td><td>Redeliver <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>webhooks:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/webhook-deliveries/{id}/retry-now</code></td><td>Retry now <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>webhooks:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/webhook-endpoints</code></td><td>List</td><td class="scopes"><code>webhooks:read</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/webhook-endpoints</code></td><td>Create <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>webhooks:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/webhook-endpoints/{id}</code></td><td>Get one</td><td class="scopes"><code>webhooks:read</code></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><code>/api/v1/webhook-endpoints/{id}</code></td><td>Update</td><td class="scopes"><code>webhooks:write</code></td></tr>
+      <tr><td><span class="method delete">DELETE</span></td><td><code>/api/v1/webhook-endpoints/{id}</code></td><td>Delete</td><td class="scopes"><code>webhooks:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/webhook-endpoints/{id}/reveal-secret</code></td><td>Reveal secret — Show the signing secret (the read is audited). <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>webhooks:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/webhook-endpoints/{id}/rotate-secret</code></td><td>Rotate secret — New signing secret; the old one also signs for 24 hours. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>webhooks:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/webhook-endpoints/{id}/test</code></td><td>Test — Send a <code>webhook.test</code> event now. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>webhooks:write</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/webhook-event-types</code></td><td>List — Event types an endpoint can subscribe to (also <code>&lt;aggregate&gt;.*</code>).</td><td class="scopes"><code>webhooks:read</code></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><code>/api/v1/webhook-event-types/{event_type}/sample</code></td><td>Get sample — An example payload: the latest real one of that type, else a synthetic one (Zapier and Make use it to show sample data).</td><td class="scopes"><code>webhooks:read</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+      <!-- END GENERATED: endpoints -->
+    </section>
+  </main>
+</div>
+
+<footer class="site-footer">
+  TutorTrack API guide · Reference sections are generated by <code>make docs</code> · See <a href="README.md">how these guides are maintained</a>
+</footer>
+</body>
+</html>

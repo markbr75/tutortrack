@@ -124,6 +124,9 @@ jobs:
           pnpm --filter @tutortrack/api-client generate
       - name: Fail if the committed client is stale
         run: git diff --exit-code -- frontend/packages/api-client/
+      - name: Fail if the guides or README are stale (docs/guides/README.md)
+        run: uv run python manage.py guides --check
+        working-directory: backend
 
   security:
     name: Security scans
