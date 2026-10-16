@@ -29,6 +29,15 @@ export function problemStatus(error: unknown): number | null {
   return error instanceof ApiError ? error.status : null;
 }
 
+/** No session: the API answers 403 "not-authenticated" (session auth sends no
+ * WWW-Authenticate challenge), so a 403 alone does not mean "not a family member". */
+export function isSignedOut(error: unknown): boolean {
+  return (
+    error instanceof ApiError &&
+    (error.status === 401 || ["not-authenticated", "authentication-failed"].includes(error.code))
+  );
+}
+
 /** Direct-to-storage upload (create → PUT → complete); returns the stored file id. */
 export async function uploadFile(file: File): Promise<string> {
   const created = unwrap(

@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-import { api, problemStatus, usePortalMe } from "./api";
+import { api, isSignedOut, problemStatus, usePortalMe } from "./api";
 import { BrandMark, PoweredBy } from "./branding";
 import { OfflineBanner } from "./offline/OfflineIndicator";
 import { HouseholdSwitcher, StudentSignIn } from "./HouseholdSwitcher";
@@ -62,7 +62,7 @@ export function Shell() {
   });
   usePortalBranding();
   if (who.isPending) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
-  if (problemStatus(who.error) === 401) return <SignIn />;
+  if (isSignedOut(who.error)) return <SignIn />;
   return (
     <>
       <StatusBanner />
@@ -95,8 +95,8 @@ function FamilyShell() {
     onSuccess: () => window.location.assign("/portal/"),
   });
   if (me.isPending) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (isSignedOut(me.error)) return <SignIn />;
   const status = problemStatus(me.error);
-  if (status === 401) return <SignIn />;
   if (!me.data) {
     return (
       <main className="mx-auto max-w-sm space-y-3 p-6">
