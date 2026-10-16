@@ -95,6 +95,37 @@ describe("portal", () => {
     });
   });
 
+  it("treats the API's 403 not-authenticated as signed out", async () => {
+    window.history.pushState(null, "", "/portal/");
+    const notAuthenticated = {
+      status: 403,
+      body: {
+        type: "https://docs.tutortrack.app/problems/not-authenticated",
+        title: "Authentication credentials were not provided.",
+        status: 403,
+      },
+    };
+    mockApi({ "GET /api/v1/me": notAuthenticated, "GET /api/v1/portal/me": notAuthenticated });
+    render(<App />);
+    expect(await screen.findByLabelText("Email")).toBeInTheDocument();
+  });
+
+  it("tells a signed-in non-family user the portal is not for them", async () => {
+    window.history.pushState(null, "", "/portal/");
+    mockApi({
+      "GET /api/v1/portal/me": {
+        status: 403,
+        body: {
+          type: "https://docs.tutortrack.app/problems/permission-denied",
+          title: "Forbidden",
+          status: 403,
+        },
+      },
+    });
+    render(<App />);
+    expect(await screen.findByText("This area is for families and students.")).toBeInTheDocument();
+  });
+
   it("shows the next lesson and cancels it after the policy preview", async () => {
     window.history.pushState(null, "", "/portal/");
     const calls = mockApi(
