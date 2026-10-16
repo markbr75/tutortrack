@@ -78,14 +78,57 @@ jobs:
           TEMPORAL_PAYLOAD_KEYS: ci:3q2+7wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhs=
       # Migrate once; each xdist worker's test database is a copy of this one (TEST_DB_TEMPLATE
       # in config/settings/test.py), instead of every worker migrating from scratch.
+      # The migrated template only changes with the schema, so a dump of it is cached. The key
+      # covers what `migrate` runs: migrations, the app modules they import, the post_migrate
+      # grants, the settings and the dependency lock. Bump "v1" to force a rebuild.
+      - name: Restore the cached template database
+        id: template-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: /tmp/test-db-template.dump
+          key: >-
+            test-db-template-v1-pg16-${{ hashFiles(
+              'backend/**/migrations/*.py',
+              'backend/tutortrack/core/ids.py',
+              'backend/tutortrack/core/migrations_utils.py',
+              'backend/tutortrack/core/fields.py',
+              'backend/tutortrack/core/crypto.py',
+              'backend/tutortrack/core/dbroles.py',
+              'backend/tutortrack/core/apps.py',
+              'backend/tutortrack/subscriptions/catalogue.py',
+              'backend/tutortrack/people/models.py',
+              'backend/tutortrack/identity/models.py',
+              'backend/tutortrack/scheduling/models.py',
+              'backend/tutortrack/core/tests/testapp/models.py',
+              'backend/config/settings/base.py',
+              'backend/config/settings/test.py',
+              'backend/uv.lock') }}
       - name: Template test database
         env:
           DATABASE_URL: postgres://tutortrack_app:tutortrack_app@localhost:5442/tutortrack_test_template
           DATABASE_OWNER_URL: postgres://tutortrack:tutortrack@localhost:5442/tutortrack_test_template
+          CACHE_HIT: ${{ steps.template-cache.outputs.cache-hit }}
         run: |
           pg=$(docker ps -qf "ancestor=postgres:16-alpine")
           docker exec "$pg" psql -U tutortrack -c "CREATE DATABASE tutortrack_test_template"
-          uv run python manage.py migrate --settings=config.settings.test -v0
+          if [ "$CACHE_HIT" = true ]; then
+            echo "Restoring the cached template"
+            docker exec -i "$pg" pg_restore -U tutortrack -d tutortrack_test_template \
+              --exit-on-error < /tmp/test-db-template.dump
+            # Safety net: fails if the dump is missing a migration the code has.
+            uv run python manage.py migrate --check --settings=config.settings.test
+          else
+            echo "No cached template: migrating"
+            uv run python manage.py migrate --settings=config.settings.test -v0
+            docker exec "$pg" pg_dump -U tutortrack -Fc tutortrack_test_template \
+              > /tmp/test-db-template.dump
+          fi
+      - name: Cache the template database
+        if: steps.template-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: /tmp/test-db-template.dump
+          key: ${{ steps.template-cache.outputs.cache-primary-key }}
       - name: Tests
         env:
           TEST_DB_TEMPLATE: tutortrack_test_template
