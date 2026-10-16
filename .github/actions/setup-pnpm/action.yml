@@ -1,0 +1,40 @@
+name: Set up pnpm
+description: >
+  pnpm/action-setup with retries. It installs pnpm (the version in frontend/package.json
+  "packageManager") from the npm registry, and that download sometimes drops with
+  ECONNRESET, which used to fail the whole job before any code ran.
+
+runs:
+  using: composite
+  steps:
+    - id: attempt1
+      uses: pnpm/action-setup@v6
+      continue-on-error: true
+      with:
+        package_json_file: frontend/package.json
+
+    - if: steps.attempt1.outcome == 'failure'
+      name: Retry pnpm setup in 20s
+      shell: bash
+      run: |
+        echo "::warning::pnpm setup failed (attempt 1 of 3); retrying in 20s"
+        rm -rf ~/setup-pnpm  # a half-finished install leaves files that break the next one
+        sleep 20
+    - id: attempt2
+      if: steps.attempt1.outcome == 'failure'
+      uses: pnpm/action-setup@v6
+      continue-on-error: true
+      with:
+        package_json_file: frontend/package.json
+
+    - if: steps.attempt2.outcome == 'failure'
+      name: Retry pnpm setup in 60s
+      shell: bash
+      run: |
+        echo "::warning::pnpm setup failed (attempt 2 of 3); retrying in 60s"
+        rm -rf ~/setup-pnpm
+        sleep 60
+    - if: steps.attempt2.outcome == 'failure'
+      uses: pnpm/action-setup@v6
+      with:
+        package_json_file: frontend/package.json
