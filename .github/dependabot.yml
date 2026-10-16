@@ -16,6 +16,11 @@ updates:
   - package-ecosystem: docker
     directory: /backend
     schedule: { interval: weekly }
+    # The image's Python must match requires-python in backend/pyproject.toml (3.12):
+    # take patch updates only and move to a newer Python on purpose, not by bot.
+    ignore:
+      - dependency-name: python
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
