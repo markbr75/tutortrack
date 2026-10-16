@@ -39,10 +39,59 @@ jobs:
           { echo "backend=$(area '^backend/')"; echo "frontend=$(area '^frontend/')"; } \
             | tee -a "$GITHUB_OUTPUT"
 
-  backend:
+  # Lint, types, migrations and deploy checks: no database needed (makemigrations only warns
+  # that it can't check the migration history).
+  backend-checks:
+    name: backend checks
     needs: changes
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: postgres://tutortrack_app:tutortrack_app@localhost:5442/tutortrack
+      DATABASE_OWNER_URL: postgres://tutortrack:tutortrack@localhost:5442/tutortrack
+      DATABASE_PLATFORM_URL: postgres://tutortrack_platform:tutortrack_platform@localhost:5442/tutortrack
+      REDIS_URL: redis://localhost:6389/0
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - name: PDF libraries (WeasyPrint)
+        run: sudo apt-get update && sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0
+      - run: uv sync --frozen
+      - name: Lint
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Type check
+        run: uv run mypy
+      - name: Migrations are up to date
+        run: |
+          uv run python manage.py makemigrations --check --dry-run
+          uv run python manage.py makemigrations --check --dry-run --settings=config.settings.test
+      - name: Deploy checks
+        run: uv run python manage.py check --deploy --fail-level WARNING --settings=config.settings.prod
+        env:
+          DJANGO_SECRET_KEY: ci-only-${{ github.run_id }}-not-a-real-secret-value-0123456789
+          TURNSTILE_SECRET_KEY: ci-only-not-a-real-key
+          FIELD_ENCRYPTION_KEYS: DbyhxHUuYW0d6P-VFWYHcV9sWb7MmEwUC9RsDpmJpS8=
+          TEMPORAL_PAYLOAD_KEYS: ci:3q2+7wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhs=
+
+  # The tests in two parallel groups of about equal duration (pytest-split reads
+  # backend/.test_durations; refresh it with scripts/test_durations.py). Each group keeps its
+  # raw coverage data; backend-coverage combines them and enforces the threshold.
+  backend:
+    name: backend tests (${{ matrix.group }}/2)
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [1, 2]
     services:
       postgres:
         image: postgres:16-alpine
@@ -90,23 +139,6 @@ jobs:
             WHERE name IN ('fsync', 'synchronous_commit', 'full_page_writes', 'max_locks_per_transaction')"
       - name: Database roles (app role is subject to RLS)
         run: uv run python manage.py ensure_db_roles
-      - name: Lint
-        run: |
-          uv run ruff check .
-          uv run ruff format --check .
-      - name: Type check
-        run: uv run mypy
-      - name: Migrations are up to date
-        run: |
-          uv run python manage.py makemigrations --check --dry-run
-          uv run python manage.py makemigrations --check --dry-run --settings=config.settings.test
-      - name: Deploy checks
-        run: uv run python manage.py check --deploy --fail-level WARNING --settings=config.settings.prod
-        env:
-          DJANGO_SECRET_KEY: ci-only-${{ github.run_id }}-not-a-real-secret-value-0123456789
-          TURNSTILE_SECRET_KEY: ci-only-not-a-real-key
-          FIELD_ENCRYPTION_KEYS: DbyhxHUuYW0d6P-VFWYHcV9sWb7MmEwUC9RsDpmJpS8=
-          TEMPORAL_PAYLOAD_KEYS: ci:3q2+7wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhs=
       # Migrate once; each xdist worker's test database is a copy of this one (TEST_DB_TEMPLATE
       # in config/settings/test.py), instead of every worker migrating from scratch.
       # The migrated template only changes with the schema, so a dump of it is cached. The key
@@ -163,16 +195,49 @@ jobs:
       - name: Tests
         env:
           TEST_DB_TEMPLATE: tutortrack_test_template
-        run: uv run pytest -n auto --cov --cov-report=xml --junitxml=junit.xml --durations=50
+        run: |
+          uv run pytest -n auto --splits 2 --group ${{ matrix.group }} \
+            --splitting-algorithm least_duration \
+            --cov --cov-report= --cov-fail-under=0 --junitxml=junit.xml --durations=50
+          mv .coverage .coverage.group-${{ matrix.group }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: backend-coverage-data-${{ matrix.group }}
+          path: backend/.coverage.group-${{ matrix.group }}
+          include-hidden-files: true
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: backend-junit-${{ matrix.group }}
+          path: backend/junit.xml
+
+  backend-coverage:
+    name: backend coverage
+    needs: backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: backend-coverage-data-*
+          merge-multiple: true
+          path: backend
+      - name: Combine and check coverage (fail_under in pyproject.toml)
+        run: |
+          uv run coverage combine
+          uv run coverage report
+          uv run coverage xml
       - uses: actions/upload-artifact@v7
         with:
           name: backend-coverage
           path: backend/coverage.xml
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: backend-junit
-          path: backend/junit.xml
 
   frontend:
     needs: changes
@@ -253,7 +318,7 @@ jobs:
 
   e2e:
     if: github.event_name == 'push'
-    needs: [backend, frontend]
+    needs: [backend-checks, backend-coverage, frontend]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
