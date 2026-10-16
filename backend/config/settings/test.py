@@ -18,6 +18,14 @@ del DATABASES["owner"]  # migrate must target the test database via "default"
 if env("TEST_DB_NAME", default=""):
     DATABASES["default"]["TEST"] = {"NAME": env("TEST_DB_NAME")}
     DATABASES["platform"]["TEST"] = {"NAME": env("TEST_DB_NAME")}
+# CI migrates one template database up front; each xdist worker's test database is then a
+# copy of it (CREATE DATABASE ... TEMPLATE), so its migrate finds nothing to apply instead of
+# every worker migrating from scratch (~6.5 min each).
+if env("TEST_DB_TEMPLATE", default=""):
+    DATABASES["default"]["TEST"] = {
+        **DATABASES["default"].get("TEST", {}),
+        "TEMPLATE": env("TEST_DB_TEMPLATE"),
+    }
 DB_RLS_ROLE_CHECK = "off"
 DB_GRANT_TRUNCATE = True  # Django flushes transactional tests with TRUNCATE
 

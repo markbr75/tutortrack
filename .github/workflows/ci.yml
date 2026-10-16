@@ -44,12 +44,19 @@ jobs:
       - run: uv sync --frozen
       # Test flushes TRUNCATE every table in one statement (a lock each); service containers
       # can't take server flags, so raise the lock table and restart (as docker-compose does).
-      - name: Postgres lock table
+      # The CI database is throwaway, so skip durability work too: with fsync on, each flush
+      # (after every transactional/Temporal test) took ~6.5s; without it, ~1.4s.
+      - name: Postgres settings for tests
         run: |
           pg=$(docker ps -qf "ancestor=postgres:16-alpine")
-          docker exec "$pg" psql -U tutortrack -c "ALTER SYSTEM SET max_locks_per_transaction = 512"
+          for setting in "max_locks_per_transaction = 512" "fsync = off" \
+            "synchronous_commit = off" "full_page_writes = off"; do
+            docker exec "$pg" psql -U tutortrack -c "ALTER SYSTEM SET $setting"
+          done
           docker restart "$pg"
           for i in $(seq 1 30); do docker exec "$pg" pg_isready -U tutortrack && break; sleep 1; done
+          docker exec "$pg" psql -U tutortrack -Atc "SELECT name || ' = ' || setting FROM pg_settings
+            WHERE name IN ('fsync', 'synchronous_commit', 'full_page_writes', 'max_locks_per_transaction')"
       - name: Database roles (app role is subject to RLS)
         run: uv run python manage.py ensure_db_roles
       - name: Lint
@@ -69,7 +76,19 @@ jobs:
           TURNSTILE_SECRET_KEY: ci-only-not-a-real-key
           FIELD_ENCRYPTION_KEYS: DbyhxHUuYW0d6P-VFWYHcV9sWb7MmEwUC9RsDpmJpS8=
           TEMPORAL_PAYLOAD_KEYS: ci:3q2+7wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhs=
+      # Migrate once; each xdist worker's test database is a copy of this one (TEST_DB_TEMPLATE
+      # in config/settings/test.py), instead of every worker migrating from scratch.
+      - name: Template test database
+        env:
+          DATABASE_URL: postgres://tutortrack_app:tutortrack_app@localhost:5442/tutortrack_test_template
+          DATABASE_OWNER_URL: postgres://tutortrack:tutortrack@localhost:5442/tutortrack_test_template
+        run: |
+          pg=$(docker ps -qf "ancestor=postgres:16-alpine")
+          docker exec "$pg" psql -U tutortrack -c "CREATE DATABASE tutortrack_test_template"
+          uv run python manage.py migrate --settings=config.settings.test -v0
       - name: Tests
+        env:
+          TEST_DB_TEMPLATE: tutortrack_test_template
         run: uv run pytest -n auto --cov --cov-report=xml --junitxml=junit.xml --durations=50
       - uses: actions/upload-artifact@v7
         with:
