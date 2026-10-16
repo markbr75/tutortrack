@@ -35,7 +35,7 @@ jobs:
       DATABASE_PLATFORM_URL: postgres://tutortrack_platform:tutortrack_platform@localhost:5442/tutortrack
       REDIS_URL: redis://localhost:6389/0
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
@@ -82,7 +82,7 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
         with:
           package_json_file: frontend/package.json
@@ -101,7 +101,7 @@ jobs:
     name: OpenAPI / client drift
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
       - uses: pnpm/action-setup@v6
         with:
@@ -132,7 +132,7 @@ jobs:
     name: Security scans
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # secret scanning covers the whole history
       - name: Secret scanning (gitleaks)
@@ -162,7 +162,7 @@ jobs:
     needs: [backend, frontend]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # The journeys (docs/test-plan/README.md) need Temporal reachable (workflows start, no
       # worker needed), events handled in-process, the console without 2FA, and room for
       # many sign-ins and public form posts (the specs run in parallel with retries).
