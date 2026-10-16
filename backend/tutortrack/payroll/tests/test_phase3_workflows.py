@@ -17,10 +17,10 @@ from tutortrack.integrations.models import IntegrationConnection
 from tutortrack.payroll import services
 from tutortrack.payroll.models import Payout, PayRun
 from tutortrack.payroll.payouts.wise_fake import FakeWise
-from tutortrack.payroll.processes import PayRunWorkflow, pay_run_workflow_id
+from tutortrack.payroll.processes import pay_run_workflow_id
 from tutortrack.people.tests.factories import TutorProfileFactory
 
-from .test_workflows import start_run, wait_for_review
+from .test_workflows import start_run, wait_for, wait_for_review, wait_for_step
 
 pytestmark = pytest.mark.django_db(transaction=True)
 HISTORIES = Path(__file__).resolve().parents[3] / "tests" / "workflow_histories"
@@ -58,16 +58,15 @@ def test_wise_payout_settles_on_the_daily_check(org, temporal_env):
     with tenant_context(org):
         services.approve(PayRun.objects.get(pk=run.pk), user=finance)
     wid = pay_run_workflow_id(org.pk, run.pk)
-    handle = temporal_env.handle(wid)
-    for _ in range(200):
-        if temporal_env.run(handle.query(PayRunWorkflow.state))["step"] == "paying":
-            break
+    wait_for_step(org, temporal_env, run, "paying")
+
+    def payout_sent() -> bool:
+        with tenant_context(org):
+            return Payout.objects.filter(pay_run_id=run.pk).exclude(provider_ref="").exists()
+
+    wait_for(payout_sent, "the Wise payout to be sent")
     with tenant_context(org):
-        for _ in range(200):
-            payout = Payout.objects.filter(pay_run_id=run.pk).first()
-            if payout is not None and payout.provider_ref:
-                break
-    assert payout is not None
+        payout = Payout.objects.get(pay_run_id=run.pk)
     assert payout.status == "processing"
     FakeWise.settle(payout.provider_ref)  # no webhook: the daily check finds it
     assert temporal_env.result(wid) == "paid"

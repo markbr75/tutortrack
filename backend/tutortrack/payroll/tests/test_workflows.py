@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import os
+import time as clock
+from collections.abc import Callable
 from datetime import timedelta
 from pathlib import Path
 
@@ -46,13 +48,27 @@ def start_run(org) -> PayRun:
     return run
 
 
-def wait_for_review(org, temporal_env, run) -> None:
-    handle = temporal_env.handle(pay_run_workflow_id(org.pk, run.pk))
-    for _ in range(100):
-        state = temporal_env.run(handle.query(PayRunWorkflow.state))
-        if state["step"] == "review":
+def wait_for(check: Callable[[], bool], what: str, seconds: float = 20) -> None:
+    """Poll while the worker runs activities in real time (time only skips while a test
+    awaits a result), so wait on a deadline rather than a number of attempts."""
+    deadline = clock.monotonic() + seconds
+    while clock.monotonic() < deadline:
+        if check():
             return
-    raise AssertionError("never reached review")
+        clock.sleep(0.1)
+    raise AssertionError(f"timed out waiting for {what}")
+
+
+def wait_for_step(org, temporal_env, run, step: str) -> None:
+    handle = temporal_env.handle(pay_run_workflow_id(org.pk, run.pk))
+    wait_for(
+        lambda: temporal_env.run(handle.query(PayRunWorkflow.state))["step"] == step,
+        f"the pay run to reach {step!r}",
+    )
+
+
+def wait_for_review(org, temporal_env, run) -> None:
+    wait_for_step(org, temporal_env, run, "review")
 
 
 def test_pay_run_is_approved_paid_and_finished(org, temporal_env):
@@ -61,10 +77,7 @@ def test_pay_run_is_approved_paid_and_finished(org, temporal_env):
     wait_for_review(org, temporal_env, run)
     with tenant_context(org):
         services.approve(PayRun.objects.get(pk=run.pk), user=finance)  # signal "approved"
-    handle = temporal_env.handle(pay_run_workflow_id(org.pk, run.pk))
-    for _ in range(100):  # until payouts were sent (manual method: waiting)
-        if temporal_env.run(handle.query(PayRunWorkflow.state))["step"] == "paying":
-            break
+    wait_for_step(org, temporal_env, run, "paying")  # payouts sent (manual method: waiting)
     with tenant_context(org):
         services.mark_paid(PayRun.objects.get(pk=run.pk), reference="Paid")  # signal "settled"
     assert temporal_env.result(pay_run_workflow_id(org.pk, run.pk)) == "paid"
@@ -145,10 +158,7 @@ def test_record_histories_if_requested(org, temporal_env):
     wait_for_review(org, temporal_env, run)
     with tenant_context(org):
         services.approve(PayRun.objects.get(pk=run.pk), user=finance)
-    handle = temporal_env.handle(pay_run_workflow_id(org.pk, run.pk))
-    for _ in range(100):
-        if temporal_env.run(handle.query(PayRunWorkflow.state))["step"] == "paying":
-            break
+    wait_for_step(org, temporal_env, run, "paying")
     with tenant_context(org):
         services.mark_paid(PayRun.objects.get(pk=run.pk), reference="Paid")
     wid = pay_run_workflow_id(org.pk, run.pk)
