@@ -12,7 +12,6 @@ runs:
       continue-on-error: true
       with:
         package_json_file: frontend/package.json
-        version: 0.0.0-force-retry-test  # TEMPORARY: conflicts with packageManager, so attempt 1 fails
 
     - if: steps.attempt1.outcome == 'failure'
       name: Retry pnpm setup in 20s
