@@ -76,7 +76,7 @@ jobs:
           npx cap sync ios
           xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Debug \
             -sdk iphonesimulator -derivedDataPath build CODE_SIGNING_ALLOWED=NO
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: tutortrack-${{ inputs.platform }}-${{ inputs.organisation_host || 'generic' }}
           path: |
