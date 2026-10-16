@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@sentry/react": "^9.17.0",
-    "@tanstack/react-query": "^5.75.7",
-    "@tanstack/react-router": "^1.120.3",
+    "@tanstack/react-query": "^5.104.2",
+    "@tanstack/react-router": "^1.170.44",
     "@tutortrack/api-client": "workspace:*",
     "@tutortrack/i18n": "workspace:*",
     "@tutortrack/ui": "workspace:*",
