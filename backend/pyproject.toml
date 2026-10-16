@@ -61,6 +61,7 @@ dev = [
     "types-redis",
     "boto3-stubs[s3]",
     "celery-types",
+    "pytest-split>=0.10",
 ]
 
 [tool.uv]
