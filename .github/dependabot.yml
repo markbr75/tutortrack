@@ -5,12 +5,14 @@ updates:
     directory: /backend
     schedule: { interval: weekly }
     groups:
-      python: { patterns: ["*"] }
+      # Grouped minor/patch only: majors come as separate PRs to review one by one.
+      python: { patterns: ["*"], update-types: ["minor", "patch"] }
   - package-ecosystem: npm
     directory: /frontend
     schedule: { interval: weekly }
     groups:
-      javascript: { patterns: ["*"] }
+      # Grouped minor/patch only: majors come as separate PRs to review one by one.
+      javascript: { patterns: ["*"], update-types: ["minor", "patch"] }
   - package-ecosystem: docker
     directory: /backend
     schedule: { interval: weekly }
