@@ -20,7 +20,7 @@ from tutortrack.billing.processes import (
     StatementRunWorkflow,
     run_workflow_id,
 )
-from tutortrack.billing.tests.test_workflows import local_today, settings_for
+from tutortrack.billing.tests.test_workflows import local_today, settings_for, wait_for
 from tutortrack.core.context import tenant_context
 from tutortrack.core.events.dispatcher import dispatch_batch
 from tutortrack.core.models import ScheduleLink
@@ -62,14 +62,8 @@ def start_run(org):
     return run
 
 
-def wait_for_review(org, temporal_env, run):
-    handle = temporal_env.handle(run_workflow_id(org.pk, run.pk))
-    for _ in range(80):
-        with tenant_context(org):
-            if TutorInvoiceReview.objects.filter(invoice_run=run).exists():
-                return
-        temporal_env.run(handle.query(InvoiceRunWorkflow.state))
-    raise AssertionError("no review opened")
+def wait_for_review(org, run):
+    wait_for(org, lambda: TutorInvoiceReview.objects.filter(invoice_run=run).exists())
 
 
 def test_issuing_waits_for_tutors_then_ends_early(org, temporal_env):
@@ -79,7 +73,7 @@ def test_issuing_waits_for_tutors_then_ends_early(org, temporal_env):
     )
     tutored_charge(org)
     run = start_run(org)
-    wait_for_review(org, temporal_env, run)
+    wait_for_review(org, run)
     with tenant_context(org):
         assert Invoice.objects.get().status == "draft"
         review = TutorInvoiceReview.objects.get()
@@ -98,7 +92,7 @@ def test_flagged_drafts_are_held_when_the_window_ends(org, temporal_env):
     )
     tutored_charge(org)
     run = start_run(org)
-    wait_for_review(org, temporal_env, run)
+    wait_for_review(org, run)
     with tenant_context(org):
         tutor_review.flag(TutorInvoiceReview.objects.get(), comment="Wrong date")
     assert temporal_env.result(run_workflow_id(org.pk, run.pk)) == "completed"
@@ -161,7 +155,7 @@ def test_record_tutor_review_history_if_requested(org, temporal_env):
     )
     tutored_charge(org)
     run = start_run(org)
-    wait_for_review(org, temporal_env, run)
+    wait_for_review(org, run)
     with tenant_context(org):
         tutor_review.confirm(TutorInvoiceReview.objects.get())
     rid = run_workflow_id(org.pk, run.pk)

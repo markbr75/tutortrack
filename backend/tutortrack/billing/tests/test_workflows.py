@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 import os
 import threading
+import time as clock
+from collections.abc import Callable
 from datetime import timedelta
 from pathlib import Path
 
@@ -49,6 +51,17 @@ def charged_client(org, amount="40.00"):
     return client
 
 
+def wait_for(org, check: Callable[[], bool], seconds: float = 20) -> None:
+    """Poll the database while the worker runs activities (time doesn't skip meanwhile)."""
+    deadline = clock.monotonic() + seconds
+    while clock.monotonic() < deadline:
+        with tenant_context(org):
+            if check():
+                return
+        clock.sleep(0.1)
+    raise AssertionError("timed out waiting for the workflow")
+
+
 def settings_for(org, values):
     with tenant_context(org):
         settings_service.update_settings("billing", {"billing.auto_send": False, **values})
@@ -85,13 +98,9 @@ def test_run_waits_for_approval_when_auto_issue_is_off(org, temporal_env):
     )
     charged_client(org)
     run = start_run(org)
-    handle = temporal_env.handle(run_workflow_id(org.pk, run.pk))
-    for _ in range(50):  # until the drafts exist
-        with tenant_context(org):
-            run.refresh_from_db()
-        if run.status == InvoiceRun.Status.REVIEW:
-            break
-        temporal_env.run(handle.query(InvoiceRunWorkflow.state))
+    wait_for(  # until the drafts exist
+        org, lambda: InvoiceRun.objects.filter(pk=run.pk, status=InvoiceRun.Status.REVIEW).exists()
+    )
     with tenant_context(org):
         assert Invoice.objects.get().status == "draft"
         services.approve_run(run)  # signal "approve" after commit
