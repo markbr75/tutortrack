@@ -91,8 +91,12 @@ def test_a_failing_warehouse_marks_the_run_failed(org, temporal_env):
 
 def test_without_the_feature_the_run_is_skipped(org, temporal_env, monkeypatch):
     found, user = destination(org)
-    wid = run(org, found, user)
+    # The plan lapses between "Run now" and the export's own check. Deny the feature before
+    # the workflow starts (its activities run straight away, so revoking it afterwards
+    # raced them) and let run_now's up-front guard through.
     monkeypatch.setattr(entitlements, "_resolver", Entitlements("warehouse_export"))
+    monkeypatch.setattr(entitlements, "require", lambda *args, **kwargs: None)
+    wid = run(org, found, user)
     assert temporal_env.result(wid) == "skipped:not_entitled"
 
 
