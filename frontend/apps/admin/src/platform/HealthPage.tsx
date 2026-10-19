@@ -84,7 +84,7 @@ export function HealthPage() {
           ]}
         />
       </div>
-      {rows.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {rows.isPending ? <Spinner label={t("grid.loading")} /> : null}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <caption className="sr-only">{t("tenantHealth.title")}</caption>

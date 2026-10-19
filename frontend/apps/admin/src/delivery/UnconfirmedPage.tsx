@@ -62,7 +62,7 @@ export function UnconfirmedPage() {
       {message ? <Alert tone="success">{message}</Alert> : null}
       <ErrorList error={act.error} />
       {lessons.isPending ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("delivery.unconfirmed.empty")}</p>
       ) : (

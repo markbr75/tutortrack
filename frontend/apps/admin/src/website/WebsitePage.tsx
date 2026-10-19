@@ -236,7 +236,7 @@ function BrandingTab() {
       void queryClient.invalidateQueries({ queryKey: ["brand-kits"] });
     },
   });
-  if (!kits.data || !options.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!kits.data || !options.data) return <Spinner label={t("grid.loading")} />;
   const errors = fieldErrors(save.error);
   const set = <K extends keyof KitForm>(key: K, value: KitForm[K]) =>
     setForm({ ...form, [key]: value });
@@ -531,8 +531,7 @@ function DomainsTab() {
       unwrap(await api.DELETE("/api/v1/domains/{id}", { params: { path: { id } } })),
     onSuccess: refresh,
   });
-  if (!domains.data || !options.data)
-    return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!domains.data || !options.data) return <Spinner label={t("grid.loading")} />;
   const addErrors = fieldErrors(add.error);
   return (
     <div className="space-y-4">

@@ -41,7 +41,7 @@ export function OperationsPage() {
   return (
     <div className="max-w-5xl space-y-6">
       <h1 className="text-2xl font-semibold">{t("platform.nav.operations")}</h1>
-      {ops.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {ops.isPending ? <Spinner label={t("grid.loading")} /> : null}
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {figures.map(([label, value]) => (
           <div key={label} className="rounded-md border border-border p-3">

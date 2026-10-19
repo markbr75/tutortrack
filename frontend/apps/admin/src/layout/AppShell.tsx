@@ -1,7 +1,7 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
 import { Alert, applyBrandTheme, Button, cn, Spinner } from "@tutortrack/ui";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useIsFetching, useMutation, useQuery } from "@tanstack/react-query";
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import {
   BookOpen,
@@ -733,7 +733,30 @@ function TopBar({ permissions }: { permissions: Partial<Record<string, string>> 
       <SuccessLayer />
       <NotificationBell />
       <UserMenu />
+      <LoadingLine />
     </header>
+  );
+}
+
+/**
+ * A 2px ink line along the foot of the top bar while a screen's first data is on its way.
+ * Only first loads count (not background refreshes or polling), and it appears after 150ms,
+ * so quick screens show nothing. Decorative: the page's own loader is what gets announced.
+ */
+export function LoadingLine() {
+  const loading =
+    useIsFetching({
+      predicate: (q) => q.state.status === "pending" && q.getObserversCount() > 0,
+    }) > 0;
+  if (!loading) return null;
+  return (
+    <div
+      aria-hidden="true"
+      data-testid="loading-line"
+      className="pointer-events-none absolute inset-x-0 -bottom-px h-0.5 animate-appear-soon overflow-hidden"
+    >
+      <div className="h-full w-1/3 animate-progress rounded-full bg-link motion-reduce:w-full motion-reduce:animate-none motion-reduce:opacity-50" />
+    </div>
   );
 }
 
@@ -852,7 +875,7 @@ export function AppShell() {
   if (session.isPending) {
     return (
       <div className="grid h-screen place-items-center">
-        <Spinner className="size-6" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       </div>
     );
   }

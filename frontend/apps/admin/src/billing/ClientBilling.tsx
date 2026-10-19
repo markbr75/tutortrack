@@ -135,7 +135,7 @@ export function ClientBilling({ clientId, currency }: { clientId: string; curren
           ))}
         </dl>
       ) : (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       )}
       <div className="flex flex-wrap gap-2">
         {canInvoice ? (

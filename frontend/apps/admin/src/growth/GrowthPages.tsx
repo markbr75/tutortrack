@@ -226,7 +226,7 @@ function ReviewsSection() {
         />
       </div>
       {act.error ? <Alert tone="danger">{act.error.message}</Alert> : null}
-      {reviews.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {reviews.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {reviews.data && !reviews.data.results.length ? <p>{t("reviews.empty")}</p> : null}
       {reviews.data?.results.length ? (
         <Table
@@ -1197,7 +1197,7 @@ function SettingsSection() {
     onSuccess: (data) => queryClient.setQueryData(["settings", "growth"], data),
   });
   const errors = fieldErrors(save.error);
-  if (!area.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!area.data) return <Spinner label={t("grid.loading")} />;
   return (
     <form
       className="max-w-2xl space-y-3"
@@ -1300,7 +1300,7 @@ export function ReviewPage({ token }: { token: string }) {
       ),
   });
   if (page.isError) return <PublicLayout title={t("reviews.page.missing")}>{null}</PublicLayout>;
-  if (!page.data) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (!page.data) return <Spinner label={t("grid.loading")} />;
   const p = page.data;
   const title = p.tutor
     ? t("reviews.page.titleTutor", { tutor: p.tutor })

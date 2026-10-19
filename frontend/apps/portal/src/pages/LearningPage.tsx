@@ -53,7 +53,7 @@ function HomeworkList() {
     queryKey: ["portal", "learning", "homework"],
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/learning/homework")),
   });
-  if (homework.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (homework.isPending) return <Spinner label={t("grid.loading")} />;
   if (!homework.data?.length) return <Muted>{t("learning.portal.noHomework")}</Muted>;
   return (
     <ul className="space-y-2">
@@ -94,7 +94,7 @@ export function HomeworkPage({ assignmentId }: { assignmentId: string }) {
         }),
       ),
   });
-  if (homework.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (homework.isPending) return <Spinner label={t("grid.loading")} />;
   const h = homework.data;
   if (!h) return <Muted>{t("errors.generic")}</Muted>;
   return (
@@ -312,7 +312,7 @@ function Resources() {
     queryKey: ["portal", "learning", "resources"],
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/learning/resources")),
   });
-  if (resources.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (resources.isPending) return <Spinner label={t("grid.loading")} />;
   if (!resources.data?.length) return <Muted>{t("learning.portal.noResources")}</Muted>;
   return (
     <ul className="space-y-2">
@@ -337,7 +337,7 @@ function Goals() {
     queryKey: ["portal", "learning", "goals"],
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/learning/goals")),
   });
-  if (goals.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (goals.isPending) return <Spinner label={t("grid.loading")} />;
   if (!goals.data?.length) return <Muted>{t("learning.portal.noGoals")}</Muted>;
   return (
     <ul className="space-y-3">
@@ -386,7 +386,7 @@ function Results() {
     queryKey: ["portal", "learning", "results"],
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/learning/results")),
   });
-  if (results.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (results.isPending) return <Spinner label={t("grid.loading")} />;
   const rows = results.data ?? [];
   const students = [...new Map(rows.map((r) => [r.student, r.student_name])).entries()];
   return (
@@ -424,7 +424,7 @@ function Progress() {
     queryKey: ["portal", "learning", "progress"],
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/learning/progress-reports")),
   });
-  if (reports.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (reports.isPending) return <Spinner label={t("grid.loading")} />;
   if (!reports.data?.length) return <Muted>{t("learning.portal.noReports")}</Muted>;
   return (
     <ul className="space-y-3">
@@ -455,7 +455,7 @@ function Loans() {
     queryKey: ["portal", "learning", "loans"],
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/learning/loans")),
   });
-  if (loans.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (loans.isPending) return <Spinner label={t("grid.loading")} />;
   if (!loans.data?.length) return <Muted>{t("learning.portal.noLoans")}</Muted>;
   return (
     <ul className="space-y-2">

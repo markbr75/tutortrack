@@ -27,7 +27,7 @@ export function TenantPage({ id }: { id: string }) {
     queryFn: async () =>
       unwrap(await api.GET("/api/v1/platform/tenants/{id}", { params: { path: { id } } })),
   });
-  if (detail.isPending) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (detail.isPending) return <Spinner label={t("grid.loading")} />;
   if (!detail.data) return <Alert tone="danger">{t("errors.generic")}</Alert>;
   const d = detail.data;
   const org = d.organisation;

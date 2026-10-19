@@ -332,7 +332,7 @@ export function FunnelPage() {
     queryKey: ["funnel"],
     queryFn: async () => unwrap(await api.GET("/api/v1/leads/reports/funnel")),
   });
-  if (!report.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!report.data) return <Spinner label={t("grid.loading")} />;
   const r = report.data;
   return (
     <LeadsPage title={t("leads.reports")}>
@@ -439,7 +439,7 @@ export function PublicFormPage({ slug }: { slug: string }) {
     },
   });
   if (form.isError) return <PublicLayout title={t("leads.formMissing")}>{null}</PublicLayout>;
-  if (!form.data) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (!form.data) return <Spinner label={t("grid.loading")} />;
   const schema = form.data.schema as unknown as Schema;
   const errors = (submit.error as { problem?: { errors?: Record<string, string[]> } } | null)
     ?.problem?.errors;
@@ -661,7 +661,7 @@ export function OfferPage({ token }: { token: string }) {
     onSuccess: (data) => queryClient.setQueryData(["offer", token], data),
   });
   if (offer.isError) return <PublicLayout title={t("leads.offerMissing")}>{null}</PublicLayout>;
-  if (!offer.data) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (!offer.data) return <Spinner label={t("grid.loading")} />;
   const o = offer.data;
   return (
     <PublicLayout title={t("leads.offerTitle", { student: o.student })}>

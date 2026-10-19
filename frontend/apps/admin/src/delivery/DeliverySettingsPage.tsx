@@ -93,7 +93,7 @@ export function PolicyForm({
       void queryClient.invalidateQueries({ queryKey: ["cancellation-policies"] });
     },
   });
-  if (policies.isPending) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (policies.isPending) return <Spinner label={t("grid.loading")} />;
   const update = (change: Partial<Rules>) => setRules({ ...value, ...change });
 
   return (
@@ -415,7 +415,7 @@ function Templates() {
     setEditing(null);
     void queryClient.invalidateQueries({ queryKey: ["report-templates"] });
   };
-  if (templates.isPending) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (templates.isPending) return <Spinner label={t("grid.loading")} />;
   const current = templates.data?.find((x) => x.id === editing) ?? null;
   if (editing) return <TemplateEditor key={editing} template={current} onSaved={saved} />;
   return (

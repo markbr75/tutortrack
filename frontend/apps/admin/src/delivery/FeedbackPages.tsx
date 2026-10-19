@@ -46,7 +46,7 @@ function FeedbackSettings() {
     onSuccess: (data) => queryClient.setQueryData(["settings", "delivery"], data),
   });
   const errors = fieldErrors(save.error);
-  if (!area.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!area.data) return <Spinner label={t("grid.loading")} />;
   return (
     <form
       className="max-w-xl space-y-3"
@@ -192,7 +192,7 @@ export function LessonFeedbackPage() {
           ]}
         />
       </form>
-      {list.isLoading ? <Spinner className="size-6" label={t("grid.loading")} /> : null}
+      {list.isLoading ? <Spinner label={t("grid.loading")} /> : null}
       {list.data && rows.length === 0 ? <p>{t("lessonFeedback.empty")}</p> : null}
       {rows.length ? (
         <table className="w-full text-sm">
@@ -282,7 +282,7 @@ export function PublicFeedbackPage({ token }: { token: string }) {
   if (item.isError) {
     return <PublicLayout title={t("lessonFeedback.missing")}>{null}</PublicLayout>;
   }
-  if (!item.data) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (!item.data) return <Spinner label={t("grid.loading")} />;
   const f = item.data;
   const title = t("lessonFeedback.question", { student: f.student });
   if (f.status !== "sent") {

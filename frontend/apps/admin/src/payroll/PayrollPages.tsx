@@ -100,7 +100,7 @@ export function PayRunsPage() {
         </form>
       ) : null}
       {create.error ? <Alert tone="danger">{create.error.message}</Alert> : null}
-      {runs.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {runs.isPending ? <Spinner label={t("grid.loading")} /> : null}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -176,7 +176,7 @@ export function PayRunPage({ id }: { id: string }) {
       ),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["pay-run", id] }),
   });
-  if (!run.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!run.data) return <Spinner label={t("grid.loading")} />;
   const r = run.data;
   const paying = r.status === "approved" || r.status === "paying";
   const error = approve.error ?? cancel.error ?? markPaid.error ?? bankFile.error;

@@ -95,7 +95,7 @@ export function ReadBackSection({ conn, canManage }: { conn: Connection; canMana
           { value: "skipped", label: t("ledgerReadBack.statuses.skipped") },
         ]}
       />
-      {imports.isLoading ? <Spinner className="size-4" label={t("grid.loading")} /> : null}
+      {imports.isLoading ? <Spinner label={t("grid.loading")} /> : null}
       {imports.data && rows.length === 0 ? (
         <p className="text-sm">{t("ledgerReadBack.none", { provider })}</p>
       ) : null}

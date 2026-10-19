@@ -44,7 +44,7 @@ export function OfflineReportPage({ lessonId }: { lessonId: string }) {
     },
   });
 
-  if (pack.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (pack.isPending) return <Spinner label={t("grid.loading")} />;
   if (!lesson) {
     return (
       <Alert tone="warning" title={t("pwa.notOnPhone")}>

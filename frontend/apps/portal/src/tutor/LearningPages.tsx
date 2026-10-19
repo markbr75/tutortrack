@@ -32,7 +32,7 @@ export function TutorHomeworkPage() {
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">{t("learning.tutor.homework")}</h1>
       <h2 className="font-semibold">{t("learning.homework.toReview")}</h2>
-      {toReview.isPending ? <Spinner className="size-6" label={t("grid.loading")} /> : null}
+      {toReview.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {toReview.data && !toReview.data.results.length ? (
         <p className="text-sm text-muted-foreground">{t("learning.homework.nothingToReview")}</p>
       ) : null}
@@ -143,7 +143,7 @@ export function TutorReviewPage({ assignmentId }: { assignmentId: string }) {
         }),
       ),
   });
-  if (assignment.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (assignment.isPending) return <Spinner label={t("grid.loading")} />;
   if (!assignment.data) return <p>{t("errors.generic")}</p>;
   return <Review assignment={assignment.data} />;
 }
@@ -282,7 +282,7 @@ export function TutorResourcesPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">{t("learning.tutor.resources")}</h1>
-      {resources.isPending ? <Spinner className="size-6" label={t("grid.loading")} /> : null}
+      {resources.isPending ? <Spinner label={t("grid.loading")} /> : null}
       <ul className="space-y-2">
         {resources.data?.results.map((r) => (
           <li key={r.id} className="space-y-2 rounded-lg border border-border p-3">

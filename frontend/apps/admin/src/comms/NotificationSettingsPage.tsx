@@ -277,7 +277,7 @@ function TemplateEditor({ setting, onClose }: { setting: Setting; onClose: () =>
         }}
       />
       {template.isPending ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : (
         <form
           className="space-y-2"
@@ -367,7 +367,7 @@ export function NotificationSettingsPage() {
       <p className="text-sm text-muted-foreground">{t("comms.help")}</p>
       {current ? <TemplateEditor setting={current} onClose={() => setEditing(null)} /> : null}
       {settings.isPending ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : (
         CATEGORIES.map((category) => {
           const rows = (settings.data ?? []).filter((s) => s.category === category);

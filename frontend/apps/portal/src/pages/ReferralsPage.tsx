@@ -44,7 +44,7 @@ export function ReferralsPage() {
     queryKey: ["portal", "referrals"],
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/referrals")),
   });
-  if (page.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (page.isPending) return <Spinner label={t("grid.loading")} />;
   if (!page.data) return <p>{t("referrals.portal.unavailable")}</p>;
   const p = page.data;
   const program = p.program;

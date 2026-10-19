@@ -445,7 +445,7 @@ function MarketingSync() {
       ),
     onSuccess: refresh,
   });
-  if (rows.isPending) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (rows.isPending) return <Spinner label={t("grid.loading")} />;
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">{t("messaging.marketing.help")}</p>

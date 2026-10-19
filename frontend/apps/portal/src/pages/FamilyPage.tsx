@@ -48,7 +48,7 @@ function Guardians() {
       <h2 id="guardians-title" className="text-lg font-medium">
         {t("family.guardiansTitle")}
       </h2>
-      {guardians.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {guardians.isPending ? <Spinner label={t("grid.loading")} /> : null}
       <ul className="divide-y divide-border rounded-lg border border-border text-sm">
         {(guardians.data ?? []).map((g) => (
           <li key={g.id} className="flex flex-wrap justify-between gap-2 p-3">
@@ -273,7 +273,7 @@ function StudentLogins() {
         {t("family.loginsTitle")}
       </h2>
       <p className="text-sm text-muted-foreground">{t("family.loginsIntro")}</p>
-      {logins.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {logins.isPending ? <Spinner label={t("grid.loading")} /> : null}
       <ul className="divide-y divide-border rounded-lg border border-border">
         {(logins.data ?? []).map((row) => (
           <LoginRow key={row.student_id} row={row} />

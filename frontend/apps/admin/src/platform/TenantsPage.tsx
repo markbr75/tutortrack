@@ -87,7 +87,7 @@ export function TenantsPage() {
           ]}
         />
       </div>
-      {tenants.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {tenants.isPending ? <Spinner label={t("grid.loading")} /> : null}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>

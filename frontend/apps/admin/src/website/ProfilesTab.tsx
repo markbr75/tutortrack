@@ -38,7 +38,7 @@ export function ProfilesTab() {
         ]}
       />
       {!profiles.data ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : profiles.data.results.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("website.profiles.none")}</p>
       ) : (

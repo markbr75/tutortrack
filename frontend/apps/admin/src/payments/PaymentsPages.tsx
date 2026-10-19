@@ -44,7 +44,7 @@ export function PaymentsSettingsPage() {
       <h1 className="text-2xl font-semibold">{t("payments.settingsTitle")}</h1>
       <p className="text-sm text-muted-foreground">{t("payments.settingsHelp")}</p>
       {providers.isPending ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : stripe ? (
         <section className="space-y-2 rounded-md border border-border p-4">
           <h2 className="font-semibold">Stripe</h2>
@@ -165,7 +165,7 @@ export function PaymentsList({ clientId }: { clientId?: string }) {
     "payment",
     list.rows.map((p) => p.id),
   );
-  if (list.query.isPending) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (list.query.isPending) return <Spinner label={t("grid.loading")} />;
   if (!list.rows.length) return <p className="text-sm text-muted-foreground">{t("grid.empty")}</p>;
   return (
     <ul className="divide-y divide-border rounded-md border border-border text-sm">

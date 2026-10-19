@@ -25,7 +25,7 @@ export function EarningsPage() {
     queryKey: ["tutor", "my-earnings"],
     queryFn: async () => unwrap(await api.GET("/api/v1/me/earnings")),
   });
-  if (!earnings.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!earnings.data) return <Spinner label={t("grid.loading")} />;
   const e = earnings.data;
   return (
     <div className="space-y-6">

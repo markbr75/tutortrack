@@ -20,7 +20,7 @@ export function TodayPage() {
     queryKey: ["tutor", "today"],
     queryFn: async () => unwrap(await api.GET("/api/v1/tutor/today")),
   });
-  if (today.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (today.isPending) return <Spinner label={t("grid.loading")} />;
   const d = today.data;
   if (!d) return null;
   return (

@@ -170,7 +170,7 @@ function ClassesSection() {
           ...(terms.data?.results ?? []).map((x) => ({ value: x.id, label: x.name })),
         ]}
       />
-      {classes.isLoading ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {classes.isLoading ? <Spinner label={t("grid.loading")} /> : null}
       {classes.data && !classes.data.results.length ? (
         <p className="text-sm">{t("courses.noClasses")}</p>
       ) : null}
@@ -846,7 +846,7 @@ export function ClassPage({ classId }: { classId: string }) {
           ),
     onSuccess: refresh,
   });
-  if (detail.isLoading) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (detail.isLoading) return <Spinner label={t("grid.loading")} />;
   if (!detail.data) return <Alert tone="danger">{t("courses.notFound")}</Alert>;
   const c: GroupClass = detail.data;
   const active = (roster.data ?? []).filter((r) =>
@@ -1203,7 +1203,7 @@ export function RegisterPage({ sessionId }: { sessionId: string }) {
       queryClient.setQueryData(["courses", "register", sessionId], data);
     },
   });
-  if (!register.data) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (!register.data) return <Spinner label={t("grid.loading")} />;
   const markAll = () =>
     setRows(
       Object.fromEntries(
@@ -1315,7 +1315,7 @@ export function ReEnrolPage({ token }: { token: string }) {
     onSuccess: (data) => queryClient.setQueryData(["re-enrol", token], data),
   });
   if (page.isError) return <PublicLayout title={t("courses.reEnrol.missing")}>{null}</PublicLayout>;
-  if (!page.data) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (!page.data) return <Spinner label={t("grid.loading")} />;
   const p = page.data;
   return (
     <PublicLayout title={t("courses.reEnrol.title", { student: p.student })}>

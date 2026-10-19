@@ -308,8 +308,7 @@ export function WidgetsTab() {
       unwrap(await api.DELETE("/api/v1/widgets/{id}", { params: { path: { id } } })),
     onSuccess: refresh,
   });
-  if (!kinds.data || !widgets.data || !options.data)
-    return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!kinds.data || !widgets.data || !options.data) return <Spinner label={t("grid.loading")} />;
   const errors = fieldErrors(create.error);
   const available = kinds.data.filter((k) => k.available);
   const description = kinds.data.find((k) => k.key === kind)?.description;
@@ -497,7 +496,7 @@ export function ReviewsTab() {
       unwrap(await api.DELETE("/api/v1/testimonials/{id}", { params: { path: { id } } })),
     onSuccess: refresh,
   });
-  if (!reviews.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!reviews.data) return <Spinner label={t("grid.loading")} />;
   const errors = fieldErrors(create.error);
   return (
     <div className="space-y-4">

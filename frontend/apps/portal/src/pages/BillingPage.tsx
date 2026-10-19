@@ -178,7 +178,7 @@ export function BillingPage() {
     queryKey: ["portal", "billing"],
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/billing")),
   });
-  if (data.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (data.isPending) return <Spinner label={t("grid.loading")} />;
   const b = data.data;
   if (!b) return null;
   const money = (v: MoneyValue) => formatMoney(v, i18n.language);

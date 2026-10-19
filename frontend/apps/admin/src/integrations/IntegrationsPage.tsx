@@ -122,7 +122,7 @@ export function CalendarSyncPanel({ connectionId }: { connectionId: string }) {
     mutationFn: async () =>
       unwrap(await api.POST("/api/v1/calendar-sync/connections/{id}/sync", path)),
   });
-  if (page.isPending) return <Spinner className="size-4" label={t("grid.loading")} />;
+  if (page.isPending) return <Spinner label={t("grid.loading")} />;
   if (!page.data) return <ErrorList error={page.error} />;
   const calendars = page.data.calendars;
   return (
@@ -471,9 +471,7 @@ export function IntegrationsPage() {
         <p className="text-sm text-muted-foreground">{t("integrations.help")}</p>
       </header>
       {simulated ? <Alert>{t("integrations.simulated")}</Alert> : null}
-      {complete.isPending ? (
-        <Spinner className="size-5" label={t("integrations.finishing")} />
-      ) : null}
+      {complete.isPending ? <Spinner label={t("integrations.finishing")} /> : null}
       {complete.isSuccess ? <Alert tone="success">{t("integrations.connected")}</Alert> : null}
       {denied ? <Alert tone="warning">{t("integrations.denied")}</Alert> : null}
       <ErrorList error={complete.error} />

@@ -31,7 +31,7 @@ export function InsightsPage() {
         <h2 className="text-lg font-semibold">
           {t("productInsights.npsTitle", { days: n?.days ?? 90 })}
         </h2>
-        {nps.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+        {nps.isPending ? <Spinner label={t("grid.loading")} /> : null}
         {n ? (
           <>
             <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">

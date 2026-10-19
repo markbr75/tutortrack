@@ -151,7 +151,7 @@ function Overview() {
     queryKey: ["developer-overview"],
     queryFn: async () => unwrap(await api.GET("/api/v1/developer/overview")),
   });
-  if (!overview.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!overview.data) return <Spinner label={t("grid.loading")} />;
   const o = overview.data;
   const stats: [string, number][] = [
     [t("developer.stats.apiKeys"), o.api_keys],
@@ -281,7 +281,7 @@ function ApiKeys() {
         </form>
       </Card>
       {!keys.data ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : keys.data.results.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("developer.keys.none")}</p>
       ) : (
@@ -467,7 +467,7 @@ function Webhooks() {
         </Card>
       ) : null}
       {!endpoints.data ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : endpoints.data.results.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("developer.webhooks.none")}</p>
       ) : (
@@ -601,7 +601,7 @@ function DeliveryLog({ endpointId, canManage }: { endpointId: string; canManage:
         }),
       ),
   });
-  if (!deliveries.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!deliveries.data) return <Spinner label={t("grid.loading")} />;
   if (deliveries.data.results.length === 0)
     return <p className="text-xs text-muted-foreground">{t("developer.deliveries.none")}</p>;
   return (
@@ -701,7 +701,7 @@ function DeliveryRow({
         <tr>
           <td colSpan={5} className="space-y-2 py-2">
             {!detail.data ? (
-              <Spinner className="size-4" label={t("grid.loading")} />
+              <Spinner label={t("grid.loading")} />
             ) : (
               <>
                 <ol className="space-y-1" aria-label={t("developer.deliveries.attempts")}>
@@ -783,7 +783,7 @@ function Apps() {
       {canConnect ? (
         <Card title={t("developer.apps.connected")}>
           {!connected.data ? (
-            <Spinner className="size-5" label={t("grid.loading")} />
+            <Spinner label={t("grid.loading")} />
           ) : connected.data.results.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t("developer.apps.noneConnected")}</p>
           ) : (

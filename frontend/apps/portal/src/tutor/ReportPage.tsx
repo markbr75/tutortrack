@@ -208,8 +208,7 @@ export function TutorReportPage({ reportId }: { reportId: string }) {
       }
     },
   });
-  if (report.isPending || answers === null)
-    return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (report.isPending || answers === null) return <Spinner label={t("grid.loading")} />;
   const r = report.data;
   if (!r) return null;
   const written = r.status === "submitted" || r.status === "approved";

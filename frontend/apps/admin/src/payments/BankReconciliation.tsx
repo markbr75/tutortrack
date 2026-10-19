@@ -241,7 +241,7 @@ export function BankReconciliation() {
         }))}
       />
       {list.query.isPending ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : list.rows.length ? (
         <ul className="divide-y divide-border rounded-md border border-border text-sm">
           {list.rows.map((line) => (

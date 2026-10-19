@@ -201,7 +201,7 @@ export function ShareShortlistSection({ jobId }: { jobId: string }) {
           {share.error ? <Alert tone="danger">{share.error.message}</Alert> : null}
         </form>
       ) : null}
-      {shares.isLoading ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {shares.isLoading ? <Spinner label={t("grid.loading")} /> : null}
       {shares.data?.results.length ? (
         <ul className="space-y-2 text-sm">
           {shares.data.results.map((s) => (
@@ -270,7 +270,7 @@ export function PublicShortlistPage({ token }: { token: string }) {
     onSuccess: (data) => queryClient.setQueryData(["public-shortlist", token], data),
   });
   if (page.isError) return <PublicLayout title={t("shortlistShare.missing")}>{null}</PublicLayout>;
-  if (!page.data) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (!page.data) return <Spinner label={t("grid.loading")} />;
   const p = page.data;
   const subject = [p.job.subject, p.job.level].filter(Boolean).join(" ") || p.job.service;
   return (

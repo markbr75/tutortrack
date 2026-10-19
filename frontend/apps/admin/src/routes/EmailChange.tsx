@@ -91,7 +91,7 @@ export function ConfirmEmailPage() {
         <Alert tone="danger">{t("emailChange.failed")}</Alert>
       ) : (
         <p className="flex items-center gap-2" role="status">
-          <Spinner className="size-4" /> {t("emailChange.checking")}
+          <Spinner /> {t("emailChange.checking")}
         </p>
       )}
     </PublicLayout>

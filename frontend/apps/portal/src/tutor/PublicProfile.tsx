@@ -47,7 +47,7 @@ export function PublicProfileSection() {
     onSuccess: (data) => queryClient.setQueryData(["public-profile-mine"], data),
   });
   if (profile.isError) return null; // not a tutor login with directory access
-  if (!profile.data || !draft) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!profile.data || !draft) return <Spinner label={t("grid.loading")} />;
   const errors =
     save.error instanceof ApiError
       ? ((save.error.problem as { errors?: Record<string, string[]> }).errors ?? {})

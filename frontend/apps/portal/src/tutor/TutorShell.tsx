@@ -40,7 +40,7 @@ export function TutorShell() {
     },
     onSuccess: () => window.location.assign("/portal/"),
   });
-  if (me.isPending) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (me.isPending) return <Spinner label={t("grid.loading")} />;
   if (!me.data) return <p className="p-6">{t("tutor.noProfile")}</p>;
   const nav = [
     { to: "/tutor", label: t("tutor.nav.today") },

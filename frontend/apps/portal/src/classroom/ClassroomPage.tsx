@@ -31,7 +31,7 @@ export function ClassroomPage({ lessonId }: { lessonId: string }) {
       ),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["classroom", lessonId] }),
   });
-  if (room.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (room.isPending) return <Spinner label={t("grid.loading")} />;
   if (!room.data) return <Alert tone="danger">{t("classroom.unavailable")}</Alert>;
   const c = room.data;
   return (
@@ -117,7 +117,7 @@ export function RecordingsPage() {
       unwrap(await api.GET("/api/v1/recordings/{id}/play", { params: { path: { id } } })),
     onSuccess: (link) => window.open(link.url, "_blank", "noopener"),
   });
-  if (recordings.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (recordings.isPending) return <Spinner label={t("grid.loading")} />;
   const rows = recordings.data ?? [];
   return (
     <div className="space-y-4">

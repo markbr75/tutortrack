@@ -131,7 +131,7 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
     onSuccess: (data) => queryClient.setQueryData(key, data),
   });
 
-  if (invoice.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (invoice.isPending) return <Spinner label={t("grid.loading")} />;
   if (!invoice.data) return <ErrorList error={invoice.error} />;
   const inv: Invoice = invoice.data;
   const money = (value: { amount: string; currency: string }) => formatMoney(value, i18n.language);

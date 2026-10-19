@@ -148,7 +148,7 @@ export function BookingPage() {
       ) : (
         <section className="space-y-3">
           {services.isPending ? (
-            <Spinner className="size-5" label={t("grid.loading")} />
+            <Spinner label={t("grid.loading")} />
           ) : !services.data?.length ? (
             <p className="text-sm text-muted-foreground">{t("portalBooking.noServices")}</p>
           ) : (
@@ -220,7 +220,7 @@ export function BookingPage() {
           )}
           {service ? (
             slots.isPending ? (
-              <Spinner className="size-5" label={t("grid.loading")} />
+              <Spinner label={t("grid.loading")} />
             ) : slots.data?.length ? (
               <ul className="flex flex-wrap gap-2" aria-label={t("portalBooking.times")}>
                 {slots.data.map((slot) => (

@@ -82,7 +82,7 @@ export function CompleteForm({ lessonId, onDone }: { lessonId: string; onDone: (
     onSuccess: onDone,
   });
 
-  if (lesson.isPending) return <Spinner className="mt-4 size-5" label={t("grid.loading")} />;
+  if (lesson.isPending) return <Spinner className="mt-4" label={t("grid.loading")} />;
   return (
     <form
       className="mt-4 space-y-3"

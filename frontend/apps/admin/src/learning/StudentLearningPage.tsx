@@ -77,7 +77,7 @@ export function StudentLearningPage({ studentId }: { studentId: string }) {
       ) : null}
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">{t("learning.coverage.title")}</h2>
-        {coverage.isLoading ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+        {coverage.isLoading ? <Spinner label={t("grid.loading")} /> : null}
         {coverage.data && !coverage.data.length ? (
           <Empty>{t("learning.coverage.none")}</Empty>
         ) : null}

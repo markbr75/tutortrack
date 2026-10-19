@@ -90,7 +90,7 @@ export function PlanLessonForm({ onDone }: { onDone: () => void }) {
       onDone();
     },
   });
-  if (jobs.isPending) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (jobs.isPending) return <Spinner label={t("grid.loading")} />;
   if (!jobs.data?.length) return <p className="text-sm">{t("tutorPlan.noJobs")}</p>;
   return (
     <form
@@ -325,7 +325,7 @@ export function StudentHistoryPage({ studentId }: { studentId: string }) {
         }),
       ),
   });
-  if (history.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (history.isPending) return <Spinner label={t("grid.loading")} />;
   if (!history.data) return <Alert tone="danger">{t("errors.generic")}</Alert>;
   const data = history.data;
   return (

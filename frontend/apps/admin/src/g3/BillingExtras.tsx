@@ -20,7 +20,7 @@ export function RunTutorReviews({ runId }: { runId: string }) {
         }),
       ),
   });
-  if (reviews.isPending) return <Spinner className="size-4" label={t("grid.loading")} />;
+  if (reviews.isPending) return <Spinner label={t("grid.loading")} />;
   return (
     <ul className="mt-2 space-y-1 text-sm">
       {(reviews.data ?? []).map((r) => (

@@ -76,7 +76,7 @@ export function AnnouncementsPage() {
         </Button>
       </form>
       {list.isPending ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : (
         <ul className="space-y-2">
           {(list.data?.results ?? []).map((a) => (

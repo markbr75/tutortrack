@@ -49,7 +49,7 @@ export function FlagsPage() {
         </Button>
       </form>
       {create.error ? <Alert tone="danger">{create.error.message}</Alert> : null}
-      {flags.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {flags.isPending ? <Spinner label={t("grid.loading")} /> : null}
       <ul className="space-y-3">
         {flags.data?.map((flag) => (
           <FlagCard key={flag.key} flag={flag} />

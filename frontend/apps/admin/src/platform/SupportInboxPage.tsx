@@ -47,7 +47,7 @@ export function SupportInboxPage() {
           />
         </div>
       </div>
-      {list.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {list.isPending ? <Spinner label={t("grid.loading")} /> : null}
       <ul className="divide-y divide-border rounded-md border border-border">
         {(list.data?.results ?? []).map((row) => (
           <li key={row.id} className="p-3">
@@ -120,7 +120,7 @@ export function SupportConversationPage({ id }: { id: string }) {
     onSuccess: done,
   });
   const data = conversation.data;
-  if (!data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!data) return <Spinner label={t("grid.loading")} />;
   return (
     <div className="max-w-3xl space-y-4">
       <Link to="/platform/support" className="text-sm underline">

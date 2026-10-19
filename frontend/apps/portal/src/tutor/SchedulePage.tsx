@@ -32,7 +32,7 @@ export function TutorSchedulePage() {
         }),
       ),
   });
-  if (items.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (items.isPending) return <Spinner label={t("grid.loading")} />;
   const lessons = (items.data ?? []).filter((item) => item.kind === "lesson");
   const days = new Map<string, typeof lessons>();
   for (const lesson of lessons) {

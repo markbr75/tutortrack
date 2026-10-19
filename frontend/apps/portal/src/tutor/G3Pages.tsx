@@ -71,7 +71,7 @@ export function AnnualEarnings() {
           )}
         </>
       ) : (
-        <Spinner className="size-4" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       )}
     </section>
   );
@@ -112,7 +112,7 @@ export function InvoiceReviewPage() {
       ),
     onSuccess: done,
   });
-  if (!reviews.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!reviews.data) return <Spinner label={t("grid.loading")} />;
   const rows = reviews.data.results;
   return (
     <div className="space-y-4">

@@ -138,7 +138,7 @@ export function DeveloperDocsPage() {
       ))}
       <Card title={t("developer.docs.changelog")}>
         {!changelog.data ? (
-          <Spinner className="size-5" label={t("grid.loading")} />
+          <Spinner label={t("grid.loading")} />
         ) : (
           <ul className="space-y-2 text-sm">
             {changelog.data.map((entry) => (
@@ -161,7 +161,7 @@ export function MarketplacePage() {
     queryKey: ["marketplace"],
     queryFn: async () => unwrap(await api.GET("/api/v1/developer/marketplace")),
   });
-  if (!entries.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!entries.data) return <Spinner label={t("grid.loading")} />;
   const categories = Array.from(new Set(entries.data.map((e) => e.category)));
   return (
     <div className="space-y-4">
@@ -243,7 +243,7 @@ export function OAuthConsentPage() {
         {consent.error.message}
       </Alert>
     );
-  if (!consent.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!consent.data) return <Spinner label={t("grid.loading")} />;
   const c = consent.data;
   return (
     <div className="mx-auto max-w-lg space-y-4">

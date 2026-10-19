@@ -236,7 +236,7 @@ export function JobsPage() {
   const me = useTutorMe();
   const tutorId = me.data?.id;
   if (!offers.data || !postings.data || !cover.data) {
-    return <Spinner className="size-5" label={t("grid.loading")} />;
+    return <Spinner label={t("grid.loading")} />;
   }
   const open = offers.data.filter((o) => o.status === "sent");
   const past = offers.data.filter((o) => o.status !== "sent");

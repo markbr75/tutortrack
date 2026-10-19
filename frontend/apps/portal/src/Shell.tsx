@@ -61,7 +61,7 @@ export function Shell() {
     queryFn: async () => unwrap(await api.GET("/api/v1/me")),
   });
   usePortalBranding();
-  if (who.isPending) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (who.isPending) return <Spinner label={t("grid.loading")} />;
   if (isSignedOut(who.error)) return <SignIn />;
   return (
     <>
@@ -94,7 +94,7 @@ function FamilyShell() {
     mutationFn: async () => api.POST("/api/v1/auth/logout"),
     onSuccess: () => window.location.assign("/portal/"),
   });
-  if (me.isPending) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (me.isPending) return <Spinner label={t("grid.loading")} />;
   if (isSignedOut(me.error)) return <SignIn />;
   const status = problemStatus(me.error);
   if (!me.data) {

@@ -106,7 +106,7 @@ function Conversation({ id, onBack }: { id: string; onBack: () => void }) {
     onSuccess: refresh,
   });
   const data = conversation.data;
-  if (!data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!data) return <Spinner label={t("grid.loading")} />;
   return (
     <div className="space-y-3">
       <Button size="sm" variant="ghost" onClick={onBack}>
