@@ -202,13 +202,17 @@ def test_provider_failures_propagate_for_retry_and_final_failure_tells_staff(
 # --- T09 join links ------------------------------------------------------------------------------
 
 
-def test_portal_and_tutor_views_show_role_specific_links_with_timed_enablement(org, people):
+def test_portal_and_tutor_views_show_role_specific_links_with_timed_enablement(
+    org, people, monkeypatch
+):
     from tutortrack.portal import tutor as tutor_portal
 
     setting(org, join_window_minutes=15)
     lesson = make_lesson(org, people, start=soon() + timedelta(minutes=5), online=True)
     reconcile(org, lesson)
     found = meeting(org, lesson)
+    # Near midnight "soon" is tomorrow in the tutor's zone; read their day at the lesson's start.
+    monkeypatch.setattr(tutor_portal, "now", lambda: lesson.start)
     with tenant_context(org):
         day = tutor_portal.today(people["tutor"], people["user"])
     row = next(r for r in day["lessons"] if r["id"] == str(lesson.pk))
