@@ -1,5 +1,6 @@
 import { useTranslation } from "@tutortrack/i18n";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { CircleHelp } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useMe } from "../api";
@@ -87,9 +88,10 @@ export function SuccessLayer() {
         data-tour="help"
         onClick={() => setPanelOpen(true)}
         aria-haspopup="dialog"
-        className="relative rounded-md px-2 py-1 text-left text-sm hover:bg-muted"
+        className="relative flex h-9 items-center gap-1.5 rounded-md px-2.5 text-sm hover:bg-muted"
       >
-        {t("help.open")}
+        <CircleHelp aria-hidden="true" className="size-5" strokeWidth={1.75} />
+        <span className="max-sm:sr-only">{t("help.open")}</span>
         {unread > 0 ? (
           <>
             <span aria-hidden="true" className="ml-1 inline-block size-2 rounded-full bg-brand" />

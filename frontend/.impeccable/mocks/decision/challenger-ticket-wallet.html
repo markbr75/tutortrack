@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><title>Coupon Book — Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1C2B5A;--navy-2:#26386F;--red:#C8102E;--carbon:#5B4B8A;--stock:#FFFFFF;--ground:#E9ECF4;--ink:#141A2E;--ink-2:#5A6178;--rule:#CDD3E2}
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;display:grid;grid-template-columns:236px 1fr;font:14px/1.45 Barlow,system-ui,sans-serif;color:var(--ink);background:var(--ground);font-variant-numeric:tabular-nums}
+.cap{font-family:"Barlow Semi Condensed",Barlow,sans-serif;text-transform:uppercase;letter-spacing:.06em}
+nav{background:var(--navy);color:#fff;padding:18px 14px;display:flex;flex-direction:column;gap:1px}
+.org{padding:2px 8px 16px;border-bottom:1px solid #ffffff26;margin-bottom:8px}.org b{font-size:15px}.org small{display:block;color:#B9C3E0}
+nav a{color:#fff;text-decoration:none;padding:6px 10px;border-radius:4px;display:flex;justify-content:space-between}
+nav a.on{background:var(--navy-2);border-left:3px solid var(--red);padding-left:7px;font-weight:600}
+nav a span{color:#B9C3E0;font-size:12px}
+nav h6{font:700 11px "Barlow Semi Condensed";letter-spacing:.1em;text-transform:uppercase;color:#8E9BC4;padding:14px 10px 4px}
+main{display:grid;grid-template-rows:56px 1fr;min-width:0}
+.top{background:#fff;display:flex;align-items:center;gap:12px;padding:0 24px;border-bottom:1px solid var(--rule)}
+.search{width:420px;height:34px;border:1px solid var(--rule);border-radius:4px;display:flex;align-items:center;padding:0 12px;color:var(--ink-2)}
+.search kbd{margin-left:auto;font:12px inherit;border:1px solid var(--rule);border-radius:3px;padding:0 5px}
+.b{height:34px;padding:0 12px;border:1px solid var(--rule);border-radius:4px;display:flex;align-items:center;background:#fff}
+.g{flex:1}
+.body{padding:22px 24px;display:grid;grid-template-columns:1fr 340px;gap:20px;overflow:hidden;align-content:start}
+.head{grid-column:1/-1;display:flex;justify-content:space-between;align-items:end}
+h1{font:700 26px "Barlow Semi Condensed";letter-spacing:.02em}.sub{color:var(--ink-2)}
+.btn{height:36px;padding:0 14px;border-radius:4px;border:1px solid var(--rule);background:#fff;font:600 14px Barlow}
+.btn.p{background:var(--navy);color:#fff;border-color:var(--navy)}
+.kp{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.k{background:#fff;border:1px solid var(--rule);border-radius:4px;padding:12px 14px}
+.k .cap{font-size:11px;color:var(--ink-2)}.k b{display:block;font:700 26px "Barlow Semi Condensed";color:var(--carbon)}
+.strip{display:flex;flex-direction:column;gap:8px}
+.cp{display:grid;grid-template-columns:96px 1fr 150px 110px;background:var(--stock);border:1px solid var(--rule);border-radius:4px;position:relative;min-height:62px}
+.cp>div{padding:10px 14px}.cp .time{border-right:1px dashed var(--rule);font:700 20px "Barlow Semi Condensed";color:var(--carbon)}
+.cp .time small{display:block;font:500 11px Barlow;color:var(--ink-2);text-transform:uppercase;letter-spacing:.08em}
+.cp .what b{display:block}.cp .what small,.cp .who small{color:var(--ink-2)}
+.cp .st{border-left:1px dashed var(--rule);display:grid;place-items:center}
+.stamp{font:700 13px "Barlow Semi Condensed";letter-spacing:.12em;border:2px solid currentColor;border-radius:3px;padding:1px 8px;transform:rotate(-6deg)}
+.used{color:var(--carbon)}.void{color:var(--red)}.due{color:var(--ink-2);border-style:dashed;transform:none}
+.cp.dim{opacity:.72}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:2px 0 8px}.sec .cap{font-size:13px;color:var(--navy);font-weight:700}
+.side{display:flex;flex-direction:column;gap:14px}
+.card{background:#fff;border:1px solid var(--rule);border-radius:4px}
+.card h2{font:700 13px "Barlow Semi Condensed";letter-spacing:.08em;text-transform:uppercase;color:var(--navy);padding:12px 14px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between}
+.row{display:flex;justify-content:space-between;padding:9px 14px;border-bottom:1px solid #EEF0F6}.row:last-child{border:0}
+.row small{display:block;color:var(--ink-2)}.amt{font:700 17px "Barlow Semi Condensed";color:var(--carbon)}.late{color:var(--red);font-weight:600;font-size:13px}
+</style></head><body>
+<nav aria-label="Main">
+  <div class="org"><b>Bright Minds Tutoring</b><small>London · 3 branches</small></div>
+  <a class="on" href="#">Home</a><a href="#">Calendar</a><a href="#">Inbox <span>6</span></a><a href="#">My tasks <span>3</span></a>
+  <h6>People</h6><a href="#">Clients</a><a href="#">Students</a><a href="#">Tutors</a>
+  <h6>Teaching</h6><a href="#">Jobs</a><a href="#">Courses</a><a href="#">Unconfirmed lessons <span>2</span></a><a href="#">Lesson reports</a>
+  <h6>Growth</h6><a href="#">Enquiries <span>4</span></a><a href="#">Recruitment</a>
+  <h6>Money</h6><a href="#">Billing</a><a href="#">Payroll</a>
+  <h6>Insights</h6><a href="#">Reports</a>
+  <a href="#" style="margin-top:auto">Settings</a>
+</nav>
+<main>
+  <div class="top"><div class="search">Search clients, students, invoices… <kbd>⌘K</kbd></div><div class="b">Ask AI ⌘J</div><div class="g"></div><div class="b">Notifications · 4</div><div class="b">Olivia Shah</div></div>
+  <div class="body">
+    <div class="head"><div><h1>Good afternoon, Olivia</h1><p class="sub">Monday 19 October · 9 lessons across 6 tutors</p></div>
+      <div style="display:flex;gap:8px"><button class="btn">Add a family</button><button class="btn p">Book a lesson</button></div></div>
+    <div>
+      <div class="kp">
+        <div class="k"><span class="cap">Revenue this month</span><b>£6,820.00</b><small style="color:#1F7A4D">+11.6% on September</small></div>
+        <div class="k"><span class="cap">Outstanding</span><b>£1,240.00</b><small style="color:var(--ink-2)">5 invoices · 2 overdue</small></div>
+        <div class="k"><span class="cap">Pay run · 31 Oct</span><b>£3,905.40</b><small style="color:var(--ink-2)">14 tutors</small></div>
+      </div>
+      <div class="sec"><span class="cap">Today's lessons</span><span class="sub">4 used · 1 void · 4 to come</span></div>
+      <div class="strip">
+        <div class="cp dim"><div class="time">09:00<small>online</small></div><div class="what"><b>A-level Chemistry</b><small>Grace Hughes</small></div><div class="who">Tom Reid<br><small>£55.00</small></div><div class="st"><span class="stamp used">USED</span></div></div>
+        <div class="cp dim"><div class="time">13:30<small>home visit</small></div><div class="what"><b>KS3 English</b><small>Ade Okafor · missed, charged per policy</small></div><div class="who">Sara Lind<br><small>£40.00</small></div><div class="st"><span class="stamp void">VOID</span></div></div>
+        <div class="cp dim"><div class="time">14:00<small>room 1</small></div><div class="what"><b>Year 4 Maths group</b><small>4 students</small></div><div class="who">Sara Lind<br><small>£96.00</small></div><div class="st"><span class="stamp used">USED</span></div></div>
+        <div class="cp"><div class="time">16:30<small>online</small></div><div class="what"><b>GCSE Higher Maths</b><small>Arjun Patel</small></div><div class="who">Nia Adeyemi<br><small>£48.00</small></div><div class="st"><span class="stamp due">VALID</span></div></div>
+        <div class="cp"><div class="time">17:30<small>room 2</small></div><div class="what"><b>Year 6 11+ Prep</b><small>Maya Patel</small></div><div class="who">Nia Adeyemi<br><small>£42.00</small></div><div class="st"><span class="stamp due">VALID</span></div></div>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card"><h2>Unconfirmed <span style="color:var(--red)">2</span></h2>
+        <div class="row"><span>Year 6 11+ Prep · Sat 10 Oct<small>Nia Adeyemi</small></span><span class="late">9 days</span></div>
+        <div class="row"><span>Year 6 11+ Prep · Sat 3 Oct<small>Nia Adeyemi</small></span><span class="late">16 days</span></div></div>
+      <div class="card"><h2>Overdue invoices <span>£380.00</span></h2>
+        <div class="row"><span>The Okafor Family<small>INV-0142 · due 2 Oct</small></span><span class="amt">£240.00</span></div>
+        <div class="row"><span>Grace Hughes<small>INV-0139 · due 28 Sep</small></span><span class="amt">£140.00</span></div></div>
+    </div>
+  </div>
+</main>
+</body></html>

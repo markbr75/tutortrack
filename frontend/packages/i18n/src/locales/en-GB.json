@@ -43,7 +43,21 @@
     "roles": "Roles",
     "booking": "Online booking",
     "sso": "Single sign-on",
-    "courses": "Courses"
+    "courses": "Courses",
+    "groups": {
+      "people": "People",
+      "scheduling": "Scheduling",
+      "lessons": "Lessons and learning",
+      "money": "Money",
+      "sales": "Sales and recruitment",
+      "comms": "Communication",
+      "insight": "Insight"
+    },
+    "settingsArea": "Settings",
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "userMenu": "Account menu for {{name}}"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -6968,5 +6982,17 @@
     "listening": "Listening…",
     "blocked": "Allow the microphone to dictate.",
     "failed": "Dictation stopped. Try again or type instead."
+  },
+  "settingsNav": {
+    "organisation": "Organisation settings",
+    "notifications": "Notifications and templates",
+    "marketplace": "Integrations directory",
+    "groups": {
+      "organisation": "Organisation",
+      "teaching": "Teaching and money",
+      "messages": "Communication",
+      "data": "Data and website",
+      "trust": "Trust and safety"
+    }
   }
 }

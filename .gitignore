@@ -53,3 +53,7 @@ frontend/playwright-report/
 
 # Agent worktrees
 .claude/worktrees/
+
+# Impeccable design-skill working files: review captures and machine-local config stay local
+/frontend/.impeccable/review/
+/frontend/.impeccable/config.local.json

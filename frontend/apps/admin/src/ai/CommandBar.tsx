@@ -1,3 +1,4 @@
+import { Sparkles } from "lucide-react";
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
 import { Button } from "@tutortrack/ui";
@@ -117,10 +118,14 @@ export function CommandBar() {
       <button
         type="button"
         onClick={open}
-        className="rounded-md px-2 py-1 text-left text-sm hover:bg-muted"
+        className="flex h-9 shrink-0 items-center gap-2 rounded-md border border-border bg-surface px-3 text-sm hover:bg-muted"
         aria-keyshortcuts="Control+J Meta+J"
       >
-        {t("ai.command.open")} <kbd className="text-xs text-muted-foreground">⌘J</kbd>
+        <Sparkles aria-hidden="true" className="size-4 text-brand" strokeWidth={1.75} />
+        <span className="max-sm:sr-only">{t("ai.command.open")}</span>
+        <kbd className="hidden rounded border border-border px-1.5 text-xs text-muted-foreground lg:inline">
+          ⌘J
+        </kbd>
       </button>
       <dialog
         ref={dialogRef}
