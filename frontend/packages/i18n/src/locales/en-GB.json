@@ -57,7 +57,9 @@
     "menu": "Menu",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "userMenu": "Account menu for {{name}}"
+    "userMenu": "Account menu for {{name}}",
+    "waiting_one": "1 waiting",
+    "waiting_other": "{{count}} waiting"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -94,7 +96,65 @@
     "title": "Welcome",
     "subtitle": "Your tutoring business at a glance.",
     "features": "Enabled features",
-    "noFeatures": "No optional features are enabled yet."
+    "noFeatures": "No optional features are enabled yet.",
+    "greeting": {
+      "morning": "Good morning, {{name}}",
+      "afternoon": "Good afternoon, {{name}}",
+      "evening": "Good evening, {{name}}"
+    },
+    "todaySummary_zero": "{{date}} · No lessons today",
+    "todaySummary_one": "{{date}} · 1 lesson today",
+    "todaySummary_other": "{{date}} · {{count}} lessons today",
+    "addFamily": "Add a family",
+    "bookLesson": "Book a lesson",
+    "money": {
+      "title": "Money this month",
+      "revenue": "Revenue this month",
+      "revenueUp": "Up {{amount}} on last month",
+      "revenueDown": "Down {{amount}} on last month",
+      "revenueSame": "The same as last month",
+      "revenueNone": "Nothing charged yet this month",
+      "outstanding": "Outstanding",
+      "overdue": "{{amount}} overdue",
+      "noneOverdue": "Nothing overdue",
+      "payRun": "Next pay run",
+      "payRunReady": "Ready for the next pay run",
+      "payRunNone": "Nothing waiting to be paid"
+    },
+    "register": {
+      "title": "Today's register",
+      "marked": "Marked {{done}} of {{total}}",
+      "time": "Time",
+      "lesson": "Lesson",
+      "tutor": "Tutor",
+      "mark": "Mark",
+      "online": "Online",
+      "now": "Now · {{time}}",
+      "empty": "No lessons today.",
+      "openCalendar": "Open the calendar",
+      "marks": {
+        "completed": "Completed",
+        "missed": "Missed",
+        "cancelled": "Cancelled",
+        "due": "Not marked yet",
+        "upcoming": "Still to come"
+      }
+    },
+    "needsMarking": {
+      "title": "Needs marking",
+      "count_one": "1 lesson",
+      "count_other": "{{count}} lessons",
+      "empty": "Nothing is waiting to be marked.",
+      "open": "Open unconfirmed lessons",
+      "days_one": "1 day",
+      "days_other": "{{count}} days"
+    },
+    "overdue": {
+      "title": "Overdue invoices",
+      "empty": "No invoices are overdue.",
+      "open": "Open billing",
+      "due": "{{number}} · due {{date}}"
+    }
   },
   "audit": {
     "title": "Audit log",

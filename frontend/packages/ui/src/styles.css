@@ -14,6 +14,9 @@
 :root {
   --tt-brand: 219 59% 40%; /* register ink blue: primary actions, links, selection */
   --tt-brand-foreground: 0 0% 100%;
+  /* Link and inline-accent text: the register's ink blue. Not tenant-overridden (the tenant
+     colour fills buttons), so it keeps AA contrast on the stock in both schemes. */
+  --tt-link: 219 59% 40%;
   --tt-background: 60 23% 97%; /* register stock */
   --tt-surface: 0 0% 100%; /* panels and tables on the stock */
   --tt-foreground: 218 31% 15%; /* blue-black ink */
@@ -27,7 +30,9 @@
   --tt-shell-foreground: 142 20% 92%;
   --tt-shell-muted: 156 17% 71%;
   --tt-margin: 4 63% 48%; /* the margin rule: now, and what still needs marking */
+  --tt-margin-foreground: 0 0% 100%; /* text on margin red (counts) */
   --tt-danger: 4 76% 40%;
+  --tt-danger-foreground: 0 0% 100%;
   --tt-success: 150 59% 30%;
   --tt-warning: 34 87% 32%;
   --tt-radius: 0.5rem;
@@ -38,6 +43,7 @@
   :root:not([data-theme="light"]) {
     --tt-brand: 220 75% 73%;
     --tt-brand-foreground: 218 59% 13%;
+    --tt-link: 220 75% 73%;
     --tt-background: 205 27% 9%;
     --tt-surface: 205 29% 12%;
     --tt-foreground: 210 29% 92%;
@@ -51,7 +57,9 @@
     --tt-shell-foreground: 150 21% 91%;
     --tt-shell-muted: 156 16% 67%;
     --tt-margin: 5 81% 69%;
+    --tt-margin-foreground: 160 41% 10%;
     --tt-danger: 5 81% 73%;
+    --tt-danger-foreground: 205 27% 9%;
     --tt-success: 151 47% 56%;
     --tt-warning: 36 71% 58%;
     color-scheme: dark;
@@ -61,6 +69,7 @@
 :root[data-theme="dark"] {
   --tt-brand: 220 75% 73%;
   --tt-brand-foreground: 218 59% 13%;
+  --tt-link: 220 75% 73%;
   --tt-background: 205 27% 9%;
   --tt-surface: 205 29% 12%;
   --tt-foreground: 210 29% 92%;
@@ -74,7 +83,9 @@
   --tt-shell-foreground: 150 21% 91%;
   --tt-shell-muted: 156 16% 67%;
   --tt-margin: 5 81% 69%;
+  --tt-margin-foreground: 160 41% 10%;
   --tt-danger: 5 81% 73%;
+  --tt-danger-foreground: 205 27% 9%;
   --tt-success: 151 47% 56%;
   --tt-warning: 36 71% 58%;
   color-scheme: dark;
@@ -83,6 +94,7 @@
 @theme inline {
   --color-brand: hsl(var(--tt-brand));
   --color-brand-foreground: hsl(var(--tt-brand-foreground));
+  --color-link: hsl(var(--tt-link));
   --color-background: hsl(var(--tt-background));
   --color-surface: hsl(var(--tt-surface));
   --color-foreground: hsl(var(--tt-foreground));
@@ -96,7 +108,9 @@
   --color-shell-foreground: hsl(var(--tt-shell-foreground));
   --color-shell-muted: hsl(var(--tt-shell-muted));
   --color-margin: hsl(var(--tt-margin));
+  --color-margin-foreground: hsl(var(--tt-margin-foreground));
   --color-danger: hsl(var(--tt-danger));
+  --color-danger-foreground: hsl(var(--tt-danger-foreground));
   --color-success: hsl(var(--tt-success));
   --color-warning: hsl(var(--tt-warning));
   --radius-md: var(--tt-radius);

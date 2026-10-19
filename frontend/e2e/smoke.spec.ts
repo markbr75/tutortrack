@@ -15,6 +15,8 @@ test("the seeded owner signs in and reaches the app", async ({ page }) => {
   await page.getByLabel("Email").fill("admin@tutortrack.localhost");
   await page.getByLabel("Password").fill(process.env.SEED_ADMIN_PASSWORD ?? "tutortrack");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Welcome" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: /^Good (morning|afternoon|evening)/ }),
+  ).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Main" })).toBeVisible();
 });

@@ -1,0 +1,736 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-19T00:00:00Z",
+  "title": "Design System: TutorTrack",
+  "extensions": {
+    "colorMeta": {
+      "brand": {
+        "role": "primary",
+        "displayName": "Register Ink Blue",
+        "canonical": "hsl(219 59% 40%)",
+        "cssVar": "--tt-brand",
+        "hex": "#2a54a2",
+        "oklch": "oklch(46.0% 0.135 261.5)",
+        "dark": {
+          "canonical": "hsl(220 75% 73%)",
+          "hex": "#87a9ee"
+        },
+        "tonalRamp": [
+          "#000728",
+          "#001d5a",
+          "#113a86",
+          "#2f5aa9",
+          "#4e7bcd",
+          "#6e9df2",
+          "#a4c5ff",
+          "#e6efff"
+        ],
+        "tenantOverridable": true
+      },
+      "brand-foreground": {
+        "role": "primary",
+        "displayName": "Brand Foreground",
+        "canonical": "hsl(0 0% 100%)",
+        "cssVar": "--tt-brand-foreground",
+        "hex": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "dark": {
+          "canonical": "hsl(218 59% 13%)",
+          "hex": "#0e1c35"
+        },
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#7d7d7d",
+          "#9e9e9e",
+          "#c4c4c4",
+          "#eeeeee"
+        ],
+        "tenantOverridable": true
+      },
+      "link": {
+        "role": "primary",
+        "displayName": "Link Ink",
+        "canonical": "hsl(219 59% 40%)",
+        "cssVar": "--tt-link",
+        "hex": "#2a54a2",
+        "oklch": "oklch(46.0% 0.135 261.5)",
+        "dark": {
+          "canonical": "hsl(220 75% 73%)",
+          "hex": "#87a9ee"
+        },
+        "tonalRamp": [
+          "#000728",
+          "#001d5a",
+          "#113a86",
+          "#2f5aa9",
+          "#4e7bcd",
+          "#6e9df2",
+          "#a4c5ff",
+          "#e6efff"
+        ]
+      },
+      "shell": {
+        "role": "secondary",
+        "displayName": "Bookcloth Green",
+        "canonical": "hsl(162 35% 18%)",
+        "cssVar": "--tt-shell",
+        "hex": "#1e3e34",
+        "oklch": "oklch(33.6% 0.042 172.1)",
+        "dark": {
+          "canonical": "hsl(160 41% 10%)",
+          "hex": "#0f241d"
+        },
+        "tonalRamp": [
+          "#000f0a",
+          "#092b22",
+          "#27473d",
+          "#45665b",
+          "#64867a",
+          "#84a79b",
+          "#a9cdc1",
+          "#d3f8eb"
+        ]
+      },
+      "shell-accent": {
+        "role": "secondary",
+        "displayName": "Bookcloth Raised",
+        "canonical": "hsl(162 32% 24%)",
+        "cssVar": "--tt-shell-accent",
+        "hex": "#2a5145",
+        "oklch": "oklch(40.1% 0.049 172.2)",
+        "dark": {
+          "canonical": "hsl(161 36% 17%)",
+          "hex": "#1c3b31"
+        },
+        "tonalRamp": [
+          "#000f0a",
+          "#012c21",
+          "#21483d",
+          "#3f675a",
+          "#5f877a",
+          "#7fa99b",
+          "#a4cfc1",
+          "#cefaeb"
+        ]
+      },
+      "shell-foreground": {
+        "role": "secondary",
+        "displayName": "Bookcloth Lettering",
+        "canonical": "hsl(142 20% 92%)",
+        "cssVar": "--tt-shell-foreground",
+        "hex": "#e7efea",
+        "oklch": "oklch(94.4% 0.011 158.5)",
+        "dark": {
+          "canonical": "hsl(150 21% 91%)",
+          "hex": "#e3ede8"
+        },
+        "tonalRamp": [
+          "#070d09",
+          "#202622",
+          "#3b423e",
+          "#59605b",
+          "#787f7b",
+          "#99a19c",
+          "#bec6c1",
+          "#e9f1ec"
+        ]
+      },
+      "shell-muted": {
+        "role": "secondary",
+        "displayName": "Bookcloth Muted",
+        "canonical": "hsl(156 17% 71%)",
+        "cssVar": "--tt-shell-muted",
+        "hex": "#a8c2b8",
+        "oklch": "oklch(79.1% 0.031 169.5)",
+        "dark": {
+          "canonical": "hsl(156 16% 67%)",
+          "hex": "#9db8ae"
+        },
+        "tonalRamp": [
+          "#000f09",
+          "#142922",
+          "#2f453d",
+          "#4d635b",
+          "#6c837a",
+          "#8ca59b",
+          "#b2cbc1",
+          "#dbf6eb"
+        ]
+      },
+      "margin": {
+        "role": "tertiary",
+        "displayName": "Margin Red",
+        "canonical": "hsl(4 63% 48%)",
+        "cssVar": "--tt-margin",
+        "hex": "#c8382d",
+        "oklch": "oklch(55.5% 0.183 28.6)",
+        "dark": {
+          "canonical": "hsl(5 81% 69%)",
+          "hex": "#f07b70"
+        },
+        "tonalRamp": [
+          "#1f0000",
+          "#4b0001",
+          "#7c0103",
+          "#ad1814",
+          "#d44438",
+          "#fb6959",
+          "#ffab9f",
+          "#ffe9e5"
+        ]
+      },
+      "margin-foreground": {
+        "role": "tertiary",
+        "displayName": "Margin Red Foreground",
+        "canonical": "hsl(0 0% 100%)",
+        "cssVar": "--tt-margin-foreground",
+        "hex": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "dark": {
+          "canonical": "hsl(160 41% 10%)",
+          "hex": "#0f241d"
+        },
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#7d7d7d",
+          "#9e9e9e",
+          "#c4c4c4",
+          "#eeeeee"
+        ]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Register Stock",
+        "canonical": "hsl(60 23% 97%)",
+        "cssVar": "--tt-background",
+        "hex": "#f9f9f6",
+        "oklch": "oklch(98.1% 0.005 106.5)",
+        "dark": {
+          "canonical": "hsl(205 27% 9%)",
+          "hex": "#11181d"
+        },
+        "tonalRamp": [
+          "#0b0b09",
+          "#242422",
+          "#40403d",
+          "#5e5e5b",
+          "#7d7d7a",
+          "#9f9f9b",
+          "#c4c4c1",
+          "#efefeb"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Clean Leaf",
+        "canonical": "hsl(0 0% 100%)",
+        "cssVar": "--tt-surface",
+        "hex": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "dark": {
+          "canonical": "hsl(205 29% 12%)",
+          "hex": "#162027"
+        },
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#7d7d7d",
+          "#9e9e9e",
+          "#c4c4c4",
+          "#eeeeee"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Blue-Black Ink",
+        "canonical": "hsl(218 31% 15%)",
+        "cssVar": "--tt-foreground",
+        "hex": "#1a2332",
+        "oklch": "oklch(25.6% 0.031 261.1)",
+        "dark": {
+          "canonical": "hsl(210 29% 92%)",
+          "hex": "#e5ebf1"
+        },
+        "tonalRamp": [
+          "#050b18",
+          "#1b2433",
+          "#364051",
+          "#545e70",
+          "#737e90",
+          "#949fb2",
+          "#b9c5d9",
+          "#e6efff"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Wash",
+        "canonical": "hsl(210 42% 95%)",
+        "cssVar": "--tt-muted",
+        "hex": "#edf2f8",
+        "oklch": "oklch(95.9% 0.009 247.9)",
+        "dark": {
+          "canonical": "hsl(206 27% 15%)",
+          "hex": "#1c2831"
+        },
+        "tonalRamp": [
+          "#080c0f",
+          "#212428",
+          "#3c4044",
+          "#5a5e63",
+          "#797e83",
+          "#9a9fa4",
+          "#c0c5ca",
+          "#eaeff4"
+        ]
+      },
+      "muted-foreground": {
+        "role": "neutral",
+        "displayName": "Faded Ink",
+        "canonical": "hsl(222 18% 41%)",
+        "cssVar": "--tt-muted-foreground",
+        "hex": "#56617b",
+        "oklch": "oklch(49.3% 0.045 266.7)",
+        "dark": {
+          "canonical": "hsl(212 18% 69%)",
+          "hex": "#a2afbe"
+        },
+        "tonalRamp": [
+          "#04091e",
+          "#1a233a",
+          "#353f58",
+          "#525d77",
+          "#717d99",
+          "#929ebb",
+          "#b7c4e2",
+          "#e7effe"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Register Rule",
+        "canonical": "hsl(212 48% 84%)",
+        "cssVar": "--tt-border",
+        "hex": "#c3d5ea",
+        "oklch": "oklch(86.5% 0.035 251.8)",
+        "dark": {
+          "canonical": "hsl(207 24% 24%)",
+          "hex": "#2f3f4c"
+        },
+        "tonalRamp": [
+          "#020c19",
+          "#172535",
+          "#324152",
+          "#4f5f71",
+          "#6e7f92",
+          "#8fa0b4",
+          "#b4c6db",
+          "#e4f0fe"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Faint Row Rule",
+        "canonical": "hsl(212 51% 93%)",
+        "cssVar": "--tt-rule",
+        "hex": "#e4edf6",
+        "oklch": "oklch(94.1% 0.016 251.6)",
+        "dark": {
+          "canonical": "hsl(205 26% 18%)",
+          "hex": "#22303a"
+        },
+        "tonalRamp": [
+          "#070c12",
+          "#1e252c",
+          "#3a4048",
+          "#575e67",
+          "#777e87",
+          "#979fa8",
+          "#bdc5ce",
+          "#e7eff9"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Field Edge",
+        "canonical": "hsl(216 17% 56%)",
+        "cssVar": "--tt-field",
+        "hex": "#7c8ba2",
+        "oklch": "oklch(63.2% 0.039 258.4)",
+        "dark": {
+          "canonical": "hsl(208 16% 47%)",
+          "hex": "#65798b"
+        },
+        "tonalRamp": [
+          "#030b1b",
+          "#182437",
+          "#334054",
+          "#505e74",
+          "#6f7e95",
+          "#90a0b7",
+          "#b5c5de",
+          "#e5effe"
+        ]
+      },
+      "danger": {
+        "role": "status",
+        "displayName": "Danger",
+        "canonical": "hsl(4 76% 40%)",
+        "cssVar": "--tt-danger",
+        "hex": "#b42318",
+        "oklch": "oklch(49.9% 0.182 29.4)",
+        "dark": {
+          "canonical": "hsl(5 81% 73%)",
+          "hex": "#f28c82"
+        },
+        "tonalRamp": [
+          "#1f0000",
+          "#4b0100",
+          "#7c0301",
+          "#ad1a11",
+          "#d34536",
+          "#fb6958",
+          "#feac9f",
+          "#fee9e5"
+        ]
+      },
+      "danger-foreground": {
+        "role": "status",
+        "displayName": "Danger Foreground",
+        "canonical": "hsl(0 0% 100%)",
+        "cssVar": "--tt-danger-foreground",
+        "hex": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "dark": {
+          "canonical": "hsl(205 27% 9%)",
+          "hex": "#11181d"
+        },
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#7d7d7d",
+          "#9e9e9e",
+          "#c4c4c4",
+          "#eeeeee"
+        ]
+      },
+      "success": {
+        "role": "status",
+        "displayName": "Success",
+        "canonical": "hsl(150 59% 30%)",
+        "cssVar": "--tt-success",
+        "hex": "#1f7a4d",
+        "oklch": "oklch(51.4% 0.110 156.6)",
+        "dark": {
+          "canonical": "hsl(151 47% 56%)",
+          "hex": "#5ac491"
+        },
+        "tonalRamp": [
+          "#000f05",
+          "#002d17",
+          "#014d2c",
+          "#0f6f43",
+          "#3b9162",
+          "#5fb382",
+          "#85daa7",
+          "#c4ffd9"
+        ]
+      },
+      "warning": {
+        "role": "status",
+        "displayName": "Warning",
+        "canonical": "hsl(34 87% 32%)",
+        "cssVar": "--tt-warning",
+        "hex": "#995b0b",
+        "oklch": "oklch(53.0% 0.115 64.6)",
+        "dark": {
+          "canonical": "hsl(36 71% 58%)",
+          "hex": "#e0a348"
+        },
+        "tonalRamp": [
+          "#150800",
+          "#371d01",
+          "#5d3500",
+          "#864e01",
+          "#ac6d26",
+          "#d08e4b",
+          "#f8b471",
+          "#feebd9"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page titles (the Home greeting)."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Money amounts in the money strip; tabular figures."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Panel headings and the settings area heading."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "The working size: tables, lists, navigation, buttons, subtitles."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "One muted context line under a row, field hints, table column headings (at 600)."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase tracked: navigation group headings and the NOW rule only."
+      }
+    },
+    "fontSource": {
+      "family": "Source Sans 3 Variable",
+      "package": "@fontsource-variable/source-sans-3@5.3.1",
+      "selfHosted": true
+    },
+    "shadows": [
+      {
+        "name": "floating-menu",
+        "value": "0 8px 24px -8px rgb(15 23 42 / 0.25)",
+        "purpose": "Account menu and other elements that float over the page; the only shadow."
+      },
+      {
+        "name": "current-margin-rule",
+        "value": "inset 1px 0 0 hsl(var(--tt-margin))",
+        "purpose": "1px red rule inside the current rail item's left edge (not depth)."
+      }
+    ],
+    "focus": [
+      {
+        "name": "focus-ring",
+        "value": "2px solid hsl(var(--tt-brand)); outline-offset: 2px",
+        "purpose": "Global :focus-visible outline; inside the rail it uses shell-foreground instead."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-transition",
+        "value": "150ms cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Hover fills, opacity and the group chevron rotation."
+      },
+      {
+        "name": "skeleton-pulse",
+        "value": "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "purpose": "Loading placeholders (wash bars)."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "transition and animation durations 0.01ms",
+        "purpose": "Applied to everything under prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px",
+        "purpose": "Register tables show the tutor column."
+      },
+      {
+        "name": "md",
+        "value": "768px",
+        "purpose": "Rail is shown; below it the rail is a modal drawer."
+      },
+      {
+        "name": "lg",
+        "value": "1024px",
+        "purpose": "Home gains its 22rem attention column; settings sub-menu becomes a sticky side column."
+      }
+    ],
+    "layout": {
+      "railWidth": "15.5rem",
+      "drawerWidth": "18rem (max 85vw)",
+      "topBarHeight": "3.5rem",
+      "contentMaxWidth": "96rem",
+      "homeAsideWidth": "22rem",
+      "settingsNavWidth": "13rem",
+      "navCollapseAfter": 16,
+      "navDefaultOpenGroups": ["people", "scheduling"]
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one main action in a header (e.g. Book a lesson); filled with the tenant-overridable brand colour.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Book a lesson</button>",
+      "css": ".ds-btn-primary { font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4,0,0.2,1), opacity 150ms cubic-bezier(0.4,0,0.2,1); border: none; background: hsl(var(--tt-brand, 219 59% 40%)); color: hsl(var(--tt-brand-foreground, 0 0% 100%)); } .ds-btn-primary:hover { opacity: 0.9; } .ds-btn-primary:focus-visible { outline: 2px solid hsl(var(--tt-brand, 219 59% 40%)); outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Second action beside a primary (e.g. Add a family): stock fill, register-rule edge.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Add a family</button>",
+      "css": ".ds-btn-secondary { font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4,0,0.2,1), opacity 150ms cubic-bezier(0.4,0,0.2,1); border: 1px solid hsl(var(--tt-border, 212 48% 84%)); background: hsl(var(--tt-background, 60 23% 97%)); color: hsl(var(--tt-foreground, 218 31% 15%)); } .ds-btn-secondary:hover { background: hsl(var(--tt-muted, 210 42% 95%)); } .ds-btn-secondary:focus-visible { outline: 2px solid hsl(var(--tt-brand, 219 59% 40%)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost-hover",
+      "description": "Low-emphasis action in toolbars and menus: no fill until hover.",
+      "html": "<button class=\"ds-btn-ghost\" type=\"button\">Customise</button>",
+      "css": ".ds-btn-ghost { font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4,0,0.2,1), opacity 150ms cubic-bezier(0.4,0,0.2,1); border: none; background: transparent; color: hsl(var(--tt-foreground, 218 31% 15%)); } .ds-btn-ghost:hover { background: hsl(var(--tt-muted, 210 42% 95%)); } .ds-btn-ghost:focus-visible { outline: 2px solid hsl(var(--tt-brand, 219 59% 40%)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Destructive action: danger fill with danger-foreground text (AA in both schemes).",
+      "html": "<button class=\"ds-btn-danger\" type=\"button\">Delete lesson</button>",
+      "css": ".ds-btn-danger { font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4,0,0.2,1), opacity 150ms cubic-bezier(0.4,0,0.2,1); border: none; background: hsl(var(--tt-danger, 4 76% 40%)); color: hsl(var(--tt-danger-foreground, 0 0% 100%)); } .ds-btn-danger:hover { opacity: 0.9; } .ds-btn-danger:focus-visible { outline: 2px solid hsl(var(--tt-brand, 219 59% 40%)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labelled field with a field-edge boundary (3:1), hint below; the border turns danger on error.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Family name</span><input class=\"ds-input\" value=\"Hughes\"><span class=\"ds-field-hint\">As it appears on invoices.</span></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 4px; font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; color: hsl(var(--tt-foreground, 218 31% 15%)); } .ds-field-label { font-size: 14px; font-weight: 500; } .ds-field-hint { font-size: 12px; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-input { font: inherit; font-size: 14px; height: 40px; padding: 0 12px; border-radius: 8px; border: 1px solid hsl(var(--tt-field, 216 17% 56%)); background: hsl(var(--tt-surface, 0 0% 100%)); color: hsl(var(--tt-foreground, 218 31% 15%)); caret-color: hsl(var(--tt-brand, 219 59% 40%)); font-variant-numeric: tabular-nums; } .ds-input:focus-visible { outline: 2px solid hsl(var(--tt-brand, 219 59% 40%)); outline-offset: 2px; } .ds-input[aria-invalid=true] { border-color: hsl(var(--tt-danger, 4 76% 40%)); }"
+    },
+    {
+      "name": "Navigation Rail",
+      "kind": "nav",
+      "refersTo": "rail",
+      "description": "Bookcloth rail: monogram and org name, grouped job sections with label headings, current item with a 1px inset margin rule, red count pill for waiting items.",
+      "html": "<nav class=\"ds-rail\" aria-label=\"Main\"><div class=\"ds-rail-org\"><span class=\"ds-rail-mono\" aria-hidden=\"true\">B</span><span><span class=\"ds-rail-name\">Bright Minds Tutoring</span><span class=\"ds-rail-product\">TutorTrack</span></span></div><a class=\"ds-rail-item\" aria-current=\"page\" href=\"#\">Home</a><h2 class=\"ds-rail-heading\">Scheduling</h2><a class=\"ds-rail-item\" href=\"#\">Calendar</a><a class=\"ds-rail-item\" href=\"#\">Unconfirmed lessons<span class=\"ds-count\" aria-hidden=\"true\">3</span></a><a class=\"ds-rail-item\" href=\"#\">Availability</a></nav>",
+      "css": ".ds-rail { width: 248px; padding: 16px 12px; background: hsl(var(--tt-shell, 162 35% 18%)); color: hsl(var(--tt-shell-foreground, 142 20% 92%)); font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; font-size: 14px; display: flex; flex-direction: column; gap: 1px; } .ds-rail-org { display: flex; align-items: center; gap: 10px; padding: 0 10px 16px; margin-bottom: 12px; border-bottom: 1px solid rgb(255 255 255 / 0.1); } .ds-rail-mono { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; background: hsl(var(--tt-shell-foreground, 142 20% 92%)); color: hsl(var(--tt-shell, 162 35% 18%)); font-weight: 700; } .ds-rail-name { display: block; font-weight: 600; } .ds-rail-product { display: block; font-size: 12px; color: hsl(var(--tt-shell-muted, 156 17% 71%)); } .ds-rail-heading { margin: 12px 0 0; padding: 0 10px 4px; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: hsl(var(--tt-shell-muted, 156 17% 71%)); } .ds-rail-item { display: flex; align-items: center; gap: 10px; padding: 4px 10px; border-radius: 8px; color: hsl(var(--tt-shell-foreground, 142 20% 92%)); text-decoration: none; transition: background-color 150ms cubic-bezier(0.4,0,0.2,1); } .ds-rail-item:hover { background: hsl(var(--tt-shell-accent, 162 32% 24%)); } .ds-rail-item[aria-current=page] { background: hsl(var(--tt-shell-accent, 162 32% 24%)); font-weight: 600; box-shadow: inset 1px 0 0 hsl(var(--tt-margin, 4 63% 48%)); } .ds-rail-item:focus-visible { outline: 2px solid hsl(var(--tt-shell-foreground, 142 20% 92%)); outline-offset: 2px; } .ds-count { margin-left: auto; padding: 0 6px; border-radius: 9999px; background: hsl(var(--tt-margin, 4 63% 48%)); color: hsl(var(--tt-margin-foreground, 0 0% 100%)); font-size: 12px; line-height: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Register Marks",
+      "kind": "custom",
+      "refersTo": "register-row",
+      "description": "The five authored lesson-state marks: completed tick (ink), missed ring (red), cancelled struck ring (faded), due dashed ring (red), upcoming dashed ring (field).",
+      "html": "<div class=\"ds-marks\"><svg class=\"ds-mark ds-mark-completed\" viewBox=\"0 0 20 20\" role=\"img\" aria-label=\"Completed\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4.5 10.5 8.2 14 15.5 6\" stroke-width=\"2.2\"/></svg><svg class=\"ds-mark ds-mark-missed\" viewBox=\"0 0 20 20\" role=\"img\" aria-label=\"Missed\" fill=\"none\" stroke=\"currentColor\"><circle cx=\"10\" cy=\"10\" r=\"6.5\" stroke-width=\"2\"/></svg><svg class=\"ds-mark ds-mark-cancelled\" viewBox=\"0 0 20 20\" role=\"img\" aria-label=\"Cancelled\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\"><circle cx=\"10\" cy=\"10\" r=\"6.5\" stroke-width=\"1.5\"/><path d=\"M5.5 14.5 14.5 5.5\" stroke-width=\"1.5\"/></svg><svg class=\"ds-mark ds-mark-due\" viewBox=\"0 0 20 20\" role=\"img\" aria-label=\"Not marked yet\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\"><circle cx=\"10\" cy=\"10\" r=\"6.5\" stroke-width=\"1.75\" stroke-dasharray=\"3 2.6\"/></svg><svg class=\"ds-mark ds-mark-upcoming\" viewBox=\"0 0 20 20\" role=\"img\" aria-label=\"To come\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\"><circle cx=\"10\" cy=\"10\" r=\"6.5\" stroke-width=\"1.75\" stroke-dasharray=\"3 2.6\"/></svg></div>",
+      "css": ".ds-marks { display: flex; gap: 16px; } .ds-mark { width: 20px; height: 20px; flex-shrink: 0; } .ds-mark-completed { color: hsl(var(--tt-foreground, 218 31% 15%)); } .ds-mark-missed, .ds-mark-due { color: hsl(var(--tt-margin, 4 63% 48%)); } .ds-mark-cancelled { color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-mark-upcoming { color: hsl(var(--tt-field, 216 17% 56%)); }"
+    },
+    {
+      "name": "Today's Register",
+      "kind": "custom",
+      "refersTo": "register-row",
+      "description": "Ruled panel table of today's lessons with fixed time and mark columns and the 2px margin-red NOW rule.",
+      "html": "<section class=\"ds-panel\"><div class=\"ds-panel-head\"><h2>Today's register</h2><p>Marked 1 of 3</p></div><table class=\"ds-reg\"><thead><tr><th class=\"ds-t\">Time</th><th>Lesson</th><th class=\"ds-m\">Mark</th></tr></thead><tbody><tr><td class=\"ds-t\">15:00</td><td><span class=\"ds-primary\">A-level Chemistry</span><span class=\"ds-ctx\">Grace Hughes · Online</span></td><td class=\"ds-m\"><svg class=\"ds-mark ds-mark-completed\" viewBox=\"0 0 20 20\" role=\"img\" aria-label=\"Completed\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4.5 10.5 8.2 14 15.5 6\" stroke-width=\"2.2\"/></svg></td></tr><tr><td class=\"ds-t\">18:00</td><td><span class=\"ds-primary\">Year 4 Maths group</span><span class=\"ds-ctx\">4 students · Room 1</span></td><td class=\"ds-m\"><svg class=\"ds-mark ds-mark-due\" viewBox=\"0 0 20 20\" role=\"img\" aria-label=\"Not marked yet\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\"><circle cx=\"10\" cy=\"10\" r=\"6.5\" stroke-width=\"1.75\" stroke-dasharray=\"3 2.6\"/></svg></td></tr><tr class=\"ds-now\" aria-hidden=\"true\"><td colspan=\"3\">Now · 20:24</td></tr><tr><td class=\"ds-t\">21:30</td><td><span class=\"ds-primary\">GCSE Higher Maths</span><span class=\"ds-ctx\">Arjun Patel · Online</span></td><td class=\"ds-m\"><svg class=\"ds-mark ds-mark-upcoming\" viewBox=\"0 0 20 20\" role=\"img\" aria-label=\"To come\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\"><circle cx=\"10\" cy=\"10\" r=\"6.5\" stroke-width=\"1.75\" stroke-dasharray=\"3 2.6\"/></svg></td></tr></tbody></table></section>",
+      "css": ".ds-panel { font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; font-size: 14px; color: hsl(var(--tt-foreground, 218 31% 15%)); background: hsl(var(--tt-surface, 0 0% 100%)); border: 1px solid hsl(var(--tt-border, 212 48% 84%)); border-radius: 12px; overflow: hidden; } .ds-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 14px 20px; border-bottom: 1px solid hsl(var(--tt-border, 212 48% 84%)); } .ds-panel-head h2 { margin: 0; font-size: 16px; font-weight: 600; } .ds-panel-head p { margin: 0; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-reg { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; } .ds-reg th { text-align: left; font-size: 12px; font-weight: 600; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); padding: 8px 12px 8px 0; } .ds-reg td { padding: 10px 12px 10px 0; border-top: 1px solid hsl(var(--tt-rule, 212 51% 93%)); vertical-align: middle; } .ds-reg .ds-t { width: 96px; padding-left: 20px; font-weight: 600; } .ds-reg .ds-m { width: 80px; padding-right: 20px; text-align: center; } .ds-reg .ds-m svg { display: block; margin: 0 auto; } .ds-primary { display: block; font-weight: 500; } .ds-ctx { display: block; font-size: 12px; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-reg .ds-now td { border-top: 2px solid hsl(var(--tt-margin, 4 63% 48%)); padding: 4px 0 4px 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: hsl(var(--tt-margin, 4 63% 48%)); } .ds-mark { width: 20px; height: 20px; flex-shrink: 0; } .ds-mark-completed { color: hsl(var(--tt-foreground, 218 31% 15%)); } .ds-mark-missed, .ds-mark-due { color: hsl(var(--tt-margin, 4 63% 48%)); } .ds-mark-cancelled { color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-mark-upcoming { color: hsl(var(--tt-field, 216 17% 56%)); }"
+    },
+    {
+      "name": "Money Strip",
+      "kind": "custom",
+      "refersTo": "money-figure",
+      "description": "One ruled line of money: figures divided by faint rules, each with a linked label, a tabular amount and a comparison in words.",
+      "html": "<section class=\"ds-money\" aria-label=\"Money this month\"><div><a href=\"#\">Revenue this month</a><p class=\"ds-amt\">£4,280.00</p><p class=\"ds-up\">£120.00 more than last month</p></div><div><a href=\"#\">Outstanding</a><p class=\"ds-amt\">£960.00</p><p class=\"ds-over\">£240.00 overdue</p></div><div><a href=\"#\">Next pay run</a><p class=\"ds-amt\">£2,150.00</p><p class=\"ds-note\">Ready to review</p></div></section>",
+      "css": ".ds-money { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid hsl(var(--tt-border, 212 48% 84%)); border-bottom: 1px solid hsl(var(--tt-border, 212 48% 84%)); font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; font-size: 14px; color: hsl(var(--tt-foreground, 218 31% 15%)); } .ds-money > div { padding: 16px 20px; border-left: 1px solid hsl(var(--tt-rule, 212 51% 93%)); } .ds-money > div:first-child { border-left: 0; padding-left: 0; } .ds-money a { color: hsl(var(--tt-muted-foreground, 222 18% 41%)); text-decoration: none; text-underline-offset: 0.2em; } .ds-money a:hover { color: hsl(var(--tt-foreground, 218 31% 15%)); text-decoration: underline; } .ds-money a:focus-visible { outline: 2px solid hsl(var(--tt-brand, 219 59% 40%)); outline-offset: 2px; } .ds-money p { margin: 0; } .ds-amt { margin-top: 4px !important; font-size: 20px; line-height: 1.4; font-weight: 600; font-variant-numeric: tabular-nums; } .ds-up { color: hsl(var(--tt-success, 150 59% 30%)); } .ds-over { color: hsl(var(--tt-margin, 4 63% 48%)); font-weight: 500; } .ds-note { color: hsl(var(--tt-muted-foreground, 222 18% 41%)); }"
+    },
+    {
+      "name": "Needs Marking List",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Attention panel: margin-red header rule, rows with a due mark, one context line and days waiting in red, one ruled link onward.",
+      "html": "<section class=\"ds-att\"><div class=\"ds-att-head\"><h2>Needs marking</h2><span>2 lessons</span></div><ul><li><a href=\"#\"><svg class=\"ds-mark ds-mark-due\" viewBox=\"0 0 20 20\" role=\"img\" aria-label=\"Not marked yet\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\"><circle cx=\"10\" cy=\"10\" r=\"6.5\" stroke-width=\"1.75\" stroke-dasharray=\"3 2.6\"/></svg><span class=\"ds-att-main\"><span>Year 6 11+ Prep</span><span class=\"ds-ctx\">3 Oct 2026 · Nia Adeyemi</span></span><span class=\"ds-att-days\">16 days</span></a></li><li><a href=\"#\"><svg class=\"ds-mark ds-mark-due\" viewBox=\"0 0 20 20\" role=\"img\" aria-label=\"Not marked yet\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\"><circle cx=\"10\" cy=\"10\" r=\"6.5\" stroke-width=\"1.75\" stroke-dasharray=\"3 2.6\"/></svg><span class=\"ds-att-main\"><span>KS3 English</span><span class=\"ds-ctx\">10 Oct 2026 · Sara Lind</span></span><span class=\"ds-att-days\">9 days</span></a></li></ul><div class=\"ds-att-more\"><a href=\"#\">Open unconfirmed lessons</a></div></section>",
+      "css": ".ds-att { font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; font-size: 14px; color: hsl(var(--tt-foreground, 218 31% 15%)); background: hsl(var(--tt-surface, 0 0% 100%)); border: 1px solid hsl(var(--tt-border, 212 48% 84%)); border-radius: 12px; overflow: hidden; } .ds-att-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid hsl(var(--tt-margin, 4 63% 48%)); } .ds-att-head h2 { margin: 0; font-size: 16px; font-weight: 600; } .ds-att-head span { font-weight: 600; color: hsl(var(--tt-margin, 4 63% 48%)); } .ds-att ul { list-style: none; margin: 0; padding: 0; } .ds-att li + li { border-top: 1px solid hsl(var(--tt-rule, 212 51% 93%)); } .ds-att li a { display: flex; align-items: flex-start; gap: 12px; padding: 10px 20px; color: inherit; text-decoration: none; } .ds-att li a:hover { background: hsl(var(--tt-muted, 210 42% 95%)); } .ds-att a:focus-visible { outline: 2px solid hsl(var(--tt-brand, 219 59% 40%)); outline-offset: 2px; } .ds-att-main { flex: 1; min-width: 0; display: flex; flex-direction: column; } .ds-ctx { font-size: 12px; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-att-days { font-size: 12px; font-weight: 600; color: hsl(var(--tt-margin, 4 63% 48%)); } .ds-att-more { border-top: 1px solid hsl(var(--tt-rule, 212 51% 93%)); padding: 12px 20px; } .ds-att-more a { font-weight: 500; color: hsl(var(--tt-link, 219 59% 40%)); text-decoration: none; text-underline-offset: 0.2em; } .ds-att-more a:hover { text-decoration: underline; } .ds-mark { width: 20px; height: 20px; flex-shrink: 0; } .ds-mark-completed { color: hsl(var(--tt-foreground, 218 31% 15%)); } .ds-mark-missed, .ds-mark-due { color: hsl(var(--tt-margin, 4 63% 48%)); } .ds-mark-cancelled { color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-mark-upcoming { color: hsl(var(--tt-field, 216 17% 56%)); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Register",
+    "overview": "**Creative North Star: \"The Register\"**\n\nTutorTrack's admin app is drawn from the teacher's register and mark book, because marking a lesson is what bills it and pays for it. The navigation is the bookcloth cover: a deep green rail with the organisation's name at the top and modules grouped by job. The work area is the register's stock: a near-white ground ruled in pale blue, written in blue-black ink. One red margin rule is the only loud colour, and it means one thing: now, or something that still needs marking or is overdue. Lesson state is shown with authored register marks (a tick, a ring, a struck ring, a dashed ring), never with generic status badges.\n\nThe system is dense and desk-oriented: one family in five sizes, 14px body text, tabular figures wherever numbers are compared, and 1px rules instead of shadows or tinted cards. Depth comes from rules and the shell/stock contrast, not elevation. The tenant's brand colour reaches primary buttons and focus only; the ink, the rules, the shell and the margin red stay constant so contrast holds in both colour schemes and under any tenant colour.\n\nScope of this record: it is evidenced by stage 1 of the build (shared tokens and font in `packages/ui/src/styles.css`, the register marks, the admin shell and Home). List screens, the calendar and the portal role shells have not yet been carried into this world. The portal already loads the shared tokens and font but still uses its earlier shell. The reporting dashboard that renders below Home also predates the world. Treat those surfaces as unconverted, not as examples.",
+    "keyCharacteristics": [
+      "Bookcloth-green navigation rail on a ruled, near-white register stock (dark scheme: night-green rail on a blue-slate stock).",
+      "Blue-black ink for text; register-blue rules (1px) for every divider, table row and panel edge.",
+      "One red margin rule for now, needs-marking, overdue and waiting counts; nothing else is red except errors.",
+      "Source Sans 3 (self-hosted variable font) is the only family, in five fixed sizes, with tabular figures in tables, inputs, times and money.",
+      "Authored SVG register marks for lesson state, the same five marks everywhere.",
+      "Flat: panels are ruled, not raised. The only shadow is on floating menus."
+    ],
+    "rules": [
+      {
+        "name": "The One Red Rule",
+        "body": "Margin red means now, overdue, or still to mark, plus the count of waiting items. It is never decoration, never a brand colour and never an error colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tenant Fills, the Register Inks Rule",
+        "body": "A tenant's colour replaces `brand` (button fills, focus, caret, selection) and nothing else. Links use `link`, which tenants never change; text, rules, shell and margin red are fixed.",
+        "section": "colors"
+      },
+      {
+        "name": "The Field Edge Rule",
+        "body": "A control's boundary uses `field` (3:1 or better in both schemes). `border` and `rule` are for dividers and panels only.",
+        "section": "colors"
+      },
+      {
+        "name": "The Bookcloth Rule",
+        "body": "Shell green is the navigation's cover: rail, drawer, avatar. Work areas never sit on it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Five Sizes Rule",
+        "body": "12, 14, 16, 20 and 26px carry the whole hierarchy. A new screen picks from these; it does not add a size.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Figures Rule",
+        "body": "Tables, inputs, `<time>` elements and money amounts use tabular figures so columns of numbers line up.",
+        "section": "typography"
+      },
+      {
+        "name": "The Label Is Navigation Rule",
+        "body": "Uppercase tracked labels name navigation groups and mark the NOW rule. They never sit above a page or panel heading as a kicker.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Work Area Rule",
+        "body": "Each screen has one leading work area; side columns stay narrower and subordinate (Home: register first, attention lists at 22rem).",
+        "section": "layout"
+      },
+      {
+        "name": "The Fixed Columns Rule",
+        "body": "Register tables keep a fixed column order and fixed widths for the time (96px) and mark (80px) columns; values update in place. On phones a secondary column (tutor) folds into the row's context lines rather than reflowing the table.",
+        "section": "layout"
+      },
+      {
+        "name": "The Ruled, Not Raised Rule",
+        "body": "Panels, strips and lists are separated by 1px rules. Shadows are reserved for elements that float over the page.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** use the semantic tokens (`brand`, `link`, `foreground`, `rule`, `field`, `margin`, …) through Tailwind's colour names; never write raw colours in components.",
+      "**Do** keep text links on `link`, so they stay AA whatever colour the tenant chooses.",
+      "**Do** draw control boundaries with `field` (3:1 or better in both schemes).",
+      "**Do** show lesson state with `RegisterMark` and an accessible label, the same five marks on every screen.",
+      "**Do** separate content with 1px register or row rules; keep panels flat.",
+      "**Do** express comparisons in words beside the figure (\"£120 more than last month\").",
+      "**Do** give every row one primary line and at most one caption context line.",
+      "**Do** collapse navigation groups when more than 16 items are visible, and show waiting counts on closed groups.",
+      "**Do** use tabular figures for times, tables and money, and pick sizes only from 12, 14, 16, 20 and 26px.",
+      "**Do** check every new pair in both schemes; the dark scheme has its own values for every token."
+    ],
+    "donts": [
+      "**Don't** use margin red for decoration, branding or errors; errors use `danger`.",
+      "**Don't** let the tenant colour reach link text, rules, the shell or the margin red.",
+      "**Don't** build KPI tiles, sparklines or stat cards; money reads as one ruled strip.",
+      "**Don't** put a coloured side border thicker than 1px on any card, row or nav item.",
+      "**Don't** use unicode glyphs or generic status badges for lesson state.",
+      "**Don't** add drop shadows to panels or cards; only floating menus cast one.",
+      "**Don't** add a second typeface or a display size above 26px.",
+      "**Don't** use uppercase tracked labels as kickers above headings.",
+      "**Don't** show the flat list of every module; navigation stays grouped by job and permission-gated."
+    ]
+  }
+}

@@ -214,8 +214,15 @@
 
 <section id="home" data-route="admin:/" aria-labelledby="home-h">
 <h3 id="home-h">Home</h3>
-<p><span class="ui">Home</span> opens with <span class="ui">Welcome</span>. New organisations see a <span class="ui">Get started</span> checklist (set up a service, add a student, schedule a lesson, connect Stripe, send your first invoice). Each step ticks itself when you do it anywhere in the app. Owners and admins can select <span class="ui">Hide checklist</span>.</p>
-<p>If you can see reports (<code>reporting.dashboard.view</code>), the <span class="ui">Dashboard</span> shows the key figures for your business, with a default layout for your role:</p>
+<p><span class="ui">Home</span> greets you by name with today's date and the number of lessons today. <span class="ui">Add a family</span> and <span class="ui">Book a lesson</span> are at the top right, if your role can do them. Each part below shows only if your role allows it.</p>
+<ul>
+<li><strong>Money this month</strong> (<code>reporting.finance.view</code>, <code>reporting.payroll.view</code>): revenue this month and how it compares with last month, the amount <span class="ui">Outstanding</span> and how much of it is overdue, and the <span class="ui">Next pay run</span>. Select a heading to open the report.</li>
+<li><span class="ui">Today's register</span> (<code>scheduling.lesson.view</code>): today's lessons in time order, with the tutor and a mark for each one: a tick for <span class="ui">Completed</span>, a red ring for <span class="ui">Missed</span>, a struck ring for <span class="ui">Cancelled</span>, a red dashed ring for a lesson that is over but <span class="ui">Not marked yet</span>, and a pale dashed ring for one <span class="ui">Still to come</span>. A red line marks the time now. <span class="ui">Marked 3 of 7</span> counts the lessons that have a result.</li>
+<li><span class="ui">Needs marking</span> (<code>scheduling.lesson.complete</code>): past lessons nobody has marked, with how many days ago each one was. See <a href="#unconfirmed">unconfirmed lessons</a>.</li>
+<li><span class="ui">Overdue invoices</span> (<code>billing.invoice.view</code>): the oldest unpaid invoices past their due date, with the amount still owed.</li>
+</ul>
+<p>New organisations see a <span class="ui">Get started</span> checklist (set up a service, add a student, schedule a lesson, connect Stripe, send your first invoice). Each step ticks itself when you do it anywhere in the app. Owners and admins can select <span class="ui">Hide checklist</span>.</p>
+<p>Below these, if you can see reports (<code>reporting.dashboard.view</code>), the <span class="ui">Dashboard</span> shows the figures you choose, with a default layout for your role:</p>
 <ul>
 <li>Choose the <span class="ui">Period</span> (this month by default) and what to <span class="ui">Compare with</span>: <span class="ui">Previous period</span>, <span class="ui">Same period last year</span> or <span class="ui">No comparison</span>.</li>
 <li>Select <span class="ui">Open report</span> on a figure to see the full report.</li>

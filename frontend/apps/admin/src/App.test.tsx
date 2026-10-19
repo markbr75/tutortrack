@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 
 import { App } from "./App";
 import { ME, mockApi } from "./test-utils";
@@ -44,15 +44,83 @@ describe("App", () => {
       "GET /api/v1/me/organisations": { body: [] },
     });
     render(<App />);
-    expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: /^Good (morning|afternoon|evening), Sam$/,
+      }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Main" })).toBeInTheDocument();
-    expect(screen.getByText("courses")).toBeInTheDocument();
-    expect(screen.queryByText("payroll")).not.toBeInTheDocument();
+    expect(screen.getByText("Courses and group programmes")).toBeInTheDocument();
+    expect(screen.queryByText("Tutor payroll and expenses")).not.toBeInTheDocument();
     // The sidebar is grouped by job, and settings live under one Settings entry.
     const main = screen.getByRole("navigation", { name: "Main" });
     expect(within(main).getByRole("region", { name: "People" })).toBeInTheDocument();
     expect(within(main).queryByRole("link", { name: "Team" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Settings" })).toBeInTheDocument();
+  });
+
+  it("collapses a long menu to its groups, keeps the current one open and counts what needs marking", async () => {
+    window.localStorage.removeItem("tt.nav.open");
+    window.history.pushState(null, "", "/clients");
+    const permissions = Object.fromEntries(
+      [
+        "people.client.view",
+        "people.student.view",
+        "people.tutor.view",
+        "people.merge",
+        "crm.task.view",
+        "scheduling.lesson.view",
+        "scheduling.lesson.complete",
+        "scheduling.availability.view",
+        "scheduling.lesson.edit",
+        "jobs.job.view",
+        "matching.search",
+        "delivery.report.view",
+        "delivery.feedback.view",
+        "courses.view",
+        "billing.invoice.view",
+        "payroll.view",
+        "leads.enquiry.view",
+        "comms.inbox.view",
+      ].map((p) => [p, "all"]),
+    );
+    mockApi({
+      "GET /api/v1/me": { body: { ...ME, permissions } },
+      "GET /api/v1/organisation": { body: ORG },
+      "GET /api/v1/me/organisations": { body: [] },
+      "GET /api/v1/unconfirmed-lessons": { body: [{ id: "u1" }, { id: "u2" }, { id: "u3" }] },
+    });
+    render(<App />);
+    const main = await screen.findByRole("navigation", { name: "Main" });
+    // The current page's group is open; the others show only their heading.
+    expect(within(main).getByRole("button", { name: "People" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    expect(within(main).getByRole("link", { name: "Clients" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    const money = within(main).getByRole("button", { name: "Money" });
+    expect(money).toHaveAttribute("aria-expanded", "false");
+    expect(within(main).queryByRole("link", { name: "Billing" })).not.toBeInTheDocument();
+    fireEvent.click(money);
+    expect(within(main).getByRole("link", { name: "Billing" })).toBeInTheDocument();
+    expect(JSON.parse(window.localStorage.getItem("tt.nav.open") ?? "[]")).toContain("money");
+    // People and Scheduling open on a first visit; the count reads on the link…
+    const scheduling = within(main).getByRole("button", { name: "Scheduling" });
+    expect(scheduling).toHaveAttribute("aria-expanded", "true");
+    expect(
+      await within(main).findByRole("link", { name: /^Unconfirmed lessons\s*3 waiting$/ }),
+    ).toBeInTheDocument();
+    // …and on the heading once its group is closed, so it is never hidden.
+    fireEvent.click(scheduling);
+    expect(within(main).getByRole("button", { name: /^Scheduling\s*3 waiting$/ })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    window.history.pushState(null, "", "/");
   });
 
   it("groups settings in their own menu, following permissions", async () => {

@@ -29,4 +29,6 @@ export {
   type TrendChartLabels,
   type TrendPoint,
 } from "./LearningCharts";
+export { RegisterMark } from "./RegisterMark";
+export { registerMarkFor, type RegisterMarkKind } from "./registerMarks";
 export { Tabs, type TabItem, type TabsProps } from "./Tabs";

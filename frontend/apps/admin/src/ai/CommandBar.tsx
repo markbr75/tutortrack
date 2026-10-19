@@ -121,7 +121,7 @@ export function CommandBar() {
         className="flex h-9 shrink-0 items-center gap-2 rounded-md border border-border bg-surface px-3 text-sm hover:bg-muted"
         aria-keyshortcuts="Control+J Meta+J"
       >
-        <Sparkles aria-hidden="true" className="size-4 text-brand" strokeWidth={1.75} />
+        <Sparkles aria-hidden="true" className="size-4 text-link" strokeWidth={1.75} />
         <span className="max-sm:sr-only">{t("ai.command.open")}</span>
         <kbd className="hidden rounded border border-border px-1.5 text-xs text-muted-foreground lg:inline">
           ⌘J
