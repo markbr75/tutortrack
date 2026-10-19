@@ -383,7 +383,7 @@ function NavLink({
         <>
           <span
             aria-hidden="true"
-            className="ml-auto rounded-full bg-margin px-1.5 text-[11px] leading-4 font-semibold text-margin-foreground tabular-nums"
+            className="ml-auto rounded-full bg-margin px-1.5 text-xs leading-4 font-semibold text-margin-foreground tabular-nums"
           >
             {count > 99 ? "99+" : count}
           </span>
@@ -545,7 +545,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                         <>
                           <span
                             aria-hidden="true"
-                            className="rounded-full bg-margin px-1.5 text-[11px] leading-4 font-semibold tracking-normal text-margin-foreground normal-case tabular-nums"
+                            className="rounded-full bg-margin px-1.5 text-xs leading-4 font-semibold tracking-normal text-margin-foreground normal-case tabular-nums"
                           >
                             {hiddenCount > 99 ? "99+" : hiddenCount}
                           </span>

@@ -9,7 +9,7 @@ import {
 import { cn } from "./cn";
 
 const control =
-  "h-10 w-full rounded-md border border-border bg-background px-3 text-sm aria-[invalid=true]:border-danger";
+  "h-10 w-full rounded-md border border-field bg-surface px-3 text-sm aria-[invalid=true]:border-danger";
 
 interface FieldShellProps {
   id: string;

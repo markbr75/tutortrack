@@ -65,7 +65,7 @@ export function HomePage() {
           {addFamily ? (
             <Link
               to="/clients/new"
-              className="inline-flex h-9 items-center rounded-md border border-border bg-surface px-3.5 text-sm font-medium hover:bg-muted"
+              className="inline-flex h-10 items-center rounded-md border border-border bg-surface px-4 text-sm font-medium hover:bg-muted"
             >
               {t("home.addFamily")}
             </Link>

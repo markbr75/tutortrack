@@ -32,6 +32,7 @@
   --tt-margin: 4 63% 48%; /* the margin rule: now, and what still needs marking */
   --tt-margin-foreground: 0 0% 100%; /* text on margin red (counts) */
   --tt-danger: 4 76% 40%;
+  --tt-danger-foreground: 0 0% 100%;
   --tt-success: 150 59% 30%;
   --tt-warning: 34 87% 32%;
   --tt-radius: 0.5rem;
@@ -58,6 +59,7 @@
     --tt-margin: 5 81% 69%;
     --tt-margin-foreground: 160 41% 10%;
     --tt-danger: 5 81% 73%;
+    --tt-danger-foreground: 205 27% 9%;
     --tt-success: 151 47% 56%;
     --tt-warning: 36 71% 58%;
     color-scheme: dark;
@@ -83,6 +85,7 @@
   --tt-margin: 5 81% 69%;
   --tt-margin-foreground: 160 41% 10%;
   --tt-danger: 5 81% 73%;
+  --tt-danger-foreground: 205 27% 9%;
   --tt-success: 151 47% 56%;
   --tt-warning: 36 71% 58%;
   color-scheme: dark;
@@ -107,6 +110,7 @@
   --color-margin: hsl(var(--tt-margin));
   --color-margin-foreground: hsl(var(--tt-margin-foreground));
   --color-danger: hsl(var(--tt-danger));
+  --color-danger-foreground: hsl(var(--tt-danger-foreground));
   --color-success: hsl(var(--tt-success));
   --color-warning: hsl(var(--tt-warning));
   --radius-md: var(--tt-radius);
