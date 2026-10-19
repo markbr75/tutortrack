@@ -5,21 +5,27 @@
  */
 import { ACCOUNTS, OTHER_ORG_URL, PASSWORD, createFamily, expect, test, uid } from "./fixtures";
 
-const NAV: Record<string, { sees: string[]; hidden: string[] }> = {
+// Main: the grouped sidebar. Settings: the settings area's own menu (opened from Settings at
+// the foot of the sidebar). Hidden: in neither.
+const NAV: Record<string, { sees: string[]; settings: string[]; hidden: string[] }> = {
   owner: {
-    sees: ["Clients", "Billing", "Payroll", "Audit log", "Safeguarding", "Billing & plan"],
+    sees: ["Clients", "Billing", "Payroll"],
+    settings: ["Audit log", "Safeguarding", "Billing & plan"],
     hidden: [],
   },
   admin: {
-    sees: ["Clients", "Billing", "Team", "Audit log", "Privacy"],
+    sees: ["Clients", "Billing"],
+    settings: ["Team", "Audit log", "Privacy"],
     hidden: ["Safeguarding"],
   },
   branchManager: {
     sees: ["Clients", "Students", "Calendar", "Jobs"],
+    settings: [],
     hidden: ["Audit log", "Billing & plan", "Import and export", "Privacy"],
   },
   coordinator: {
     sees: ["Clients", "Students", "Jobs", "Calendar", "Enquiries", "Inbox"],
+    settings: [],
     hidden: [
       "Payroll",
       "Audit log",
@@ -32,7 +38,8 @@ const NAV: Record<string, { sees: string[]; hidden: string[] }> = {
     ],
   },
   finance: {
-    sees: ["Billing", "Payroll", "Clients", "Accounting"],
+    sees: ["Billing", "Payroll", "Clients"],
+    settings: ["Accounting"],
     hidden: [
       "Students",
       "Jobs",
@@ -51,17 +58,29 @@ const NAV: Record<string, { sees: string[]; hidden: string[] }> = {
 };
 
 test.describe("staff roles see their own navigation", () => {
-  for (const [role, { sees, hidden }] of Object.entries(NAV)) {
+  for (const [role, { sees, settings, hidden }] of Object.entries(NAV)) {
     test(`${role} (${ACCOUNTS[role as keyof typeof ACCOUNTS]})`, async ({ pageAs }) => {
       const page = await pageAs(role as keyof typeof ACCOUNTS);
       await page.goto("/");
-      await expect(page.getByRole("heading", { name: "Welcome" })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
       const nav = page.getByRole("navigation", { name: "Main" });
       for (const name of sees) {
         await expect(nav.getByRole("link", { name, exact: true })).toBeVisible();
       }
       for (const name of hidden) {
         await expect(nav.getByRole("link", { name, exact: true })).toHaveCount(0);
+      }
+      const settingsLink = page.getByRole("link", { name: "Settings", exact: true });
+      if (settings.length) await expect(settingsLink).toBeVisible();
+      if ((await settingsLink.count()) === 0) return;
+      await settingsLink.click();
+      const area = page.getByRole("navigation", { name: "Settings" });
+      await expect(area).toBeVisible();
+      for (const name of settings) {
+        await expect(area.getByRole("link", { name, exact: true })).toBeVisible();
+      }
+      for (const name of hidden) {
+        await expect(area.getByRole("link", { name, exact: true })).toHaveCount(0);
       }
     });
   }

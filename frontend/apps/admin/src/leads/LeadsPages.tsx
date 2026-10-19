@@ -111,7 +111,13 @@ export function BoardPage() {
       </div>
       {move.error ? <Alert tone="danger">{move.error.message}</Alert> : null}
       {board.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
-      <div className="flex gap-3 overflow-x-auto pb-2">
+      {/* Scrolls sideways when the stages outgrow the page: focusable so keyboards can scroll it. */}
+      <div
+        role="region"
+        aria-label={t("leads.board")}
+        tabIndex={0}
+        className="flex gap-3 overflow-x-auto pb-2"
+      >
         {board.data?.map((column) => (
           <section
             key={column.stage.id}
