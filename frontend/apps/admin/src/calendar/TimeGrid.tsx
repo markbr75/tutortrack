@@ -1,5 +1,6 @@
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { RegisterMark, registerMarkFor } from "@tutortrack/ui";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 
 import { timeIn } from "../g3/zones";
 import { minutesOfDay, sameDay } from "./dates";
@@ -25,6 +26,8 @@ interface Props {
   onCreate?: (start: Date, columnKey: string) => void;
   /** Gap G3: a second hour column in this timezone (FR-08-7). */
   secondaryZone?: string;
+  /** Columns are days (day/week), so today's header is marked; tutor and room columns are not. */
+  byDay?: boolean;
 }
 
 /** Side-by-side lanes for overlapping items in one column. */
@@ -69,13 +72,26 @@ interface Drag {
 
 /** Day/week/resource time grid with click-to-create and drag-to-reschedule. Every item is
  * a button, so keyboard users open the quick view and reschedule there (WCAG 2.5.7). */
-export function TimeGrid({ columns, colour, onSelect, onMove, onCreate, secondaryZone }: Props) {
+export function TimeGrid({
+  columns,
+  colour,
+  onSelect,
+  onMove,
+  onCreate,
+  secondaryZone,
+  byDay = false,
+}: Props) {
   const { t, i18n } = useTranslation();
   const gridRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
   const height = (LAST_HOUR - FIRST_HOUR) * 60 * PX_PER_MIN;
   const hours = Array.from({ length: LAST_HOUR - FIRST_HOUR }, (_, i) => FIRST_HOUR + i);
-  const now = new Date();
+  // The NOW rule moves with the clock.
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const columnWidth = () => {
     const grid = gridRef.current;
@@ -146,7 +162,7 @@ export function TimeGrid({ columns, colour, onSelect, onMove, onCreate, secondar
         </div>
         {secondaryZone ? (
           <div className="w-16 shrink-0 border-l border-border" aria-hidden="true">
-            <div className="flex h-10 items-center justify-center border-b border-border px-1 text-center text-[10px] leading-tight text-muted-foreground">
+            <div className="flex h-10 items-center justify-center border-b border-border px-1 text-center text-xs leading-tight text-muted-foreground">
               {secondaryZone.split("/").pop()?.replace("_", " ")}
             </div>
             <div className="relative" style={{ height }}>
@@ -173,7 +189,8 @@ export function TimeGrid({ columns, colour, onSelect, onMove, onCreate, secondar
             return (
               <div key={column.key} className="min-w-0 flex-1 border-l border-border">
                 <div
-                  className={`flex h-10 items-center justify-center border-b border-border text-sm ${isToday ? "font-semibold" : ""}`}
+                  aria-current={byDay && isToday ? "date" : undefined}
+                  className={`flex h-10 items-center justify-center border-b border-border text-sm ${byDay && isToday ? "font-semibold text-margin" : ""}`}
                 >
                   {column.label}
                 </div>
@@ -182,11 +199,22 @@ export function TimeGrid({ columns, colour, onSelect, onMove, onCreate, secondar
                   style={{
                     height,
                     backgroundImage:
-                      "repeating-linear-gradient(to bottom, transparent 0, transparent 59px, var(--color-border, #e5e7eb) 59px, var(--color-border, #e5e7eb) 60px)",
+                      "repeating-linear-gradient(to bottom, transparent 0, transparent 59px, var(--color-rule) 59px, var(--color-rule) 60px)",
                   }}
                   onPointerDown={(e) => create(e, column)}
                   data-testid={`column-${column.key}`}
                 >
+                  {isToday &&
+                  minutesOfDay(now) >= FIRST_HOUR * 60 &&
+                  minutesOfDay(now) < LAST_HOUR * 60 ? (
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-x-0 z-20 border-t-2 border-margin"
+                      style={{ top: (minutesOfDay(now) - FIRST_HOUR * 60) * PX_PER_MIN }}
+                    >
+                      <span className="absolute -top-[5px] -left-[5px] size-2 rounded-full bg-margin" />
+                    </div>
+                  ) : null}
                   {column.items.map((item) => {
                     const start = new Date(item.start);
                     const end = new Date(item.end);
@@ -202,13 +230,15 @@ export function TimeGrid({ columns, colour, onSelect, onMove, onCreate, secondar
                       <button
                         key={`${item.kind}-${item.id}`}
                         type="button"
-                        className={`absolute overflow-hidden rounded px-1 py-0.5 text-left text-xs text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 ${cancelled ? "line-through opacity-60" : ""}`}
+                        className={`absolute overflow-hidden rounded-md border px-1.5 py-1 text-left text-xs text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 ${cancelled ? "line-through opacity-70" : ""}`}
                         style={{
                           top: top + (dragging ? drag.dy : 0),
                           height: Math.max(bottom - top, 18),
                           left: `calc(${(pos.lane / pos.of) * 100}% + ${dragging ? drag.dx : 0}px)`,
                           width: `calc(${100 / pos.of}% - 2px)`,
-                          background: colour(item),
+                          // A tint of the category colour with its edge: ink stays readable on any colour.
+                          background: `color-mix(in srgb, ${colour(item)} 16%, hsl(var(--tt-surface)))`,
+                          borderColor: colour(item),
                           touchAction: "none",
                           zIndex: dragging ? 10 : 1,
                         }}
@@ -230,8 +260,18 @@ export function TimeGrid({ columns, colour, onSelect, onMove, onCreate, secondar
                           if (e.detail === 0 || !draggable(item)) onSelect(item);
                         }}
                       >
-                        <span className="font-medium">{item.title}</span>
-                        <br />
+                        <span className="flex items-start gap-1">
+                          {item.kind === "lesson" ? (
+                            <RegisterMark
+                              kind={registerMarkFor(item.status, item.end, now)}
+                              label={t(`calendar.status.${item.status}`, {
+                                defaultValue: item.status,
+                              })}
+                              className="size-3.5 shrink-0"
+                            />
+                          ) : null}
+                          <span className="font-medium">{item.title}</span>
+                        </span>
                         {start.toLocaleTimeString(i18n.language, {
                           hour: "2-digit",
                           minute: "2-digit",

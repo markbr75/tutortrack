@@ -1,7 +1,8 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, ErrorFallback, SelectField, Spinner } from "@tutortrack/ui";
+import { Alert, Button, ErrorFallback, PageHeader, SelectField, Spinner } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { api, usePermission } from "../api";
@@ -110,11 +111,11 @@ export function CalendarPage() {
     () =>
       (item: CalendarItem): string => {
         if (item.kind === "event") return item.colour;
-        if (colourBy === "status") return STATUS_COLOURS[item.status] ?? "#2563eb";
+        if (colourBy === "status") return STATUS_COLOURS[item.status] ?? "hsl(var(--tt-link))";
         if (colourBy === "tutor") return colourFor(item.tutors[0]?.id ?? "none");
         if (colourBy === "location")
           return colourFor(item.online ? "online" : item.location || "none");
-        return item.colour || "#2563eb";
+        return item.colour || "hsl(var(--tt-link))";
       },
     [colourBy],
   );
@@ -172,54 +173,66 @@ export function CalendarPage() {
 
   return (
     <section>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">{t("calendar.title")}</h1>
-        {canCreate ? (
-          <Button onClick={() => setCreating({ start: nextHalfHour() })}>
-            {t("calendar.new.title")}
-          </Button>
-        ) : null}
-      </div>
-      <div className="mb-4 flex flex-wrap items-end gap-3">
-        <div role="group" aria-label={t("calendar.navigate")} className="flex gap-1">
+      <PageHeader
+        title={t("calendar.title")}
+        actions={
+          canCreate ? (
+            <Button onClick={() => setCreating({ start: nextHalfHour() })}>
+              {t("calendar.new.title")}
+            </Button>
+          ) : null
+        }
+      />
+      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border pb-3">
+        <div role="group" aria-label={t("calendar.navigate")} className="flex items-center gap-1">
           <Button
             size="sm"
-            variant="secondary"
+            variant="ghost"
+            className="w-8 px-0"
             aria-label={t("calendar.previous")}
             onClick={() => setAnchor(shift(view, anchor, -1))}
           >
-            ‹
+            <ChevronLeft aria-hidden="true" className="size-4" />
           </Button>
           <Button size="sm" variant="secondary" onClick={() => setAnchor(new Date())}>
             {t("calendar.today")}
           </Button>
           <Button
             size="sm"
-            variant="secondary"
+            variant="ghost"
+            className="w-8 px-0"
             aria-label={t("calendar.next")}
             onClick={() => setAnchor(shift(view, anchor, 1))}
           >
-            ›
+            <ChevronRight aria-hidden="true" className="size-4" />
           </Button>
         </div>
-        <h2 className="min-w-48 font-medium" aria-live="polite">
+        <h2 className="min-w-48 text-base font-semibold" aria-live="polite">
           {title}
         </h2>
-        <div role="group" aria-label={t("calendar.view")} className="flex flex-wrap gap-1">
+        <div
+          role="group"
+          aria-label={t("calendar.view")}
+          className="flex w-full rounded-md border border-border bg-surface p-0.5 sm:ml-auto sm:w-auto"
+        >
           {VIEWS.map((v) => (
-            <Button
+            <button
               key={v}
-              size="sm"
-              variant={view === v ? "primary" : "secondary"}
+              type="button"
               aria-pressed={view === v}
               onClick={() => setView(v)}
+              className="h-7 flex-1 rounded px-2 text-sm text-muted-foreground sm:flex-none sm:px-3 hover:text-foreground aria-pressed:bg-foreground aria-pressed:font-medium aria-pressed:text-background"
             >
               {t(`calendar.views.${v}`)}
-            </Button>
+            </button>
           ))}
         </div>
+      </div>
+      <div className="mb-4 flex flex-wrap items-start gap-2">
         <SelectField
           label={t("calendar.tutor")}
+          hideLabel
+          size="sm"
           value={tutorFilter}
           onChange={(e) => setTutorFilter(e.target.value)}
           options={[
@@ -229,6 +242,8 @@ export function CalendarPage() {
         />
         <SelectField
           label={t("calendar.statusLabel")}
+          hideLabel
+          size="sm"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           options={[
@@ -241,18 +256,19 @@ export function CalendarPage() {
         />
         <SelectField
           label={t("calendar.colourBy")}
+          hideLabel
+          size="sm"
           value={colourBy}
           onChange={(e) => setColourBy(e.target.value as ColourBy)}
           options={(["service", "tutor", "status", "location"] as const).map((c) => ({
             value: c,
-            label: t(`calendar.colour.${c}`),
+            label: t(`calendar.colourByOption.${c}`),
           }))}
         />
-        <SecondaryZoneSelect value={secondaryZone} onChange={chooseZone} />
-        <PrintTimetable start={range.start} end={range.end} tutor={tutorFilter} />
         {view === "agenda" ? (
           <Button
             size="sm"
+            className="h-9"
             variant={selecting ? "primary" : "secondary"}
             aria-pressed={selecting}
             onClick={() => {
@@ -263,12 +279,21 @@ export function CalendarPage() {
             {t("g3.calendar.selectMode")}
           </Button>
         ) : null}
-      </div>
-      <div className="mb-4">
-        <SavedFilterSets
-          current={{ view, tutor: tutorFilter, status: statusFilter, colourBy }}
-          onApply={applyFilters}
-        />
+        {/* Less-used tools stay one click away instead of filling the first viewport. */}
+        <details className="group">
+          <summary className="flex h-9 cursor-pointer list-none items-center gap-1.5 rounded-md px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
+            <SlidersHorizontal aria-hidden="true" className="size-4" />
+            {t("calendar.moreOptions")}
+          </summary>
+          <div className="mt-2 flex flex-wrap items-end gap-3 rounded-lg border border-border bg-surface p-3">
+            <SecondaryZoneSelect value={secondaryZone} onChange={chooseZone} />
+            <PrintTimetable start={range.start} end={range.end} tutor={tutorFilter} />
+            <SavedFilterSets
+              current={{ view, tutor: tutorFilter, status: statusFilter, colourBy }}
+              onApply={applyFilters}
+            />
+          </div>
+        </details>
       </div>
       {selecting && view === "agenda" ? (
         <BulkLessonBar
@@ -326,6 +351,7 @@ export function CalendarPage() {
       ) : (
         <TimeGrid
           columns={columns}
+          byDay={view === "day" || view === "week"}
           colour={colour}
           secondaryZone={secondaryZone || undefined}
           onSelect={setSelectedItem}

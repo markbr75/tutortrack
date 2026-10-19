@@ -184,7 +184,7 @@ TutorTrack's admin app is drawn from the teacher's register and mark book, becau
 
 The system is dense and desk-oriented: one family in five sizes, 14px body text, tabular figures wherever numbers are compared, and 1px rules instead of shadows or tinted cards. Depth comes from rules and the shell/stock contrast, not elevation. The tenant's brand colour reaches primary-button fills, the caret and text selection only; the ink (including the focus ring), the rules, the shell and the margin red stay constant so contrast holds in both colour schemes and under any tenant colour.
 
-Scope of this record: it is evidenced by stages 1 and 2 of the build. Stage 1: the shared tokens and font in `packages/ui/src/styles.css`, the register marks, the admin shell and Home. Stage 2: the shared components in `packages/ui` (page header, button styles for links, fields, alerts, tabs, the data grid, chart labels), global defaults for form-control edges and hand-built tables, and the people list screens (Clients, Students, Tutors). The calendar, the other modules' screens and the portal role shells have not yet been carried into this world, beyond what they inherit from the shared components and global defaults. The portal already loads the shared tokens and font but still uses its earlier shell. The reporting dashboard below Home is ruled off from Home's work area and no longer repeats Home's figures, but its widgets and heading still predate the world. Treat those surfaces as unconverted, not as examples.
+Scope of this record: it is evidenced by stages 1 to 3 of the build. Stage 1: the shared tokens and font in `packages/ui/src/styles.css`, the register marks, the admin shell and Home. Stage 2: the shared components in `packages/ui` (page header, button styles for links, fields, alerts, tabs, the data grid, chart labels), global defaults for form-control edges and hand-built tables, and the people list screens (Clients, Students, Tutors). Stage 3: the admin calendar (toolbar, day/week/tutor/room time grids, month and agenda). The other modules' screens and the portal role shells have not yet been carried into this world, beyond what they inherit from the shared components and global defaults. The portal already loads the shared tokens and font but still uses its earlier shell. The reporting dashboard below Home is ruled off from Home's work area and no longer repeats Home's figures, but its widgets and heading still predate the world. Treat those surfaces as unconverted, not as examples.
 
 **Key Characteristics:**
 
@@ -215,7 +215,7 @@ A cool, restrained palette: green-bound navigation, blue-black ink on ruled stoc
 
 ### Tertiary
 
-- **Margin Red** (margin; light #c8382d, dark #f07b70): the red margin rule. Used for the NOW rule in today's register, the header rule and day counts of Needs marking, the "overdue" line in the money strip, the "due" and "missed" register marks, the 1px inset rule on the current rail item, and the count pills.
+- **Margin Red** (margin; light #c8382d, dark #f07b70): the red margin rule. Used for the NOW rule in today's register and the calendar, today's date in the calendar, the header rule and day counts of Needs marking, the "overdue" line in the money strip, the "due" and "missed" register marks, the 1px inset rule on the current rail item, and the count pills.
 - **Margin Red Foreground** (margin-foreground; light #ffffff, dark #0f241d): numerals inside count pills (5.2:1 light, 6.0:1 dark).
 
 ### Neutral
@@ -306,7 +306,7 @@ The system is flat. Depth comes from the bookcloth/stock contrast and from 1px r
 
 ## Shapes
 
-Gently rounded and ruled. Controls, alerts, rail items and menu rows have 8px corners; panels (register, attention lists, data grids) have 12px; count pills and the avatar are fully round. Every line is 1px, except the NOW rule, a 2px margin-red line across the full table width, and the active tab's 2px ink underline. Coloured emphasis on an edge is never thicker than 1px: the current rail item carries a 1px inset margin rule and Needs marking a 1px margin-red header rule.
+Gently rounded and ruled. Controls, alerts, rail items and menu rows have 8px corners; panels (register, attention lists, data grids) have 12px; count pills and the avatar are fully round. Every line is 1px, except the NOW rule, a 2px margin-red line across the full table width (or across today's calendar column), and the active tab's 2px ink underline. Coloured emphasis on an edge is never thicker than 1px: the current rail item carries a 1px inset margin rule and Needs marking a 1px margin-red header rule.
 
 Register marks are authored SVG on a 20px grid with round caps and joins: a tick (2.2px stroke) for completed, a solid ring (2px) for missed, a ring struck from lower left to upper right (1.5px) for cancelled, and a dashed ring (1.75px, 3/2.6 dash) for still-to-mark, red when over and pale field-blue when still to come. Each mark carries an accessible name. Rail icons are 16px outline icons at 1.75px stroke; top-bar icons are 20px.
 
@@ -384,6 +384,14 @@ One ruled line of money, not tiles: a register-rule above and below, three figur
 ### Attention Lists
 
 Ruled panels of at most five rows ("Needs marking", "Overdue invoices"). Each row: an optional register mark, a primary line, one caption context line, and a right-aligned fact (days waiting in margin red, or the amount owed at 600 tabular). Whole rows are links with a wash hover.
+
+### Calendar
+
+- **Toolbar:** the page header (title, New lesson) and then two rows. The first is ruled off below: previous and next as 32px ghost icon buttons around a secondary Today button, the range title at 16px/600 (announced politely when it changes), and on the right a segmented view switcher: a clean-leaf strip with an 8px corner and 1px rule, its options in faded ink, the pressed one an ink fill with stock lettering at 500 (`aria-pressed`). On phones the switcher takes the full width and its options share it. The second row holds the small selects (Tutor, Status, Colour by) with visually hidden labels, the agenda's Select lessons button and a "More options" disclosure for the second time zone, printing and saved filters.
+- **Time grid:** hour rows ruled in register rule on the stock, caption-size hour labels in faded ink. Day and week columns mark today with its heading in margin red at 600 and `aria-current="date"`; tutor and room columns never do. In today's column (and across every resource column, which are all today) a 2px margin-red NOW rule with an 8px dot at its start shows the current time between 07:00 and 22:00, refreshed each minute and hidden from assistive tech.
+- **Lesson block:** 8px corners, 6px × 4px padding, caption-size ink text; the fill is the category colour mixed 16% into the clean leaf and the 1px edge is the category colour at full strength, so ink stays readable on any service, tutor or status colour. A 14px register mark leads the title; cancelled blocks are struck through at 70% opacity. Status colouring uses tokens: planned in ink blue, completed in success, missed in margin red, cancelled in faded ink.
+- **Month:** in-month days are clean leaf, other days the stock; lesson chips use the same tint-and-edge as blocks. Today's date number is margin red.
+- **Agenda:** one clean-leaf panel per day (12px corners, register-rule edge, faint row rules, 10px × 16px rows) under a 16px/600 date heading, margin red for today. Lessons run in time order, with the register mark at the row's end.
 
 ## Do's and Don'ts
 

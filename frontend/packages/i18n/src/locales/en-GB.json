@@ -933,7 +933,14 @@
       "saveSeries": "Schedule series",
       "createdSkipped": "Created {{count}} lessons; {{skipped}} dates were skipped because the tutor is busy."
     },
-    "writeReport": "Write report"
+    "writeReport": "Write report",
+    "moreOptions": "More options",
+    "colourByOption": {
+      "service": "Colour by service",
+      "tutor": "Colour by tutor",
+      "status": "Colour by status",
+      "location": "Colour by location"
+    }
   },
   "availability": {
     "title": "Availability",
