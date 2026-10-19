@@ -68,14 +68,25 @@ export function DataGrid<Row>({
   });
 
   return (
-    <div className={cn("overflow-x-auto rounded-md border border-border", className)}>
+    // Wide tables scroll sideways on small screens; a labelled, focusable region lets
+    // keyboard users scroll it too (WCAG 2.1.1).
+    <div
+      role={caption ? "region" : undefined}
+      aria-label={caption}
+      tabIndex={caption ? 0 : undefined}
+      className={cn("overflow-x-auto rounded-xl border border-border bg-surface", className)}
+    >
       <table className="w-full text-left text-sm">
         {caption && <caption className="sr-only">{caption}</caption>}
-        <thead className="bg-muted text-muted-foreground">
+        <thead className="border-b border-border">
           {table.getHeaderGroups().map((group) => (
             <tr key={group.id}>
               {group.headers.map((header) => (
-                <th key={header.id} scope="col" className="px-3 py-2 font-medium">
+                <th
+                  key={header.id}
+                  scope="col"
+                  className="px-4 py-2.5 text-xs font-semibold whitespace-nowrap text-muted-foreground"
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(header.column.columnDef.header, header.getContext())}
@@ -85,16 +96,19 @@ export function DataGrid<Row>({
           ))}
         </thead>
         <tbody>
-          {isLoading && (
-            <tr>
-              <td colSpan={columns.length} className="px-3 py-6 text-center">
-                <Spinner className="size-5" label={labels.loading} />
-              </td>
-            </tr>
-          )}
+          {isLoading &&
+            // Skeleton rows hold the table's shape; the status is announced once.
+            [0, 1, 2].map((i) => (
+              <tr key={`loading-${i}`} className="border-t border-rule first:border-0">
+                <td colSpan={columns.length} className="px-4 py-3">
+                  {i === 0 ? <Spinner className="sr-only" label={labels.loading} /> : null}
+                  <div aria-hidden="true" className="h-4 animate-pulse rounded bg-muted" />
+                </td>
+              </tr>
+            ))}
           {!isLoading && rows.length === 0 && (
             <tr>
-              <td colSpan={columns.length} className="px-3 py-6 text-center text-muted-foreground">
+              <td colSpan={columns.length} className="px-4 py-10 text-center text-muted-foreground">
                 {labels.empty}
               </td>
             </tr>
@@ -104,13 +118,13 @@ export function DataGrid<Row>({
               <tr
                 key={row.id}
                 className={cn(
-                  "border-t border-border",
-                  onRowClick && "cursor-pointer hover:bg-muted",
+                  "border-t border-rule first:border-0",
+                  onRowClick && "cursor-pointer hover:bg-muted/60",
                 )}
                 onClick={onRowClick ? () => onRowClick(row.original) : undefined}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-3 py-2 align-top">
+                  <td key={cell.id} className="px-4 py-2.5 align-middle">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -119,7 +133,7 @@ export function DataGrid<Row>({
         </tbody>
       </table>
       {hasMore && (
-        <div className="border-t border-border p-2 text-center">
+        <div className="border-t border-rule p-2 text-center">
           <Button variant="ghost" size="sm" loading={isFetchingMore} onClick={onLoadMore}>
             {labels.loadMore}
           </Button>

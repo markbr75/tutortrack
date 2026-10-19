@@ -42,7 +42,11 @@ export function Tabs<K extends string>({
   };
   return (
     <div className={className}>
-      <div role="tablist" aria-label={label} className="mb-4 flex flex-wrap gap-1 border-b">
+      <div
+        role="tablist"
+        aria-label={label}
+        className="mb-5 flex gap-1 overflow-x-auto border-b border-border pr-6 [mask-image:linear-gradient(to_right,black_calc(100%-1.5rem),transparent)] [scrollbar-width:none]"
+      >
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -56,8 +60,9 @@ export function Tabs<K extends string>({
             aria-controls={`${baseId}-panel`}
             tabIndex={value === tab.key ? 0 : -1}
             className={cn(
-              "-mb-px border-b-2 border-transparent px-3 py-2 text-sm",
-              "aria-selected:border-primary aria-selected:font-medium",
+              "-mb-px shrink-0 border-b-2 border-transparent px-3 py-2 text-sm whitespace-nowrap",
+              "text-muted-foreground hover:text-foreground",
+              "aria-selected:border-foreground aria-selected:font-semibold aria-selected:text-foreground",
             )}
             onClick={() => onChange(tab.key)}
             onKeyDown={(e) => {

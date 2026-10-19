@@ -19,7 +19,7 @@ export function AttentionReasons({ reasons }: { reasons: readonly string[] | und
       {reasons.map((r) => (
         <li
           key={r}
-          className="rounded-full border border-amber-600 px-2 py-0.5 text-xs text-amber-900 dark:text-amber-200"
+          className="rounded-full border border-warning/60 px-2 py-0.5 text-xs text-warning"
         >
           {t(`g3.attention.reasons.${r}`)}
         </li>

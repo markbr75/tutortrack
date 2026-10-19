@@ -18,7 +18,7 @@ const COMPONENTS: Array<keyof Components> = [
 ];
 const RISK_STYLE: Record<string, string> = {
   healthy: "border-success/40 bg-success/10",
-  watch: "border-amber-500/40 bg-amber-500/10",
+  watch: "border-warning/40 bg-warning/10",
   at_risk: "border-danger/40 bg-danger/10",
 };
 

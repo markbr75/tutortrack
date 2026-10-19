@@ -9,20 +9,23 @@ import {
 import { cn } from "./cn";
 
 const control =
-  "h-10 w-full rounded-md border border-field bg-surface px-3 text-sm aria-[invalid=true]:border-danger";
+  "w-full rounded-md border border-field bg-surface px-3 text-sm aria-[invalid=true]:border-danger";
+const heights = { md: "h-10", sm: "h-9" } as const;
 
 interface FieldShellProps {
   id: string;
   label: string;
+  /** Keep the label for screen readers only, where the control speaks for itself. */
+  hideLabel?: boolean;
   hint?: string;
   error?: string;
   children: ReactNode;
 }
 
-function FieldShell({ id, label, hint, error, children }: FieldShellProps) {
+function FieldShell({ id, label, hideLabel, hint, error, children }: FieldShellProps) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-sm font-medium">
+      <label htmlFor={id} className={hideLabel ? "sr-only" : "text-sm font-medium"}>
         {label}
       </label>
       {children}
@@ -46,54 +49,60 @@ function describedBy(id: string, hint?: string, error?: string): string | undefi
   return undefined;
 }
 
-export interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
   label: string;
+  hideLabel?: boolean;
+  /** "sm" for compact filter bars. */
+  size?: "md" | "sm";
   hint?: string;
   error?: string;
 }
 
 /** Labelled input with hint and error text wired up for screen readers (WCAG 2.2 AA). */
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, hint, error, id, className, ...props },
+  { label, hideLabel, size = "md", hint, error, id, className, ...props },
   ref,
 ) {
   const autoId = useId();
   const fieldId = id ?? autoId;
   return (
-    <FieldShell id={fieldId} label={label} hint={hint} error={error}>
+    <FieldShell id={fieldId} label={label} hideLabel={hideLabel} hint={hint} error={error}>
       <input
         ref={ref}
         id={fieldId}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(fieldId, hint, error)}
-        className={cn(control, className)}
+        className={cn(control, heights[size], className)}
         {...props}
       />
     </FieldShell>
   );
 });
 
-export interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
+export interface SelectFieldProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "size"> {
   label: string;
+  hideLabel?: boolean;
+  /** "sm" for compact filter bars. */
+  size?: "md" | "sm";
   hint?: string;
   error?: string;
   options: ReadonlyArray<{ value: string; label: string }>;
 }
 
 export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(function SelectField(
-  { label, hint, error, id, options, className, ...props },
+  { label, hideLabel, size = "md", hint, error, id, options, className, ...props },
   ref,
 ) {
   const autoId = useId();
   const fieldId = id ?? autoId;
   return (
-    <FieldShell id={fieldId} label={label} hint={hint} error={error}>
+    <FieldShell id={fieldId} label={label} hideLabel={hideLabel} hint={hint} error={error}>
       <select
         ref={ref}
         id={fieldId}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(fieldId, hint, error)}
-        className={cn(control, className)}
+        className={cn(control, heights[size], className)}
         {...props}
       >
         {options.map((o) => (
@@ -114,8 +123,8 @@ export interface AlertProps {
 }
 
 const tones = {
-  info: "border-border bg-muted",
-  warning: "border-amber-500/40 bg-amber-500/10",
+  info: "border-border bg-surface",
+  warning: "border-warning/40 bg-warning/10",
   danger: "border-danger/40 bg-danger/10",
   success: "border-success/40 bg-success/10",
 };

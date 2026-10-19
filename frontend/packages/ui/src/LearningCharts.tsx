@@ -78,7 +78,7 @@ export function TrendChart({
                 x={PAD.left - 6}
                 y={y(tick) + 4}
                 textAnchor="end"
-                className="fill-muted-foreground text-[11px]"
+                className="fill-muted-foreground text-xs"
               >
                 {tick}%
               </text>
@@ -102,7 +102,7 @@ export function TrendChart({
               onBlur={() => setActive(null)}
             />
           ))}
-          <text x={PAD.left} y={H - 6} className="fill-muted-foreground text-[11px]">
+          <text x={PAD.left} y={H - 6} className="fill-muted-foreground text-xs">
             {formatDate(points[0]!.date)}
           </text>
           {points.length > 1 ? (
@@ -110,7 +110,7 @@ export function TrendChart({
               x={W - PAD.right}
               y={H - 6}
               textAnchor="end"
-              className="fill-muted-foreground text-[11px]"
+              className="fill-muted-foreground text-xs"
             >
               {formatDate(points[points.length - 1]!.date)}
             </text>

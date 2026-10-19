@@ -21,7 +21,7 @@ export function StatusBadge({ status, overdue }: { status: string; overdue?: boo
         ? "bg-danger/15 text-danger"
         : status === "draft"
           ? "bg-muted"
-          : "bg-amber-500/15";
+          : "bg-warning/15";
   return (
     <span className={`rounded px-2 py-0.5 text-xs font-medium ${tone}`}>
       {overdue ? t("billing.status.overdue") : t(`billing.status.${status}`)}

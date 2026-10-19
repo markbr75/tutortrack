@@ -2,8 +2,10 @@ import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
 import {
   Button,
+  buttonClass,
   DataGrid,
   ErrorFallback,
+  PageHeader,
   SelectField,
   TextField,
   type ColumnDef,
@@ -39,7 +41,6 @@ function Filters({
   sorts,
   computed,
   onApply,
-  actions,
 }: {
   label: string;
   statuses: readonly string[];
@@ -47,7 +48,6 @@ function Filters({
   sorts: [string, string][];
   computed?: { upcoming?: boolean; owing?: boolean };
   onApply: (filters: ListFilters) => void;
-  actions?: ReactNode;
 }) {
   const { t } = useTranslation();
   const [draft, setDraft] = useState<ListFilters>(EMPTY);
@@ -55,20 +55,28 @@ function Filters({
     <form
       role="search"
       aria-label={label}
-      className="mb-6 grid gap-3 sm:grid-cols-[1fr_12rem_12rem] sm:items-end"
+      className="mb-4 flex flex-wrap items-center gap-2"
       onSubmit={(e) => {
         e.preventDefault();
         onApply(draft);
       }}
     >
-      <TextField
-        label={t("people.search")}
-        type="search"
-        value={draft.q}
-        onChange={(e) => setDraft((d) => ({ ...d, q: e.target.value }))}
-      />
+      <div className="min-w-56 flex-1">
+        <TextField
+          label={t("people.search")}
+          hideLabel
+          size="sm"
+          placeholder={t("people.search")}
+          className="min-w-56"
+          type="search"
+          value={draft.q}
+          onChange={(e) => setDraft((d) => ({ ...d, q: e.target.value }))}
+        />
+      </div>
       <SelectField
         label={t("people.status")}
+        hideLabel
+        size="sm"
         value={draft.status}
         onChange={(e) => setDraft((d) => ({ ...d, status: e.target.value }))}
         options={[
@@ -78,6 +86,8 @@ function Filters({
       />
       <SelectField
         label={t("peopleTools.sort.label")}
+        hideLabel
+        size="sm"
         value={draft.ordering}
         onChange={(e) => setDraft((d) => ({ ...d, ordering: e.target.value }))}
         options={[
@@ -88,17 +98,19 @@ function Filters({
       {computed?.upcoming ? (
         <SelectField
           label={t("peopleTools.filters.upcoming")}
+          hideLabel
+          size="sm"
           value={draft.upcoming}
           onChange={(e) => setDraft((d) => ({ ...d, upcoming: e.target.value }))}
           options={[
-            { value: "", label: t("peopleTools.filters.any") },
+            { value: "", label: t("peopleTools.filters.upcomingAny") },
             { value: "true", label: t("peopleTools.filters.yes") },
             { value: "false", label: t("peopleTools.filters.no") },
           ]}
         />
       ) : null}
       {computed?.owing ? (
-        <label className="flex items-center gap-2 text-sm sm:pb-2">
+        <label className="flex h-9 items-center gap-2 px-1 text-sm">
           <input
             type="checkbox"
             className="size-4"
@@ -108,10 +120,9 @@ function Filters({
           {t("peopleTools.filters.owing")}
         </label>
       ) : null}
-      <div className="flex flex-wrap gap-2 sm:col-span-3">
-        <Button type="submit">{t("people.apply")}</Button>
-        {actions}
-      </div>
+      <Button type="submit" variant="secondary" size="sm" className="h-9">
+        {t("people.apply")}
+      </Button>
     </form>
   );
 }
@@ -133,8 +144,10 @@ function ListShell<T>({
   columns,
   query,
   getRowId,
+  actions,
   children,
 }: {
+  actions?: ReactNode;
   title: string;
   rows: T[];
   columns: ColumnDef<T, unknown>[];
@@ -145,7 +158,7 @@ function ListShell<T>({
   const { t } = useTranslation();
   return (
     <section>
-      <h1 className="mb-4 text-2xl font-semibold">{title}</h1>
+      <PageHeader title={title} actions={actions} />
       {children}
       {query.isError ? (
         <ErrorFallback
@@ -265,6 +278,21 @@ export function ClientsPage() {
       columns={columns}
       query={query}
       getRowId={(r) => r.id}
+      actions={
+        <>
+          {canMerge ? (
+            <Link className={actionLink} to="/people/duplicates">
+              {t("peopleTools.duplicates.nav")}
+            </Link>
+          ) : null}
+          {canExport ? <ExportLinks path="/api/v1/clients/export" params={params} /> : null}
+          {canCreate ? (
+            <Link className={buttonClass()} to="/clients/new">
+              {t("people.quickAdd.title")}
+            </Link>
+          ) : null}
+        </>
+      }
     >
       <Filters
         label={t("people.clients")}
@@ -279,21 +307,6 @@ export function ClientsPage() {
         ]}
         computed={{ upcoming: true, owing: true }}
         onApply={setFilters}
-        actions={
-          <>
-            {canCreate ? (
-              <Link className={actionLink} to="/clients/new">
-                {t("people.quickAdd.title")}
-              </Link>
-            ) : null}
-            {canExport ? <ExportLinks path="/api/v1/clients/export" params={params} /> : null}
-            {canMerge ? (
-              <Link className={actionLink} to="/people/duplicates">
-                {t("peopleTools.duplicates.nav")}
-              </Link>
-            ) : null}
-          </>
-        }
       />
       <BulkBar entity="client" selection={selection} mergeEntity="clients" />
     </ListShell>
@@ -379,6 +392,7 @@ export function StudentsPage() {
       columns={columns}
       query={query}
       getRowId={(r) => r.id}
+      actions={canExport ? <ExportLinks path="/api/v1/students/export" params={params} /> : null}
     >
       <Filters
         label={t("people.studentsTitle")}
@@ -392,7 +406,6 @@ export function StudentsPage() {
         ]}
         computed={{ upcoming: true }}
         onApply={setFilters}
-        actions={canExport ? <ExportLinks path="/api/v1/students/export" params={params} /> : null}
       />
       <BulkBar entity="student" selection={selection} mergeEntity="students" />
     </ListShell>
@@ -473,6 +486,7 @@ export function TutorsPage() {
       columns={columns}
       query={query}
       getRowId={(r) => r.id}
+      actions={canExport ? <ExportLinks path="/api/v1/tutors/export" params={params} /> : null}
     >
       <Filters
         label={t("people.tutorsTitle")}
@@ -484,7 +498,6 @@ export function TutorsPage() {
           ["report_sla", "reportSla"],
         ]}
         onApply={setFilters}
-        actions={canExport ? <ExportLinks path="/api/v1/tutors/export" params={params} /> : null}
       />
       <BulkBar entity="tutor" selection={selection} />
     </ListShell>

@@ -1,5 +1,6 @@
 export { applyBrandTheme, hexToHslTriplet, type BrandTheme } from "./brandTheme";
 export { Button, Spinner, type ButtonProps } from "./Button";
+export { buttonClass } from "./buttonStyles";
 export { cn } from "./cn";
 export {
   COOKIE_CONSENT_VERSION,
@@ -29,6 +30,7 @@ export {
   type TrendChartLabels,
   type TrendPoint,
 } from "./LearningCharts";
+export { PageHeader } from "./PageHeader";
 export { RegisterMark } from "./RegisterMark";
 export { registerMarkFor, type RegisterMarkKind } from "./registerMarks";
 export { Tabs, type TabItem, type TabsProps } from "./Tabs";

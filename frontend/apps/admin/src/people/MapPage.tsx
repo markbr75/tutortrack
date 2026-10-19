@@ -95,7 +95,7 @@ function Marker({
           strokeWidth={1.5}
         />
       ) : (
-        <circle cx={x} cy={y} r={size} className="fill-amber-500 stroke-black" strokeWidth={1} />
+        <circle cx={x} cy={y} r={size} className="fill-warning stroke-black" strokeWidth={1} />
       )}
     </g>
   );
@@ -238,7 +238,7 @@ export function PeopleMapPage() {
           <figcaption className="flex flex-wrap gap-4 text-sm">
             <span className="flex items-center gap-1">
               <svg width="14" height="14" aria-hidden="true">
-                <circle cx="7" cy="7" r="5" className="fill-amber-500 stroke-black" />
+                <circle cx="7" cy="7" r="5" className="fill-warning stroke-black" />
               </svg>
               {t("peopleMap.kinds.studentPlural")}
             </span>

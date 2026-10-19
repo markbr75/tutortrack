@@ -1,13 +1,13 @@
 import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
-import type { ColumnDef } from "@tutortrack/ui";
+import { buttonClass, type ColumnDef } from "@tutortrack/ui";
 import { useState } from "react";
 
 /** Gap batch G1 (FR-05-11/12): helpers for the people list grids (figures, row selection). */
 
 export type BulkEntity = "client" | "contact" | "student" | "tutor";
 
-export const actionLink =
-  "inline-flex h-10 items-center rounded-md border border-border px-4 text-sm hover:bg-muted";
+/** Secondary actions beside a page's primary button: smaller, so the primary leads. */
+export const actionLink = buttonClass({ variant: "secondary", size: "sm" });
 
 /** "12.5 h", "—" when the figure isn't available to the viewer. */
 export function useFigures() {

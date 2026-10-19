@@ -239,7 +239,11 @@ function WidgetTile({
 }
 
 /** The configurable dashboard (FR-26-1): KPI tiles, lists and charts for a period. */
-export function Dashboard() {
+/**
+ * The customisable figures. `hide` drops widgets the page already shows elsewhere (Home's
+ * money strip and register), except while customising, when every widget stays arrangeable.
+ */
+export function Dashboard({ hide = [] }: { hide?: readonly string[] } = {}) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [period, setPeriod] = useState({ period: "this_month", from: "", to: "" });
@@ -273,7 +277,7 @@ export function Dashboard() {
   });
   if (!layout.data) return <Spinner className="size-5" label={t("grid.loading")} />;
   const query = { ...periodQuery(period), compare };
-  const items = editing ? draft : layout.data.widgets;
+  const items = editing ? draft : layout.data.widgets.filter((w) => !hide.includes(w.widget));
   const titles = Object.fromEntries((library.data ?? []).map((w: WidgetInfo) => [w.key, w.title]));
   const move = (index: number, by: number) => {
     const next = [...draft];
@@ -287,7 +291,7 @@ export function Dashboard() {
       className="mt-6 space-y-4 border-t border-border pt-6"
     >
       <div className="flex flex-wrap items-end gap-3">
-        <h2 id="dashboard-title" className="w-full text-lg font-semibold sm:mr-auto sm:w-auto">
+        <h2 id="dashboard-title" className="w-full text-base font-semibold sm:mr-auto sm:w-auto">
           {t("reporting.dashboard")}
         </h2>
         <PeriodFields {...period} onChange={setPeriod} />
@@ -461,7 +465,7 @@ export function ReportsLibraryPage() {
       {reports.data?.length === 0 ? <p>{t("reporting.noReports")}</p> : null}
       {groups.map(([key, group]) => (
         <section key={key} aria-labelledby={`cat-${key}`} className="space-y-2">
-          <h2 id={`cat-${key}`} className="text-lg font-medium">
+          <h2 id={`cat-${key}`} className="text-base font-semibold">
             {group.label}
           </h2>
           <ul className="grid gap-3 md:grid-cols-2">
@@ -974,7 +978,7 @@ export function SavedReportsPage() {
       <h1 className="text-2xl font-semibold">{t("reporting.savedTitle")}</h1>
       <ReportsNav />
       <section aria-labelledby="saved-views" className="space-y-2">
-        <h2 id="saved-views" className="text-lg font-medium">
+        <h2 id="saved-views" className="text-base font-semibold">
           {t("reporting.savedViews")}
         </h2>
         {saved.data?.results.length === 0 ? <p>{t("reporting.noSaved")}</p> : null}
@@ -1021,7 +1025,7 @@ export function SavedReportsPage() {
       </section>
       {canSchedule ? (
         <section aria-labelledby="scheduled" className="space-y-2">
-          <h2 id="scheduled" className="text-lg font-medium">
+          <h2 id="scheduled" className="text-base font-semibold">
             {t("reporting.scheduledTitle")}
           </h2>
           {scheduled.data?.results.length === 0 ? <p>{t("reporting.noScheduled")}</p> : null}
@@ -1054,7 +1058,7 @@ export function SavedReportsPage() {
       ) : null}
       {canExport ? (
         <section aria-labelledby="runs" className="space-y-2">
-          <h2 id="runs" className="text-lg font-medium">
+          <h2 id="runs" className="text-base font-semibold">
             {t("reporting.runsTitle")}
           </h2>
           <ul className="space-y-1 text-sm">

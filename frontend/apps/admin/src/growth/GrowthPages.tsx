@@ -87,7 +87,7 @@ export function Stars({ rating }: { rating: number }) {
   const { t } = useTranslation();
   return (
     <span>
-      <span aria-hidden="true" className="text-amber-600">
+      <span aria-hidden="true" className="text-warning">
         {"★".repeat(rating)}
         {"☆".repeat(Math.max(0, 5 - rating))}
       </span>
@@ -1420,7 +1420,7 @@ function StarChoice({
             />
             <span
               aria-hidden="true"
-              className={n <= value ? "text-amber-600" : "text-muted-foreground"}
+              className={n <= value ? "text-warning" : "text-muted-foreground"}
             >
               {n <= value ? "★" : "☆"}
             </span>

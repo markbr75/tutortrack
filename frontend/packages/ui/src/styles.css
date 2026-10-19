@@ -29,6 +29,7 @@
   --tt-shell-accent: 162 32% 24%;
   --tt-shell-foreground: 142 20% 92%;
   --tt-shell-muted: 156 17% 71%;
+  --tt-shell-rule: 160 20% 30%; /* dividers inside the bookcloth rail */
   --tt-margin: 4 63% 48%; /* the margin rule: now, and what still needs marking */
   --tt-margin-foreground: 0 0% 100%; /* text on margin red (counts) */
   --tt-danger: 4 76% 40%;
@@ -56,6 +57,7 @@
     --tt-shell-accent: 161 36% 17%;
     --tt-shell-foreground: 150 21% 91%;
     --tt-shell-muted: 156 16% 67%;
+    --tt-shell-rule: 160 25% 20%;
     --tt-margin: 5 81% 69%;
     --tt-margin-foreground: 160 41% 10%;
     --tt-danger: 5 81% 73%;
@@ -82,6 +84,7 @@
   --tt-shell-accent: 161 36% 17%;
   --tt-shell-foreground: 150 21% 91%;
   --tt-shell-muted: 156 16% 67%;
+  --tt-shell-rule: 160 25% 20%;
   --tt-margin: 5 81% 69%;
   --tt-margin-foreground: 160 41% 10%;
   --tt-danger: 5 81% 73%;
@@ -107,6 +110,7 @@
   --color-shell-accent: hsl(var(--tt-shell-accent));
   --color-shell-foreground: hsl(var(--tt-shell-foreground));
   --color-shell-muted: hsl(var(--tt-shell-muted));
+  --color-shell-rule: hsl(var(--tt-shell-rule));
   --color-margin: hsl(var(--tt-margin));
   --color-margin-foreground: hsl(var(--tt-margin-foreground));
   --color-danger: hsl(var(--tt-danger));
@@ -151,13 +155,28 @@
     text-underline-offset: 0.2em;
   }
 
+  /* Hand-built tables get the register's ruling by default; components may override. */
+  table {
+    border-collapse: collapse;
+  }
+  thead th {
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: hsl(var(--tt-muted-foreground));
+  }
+  tbody tr + tr {
+    border-top: 1px solid hsl(var(--tt-rule));
+  }
+
   ::selection {
     background: hsl(var(--tt-brand) / 0.22);
     color: hsl(var(--tt-foreground));
   }
 
+  /* The register ink, not the tenant colour: a pale brand would make focus hard to see. */
   :focus-visible {
-    outline: 2px solid hsl(var(--tt-brand));
+    outline: 2px solid hsl(var(--tt-link));
     outline-offset: 2px;
   }
 
@@ -169,4 +188,27 @@
       animation-duration: 0.01ms !important;
     }
   }
+}
+
+/*
+ * Form controls meet the Field Edge rule (3:1, WCAG 1.4.11) everywhere, including the many
+ * hand-styled inputs that still say border-border. Deliberately unlayered so it wins over
+ * utilities; invalid controls keep their danger edge.
+ */
+:where(
+  input:not(
+    [type="checkbox"],
+    [type="radio"],
+    [type="range"],
+    [type="color"],
+    [type="file"],
+    [type="hidden"]
+  ),
+  select,
+  textarea
+) {
+  border-color: hsl(var(--tt-field));
+}
+:where(input, select, textarea)[aria-invalid="true"] {
+  border-color: hsl(var(--tt-danger));
 }

@@ -108,7 +108,7 @@ function ProfileReview({ profile }: { profile: Profile }) {
             <dt className="font-medium">
               {t(`website.profiles.${key}`)}
               {changed(key) ? (
-                <span className="ml-1 rounded bg-amber-500/15 px-1 text-xs">
+                <span className="ml-1 rounded bg-warning/15 px-1 text-xs">
                   {t("website.profiles.changed")}
                 </span>
               ) : null}
