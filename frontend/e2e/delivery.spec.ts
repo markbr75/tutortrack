@@ -17,11 +17,11 @@ function escape(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-async function pastLesson(api: Api) {
+async function pastLesson(api: Api, days = -1) {
   const family = await createFamily(api, { students: ["Remy"] });
   const tutor = await createTutor(api);
   const job = await createJob(api, { studentId: family.studentIds[0]!, tutorId: tutor.id });
-  const lesson = await createLesson(api, { jobId: job.id, days: -1, at: "10:00" });
+  const lesson = await createLesson(api, { jobId: job.id, days, at: "10:00" });
   return { family, tutor, job, lesson };
 }
 
@@ -63,7 +63,9 @@ test("forgotten lessons are confirmed in bulk from Unconfirmed lessons", async (
   pageAs,
 }) => {
   const api = await apiAs("coordinator");
-  const { job, lesson } = await pastLesson(api);
+  // Unconfirmed means ended more than 24 hours ago (delivery.unconfirmed_after_hours), so
+  // yesterday's 10:00 lesson only qualifies after 11:00: take one from two days ago.
+  const { job, lesson } = await pastLesson(api, -2);
 
   const page = await pageAs("coordinator");
   await page.goto("/unconfirmed");
