@@ -2,26 +2,15 @@ import { forwardRef, type ButtonHTMLAttributes } from "react";
 
 import { cn } from "./cn";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
-export type ButtonSize = "sm" | "md";
+import { buttonClass, type ButtonSize, type ButtonVariant } from "./buttonStyles";
+
+export type { ButtonSize, ButtonVariant };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
 }
-
-const variants: Record<ButtonVariant, string> = {
-  primary: "bg-brand text-brand-foreground hover:opacity-90",
-  secondary: "border border-border bg-background hover:bg-muted",
-  ghost: "hover:bg-muted",
-  danger: "bg-danger text-danger-foreground hover:opacity-90",
-};
-
-const sizes: Record<ButtonSize, string> = {
-  sm: "h-8 px-3 text-sm",
-  md: "h-10 px-4 text-sm",
-};
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   { variant = "primary", size = "md", loading = false, disabled, className, children, ...props },
@@ -34,10 +23,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-md font-medium transition",
+        buttonClass({ variant, size }),
         "disabled:cursor-not-allowed disabled:opacity-50",
-        variants[variant],
-        sizes[size],
         className,
       )}
       {...props}

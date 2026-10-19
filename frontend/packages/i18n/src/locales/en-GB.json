@@ -6308,10 +6308,10 @@
     },
     "filters": {
       "upcoming": "Lessons booked",
-      "any": "Any",
       "yes": "Has a lesson booked",
       "no": "No lesson booked",
-      "owing": "Only those who owe money"
+      "owing": "Only those who owe money",
+      "upcomingAny": "Lessons booked: any"
     },
     "export": {
       "csv": "Export CSV",

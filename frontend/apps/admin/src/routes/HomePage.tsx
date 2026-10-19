@@ -12,6 +12,9 @@ import { TodaysRegister } from "../home/TodaysRegister";
 import { Dashboard } from "../reporting/ReportingPages";
 import { SetupChecklist } from "../success/SetupChecklist";
 
+/** Figures Home already shows in its money strip, register and attention lists. */
+const SHOWN_ABOVE = ["revenue", "outstanding", "next_pay_run", "upcoming_today", "unconfirmed"];
+
 function nextHalfHour(): Date {
   const d = new Date();
   d.setMinutes(d.getMinutes() < 30 ? 30 : 60, 0, 0);
@@ -86,7 +89,7 @@ export function HomePage() {
           </div>
         </div>
       ) : null}
-      {dashboard ? <Dashboard /> : null}
+      {dashboard ? <Dashboard hide={SHOWN_ABOVE} /> : null}
       <section aria-labelledby="features-h" className="border-t border-border pt-4">
         <h2 id="features-h" className="text-sm font-semibold">
           {t("home.features")}

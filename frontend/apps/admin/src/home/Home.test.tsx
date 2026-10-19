@@ -185,6 +185,46 @@ describe("home", () => {
     expect(within(money).getByText("£3,905.40")).toBeInTheDocument();
   });
 
+  it("leaves out of the dashboard what Home already shows", async () => {
+    const r = routes({ ...PERMISSIONS, "reporting.dashboard.view": "all" });
+    mockApi({
+      ...r,
+      "GET /api/v1/reporting/dashboard": {
+        body: {
+          preset: "simple",
+          customised: false,
+          widgets: [
+            { widget: "revenue", size: "s" },
+            { widget: "lessons", size: "s" },
+            { widget: "upcoming_today", size: "s" },
+          ],
+        },
+      },
+      "GET /api/v1/reporting/widgets/lessons": {
+        body: {
+          widget: {
+            key: "lessons",
+            title: "Lessons delivered",
+            category: "operations",
+            kind: "kpi",
+            report: "lessons",
+          },
+          unit: "count",
+          values: [{ label: "", currency: "", value: "12", previous: null }],
+          series: [],
+          rows: [],
+        },
+      },
+    });
+    render(<App />);
+    const dashboard = await screen.findByRole("region", { name: "Dashboard" });
+    expect(
+      await within(dashboard).findByRole("region", { name: "Lessons delivered" }),
+    ).toBeInTheDocument();
+    // Revenue and today's lessons are already in the money strip and the register.
+    expect(within(dashboard).queryAllByRole("region")).toHaveLength(1);
+  });
+
   it("shows only what the role may see", async () => {
     mockApi(routes({ "scheduling.lesson.view": "all" }));
     render(<App />);

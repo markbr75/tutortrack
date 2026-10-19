@@ -1,6 +1,6 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDate, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, ErrorFallback, SelectField, Spinner } from "@tutortrack/ui";
+import { Alert, Button, buttonClass, ErrorFallback, SelectField, Spinner } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
@@ -17,8 +17,7 @@ import { StudentPrivacyPanel } from "../safeguarding/SafeguardingPages";
 import { STUDENT_STATUSES, TUTOR_STATUSES } from "./statuses";
 
 const linkClass = "font-medium underline-offset-2 hover:underline";
-const actionLink =
-  "inline-flex h-10 items-center rounded-md border border-border px-4 text-sm hover:bg-muted";
+const actionLink = buttonClass({ variant: "secondary" });
 
 /** FR-05-13: "Merge with another record", and the banner on a merged (archived) record. */
 function MergeActions({

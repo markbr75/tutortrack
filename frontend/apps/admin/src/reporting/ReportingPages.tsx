@@ -239,7 +239,11 @@ function WidgetTile({
 }
 
 /** The configurable dashboard (FR-26-1): KPI tiles, lists and charts for a period. */
-export function Dashboard() {
+/**
+ * The customisable figures. `hide` drops widgets the page already shows elsewhere (Home's
+ * money strip and register), except while customising, when every widget stays arrangeable.
+ */
+export function Dashboard({ hide = [] }: { hide?: readonly string[] } = {}) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [period, setPeriod] = useState({ period: "this_month", from: "", to: "" });
@@ -273,7 +277,7 @@ export function Dashboard() {
   });
   if (!layout.data) return <Spinner className="size-5" label={t("grid.loading")} />;
   const query = { ...periodQuery(period), compare };
-  const items = editing ? draft : layout.data.widgets;
+  const items = editing ? draft : layout.data.widgets.filter((w) => !hide.includes(w.widget));
   const titles = Object.fromEntries((library.data ?? []).map((w: WidgetInfo) => [w.key, w.title]));
   const move = (index: number, by: number) => {
     const next = [...draft];

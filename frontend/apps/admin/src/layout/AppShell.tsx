@@ -496,7 +496,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const unconfirmed = canMark ? (waiting.data?.length ?? 0) : 0;
   return (
     <div className="flex h-full flex-col bg-shell px-3 py-4 text-shell-foreground [&_:focus-visible]:outline-shell-foreground">
-      <div className="flex items-center gap-2.5 border-b border-white/10 px-2.5 pb-4">
+      <div className="flex items-center gap-2.5 border-b border-shell-rule px-2.5 pb-4">
         <span
           aria-hidden="true"
           className="grid size-8 shrink-0 place-items-center rounded-md bg-shell-foreground text-sm font-bold text-shell"
@@ -580,7 +580,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
       </nav>
-      <div className="mt-3 border-t border-white/10 pt-3">
+      <div className="mt-3 border-t border-shell-rule pt-3">
         {settings.length > 0 ? (
           <Link
             to={settings[0]!.to}
