@@ -8,7 +8,7 @@ export type SyncRecord = components["schemas"]["ExternalRecordLink"];
 const TONES: Record<string, string> = {
   synced: "bg-success/15",
   error: "bg-danger/15 text-danger",
-  pending: "bg-amber-500/15",
+  pending: "bg-warning/15",
   skipped: "bg-muted",
 };
 

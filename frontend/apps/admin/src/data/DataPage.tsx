@@ -368,7 +368,7 @@ function ProjectView({ project }: { project: MigrationProject }) {
             <li
               key={step}
               aria-current={current ? "step" : undefined}
-              className="rounded-md border border-border p-3 aria-[current=step]:border-primary"
+              className="rounded-md border border-border p-3 aria-[current=step]:border-foreground"
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h3 className="font-medium">

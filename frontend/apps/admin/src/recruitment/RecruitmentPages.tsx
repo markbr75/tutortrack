@@ -272,7 +272,7 @@ export function ApplicationPage({ id }: { id: string }) {
 
 const CELL_TONE: Record<string, string> = {
   verified: "bg-green-100 text-green-900",
-  submitted: "bg-amber-100 text-amber-900",
+  submitted: "bg-warning/10 text-warning",
   missing: "bg-red-100 text-red-900",
   rejected: "bg-red-100 text-red-900",
   expired: "bg-red-100 text-red-900",

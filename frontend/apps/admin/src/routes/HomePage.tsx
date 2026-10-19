@@ -1,5 +1,5 @@
 import { useTranslation } from "@tutortrack/i18n";
-import { Button } from "@tutortrack/ui";
+import { Button, buttonClass } from "@tutortrack/ui";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -66,10 +66,7 @@ export function HomePage() {
         </div>
         <div className="flex flex-wrap gap-2">
           {addFamily ? (
-            <Link
-              to="/clients/new"
-              className="inline-flex h-10 items-center rounded-md border border-border bg-surface px-4 text-sm font-medium hover:bg-muted"
-            >
+            <Link to="/clients/new" className={buttonClass({ variant: "secondary" })}>
               {t("home.addFamily")}
             </Link>
           ) : null}

@@ -78,7 +78,7 @@ function DueBadge({ request }: { request: DataRequest }) {
   if (request.closed_at) return null;
   const days = daysUntil(request.due_at);
   const tone =
-    days < 0 ? "text-destructive font-semibold" : days <= 7 ? "text-amber-700" : "text-foreground";
+    days < 0 ? "text-destructive font-semibold" : days <= 7 ? "text-warning" : "text-foreground";
   return (
     <span className={tone}>
       {days < 0

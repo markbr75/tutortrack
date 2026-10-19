@@ -313,7 +313,7 @@ function Conversation({ id }: { id: string }) {
             key={m.id}
             className={
               m.direction === "internal"
-                ? "rounded-md border border-amber-300 bg-amber-50 p-2 text-sm text-amber-950"
+                ? "rounded-md border border-warning/40 bg-warning/10 p-2 text-sm text-foreground"
                 : m.direction === "outbound"
                   ? "ml-8 rounded-md bg-muted p-2 text-sm"
                   : "mr-8 rounded-md border border-border p-2 text-sm"

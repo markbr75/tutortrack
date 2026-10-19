@@ -90,9 +90,9 @@ function SlotFit({ fit, slots }: { fit: number[]; slots: { weekday: number; time
             className={
               "rounded px-1 text-xs " +
               (pct >= 100
-                ? "bg-green-700 text-white"
+                ? "bg-success/15 text-success"
                 : pct >= 50
-                  ? "bg-amber-300 text-black"
+                  ? "bg-warning/15 text-warning"
                   : "bg-muted text-foreground")
             }
           >
