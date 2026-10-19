@@ -107,7 +107,9 @@ test("a coordinator signs in with the form and signs out again", async ({ page }
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   const nav = page.getByRole("navigation", { name: "Main" });
   await expect(nav).toBeVisible();
-  await nav.getByRole("button", { name: "Sign out" }).click();
+  // Sign out lives in the account menu (your initials) in the top bar.
+  await page.getByRole("button", { name: /^Account menu for / }).click();
+  await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page.getByRole("heading", { name: /sign in/i })).toBeVisible();
   await page.goto("/clients");
   await expect(page).toHaveURL(/\/login/);

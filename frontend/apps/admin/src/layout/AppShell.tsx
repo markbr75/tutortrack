@@ -645,7 +645,10 @@ function UserMenu() {
         onClick={() => setOpen((value) => !value)}
         className="flex items-center gap-1.5 rounded-full p-0.5 pr-1.5 hover:bg-muted"
       >
-        <span className="grid size-8 place-items-center rounded-full bg-shell text-xs font-semibold text-shell-foreground">
+        <span
+          aria-hidden="true"
+          className="grid size-8 place-items-center rounded-full bg-shell text-xs font-semibold text-shell-foreground"
+        >
           {initials || "?"}
         </span>
         <span className="sr-only">{t("nav.userMenu", { name })}</span>
