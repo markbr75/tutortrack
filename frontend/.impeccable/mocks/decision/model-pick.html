@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><title>The Timetable — Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1A1D24;--ink-2:#5B6170;--grid:#E4E6EB;--ground:#F5F6F8;--teal:#2F8F83;--ochre:#C8902E;--plum:#7B4B8E;--coral:#D46A4F;--leaf:#5B8C3A;--sky:#3D7CC9}
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;font:14px/1.45 Lexend,system-ui,sans-serif;color:var(--ink);background:var(--ground);display:grid;grid-template-rows:56px 1fr;font-variant-numeric:tabular-nums}
+header{background:#fff;border-bottom:1px solid var(--grid);display:flex;align-items:center;gap:16px;padding:0 20px}
+.brand{font-weight:700;font-size:16px;width:208px;display:flex;gap:10px;align-items:center}
+.brand i{width:26px;height:26px;border-radius:6px;background:conic-gradient(var(--teal) 0 25%,var(--ochre) 0 50%,var(--plum) 0 75%,var(--coral) 0)}
+.search{width:440px;height:34px;border:1px solid var(--grid);border-radius:8px;display:flex;align-items:center;padding:0 12px;color:var(--ink-2)}
+.search kbd{margin-left:auto;font:12px inherit;border:1px solid var(--grid);border-radius:4px;padding:0 5px}
+.grow{flex:1}.pill{height:34px;padding:0 12px;border:1px solid var(--grid);border-radius:8px;display:flex;align-items:center}
+.av{width:34px;height:34px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:13px}
+.wrap{display:grid;grid-template-columns:228px 1fr;min-height:0}
+nav{background:#fff;border-right:1px solid var(--grid);padding:14px 12px;display:flex;flex-direction:column;gap:1px}
+nav a{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:7px;color:var(--ink);text-decoration:none}
+nav a.on{background:var(--ground);font-weight:600}
+nav h6{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:600;padding:14px 10px 4px}
+nav h6:before{content:"";width:10px;height:10px;border-radius:3px;background:var(--c)}
+main{padding:22px 28px;display:grid;grid-template-columns:1fr 340px;gap:22px;min-height:0;overflow:hidden;align-content:start}
+.head{grid-column:1/-1;display:flex;justify-content:space-between;align-items:end}
+h1{font-size:24px;font-weight:600}.sub{color:var(--ink-2)}
+.btn{height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--grid);background:#fff;font:500 14px inherit}
+.btn.p{background:var(--ink);color:#fff;border-color:var(--ink)}
+.card{background:#fff;border:1px solid var(--grid);border-radius:12px}
+.tt{display:grid;grid-template-columns:56px repeat(4,1fr);position:relative}
+.tt .h{padding:10px 12px;font-size:13px;font-weight:600;border-bottom:1px solid var(--grid)}
+.tt .h small{display:block;font-weight:400;color:var(--ink-2)}
+.hour{grid-column:1;font-size:12px;color:var(--ink-2);padding:4px 8px;height:56px;border-top:1px solid var(--grid)}
+.cell{height:56px;border-top:1px solid var(--grid);border-left:1px solid var(--grid)}
+.blk{position:absolute;border-radius:8px;padding:6px 9px;font-size:12px;color:#fff;line-height:1.3}
+.blk b{display:block;font-size:13px}
+.now{position:absolute;left:56px;right:0;height:2px;background:var(--coral)}
+.now:before{content:"15:12";position:absolute;left:-52px;top:-8px;font-size:11px;color:var(--coral);font-weight:600}
+.side{display:flex;flex-direction:column;gap:16px}
+.k{padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+.k p{color:var(--ink-2);font-size:13px}.k b{font-size:22px}
+.bar{width:6px;align-self:stretch;border-radius:3px;background:var(--c);margin-right:12px}
+.card h2{font-size:15px;font-weight:600;padding:12px 16px;border-bottom:1px solid var(--grid)}
+.row{display:flex;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--grid);font-size:13px}
+.row:last-child{border:0}.row small{display:block;color:var(--ink-2)}
+.tag{font-size:12px;font-weight:600;color:var(--coral)}
+</style></head><body>
+<header><div class="brand"><i></i>TutorTrack</div><div class="search">Search clients, students, invoices… <kbd>⌘K</kbd></div>
+  <div class="pill">Ask AI ⌘J</div><div class="grow"></div><div class="pill">Bright Minds Tutoring ▾</div><div class="pill">Notifications · 4</div><div class="av">OS</div></header>
+<div class="wrap">
+<nav aria-label="Main">
+  <a class="on" href="#">Home</a><a href="#">Calendar</a><a href="#">Inbox</a><a href="#">My tasks</a>
+  <h6 style="--c:var(--teal)">People</h6><a href="#">Clients</a><a href="#">Students</a><a href="#">Tutors</a>
+  <h6 style="--c:var(--ochre)">Teaching</h6><a href="#">Jobs</a><a href="#">Courses</a><a href="#">Unconfirmed lessons</a><a href="#">Lesson reports</a>
+  <h6 style="--c:var(--plum)">Growth</h6><a href="#">Enquiries</a><a href="#">Recruitment</a>
+  <h6 style="--c:var(--coral)">Money</h6><a href="#">Billing</a><a href="#">Payroll</a>
+  <h6 style="--c:var(--sky)">Insights</h6><a href="#">Reports</a>
+  <a href="#" style="margin-top:auto">Settings</a>
+</nav>
+<main>
+  <div class="head"><div><h1>Monday 19 October</h1><p class="sub">9 lessons · 6 tutors · 2 rooms in use</p></div>
+    <div style="display:flex;gap:8px"><button class="btn">Add a family</button><button class="btn p">Book a lesson</button></div></div>
+  <div class="card" style="overflow:hidden">
+    <div class="tt">
+      <div class="h"></div><div class="h">Nia Adeyemi<small>3 lessons</small></div><div class="h">Tom Reid<small>2 lessons</small></div><div class="h">Sara Lind<small>2 lessons</small></div><div class="h">Room 1 · Hampstead<small>1 class</small></div>
+      <div class="hour">13:00</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="hour">14:00</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="hour">15:00</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="hour">16:00</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="hour">17:00</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="hour">18:00</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="hour">19:00</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="blk" style="background:var(--teal);left:calc(56px + 4px);top:249px;width:calc(25% - 22px);height:52px"><b>GCSE Higher Maths</b>Arjun Patel · 16:30</div>
+      <div class="blk" style="background:var(--plum);left:calc(56px + 4px);top:305px;width:calc(25% - 22px);height:52px"><b>Year 6 11+ Prep</b>Maya Patel · 17:30</div>
+      <div class="blk" style="background:var(--ochre);left:calc(56px + 25% - 10px);top:333px;width:calc(25% - 22px);height:52px"><b>GCSE Physics</b>Leo Grant · 18:00</div>
+      <div class="blk" style="background:var(--leaf);left:calc(56px + 50% - 24px);top:81px;width:calc(25% - 22px);height:52px;opacity:.55"><b>KS3 English · missed</b>Ade Okafor · 13:30</div>
+      <div class="blk" style="background:var(--sky);left:calc(56px + 75% - 38px);top:109px;width:calc(25% - 22px);height:52px;opacity:.55"><b>Year 4 Maths group ✓</b>4 students · 14:00</div>
+      <div class="now" style="top:174px"></div>
+    </div>
+  </div>
+  <div class="side">
+    <div class="card k"><span class="bar" style="--c:var(--coral)"></span><div style="flex:1"><p>Outstanding · 2 overdue</p><b>£1,240.00</b></div></div>
+    <div class="card k"><span class="bar" style="--c:var(--sky)"></span><div style="flex:1"><p>Revenue this month</p><b>£6,820.00</b></div><span class="tag" style="color:var(--leaf)">+11.6%</span></div>
+    <div class="card"><h2>Needs marking</h2>
+      <div class="row"><span>Year 6 11+ Prep · Sat 10 Oct<small>Nia Adeyemi</small></span><span class="tag">9 days</span></div>
+      <div class="row"><span>Year 6 11+ Prep · Sat 3 Oct<small>Nia Adeyemi</small></span><span class="tag">16 days</span></div></div>
+    <div class="card"><h2>Overdue invoices</h2>
+      <div class="row"><span>The Okafor Family<small>INV-0142 · due 2 Oct</small></span><b>£240.00</b></div>
+      <div class="row"><span>Grace Hughes<small>INV-0139 · due 28 Sep</small></span><b>£140.00</b></div></div>
+  </div>
+</main>
+</div>
+</body></html>

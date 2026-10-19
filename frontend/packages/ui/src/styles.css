@@ -1,44 +1,82 @@
 @import "tailwindcss";
+@import "@fontsource-variable/source-sans-3";
 
 /* Workspace packages are reached through node_modules symlinks, which Tailwind skips when
    scanning the consuming app. Register this package so its component classes are generated. */
 @source ".";
 
 /*
- * Design tokens. Tenants re-brand the portals at runtime by overriding --tt-brand-* on
- * :root (E24). Components only use the semantic tokens below, never raw colours.
+ * Design tokens (the "register" world: bookcloth shell, register-ruled stock, blue-black ink,
+ * one red margin rule; see DESIGN.md). Tenants re-brand at runtime by overriding --tt-brand*
+ * on :root (E24). Components only use the semantic tokens below, never raw colours.
+ * Values are HSL triplets so applyBrandTheme can write the same format.
  */
 :root {
-  --tt-brand: 221 83% 53%;
+  --tt-brand: 219 59% 40%; /* register ink blue: primary actions, links, selection */
   --tt-brand-foreground: 0 0% 100%;
-  --tt-background: 0 0% 100%;
-  --tt-foreground: 222 47% 11%;
-  --tt-muted: 210 40% 96%;
-  --tt-muted-foreground: 215 16% 40%;
-  --tt-border: 214 32% 88%;
-  --tt-danger: 0 72% 45%;
-  --tt-success: 142 71% 30%;
+  --tt-background: 60 23% 97%; /* register stock */
+  --tt-surface: 0 0% 100%; /* panels and tables on the stock */
+  --tt-foreground: 218 31% 15%; /* blue-black ink */
+  --tt-muted: 210 42% 95%;
+  --tt-muted-foreground: 222 18% 41%;
+  --tt-border: 212 48% 84%; /* register rule: dividers and panel edges */
+  --tt-rule: 212 51% 93%; /* the faint rule between table rows */
+  --tt-field: 216 17% 56%; /* form-field borders (3:1 against the stock) */
+  --tt-shell: 162 35% 18%; /* bookcloth: the app's navigation */
+  --tt-shell-accent: 162 32% 24%;
+  --tt-shell-foreground: 142 20% 92%;
+  --tt-shell-muted: 156 17% 71%;
+  --tt-margin: 4 63% 48%; /* the margin rule: now, and what still needs marking */
+  --tt-danger: 4 76% 40%;
+  --tt-success: 150 59% 30%;
+  --tt-warning: 34 87% 32%;
   --tt-radius: 0.5rem;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --tt-background: 222 47% 8%;
-    --tt-foreground: 210 40% 96%;
-    --tt-muted: 217 33% 15%;
-    --tt-muted-foreground: 215 20% 70%;
-    --tt-border: 217 33% 22%;
+    --tt-brand: 220 75% 73%;
+    --tt-brand-foreground: 218 59% 13%;
+    --tt-background: 205 27% 9%;
+    --tt-surface: 205 29% 12%;
+    --tt-foreground: 210 29% 92%;
+    --tt-muted: 206 27% 15%;
+    --tt-muted-foreground: 212 18% 69%;
+    --tt-border: 207 24% 24%;
+    --tt-rule: 205 26% 18%;
+    --tt-field: 208 16% 47%;
+    --tt-shell: 160 41% 10%;
+    --tt-shell-accent: 161 36% 17%;
+    --tt-shell-foreground: 150 21% 91%;
+    --tt-shell-muted: 156 16% 67%;
+    --tt-margin: 5 81% 69%;
+    --tt-danger: 5 81% 73%;
+    --tt-success: 151 47% 56%;
+    --tt-warning: 36 71% 58%;
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --tt-background: 222 47% 8%;
-  --tt-foreground: 210 40% 96%;
-  --tt-muted: 217 33% 15%;
-  --tt-muted-foreground: 215 20% 70%;
-  --tt-border: 217 33% 22%;
+  --tt-brand: 220 75% 73%;
+  --tt-brand-foreground: 218 59% 13%;
+  --tt-background: 205 27% 9%;
+  --tt-surface: 205 29% 12%;
+  --tt-foreground: 210 29% 92%;
+  --tt-muted: 206 27% 15%;
+  --tt-muted-foreground: 212 18% 69%;
+  --tt-border: 207 24% 24%;
+  --tt-rule: 205 26% 18%;
+  --tt-field: 208 16% 47%;
+  --tt-shell: 160 41% 10%;
+  --tt-shell-accent: 161 36% 17%;
+  --tt-shell-foreground: 150 21% 91%;
+  --tt-shell-muted: 156 16% 67%;
+  --tt-margin: 5 81% 69%;
+  --tt-danger: 5 81% 73%;
+  --tt-success: 151 47% 56%;
+  --tt-warning: 36 71% 58%;
   color-scheme: dark;
 }
 
@@ -46,28 +84,75 @@
   --color-brand: hsl(var(--tt-brand));
   --color-brand-foreground: hsl(var(--tt-brand-foreground));
   --color-background: hsl(var(--tt-background));
+  --color-surface: hsl(var(--tt-surface));
   --color-foreground: hsl(var(--tt-foreground));
   --color-muted: hsl(var(--tt-muted));
   --color-muted-foreground: hsl(var(--tt-muted-foreground));
   --color-border: hsl(var(--tt-border));
+  --color-rule: hsl(var(--tt-rule));
+  --color-field: hsl(var(--tt-field));
+  --color-shell: hsl(var(--tt-shell));
+  --color-shell-accent: hsl(var(--tt-shell-accent));
+  --color-shell-foreground: hsl(var(--tt-shell-foreground));
+  --color-shell-muted: hsl(var(--tt-shell-muted));
+  --color-margin: hsl(var(--tt-margin));
   --color-danger: hsl(var(--tt-danger));
   --color-success: hsl(var(--tt-success));
+  --color-warning: hsl(var(--tt-warning));
   --radius-md: var(--tt-radius);
+  --font-sans: "Source Sans 3 Variable", ui-sans-serif, system-ui, sans-serif;
+  /* Five sizes carry the whole hierarchy: 12, 14 (body), 16, 20 and 26 px. */
+  --text-2xl: 1.625rem;
+  --text-2xl--line-height: 1.25;
 }
 
-body {
-  background: hsl(var(--tt-background));
-  color: hsl(var(--tt-foreground));
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    sans-serif;
-}
+/* Element defaults live in the base layer, so utilities (in a later layer) can override them. */
+@layer base {
+  body {
+    background: hsl(var(--tt-background));
+    color: hsl(var(--tt-foreground));
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    caret-color: hsl(var(--tt-brand));
+    accent-color: hsl(var(--tt-brand));
+    scrollbar-color: hsl(var(--tt-border)) transparent;
+  }
 
-:focus-visible {
-  outline: 2px solid hsl(var(--tt-brand));
-  outline-offset: 2px;
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  /* Figures line up in columns wherever numbers are read against each other. */
+  table,
+  input,
+  time,
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+  }
+
+  ::selection {
+    background: hsl(var(--tt-brand) / 0.22);
+    color: hsl(var(--tt-foreground));
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--tt-brand));
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
 }

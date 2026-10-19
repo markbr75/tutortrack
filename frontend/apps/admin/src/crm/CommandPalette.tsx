@@ -1,4 +1,5 @@
 import { unwrap, type components } from "@tutortrack/api-client";
+import { Search } from "lucide-react";
 import { useTranslation } from "@tutortrack/i18n";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -73,10 +74,14 @@ export function CommandPalette() {
       <button
         type="button"
         onClick={open}
-        className="rounded-md px-2 py-1 text-left text-sm hover:bg-muted"
+        className="flex h-9 w-full max-w-md min-w-0 items-center gap-2 rounded-md border border-field bg-surface px-3 text-left text-sm text-muted-foreground hover:border-foreground/40"
         aria-keyshortcuts="Control+K Meta+K"
       >
-        {t("search.open")} <kbd className="text-xs text-muted-foreground">⌘K</kbd>
+        <Search aria-hidden="true" className="size-4 shrink-0" strokeWidth={1.75} />
+        <span className="truncate">{t("search.open")}</span>
+        <kbd className="ml-auto hidden rounded border border-border px-1.5 text-xs sm:inline">
+          ⌘K
+        </kbd>
       </button>
       <dialog
         ref={dialogRef}
