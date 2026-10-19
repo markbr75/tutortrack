@@ -21,7 +21,7 @@ from tutortrack.billing.tests.test_billing import (  # noqa: F401 - fixtures
 )
 from tutortrack.billing.tests.test_phase2 import sold, template
 from tutortrack.core.context import tenant_context
-from tutortrack.core.time import now
+from tutortrack.core.time import now, to_tz
 
 pytestmark = pytest.mark.django_db
 CODES = {
@@ -61,7 +61,7 @@ def test_package_sale_is_deferred_then_released_as_units_are_used(org, family): 
     job = make_job(org, family, "package")
     sold(org, family, template(org, quantity="4", price="160.00"))
     complete(org, lesson(org, family, job=job, minutes=60))
-    today = now().date()
+    today = to_tz(now(), org.timezone).date()  # the org's day, as issue dates are
     with tenant_context(org):
         rows = journals.sales_postings(
             maps, today - timedelta(days=1), today + timedelta(days=1), org.timezone
@@ -78,7 +78,7 @@ def test_package_sale_is_deferred_then_released_as_units_are_used(org, family): 
 def test_without_the_setting_package_sales_are_revenue(org, family):  # noqa: F811
     maps = export_maps(org)
     sold(org, family, template(org, quantity="4", price="160.00"))
-    today = now().date()
+    today = to_tz(now(), org.timezone).date()  # the org's day, as issue dates are
     with tenant_context(org):
         rows = journals.sales_postings(maps, today, today, org.timezone)
         assert journals.package_postings(maps, today, today, org.timezone) == []
