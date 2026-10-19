@@ -20,7 +20,7 @@ async function scan(page: Page) {
 }
 
 const SCREENS: { name: string; role: Role; path: string; ready: string | RegExp }[] = [
-  { name: "home dashboard", role: "owner", path: "/", ready: "Welcome" },
+  { name: "home dashboard", role: "owner", path: "/", ready: /^Good (morning|afternoon|evening)/ },
   { name: "clients list", role: "coordinator", path: "/clients", ready: "Clients" },
   { name: "calendar", role: "coordinator", path: "/calendar", ready: "Calendar" },
   { name: "billing", role: "finance", path: "/billing", ready: "Billing" },

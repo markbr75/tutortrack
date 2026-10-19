@@ -44,7 +44,12 @@ describe("App", () => {
       "GET /api/v1/me/organisations": { body: [] },
     });
     render(<App />);
-    expect(await screen.findByRole("heading", { name: "Welcome" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: /^Good (morning|afternoon|evening), Sam$/,
+      }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Main" })).toBeInTheDocument();
     expect(screen.getByText("courses")).toBeInTheDocument();
     expect(screen.queryByText("payroll")).not.toBeInTheDocument();
