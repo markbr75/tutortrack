@@ -71,6 +71,8 @@ const GROUPS = [
 ] as const;
 /** Settings has its own sub-menu, in the order of the admin guide. */
 const SETTINGS_GROUPS = ["organisation", "teaching", "messages", "data", "trust"] as const;
+/** Menus longer than this collapse to their group headings. */
+const COLLAPSE_AFTER = 16;
 
 // Each entry starts `{ to: "…", key: …` so `manage.py guides --check` can read the routes.
 const NAV: NavItem[] = [
@@ -350,23 +352,87 @@ function useAllowed(): (item: NavItem) => boolean {
   return (item) => !item.permission || Boolean(permissions[item.permission]);
 }
 
-function NavLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => void }) {
+function NavLink({
+  item,
+  onNavigate,
+  count = 0,
+}: {
+  item: NavItem;
+  onNavigate?: () => void;
+  count?: number;
+}) {
   const { t } = useTranslation();
   const Icon = item.icon;
   return (
     <Link
       to={item.to}
       onClick={onNavigate}
-      className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-shell-foreground hover:bg-shell-accent"
-      activeProps={{ className: "bg-shell-accent font-semibold", "aria-current": "page" }}
+      className="flex items-center gap-2.5 rounded-md px-2.5 py-1 text-sm text-shell-foreground hover:bg-shell-accent"
+      // The current page carries the register's 1px red margin rule.
+      activeProps={{
+        className: "bg-shell-accent font-semibold shadow-[inset_1px_0_0_hsl(var(--tt-margin))]",
+        "aria-current": "page",
+      }}
       activeOptions={{ exact: item.to === "/" }}
     >
       {Icon ? (
         <Icon aria-hidden="true" className="size-4 shrink-0 text-shell-muted" strokeWidth={1.75} />
       ) : null}
       <span className="truncate">{t(item.key)}</span>
+      {count > 0 ? (
+        <>
+          <span
+            aria-hidden="true"
+            className="ml-auto rounded-full bg-margin px-1.5 text-[11px] leading-4 font-semibold text-white tabular-nums"
+          >
+            {count > 99 ? "99+" : count}
+          </span>
+          <span className="sr-only">{t("nav.waiting", { count })}</span>
+        </>
+      ) : null}
     </Link>
   );
+}
+
+const OPEN_GROUPS_KEY = "tt.nav.open";
+
+function readOpenGroups(): string[] {
+  try {
+    const value: unknown = JSON.parse(window.localStorage.getItem(OPEN_GROUPS_KEY) ?? "[]");
+    return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Long menus (agency roles) collapse to their group headings so every group fits the first
+ * viewport; the group holding the current page opens itself, and opened groups are remembered.
+ */
+function useOpenGroups(pathname: string, collapsible: boolean) {
+  const current = NAV.filter(
+    (item) => (GROUPS as readonly string[]).includes(item.group) && isActive(pathname, item.to),
+  ).sort((a, b) => b.to.length - a.to.length)[0]?.group;
+  const [open, setOpen] = useState<string[]>(readOpenGroups);
+  useEffect(() => {
+    if (current && !open.includes(current)) setOpen((groups) => [...groups, current]);
+    // Only a change of page opens its group; closing it again is the user's choice.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current]);
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(OPEN_GROUPS_KEY, JSON.stringify(open));
+    } catch {
+      // Private windows and blocked storage just forget the choice.
+    }
+  }, [open]);
+  return {
+    isOpen: (group: string) => !collapsible || group === "main" || open.includes(group),
+    toggle: (group: string) =>
+      setOpen((groups) =>
+        groups.includes(group) ? groups.filter((g) => g !== group) : [...groups, group],
+      ),
+  };
 }
 
 /** Lists the user's other organisations; switching is navigation (FR-02-7). */
@@ -404,6 +470,25 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const settings = SETTINGS_ITEMS.filter(allowed);
   const inSettings = Boolean(settingsItemFor(pathname));
+  const visible = NAV.filter(
+    (item) => (GROUPS as readonly string[]).includes(item.group) && allowed(item),
+  ).length;
+  const collapsible = visible > COLLAPSE_AFTER;
+  const groups = useOpenGroups(pathname, collapsible);
+  const canMark = allowed({
+    to: "",
+    key: "",
+    group: "main",
+    permission: "scheduling.lesson.complete",
+  });
+  // Shares Home's query, so the count and the Needs marking list agree.
+  const waiting = useQuery({
+    queryKey: ["home-unconfirmed"],
+    enabled: canMark,
+    staleTime: 60_000,
+    queryFn: async () => unwrap(await api.GET("/api/v1/unconfirmed-lessons")),
+  });
+  const unconfirmed = canMark ? (waiting.data?.length ?? 0) : 0;
   return (
     <div className="flex h-full flex-col bg-shell px-3 py-4 text-shell-foreground [&_:focus-visible]:outline-shell-foreground">
       <div className="flex items-center gap-2.5 border-b border-white/10 px-2.5 pb-4">
@@ -420,30 +505,58 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       </div>
       <nav
         aria-label="Main"
-        className="mt-3 flex-1 overflow-y-auto pb-6 [mask-image:linear-gradient(to_bottom,black_calc(100%-2.5rem),transparent)] [scrollbar-width:thin]"
+        className="mt-3 flex-1 overflow-y-auto pb-12 [mask-image:linear-gradient(to_bottom,black_calc(100%-2.5rem),transparent)] [scrollbar-width:thin]"
       >
         {GROUPS.map((group) => {
           const items = NAV.filter((item) => item.group === group && allowed(item));
           if (items.length === 0) return null;
           const heading = group === "main" ? null : t(`nav.groups.${group}`);
+          const open = groups.isOpen(group);
+          const label = "px-2.5 text-xs font-semibold uppercase tracking-wider text-shell-muted";
           return (
             <section
               key={group}
               aria-label={heading ?? undefined}
-              className={group === "main" ? "" : "mt-4"}
+              className={group === "main" ? "" : "mt-3"}
             >
-              {heading ? (
-                <h2 className="px-2.5 pb-1 text-xs font-semibold uppercase tracking-wider text-shell-muted">
-                  {heading}
+              {heading && collapsible ? (
+                <h2>
+                  <button
+                    type="button"
+                    aria-expanded={open}
+                    aria-controls={`nav-${group}`}
+                    onClick={() => groups.toggle(group)}
+                    className={cn(
+                      label,
+                      "flex w-full items-center justify-between rounded-md py-1 hover:text-shell-foreground",
+                    )}
+                  >
+                    {heading}
+                    <ChevronDown
+                      aria-hidden="true"
+                      className={cn(
+                        "size-3.5 transition-transform duration-150",
+                        open ? "" : "-rotate-90",
+                      )}
+                    />
+                  </button>
                 </h2>
+              ) : heading ? (
+                <h2 className={cn(label, "pb-1")}>{heading}</h2>
               ) : null}
-              <ul className="space-y-px">
-                {items.map((item) => (
-                  <li key={item.to}>
-                    <NavLink item={item} onNavigate={onNavigate} />
-                  </li>
-                ))}
-              </ul>
+              {open ? (
+                <ul id={`nav-${group}`} className="space-y-px">
+                  {items.map((item) => (
+                    <li key={item.to}>
+                      <NavLink
+                        item={item}
+                        onNavigate={onNavigate}
+                        count={item.to === "/unconfirmed" ? unconfirmed : 0}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </section>
           );
         })}

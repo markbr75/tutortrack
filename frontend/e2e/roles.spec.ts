@@ -64,6 +64,9 @@ test.describe("staff roles see their own navigation", () => {
       await page.goto("/");
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
       const nav = page.getByRole("navigation", { name: "Main" });
+      // Long menus collapse to their group headings: open them all before checking links.
+      const closed = nav.getByRole("button", { expanded: false });
+      while ((await closed.count()) > 0) await closed.first().click();
       for (const name of sees) {
         await expect(nav.getByRole("link", { name, exact: true })).toBeVisible();
       }

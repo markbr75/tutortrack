@@ -57,7 +57,9 @@
     "menu": "Menu",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "userMenu": "Account menu for {{name}}"
+    "userMenu": "Account menu for {{name}}",
+    "waiting_one": "1 waiting",
+    "waiting_other": "{{count}} waiting"
   },
   "auth": {
     "signInTitle": "Sign in",

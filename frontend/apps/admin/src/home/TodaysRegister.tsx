@@ -58,7 +58,7 @@ export function TodaysRegister({ now = new Date() }: { now?: Date }) {
       ) : rows.length === 0 ? (
         <div className="px-5 py-8 text-sm">
           <p className="text-muted-foreground">{t("home.register.empty")}</p>
-          <Link to="/calendar" className="mt-2 inline-block font-medium text-brand hover:underline">
+          <Link to="/calendar" className="mt-2 inline-block font-medium text-link hover:underline">
             {t("home.register.openCalendar")}
           </Link>
         </div>
@@ -91,11 +91,17 @@ export function TodaysRegister({ now = new Date() }: { now?: Date }) {
                   <Fragment key={lesson.id}>
                     {index === nowIndex ? nowRule : null}
                     <tr className="border-t border-rule align-middle">
-                      <td className="py-2.5 pr-3 pl-5 font-semibold">
+                      <td className="py-2.5 pr-3 pl-5 font-semibold tabular-nums">
                         <time dateTime={lesson.start}>{time(lesson.start)}</time>
                       </td>
                       <td className="py-2.5 pr-3">
-                        <span className="block">{lesson.title}</span>
+                        {/* Over and unmarked: straight to marking; otherwise the day in the calendar. */}
+                        <Link
+                          to={kind === "due" ? "/unconfirmed" : "/calendar"}
+                          className="block font-medium hover:text-link hover:underline"
+                        >
+                          {lesson.title}
+                        </Link>
                         <span className="block text-xs text-muted-foreground">
                           {[students, where].filter(Boolean).join(" · ")}
                         </span>

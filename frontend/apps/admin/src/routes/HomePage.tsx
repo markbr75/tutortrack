@@ -96,7 +96,7 @@ export function HomePage() {
         ) : (
           <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
             {enabled.map(([key]) => (
-              <li key={key}>{key}</li>
+              <li key={key}>{t(`plan.features.${key}`, { defaultValue: key })}</li>
             ))}
           </ul>
         )}

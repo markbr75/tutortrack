@@ -282,9 +282,12 @@ export function Dashboard() {
     setDraft(next);
   };
   return (
-    <section aria-labelledby="dashboard-title" className="mt-6 space-y-4">
+    <section
+      aria-labelledby="dashboard-title"
+      className="mt-6 space-y-4 border-t border-border pt-6"
+    >
       <div className="flex flex-wrap items-end gap-3">
-        <h2 id="dashboard-title" className="mr-auto text-lg font-medium">
+        <h2 id="dashboard-title" className="w-full text-lg font-semibold sm:mr-auto sm:w-auto">
           {t("reporting.dashboard")}
         </h2>
         <PeriodFields {...period} onChange={setPeriod} />

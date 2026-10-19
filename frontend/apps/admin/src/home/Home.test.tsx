@@ -137,6 +137,15 @@ describe("home", () => {
     // Year 4 Maths ended at 15:00 and is still planned: over, not marked.
     expect(within(register).getByRole("img", { name: "Not marked yet" })).toBeInTheDocument();
     expect(within(register).getByRole("img", { name: "Still to come" })).toBeInTheDocument();
+    // Over and unmarked goes straight to marking; the rest open the calendar.
+    expect(within(register).getByRole("link", { name: "Year 4 Maths" })).toHaveAttribute(
+      "href",
+      "/unconfirmed",
+    );
+    expect(within(register).getByRole("link", { name: "GCSE Higher Maths" })).toHaveAttribute(
+      "href",
+      "/calendar",
+    );
     // The rule is decoration for sighted users (aria-hidden), so read the table rows directly.
     const rows = [...register.querySelectorAll("tbody tr")];
     const nowRow = rows.findIndex((row) => /Now · 15:12/.test(row.textContent ?? ""));
@@ -155,9 +164,21 @@ describe("home", () => {
       "href",
       "/unconfirmed",
     );
+    // The same mark the register uses, and a way straight to marking.
+    expect(within(marking).getByRole("img", { name: "Not marked yet" })).toBeInTheDocument();
+    expect(within(marking).getByRole("link", { name: /Year 6 11\+ Prep/ })).toHaveAttribute(
+      "href",
+      "/unconfirmed",
+    );
     const overdue = screen.getByRole("region", { name: "Overdue invoices" });
     expect(await within(overdue).findByText("The Okafor Family")).toBeInTheDocument();
     expect(within(overdue).getByText("£240.00")).toBeInTheDocument();
+    expect(within(overdue).getByRole("link", { name: /The Okafor Family/ })).toHaveAttribute(
+      "href",
+      "/invoices/i1",
+    );
+    // The total owed overdue comes from the outstanding figure.
+    expect(await within(overdue).findByText("£380.00")).toBeInTheDocument();
   });
 
   it("puts this month's money on one line, the change said in words", async () => {

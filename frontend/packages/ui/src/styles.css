@@ -14,6 +14,9 @@
 :root {
   --tt-brand: 219 59% 40%; /* register ink blue: primary actions, links, selection */
   --tt-brand-foreground: 0 0% 100%;
+  /* Link and inline-accent text: the register's ink blue. Not tenant-overridden (the tenant
+     colour fills buttons), so it keeps AA contrast on the stock in both schemes. */
+  --tt-link: 219 59% 40%;
   --tt-background: 60 23% 97%; /* register stock */
   --tt-surface: 0 0% 100%; /* panels and tables on the stock */
   --tt-foreground: 218 31% 15%; /* blue-black ink */
@@ -38,6 +41,7 @@
   :root:not([data-theme="light"]) {
     --tt-brand: 220 75% 73%;
     --tt-brand-foreground: 218 59% 13%;
+    --tt-link: 220 75% 73%;
     --tt-background: 205 27% 9%;
     --tt-surface: 205 29% 12%;
     --tt-foreground: 210 29% 92%;
@@ -61,6 +65,7 @@
 :root[data-theme="dark"] {
   --tt-brand: 220 75% 73%;
   --tt-brand-foreground: 218 59% 13%;
+  --tt-link: 220 75% 73%;
   --tt-background: 205 27% 9%;
   --tt-surface: 205 29% 12%;
   --tt-foreground: 210 29% 92%;
@@ -83,6 +88,7 @@
 @theme inline {
   --color-brand: hsl(var(--tt-brand));
   --color-brand-foreground: hsl(var(--tt-brand-foreground));
+  --color-link: hsl(var(--tt-link));
   --color-background: hsl(var(--tt-background));
   --color-surface: hsl(var(--tt-surface));
   --color-foreground: hsl(var(--tt-foreground));

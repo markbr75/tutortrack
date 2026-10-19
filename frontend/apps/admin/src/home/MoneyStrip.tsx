@@ -49,7 +49,7 @@ function Figure({
 }
 
 function Amount({ children }: { children: ReactNode }) {
-  return <p className="mt-1 text-xl font-semibold">{children}</p>;
+  return <p className="mt-1 text-xl font-semibold tabular-nums">{children}</p>;
 }
 
 /** One ruled line of money: what came in this month, what is owed, what tutors are due. */
