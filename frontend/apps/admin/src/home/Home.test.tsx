@@ -13,6 +13,11 @@ const ORG = {
   default_currency: "GBP",
 };
 
+/** 19 October 2026 at hh:mm on this machine's clock, as an ISO instant. */
+function local(hour: number, minute = 0, day = 19): string {
+  return new Date(2026, 9, day, hour, minute).toISOString();
+}
+
 function lesson(id: string, title: string, start: string, end: string, status: string) {
   return {
     id,
@@ -47,29 +52,15 @@ function routes(permissions: Record<string, string> = PERMISSIONS) {
         next: null,
         previous: null,
         results: [
-          lesson(
-            "l1",
-            "A-level Chemistry",
-            "2026-10-19T08:00:00Z",
-            "2026-10-19T09:00:00Z",
-            "completed",
-          ),
-          lesson("l2", "KS3 English", "2026-10-19T12:30:00Z", "2026-10-19T13:30:00Z", "missed"),
-          lesson("l3", "Year 4 Maths", "2026-10-19T13:00:00Z", "2026-10-19T14:00:00Z", "planned"),
-          lesson(
-            "l4",
-            "GCSE Higher Maths",
-            "2026-10-19T15:30:00Z",
-            "2026-10-19T16:30:00Z",
-            "planned",
-          ),
+          lesson("l1", "A-level Chemistry", local(9, 0), local(10, 0), "completed"),
+          lesson("l2", "KS3 English", local(13, 30), local(14, 30), "missed"),
+          lesson("l3", "Year 4 Maths", local(14, 0), local(15, 0), "planned"),
+          lesson("l4", "GCSE Higher Maths", local(16, 30), local(17, 30), "planned"),
         ],
       },
     },
     "GET /api/v1/unconfirmed-lessons": {
-      body: [
-        lesson("u1", "Year 6 11+ Prep", "2026-10-10T09:00:00Z", "2026-10-10T10:00:00Z", "planned"),
-      ],
+      body: [lesson("u1", "Year 6 11+ Prep", local(10, 0, 10), local(11, 0, 10), "planned")],
     },
     "GET /api/v1/invoices": {
       body: {
@@ -101,14 +92,14 @@ function routes(permissions: Record<string, string> = PERMISSIONS) {
       body: { values: [{ label: "", currency: "GBP", value: "3905.40", previous: null }] },
     },
     "GET /api/v1/features": { body: {} },
-    "GET /api/v1/setup-checklist": { body: { dismissed_at: "2026-10-01T00:00:00Z", steps: [] } },
+    "GET /api/v1/setup-checklist": { body: { dismissed_at: local(1, 0, 1), steps: [] } },
   };
 }
 
 describe("home", () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
-    vi.setSystemTime(new Date("2026-10-19T14:12:00Z")); // 15:12 in London
+    vi.setSystemTime(new Date(local(15, 12))); // 15:12 on Monday 19 October, local time
   });
   afterEach(() => vi.useRealTimers());
 
@@ -148,7 +139,9 @@ describe("home", () => {
     );
     // The rule is decoration for sighted users (aria-hidden), so read the table rows directly.
     const rows = [...register.querySelectorAll("tbody tr")];
-    const nowRow = rows.findIndex((row) => /Now · 15:12/.test(row.textContent ?? ""));
+    // The rule shows the viewer's local time, so expect it in this machine's timezone.
+    const nowLabel = `Now · ${new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" }).format(new Date())}`;
+    const nowRow = rows.findIndex((row) => (row.textContent ?? "").includes(nowLabel));
     const upcoming = rows.findIndex((row) => /GCSE Higher Maths/.test(row.textContent ?? ""));
     expect(nowRow).toBeGreaterThan(0);
     expect(nowRow).toBe(upcoming - 1);
