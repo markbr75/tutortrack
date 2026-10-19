@@ -108,10 +108,18 @@ describe("App", () => {
     fireEvent.click(money);
     expect(within(main).getByRole("link", { name: "Billing" })).toBeInTheDocument();
     expect(JSON.parse(window.localStorage.getItem("tt.nav.open") ?? "[]")).toContain("money");
-    fireEvent.click(within(main).getByRole("button", { name: "Scheduling" }));
+    // People and Scheduling open on a first visit; the count reads on the link…
+    const scheduling = within(main).getByRole("button", { name: "Scheduling" });
+    expect(scheduling).toHaveAttribute("aria-expanded", "true");
     expect(
       await within(main).findByRole("link", { name: /^Unconfirmed lessons\s*3 waiting$/ }),
     ).toBeInTheDocument();
+    // …and on the heading once its group is closed, so it is never hidden.
+    fireEvent.click(scheduling);
+    expect(within(main).getByRole("button", { name: /^Scheduling\s*3 waiting$/ })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
     window.history.pushState(null, "", "/");
   });
 

@@ -396,12 +396,17 @@ function NavLink({
 
 const OPEN_GROUPS_KEY = "tt.nav.open";
 
+/** Open on a first visit: the groups an office opens most. */
+const DEFAULT_OPEN = ["people", "scheduling"];
+
 function readOpenGroups(): string[] {
   try {
-    const value: unknown = JSON.parse(window.localStorage.getItem(OPEN_GROUPS_KEY) ?? "[]");
+    const stored = window.localStorage.getItem(OPEN_GROUPS_KEY);
+    if (stored === null) return DEFAULT_OPEN;
+    const value: unknown = JSON.parse(stored);
     return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : [];
   } catch {
-    return [];
+    return DEFAULT_OPEN;
   }
 }
 
@@ -512,6 +517,9 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           if (items.length === 0) return null;
           const heading = group === "main" ? null : t(`nav.groups.${group}`);
           const open = groups.isOpen(group);
+          const countFor = (item: NavItem) => (item.to === "/unconfirmed" ? unconfirmed : 0);
+          // A closed group still shows what is waiting inside it.
+          const hiddenCount = open ? 0 : items.reduce((sum, item) => sum + countFor(item), 0);
           const label = "px-2.5 text-xs font-semibold uppercase tracking-wider text-shell-muted";
           return (
             <section
@@ -531,7 +539,22 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                       "flex w-full items-center justify-between rounded-md py-1 hover:text-shell-foreground",
                     )}
                   >
-                    {heading}
+                    <span className="flex items-center gap-2">
+                      {heading}
+                      {hiddenCount > 0 ? (
+                        <>
+                          <span
+                            aria-hidden="true"
+                            className="rounded-full bg-margin px-1.5 text-[11px] leading-4 font-semibold tracking-normal text-white normal-case tabular-nums"
+                          >
+                            {hiddenCount > 99 ? "99+" : hiddenCount}
+                          </span>
+                          <span className="sr-only">
+                            {t("nav.waiting", { count: hiddenCount })}
+                          </span>
+                        </>
+                      ) : null}
+                    </span>
                     <ChevronDown
                       aria-hidden="true"
                       className={cn(
@@ -548,11 +571,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 <ul id={`nav-${group}`} className="space-y-px">
                   {items.map((item) => (
                     <li key={item.to}>
-                      <NavLink
-                        item={item}
-                        onNavigate={onNavigate}
-                        count={item.to === "/unconfirmed" ? unconfirmed : 0}
-                      />
+                      <NavLink item={item} onNavigate={onNavigate} count={countFor(item)} />
                     </li>
                   ))}
                 </ul>
