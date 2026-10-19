@@ -104,9 +104,10 @@ export function colourFor(key: string): string {
   return PALETTE[hash % PALETTE.length] ?? "#2563eb";
 }
 
+/** Lesson status colours from the design tokens, so they follow the light/dark scheme. */
 export const STATUS_COLOURS: Record<string, string> = {
-  planned: "#2563eb",
-  completed: "#059669",
-  cancelled: "#9ca3af",
-  missed: "#dc2626",
+  planned: "hsl(var(--tt-link))",
+  completed: "hsl(var(--tt-success))",
+  cancelled: "hsl(var(--tt-muted-foreground))",
+  missed: "hsl(var(--tt-margin))",
 };

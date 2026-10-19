@@ -1,3 +1,4 @@
+import { RegisterMark, registerMarkFor } from "@tutortrack/ui";
 import { formatDate, useTranslation } from "@tutortrack/i18n";
 
 import { timeIn } from "../g3/zones";
@@ -48,11 +49,12 @@ export function MonthView({
                 return (
                   <td
                     key={day.toISOString()}
-                    className={`h-24 border border-border p-1 align-top ${day.getMonth() === month ? "" : "bg-muted/40 text-muted-foreground"}`}
+                    className={`h-24 border border-border p-1 align-top ${day.getMonth() === month ? "bg-surface" : "bg-muted/40 text-muted-foreground"}`}
                   >
                     <button
                       type="button"
-                      className="mb-1 text-xs font-medium hover:underline"
+                      aria-current={sameDay(day, new Date()) ? "date" : undefined}
+                      className="mb-1 text-xs font-medium hover:underline aria-[current=date]:font-semibold aria-[current=date]:text-margin"
                       aria-label={t("calendar.openDay", {
                         day: formatDate(day.toISOString(), i18n.language),
                       })}
@@ -65,8 +67,11 @@ export function MonthView({
                         <li key={`${item.kind}-${item.id}`}>
                           <button
                             type="button"
-                            className={`block w-full truncate rounded px-1 text-left text-white ${item.status === "cancelled" ? "line-through opacity-60" : ""}`}
-                            style={{ background: colour(item) }}
+                            className={`block w-full truncate rounded border px-1 text-left text-foreground ${item.status === "cancelled" ? "line-through opacity-70" : ""}`}
+                            style={{
+                              background: `color-mix(in srgb, ${colour(item)} 16%, hsl(var(--tt-surface)))`,
+                              borderColor: colour(item),
+                            }}
                             onClick={() => onSelect(item)}
                           >
                             {time(item.start, i18n.language)} {item.title}
@@ -111,7 +116,13 @@ export function AgendaView({
 }) {
   const { t, i18n } = useTranslation();
   const withItems = days
-    .map((day) => ({ day, items: items.filter((i) => sameDay(new Date(i.start), day)) }))
+    .map((day) => ({
+      day,
+      // In time order within the day, whatever order the API sent.
+      items: items
+        .filter((i) => sameDay(new Date(i.start), day))
+        .sort((a, b) => a.start.localeCompare(b.start)),
+    }))
     .filter((d) => d.items.length);
   if (!withItems.length)
     return <p className="text-sm text-muted-foreground">{t("calendar.nothing")}</p>;
@@ -119,14 +130,17 @@ export function AgendaView({
     <div className="space-y-4">
       {withItems.map(({ day, items: dayItems }) => (
         <section key={day.toISOString()}>
-          <h2 className="mb-2 font-semibold">
+          <h2
+            aria-current={sameDay(day, new Date()) ? "date" : undefined}
+            className="mb-2 text-base font-semibold aria-[current=date]:text-margin"
+          >
             {day.toLocaleDateString(i18n.language, {
               weekday: "long",
               day: "numeric",
               month: "long",
             })}
           </h2>
-          <ul className="divide-y divide-border rounded-md border border-border">
+          <ul className="divide-y divide-rule rounded-xl border border-border bg-surface">
             {dayItems.map((item) => (
               <li key={`${item.kind}-${item.id}`} className="flex items-start">
                 {onToggle && item.kind === "lesson" ? (
@@ -140,7 +154,7 @@ export function AgendaView({
                 ) : null}
                 <button
                   type="button"
-                  className="flex w-full items-start gap-3 p-2 text-left text-sm hover:bg-muted"
+                  className="flex w-full items-start gap-3 px-4 py-2.5 text-left text-sm hover:bg-muted/60"
                   onClick={() => onSelect(item)}
                 >
                   <span
@@ -157,7 +171,9 @@ export function AgendaView({
                       </span>
                     ) : null}
                   </span>
-                  <span className={item.status === "cancelled" ? "line-through" : undefined}>
+                  <span
+                    className={`min-w-0 flex-1 ${item.status === "cancelled" ? "line-through" : ""}`}
+                  >
                     <span className="font-medium">{item.title}</span>
                     <span className="block text-muted-foreground">
                       {[
@@ -171,6 +187,13 @@ export function AgendaView({
                         : ""}
                     </span>
                   </span>
+                  {item.kind === "lesson" ? (
+                    <RegisterMark
+                      kind={registerMarkFor(item.status, item.end)}
+                      label={t(`calendar.status.${item.status}`, { defaultValue: item.status })}
+                      className="mt-0.5"
+                    />
+                  ) : null}
                 </button>
               </li>
             ))}
