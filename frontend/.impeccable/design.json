@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-19T21:45:00Z",
+  "generatedAt": "2026-10-20T12:00:00Z",
   "title": "Design System: TutorTrack",
   "extensions": {
     "colorMeta": {
@@ -25,7 +25,12 @@
           "#a4c5ff",
           "#e6efff"
         ],
-        "tenantOverridable": true
+        "tenantOverridable": true,
+        "portalTint": {
+          "tab": "hsl(var(--tt-brand) / 0.15)",
+          "railRow": "hsl(var(--tt-brand) / 0.10)",
+          "purpose": "Soft tint behind the current portal tab's icon and the current portal rail row; never text, icon colour or edge."
+        }
       },
       "brand-foreground": {
         "role": "primary",
@@ -494,15 +499,15 @@
     "typographyMeta": {
       "headline": {
         "displayName": "Headline",
-        "purpose": "Page titles: the Home greeting and every page header."
+        "purpose": "Admin page titles: the Home greeting and every page header. Portal screens title at 20px/600 instead."
       },
       "figure": {
         "displayName": "Figure",
-        "purpose": "Money amounts in the money strip; tabular figures."
+        "purpose": "Money amounts in the money strip; in the portal the lesson card's time range, the tutor's earnings and the affiliate's figures. Tabular figures."
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Panel headings and the settings area heading."
+        "purpose": "Panel headings and the settings area heading; in the portal (16px reading base) a row's primary line, such as the lesson title and the owed line."
       },
       "body": {
         "displayName": "Body",
@@ -510,11 +515,11 @@
       },
       "caption": {
         "displayName": "Caption",
-        "purpose": "One muted context line under a row, field hints, chart axis labels, table column headings (at 600)."
+        "purpose": "One muted context line under a row, field hints, chart axis labels, table column headings (at 600), the portal tab bar's labels."
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Uppercase tracked: navigation group headings and the NOW rule only."
+        "purpose": "Uppercase tracked: navigation group headings (admin rail, settings sub-menu, portal rail and More sheet) and the NOW rule only."
       }
     },
     "fontSource": {
@@ -526,12 +531,12 @@
       {
         "name": "floating-menu",
         "value": "0 8px 24px -8px rgb(15 23 42 / 0.25)",
-        "purpose": "Account menu and other elements that float over the page; the only shadow."
+        "purpose": "The account menu (admin and portal) and other elements that float over the page; the only shadow. The portal's modal More sheet has none."
       },
       {
         "name": "current-margin-rule",
         "value": "inset 1px 0 0 hsl(var(--tt-margin))",
-        "purpose": "1px red rule inside the current rail item's left edge (not depth)."
+        "purpose": "1px red rule inside the current admin rail item's left edge (not depth). The portal rail uses the brand tint instead."
       }
     ],
     "focus": [
@@ -556,18 +561,23 @@
         "name": "reduced-motion",
         "value": "transition and animation durations 0.01ms",
         "purpose": "Applied to everything under prefers-reduced-motion: reduce."
+      },
+      {
+        "name": "sheet-slide",
+        "value": "transform 200ms ease-out, from translateY(100%)",
+        "purpose": "The portal's More sheet sliding up from the tab bar on opening."
       }
     ],
     "breakpoints": [
       {
         "name": "sm",
         "value": "640px",
-        "purpose": "Register tables show the tutor column."
+        "purpose": "Register tables show the tutor column; portal lesson-card actions leave their two phone columns for one wrapping row; Copy link moves beside its value."
       },
       {
         "name": "md",
         "value": "768px",
-        "purpose": "Rail is shown; below it the rail is a modal drawer."
+        "purpose": "Admin: the rail is shown (below it, a modal drawer). Portal: the 240px rail replaces the tab bar."
       },
       {
         "name": "lg",
@@ -597,7 +607,18 @@
         "next_pay_run",
         "upcoming_today",
         "unconfirmed"
-      ]
+      ],
+      "portalHeaderHeight": "3.5rem",
+      "portalTabSlotHeight": "4rem (plus the safe-area inset)",
+      "portalTabBarMaxWidth": "32rem",
+      "portalTabsMax": 4,
+      "portalAllTabsUpTo": 5,
+      "portalRailWidth": "15rem",
+      "portalContentMaxWidth": "48rem",
+      "portalSheetMaxHeight": "85dvh",
+      "portalSheetFade": "3.5rem",
+      "portalSignInWidth": "24rem",
+      "portalHomeSectionGap": "2rem"
     },
     "globalDefaults": [
       {
@@ -726,18 +747,67 @@
       "description": "A lesson in the time grid: the category colour mixed 16% into the clean leaf with a full-strength 1px edge, ink caption text and a leading register mark.",
       "html": "<div class=\"ds-cal\"><button class=\"ds-block\" style=\"--c:#2f8f83\" type=\"button\"><svg class=\"ds-mark ds-mark-upcoming\" viewBox=\"0 0 20 20\" role=\"img\" aria-label=\"To come\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\"><circle cx=\"10\" cy=\"10\" r=\"6.5\" stroke-width=\"1.75\" stroke-dasharray=\"3 2.6\"/></svg><span>Year 4 Maths group<br>13:00</span></button><div class=\"ds-cal-now\" aria-hidden=\"true\"></div></div>",
       "css": ".ds-cal { position: relative; width: 200px; padding: 8px 0 24px; font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; background: hsl(var(--tt-background, 40 33% 98%)); } .ds-block { display: flex; align-items: flex-start; gap: 4px; width: 100%; text-align: left; padding: 4px 6px; border-radius: 8px; border: 1px solid var(--c); background: color-mix(in srgb, var(--c) 16%, hsl(var(--tt-surface, 0 0% 100%))); color: hsl(var(--tt-foreground, 218 31% 15%)); font: inherit; font-size: 12px; line-height: 16px; } .ds-block:focus-visible { outline: 2px solid hsl(var(--tt-link, 219 59% 40%)); outline-offset: 1px; } .ds-block .ds-mark { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; } .ds-mark-upcoming { color: hsl(var(--tt-field, 216 17% 56%)); } .ds-cal-now { position: absolute; left: 0; right: 0; bottom: 10px; border-top: 2px solid hsl(var(--tt-margin, 4 63% 48%)); } .ds-cal-now::before { content: ''; position: absolute; left: -5px; top: -5px; width: 8px; height: 8px; border-radius: 50%; background: hsl(var(--tt-margin, 4 63% 48%)); }"
+    },
+    {
+      "name": "Portal Tab Bar",
+      "kind": "nav",
+      "refersTo": "tab-bar-item-active",
+      "description": "Phone navigation for every portal role: up to four everyday tabs plus More, 64px slots; the current tab is ink at 600 with its icon in a soft brand-tint pill.",
+      "html": "<nav class=\"ds-tabbar\" aria-label=\"Portal\"><ul><li><a href=\"#\" aria-current=\"page\"><span class=\"ds-pill\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\"/><path d=\"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/></svg></span>Home</a></li><li><a href=\"#\"><span class=\"ds-pill\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M8 2v4M16 2v4M3 10h18\"/></svg></span>Schedule</a></li><li><a href=\"#\"><span class=\"ds-pill\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"20\" height=\"14\" x=\"2\" y=\"5\" rx=\"2\"/><path d=\"M2 10h20\"/></svg></span>Billing</a></li><li><a href=\"#\"><span class=\"ds-pill\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"/></svg></span>Messages</a></li><li><button type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\"><span class=\"ds-pill\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"1\"/><circle cx=\"19\" cy=\"12\" r=\"1\"/><circle cx=\"5\" cy=\"12\" r=\"1\"/></svg></span>More</button></li></ul></nav>",
+      "css": ".ds-tabbar { width: 390px; background: hsl(var(--tt-surface, 0 0% 100%)); border-top: 1px solid hsl(var(--tt-border, 212 48% 84%)); font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; } .ds-tabbar ul { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; } .ds-tabbar a, .ds-tabbar button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 100%; min-height: 64px; padding: 6px 4px 4px; border: 0; background: none; font: inherit; font-size: 12px; line-height: 16px; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); text-decoration: none; cursor: pointer; } .ds-pill { display: grid; place-items: center; width: 56px; height: 28px; border-radius: 9999px; transition: background-color 150ms cubic-bezier(0.4,0,0.2,1); } .ds-tabbar a:hover { color: hsl(var(--tt-foreground, 218 31% 15%)); } .ds-tabbar [aria-current=page] { color: hsl(var(--tt-foreground, 218 31% 15%)); font-weight: 600; } .ds-tabbar [aria-current=page] .ds-pill { background: hsl(var(--tt-brand, 219 59% 40%) / 0.15); } .ds-tabbar a:focus-visible, .ds-tabbar button:focus-visible { outline: 2px solid hsl(var(--tt-link, 219 59% 40%)); outline-offset: 2px; }"
+    },
+    {
+      "name": "More Sheet",
+      "kind": "nav",
+      "refersTo": "more-sheet",
+      "description": "Modal bottom sheet for the portal's other destinations: fixed ruled header, scrolling list that fades at the foot, label-style group headings, 48px ruled rows.",
+      "html": "<div class=\"ds-sheet\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"ds-sheet-h\"><div class=\"ds-sheet-head\"><h2 id=\"ds-sheet-h\">More</h2><button type=\"button\" aria-label=\"Close\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M18 6 6 18M6 6l12 12\"/></svg></button></div><div class=\"ds-sheet-body\"><section aria-labelledby=\"ds-g1\"><h3 id=\"ds-g1\">Lessons and learning</h3><ul><li><a href=\"#\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/></svg>Reports</a></li><li><a href=\"#\" aria-current=\"page\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 7v14\"/><path d=\"M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z\"/></svg>Learning</a></li></ul></section><section aria-labelledby=\"ds-g2\"><h3 id=\"ds-g2\">Account</h3><ul><li><a href=\"#\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"/></svg>Messages</a></li><li><a href=\"#\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"20\" height=\"14\" x=\"2\" y=\"5\" rx=\"2\"/><path d=\"M2 10h20\"/></svg>Billing</a></li></ul></section></div></div>",
+      "css": ".ds-sheet { width: 390px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; background: hsl(var(--tt-surface, 0 0% 100%)); color: hsl(var(--tt-foreground, 218 31% 15%)); border-top: 1px solid hsl(var(--tt-border, 212 48% 84%)); border-radius: 12px 12px 0 0; font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; font-size: 14px; } .ds-sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid hsl(var(--tt-border, 212 48% 84%)); } .ds-sheet-head h2 { margin: 0; font-size: 16px; font-weight: 600; } .ds-sheet-head button { display: grid; place-items: center; width: 40px; height: 40px; margin-right: -8px; border: 0; border-radius: 8px; background: none; color: inherit; cursor: pointer; } .ds-sheet-head button:hover { background: hsl(var(--tt-muted, 210 42% 95%)); } .ds-sheet-body { overflow-y: auto; overscroll-behavior: contain; padding-bottom: 56px; -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 3.5rem), transparent); mask-image: linear-gradient(to bottom, black calc(100% - 3.5rem), transparent); } .ds-sheet h3 { margin: 0; padding: 16px 20px 4px; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-sheet ul { margin: 0; padding: 0; list-style: none; } .ds-sheet li + li { border-top: 1px solid hsl(var(--tt-rule, 212 51% 93%)); } .ds-sheet-body a { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 20px; color: hsl(var(--tt-foreground, 218 31% 15%)); text-decoration: none; } .ds-sheet-body a svg { color: hsl(var(--tt-muted-foreground, 222 18% 41%)); flex-shrink: 0; } .ds-sheet-body a:hover { background: hsl(var(--tt-muted, 210 42% 95%)); } .ds-sheet-body a[aria-current=page] { font-weight: 600; } .ds-sheet a:focus-visible, .ds-sheet button:focus-visible { outline: 2px solid hsl(var(--tt-link, 219 59% 40%)); outline-offset: 2px; outline-offset: -2px; }"
+    },
+    {
+      "name": "Portal Rail",
+      "kind": "nav",
+      "refersTo": "portal-rail",
+      "description": "The portal's wide-screen navigation: a 240px clean-leaf rail with the business name in ink, label-style group headings, and the current row filled with the brand at 10% at 600.",
+      "html": "<aside class=\"ds-prail\"><div class=\"ds-prail-head\"><span>Bright Minds Tutoring</span></div><nav aria-label=\"Portal\"><ul><li><a href=\"#\" aria-current=\"page\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\"/><path d=\"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/></svg>Home</a></li></ul><h2>Lessons and learning</h2><ul><li><a href=\"#\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M8 2v4M16 2v4M3 10h18\"/></svg>Schedule</a></li><li><a href=\"#\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/></svg>Reports</a></li></ul><h2>Account</h2><ul><li><a href=\"#\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"20\" height=\"14\" x=\"2\" y=\"5\" rx=\"2\"/><path d=\"M2 10h20\"/></svg>Billing</a></li><li><a href=\"#\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"/></svg>Messages</a></li></ul></nav></aside>",
+      "css": ".ds-prail { width: 240px; background: hsl(var(--tt-surface, 0 0% 100%)); color: hsl(var(--tt-foreground, 218 31% 15%)); border-right: 1px solid hsl(var(--tt-border, 212 48% 84%)); font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; font-size: 14px; } .ds-prail-head { display: flex; align-items: center; height: 56px; padding: 0 20px; border-bottom: 1px solid hsl(var(--tt-border, 212 48% 84%)); font-weight: 600; } .ds-prail nav { padding: 16px 12px; } .ds-prail h2 { margin: 20px 0 0; padding: 0 12px 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-prail ul { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; } .ds-prail a { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; color: hsl(var(--tt-foreground, 218 31% 15%)); text-decoration: none; transition: background-color 150ms cubic-bezier(0.4,0,0.2,1); } .ds-prail a svg { color: hsl(var(--tt-muted-foreground, 222 18% 41%)); flex-shrink: 0; } .ds-prail a:hover { background: hsl(var(--tt-muted, 210 42% 95%)); } .ds-prail a[aria-current=page] { background: hsl(var(--tt-brand, 219 59% 40%) / 0.10); font-weight: 600; } .ds-prail a:focus-visible { outline: 2px solid hsl(var(--tt-link, 219 59% 40%)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Lesson Card",
+      "kind": "card",
+      "refersTo": "lesson-card",
+      "description": "The family's lesson: weekday and date in faded ink, the time range at 20px/600 tabular, the register mark, title and context, then ruled actions in order of use with Cancel lesson last as a muted ghost.",
+      "html": "<article class=\"ds-lesson\" aria-label=\"Maths with Sam\"><div class=\"ds-lesson-when\"><div><p class=\"ds-lesson-date\">Thursday 22 October</p><p class=\"ds-lesson-time\"><time>16:00</time>–<time>17:00</time></p></div><span class=\"ds-lesson-mark\"><svg class=\"ds-mark\" width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" role=\"img\" aria-label=\"To come\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\"><circle cx=\"10\" cy=\"10\" r=\"6.5\" stroke-width=\"1.75\" stroke-dasharray=\"3 2.6\"/></svg></span></div><div class=\"ds-lesson-what\"><h2>Maths with Sam</h2><p>Priya Shah · Online</p></div><div class=\"ds-lesson-actions\"><a class=\"ds-b ds-b-primary ds-wide\" href=\"#\">Join the lesson</a><a class=\"ds-b ds-b-secondary\" href=\"#\">Open the classroom</a><button class=\"ds-b ds-b-secondary\" type=\"button\">Ask to move</button><button class=\"ds-b ds-b-secondary\" type=\"button\">Can't make it</button><a class=\"ds-b ds-b-secondary\" href=\"#\">Add to calendar</a><button class=\"ds-b ds-b-ghost\" type=\"button\">Cancel lesson</button></div></article>",
+      "css": ".ds-lesson { width: 358px; display: flex; flex-direction: column; gap: 12px; padding: 16px; background: hsl(var(--tt-surface, 0 0% 100%)); color: hsl(var(--tt-foreground, 218 31% 15%)); border: 1px solid hsl(var(--tt-border, 212 48% 84%)); border-radius: 12px; font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; } .ds-lesson p, .ds-lesson h2 { margin: 0; } .ds-lesson-when { display: flex; align-items: flex-start; gap: 12px; } .ds-lesson-when > div { flex: 1; } .ds-lesson-date { font-size: 14px; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-lesson-time { font-size: 20px; line-height: 1.4; font-weight: 600; font-variant-numeric: tabular-nums; } .ds-lesson-mark { margin-top: 4px; color: hsl(var(--tt-field, 216 17% 56%)); } .ds-lesson-what h2 { font-size: 16px; font-weight: 600; } .ds-lesson-what p { margin-top: 4px; font-size: 14px; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-lesson-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding-top: 12px; border-top: 1px solid hsl(var(--tt-rule, 212 51% 93%)); } .ds-wide { grid-column: span 2; } .ds-b { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4,0,0.2,1), opacity 150ms cubic-bezier(0.4,0,0.2,1); } .ds-b-primary { background: hsl(var(--tt-brand, 219 59% 40%)); color: hsl(var(--tt-brand-foreground, 0 0% 100%)); border: 0; } .ds-b-primary:hover { opacity: 0.9; } .ds-b-secondary { background: hsl(var(--tt-surface, 0 0% 100%)); color: hsl(var(--tt-foreground, 218 31% 15%)); border: 1px solid hsl(var(--tt-border, 212 48% 84%)); } .ds-b-secondary:hover { background: hsl(var(--tt-muted, 210 42% 95%)); } .ds-b-ghost { background: none; border: 0; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-b-ghost:hover { background: hsl(var(--tt-muted, 210 42% 95%)); } .ds-b:focus-visible { outline: 2px solid hsl(var(--tt-link, 219 59% 40%)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Owed Line",
+      "kind": "custom",
+      "refersTo": "owed-line",
+      "description": "The family's money said once at the top of Home, only when something is owed: one ruled line with the amount at 600 tabular and a primary Pay now.",
+      "html": "<div class=\"ds-owed\"><p>You owe £84.00.</p><a class=\"ds-owed-pay\" href=\"#\">Pay now</a></div>",
+      "css": ".ds-owed { width: 358px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid hsl(var(--tt-border, 212 48% 84%)); border-bottom: 1px solid hsl(var(--tt-border, 212 48% 84%)); color: hsl(var(--tt-foreground, 218 31% 15%)); font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; font-size: 16px; } .ds-owed p { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; } .ds-owed-pay { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4,0,0.2,1), opacity 150ms cubic-bezier(0.4,0,0.2,1); background: hsl(var(--tt-brand, 219 59% 40%)); color: hsl(var(--tt-brand-foreground, 0 0% 100%)); border: 0; } .ds-owed-pay:hover { opacity: 0.9; } .ds-owed-pay:focus-visible { outline: 2px solid hsl(var(--tt-link, 219 59% 40%)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Copy Link",
+      "kind": "input",
+      "refersTo": "copy-link-value",
+      "description": "A shareable link as a one-line read-only value in a field-edged box with a secondary Copy link button (full width below it on phones) and a polite status line.",
+      "html": "<div class=\"ds-copy\"><p class=\"ds-copy-label\">Your link</p><div class=\"ds-copy-row\"><p class=\"ds-copy-value\" title=\"https://brightminds.tutortrack.app/r/PRIYA-7K2\">https://brightminds.tutortrack.app/r/PRIYA-7K2</p><button class=\"ds-copy-btn\" type=\"button\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\"/><path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\"/></svg>Copy link</button></div><p class=\"ds-copy-status\" role=\"status\"></p></div>",
+      "css": ".ds-copy { width: 520px; display: flex; flex-direction: column; gap: 6px; color: hsl(var(--tt-foreground, 218 31% 15%)); font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; font-size: 14px; } .ds-copy p { margin: 0; } .ds-copy-label { font-weight: 500; } .ds-copy-row { display: flex; align-items: stretch; gap: 8px; } .ds-copy-value { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 8px 12px; border: 1px solid hsl(var(--tt-field, 216 17% 56%)); border-radius: 8px; background: hsl(var(--tt-background, 60 23% 97%)); } .ds-copy-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4,0,0.2,1), opacity 150ms cubic-bezier(0.4,0,0.2,1); height: auto; background: hsl(var(--tt-surface, 0 0% 100%)); color: hsl(var(--tt-foreground, 218 31% 15%)); border: 1px solid hsl(var(--tt-border, 212 48% 84%)); flex-shrink: 0; } .ds-copy-btn:hover { background: hsl(var(--tt-muted, 210 42% 95%)); } .ds-copy-btn:focus-visible { outline: 2px solid hsl(var(--tt-link, 219 59% 40%)); outline-offset: 2px; } .ds-copy-status { min-height: 16px; font-size: 12px; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } @media (max-width: 639px) { .ds-copy { width: auto; } .ds-copy-row { flex-direction: column; } .ds-copy-btn { width: 100%; height: 40px; } }"
     }
   ],
   "narrative": {
     "northStar": "The Register",
-    "overview": "**Creative North Star: \"The Register\"**\n\nTutorTrack's admin app is drawn from the teacher's register and mark book, because marking a lesson is what bills it and pays for it. The navigation is the bookcloth cover: a deep green rail with the organisation's name at the top and modules grouped by job. The work area is the register's stock: a near-white ground ruled in pale blue, written in blue-black ink. One red margin rule is the only loud colour, and it means one thing: now, or something that still needs marking or is overdue. Lesson state is shown with authored register marks (a tick, a ring, a struck ring, a dashed ring), never with generic status badges.\n\nThe system is dense and desk-oriented: one family in five sizes, 14px body text, tabular figures wherever numbers are compared, and 1px rules instead of shadows or tinted cards. Depth comes from rules and the shell/stock contrast, not elevation. The tenant's brand colour reaches primary-button fills, the caret and text selection only; the ink (including the focus ring), the rules, the shell and the margin red stay constant so contrast holds in both colour schemes and under any tenant colour.\n\nScope of this record: it is evidenced by stages 1 to 3 of the build. Stage 1: the shared tokens and font in `packages/ui/src/styles.css`, the register marks, the admin shell and Home. Stage 2: the shared components in `packages/ui` (page header, button styles for links, fields, alerts, tabs, the data grid, chart labels), global defaults for form-control edges and hand-built tables, and the people list screens (Clients, Students, Tutors). Stage 3: the admin calendar (toolbar, day/week/tutor/room time grids, month and agenda). The other modules' screens and the portal role shells have not yet been carried into this world, beyond what they inherit from the shared components and global defaults. The portal already loads the shared tokens and font but still uses its earlier shell. The reporting dashboard below Home is ruled off from Home's work area and no longer repeats Home's figures, but its widgets and heading still predate the world. Treat those surfaces as unconverted, not as examples.",
+    "overview": "**Creative North Star: \"The Register\"**\n\nTutorTrack's admin app is drawn from the teacher's register and mark book, because marking a lesson is what bills it and pays for it. The navigation is the bookcloth cover: a deep green rail with the organisation's name at the top and modules grouped by job. The work area is the register's stock: a near-white ground ruled in pale blue, written in blue-black ink. One red margin rule is the only loud colour, and it means one thing: now, or something that still needs marking or is overdue. Lesson state is shown with authored register marks (a tick, a ring, a struck ring, a dashed ring), never with generic status badges.\n\nThe system is dense and desk-oriented: one family in five sizes, 14px body text, tabular figures wherever numbers are compared, and 1px rules instead of shadows or tinted cards. Depth comes from rules and the shell/stock contrast, not elevation. The tenant's brand colour reaches primary-button fills, the caret, text selection and, in the portal, a soft tint behind the current navigation item only; the ink (including the focus ring), the rules, the shell and the margin red stay constant so contrast holds in both colour schemes and under any tenant colour.\n\nThe portal (families, students, tutors and partners) is the same register carried in a pocket, and it is white-labelled: it has no bookcloth cover. Its navigation is a clean leaf (a tab bar under the thumb on phones, a rail on wider screens) with the tenant's logo or name in ink. The tenant colour appears on primary fills and as a soft tint behind the current tab or row, never as text.\n\nScope of this record: it is evidenced by stages 1 to 4 of the build. Stage 1: the shared tokens and font in `packages/ui/src/styles.css`, the register marks, the admin shell and Home. Stage 2: the shared components in `packages/ui` (page header, button styles for links, fields, alerts, tabs, the data grid, chart labels), global defaults for form-control edges and hand-built tables, and the people list screens (Clients, Students, Tutors). Stage 3: the admin calendar (toolbar, day/week/tutor/room time grids, month and agenda). Stage 4: the portal's shared frame (`apps/portal/src/layout/PortalFrame.tsx`: header, tab bar, More sheet, rail, account menu) for every role, sign-in, the lesson card, and each role's home screen (family Home, tutor Today, affiliate Overview). The other admin modules' screens and the portal's inner screens (Schedule, Billing, Messages, Classes, Privacy and the rest) sit inside their converted shells but have not themselves been carried into this world, beyond what they inherit from the shared components and global defaults. The reporting dashboard below Home is ruled off from Home's work area and no longer repeats Home's figures, but its widgets and heading still predate the world. Treat those surfaces as unconverted, not as examples.",
     "keyCharacteristics": [
       "Bookcloth-green navigation rail on a ruled, near-white register stock (dark scheme: night-green rail on a blue-slate stock).",
       "Blue-black ink for text; register-blue rules (1px) for every divider, table row and panel edge.",
       "One red margin rule for now, needs-marking, overdue and waiting counts; nothing else is red except errors.",
       "Source Sans 3 (self-hosted variable font) is the only family, in five fixed sizes, with tabular figures in tables, inputs, times and money.",
       "Authored SVG register marks for lesson state, the same five marks everywhere.",
-      "Flat: panels are ruled, not raised. The only shadow is on floating menus."
+      "Flat: panels are ruled, not raised. The only shadow is on floating menus.",
+      "The portal is white-labelled: a clean-leaf header and tab bar (rail on wide screens), the business name in ink, the tenant colour only on primary fills and as a soft tint behind the current item."
     ],
     "rules": [
       {
@@ -747,7 +817,12 @@
       },
       {
         "name": "The Tenant Fills, the Register Inks Rule",
-        "body": "A tenant's colour replaces `brand` (primary-button fills, caret, selection) and nothing else. Links and the focus outline use `link`, which tenants never change; text, rules, shell and margin red are fixed.",
+        "body": "A tenant's colour replaces `brand` (primary-button fills, caret, selection, and the portal's soft tint behind the current item) and nothing else. Links and the focus outline use `link`, which tenants never change; text, rules, shell and margin red are fixed. The business name in the portal header is ink, not brand.",
+        "section": "colors"
+      },
+      {
+        "name": "The Soft Tint Rule",
+        "body": "In the portal, where you are is shown by the tenant colour as a soft tint behind the current item: brand at 15% in a pill behind the current tab's icon, brand at 10% behind the current rail row. The label beside it is ink at 600. The tint is never text, an icon colour, an underline or an edge.",
         "section": "colors"
       },
       {
@@ -757,7 +832,7 @@
       },
       {
         "name": "The Bookcloth Rule",
-        "body": "Shell green is the navigation's cover: rail, drawer, avatar. Work areas never sit on it. Lines on the cover use `shell-rule`, never a white overlay.",
+        "body": "Shell green is the admin navigation's cover: rail, drawer, avatar. Work areas never sit on it. Lines on the cover use `shell-rule`, never a white overlay. The white-labelled portal has no cover: its navigation is a clean leaf ruled off with `border`.",
         "section": "colors"
       },
       {
@@ -791,6 +866,11 @@
         "section": "layout"
       },
       {
+        "name": "The One Landmark Rule",
+        "body": "The portal shows one navigation landmark at a time: the tab bar on phones, the rail from 768px. The two are never both in the page.",
+        "section": "layout"
+      },
+      {
         "name": "The Ruled, Not Raised Rule",
         "body": "Panels, strips and lists are separated by 1px rules. Shadows are reserved for elements that float over the page.",
         "section": "elevation"
@@ -809,7 +889,10 @@
       "**Do** open a page with the shared page header, secondary actions small and the primary last.",
       "**Do** put list filters in one compact row with self-describing first options, above a data grid.",
       "**Do** style links that act as buttons with the shared button styles.",
-      "**Do** check every new pair in both schemes; the dark scheme has its own values for every token."
+      "**Do** check every new pair in both schemes; the dark scheme has its own values for every token.",
+      "**Do** build portal screens inside `PortalFrame`: up to four everyday tabs plus More on phones, the rail from 768px, one navigation landmark at a time, sign out in the account menu.",
+      "**Do** mark the current portal tab or rail row with the soft brand tint (15% behind the tab's icon, 10% behind the rail row) and the label in ink at 600.",
+      "**Do** order a lesson's actions by use: Join first and full width, Cancel lesson last as a faded-ink ghost."
     ],
     "donts": [
       "**Don't** use margin red for decoration, branding or errors; errors use `danger`.",
@@ -822,7 +905,9 @@
       "**Don't** use uppercase tracked labels as kickers above headings.",
       "**Don't** show the flat list of every module; navigation stays grouped by job and permission-gated.",
       "**Don't** use raw palette colours (amber, white overlays) for status tints or rail lines; use `warning`, `danger`, `success` and `shell-rule`.",
-      "**Don't** repeat a figure the screen already shows in a second widget or tile."
+      "**Don't** repeat a figure the screen already shows in a second widget or tile.",
+      "**Don't** set text, icons or edges in the tenant colour in the portal; the business name is ink and the current item is a tint, not brand-coloured text.",
+      "**Don't** use bookcloth green in the portal, or wrap the portal's destinations into a cloud of links; the rest go under More, grouped by job."
     ]
   }
 }

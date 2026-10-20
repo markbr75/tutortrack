@@ -50,7 +50,7 @@ test("a parent sees their children's lessons in the portal", async ({ pageAs }) 
   await page.goto(PORTAL);
   await expect(page.getByRole("navigation").first()).toBeVisible();
   await page.getByRole("link", { name: "Lessons", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Lessons" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Lessons", exact: true })).toBeVisible();
   // Arjun's weekly GCSE Maths with Nia Adeyemi is seeded.
   await expect(page.getByRole("heading", { name: /Arjun Patel/ }).first()).toBeVisible();
   await expect(page.getByText(/Okafor|Grace Hughes/)).toHaveCount(0);

@@ -59,7 +59,7 @@ export function StudentSignIn() {
         signIn.mutate();
       }}
     >
-      <h2 className="text-lg font-medium">{t("family.childSignIn")}</h2>
+      <h2 className="text-base font-semibold">{t("family.childSignIn")}</h2>
       <TextField
         label={t("family.username")}
         autoComplete="username"
@@ -77,11 +77,11 @@ export function StudentSignIn() {
         onChange={(e) => setPin(e.target.value)}
       />
       {signIn.isError ? (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-sm text-danger">
           {signIn.error.message}
         </p>
       ) : null}
-      <Button type="submit" variant="secondary" loading={signIn.isPending}>
+      <Button type="submit" variant="secondary" className="w-full" loading={signIn.isPending}>
         {t("family.childSignInButton")}
       </Button>
     </form>

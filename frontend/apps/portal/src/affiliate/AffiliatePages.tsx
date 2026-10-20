@@ -2,11 +2,13 @@ import { unwrap } from "@tutortrack/api-client";
 import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
 import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { FileText, House, Landmark, Users } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { api, problemStatus } from "../api";
-import { PoweredBy } from "../branding";
+import { BrandMark, PoweredBy } from "../branding";
+import { PortalFrame } from "../layout/PortalFrame";
 import { CopyLink } from "../pages/ReferralsPage";
 
 function useAffiliate() {
@@ -41,7 +43,7 @@ export function AffiliateShell() {
     mutationFn: async () => api.POST("/api/v1/auth/logout"),
     onSuccess: () => window.location.assign("/portal/"),
   });
-  if (me.isPending) return <Spinner label={t("grid.loading")} />;
+  if (me.isPending) return <Spinner className="p-6" label={t("grid.loading")} />;
   if (!me.data) {
     return (
       <main className="mx-auto max-w-sm p-6">
@@ -52,41 +54,24 @@ export function AffiliateShell() {
     );
   }
   const nav = [
-    { to: "/affiliate", label: t("referrals.partner.nav.home") },
-    { to: "/affiliate/clients", label: t("referrals.partner.nav.clients") },
-    { to: "/affiliate/statements", label: t("referrals.partner.nav.statements") },
-    { to: "/affiliate/payout", label: t("referrals.partner.nav.payout") },
-  ] as const;
+    { to: "/affiliate", label: t("referrals.partner.nav.home"), icon: House },
+    { to: "/affiliate/clients", label: t("referrals.partner.nav.clients"), icon: Users },
+    { to: "/affiliate/statements", label: t("referrals.partner.nav.statements"), icon: FileText },
+    { to: "/affiliate/payout", label: t("referrals.partner.nav.payout"), icon: Landmark },
+  ];
   return (
-    <div className="mx-auto min-h-screen max-w-3xl">
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border p-4">
-        <span className="font-semibold">{me.data.organisation}</span>
-        <nav aria-label={t("referrals.partner.menu")} className="flex flex-wrap gap-1 text-sm">
-          {nav.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className="rounded-md px-3 py-2 hover:bg-muted"
-              activeProps={{ className: "bg-muted font-medium" }}
-              activeOptions={{ exact: item.to === "/affiliate" }}
-            >
-              {item.label}
-            </Link>
-          ))}
-          <button
-            type="button"
-            className="rounded-md px-3 py-2 hover:bg-muted"
-            onClick={() => logout.mutate()}
-          >
-            {t("portal.signOut")}
-          </button>
-        </nav>
-      </header>
-      <main className="p-4">
-        <Outlet />
-      </main>
-      <PoweredBy />
-    </div>
+    <PortalFrame
+      brand={<BrandMark fallback={me.data.organisation} />}
+      navLabel={t("referrals.partner.menu")}
+      items={nav}
+      primary={nav.map((item) => item.to)}
+      root="/affiliate"
+      person={me.data.name}
+      onSignOut={() => logout.mutate()}
+      footer={<PoweredBy />}
+    >
+      <Outlet />
+    </PortalFrame>
   );
 }
 
@@ -96,40 +81,47 @@ export function AffiliateHomePage() {
   if (!me.data) return null;
   const s = me.data.summary;
   return (
-    <section className="space-y-4" aria-labelledby="partner-title">
+    <section className="space-y-8" aria-labelledby="partner-title">
       <h1 id="partner-title" className="text-xl font-semibold">
         {t("referrals.partner.welcome", { name: me.data.name })}
       </h1>
-      <dl className="grid grid-cols-3 gap-3 text-center">
-        {(
-          [
-            ["clicks", s.clicks],
-            ["referred", s.referred],
-            ["converted", s.converted],
-          ] as const
-        ).map(([key, value]) => (
-          <div key={key} className="rounded-md border border-border p-3">
-            <dt className="text-xs text-muted-foreground">{t(`referrals.partner.${key}`)}</dt>
-            <dd className="text-xl font-semibold">{value}</dd>
-          </div>
+      <div className="space-y-3">
+        {/* One ruled line of figures, not tiles. */}
+        <dl className="grid grid-cols-3 border-y border-border">
+          {(
+            [
+              ["clicks", s.clicks],
+              ["referred", s.referred],
+              ["converted", s.converted],
+            ] as const
+          ).map(([key, value]) => (
+            <div key={key} className="border-l border-rule py-3 pl-4 first:border-l-0 first:pl-0">
+              <dt className="text-sm text-muted-foreground">{t(`referrals.partner.${key}`)}</dt>
+              <dd className="text-xl font-semibold tabular-nums">{value}</dd>
+            </div>
+          ))}
+        </dl>
+        {s.totals.map((total) => (
+          <p key={total.currency} className="text-sm">
+            {t("referrals.partner.totals", {
+              earned: formatMoney(total.earned, i18n.language),
+              unpaid: formatMoney(total.unpaid, i18n.language),
+            })}
+          </p>
         ))}
-      </dl>
-      {s.totals.map((total) => (
-        <p key={total.currency}>
-          {t("referrals.partner.totals", {
-            earned: formatMoney(total.earned, i18n.language),
-            unpaid: formatMoney(total.unpaid, i18n.language),
-          })}
-        </p>
-      ))}
-      <h2 className="font-semibold">{t("referrals.partner.links")}</h2>
-      {me.data.links.map((link) => (
-        <CopyLink
-          key={link.code}
-          label={`${link.name || link.code} · ${t("referrals.partner.clickCount", { count: link.clicks })}`}
-          url={link.url}
-        />
-      ))}
+      </div>
+      <div className="space-y-3">
+        <h2 className="text-base font-semibold">{t("referrals.partner.links")}</h2>
+        <div className="space-y-4 rounded-xl border border-border bg-surface p-4">
+          {me.data.links.map((link) => (
+            <CopyLink
+              key={link.code}
+              label={`${link.name || link.code} · ${t("referrals.partner.clickCount", { count: link.clicks })}`}
+              url={link.url}
+            />
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

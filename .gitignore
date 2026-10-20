@@ -56,4 +56,5 @@ frontend/playwright-report/
 
 # Impeccable design-skill working files: review captures and machine-local config stay local
 /frontend/.impeccable/review/
+/frontend/apps/*/.impeccable/review/
 /frontend/.impeccable/config.local.json

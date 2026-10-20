@@ -2,6 +2,7 @@ import { unwrap } from "@tutortrack/api-client";
 import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
 import { Button, Spinner } from "@tutortrack/ui";
 import { useQuery } from "@tanstack/react-query";
+import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 
 import { api } from "../api";
@@ -11,13 +12,18 @@ export function CopyLink({ label, url }: { label: string; url: string }) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       <p className="text-sm font-medium">{label}</p>
-      <div className="flex flex-wrap items-center gap-2">
-        <code className="break-all rounded-md bg-muted px-2 py-1 text-sm">{url}</code>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+        <p
+          title={url}
+          className="min-w-0 flex-1 truncate rounded-md border border-field bg-background px-3 py-2 text-sm"
+        >
+          {url}
+        </p>
         <Button
-          size="sm"
           variant="secondary"
+          className="shrink-0 max-sm:w-full sm:h-auto"
           onClick={async () => {
             try {
               await navigator.clipboard.writeText(url);
@@ -27,6 +33,11 @@ export function CopyLink({ label, url }: { label: string; url: string }) {
             }
           }}
         >
+          {copied ? (
+            <Check aria-hidden="true" className="size-4" />
+          ) : (
+            <Copy aria-hidden="true" className="size-4" />
+          )}
           {t("referrals.portal.copy")}
         </Button>
       </div>
