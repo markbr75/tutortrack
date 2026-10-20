@@ -1,6 +1,14 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  buttonClass,
+  RegisterMark,
+  registerMarkFor,
+  SelectField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -81,6 +89,8 @@ export function LessonCard({
     onSuccess: done,
   });
 
+  const clock = (iso: string) =>
+    formatDateTime(iso, i18n.language, undefined, { hour: "2-digit", minute: "2-digit" });
   const start = new Date(lesson.start);
   const future = start.getTime() > Date.now() && lesson.status === "planned";
   // Gap G3: lessons booked online can only be cancelled online until the booking window.
@@ -89,58 +99,88 @@ export function LessonCard({
   const features = me.data?.features;
 
   return (
-    <article className="space-y-2 rounded-lg border border-border p-4" aria-label={lesson.title}>
-      <h3 className="font-semibold">{lesson.title}</h3>
-      <p className="text-sm">
-        {formatDateTime(lesson.start, i18n.language)}
-        {lesson.status !== "planned" ? ` · ${t(`portal.status.${lesson.status}`)}` : ""}
-      </p>
-      <p className="text-sm text-muted-foreground">
-        {lesson.tutors.map((tutor) => tutor.name).join(", ")}
-        {lesson.online
-          ? ` · ${t("portal.online")}`
-          : lesson.location
-            ? ` · ${lesson.location}`
-            : ""}
-      </p>
-      {lesson.tutors.some((tutor) => tutor.email || tutor.phone) ? (
-        <p className="text-xs text-muted-foreground">
-          {lesson.tutors.map((tutor) => [tutor.email, tutor.phone].filter(Boolean).join(" · "))}
+    <article
+      className="space-y-3 rounded-xl border border-border bg-surface p-4"
+      aria-label={lesson.title}
+    >
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm text-muted-foreground">
+            {formatDateTime(lesson.start, i18n.language, undefined, {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+            })}
+            {lesson.status !== "planned" ? ` · ${t(`portal.status.${lesson.status}`)}` : ""}
+          </p>
+          <p className="text-xl font-semibold tabular-nums">
+            <time dateTime={lesson.start}>{clock(lesson.start)}</time>–
+            <time dateTime={lesson.end}>{clock(lesson.end)}</time>
+          </p>
+        </div>
+        <RegisterMark
+          kind={registerMarkFor(lesson.status, lesson.end)}
+          label={t(`portal.status.${lesson.status}`)}
+          className="mt-1 size-5"
+        />
+      </div>
+      <div className="space-y-1">
+        <h2 className="font-semibold">{lesson.title}</h2>
+        <p className="text-sm text-muted-foreground">
+          {lesson.tutors.map((tutor) => tutor.name).join(", ")}
+          {lesson.online
+            ? ` · ${t("portal.online")}`
+            : lesson.location
+              ? ` · ${lesson.location}`
+              : ""}
         </p>
-      ) : null}
-      {lesson.notes_for_client ? <p className="text-sm">{lesson.notes_for_client}</p> : null}
-      <div className="flex flex-wrap gap-2 text-sm">
+        {lesson.tutors.some((tutor) => tutor.email || tutor.phone) ? (
+          <p className="text-xs text-muted-foreground">
+            {lesson.tutors.map((tutor) => [tutor.email, tutor.phone].filter(Boolean).join(" · "))}
+          </p>
+        ) : null}
+        {lesson.notes_for_client ? <p className="text-sm">{lesson.notes_for_client}</p> : null}
+      </div>
+      {/* Most useful first; cancelling is last and quietest. Two even columns on phones. */}
+      <div className="grid grid-cols-2 gap-2 border-t border-rule pt-3 sm:flex sm:flex-wrap">
         {lesson.online && lesson.status === "planned" ? (
           <JoinButton
             url={lesson.join_url || lesson.meeting_url}
             start={lesson.start}
             end={lesson.end}
             opensAt={lesson.join_opens_at}
-            className="py-1.5"
+            className="col-span-2"
           />
         ) : null}
         {lesson.online && lesson.status === "planned" ? (
           <Link
             to="/classroom/$lessonId"
             params={{ lessonId: lesson.id }}
-            className="rounded-md border border-border px-3 py-1.5"
+            className={buttonClass({ variant: "secondary" })}
           >
             {t("classroom.open")}
           </Link>
         ) : null}
+        {actions && future && features?.reschedule && mode === "none" ? (
+          <Button variant="secondary" onClick={() => setMode("move")}>
+            {t("portalBooking.askToMove")}
+          </Button>
+        ) : null}
+        {actions && future && features?.absence && mode === "none" ? (
+          <Button variant="secondary" onClick={() => setMode("absence")}>
+            {t("portal.reportAbsence")}
+          </Button>
+        ) : null}
         <a
-          className="rounded-md border border-border px-3 py-1.5"
+          className={buttonClass({ variant: "secondary" })}
           href={`/api/v1/portal/lessons/${lesson.id}/ics`}
         >
           {t("portal.addToCalendar")}
         </a>
-        {actions && future && features?.cancellations && mode === "none" && tooLate ? (
-          <span className="text-xs text-muted-foreground">{t("g3.portal.cancelClosed")}</span>
-        ) : null}
         {actions && future && features?.cancellations && mode === "none" && !tooLate ? (
           <Button
-            size="sm"
-            variant="secondary"
+            variant="ghost"
+            className="text-muted-foreground"
             onClick={() => {
               setMode("cancel");
               preview.mutate();
@@ -149,15 +189,10 @@ export function LessonCard({
             {t("portal.cancel")}
           </Button>
         ) : null}
-        {actions && future && features?.reschedule && mode === "none" ? (
-          <Button size="sm" variant="secondary" onClick={() => setMode("move")}>
-            {t("portalBooking.askToMove")}
-          </Button>
-        ) : null}
-        {actions && future && features?.absence && mode === "none" ? (
-          <Button size="sm" variant="ghost" onClick={() => setMode("absence")}>
-            {t("portal.reportAbsence")}
-          </Button>
+        {actions && future && features?.cancellations && mode === "none" && tooLate ? (
+          <span className="col-span-2 self-center text-xs text-muted-foreground">
+            {t("g3.portal.cancelClosed")}
+          </span>
         ) : null}
       </div>
       {mode === "cancel" ? (

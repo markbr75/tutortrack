@@ -2,13 +2,30 @@ import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
 import { Button, Spinner, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import {
+  BookOpen,
+  CalendarDays,
+  CalendarPlus,
+  CreditCard,
+  FilePen,
+  FileText,
+  Gift,
+  House,
+  MessageSquare,
+  ShieldCheck,
+  UserRound,
+  Users,
+  UsersRound,
+  Video,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { api, isSignedOut, problemStatus, usePortalMe } from "./api";
 import { BrandMark, PoweredBy } from "./branding";
 import { OfflineBanner } from "./offline/OfflineIndicator";
 import { HouseholdSwitcher, StudentSignIn } from "./HouseholdSwitcher";
+import { PortalFrame } from "./layout/PortalFrame";
 import { StatusBanner } from "./StatusBanner";
 import { usePortalBranding } from "./useBranding";
 import { AffiliateShell } from "./affiliate/AffiliatePages";
@@ -16,39 +33,50 @@ import { TutorShell } from "./tutor/TutorShell";
 
 export function SignIn() {
   const { t } = useTranslation();
+  const brand = usePortalBranding();
   const [email, setEmail] = useState("");
   const send = useMutation({
     mutationFn: async () =>
       unwrap(await api.POST("/api/v1/auth/magic-link", { body: { email, next: "/portal/" } })),
   });
   return (
-    <main className="mx-auto max-w-sm space-y-4 p-6">
-      <h1 className="text-2xl font-semibold">{t("portal.signIn")}</h1>
-      {send.isSuccess ? (
-        <p role="status">{t("portal.checkEmail", { email })}</p>
-      ) : (
-        <form
-          className="space-y-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            send.mutate();
-          }}
-        >
-          <TextField
-            type="email"
-            required
-            autoComplete="email"
-            label={t("portal.email")}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Button type="submit" disabled={send.isPending}>
-            {t("portal.sendLink")}
-          </Button>
-        </form>
-      )}
-      <hr className="border-border" />
-      <StudentSignIn />
+    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-6 px-4 py-10">
+      <div className="text-center">{brand ? <BrandMark fallback={brand.name} /> : null}</div>
+      <section
+        aria-labelledby="sign-in-h"
+        className="space-y-4 rounded-xl border border-border bg-surface p-5"
+      >
+        <h1 id="sign-in-h" className="text-xl font-semibold">
+          {t("portal.signIn")}
+        </h1>
+        {send.isSuccess ? (
+          <p role="status">{t("portal.checkEmail", { email })}</p>
+        ) : (
+          <form
+            className="space-y-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              send.mutate();
+            }}
+          >
+            <TextField
+              type="email"
+              required
+              autoComplete="email"
+              label={t("portal.email")}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <Button type="submit" className="w-full" disabled={send.isPending}>
+              {t("portal.sendLink")}
+            </Button>
+          </form>
+        )}
+      </section>
+      <section className="border-t border-border pt-5">
+        <StudentSignIn />
+      </section>
+      <PoweredBy />
     </main>
   );
 }
@@ -61,7 +89,7 @@ export function Shell() {
     queryFn: async () => unwrap(await api.GET("/api/v1/me")),
   });
   usePortalBranding();
-  if (who.isPending) return <Spinner label={t("grid.loading")} />;
+  if (who.isPending) return <Spinner className="p-6" label={t("grid.loading")} />;
   if (isSignedOut(who.error)) return <SignIn />;
   return (
     <>
@@ -73,14 +101,20 @@ export function Shell() {
       ) : (
         <>
           <OfflineBanner />
-          <FamilyShell />
+          <FamilyShell person={personName(who.data?.user)} />
         </>
       )}
     </>
   );
 }
 
-function FamilyShell() {
+function personName(
+  user: { first_name?: string; last_name?: string; email?: string } | null | undefined,
+): string {
+  return [user?.first_name, user?.last_name].filter(Boolean).join(" ") || user?.email || "";
+}
+
+function FamilyShell({ person }: { person: string }) {
   const { t } = useTranslation();
   const me = usePortalMe();
   const location = useLocation();
@@ -94,7 +128,7 @@ function FamilyShell() {
     mutationFn: async () => api.POST("/api/v1/auth/logout"),
     onSuccess: () => window.location.assign("/portal/"),
   });
-  if (me.isPending) return <Spinner label={t("grid.loading")} />;
+  if (me.isPending) return <Spinner className="p-6" label={t("grid.loading")} />;
   if (isSignedOut(me.error)) return <SignIn />;
   const status = problemStatus(me.error);
   if (!me.data) {
@@ -109,57 +143,68 @@ function FamilyShell() {
   }
   const f = me.data.features;
   const nav = [
-    { to: "/", label: t("portal.nav.home") },
-    { to: "/schedule", label: t("portal.nav.schedule") },
-    ...(f.booking ? [{ to: "/book", label: t("portalBooking.nav") }] : []),
-    ...(f.classes ? [{ to: "/classes", label: t("portalCourses.nav") }] : []),
-    ...(f.reports ? [{ to: "/reports", label: t("portal.nav.reports") }] : []),
-    ...(f.learning ? [{ to: "/learning", label: t("learning.portal.nav") }] : []),
-    ...(f.invoices ? [{ to: "/billing", label: t("portal.nav.billing") }] : []),
-    ...(f.profile ? [{ to: "/profile", label: t("portal.nav.profile") }] : []),
-    ...(f.guardian_invites || f.student_logins ? [{ to: "/family", label: t("family.nav") }] : []),
-    ...(f.documents ? [{ to: "/documents", label: t("esign.nav") }] : []),
-    ...(f.referrals ? [{ to: "/referrals", label: t("referrals.portal.nav") }] : []),
-    ...(f.messages ? [{ to: "/messages", label: t("portalMessages.nav") }] : []),
-    { to: "/recordings", label: t("classroom.recordingsNav") },
-    { to: "/privacy", label: t("privacyCentre.portal.nav") },
-  ] as const;
+    { to: "/", label: t("portal.nav.home"), icon: House },
+    { to: "/schedule", label: t("portal.nav.schedule"), icon: CalendarDays, group: "lessons" },
+    ...(f.booking
+      ? [{ to: "/book", label: t("portalBooking.nav"), icon: CalendarPlus, group: "lessons" }]
+      : []),
+    ...(f.classes
+      ? [{ to: "/classes", label: t("portalCourses.nav"), icon: Users, group: "lessons" }]
+      : []),
+    ...(f.reports
+      ? [{ to: "/reports", label: t("portal.nav.reports"), icon: FileText, group: "lessons" }]
+      : []),
+    ...(f.learning
+      ? [{ to: "/learning", label: t("learning.portal.nav"), icon: BookOpen, group: "lessons" }]
+      : []),
+    { to: "/recordings", label: t("classroom.recordingsNav"), icon: Video, group: "lessons" },
+    ...(f.invoices
+      ? [{ to: "/billing", label: t("portal.nav.billing"), icon: CreditCard, group: "account" }]
+      : []),
+    ...(f.messages
+      ? [{ to: "/messages", label: t("portalMessages.nav"), icon: MessageSquare, group: "account" }]
+      : []),
+    ...(f.profile
+      ? [{ to: "/profile", label: t("portal.nav.profile"), icon: UserRound, group: "account" }]
+      : []),
+    ...(f.guardian_invites || f.student_logins
+      ? [{ to: "/family", label: t("family.nav"), icon: UsersRound, group: "account" }]
+      : []),
+    ...(f.documents
+      ? [{ to: "/documents", label: t("esign.nav"), icon: FilePen, group: "account" }]
+      : []),
+    ...(f.referrals
+      ? [{ to: "/referrals", label: t("referrals.portal.nav"), icon: Gift, group: "account" }]
+      : []),
+    { to: "/privacy", label: t("privacyCentre.portal.nav"), icon: ShieldCheck, group: "account" },
+  ];
   return (
-    <div className="mx-auto min-h-screen max-w-3xl">
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border p-4">
-        <BrandMark fallback={me.data.organisation.name} />
-        <HouseholdSwitcher me={me.data} />
-        <nav aria-label={t("portal.menu")} className="flex flex-wrap gap-1 text-sm">
-          {nav.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className="rounded-md px-2 py-1 hover:bg-muted"
-              activeProps={{ className: "bg-muted font-medium" }}
-              activeOptions={{ exact: item.to === "/" }}
-            >
-              {item.label}
-            </Link>
-          ))}
-          <button
-            type="button"
-            className="rounded-md px-2 py-1 hover:bg-muted"
-            onClick={() => logout.mutate()}
-          >
-            {t("portal.signOut")}
-          </button>
-        </nav>
-      </header>
-      <main className="p-4">
-        <Outlet />
-      </main>
-      {me.data.help_url || me.data.terms_url ? (
-        <footer className="flex gap-4 p-4 text-xs text-muted-foreground">
-          {me.data.help_url ? <a href={me.data.help_url}>{t("portal.help")}</a> : null}
-          {me.data.terms_url ? <a href={me.data.terms_url}>{t("portal.terms")}</a> : null}
-        </footer>
-      ) : null}
-      <PoweredBy />
-    </div>
+    <PortalFrame
+      brand={<BrandMark fallback={me.data.organisation.name} />}
+      navLabel={t("portal.menu")}
+      items={nav}
+      primary={["/", "/schedule", "/billing", "/messages", "/learning", "/reports"]}
+      groups={{
+        lessons: t("portalFrame.groups.lessons"),
+        account: t("portalFrame.groups.account"),
+      }}
+      root="/"
+      person={person}
+      onSignOut={() => logout.mutate()}
+      headerExtra={<HouseholdSwitcher me={me.data} />}
+      footer={
+        <>
+          {me.data.help_url || me.data.terms_url ? (
+            <p className="flex justify-center gap-4 px-4 pt-2 text-xs text-muted-foreground">
+              {me.data.help_url ? <a href={me.data.help_url}>{t("portal.help")}</a> : null}
+              {me.data.terms_url ? <a href={me.data.terms_url}>{t("portal.terms")}</a> : null}
+            </p>
+          ) : null}
+          <PoweredBy />
+        </>
+      }
+    >
+      <Outlet />
+    </PortalFrame>
   );
 }

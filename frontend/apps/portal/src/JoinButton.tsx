@@ -1,4 +1,5 @@
 import { useTranslation } from "@tutortrack/i18n";
+import { buttonClass, cn } from "@tutortrack/ui";
 import { useEffect, useState } from "react";
 
 const DEFAULT_EARLY_MS = 10 * 60_000;
@@ -30,17 +31,20 @@ export function JoinButton({
     ? new Date(opensAt).getTime()
     : new Date(start).getTime() - DEFAULT_EARLY_MS;
   if (current > new Date(end).getTime()) return null;
-  const style = `rounded-md px-3 py-2 text-sm ${className}`;
   if (current < opens) {
     const time = new Intl.DateTimeFormat(i18n.language, { timeStyle: "short" }).format(opens);
     return (
-      <button type="button" disabled className={`${style} border border-border opacity-70`}>
+      <button
+        type="button"
+        disabled
+        className={cn(buttonClass({ variant: "secondary" }), "opacity-70", className)}
+      >
         {t("portal.joinOpensAt", { time })}
       </button>
     );
   }
   return (
-    <a className={`${style} bg-primary text-primary-foreground`} href={url} rel="noreferrer">
+    <a className={cn(buttonClass(), className)} href={url} rel="noreferrer">
       {t("portal.join")}
     </a>
   );

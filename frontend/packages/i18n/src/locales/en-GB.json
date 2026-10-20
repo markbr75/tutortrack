@@ -7061,5 +7061,27 @@
       "data": "Data and website",
       "trust": "Trust and safety"
     }
+  },
+  "portalFrame": {
+    "more": "More",
+    "close": "Close",
+    "account": "Your account: {{name}}",
+    "groups": {
+      "lessons": "Lessons and learning",
+      "account": "Payments and your family",
+      "teaching": "Teaching",
+      "money": "Money",
+      "you": "You and your work"
+    }
+  },
+  "portalHome": {
+    "allLessons": "All lessons"
+  },
+  "tutorToday": {
+    "lessons": "Your lessons",
+    "marked": "Marked {{done}} of {{total}}",
+    "now": "Now · {{time}}",
+    "waiting": "Waiting for you",
+    "nothingWaiting": "Nothing waiting for you."
   }
 }

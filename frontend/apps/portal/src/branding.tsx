@@ -2,17 +2,14 @@ import { useTranslation } from "@tutortrack/i18n";
 
 import { usePortalBranding } from "./useBranding";
 
-/** Logo (or the name in the AA-safe brand colour) for the portal header. */
+/** Logo, or the business name, for the portal header. */
 export function BrandMark({ fallback }: { fallback: string }) {
   const brand = usePortalBranding();
   if (brand?.logo_url) {
     return <img src={brand.logo_url} alt={brand.name} className="h-8 w-auto" />;
   }
-  return (
-    <span className="font-semibold" style={brand ? { color: brand.link_colour } : undefined}>
-      {fallback}
-    </span>
-  );
+  // The name in ink, not the brand colour: it stays legible in both colour schemes.
+  return <span className="font-semibold">{fallback}</span>;
 }
 
 export function PoweredBy() {

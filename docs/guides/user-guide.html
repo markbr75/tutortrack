@@ -128,7 +128,7 @@
 <header>
 <h1>TutorTrack user guide</h1>
 <p class="lead">How to use TutorTrack day to day: for the office team in the admin app, tutors in the tutor app, families and students in the client portal, and affiliates in the partner portal.</p>
-<p class="meta">Last updated: 2026-10-19</p>
+<p class="meta">Last updated: 2026-10-20</p>
 </header>
 <p>Setting up the organisation (settings, roles, payments, integrations, the website and data import) is covered in the <a href="admin-guide.html">admin guide</a>. Developers should read the <a href="api-guide.html">API guide</a>.</p>
 
@@ -739,7 +739,13 @@
 <section id="tutors" aria-labelledby="tutors-h">
 <h2 id="tutors-h">Tutors: the tutor app</h2>
 <p>The tutor app is built for a phone. Open <code>/portal/</code> on your organisation's address and sign in. If your login has the Tutor role you go straight to the tutor app (<code>/portal/tutor</code>). If you sign in to the admin app as a tutor, it sends you here too.</p>
-<p>The menu shows these items, in this order: <span class="ui">Today</span>, <span class="ui">Lessons</span>, <span class="ui">Students</span>, <span class="ui">Availability</span>, <span class="ui">Calendar and video</span>, <span class="ui">Jobs</span>, <span class="ui">Homework</span>, <span class="ui">Resources</span>, <span class="ui">Earnings</span>, <span class="ui">Expenses</span>, <span class="ui">Check invoices</span>, <span class="ui">Getting started</span>, <span class="ui">Checks</span>, <span class="ui">Profile</span>, <span class="ui">Notifications</span>, <span class="ui">Referrals</span> and <span class="ui">Messages</span>. <span class="ui">Earnings</span> only shows if your organisation lets tutors see their pay.</p>
+<p>On a phone, the tabs along the bottom are <span class="ui">Today</span>, <span class="ui">Lessons</span>, <span class="ui">Students</span> and <span class="ui">Earnings</span> (or <span class="ui">Messages</span> if your organisation doesn't let tutors see their pay). <span class="ui">More</span> opens everything else, grouped:</p>
+<ul>
+<li><strong>Teaching:</strong> <span class="ui">Availability</span>, <span class="ui">Calendar and video</span>, <span class="ui">Jobs</span>, <span class="ui">Homework</span> and <span class="ui">Resources</span>.</li>
+<li><strong>Money:</strong> <span class="ui">Expenses</span> and <span class="ui">Check invoices</span>.</li>
+<li><strong>You and your work:</strong> <span class="ui">Messages</span>, <span class="ui">Notifications</span>, <span class="ui">Getting started</span>, <span class="ui">Checks</span>, <span class="ui">Profile</span> and <span class="ui">Referrals</span>.</li>
+</ul>
+<p>On a larger screen the same items are listed down the left. To sign out, select your initials at the top right, then <span class="ui">Sign out</span>.</p>
 <p>If you see "There's no tutor profile for this login yet", ask the office to link your login to your tutor record.</p>
 
 <section id="tutor-install" aria-labelledby="tutor-install-h">
@@ -761,8 +767,9 @@
 
 <section id="tutor-today" data-route="portal:/tutor" aria-labelledby="tutor-today-h">
 <h3 id="tutor-today-h">Today</h3>
-<p><span class="ui">Today</span> is your start page. At the top it counts <span class="ui">Reports to write</span>, <span class="ui">Job offers</span> and <span class="ui">New notifications</span>, and, if you can see your pay, <span class="ui">Earned this month</span>.</p>
-<p>Below that are today's lessons, with the time, students and place. Online lessons have a <span class="ui">Join the lesson</span> button that opens shortly before the start. Select <span class="ui">Open and complete</span> to go to the lesson page.</p>
+<p><span class="ui">Today</span> is your start page. <span class="ui">Your lessons</span> lists today's lessons in time order with the time, students and place, and shows how many you have marked ("Marked 1 of 3"). Each lesson carries a mark: a tick once it is completed, a red dashed ring once it has ended and still needs completing, and a pale ring while it is still to come. A red line marks the time now.</p>
+<p>Online lessons have a <span class="ui">Join the lesson</span> button that opens shortly before the start. Select <span class="ui">Open and complete</span> to go to the lesson page; it is highlighted on lessons that have ended and still need completing.</p>
+<p><span class="ui">Waiting for you</span> lists <span class="ui">Reports to write</span>, <span class="ui">Job offers</span> and <span class="ui">New notifications</span> when there are any; select one to go to it. If you can see your pay, <span class="ui">Earned this month</span> is at the bottom.</p>
 </section>
 
 <section id="tutor-lesson" aria-labelledby="tutor-lesson-h">
@@ -925,7 +932,8 @@ A moved lesson tells the family. A request waits for the office or the family to
 <li><strong>Parents, guardians and students with an email address:</strong> enter your <span class="ui">Email</span> and select <span class="ui">Email me a sign-in link</span>. Open the link in the email. There is no password to remember.</li>
 <li><strong>Children under 13 with a login made by a parent:</strong> under <span class="ui">Child sign-in</span>, enter the <span class="ui">Username</span> and <span class="ui">PIN or password</span> and select <span class="ui">Sign in with username</span>. After several wrong attempts, sign-in slows down for a while.</li>
 </ul>
-<p>Some menu items only appear when your tutoring organisation turns them on, so your menu may be shorter than the one described here. (Office staff: see <a href="admin-guide.html#portal-config-h">portal configuration in the admin guide</a>.)</p>
+<p>On a phone, the tabs along the bottom take you to <span class="ui">Home</span>, <span class="ui">Lessons</span>, <span class="ui">Payments</span> and <span class="ui">Messages</span> (for students, the last two tabs are the first two of <span class="ui">Messages</span>, <span class="ui">Learning</span> and <span class="ui">Reports</span> that are turned on). <span class="ui">More</span> opens everything else, grouped under <span class="ui">Lessons and learning</span> and <span class="ui">Payments and your family</span>. On a larger screen the same items are listed down the left. To sign out, select your initials at the top right, then <span class="ui">Sign out</span>.</p>
+<p>Some menu items only appear when your tutoring organisation turns them on, so your menu may be shorter than the one described here. When an item is turned off, the next one moves up into the tabs. (Office staff: see <a href="admin-guide.html#portal-config-h">portal configuration in the admin guide</a>.)</p>
 <div class="table-wrap">
 <table>
 <caption class="meta">What parents and students see</caption>
@@ -943,8 +951,8 @@ A moved lesson tells the family. A request waits for the office or the family to
 
 <section id="portal-home" data-route="portal:/" aria-labelledby="portal-home-h">
 <h3 id="portal-home-h">Home and switching households</h3>
-<p><span class="ui">Home</span> shows any amount you owe (with <span class="ui">Pay now</span>), your <span class="ui">Next lesson</span>, the lessons <span class="ui">This week</span>, the <span class="ui">Latest reports</span> and <span class="ui">News</span> from your tutoring organisation.</p>
-<p>If you belong to more than one household (for example, separated parents with children in two accounts), a <span class="ui">Household</span> selector appears at the top. Choose one household or <span class="ui">All households</span>.</p>
+<p><span class="ui">Home</span> shows any amount you owe (with <span class="ui">Pay now</span>), then your <span class="ui">Next lesson</span>: the day, the time, the tutor and place, and its buttons (<span class="ui">Join the lesson</span> for online lessons, <span class="ui">Add to calendar</span>, and, if your organisation allows them, <span class="ui">Cancel lesson</span>, <span class="ui">Ask to move</span> and <span class="ui">Can't make it</span>). Below are the lessons <span class="ui">This week</span> (with <span class="ui">All lessons</span>), the <span class="ui">Latest reports</span> and <span class="ui">News</span> from your tutoring organisation.</p>
+<p>If you belong to more than one household (for example, separated parents with children in two accounts), a household selector appears in the bar at the top. Choose one household or <span class="ui">All households</span>.</p>
 <p>The family portal needs an internet connection. When you are offline it says so; reconnect to see the latest lessons, reports and invoices.</p>
 </section>
 
@@ -1076,6 +1084,7 @@ A moved lesson tells the family. A request waits for the office or the family to
 <section id="affiliates" aria-labelledby="affiliates-h">
 <h2 id="affiliates-h">Affiliates: the partner portal</h2>
 <p>Affiliates are partners (people or organisations) who refer new families and earn commission. The office adds you and sends a portal invitation. Sign in at <code>/portal/</code> with the emailed sign-in link; you go straight to the partner portal. If you see "This login isn't linked to a partner account.", contact the office.</p>
+<p>On a phone, the four pages are tabs along the bottom; on a larger screen they are listed down the left. To sign out, select your initials at the top right, then <span class="ui">Sign out</span>.</p>
 
 <section id="affiliate-overview" data-route="portal:/affiliate" aria-labelledby="affiliate-overview-h">
 <h3 id="affiliate-overview-h">Overview</h3>
@@ -1249,7 +1258,7 @@ A moved lesson tells the family. A request waits for the office or the family to
 </main>
 </div>
 <footer class="site-footer">
-<p>TutorTrack user guide. Last updated 2026-10-19. Found something out of date? Update this guide in the same pull request as the change.</p>
+<p>TutorTrack user guide. Last updated 2026-10-20. Found something out of date? Update this guide in the same pull request as the change.</p>
 </footer>
 </body>
 </html>

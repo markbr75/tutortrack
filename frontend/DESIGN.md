@@ -172,6 +172,67 @@ components:
     textColor: "{colors.foreground}"
     typography: "{typography.figure}"
     padding: "16px 20px"
+  portal-header:
+    backgroundColor: "{colors.surface}"
+    height: "56px"
+  tab-bar:
+    backgroundColor: "{colors.surface}"
+    height: "64px"
+  tab-bar-item:
+    textColor: "{colors.muted-foreground}"
+    typography: "{typography.caption}"
+    height: "64px"
+  tab-bar-item-active:
+    textColor: "{colors.foreground}"
+  tab-bar-pill:
+    rounded: "{rounded.full}"
+    width: "56px"
+    height: "28px"
+  more-sheet:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.foreground}"
+    rounded: "{rounded.xl}"
+  more-sheet-row:
+    textColor: "{colors.foreground}"
+    typography: "{typography.body}"
+    padding: "0 20px"
+    height: "48px"
+  portal-rail:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.foreground}"
+    padding: "16px 12px"
+    width: "240px"
+  portal-nav-item:
+    textColor: "{colors.foreground}"
+    typography: "{typography.body}"
+    rounded: "{rounded.md}"
+    padding: "8px 12px"
+  portal-nav-item-hover:
+    backgroundColor: "{colors.muted}"
+  account-menu:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.foreground}"
+    rounded: "{rounded.md}"
+    padding: "4px"
+    width: "240px"
+  lesson-card:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.foreground}"
+    rounded: "{rounded.xl}"
+    padding: "16px"
+  lesson-card-time:
+    textColor: "{colors.foreground}"
+    typography: "{typography.figure}"
+  owed-line:
+    textColor: "{colors.foreground}"
+    typography: "{typography.title}"
+    padding: "12px 0"
+  copy-link-value:
+    backgroundColor: "{colors.background}"
+    textColor: "{colors.foreground}"
+    typography: "{typography.body}"
+    rounded: "{rounded.md}"
+    padding: "8px 12px"
 ---
 
 # Design System: TutorTrack
@@ -182,9 +243,11 @@ components:
 
 TutorTrack's admin app is drawn from the teacher's register and mark book, because marking a lesson is what bills it and pays for it. The navigation is the bookcloth cover: a deep green rail with the organisation's name at the top and modules grouped by job. The work area is the register's stock: a near-white ground ruled in pale blue, written in blue-black ink. One red margin rule is the only loud colour, and it means one thing: now, or something that still needs marking or is overdue. Lesson state is shown with authored register marks (a tick, a ring, a struck ring, a dashed ring), never with generic status badges.
 
-The system is dense and desk-oriented: one family in five sizes, 14px body text, tabular figures wherever numbers are compared, and 1px rules instead of shadows or tinted cards. Depth comes from rules and the shell/stock contrast, not elevation. The tenant's brand colour reaches primary-button fills, the caret and text selection only; the ink (including the focus ring), the rules, the shell and the margin red stay constant so contrast holds in both colour schemes and under any tenant colour.
+The system is dense and desk-oriented: one family in five sizes, 14px body text, tabular figures wherever numbers are compared, and 1px rules instead of shadows or tinted cards. Depth comes from rules and the shell/stock contrast, not elevation. The tenant's brand colour reaches primary-button fills, the caret, text selection and, in the portal, a soft tint behind the current navigation item only; the ink (including the focus ring), the rules, the shell and the margin red stay constant so contrast holds in both colour schemes and under any tenant colour.
 
-Scope of this record: it is evidenced by stages 1 to 3 of the build. Stage 1: the shared tokens and font in `packages/ui/src/styles.css`, the register marks, the admin shell and Home. Stage 2: the shared components in `packages/ui` (page header, button styles for links, fields, alerts, tabs, the data grid, chart labels), global defaults for form-control edges and hand-built tables, and the people list screens (Clients, Students, Tutors). Stage 3: the admin calendar (toolbar, day/week/tutor/room time grids, month and agenda). The other modules' screens and the portal role shells have not yet been carried into this world, beyond what they inherit from the shared components and global defaults. The portal already loads the shared tokens and font but still uses its earlier shell. The reporting dashboard below Home is ruled off from Home's work area and no longer repeats Home's figures, but its widgets and heading still predate the world. Treat those surfaces as unconverted, not as examples.
+The portal (families, students, tutors and partners) is the same register carried in a pocket, and it is white-labelled: it has no bookcloth cover. Its navigation is a clean leaf (a tab bar under the thumb on phones, a rail on wider screens) with the tenant's logo or name in ink. The tenant colour appears on primary fills and as a soft tint behind the current tab or row, never as text.
+
+Scope of this record: it is evidenced by stages 1 to 4 of the build. Stage 1: the shared tokens and font in `packages/ui/src/styles.css`, the register marks, the admin shell and Home. Stage 2: the shared components in `packages/ui` (page header, button styles for links, fields, alerts, tabs, the data grid, chart labels), global defaults for form-control edges and hand-built tables, and the people list screens (Clients, Students, Tutors). Stage 3: the admin calendar (toolbar, day/week/tutor/room time grids, month and agenda). Stage 4: the portal's shared frame (`apps/portal/src/layout/PortalFrame.tsx`: header, tab bar, More sheet, rail, account menu) for every role, sign-in, the lesson card, and each role's home screen (family Home, tutor Today, affiliate Overview). The other admin modules' screens and the portal's inner screens (Schedule, Billing, Messages, Classes, Privacy and the rest) sit inside their converted shells but have not themselves been carried into this world, beyond what they inherit from the shared components and global defaults. The reporting dashboard below Home is ruled off from Home's work area and no longer repeats Home's figures, but its widgets and heading still predate the world. Treat those surfaces as unconverted, not as examples.
 
 **Key Characteristics:**
 
@@ -194,6 +257,7 @@ Scope of this record: it is evidenced by stages 1 to 3 of the build. Stage 1: th
 - Source Sans 3 (self-hosted variable font) is the only family, in five fixed sizes, with tabular figures in tables, inputs, times and money.
 - Authored SVG register marks for lesson state, the same five marks everywhere.
 - Flat: panels are ruled, not raised. The only shadow is on floating menus.
+- The portal is white-labelled: a clean-leaf header and tab bar (rail on wide screens), the business name in ink, the tenant colour only on primary fills and as a soft tint behind the current item.
 
 ## Colors
 
@@ -201,13 +265,13 @@ A cool, restrained palette: green-bound navigation, blue-black ink on ruled stoc
 
 ### Primary
 
-- **Register Ink Blue** (brand; light #2a54a2, dark #87a9ee): the fill of primary buttons, the caret, form accent colour and text selection (at 22% alpha). It is the tenant's runtime colour: `applyBrandTheme` overwrites `brand` and `brand-foreground` with the organisation's colour and its AA-safe text colour (E24 FR-24-1).
+- **Register Ink Blue** (brand; light #2a54a2, dark #87a9ee): the fill of primary buttons, the caret, form accent colour and text selection (at 22% alpha). In the portal it is also the soft tint behind the current tab's icon (15%) and the current rail row (10%). It is the tenant's runtime colour: `applyBrandTheme` overwrites `brand` and `brand-foreground` with the organisation's colour and its AA-safe text colour (E24 FR-24-1).
 - **Brand Foreground** (brand-foreground; light #ffffff, dark #0e1c35): text and icons on a brand fill.
 - **Link Ink** (link; light #2a54a2, dark #87a9ee): text links, inline accents ("Open unconfirmed lessons", the hover colour of register row titles) and the global focus outline. Same value as the default brand, but it is never tenant-overridden, so links and focus keep AA on the stock (6.9:1 light, 7.6:1 dark) whatever colour a tenant picks, however pale.
 
 ### Secondary
 
-- **Bookcloth Green** (shell; light #1e3e34, dark #0f241d): the navigation rail, the mobile navigation drawer, and the signed-in user's avatar disc. Nowhere else.
+- **Bookcloth Green** (shell; light #1e3e34, dark #0f241d): the admin navigation rail, the mobile navigation drawer, and the signed-in user's avatar disc. Nowhere else; the portal does not use it.
 - **Bookcloth Raised** (shell-accent; light #2a5145, dark #1c3b31): the hover and current-page fill of rail items.
 - **Bookcloth Lettering** (shell-foreground; light #e7efea, dark #e3ede8): rail text and the focus outline inside the rail; also the organisation monogram tile's fill (with bookcloth-green letter).
 - **Bookcloth Muted** (shell-muted; light #a8c2b8, dark #9db8ae): rail icons, group headings and the product name under the organisation name.
@@ -215,13 +279,13 @@ A cool, restrained palette: green-bound navigation, blue-black ink on ruled stoc
 
 ### Tertiary
 
-- **Margin Red** (margin; light #c8382d, dark #f07b70): the red margin rule. Used for the NOW rule in today's register and the calendar, today's date in the calendar, the header rule and day counts of Needs marking, the "overdue" line in the money strip, the "due" and "missed" register marks, the 1px inset rule on the current rail item, and the count pills.
+- **Margin Red** (margin; light #c8382d, dark #f07b70): the red margin rule. Used for the NOW rule in today's register and the calendar, today's date in the calendar, the header rule and day counts of Needs marking, the tutor's Waiting header rule and counts (only while something waits), the "overdue" line in the money strip, the "due" and "missed" register marks, the 1px inset rule on the current rail item, and the count pills.
 - **Margin Red Foreground** (margin-foreground; light #ffffff, dark #0f241d): numerals inside count pills (5.2:1 light, 6.0:1 dark).
 
 ### Neutral
 
 - **Register Stock** (background; light #f9f9f6, dark #11181d): the page ground and the top bar (at 95% opacity).
-- **Clean Leaf** (surface; light #ffffff, dark #162027): panels, data grids and tables sitting on the stock, form fields, secondary buttons, info alerts, floating menus.
+- **Clean Leaf** (surface; light #ffffff, dark #162027): panels, data grids and tables sitting on the stock, form fields, secondary buttons, info alerts, floating menus; in the portal also the header, tab bar, rail and More sheet.
 - **Blue-Black Ink** (foreground; light #1a2332, dark #e5ebf1): all body text and the "completed" register tick.
 - **Wash** (muted; light #edf2f8, dark #1c2831): hover fill for rows (data-grid rows at 60%), buttons and menu items; loading placeholders and skeleton rows.
 - **Faded Ink** (muted-foreground; light #56617b, dark #a2afbe): secondary lines, column headings, figure labels, inactive tabs, chart axis labels, the "cancelled" mark (5.9:1 or better on the stock).
@@ -240,11 +304,13 @@ A cool, restrained palette: green-bound navigation, blue-black ink on ruled stoc
 
 **The One Red Rule.** Margin red means now, overdue, or still to mark, plus the count of waiting items. It is never decoration, never a brand colour and never an error colour.
 
-**The Tenant Fills, the Register Inks Rule.** A tenant's colour replaces `brand` (primary-button fills, caret, selection) and nothing else. Links and the focus outline use `link`, which tenants never change; text, rules, shell and margin red are fixed.
+**The Tenant Fills, the Register Inks Rule.** A tenant's colour replaces `brand` (primary-button fills, caret, selection, and the portal's soft tint behind the current item) and nothing else. Links and the focus outline use `link`, which tenants never change; text, rules, shell and margin red are fixed. The business name in the portal header is ink, not brand.
+
+**The Soft Tint Rule.** In the portal, where you are is shown by the tenant colour as a soft tint behind the current item: brand at 15% in a pill behind the current tab's icon, brand at 10% behind the current rail row. The label beside it is ink at 600. The tint is never text, an icon colour, an underline or an edge.
 
 **The Field Edge Rule.** A form control's boundary uses `field` (3:1 or better in both schemes); a global rule applies it to every text input, select and textarea, and invalid controls turn `danger`. `border` and `rule` are for dividers, panels and secondary-button edges only.
 
-**The Bookcloth Rule.** Shell green is the navigation's cover: rail, drawer, avatar. Work areas never sit on it. Lines on the cover use `shell-rule`, never a white overlay.
+**The Bookcloth Rule.** Shell green is the admin navigation's cover: rail, drawer, avatar. Work areas never sit on it. Lines on the cover use `shell-rule`, never a white overlay. The white-labelled portal has no cover: its navigation is a clean leaf ruled off with `border`.
 
 ## Typography
 
@@ -254,12 +320,12 @@ A cool, restrained palette: green-bound navigation, blue-black ink on ruled stoc
 
 ### Hierarchy
 
-- **Headline** (600, 26px, 1.25): page titles (the Home greeting and every page header). Headings balance their line wrapping.
-- **Figure** (600, 20px, 1.4, tabular figures): money amounts in the money strip.
-- **Title** (600, 16px, 1.5): panel headings ("Today's register", "Needs marking") and the settings area heading.
-- **Body** (400, 14px, 20px line): the app's working size: table cells, list rows, navigation, buttons, page subtitles. Times in the register are body at 600.
-- **Caption** (400, 12px, 16px line): the one muted context line under a row's primary line, hints under fields, chart axis labels, table column headings (at 600, sentence case, faded ink, left-aligned; the default for every table head).
-- **Label** (600, 12px, 0.05em tracking, uppercase): navigation group headings (rail and settings sub-menu) and the NOW rule's time label. Nowhere else.
+- **Headline** (600, 26px, 1.25): admin page titles (the Home greeting and every page header). Headings balance their line wrapping. The portal is phone-first and titles its converted screens one step down, at 20px/600 (sign-in, Next lesson, Today, the affiliate welcome).
+- **Figure** (600, 20px, 1.4, tabular figures): money amounts in the money strip; in the portal, the lesson card's time range, the tutor's earnings and the affiliate's figures.
+- **Title** (600, 16px, 1.5): panel headings ("Today's register", "Needs marking") and the settings area heading. The portal reads at a 16px base, so a portal row's primary line (lesson title, the owed line) sits at this size, at 500 or 600.
+- **Body** (400, 14px, 20px line): the app's working size: table cells, list rows, navigation, buttons, page subtitles. Times in the register are body at 600. In the portal it carries secondary lines (the lesson card's date and context) and navigation rows.
+- **Caption** (400, 12px, 16px line): the one muted context line under a row's primary line, hints under fields, chart axis labels, table column headings (at 600, sentence case, faded ink, left-aligned; the default for every table head), and the portal tab bar's labels.
+- **Label** (600, 12px, 0.05em tracking, uppercase): navigation group headings (admin rail, settings sub-menu, portal rail and More sheet) and the NOW rule's time label. Nowhere else.
 
 ### Named Rules
 
@@ -283,6 +349,14 @@ The admin app is a two-column frame: a 248px (15.5rem) navigation rail fixed to 
 - **Home:** a header row (headline and subtitle left; actions right, wrapping under on phones), the money strip, then from 1024px a main column with a 352px (22rem) subordinate column for attention lists. Sections are 24px apart. The customisable dashboard, when permitted, sits below the work area after a register rule (24px above and below it) and leaves out widgets Home already shows (revenue, outstanding, next pay run, today's lessons, unconfirmed lessons) except while it is being customised.
 - **Rhythm:** panel content is inset 20px; panel headers are 14px top and bottom; rows are 10px top and bottom. The rail is padded 12px with 4px item padding and 12px between groups.
 
+The portal has its own frame, shared by every role (family and student, tutor, affiliate):
+
+- **Phones (below 768px):** a sticky 56px clean-leaf header ruled off below (logo or business name left; the household switcher and the account initials right), one content column up to 48rem with 16px sides and 24px top and bottom, and a fixed tab bar at the foot: 64px slots plus the safe-area inset, centred up to 32rem. An 80px spacer keeps the last row clear of the bar.
+- **Tabs:** up to four everyday destinations (each role names its own in order of use; the first four it is allowed become tabs) plus More for the rest. A role with five or fewer destinations gets them all as tabs and no More (the affiliate has four).
+- **Wide screens (768px and up):** the tab bar gives way to a 240px clean-leaf rail on the left, ruled off on its right edge, its 56px head holding the brand; the header keeps only the switcher and account menu, and content sits up to 48rem with 32px sides and top.
+- **Home screens:** sections 32px apart in one column; the most urgent fact first (the owed line, then the next lesson; for tutors, today's register, then what is waiting).
+- **Sign-in:** one centred column up to 24rem, vertically centred: the brand mark, one clean-leaf panel, then the child sign-in below a register rule.
+
 ### Named Rules
 
 **The One Work Area Rule.** Each screen has one leading work area; side columns stay narrower and subordinate (Home: register first, attention lists at 22rem).
@@ -291,14 +365,18 @@ The admin app is a two-column frame: a 248px (15.5rem) navigation rail fixed to 
 
 **The Fixed Columns Rule.** Register tables keep a fixed column order and fixed widths for the time (96px) and mark (80px) columns; values update in place. On phones a secondary column (tutor) folds into the row's context lines rather than reflowing the table.
 
+**The One Landmark Rule.** The portal shows one navigation landmark at a time: the tab bar on phones, the rail from 768px. The two are never both in the page.
+
 ## Elevation & Depth
 
 The system is flat. Depth comes from the bookcloth/stock contrast and from 1px rules: panels are white leaves on the stock with a register-rule edge, not raised cards. The sticky top bar is separated by a rule, not a shadow.
 
 ### Shadow Vocabulary
 
-- **Floating menu** (`box-shadow: 0 8px 24px -8px rgb(15 23 42 / 0.25)`): the account menu, the only element that floats above the page.
-- **Current-page margin rule** (`box-shadow: inset 1px 0 0 hsl(var(--tt-margin))`): not depth; a 1px red rule drawn inside the current rail item's left edge.
+- **Floating menu** (`box-shadow: 0 8px 24px -8px rgb(15 23 42 / 0.25)`): the account menu (admin and portal), the only element that floats above the page.
+- **Current-page margin rule** (`box-shadow: inset 1px 0 0 hsl(var(--tt-margin))`): not depth; a 1px red rule drawn inside the current admin rail item's left edge. The portal rail does not use it (see the Soft Tint Rule).
+
+The portal's More sheet is modal: it sits over a 40% black backdrop and is set off by its top register rule, with no shadow. The fixed tab bar is set off by a register rule along its top edge.
 
 ### Named Rules
 
@@ -306,9 +384,9 @@ The system is flat. Depth comes from the bookcloth/stock contrast and from 1px r
 
 ## Shapes
 
-Gently rounded and ruled. Controls, alerts, rail items and menu rows have 8px corners; panels (register, attention lists, data grids) have 12px; count pills and the avatar are fully round. Every line is 1px, except the NOW rule, a 2px margin-red line across the full table width (or across today's calendar column), and the active tab's 2px ink underline. Coloured emphasis on an edge is never thicker than 1px: the current rail item carries a 1px inset margin rule and Needs marking a 1px margin-red header rule.
+Gently rounded and ruled. Controls, alerts, rail items and menu rows have 8px corners; panels (register, attention lists, data grids, the portal's lesson card) have 12px, and the portal's More sheet has 12px top corners only; count pills, the avatar, the portal's initials disc and its current-tab pill are fully round. Every line is 1px, except the NOW rule, a 2px margin-red line across the full table width (or across today's calendar column), and the active tab's 2px ink underline. Coloured emphasis on an edge is never thicker than 1px: the current rail item carries a 1px inset margin rule and Needs marking a 1px margin-red header rule.
 
-Register marks are authored SVG on a 20px grid with round caps and joins: a tick (2.2px stroke) for completed, a solid ring (2px) for missed, a ring struck from lower left to upper right (1.5px) for cancelled, and a dashed ring (1.75px, 3/2.6 dash) for still-to-mark, red when over and pale field-blue when still to come. Each mark carries an accessible name. Rail icons are 16px outline icons at 1.75px stroke; top-bar icons are 20px.
+Register marks are authored SVG on a 20px grid with round caps and joins: a tick (2.2px stroke) for completed, a solid ring (2px) for missed, a ring struck from lower left to upper right (1.5px) for cancelled, and a dashed ring (1.75px, 3/2.6 dash) for still-to-mark, red when over and pale field-blue when still to come. Each mark carries an accessible name. Rail icons are 16px outline icons at 1.75px stroke; top-bar icons are 20px. In the portal, tab-bar and More-sheet icons are 20px and portal rail icons 18px, all in faded ink except the current tab's, which is ink.
 
 ## Components
 
@@ -321,7 +399,7 @@ Quiet, rectangular controls; the tenant colour shows here.
 - **Hover / Focus:** primary fades to 90% opacity; all buttons take the global 2px link-ink outline at 2px offset on keyboard focus; disabled is 50% opacity with a not-allowed cursor; loading shows an inline spinner and sets `aria-busy`.
 - **Secondary:** clean-leaf (surface) fill, register-rule edge, ink text; hover fills with wash. Beside a page's primary, secondary actions are small (Duplicates, Export CSV, Export Excel) so the primary leads.
 - **Links that act as buttons:** take the same look from the shared button styles (variant and size), never a hand-written class string.
-- **Ghost:** no fill or edge; hover fills with wash.
+- **Ghost:** no fill or edge; hover fills with wash. In faded ink it is the quietest action in a row (the lesson card's Cancel lesson, always last).
 - **Danger:** danger fill with danger-foreground text for destructive actions; hover fades to 90% opacity like primary.
 
 ### Inputs / Fields
@@ -349,6 +427,16 @@ One compact row inside a search landmark: the search field grows, then the filte
 - **Settings sub-menu:** ink text on the stock; hover wash; current item wash fill at 600.
 - **Rail dividers:** 1px bookcloth seam (`shell-rule`) under the organisation name and above Settings.
 - **Mobile:** the same rail inside a modal drawer, with a close button in its top-right corner.
+
+### Portal Navigation
+
+One frame for every portal role; the role supplies its destinations, their groups and its order of everyday use.
+
+- **Header:** 56px, clean leaf, register rule below, sticky under the safe-area inset. The brand is the tenant's logo (32px high) or the business name in ink at 600, never in the brand colour. On wide screens the brand moves to the rail's head and the header keeps only the controls.
+- **Tab bar (phones):** fixed to the foot, clean leaf with a register rule on top, even columns. Each tab is a 64px slot: a 20px icon inside a 56 × 28px fully round pill, with the label below at caption size, truncated to one line. Other tabs are faded ink. The current tab is ink at 600, its pill filled with the brand at 15%, and `aria-current="page"`. More is the last slot (an ellipsis icon, `aria-haspopup="dialog"`) and takes the same current treatment when the page is one of its destinations.
+- **More sheet:** a modal dialog that slides up from the foot (200ms, ease-out), up to 85% of the viewport high, clean leaf with 12px top corners and a register rule on top, over a 40% black backdrop. A fixed header (More at 16px/600, a 40px close button) is ruled off below; the list scrolls under it, contains its overscroll, and fades out over its last 56px above the safe-area inset. Destinations are grouped under label-style headings in faded ink; rows are 48px high with 20px sides, a 20px faded-ink icon, body size, divided by faint row rules, wash on hover, current at 600. It closes on choosing a row, on the close button, on Escape and on a backdrop tap, and is mounted only while open.
+- **Rail (wide screens):** 240px, clean leaf, register rule on its right edge, sticky to the viewport height, the brand in a 56px ruled head. Groups have label-style headings in faded ink, 20px apart. Rows are body size in ink with an 18px faded-ink icon, 8px corners, 8px × 12px padding, wash on hover. The current row is filled with the brand at 10% and set at 600 (no margin rule).
+- **Account menu:** the person's initials (caption at 600) in a 32px round disc on the stock with a register-rule edge, inside a 40px round button with a wash hover and a visually hidden name. It opens a 240px floating menu (clean leaf, register-rule edge, 8px corners, 4px padding, the floating-menu shadow): the person's name in faded ink, then Sign out with a 16px icon. Escape or a click outside closes it.
 
 ### Tabs
 
@@ -385,9 +473,36 @@ Waiting is quiet and late, never a centrepiece.
 
 A table of today's lessons in time order: time (600, tabular), the lesson title with one context line beneath (students · place), tutor, and the register mark centred in the last column. Column headings are caption at 600 in faded ink. A 2px margin-red NOW rule with a "NOW · 20:24" label is inserted before the first lesson that has not ended (or after the last row). The header's right side reads "Marked 3 of 7". Rows that are over and unmarked link straight to marking; others link to the calendar.
 
+In the tutor's portal the same register is a ruled list panel rather than a table: header 12px × 16px with "Your lessons" at 16px/600 and "Marked x of y" in faded ink; each row a 56px time column (start at 600, end as a faded caption), the lesson title at 500 with one caption context line (students · place), its actions, and the mark at the row's end. The NOW rule is the same 2px margin-red line with its label-style "NOW · 16:20" label, refreshed each minute and hidden from assistive tech. Actions wrap under the title: Join (primary) when online, then "Open and complete" as a primary button on a due lesson (secondary "Open" otherwise). Below it a "Waiting for you" panel lists reports to write, job offers and new notifications as 48px rows with the count in margin red at 600 and a chevron; its header rule is margin red only while something waits, otherwise a register rule and one sentence. When the tutor may see pay, the earnings line follows: a ruled line (register rule above and below) with "Earned this month" as a faded-ink link left and the amount in the figure style right.
+
 ### Money Strip (signature component)
 
 One ruled line of money, not tiles: a register-rule above and below, three figures (revenue this month, outstanding, next pay run) divided by faint vertical rules (horizontal rules when stacked on phones). Each figure is a faded-ink label that links to its report, the amount in the figure style, and one sentence of comparison or status (success colour for an increase, margin red for an overdue amount, faded ink otherwise). No sparklines, deltas-as-badges or icons.
+
+The affiliate's Overview uses the same strip for its three counts (clicks, referred, converted): three even columns between register rules, divided by faint vertical rules, each a body-size faded-ink label over its figure; the earned and unpaid totals follow as one sentence.
+
+### Owed Line (portal)
+
+The family's money, said once at the top of Home and only when something is owed: one ruled line (register rule above and below, 12px top and bottom) with "You owe £84.00." at 16px/600 tabular on the left and a primary Pay now on the right. No tile, no icon, no red: owing is not overdue.
+
+### Lesson Card (portal signature component)
+
+The next lesson, and every lesson in the family's lists. A clean-leaf panel with 12px corners, a register-rule edge and 16px padding, 12px between its parts:
+
+- **When:** the weekday and date in faded ink at body size (plus the status when it is not planned), then the time range at 20px/600 tabular, with the register mark (20px) at the top right.
+- **What:** the lesson title at 16px/600, one faded-ink line of tutor and place ("Online" for online lessons), the tutor's contact details as a caption when shared, and any note for the family in ink.
+- **Actions:** below a faint row rule, in order of use: Join (primary, full width; before the join window opens it is a disabled secondary, "Join opens at 16:50"), Open the classroom, Ask to move, Can't make it, Add to calendar (all secondary), and Cancel lesson last as a faded-ink ghost. On phones they sit in two even columns; from 640px they wrap in one row. When online cancelling has closed, a caption sentence takes Cancel lesson's place.
+- **Inline forms:** cancelling, moving and reporting an absence open in place below the actions (the cancellation policy shown first as an alert), with a small confirming button and a ghost "Keep the lesson".
+
+The week on Home is the card's compact form: one ruled list panel whose rows are 12px × 16px, a 64px column with the short weekday and day as a faded caption over the time at 600 tabular, then the title at 500 with one caption line of tutor and place, and the mark at the row's end. Latest reports and news follow as ruled list panels (a report row: title at 500, date as a tabular caption on the right, 60% wash on hover).
+
+### Copy Link (portal)
+
+A link the person shares (referral and partner links). The label at body size and 500, then the link as a one-line read-only value: a field-edged box with 8px corners on the stock, 8px × 12px padding, body size, truncated with the full link as its tooltip. Copy link is a secondary button with a copy icon that turns to a tick once copied; on phones it takes the full width below the value, from 640px it sits beside it at the value's height. A caption status line below announces "Link copied."
+
+### Portal Sign-in
+
+The brand mark centred above one clean-leaf panel (12px corners, register-rule edge, 20px padding): "Sign in" at 20px/600, the email field and a full-width primary "Email me a sign-in link"; after sending, one status sentence replaces the form. The child sign-in follows as a ruled section (a register rule above, 20px gap) with its own 16px/600 heading and a full-width secondary button, then the "Powered by" credit in faded ink.
 
 ### Attention Lists
 
@@ -418,6 +533,9 @@ Ruled panels of at most five rows ("Needs marking", "Overdue invoices"). Each ro
 - **Do** put list filters in one compact row with self-describing first options, above a data grid.
 - **Do** style links that act as buttons with the shared button styles.
 - **Do** check every new pair in both schemes; the dark scheme has its own values for every token.
+- **Do** build portal screens inside `PortalFrame`: up to four everyday tabs plus More on phones, the rail from 768px, one navigation landmark at a time, sign out in the account menu.
+- **Do** mark the current portal tab or rail row with the soft brand tint (15% behind the tab's icon, 10% behind the rail row) and the label in ink at 600.
+- **Do** order a lesson's actions by use: Join first and full width, Cancel lesson last as a faded-ink ghost.
 
 ### Don't:
 
@@ -432,3 +550,5 @@ Ruled panels of at most five rows ("Needs marking", "Overdue invoices"). Each ro
 - **Don't** show the flat list of every module; navigation stays grouped by job and permission-gated.
 - **Don't** use raw palette colours (amber, white overlays) for status tints or rail lines; use `warning`, `danger`, `success` and `shell-rule`.
 - **Don't** repeat a figure the screen already shows in a second widget or tile.
+- **Don't** set text, icons or edges in the tenant colour in the portal; the business name is ink and the current item is a tint, not brand-coloured text.
+- **Don't** use bookcloth green in the portal, or wrap the portal's destinations into a cloud of links; the rest go under More, grouped by job.
