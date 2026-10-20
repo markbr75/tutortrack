@@ -15,6 +15,7 @@ import { useMemo, useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
 import { useCursorList } from "../lists";
+import { AddMeAsTutor } from "./AddMeAsTutor";
 import { actionLink, selectionColumn, useFigures, useSelection } from "./listHelpers";
 import { BulkBar, ExportLinks } from "./listTools";
 import { CLIENT_STATUSES, STUDENT_STATUSES, TUTOR_STATUSES } from "./statuses";
@@ -486,7 +487,12 @@ export function TutorsPage() {
       columns={columns}
       query={query}
       getRowId={(r) => r.id}
-      actions={canExport ? <ExportLinks path="/api/v1/tutors/export" params={params} /> : null}
+      actions={
+        <>
+          <AddMeAsTutor />
+          {canExport ? <ExportLinks path="/api/v1/tutors/export" params={params} /> : null}
+        </>
+      }
     >
       <Filters
         label={t("people.tutorsTitle")}

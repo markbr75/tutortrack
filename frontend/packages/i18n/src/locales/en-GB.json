@@ -59,7 +59,8 @@
     "closeMenu": "Close menu",
     "userMenu": "Account menu for {{name}}",
     "waiting_one": "1 waiting",
-    "waiting_other": "{{count}} waiting"
+    "waiting_other": "{{count}} waiting",
+    "tutorApp": "Open the tutor app"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -119,7 +120,10 @@
       "noneOverdue": "Nothing overdue",
       "payRun": "Next pay run",
       "payRunReady": "Ready for the next pay run",
-      "payRunNone": "Nothing waiting to be paid"
+      "payRunNone": "Nothing waiting to be paid",
+      "toInvoice": "Not yet invoiced",
+      "toInvoiceNone": "Nothing waiting to be invoiced",
+      "toInvoiceReady": "Ready for your next invoices"
     },
     "register": {
       "title": "Today's register",
@@ -275,7 +279,9 @@
       "monthly_advance": "Monthly in advance",
       "packages": "Prepaid packages"
     },
-    "handoffFailed": "Your sign-in link has expired. Please sign in to continue."
+    "handoffFailed": "Your sign-in link has expired. Please sign in to continue.",
+    "ownerTeaches": "I teach lessons myself",
+    "ownerTeachesHint": "We'll add you as a tutor, so you can put yourself on lessons and use the tutor app on your phone. You can change this later under Tutors."
   },
   "settings": {
     "title": "Settings",
@@ -309,7 +315,9 @@
     "closePassword": "Your password",
     "closeReason": "Why are you leaving?",
     "closeAction": "Close account permanently",
-    "closed": "Your account has been closed."
+    "closed": "Your account has been closed.",
+    "businessType": "Type of business",
+    "businessTypeHint": "Sole traders don't see the menus for running a team of tutors (matching, payroll, recruitment and compliance checks). Choose another type when you take on tutors."
   },
   "terms": {
     "tutor": "Tutor",
@@ -545,7 +553,8 @@
       "removeStudent": "Remove student {{n}}",
       "save": "Create family",
       "failed": "We couldn't create the family. Check the details and try again."
-    }
+    },
+    "addMeAsTutor": "Add yourself as a tutor"
   },
   "crm": {
     "activity": "Activity",

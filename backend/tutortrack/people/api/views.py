@@ -6,6 +6,7 @@ from typing import Any
 
 from django.db.models import Count, Q, QuerySet
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 from django_filters import rest_framework as filters
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
@@ -684,6 +685,34 @@ class TutorViewSet(PeopleViewSet):
         address = data.pop("address_data", None)
         branches = data.pop("branches", [])
         serializer.instance = services.create_tutor(address=address, branches=branches, **data)
+
+    @extend_schema(
+        request=None,
+        responses=TutorSerializer,
+        description=(
+            "Add the signed-in person as a tutor (a sole trader, or an owner who teaches): an "
+            "active tutor record on their own login, with no invitation. Idempotent: returns "
+            "their existing tutor record if they have one."
+        ),
+    )
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="add-me",
+        permission_classes=[
+            IsAuthenticated,
+            HasOrganisation,
+            HasMethodPermission.for_({"POST": "people.tutor.create"}),
+        ],
+    )
+    def add_me(self, request: Request) -> Response:
+        membership = getattr(request, "membership", None)
+        if membership is None:
+            from tutortrack.core.exceptions import PermissionDenied
+
+            raise PermissionDenied(_("Only members of this organisation can be its tutors."))
+        tutor = services.add_self_as_tutor(membership)
+        return Response(TutorSerializer(tutor, context={"request": request}).data)
 
     def perform_update(self, serializer: Any) -> None:
         data = dict(serializer.validated_data)

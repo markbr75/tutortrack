@@ -1,6 +1,6 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, TextField } from "@tutortrack/ui";
+import { Alert, Button, SelectField, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 
@@ -10,6 +10,7 @@ import { Locked } from "../subscription/UpgradePrompts";
 import { SupportAccessSection } from "./SupportAccessSection";
 
 const TERMS = ["tutor", "student", "client", "lesson", "job"] as const;
+const BUSINESS_TYPES = ["sole_trader", "team", "agency", "centre", "online"] as const;
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -35,12 +36,17 @@ function ProfileSection() {
         contact_phone: org.contact_phone ?? "",
         timezone: org.timezone ?? "",
         primary_colour: org.primary_colour || "#2563eb",
+        business_type: org.business_type ?? "sole_trader",
       });
     }
   }, [org]);
   const save = useMutation({
     mutationFn: async () => unwrap(await api.PATCH("/api/v1/organisation", { body: form })),
-    onSuccess: (data) => queryClient.setQueryData(["organisation"], data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(["organisation"], data);
+      // The type of business decides which menus show (sole traders see fewer).
+      void queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
   });
   const errors = fieldErrors(save.error);
   const field = (name: string, label: string, extra: Record<string, unknown> = {}) => (
@@ -66,6 +72,16 @@ function ProfileSection() {
         {field("contact_email", t("settings.contactEmail"), { type: "email" })}
         {field("contact_phone", t("settings.contactPhone"), { type: "tel" })}
         {field("primary_colour", t("settings.primaryColour"), { type: "color" })}
+        <div className="sm:col-span-2">
+          <SelectField
+            label={t("settings.businessType")}
+            hint={t("settings.businessTypeHint")}
+            value={form.business_type ?? "sole_trader"}
+            error={errors.business_type}
+            onChange={(e) => setForm((f) => ({ ...f, business_type: e.target.value }))}
+            options={BUSINESS_TYPES.map((b) => ({ value: b, label: t(`businessTypes.${b}`) }))}
+          />
+        </div>
         <div className="flex items-end gap-3 sm:col-span-2">
           <Button type="submit" loading={save.isPending}>
             {t("common.save")}

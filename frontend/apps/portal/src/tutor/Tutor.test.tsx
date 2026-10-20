@@ -33,6 +33,33 @@ function routes(extra: Routes = {}): Routes {
 }
 
 describe("tutor portal", () => {
+  it("opens for an owner who teaches (a sole trader)", async () => {
+    window.history.pushState(null, "", "/portal/");
+    mockApi(
+      routes({
+        "GET /api/v1/me": {
+          body: {
+            membership: { role: "owner", teaches: true },
+            user: { email: "sam@example.com", first_name: "Sam" },
+          },
+        },
+        "GET /api/v1/tutor/today": {
+          body: {
+            date: "2026-10-10",
+            lessons: [],
+            reports_due: 0,
+            offers: 0,
+            unread: 0,
+            earnings_this_month: { amount: "0.00", currency: "GBP" },
+          },
+        },
+      }),
+    );
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "Today" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Tutor menu" })).toBeInTheDocument();
+  });
+
   it("shows today with counts and lessons", async () => {
     window.history.pushState(null, "", "/portal/");
     mockApi(
