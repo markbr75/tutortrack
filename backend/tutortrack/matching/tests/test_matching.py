@@ -529,9 +529,14 @@ def test_cover_rules_and_unfilled(org, maths):
         assert services.mark_unfilled(str(request.pk))
         request.refresh_from_db()
         assert request.status == "unfilled"
-        soon = _lesson_for(org, job, away, days=0)
+        # An hour away: inside the 2-hour cut-off whatever the time of day.
+        current = now().replace(second=0, microsecond=0)
+        start = current + timedelta(minutes=65 - current.minute % 5)
+        soon = scheduling.create_lesson(
+            job=job, start=start, end=start + timedelta(hours=1), tutors=[{"tutor": away}]
+        ).lesson
     with tenant_context(org), pytest.raises(BusinessRuleViolation):
-        services.create_cover([soon])  # within the cut-off (or already started)
+        services.create_cover([soon])  # within the cut-off
     staff = api_as(org, "coordinator")
     listed = staff.get("/api/v1/cover-requests?status=unfilled").json()["results"]
     assert [r["id"] for r in listed] == [str(request.pk)]
