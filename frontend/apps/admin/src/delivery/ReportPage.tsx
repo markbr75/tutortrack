@@ -384,7 +384,7 @@ export function ReportPage({ reportId }: { reportId: string }) {
     },
   });
 
-  if (report.isPending || !answers) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (report.isPending || !answers) return <Spinner label={t("grid.loading")} />;
   if (!report.data) return <ErrorList error={report.error} />;
   const data = report.data;
   const written = data.status === "submitted" || data.status === "approved";

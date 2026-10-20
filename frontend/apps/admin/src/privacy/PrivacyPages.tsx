@@ -177,7 +177,7 @@ function RequestsSection() {
           ))}
         </Table>
       ) : (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       )}
       <FormCard
         title={t("privacyCentre.logRequest")}
@@ -287,7 +287,7 @@ export function DataRequestPage({ requestId }: { requestId: string }) {
       ),
     onSuccess: refresh,
   });
-  if (!request.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!request.data) return <Spinner label={t("grid.loading")} />;
   const r = request.data;
   return (
     <article className="space-y-6">
@@ -463,7 +463,7 @@ function ExportReview({ request }: { request: DataRequest }) {
     },
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["data-requests"] }),
   });
-  if (!preview.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!preview.data) return <Spinner label={t("grid.loading")} />;
   return (
     <section aria-labelledby="review" className="space-y-4 rounded-md border border-border p-4">
       <h2 id="review" className="font-semibold">
@@ -624,7 +624,7 @@ function ErasuresSection() {
     queryKey: ["erasures"],
     queryFn: async () => unwrap(await api.GET("/api/v1/erasures", { params: { query: PAGE } })),
   });
-  if (!erasures.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!erasures.data) return <Spinner label={t("grid.loading")} />;
   return (
     <Table
       caption={t("privacyCentre.tabs.erasures")}
@@ -735,7 +735,7 @@ function HoldsSection() {
           ))}
         </Table>
       ) : (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       )}
       <FormCard
         title={t("privacyCentre.placeHold")}
@@ -817,7 +817,7 @@ function RetentionSection() {
           ))}
         </Table>
       ) : (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       )}
       {update.error ? <Alert tone="danger">{update.error.message}</Alert> : null}
       <div className="flex flex-wrap gap-2">
@@ -889,7 +889,7 @@ function AgreementSection() {
     onSuccess: (data) => queryClient.setQueryData(["dpa"], data),
   });
   const errors = fieldErrors(accept.error);
-  if (!dpa.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!dpa.data) return <Spinner label={t("grid.loading")} />;
   const d = dpa.data;
   return (
     <div className="space-y-6">

@@ -123,7 +123,7 @@ function Invoices() {
         }))}
       />
       {list.query.isPending ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : (
         <InvoiceTable rows={list.rows} />
       )}
@@ -144,7 +144,7 @@ function Charges() {
       await api.GET("/api/v1/charges", { params: { query: { status: ["uninvoiced"], cursor } } }),
     ),
   );
-  if (list.query.isPending) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (list.query.isPending) return <Spinner label={t("grid.loading")} />;
   if (!list.rows.length) return <p className="text-sm text-muted-foreground">{t("grid.empty")}</p>;
   return (
     <div className="overflow-x-auto">
@@ -260,7 +260,7 @@ function Requests() {
       ) : null}
       <ErrorList error={bulk.error} />
       {list.query.isPending ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : (
         <RequestTable rows={list.rows} />
       )}
@@ -391,7 +391,7 @@ function Ageing() {
     queryKey: ["ageing"],
     queryFn: async () => unwrap(await api.GET("/api/v1/billing/ageing")),
   });
-  if (rows.isPending) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (rows.isPending) return <Spinner label={t("grid.loading")} />;
   if (!rows.data?.length) return <p className="text-sm text-muted-foreground">{t("grid.empty")}</p>;
   const buckets = [
     "current",

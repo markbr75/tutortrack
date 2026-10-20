@@ -48,7 +48,7 @@ export function CustomerNoticesPage() {
     <div className="max-w-4xl space-y-6">
       <h1 className="text-2xl font-semibold">{t("customerNotices.title")}</h1>
       <p className="text-sm text-muted-foreground">{t("customerNotices.intro")}</p>
-      {templates.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {templates.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {draft ? (
         <NoticePreview
           notice={draft}
@@ -158,7 +158,7 @@ function NoticePreview({ notice, onDone }: { notice: Notice; onDone: () => void 
           </pre>
         </>
       ) : (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       )}
       <form
         className="flex flex-wrap items-end gap-2"

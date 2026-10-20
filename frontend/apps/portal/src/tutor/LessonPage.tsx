@@ -131,7 +131,7 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
     },
   });
 
-  if (lesson.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (lesson.isPending) return <Spinner label={t("grid.loading")} />;
   const l = lesson.data;
   if (!l) return <Alert tone="danger">{t("errors.generic")}</Alert>;
   const started = new Date(l.start).getTime() <= Date.now();

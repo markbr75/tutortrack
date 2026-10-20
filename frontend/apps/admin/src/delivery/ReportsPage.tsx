@@ -32,7 +32,7 @@ export function ReportsPage() {
         tabs={tabs.map((key) => ({ key, label: t(`delivery.reports.tabs.${key}`) }))}
       >
         {list.query.isPending ? (
-          <Spinner className="size-5" label={t("grid.loading")} />
+          <Spinner label={t("grid.loading")} />
         ) : list.rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("delivery.reports.empty")}</p>
         ) : (

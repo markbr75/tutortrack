@@ -166,7 +166,11 @@ export function OnboardingPage() {
     const asStrings = Object.fromEntries(
       Object.entries(saved).map(([k, v]) => [
         k,
-        k === "price" ? String((v as { amount: string }).amount) : Array.isArray(v) ? v.join("\n") : String(v),
+        k === "price"
+          ? String((v as { amount: string }).amount)
+          : Array.isArray(v)
+            ? v.join("\n")
+            : String(v),
       ]),
     );
     setValues({ ...(DEFAULTS[current] ?? {}), ...asStrings });
@@ -210,7 +214,7 @@ export function OnboardingPage() {
   if (!state.data || !current) {
     return (
       <div className="grid h-screen place-items-center">
-        <Spinner className="size-6" label={t("common.loading")} />
+        <Spinner label={t("common.loading")} />
       </div>
     );
   }

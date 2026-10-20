@@ -46,7 +46,7 @@ function SyncSettings({ connection }: { connection: Connection }) {
       ),
     onSuccess: (data) => queryClient.setQueryData(["calendar-sync", connection.id], data),
   });
-  if (!page.data) return <Spinner className="size-4" label={t("common.loading")} />;
+  if (!page.data) return <Spinner label={t("common.loading")} />;
   return (
     <form
       className="mt-3 space-y-2"

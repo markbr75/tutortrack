@@ -285,7 +285,7 @@ export function WarehousePage() {
         <p className="text-sm text-muted-foreground">{t("warehouse.help")}</p>
       </header>
       {!entitled ? <Alert tone="warning">{t("warehouse.enterpriseOnly")}</Alert> : null}
-      {destinations.isPending ? <Spinner className="size-5" label={t("common.loading")} /> : null}
+      {destinations.isPending ? <Spinner label={t("common.loading")} /> : null}
       {!forbidden ? <ErrorList error={destinations.error} /> : null}
       {(destinations.data?.results ?? []).map((d) => (
         <DestinationCard key={d.id} destination={d} />

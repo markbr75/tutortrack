@@ -20,7 +20,7 @@ export function PlansPage() {
     <div className="max-w-5xl space-y-4">
       <h1 className="text-2xl font-semibold">{t("platformPlans.title")}</h1>
       <p className="text-sm text-muted-foreground">{t("platformPlans.intro")}</p>
-      {plans.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {plans.isPending ? <Spinner label={t("grid.loading")} /> : null}
       <ul className="space-y-4">
         {plans.data?.map((plan) => (
           <PlanCard key={plan.key} plan={plan} />

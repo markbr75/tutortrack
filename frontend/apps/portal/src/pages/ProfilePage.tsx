@@ -168,7 +168,7 @@ export function ProfilePage() {
     queryKey: ["portal", "profile"],
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/profile")),
   });
-  if (profile.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (profile.isPending) return <Spinner label={t("grid.loading")} />;
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">{t("portal.nav.profile")}</h1>

@@ -36,7 +36,7 @@ export function OnboardingPage() {
       queryClient.setQueryData(["tutor", "onboarding"], data);
     },
   });
-  if (!state.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!state.data) return <Spinner label={t("grid.loading")} />;
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">{t("onboard.title")}</h1>
@@ -127,7 +127,7 @@ export function ChecksPage() {
     queryKey: ["tutor", "compliance"],
     queryFn: async () => unwrap(await api.GET("/api/v1/me/compliance")),
   });
-  if (!data.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!data.data) return <Spinner label={t("grid.loading")} />;
   const records = new Map(data.data.records.map((r) => [r.requirement, r]));
   return (
     <div className="space-y-4">

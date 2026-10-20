@@ -276,7 +276,7 @@ export function ProposalsSection({ enquiryId }: { enquiryId: string }) {
           </Button>
         ) : null}
       </div>
-      {proposals.isLoading ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {proposals.isLoading ? <Spinner label={t("grid.loading")} /> : null}
       {rows.length === 0 && proposals.data ? <p>{t("proposals.none")}</p> : null}
       <ul className="space-y-2">
         {rows.map((p) => (
@@ -396,7 +396,7 @@ export function PublicProposalPage({ token }: { token: string }) {
     onSuccess: (data) => queryClient.setQueryData(["public-proposal", token], data),
   });
   if (proposal.isError) return <PublicLayout title={t("proposals.missing")}>{null}</PublicLayout>;
-  if (!proposal.data) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (!proposal.data) return <Spinner label={t("grid.loading")} />;
   const p = proposal.data;
   const money = (amount: string) => formatMoney({ amount, currency: p.currency });
   const errors = fieldErrors(accept.error);

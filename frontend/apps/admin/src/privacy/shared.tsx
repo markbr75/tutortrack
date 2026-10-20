@@ -215,7 +215,7 @@ export function AreaSettings({ area, label }: { area: string; label: string }) {
     onSuccess: (data) => queryClient.setQueryData(["settings", area], data),
   });
   const errors = fieldErrors(save.error);
-  if (!query.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!query.data) return <Spinner label={t("grid.loading")} />;
   return (
     <form
       className="max-w-2xl space-y-3"

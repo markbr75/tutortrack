@@ -36,7 +36,7 @@ export function DocumentList({
       void queryClient.invalidateQueries({ queryKey });
     },
   });
-  if (documents.isPending) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (documents.isPending) return <Spinner label={t("grid.loading")} />;
   const rows = documents.data ?? [];
   if (rows.length === 0) return <p className="text-sm text-muted-foreground">{t("esign.none")}</p>;
   return (

@@ -75,7 +75,7 @@ function ThisDevice() {
         <p className="text-sm">{t("pwa.unsupported")}</p>
       );
   } else if (config.isPending || subscribed === null) {
-    body = <Spinner className="size-5" label={t("grid.loading")} />;
+    body = <Spinner label={t("grid.loading")} />;
   } else if (!config.data?.enabled) {
     body = <p className="text-sm">{t("pwa.notConfigured")}</p>;
   } else if (denied) {
@@ -178,7 +178,7 @@ function Preferences() {
       ),
     onSuccess: (data) => setRows(data.preferences),
   });
-  if (!rows) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!rows) return <Spinner label={t("grid.loading")} />;
   const toggle = (category: string, channel: Preference["channels"][number], on: boolean) =>
     setRows((current) =>
       (current ?? []).map((r) =>

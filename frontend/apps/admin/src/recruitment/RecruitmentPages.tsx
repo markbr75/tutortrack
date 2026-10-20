@@ -48,7 +48,7 @@ export function ApplicationsPage() {
   });
   return (
     <Page title={t("recruitment.title")}>
-      {applications.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {applications.isPending ? <Spinner label={t("grid.loading")} /> : null}
       <div className="flex gap-3 overflow-x-auto pb-2">
         {stages.data
           ?.filter((s) => s.kind === "open")
@@ -157,7 +157,7 @@ export function ApplicationPage({ id }: { id: string }) {
       ),
     onSuccess: set,
   });
-  if (!application.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!application.data) return <Spinner label={t("grid.loading")} />;
   const a = application.data;
   const error = move.error ?? approve.error ?? reject.error ?? reference.error ?? interview.error;
   return (
@@ -285,7 +285,7 @@ export function ComplianceDashboardPage() {
     queryKey: ["compliance-dashboard"],
     queryFn: async () => unwrap(await api.GET("/api/v1/compliance/dashboard")),
   });
-  if (!board.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!board.data) return <Spinner label={t("grid.loading")} />;
   return (
     <Page title={t("recruitment.compliance")}>
       <div className="overflow-x-auto">
@@ -458,7 +458,7 @@ export function VacancyPage({ slug }: { slug: string }) {
   });
   if (opening.isError)
     return <PublicLayout title={t("recruitment.noOpening")}>{null}</PublicLayout>;
-  if (!opening.data) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (!opening.data) return <Spinner label={t("grid.loading")} />;
   const schema = opening.data.schema as unknown as Schema;
   const errors = (apply.error as { problem?: { errors?: Record<string, string[]> } } | null)
     ?.problem?.errors;
@@ -523,7 +523,7 @@ export function InterviewChoicePage({ token }: { token: string }) {
   });
   if (interview.isError)
     return <PublicLayout title={t("recruitment.linkExpired")}>{null}</PublicLayout>;
-  if (!interview.data) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (!interview.data) return <Spinner label={t("grid.loading")} />;
   const i = interview.data;
   return (
     <PublicLayout title={t("recruitment.chooseTime", { organisation: i.organisation })}>
@@ -568,7 +568,7 @@ export function ReferencePage({ token }: { token: string }) {
   });
   if (reference.isError)
     return <PublicLayout title={t("recruitment.linkExpired")}>{null}</PublicLayout>;
-  if (!reference.data) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (!reference.data) return <Spinner label={t("grid.loading")} />;
   const r = reference.data;
   if (give.isSuccess || r.status !== "requested") {
     return (

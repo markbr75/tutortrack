@@ -126,7 +126,7 @@ export function XeroPayrollPage() {
           resync.error
         }
       />
-      {status.isPending ? <Spinner className="size-5" label={t("common.loading")} /> : null}
+      {status.isPending ? <Spinner label={t("common.loading")} /> : null}
       {data && !data.connected ? (
         canManage ? (
           <Button onClick={() => connect.mutate()} loading={connect.isPending}>

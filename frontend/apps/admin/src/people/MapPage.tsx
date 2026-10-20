@@ -192,7 +192,7 @@ export function PeopleMapPage() {
           {t("peopleMap.listView")}
         </Button>
       </div>
-      {map.isLoading ? <Spinner className="size-6" label={t("grid.loading")} /> : null}
+      {map.isLoading ? <Spinner label={t("grid.loading")} /> : null}
       {map.error ? <Alert tone="danger">{map.error.message}</Alert> : null}
       {missing > 0 ? (
         <Alert tone="info">

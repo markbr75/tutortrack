@@ -89,7 +89,7 @@ export function ReportsPage() {
     queryKey: ["portal", "reports"],
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/reports")),
   });
-  if (reports.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (reports.isPending) return <Spinner label={t("grid.loading")} />;
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">{t("portal.nav.reports")}</h1>

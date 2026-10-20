@@ -37,7 +37,7 @@ export function BlogTab() {
       {editing ? (
         <PostEditor post={editing === "new" ? null : editing} onClose={() => setEditing(null)} />
       ) : null}
-      {posts.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {posts.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {posts.data?.results.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("blogPosts.none")}</p>
       ) : null}

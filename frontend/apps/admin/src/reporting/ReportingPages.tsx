@@ -179,7 +179,7 @@ function WidgetTile({
           </a>
         ) : null}
       </div>
-      {widget.isPending ? <Spinner className="size-4" label={t("grid.loading")} /> : null}
+      {widget.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {widget.isError ? <p className="text-sm">{t("reporting.widgetError")}</p> : null}
       {data ? (
         <>
@@ -275,7 +275,7 @@ export function Dashboard({ hide = [] }: { hide?: readonly string[] } = {}) {
       setEditing(false);
     },
   });
-  if (!layout.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!layout.data) return <Spinner label={t("grid.loading")} />;
   const query = { ...periodQuery(period), compare };
   const items = editing ? draft : layout.data.widgets.filter((w) => !hide.includes(w.widget));
   const titles = Object.fromEntries((library.data ?? []).map((w: WidgetInfo) => [w.key, w.title]));
@@ -461,7 +461,7 @@ export function ReportsLibraryPage() {
     <section className="space-y-6">
       <h1 className="text-2xl font-semibold">{t("reporting.title")}</h1>
       <ReportsNav />
-      {reports.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {reports.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {reports.data?.length === 0 ? <p>{t("reporting.noReports")}</p> : null}
       {groups.map(([key, group]) => (
         <section key={key} aria-labelledby={`cat-${key}`} className="space-y-2">
@@ -757,7 +757,7 @@ export function ReportViewPage({ reportKey }: { reportKey: string }) {
           {Object.values(errors).join(" ")}
         </Alert>
       ) : null}
-      {report.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {report.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {result ? (
         <>
           {result.period ? (

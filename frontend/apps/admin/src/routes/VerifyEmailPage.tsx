@@ -27,7 +27,7 @@ export function VerifyEmailPage() {
         <Alert tone="danger">{t("verifyEmail.failed")}</Alert>
       ) : (
         <p className="flex items-center gap-2" role="status">
-          <Spinner className="size-4" /> {t("verifyEmail.checking")}
+          <Spinner /> {t("verifyEmail.checking")}
         </p>
       )}
     </PublicLayout>

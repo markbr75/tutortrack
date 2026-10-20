@@ -31,7 +31,7 @@ function FeatureRows({ canManage }: { canManage: boolean }) {
       void queryClient.invalidateQueries({ queryKey: ["ai", "status"] });
     },
   });
-  if (!features.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!features.data) return <Spinner label={t("grid.loading")} />;
   return (
     <section aria-labelledby="ai-features" className="space-y-2">
       <h2 id="ai-features" className="text-lg font-semibold">

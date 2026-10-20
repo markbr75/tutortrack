@@ -380,7 +380,7 @@ function Detail({ id }: { id: string }) {
     },
     onSuccess: done,
   });
-  if (!broadcast.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!broadcast.data) return <Spinner label={t("grid.loading")} />;
   const b = broadcast.data;
   return (
     <section aria-labelledby="broadcast-title" className="space-y-4 rounded-md border p-4">
@@ -502,7 +502,7 @@ export function BroadcastsPage() {
         />
       ) : null}
       {list.isPending ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : !list.data?.results.length ? (
         <p className="text-sm text-muted-foreground">{t("broadcasts.none")}</p>
       ) : (

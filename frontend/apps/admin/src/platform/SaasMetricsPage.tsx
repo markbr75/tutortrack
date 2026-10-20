@@ -77,7 +77,7 @@ export function SaasMetricsPage() {
           />
         </div>
       </div>
-      {metrics.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {metrics.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {latest ? (
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {tiles.map(([key, value]) => (

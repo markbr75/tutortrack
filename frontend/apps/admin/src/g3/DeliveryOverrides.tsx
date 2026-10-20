@@ -58,7 +58,7 @@ export function PolicyOverrides() {
         </h2>
         <p className="text-sm text-muted-foreground">{t("g3.delivery.overridesHelp")}</p>
         {policies.isPending ? (
-          <Spinner className="size-5" label={t("grid.loading")} />
+          <Spinner label={t("grid.loading")} />
         ) : overrides.length ? (
           <ul className="divide-y divide-border rounded-md border border-border">
             {overrides.map((p) => (

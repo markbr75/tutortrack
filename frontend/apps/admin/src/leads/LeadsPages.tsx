@@ -110,7 +110,7 @@ export function BoardPage() {
         <NewEnquiry />
       </div>
       {move.error ? <Alert tone="danger">{move.error.message}</Alert> : null}
-      {board.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {board.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {/* Scrolls sideways when the stages outgrow the page: focusable so keyboards can scroll it. */}
       <div
         role="region"
@@ -303,7 +303,7 @@ export function EnquiryPage({ id }: { id: string }) {
     if (data) queryClient.setQueryData(["enquiry", id], data);
     void queryClient.invalidateQueries({ queryKey: ["enquiry", id, "history"] });
   };
-  if (!enquiry.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!enquiry.data) return <Spinner label={t("grid.loading")} />;
   const e = enquiry.data;
   return (
     <LeadsPage title={e.title}>

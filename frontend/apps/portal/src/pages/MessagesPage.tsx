@@ -72,9 +72,7 @@ function Attach({ onChange }: { onChange: (ids: string[]) => void }) {
         multiple
         onChange={(e) => (e.target.files?.length ? upload.mutate(e.target.files) : undefined)}
       />
-      {upload.isPending ? (
-        <Spinner className="size-4" label={t("portalMessages.uploading")} />
-      ) : null}
+      {upload.isPending ? <Spinner label={t("portalMessages.uploading")} /> : null}
       {upload.error ? <p role="alert">{t("portalMessages.uploadFailed")}</p> : null}
     </div>
   );
@@ -101,7 +99,7 @@ function Conversation({ who, id }: { who: Who; id: string }) {
       void queryClient.invalidateQueries({ queryKey: messaging.listKey });
     },
   });
-  if (!thread.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!thread.data) return <Spinner label={t("grid.loading")} />;
   return (
     <section aria-labelledby="conversation-title" className="space-y-3">
       <h2 id="conversation-title" className="font-semibold">
@@ -270,7 +268,7 @@ export function MessagesView({ who, canChoose }: { who: Who; canChoose: boolean 
         />
       ) : null}
       {threads.isPending ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : !threads.data?.length ? (
         <p className="text-sm text-muted-foreground">{t("portalMessages.none")}</p>
       ) : (
@@ -314,7 +312,7 @@ export function MessagesView({ who, canChoose }: { who: Who; canChoose: boolean 
 export function MessagesPage() {
   const me = usePortalMe();
   const { t } = useTranslation();
-  if (!me.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!me.data) return <Spinner label={t("grid.loading")} />;
   if (!me.data.features.messages) return <Alert tone="info">{t("portalMessages.off")}</Alert>;
   return <MessagesView who="family" canChoose={me.data.features.message_tutors} />;
 }

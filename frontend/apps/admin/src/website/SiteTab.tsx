@@ -31,7 +31,7 @@ export function SiteTab() {
       void queryClient.invalidateQueries({ queryKey: ["site-pages"] });
     },
   });
-  if (!sites.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!sites.data) return <Spinner label={t("grid.loading")} />;
   const site = sites.data[0];
   if (!site) {
     return (
@@ -209,7 +209,7 @@ function Pages() {
       void queryClient.invalidateQueries({ queryKey: ["site-pages"] });
     },
   });
-  if (!pages.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!pages.data) return <Spinner label={t("grid.loading")} />;
   const page = pages.data.results.find((p) => p.id === editing);
   if (page) return <PageEditor page={page} onClose={() => setEditing(null)} />;
   return (
@@ -364,7 +364,7 @@ function PageEditor({ page, onClose }: { page: SitePage; onClose: () => void }) 
       onClose();
     },
   });
-  if (!types.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!types.data) return <Spinner label={t("grid.loading")} />;
   const blockErrors = (fieldErrors(save.error).blocks ?? {}) as unknown as Record<string, unknown>;
   const move = (i: number, step: number) => {
     const next = [...blocks];

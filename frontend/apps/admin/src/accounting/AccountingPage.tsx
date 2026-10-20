@@ -289,7 +289,7 @@ export function MappingsForm({
       void queryClient.invalidateQueries({ queryKey: ["accounting", "connections"] });
     },
   });
-  if (set.isPending) return <Spinner className="size-4" label={t("grid.loading")} />;
+  if (set.isPending) return <Spinner label={t("grid.loading")} />;
   if (!set.data) return <ErrorList error={set.error} />;
   const data = set.data;
   const accountOptions: Option[] = [
@@ -717,13 +717,11 @@ export function AccountingPage() {
         </p>
       </header>
       {conn?.simulated ? <Alert>{t("accounting.simulated")}</Alert> : null}
-      {complete.isPending ? (
-        <Spinner className="size-5" label={t("integrations.finishing")} />
-      ) : null}
+      {complete.isPending ? <Spinner label={t("integrations.finishing")} /> : null}
       {complete.isSuccess ? <Alert tone="success">{t("accounting.connected")}</Alert> : null}
       {denied ? <Alert tone="warning">{t("integrations.denied")}</Alert> : null}
       <ErrorList error={complete.error ?? connections.error} />
-      {connections.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {connections.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {connections.data && !conn ? (
         canManage ? (
           <ConnectButtons />
@@ -746,7 +744,7 @@ export function AccountingPage() {
                 canManage={canManage}
               />
             ) : (
-              <Spinner className="size-4" label={t("grid.loading")} />
+              <Spinner label={t("grid.loading")} />
             )}
           </section>
           <SyncSwitch conn={conn} canManage={canManage} />

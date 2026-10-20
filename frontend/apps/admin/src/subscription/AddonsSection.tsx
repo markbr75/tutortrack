@@ -44,7 +44,7 @@ export function AddonsSection({ canManage }: { canManage: boolean }) {
       <h2 id="addons-h" className="text-lg font-semibold">
         {t("addons.title")}
       </h2>
-      {addons.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {addons.isPending ? <Spinner label={t("grid.loading")} /> : null}
       <ul className="grid gap-3 sm:grid-cols-3">
         {addons.data?.map((addon) => (
           <li key={addon.key} className="flex flex-col gap-2 rounded-md border border-border p-4">

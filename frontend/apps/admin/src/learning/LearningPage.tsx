@@ -111,7 +111,7 @@ function HomeworkSection() {
       {toReview.data?.results.map((a) => (
         <ReviewCard key={a.id} assignment={a} />
       ))}
-      {homework.isLoading ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {homework.isLoading ? <Spinner label={t("grid.loading")} /> : null}
       {homework.data?.results.length ? (
         <Table
           caption={t("learning.homework.set")}

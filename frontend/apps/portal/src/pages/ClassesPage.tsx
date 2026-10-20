@@ -54,7 +54,7 @@ export function ClassesPage() {
     onSuccess: refresh,
   });
   if (!mine.data || !catalogue.data) {
-    return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+    return <Spinner label={t("grid.loading")} />;
   }
   const { enrolments, waitlist, rollover_offers: offers } = mine.data;
   const current = enrolments.filter((e) =>

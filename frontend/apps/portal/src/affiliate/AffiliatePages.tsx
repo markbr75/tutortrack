@@ -41,7 +41,7 @@ export function AffiliateShell() {
     mutationFn: async () => api.POST("/api/v1/auth/logout"),
     onSuccess: () => window.location.assign("/portal/"),
   });
-  if (me.isPending) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (me.isPending) return <Spinner label={t("grid.loading")} />;
   if (!me.data) {
     return (
       <main className="mx-auto max-w-sm p-6">
@@ -140,7 +140,7 @@ export function AffiliateClientsPage() {
     queryKey: ["portal", "affiliate", "clients"],
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/affiliate/clients")),
   });
-  if (!clients.data) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (!clients.data) return <Spinner label={t("grid.loading")} />;
   if (!clients.data.length) return <p>{t("referrals.partner.noClients")}</p>;
   return (
     <table className="w-full text-sm">
@@ -175,7 +175,7 @@ export function AffiliateStatementsPage() {
     queryKey: ["portal", "affiliate", "statements"],
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/affiliate/statements")),
   });
-  if (!statements.data) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (!statements.data) return <Spinner label={t("grid.loading")} />;
   if (!statements.data.length) return <p>{t("referrals.partner.noStatements")}</p>;
   return (
     <div className="space-y-6">

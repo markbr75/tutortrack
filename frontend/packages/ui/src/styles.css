@@ -124,6 +124,30 @@
   --text-2xl--line-height: 1.25;
 }
 
+/* Loading motion: indicators appear only when a wait is long enough to notice. */
+@theme {
+  --animate-appear: tt-appear 200ms ease-out 300ms both;
+  --animate-appear-soon: tt-appear 150ms ease-out 150ms both;
+  --animate-progress: tt-progress 1.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+
+  @keyframes tt-appear {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes tt-progress {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(300%);
+    }
+  }
+}
+
 /* Element defaults live in the base layer, so utilities (in a later layer) can override them. */
 @layer base {
   body {

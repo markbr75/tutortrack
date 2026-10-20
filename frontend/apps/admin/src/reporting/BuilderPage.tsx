@@ -428,7 +428,7 @@ export function BuilderPage() {
       <ReportsNav />
       <h1 className="text-2xl font-semibold">{t("reportBuilder.title")}</h1>
       <p className="text-muted-foreground">{t("reportBuilder.intro")}</p>
-      {datasets.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {datasets.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {datasets.data?.length === 0 ? <p>{t("reportBuilder.noDatasets")}</p> : null}
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         {dataset ? (

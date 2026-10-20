@@ -42,7 +42,7 @@ export function RevenueSharePage() {
         value={month}
         onChange={(e) => setMonth(e.target.value)}
       />
-      {report.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {report.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {report.data ? (
         <>
           <ul className="flex flex-wrap gap-4 text-sm">

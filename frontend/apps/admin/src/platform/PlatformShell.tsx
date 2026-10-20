@@ -37,7 +37,7 @@ export function PlatformShell() {
   if (me.isPending || signedOut) {
     return (
       <div className="grid h-screen place-items-center">
-        <Spinner className="size-6" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       </div>
     );
   }

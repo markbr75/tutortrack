@@ -113,7 +113,7 @@ function ConcernsSection() {
           ))}
         </Table>
       ) : (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       )}
     </div>
   );
@@ -169,7 +169,7 @@ export function ConcernPage({ concernId }: { concernId: string }) {
       ),
     onSuccess: refresh,
   });
-  if (!concern.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!concern.data) return <Spinner label={t("grid.loading")} />;
   const c: Concern = concern.data;
   return (
     <article className="space-y-6">
@@ -297,7 +297,7 @@ function FlagsSection() {
       ),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["safeguarding"] }),
   });
-  if (!flags.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!flags.data) return <Spinner label={t("grid.loading")} />;
   if (!flags.data.results.length) return <p>{t("safeguarding.noFlags")}</p>;
   return (
     <ul className="space-y-3">
@@ -357,7 +357,7 @@ function LoneWorkingSection() {
       ),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["lone-working"] }),
   });
-  if (!visits.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!visits.data) return <Spinner label={t("grid.loading")} />;
   return (
     <Table
       caption={t("safeguarding.visits")}

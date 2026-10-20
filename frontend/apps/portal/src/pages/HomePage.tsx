@@ -15,7 +15,7 @@ export function HomePage() {
     queryKey: ["portal", "dashboard"],
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/dashboard")),
   });
-  if (dash.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (dash.isPending) return <Spinner label={t("grid.loading")} />;
   const d = dash.data;
   if (!d) return null;
   return (

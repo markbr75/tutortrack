@@ -168,7 +168,7 @@ export function PackagesTab({ clientId }: { clientId?: string }) {
     <div className="space-y-4">
       {canSell && !clientId ? <SellPackage onDone={refresh} /> : null}
       {list.query.isPending ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : list.rows.length ? (
         <ul className="divide-y divide-border rounded-md border border-border text-sm">
           {list.rows.map((row) => (
@@ -334,7 +334,7 @@ export function PlansTab() {
       <p className="text-sm text-muted-foreground">{t("plans.help")}</p>
       {canManage ? <NewPlan onDone={refresh} /> : null}
       {list.query.isPending ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : list.rows.length ? (
         <ul className="divide-y divide-border rounded-md border border-border text-sm">
           {list.rows.map((plan) => (
@@ -500,7 +500,7 @@ export function LateFeesTab() {
         <h2 className="text-lg font-semibold">{t("lateFees.title")}</h2>
         <p className="text-sm text-muted-foreground">{t("lateFees.help")}</p>
         {rules.isPending ? (
-          <Spinner className="size-5" label={t("grid.loading")} />
+          <Spinner label={t("grid.loading")} />
         ) : canManage ? (
           <RuleForm
             key={rule?.id ?? "new"}
@@ -512,7 +512,7 @@ export function LateFeesTab() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">{t("lateFees.collections")}</h2>
         {cases.query.isPending ? (
-          <Spinner className="size-5" label={t("grid.loading")} />
+          <Spinner label={t("grid.loading")} />
         ) : cases.rows.length ? (
           <ul className="divide-y divide-border rounded-md border border-border text-sm">
             {cases.rows.map((c) => (

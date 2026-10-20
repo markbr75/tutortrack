@@ -103,7 +103,7 @@ export function AttachmentInput({
             className="text-sm"
             onChange={(e) => void upload(e.target.files)}
           />
-          {busy ? <Spinner className="size-4" label={t("g3.files.uploading")} /> : null}
+          {busy ? <Spinner label={t("g3.files.uploading")} /> : null}
         </div>
       ) : null}
       {failed ? <Alert tone="danger">{t("g3.files.failed")}</Alert> : null}

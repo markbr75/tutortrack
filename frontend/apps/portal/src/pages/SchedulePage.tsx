@@ -37,7 +37,7 @@ export function SchedulePage() {
         />
       ) : null}
       {lessons.isPending ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : lessons.data?.length ? (
         lessons.data.map((lesson) => <LessonCard key={lesson.id} lesson={lesson} />)
       ) : (

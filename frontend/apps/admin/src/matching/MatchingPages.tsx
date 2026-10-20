@@ -223,7 +223,7 @@ export function JobMatchPage({ jobId }: { jobId: string }) {
         </label>
       ) : null}
       {results.error ? <Alert tone="danger">{results.error.message}</Alert> : null}
-      {results.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {results.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {results.data ? (
         <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
           <Card title={t("matching.results", { count: results.data.results.length })}>
@@ -444,7 +444,7 @@ function PostingPanel({ id, onChange }: { id: string; onChange: () => void }) {
       unwrap(await api.POST("/api/v1/job-postings/{id}/close", { params: { path: { id } } })),
     onSuccess: set,
   });
-  if (!posting.data) return <Spinner className="size-4" label={t("grid.loading")} />;
+  if (!posting.data) return <Spinner label={t("grid.loading")} />;
   const p = posting.data;
   return (
     <div className="space-y-2 text-sm">
@@ -589,7 +589,7 @@ function CoverCandidates({ id }: { id: string }) {
       ),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["cover-requests"] }),
   });
-  if (!rows.data) return <Spinner className="size-4" label={t("grid.loading")} />;
+  if (!rows.data) return <Spinner label={t("grid.loading")} />;
   if (rows.data.length === 0) return <p className="text-xs">{t("matching.none")}</p>;
   return (
     <ul className="space-y-1">
@@ -615,7 +615,7 @@ function AnalyticsPanel() {
     queryFn: async () =>
       unwrap(await api.GET("/api/v1/matching/analytics", { params: { query: { days: 90 } } })),
   });
-  if (!data.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!data.data) return <Spinner label={t("grid.loading")} />;
   const d = data.data;
   return (
     <div className="grid gap-4 lg:grid-cols-3">
@@ -695,7 +695,7 @@ function WeightsPanel() {
       queryClient.setQueryData(["matching-weights"], data);
     },
   });
-  if (!weights.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!weights.data) return <Spinner label={t("grid.loading")} />;
   return (
     <form
       className="grid max-w-xl gap-3 sm:grid-cols-3"

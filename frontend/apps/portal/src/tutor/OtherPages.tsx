@@ -17,7 +17,7 @@ export function StudentsPage() {
     queryKey: ["tutor", "students"],
     queryFn: async () => unwrap(await api.GET("/api/v1/tutor/students")),
   });
-  if (students.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (students.isPending) return <Spinner label={t("grid.loading")} />;
   return (
     <div className="space-y-3">
       <h1 className="text-xl font-semibold">{t("tutor.nav.students")}</h1>
@@ -113,7 +113,7 @@ export function AvailabilityPage() {
   });
   const dayName = (d: number) =>
     new Date(2024, 0, 1 + d).toLocaleDateString(undefined, { weekday: "long" });
-  if (availability.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (availability.isPending) return <Spinner label={t("grid.loading")} />;
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">{t("tutor.nav.availability")}</h1>
@@ -256,7 +256,7 @@ export function TutorProfilePage() {
         }),
       ),
   });
-  if (profile.isPending) return <Spinner className="size-6" label={t("grid.loading")} />;
+  if (profile.isPending) return <Spinner label={t("grid.loading")} />;
   return (
     <div className="space-y-8">
       <form

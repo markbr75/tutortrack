@@ -54,7 +54,7 @@ function Articles() {
             <Markdown source={article.data.body} headingLevel={4} />
           </>
         ) : (
-          <Spinner className="size-5" label={t("grid.loading")} />
+          <Spinner label={t("grid.loading")} />
         )}
       </article>
     );
@@ -121,7 +121,7 @@ function WhatsNew() {
           <Markdown source={entry.body} headingLevel={4} />
         </li>
       ))}
-      {entries.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {entries.isPending ? <Spinner label={t("grid.loading")} /> : null}
     </ul>
   );
 }

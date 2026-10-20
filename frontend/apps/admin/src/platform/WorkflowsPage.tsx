@@ -45,7 +45,7 @@ export function WorkflowsPage() {
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
-      {rows.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {rows.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {rows.data?.results.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("workflowConsole.none")}</p>
       ) : null}

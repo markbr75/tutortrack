@@ -373,6 +373,14 @@ Hand-built tables inherit the same defaults: collapsed borders, left-aligned 12p
 
 8px corners, 12px × 16px padding, body size, an optional 500-weight title. Info is a clean-leaf panel with a register-rule edge; warning, danger and success are their status token at 10% fill with a 40% edge. Warning and danger are announced as alerts, info and success as status.
 
+### Loading
+
+Waiting is quiet and late, never a centrepiece.
+
+- **Loading line:** between screens, a 2px ink-blue line slides along the foot of the top bar while a screen's first data is on its way (background refreshes and polling never trigger it). It fades in after 150ms, so quick screens show nothing, and it is decorative (`aria-hidden`); with reduced motion it holds still at half strength.
+- **Page loader:** a fixed 16px ring (a faint full circle with one quarter arc) beside "Loading…" in faded ink at body size, announced as a status. It fades in after 300ms. Lists use the data grid's skeleton rows instead.
+- **Inline spinner:** the same ring in the surrounding colour, with no delay, inside buttons and rows.
+
 ### Today's Register (signature component)
 
 A table of today's lessons in time order: time (600, tabular), the lesson title with one context line beneath (students · place), tutor, and the register mark centred in the last column. Column headings are caption at 600 in faded ink. A 2px margin-red NOW rule with a "NOW · 20:24" label is inserted before the first lesson that has not ended (or after the last row). The header's right side reads "Marked 3 of 7". Rows that are over and unmarked link straight to marking; others link to the calendar.

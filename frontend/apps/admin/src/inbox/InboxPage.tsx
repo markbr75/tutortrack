@@ -44,7 +44,7 @@ function ThreadList({
         onChange={(e) => setQ(e.target.value)}
       />
       {threads.isPending ? (
-        <Spinner className="size-5" label={t("grid.loading")} />
+        <Spinner label={t("grid.loading")} />
       ) : !threads.data?.results.length ? (
         <p className="text-sm text-muted-foreground">{t("inbox.empty")}</p>
       ) : (
@@ -251,7 +251,7 @@ function Conversation({ id }: { id: string }) {
     },
     onSuccess: refresh,
   });
-  if (!thread.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!thread.data) return <Spinner label={t("grid.loading")} />;
   const th = thread.data;
   return (
     <section aria-labelledby="thread-title" className="space-y-4">

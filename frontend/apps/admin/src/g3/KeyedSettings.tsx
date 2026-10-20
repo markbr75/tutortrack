@@ -60,7 +60,7 @@ export function KeyedSettings({
     onSuccess: (data) => queryClient.setQueryData(queryKey, data),
   });
   const errors = fieldErrors(save.error);
-  if (!query.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!query.data) return <Spinner label={t("grid.loading")} />;
   const schema = (query.data.schema as Definition[]).filter((d) => keys.includes(d.key));
   const set = (key: string, value: unknown) => setValues((v) => ({ ...v, [key]: value }));
   return (

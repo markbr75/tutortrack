@@ -107,7 +107,7 @@ function AutomationList() {
     },
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["automations"] }),
   });
-  if (!list.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!list.data) return <Spinner label={t("grid.loading")} />;
   if (list.data.length === 0)
     return <p className="text-sm text-muted-foreground">{t("automations.none")}</p>;
   return (
@@ -164,7 +164,7 @@ function RecipeList({ onInstalled }: { onInstalled: () => void }) {
       onInstalled();
     },
   });
-  if (!recipes.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!recipes.data) return <Spinner label={t("grid.loading")} />;
   return (
     <ul className="grid gap-3 md:grid-cols-2">
       {recipes.data.map((r) => (
@@ -244,7 +244,7 @@ function RunList() {
     queryKey: ["automation-runs"],
     queryFn: async () => unwrap(await api.GET("/api/v1/automation-runs")),
   });
-  if (!runs.data) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (!runs.data) return <Spinner label={t("grid.loading")} />;
   return <RunRows runs={runs.data.results} />;
 }
 
@@ -791,6 +791,7 @@ function TriggerForm({
 
 /** The When → If → Then builder with a dry run (FR-14-4). */
 export function AutomationBuilderPage({ id }: { id: string }) {
+  const { t } = useTranslation();
   const isNew = id === "new";
   const schema = useSchema();
   const automation = useQuery({
@@ -799,7 +800,7 @@ export function AutomationBuilderPage({ id }: { id: string }) {
       unwrap(await api.GET("/api/v1/automations/{id}", { params: { path: { id } } })),
     enabled: !isNew,
   });
-  if (!schema.data || (!isNew && !automation.data)) return <Spinner className="size-5" label="…" />;
+  if (!schema.data || (!isNew && !automation.data)) return <Spinner label={t("grid.loading")} />;
   return (
     <Builder
       key={automation.data?.version ?? "new"}

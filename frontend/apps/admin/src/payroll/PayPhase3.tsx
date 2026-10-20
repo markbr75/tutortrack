@@ -245,7 +245,7 @@ export function TaxFormsPage() {
           {t("payrollPhase3.finalised", { count: finalise.data.length })}
         </Alert>
       ) : null}
-      {summary.isPending ? <Spinner className="size-5" label={t("common.loading")} /> : null}
+      {summary.isPending ? <Spinner label={t("common.loading")} /> : null}
       {data ? (
         <>
           <p className="text-sm">

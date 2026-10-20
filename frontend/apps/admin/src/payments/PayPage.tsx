@@ -161,7 +161,7 @@ export function PayPage({ token }: { token: string }) {
     else confirm.mutate({ id: result.paymentIntent?.id ?? intent.data.intent, via: "stripe" });
   };
 
-  if (page.isPending) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (page.isPending) return <Spinner label={t("grid.loading")} />;
   if (!page.data)
     return (
       <main className="mx-auto max-w-lg p-6">
@@ -369,11 +369,11 @@ export function SetupPage({ token }: { token: string }) {
           (complete.error ? (
             <Alert tone="danger">{problemMessage(complete.error, t("pay.failed"))}</Alert>
           ) : (
-            <Spinner className="size-6" label={t("payOptions.finishing")} />
+            <Spinner label={t("payOptions.finishing")} />
           ))}
       </main>
     );
-  if (page.isPending) return <Spinner className="m-8 size-6" label={t("grid.loading")} />;
+  if (page.isPending) return <Spinner label={t("grid.loading")} />;
   if (!page.data)
     return (
       <main className="mx-auto max-w-lg p-6">

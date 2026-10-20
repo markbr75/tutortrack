@@ -72,7 +72,7 @@ export function PlanPage() {
     enabled: subscription.isSuccess,
   });
 
-  if (subscription.isPending) return <Spinner className="size-5" label={t("grid.loading")} />;
+  if (subscription.isPending) return <Spinner label={t("grid.loading")} />;
   if (!subscription.data) return <Alert tone="info">{t("plan.noSubscription")}</Alert>;
   const sub = subscription.data;
   return (
@@ -296,7 +296,7 @@ function PlansSection({ sub }: { sub: Subscription }) {
           ))}
         </fieldset>
       </div>
-      {plans.isPending ? <Spinner className="size-5" label={t("grid.loading")} /> : null}
+      {plans.isPending ? <Spinner label={t("grid.loading")} /> : null}
       <ul className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {plans.data?.map((plan) => {
           const lines = priceLines(t, plan, interval);
