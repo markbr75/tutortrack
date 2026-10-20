@@ -58,6 +58,9 @@ class BusinessStep(serializers.Serializer):
     team_size = serializers.ChoiceField(
         choices=["1", "2-5", "6-20", "21-100", "100+"], required=False
     )
+    owner_teaches = serializers.BooleanField(
+        required=False, help_text="The person setting up teaches lessons too: add them as a tutor."
+    )
 
 
 class LocaleStep(serializers.Serializer):
@@ -168,10 +171,16 @@ def get_state() -> OnboardingState:
     return start_onboarding(_organisation())
 
 
-def _apply(step: str, data: dict[str, Any], organisation: Organisation) -> dict[str, Any]:
+def _apply(
+    step: str, data: dict[str, Any], organisation: Organisation, membership: Any = None
+) -> dict[str, Any]:
     """Apply what tenancy owns; return the JSON-safe payload to record."""
     if step == "business":
         services.update_organisation(organisation, business_type=data["business_type"])
+        if data.get("owner_teaches") and membership is not None:
+            from tutortrack.people.services import add_self_as_tutor
+
+            add_self_as_tutor(membership)
         if data["business_type"] in MULTI_BRANCH_TYPES:
             flags.set_override(
                 "multi_branch", organisation.pk, enabled=True, reason="onboarding default"
@@ -207,7 +216,9 @@ def _apply(step: str, data: dict[str, Any], organisation: Organisation) -> dict[
 
 
 @transaction.atomic
-def submit_step(step: str, payload: dict[str, Any], *, skip: bool = False) -> OnboardingState:
+def submit_step(
+    step: str, payload: dict[str, Any], *, skip: bool = False, membership: Any = None
+) -> OnboardingState:
     if step not in STEP_KEYS:
         raise NotFound(f"Unknown onboarding step {step!r}.")
     organisation = _organisation()
@@ -222,7 +233,7 @@ def submit_step(step: str, payload: dict[str, Any], *, skip: bool = False) -> On
         definition = next(s for s in STEPS if s.key == step)
         serializer = definition.payload(data=payload)
         serializer.is_valid(raise_exception=True)
-        recorded = _apply(step, dict(serializer.validated_data), organisation)
+        recorded = _apply(step, dict(serializer.validated_data), organisation, membership)
         organisation.refresh_from_db()
 
     with audit.track(state, action="onboarding_step"):

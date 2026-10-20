@@ -56,6 +56,8 @@ type NavItem = {
   permission: string | null;
   group: Group;
   icon?: LucideIcon;
+  /** Only for businesses with a team of tutors: hidden for sole traders (mode "solo"). */
+  team?: boolean;
 };
 
 /** The sidebar's sections, in the order of the user guide ("grouped by job"). */
@@ -160,6 +162,7 @@ const NAV: NavItem[] = [
     permission: "matching.search",
     group: "scheduling",
     icon: Handshake,
+    team: true,
   },
   {
     to: "/reports",
@@ -196,7 +199,14 @@ const NAV: NavItem[] = [
     group: "money",
     icon: Receipt,
   },
-  { to: "/payroll", key: "nav.payroll", permission: "payroll.view", group: "money", icon: Wallet },
+  {
+    to: "/payroll",
+    key: "nav.payroll",
+    permission: "payroll.view",
+    group: "money",
+    icon: Wallet,
+    team: true,
+  },
   {
     to: "/leads",
     key: "nav.leads",
@@ -210,6 +220,7 @@ const NAV: NavItem[] = [
     permission: "recruitment.application.view",
     group: "sales",
     icon: UserPlus,
+    team: true,
   },
   {
     to: "/compliance",
@@ -217,6 +228,7 @@ const NAV: NavItem[] = [
     permission: "compliance.view",
     group: "sales",
     icon: ShieldCheck,
+    team: true,
   },
   {
     to: "/growth",
@@ -349,7 +361,10 @@ function settingsItemFor(pathname: string): NavItem | undefined {
 function useAllowed(): (item: NavItem) => boolean {
   const { data } = useMe();
   const permissions = data?.permissions ?? {};
-  return (item) => !item.permission || Boolean(permissions[item.permission]);
+  // Sole traders don't match, pay, recruit or vet a team of tutors.
+  const solo = data?.organisation?.mode === "solo";
+  return (item) =>
+    !(item.team && solo) && (!item.permission || Boolean(permissions[item.permission]));
 }
 
 function NavLink({
@@ -664,6 +679,12 @@ function UserMenu() {
           >
             {t("nav.account")}
           </Link>
+          {me?.membership?.teaches ? (
+            // The phone-first tutor app (a separate app under /portal/).
+            <a href="/portal/tutor" className="block rounded-md px-3 py-2 hover:bg-muted">
+              {t("nav.tutorApp")}
+            </a>
+          ) : null}
           <button
             type="button"
             className="block w-full rounded-md px-3 py-2 text-left hover:bg-muted"

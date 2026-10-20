@@ -83,7 +83,7 @@ Each app in `backend/tutortrack/` owns its models, `services.py` (writes), `sele
 | App | Responsibility | Epic |
 |---|---|---|
 | `core` | Tenant models and RLS, events and outbox, audit, money, crypto, permissions, API conventions | E01, E02 |
-| `tenancy` | Organisations, branches, org settings, onboarding | E02 |
+| `tenancy` | Organisations, branches, org settings, onboarding, sole-trader (solo) mode | E02 |
 | `identity` | Users, sign-in, MFA, passkeys, SSO, roles and custom roles, invitations | E03 |
 | `workflows` | Temporal runtime, tenant-aware workflows and activities | E32 |
 | `subscriptions` | SaaS plans, trials, entitlements, Stripe Billing | E04 |

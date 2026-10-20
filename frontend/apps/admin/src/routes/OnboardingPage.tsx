@@ -13,13 +13,15 @@ type Values = Record<string, string>;
 interface FieldDef {
   name: string;
   label: string;
-  type?: "text" | "email" | "number" | "color" | "textarea" | "select";
+  type?: "text" | "email" | "number" | "color" | "textarea" | "select" | "checkbox";
+  hint?: string;
   options?: { value: string; label: string }[];
   optional?: boolean;
 }
 
 const BUSINESS_TYPES = ["sole_trader", "team", "agency", "centre", "online"];
 const TEAM_SIZES = ["1", "2-5", "6-20", "21-100", "100+"];
+const TEACHING_TYPES = new Set(["sole_trader", "team"]);
 const CURRENCIES = ["GBP", "EUR", "USD", "AUD", "CAD", "NZD"];
 
 function useSteps(t: (key: string) => string): Record<string, FieldDef[]> {
@@ -36,6 +38,12 @@ function useSteps(t: (key: string) => string): Record<string, FieldDef[]> {
         label: t("onboarding.teamSize"),
         type: "select",
         options: TEAM_SIZES.map((s) => ({ value: s, label: s })),
+      },
+      {
+        name: "owner_teaches",
+        label: t("onboarding.ownerTeaches"),
+        type: "checkbox",
+        hint: t("onboarding.ownerTeachesHint"),
       },
     ],
     locale: [
@@ -96,7 +104,7 @@ function useSteps(t: (key: string) => string): Record<string, FieldDef[]> {
 }
 
 const DEFAULTS: Record<string, Values> = {
-  business: { business_type: "sole_trader", team_size: "1" },
+  business: { business_type: "sole_trader", team_size: "1", owner_teaches: "true" },
   locale: {
     locale: "en-GB",
     default_currency: "GBP",
@@ -117,6 +125,9 @@ function toPayload(step: string, values: Values, currency: string): Record<strin
       duration_minutes: Number(values.duration_minutes),
       price: { amount: values.price ?? "", currency },
     };
+  }
+  if (step === "business") {
+    return { ...values, owner_teaches: values.owner_teaches === "true" };
   }
   if (step === "tutors") {
     return { emails: (values.emails ?? "").split(/\s+/).filter(Boolean) };
@@ -157,6 +168,13 @@ export function OnboardingPage() {
     enabled: handoff === "done",
     queryFn: async () => unwrap(await api.GET("/api/v1/onboarding/state")),
   });
+  // Sign-up already asked for the type of business; the business step starts from it.
+  const organisation = useQuery({
+    queryKey: ["organisation"],
+    enabled: handoff === "done",
+    queryFn: async () => unwrap(await api.GET("/api/v1/organisation")),
+  });
+  const businessType = organisation.data?.business_type;
   const keys = state.data?.steps.map((s) => s.key) ?? [];
   const current = step ?? (state.data?.current_step || keys[0]) ?? null;
 
@@ -173,8 +191,13 @@ export function OnboardingPage() {
             : String(v),
       ]),
     );
-    setValues({ ...(DEFAULTS[current] ?? {}), ...asStrings });
-  }, [current, state.data]);
+    const defaults = { ...(DEFAULTS[current] ?? {}) };
+    if (current === "business" && businessType) {
+      defaults.business_type = businessType;
+      defaults.owner_teaches = String(TEACHING_TYPES.has(businessType));
+    }
+    setValues({ ...defaults, ...asStrings });
+  }, [current, state.data, businessType]);
 
   const submit = useMutation({
     mutationFn: async ({ key, skip }: { key: string; skip: boolean }) =>
@@ -254,7 +277,14 @@ export function OnboardingPage() {
             error: errors[field.name],
           };
           const onChange = (e: { target: { value: string } }) =>
-            setValues((v) => ({ ...v, [field.name]: e.target.value }));
+            setValues((v) => ({
+              ...v,
+              [field.name]: e.target.value,
+              // Sole traders and small teams usually teach; larger businesses usually don't.
+              ...(field.name === "business_type"
+                ? { owner_teaches: String(TEACHING_TYPES.has(e.target.value)) }
+                : {}),
+            }));
           if (field.type === "select") {
             return (
               <SelectField
@@ -263,6 +293,32 @@ export function OnboardingPage() {
                 options={field.options ?? []}
                 onChange={onChange}
               />
+            );
+          }
+          if (field.type === "checkbox") {
+            return (
+              <div key={field.name} className="flex items-start gap-3">
+                <input
+                  id={`f-${field.name}`}
+                  type="checkbox"
+                  className="mt-1 size-4"
+                  checked={values[field.name] === "true"}
+                  aria-describedby={field.hint ? `f-${field.name}-hint` : undefined}
+                  onChange={(e) =>
+                    setValues((v) => ({ ...v, [field.name]: e.target.checked ? "true" : "false" }))
+                  }
+                />
+                <div>
+                  <label htmlFor={`f-${field.name}`} className="text-sm font-medium">
+                    {field.label}
+                  </label>
+                  {field.hint ? (
+                    <p id={`f-${field.name}-hint`} className="text-xs text-muted-foreground">
+                      {field.hint}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
             );
           }
           if (field.type === "textarea") {

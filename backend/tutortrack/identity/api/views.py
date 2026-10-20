@@ -335,6 +335,8 @@ class SSOCallbackView(APIView):
 
 
 def me_payload(request: Request) -> dict[str, Any]:
+    from tutortrack.people import selectors as people_selectors
+
     user = request.user
     organisation = getattr(request, "organisation", None)
     membership = getattr(request, "membership", None)
@@ -354,7 +356,12 @@ def me_payload(request: Request) -> dict[str, Any]:
             else None
         ),
         "membership": (
-            {"id": membership.pk, "role": membership.role, "branch_scope": membership.branch_scope}
+            {
+                "id": membership.pk,
+                "role": membership.role,
+                "branch_scope": membership.branch_scope,
+                "teaches": people_selectors.teaches(membership),
+            }
             if membership is not None
             else None
         ),

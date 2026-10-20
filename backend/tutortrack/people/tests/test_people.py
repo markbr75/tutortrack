@@ -285,6 +285,38 @@ def test_adding_a_tutor_invites_them_and_joining_links_the_profile(
     assert (body["has_joined"], body["status"]) == (True, "active")
 
 
+def test_the_signed_in_owner_adds_themselves_as_a_tutor(org, api, user, member):
+    from tutortrack.people.models import TutorProfile
+
+    added = api.post("/api/v1/tutors/add-me")
+    assert added.status_code == 200, added.json()
+    body = added.json()
+    assert (body["email"], body["status"], body["has_joined"]) == (user.email, "active", True)
+    with tenant_context(org):
+        assert TutorProfile.objects.get(pk=body["id"]).membership == member
+        assert not Invitation.objects.exists()
+        assert AuditEntry.objects.filter(action="create", object_id=str(body["id"])).exists()
+    # Idempotent: a second call returns the same record.
+    assert api.post("/api/v1/tutors/add-me").json()["id"] == body["id"]
+    assert api.get("/api/v1/me").json()["membership"]["teaches"] is True
+
+
+def test_adding_yourself_links_a_tutor_record_already_made_with_your_email(org, api, user):
+    existing = TutorProfileFactory(organisation=org, email=user.email.upper())
+    with tenant_context(org):
+        existing.email = user.email.lower()
+        existing.save(update_fields=["email"])
+    body = api.post("/api/v1/tutors/add-me").json()
+    assert body["id"] == str(existing.pk)
+    assert body["has_joined"] is True
+
+
+def test_adding_yourself_as_a_tutor_needs_the_create_permission(org):
+    tutor_login = MembershipFactory(organisation=org, role=Membership.Role.TUTOR)
+    response = client_for(org, tutor_login.user).post("/api/v1/tutors/add-me")
+    assert response.status_code == 403
+
+
 def test_tutor_subjects_and_approval(org, admin_api):
     tutor = TutorProfileFactory(organisation=org)
     subjects = admin_api.put(

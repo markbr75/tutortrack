@@ -1233,7 +1233,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
         start with <code>/api/v1/</code>. Use the interactive reference or the OpenAPI document
         for request and response schemas and examples.</p>
       <!-- BEGIN GENERATED: endpoints -->
-<p class="meta">201 public operations in 23 groups, generated from <code>openapi.json</code>.</p>
+<p class="meta">202 public operations in 23 groups, generated from <code>openapi.json</code>.</p>
 <details class="ref" id="ref-availability">
   <summary>Availability <span class="badge">3</span></summary>
   <p>A tutor&#x27;s weekly availability (GET current template and windows, PUT a new one).</p>
@@ -1607,7 +1607,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
   </table></div>
 </details>
 <details class="ref" id="ref-tutors">
-  <summary>Tutors <span class="badge">10</span></summary>
+  <summary>Tutors <span class="badge">11</span></summary>
   <p>Tutors.</p>
   <div class="table-wrap"><table class="endpoints">
     <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Description</th><th scope="col">Scope</th></tr></thead>
@@ -1621,6 +1621,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
       <tr><td><span class="method post">POST</span></td><td><code>/api/v1/tutors/{id}/status</code></td><td>Status <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>tutors:write</code></td></tr>
       <tr><td><span class="method put">PUT</span></td><td><code>/api/v1/tutors/{id}/subjects</code></td><td>Update subjects</td><td class="scopes"><code>tutors:write</code></td></tr>
       <tr><td><span class="method post">POST</span></td><td><code>/api/v1/tutors/{id}/subjects/{subject_id}/approve</code></td><td>Approve <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>tutors:write</code></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><code>/api/v1/tutors/add-me</code></td><td>Add me — Add the signed-in person as a tutor (a sole trader, or an owner who teaches): an active tutor record on their own login, with no invitation. <span class="badge">Idempotency-Key</span></td><td class="scopes"><code>tutors:write</code></td></tr>
       <tr><td><span class="method get">GET</span></td><td><code>/api/v1/tutors/export</code></td><td>Get export</td><td class="scopes"><code>tutors:read</code></td></tr>
     </tbody>
   </table></div>

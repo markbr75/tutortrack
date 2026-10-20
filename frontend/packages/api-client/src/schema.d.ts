@@ -21294,6 +21294,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/tutors/add-me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Add the signed-in person as a tutor (a sole trader, or an owner who teaches): an active tutor record on their own login, with no invitation. Idempotent: returns their existing tutor record if they have one. */
+    post: operations["tutors_add_me_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/tutors/export": {
     parameters: {
       query?: never;
@@ -30969,6 +30986,8 @@ export interface components {
       id: string;
       role: string;
       branch_scope: string;
+      /** @description This login has its own tutor record, so it can use the tutor app. */
+      teaches: boolean;
     };
     MeOrganisation: {
       /** Format: uuid */
@@ -82084,6 +82103,28 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TaxIdentityOut"];
+        };
+      };
+    };
+  };
+  tutors_add_me_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tutor"];
         };
       };
     };

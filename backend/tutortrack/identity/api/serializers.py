@@ -48,6 +48,9 @@ class MeMembershipSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     role = serializers.CharField()
     branch_scope = serializers.CharField()
+    teaches = serializers.BooleanField(
+        help_text="This login has its own tutor record, so it can use the tutor app."
+    )
 
 
 class ImpersonatorSerializer(serializers.Serializer):

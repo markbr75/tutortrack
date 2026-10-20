@@ -42,7 +42,52 @@ describe("OnboardingPage", () => {
     expect(calls.find((c) => c.path === "/api/v1/onboarding/business")?.body).toEqual({
       business_type: "team",
       team_size: "1",
+      owner_teaches: true,
     });
+  });
+
+  it("asks whether the owner teaches: yes by default for sole traders, no for agencies", async () => {
+    window.history.pushState(null, "", "/onboarding");
+    const calls = mockApi({
+      "GET /api/v1/onboarding/state": { body: state("business") },
+      "POST /api/v1/onboarding/business": { body: state("locale", ["business"]) },
+    });
+    render(<App />);
+    const teaches = await screen.findByRole("checkbox", { name: "I teach lessons myself" });
+    expect(teaches).toBeChecked();
+    fireEvent.change(screen.getByLabelText("Type of business"), { target: { value: "agency" } });
+    expect(teaches).not.toBeChecked();
+    fireEvent.click(teaches); // an agency owner who teaches too
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    await waitFor(() =>
+      expect(calls.find((c) => c.path === "/api/v1/onboarding/business")?.body).toEqual({
+        business_type: "agency",
+        team_size: "1",
+        owner_teaches: true,
+      }),
+    );
+  });
+
+  it("starts the business step from the type of business chosen at sign-up", async () => {
+    window.history.pushState(null, "", "/onboarding");
+    const calls = mockApi({
+      "GET /api/v1/onboarding/state": { body: state("business") },
+      "GET /api/v1/organisation": {
+        body: { id: "o1", name: "Big Agency", business_type: "agency" },
+      },
+      "POST /api/v1/onboarding/business": { body: state("locale", ["business"]) },
+    });
+    render(<App />);
+    await waitFor(() => expect(screen.getByLabelText("Type of business")).toHaveValue("agency"));
+    expect(screen.getByRole("checkbox", { name: "I teach lessons myself" })).not.toBeChecked();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    await waitFor(() =>
+      expect(calls.find((c) => c.path === "/api/v1/onboarding/business")?.body).toEqual({
+        business_type: "agency",
+        team_size: "1",
+        owner_teaches: false,
+      }),
+    );
   });
 
   it("can skip a step", async () => {

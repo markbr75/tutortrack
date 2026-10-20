@@ -80164,6 +80164,51 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/tutors/add-me": {
+            "post": {
+                "operationId": "tutors_add_me_create",
+                "description": "Add the signed-in person as a tutor (a sole trader, or an owner who teaches): an active tutor record on their own login, with no invitation. Idempotent: returns their existing tutor record if they have one.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "security": [
+                    {
+                        "apiToken": [
+                            "tutors:write"
+                        ]
+                    },
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tutor"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "public",
+                "x-scopes": [
+                    "tutors:write"
+                ]
+            }
+        },
         "/api/v1/tutors/export": {
             "get": {
                 "operationId": "tutors_export_retrieve",
@@ -110597,12 +110642,17 @@
                     },
                     "branch_scope": {
                         "type": "string"
+                    },
+                    "teaches": {
+                        "type": "boolean",
+                        "description": "This login has its own tutor record, so it can use the tutor app."
                     }
                 },
                 "required": [
                     "branch_scope",
                     "id",
-                    "role"
+                    "role",
+                    "teaches"
                 ]
             },
             "MeOrganisation": {

@@ -81,7 +81,8 @@ export function SignIn() {
   );
 }
 
-/** Signed in as a tutor → the tutor shell (E16); otherwise the family shell (E15). */
+/** Signed in as a tutor, or as staff who teach → the tutor shell (E16); otherwise the family
+ * shell (E15). */
 export function Shell() {
   const { t } = useTranslation();
   const who = useQuery({
@@ -94,7 +95,8 @@ export function Shell() {
   return (
     <>
       <StatusBanner />
-      {who.data?.membership?.role === "tutor" ? (
+      {/* Tutors, and people who run the business and teach too (a sole trader, say). */}
+      {who.data?.membership?.role === "tutor" || who.data?.membership?.teaches ? (
         <TutorShell />
       ) : who.data?.membership?.role === "affiliate" ? (
         <AffiliateShell />

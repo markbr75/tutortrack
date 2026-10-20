@@ -52,7 +52,8 @@ function Amount({ children }: { children: ReactNode }) {
   return <p className="mt-1 text-xl font-semibold tabular-nums">{children}</p>;
 }
 
-/** One ruled line of money: what came in this month, what is owed, what tutors are due. */
+/** One ruled line of money: what came in this month, what is owed, and what tutors are due
+ * (or, for a sole trader, what is ready to invoice). */
 export function MoneyStrip() {
   const { t, i18n } = useTranslation();
   const { data: org } = useOrganisation();
@@ -60,7 +61,10 @@ export function MoneyStrip() {
   const payroll = usePermission("reporting.payroll.view");
   const revenue = useWidgetValues("revenue", finance);
   const outstanding = useWidgetValues("outstanding", finance);
-  const payRun = useWidgetValues("next_pay_run", payroll);
+  // A sole trader has no tutors to pay: their third figure is what is ready to invoice.
+  const solo = org?.mode === "solo";
+  const payRun = useWidgetValues("next_pay_run", payroll && !solo);
+  const toInvoice = useWidgetValues("uninvoiced", finance && solo);
   if (!finance && !payroll) return null;
   const currency = org?.default_currency;
   if (!currency) {
@@ -141,7 +145,24 @@ export function MoneyStrip() {
           )}
         </Figure>
       ) : null}
-      {payroll ? (
+      {solo && finance ? (
+        <Figure label={t("home.money.toInvoice")} to="/billing" pending={toInvoice.pending}>
+          {toInvoice.values.length === 0 ? (
+            <>
+              <Amount>{money("0", currency)}</Amount>
+              <p className="text-sm text-muted-foreground">{t("home.money.toInvoiceNone")}</p>
+            </>
+          ) : (
+            toInvoice.values.map((v) => (
+              <div key={v.currency}>
+                <Amount>{money(v.value, v.currency)}</Amount>
+                <p className="text-sm text-muted-foreground">{t("home.money.toInvoiceReady")}</p>
+              </div>
+            ))
+          )}
+        </Figure>
+      ) : null}
+      {payroll && !solo ? (
         <Figure label={t("home.money.payRun")} to="/payroll" pending={payRun.pending}>
           {payRun.values.length === 0 ? (
             <>

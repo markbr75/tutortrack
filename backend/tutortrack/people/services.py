@@ -426,6 +426,27 @@ def create_tutor(
 
 
 @transaction.atomic
+def add_self_as_tutor(membership: Any) -> TutorProfile:
+    """The signed-in person teaches too (a sole trader, or an owner who tutors): a tutor
+    record on their own login, active at once and without an invitation. Idempotent."""
+    existing = TutorProfile.objects.filter(membership=membership).first()
+    if existing is not None:
+        return existing
+    user = membership.user
+    email = user.email.strip().lower()
+    unlinked = TutorProfile.objects.filter(email=email, membership__isnull=True).first()
+    if unlinked is not None:
+        # Added earlier by email (before they had a login here): link it to this login.
+        return link_membership(unlinked, membership)
+    return create_tutor(
+        email=email,
+        first_name=user.first_name or email.split("@")[0],
+        last_name=user.last_name,
+        invite=False,
+    )
+
+
+@transaction.atomic
 def update_tutor(tutor: TutorProfile, **changes: Any) -> TutorProfile:
     if "address" in changes:
         tutor.address = save_address(tutor.address, changes.pop("address"))

@@ -551,3 +551,8 @@ def map_points(
             radius = tutor.travel_radius_km if tutor.delivers_in_person else None
             points.append(_point("tutor", tutor, place, subjects, radius))
     return {"points": points, "missing": missing}
+
+
+def teaches(membership: Any) -> bool:
+    """Whether this login has its own tutor record (it can use the tutor app)."""
+    return membership is not None and TutorProfile.objects.filter(membership=membership).exists()

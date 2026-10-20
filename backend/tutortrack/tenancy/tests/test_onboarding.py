@@ -64,6 +64,33 @@ def test_business_step_sets_mode_and_feature_defaults(api, new_org):
     assert body["answers"]["business"] == {"business_type": "agency", "team_size": "6-20"}
 
 
+def test_a_sole_trader_who_teaches_becomes_a_tutor_on_their_own_login(api, new_org, owner):
+    from tutortrack.identity.models import Invitation
+    from tutortrack.people.models import TutorProfile
+
+    step(api, "business", business_type="sole_trader", team_size="1", owner_teaches=True)
+    with tenant_context(new_org):
+        tutor = TutorProfile.objects.get()
+        assert tutor.membership.user == owner
+        assert tutor.status == TutorProfile.Status.ACTIVE
+        assert not Invitation.objects.exists()  # it's them: nobody to invite
+    assert api.get("/api/v1/me").json()["membership"]["teaches"] is True
+    assert api.get("/api/v1/tutor/me").status_code == 200
+    # Going back over the step doesn't add them twice.
+    step(api, "business", business_type="sole_trader", owner_teaches=True)
+    with tenant_context(new_org):
+        assert TutorProfile.objects.count() == 1
+
+
+def test_an_owner_who_does_not_teach_is_not_a_tutor(api, new_org):
+    from tutortrack.people.models import TutorProfile
+
+    step(api, "business", business_type="agency", team_size="6-20")
+    with tenant_context(new_org):
+        assert not TutorProfile.objects.exists()
+    assert api.get("/api/v1/me").json()["membership"]["teaches"] is False
+
+
 def test_locale_step_updates_the_organisation(api, new_org):
     body = step(
         api, "locale", locale="en-US", default_currency="usd", timezone="America/Chicago"

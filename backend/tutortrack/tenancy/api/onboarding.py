@@ -106,6 +106,9 @@ class OnboardingStepView(APIView):
         body = request.data if isinstance(request.data, dict) else {}
         skip = bool(body.get("skip"))
         state = onboarding.submit_step(
-            step, {k: v for k, v in body.items() if k != "skip"}, skip=skip
+            step,
+            {k: v for k, v in body.items() if k != "skip"},
+            skip=skip,
+            membership=getattr(request, "membership", None),
         )
         return Response(state_payload(state))
