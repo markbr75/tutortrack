@@ -76,7 +76,8 @@ def validate_slug(slug: str, *, organisation: Organisation | None = None) -> str
 
 def suggest_slug(name: str) -> str:
     """An available slug derived from a business name ("Bright Minds" -> "bright-minds")."""
-    base = slugify(name)[: MAX_LENGTH - 4].strip("-") or "tutoring"
+    # slugify keeps underscores, which subdomains can't contain.
+    base = slugify(name).replace("_", "-")[: MAX_LENGTH - 4].strip("-") or "tutoring"
     base = re.sub(r"-{2,}", "-", base)
     if len(base) < MIN_LENGTH:
         base = f"{base}-tutoring"

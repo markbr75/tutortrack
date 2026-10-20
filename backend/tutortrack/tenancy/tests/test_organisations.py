@@ -114,6 +114,12 @@ def test_short_names_get_a_valid_suggestion():
     assert slugs.slug_problem(slugs.suggest_slug("株式会社")) is None
 
 
+def test_underscores_in_a_name_become_hyphens():
+    # slugify keeps "_", which subdomains can't use; sign-up used to fail outright.
+    assert slugs.suggest_slug("Maths_and_English Tutors") == "maths-and-english-tutors"
+    assert slugs.suggest_slug("__A__") == "a-tutoring"
+
+
 def test_changing_slug_keeps_a_90_day_redirect(org, other_org):
     old = org.slug
     services.change_slug(org, "bright-new")
