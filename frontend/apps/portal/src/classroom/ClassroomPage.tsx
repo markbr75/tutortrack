@@ -1,8 +1,8 @@
-import { unwrap } from "@tutortrack/api-client";
+import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner } from "@tutortrack/ui";
+import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 
 import { api } from "../api";
 import { JoinButton } from "../JoinButton";
@@ -19,7 +19,9 @@ export function ClassroomPage({ lessonId }: { lessonId: string }) {
       unwrap(
         await api.GET("/api/v1/lessons/{id}/classroom", { params: { path: { id: lessonId } } }),
       ),
-    refetchInterval: 60_000, // the room opens a few minutes before the start
+    // The room opens a few minutes before the start; while it's open, poll faster so a
+    // resource shared during the lesson reaches everyone's room (gap G5c, FR-21-8).
+    refetchInterval: (query) => (query.state.data?.open ? 15_000 : 60_000),
   });
   const consent = useMutation({
     mutationFn: async () =>
@@ -82,26 +84,134 @@ export function ClassroomPage({ lessonId }: { lessonId: string }) {
           {t("classroom.opensAt", { when: formatDateTime(c.opens_at, i18n.language) })}
         </p>
       ) : null}
-      {c.resources.length ? (
-        <section aria-labelledby="classroom-resources" className="space-y-1 text-sm">
-          <h2 id="classroom-resources" className="font-semibold">
-            {t("classroom.resources")}
-          </h2>
-          <ul className="list-disc pl-5">
-            {c.resources.map((r) => (
-              <li key={r.id}>
-                <Link
-                  to={c.role === "tutor" ? "/tutor/resources" : "/learning"}
-                  className="underline"
-                >
-                  {r.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <ClassroomResources
+        lessonId={lessonId}
+        resources={c.resources}
+        canShare={c.role === "tutor"}
+      />
     </article>
+  );
+}
+
+type Resource = components["schemas"]["ClassroomResource"];
+
+/** Resources in the room (gap G5c, FR-21-8): anything shared with the lesson, its job or
+ * the family's students opens from here; the tutor can put one of their resources into
+ * the room during the lesson (everyone's page picks it up within seconds). */
+function ClassroomResources({
+  lessonId,
+  resources,
+  canShare,
+}: {
+  lessonId: string;
+  resources: Resource[];
+  canShare: boolean;
+}) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [chosen, setChosen] = useState("");
+  const [message, setMessage] = useState("");
+  const open = useMutation({
+    mutationFn: async (resourceId: string) =>
+      unwrap(
+        await api.POST("/api/v1/lessons/{id}/classroom/resources/{resource_id}/open", {
+          params: { path: { id: lessonId, resource_id: resourceId } },
+        }),
+      ),
+    onSuccess: (link) => window.open(link.url, "_blank", "noopener"),
+  });
+  const library = useQuery({
+    queryKey: ["tutor", "learning", "resources"],
+    queryFn: async () =>
+      unwrap(
+        await api.GET("/api/v1/learning/resources", {
+          params: { query: { archived: false, page_size: 100 } },
+        }),
+      ),
+    enabled: canShare,
+  });
+  const share = useMutation({
+    mutationFn: async () =>
+      unwrap(
+        await api.POST("/api/v1/learning/resources/{id}/share", {
+          params: { path: { id: chosen } },
+          body: { lessons: [lessonId], message },
+        }),
+      ),
+    onSuccess: () => {
+      setChosen("");
+      setMessage("");
+      void queryClient.invalidateQueries({ queryKey: ["classroom", lessonId] });
+    },
+  });
+  const inRoom = new Set(resources.map((r) => r.id));
+  const options = (library.data?.results ?? []).filter((r) => !inRoom.has(r.id));
+  if (!resources.length && !canShare) return null;
+  return (
+    <section aria-labelledby="classroom-resources" className="space-y-3 text-sm">
+      <h2 id="classroom-resources" className="font-semibold">
+        {t("classroom.resources")}
+      </h2>
+      {resources.length ? (
+        <ul className="divide-y divide-rule rounded-xl border border-border bg-surface">
+          {resources.map((r) => (
+            <li
+              key={r.id}
+              className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5"
+            >
+              <span>
+                <span className="font-medium">{r.title}</span>
+                {r.message ? (
+                  <span className="block text-xs text-muted-foreground">{r.message}</span>
+                ) : null}
+              </span>
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={open.isPending}
+                onClick={() => open.mutate(r.id)}
+                aria-label={t("g5c.classroom.openResource", { title: r.title })}
+              >
+                {t("g5c.classroom.open")}
+              </Button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-muted-foreground">{t("g5c.classroom.none")}</p>
+      )}
+      {open.error ? <Alert tone="danger">{open.error.message}</Alert> : null}
+      {canShare ? (
+        <form
+          aria-label={t("g5c.classroom.share")}
+          className="flex flex-wrap items-end gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (chosen) share.mutate();
+          }}
+        >
+          <SelectField
+            label={t("g5c.classroom.choose")}
+            value={chosen}
+            onChange={(e) => setChosen(e.target.value)}
+            options={[
+              { value: "", label: t("g5c.classroom.pick") },
+              ...options.map((r) => ({ value: r.id, label: r.title })),
+            ]}
+          />
+          <TextField
+            label={t("g5c.classroom.message")}
+            value={message}
+            maxLength={500}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <Button type="submit" disabled={!chosen} loading={share.isPending}>
+            {t("g5c.classroom.share")}
+          </Button>
+          {share.error ? <Alert tone="danger">{share.error.message}</Alert> : null}
+        </form>
+      ) : null}
+    </section>
   );
 }
 

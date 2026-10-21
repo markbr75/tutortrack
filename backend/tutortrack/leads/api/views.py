@@ -37,6 +37,7 @@ from ..models import (
     PipelineStage,
     Proposal,
     WaitlistEntry,
+    WaitlistSuggestion,
 )
 from . import serializers as s
 
@@ -534,6 +535,96 @@ class WaitlistViewSet(
     def remove(self, request: Request, pk: Any = None) -> Response:
         entry = services.remove_from_waitlist(self.get_object())
         return Response(s.WaitlistEntrySerializer(entry).data)
+
+
+SUGGESTION_EXAMPLE = OpenApiExample(
+    "Open suggestion",
+    value={
+        "id": "01929a3e-7b1c-7f00-8000-000000000001",
+        "entry": "01929a3e-7b1c-7f00-8000-000000000002",
+        "student": "01929a3e-7b1c-7f00-8000-000000000003",
+        "student_name": "Arjun Patel",
+        "subject": "Maths",
+        "level": "GCSE",
+        "position": 1,
+        "tutor": "01929a3e-7b1c-7f00-8000-000000000004",
+        "tutor_name": "Nia Okafor",
+        "reason": "availability",
+        "score": "78.5",
+        "status": "open",
+        "decided_at": None,
+        "created_at": "2026-10-21T09:00:00Z",
+        "updated_at": "2026-10-21T09:00:00Z",
+    },
+    response_only=True,
+)
+
+
+class WaitlistSuggestionViewSet(
+    TenantScopedViewMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Gap G5c (FR-17-6): tutors who now have room for waiting students, raised when
+    capacity appears. Offer the place from a suggestion, or dismiss it."""
+
+    model = WaitlistSuggestion
+    serializer_class = s.WaitlistSuggestionSerializer
+    permission_classes = perms(dict.fromkeys(("GET", "POST"), "leads.waitlist.manage"))
+
+    def get_tenant_queryset(self) -> Any:
+        qs = WaitlistSuggestion.objects.select_related("entry__student", "tutor")
+        if self.action != "list":
+            return qs
+        state = self.request.query_params.get("status", "open")
+        qs = qs.filter(status=state) if state != "all" else qs
+        entry = self.request.query_params.get("entry")
+        return qs.filter(entry_id=entry) if entry else qs
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("status", str, description="open (default), offered, ... or all"),
+            OpenApiParameter("entry", OpenApiTypes.UUID, description="One waitlist entry"),
+        ],
+        examples=[SUGGESTION_EXAMPLE],
+    )
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        request=s.SuggestionOfferSerializer,
+        responses=s.WaitlistSuggestionSerializer,
+        examples=[
+            OpenApiExample(
+                "Offer", value={"details": "Tuesdays 4pm with Nia", "hours": 48}, request_only=True
+            ),
+            SUGGESTION_EXAMPLE,
+        ],
+    )
+    @action(detail=True, methods=["post"])
+    def offer(self, request: Request, pk: Any = None) -> Response:
+        """Send the waiting family the time-limited offer link (E17) for this tutor."""
+        payload = s.SuggestionOfferSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        from .. import suggestions
+
+        done = suggestions.offer_from_suggestion(
+            self.get_object(),
+            details=payload.validated_data.get("details", ""),
+            hours=payload.validated_data.get("hours"),
+            user=request.user,
+        )
+        return Response(s.WaitlistSuggestionSerializer(done).data)
+
+    @extend_schema(request=None, responses=s.WaitlistSuggestionSerializer)
+    @action(detail=True, methods=["post"])
+    def dismiss(self, request: Request, pk: Any = None) -> Response:
+        """Not this tutor: the suggestion isn't raised again."""
+        from .. import suggestions
+
+        done = suggestions.dismiss(self.get_object(), user=request.user)
+        return Response(s.WaitlistSuggestionSerializer(done).data)
 
 
 class PublicOfferView(APIView):

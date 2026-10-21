@@ -289,6 +289,16 @@ def field_specs(subject_type: str) -> list[FieldSpec]:
                 "learning_needs", _("Learning needs"), permission="people.student.view_sensitive"
             ),
             FieldSpec("exam_boards", _("Exam boards")),
+            FieldSpec(
+                "sen_tags",
+                _("Special educational needs"),
+                permission="people.student.view_sensitive",
+            ),
+            FieldSpec(
+                "tutor_gender_preference",
+                _("Tutor gender preference"),
+                permission="people.student.view_sensitive",
+            ),
             FieldSpec("target_grades", _("Target grades")),
             FieldSpec("availability", _("Availability")),
             FieldSpec("lesson_address", _("Lesson address"), "address"),

@@ -264,6 +264,43 @@ class WaitlistEntry(BranchScopedModel):
         return f"{self.student_id} waiting for {self.subject}"
 
 
+class WaitlistSuggestion(BranchScopedModel):
+    """Gap G5c (FR-17-6): a tutor who now has room for a waiting student. Created by
+    ``leads.suggestions`` when capacity appears (availability added, a job ended or lost
+    its tutor, a tutor became active again); staff offer the place from it or dismiss it.
+    One row per entry and tutor, so a dismissed suggestion isn't raised again."""
+
+    class Reason(models.TextChoices):
+        AVAILABILITY = "availability", _("Availability changed")
+        JOB_ENDED = "job_ended", _("A job ended or lost its tutor")
+        TUTOR_AVAILABLE = "tutor_available", _("Tutor available again")
+
+    class Status(models.TextChoices):
+        OPEN = "open", _("Open")
+        OFFERED = "offered", _("Place offered")
+        DISMISSED = "dismissed", _("Dismissed")
+        CLOSED = "closed", _("No longer waiting")
+
+    entry = models.ForeignKey(WaitlistEntry, on_delete=models.CASCADE, related_name="suggestions")
+    tutor = models.ForeignKey("people.TutorProfile", on_delete=models.CASCADE, related_name="+")
+    reason = models.CharField(max_length=16, choices=Reason.choices)
+    score = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.OPEN)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta(BranchScopedModel.Meta):
+        ordering = ["-score", "created_at"]
+        constraints = [
+            models.UniqueConstraint(fields=["entry", "tutor"], name="waitlist_suggestion_unique")
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.tutor_id} for {self.entry_id}"
+
+
 class Proposal(BranchScopedModel):
     """A branded proposal for an enquiry (FR-17-3, E17-T09): suggested tutors (E19 cards),
     schedule, priced lines and an optional deposit. Sent as a signed link and PDF; the

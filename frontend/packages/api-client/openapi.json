@@ -45199,6 +45199,71 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/lessons/{id}/classroom/resources/{resource_id}/open": {
+            "post": {
+                "operationId": "lessons_classroom_resources_open_create",
+                "description": "``POST /lessons/{id}/classroom/resources/{resource_id}/open`` (gap G5c, FR-21-8):\nopen a resource shared into the lesson's classroom, for anyone in the classroom (the\nlesson's tutor, its families, staff). Returns a short-lived link for files, the link\nitself otherwise, and records the view.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "resource_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClassroomResourceOpen"
+                                },
+                                "examples": {
+                                    "ASharedLink": {
+                                        "value": {
+                                            "url": "https://example.com/fractions",
+                                            "expires_in": null,
+                                            "kind": "link"
+                                        },
+                                        "summary": "A shared link"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/lessons/{id}/complete": {
             "post": {
                 "operationId": "lessons_complete_create",
@@ -81886,6 +81951,305 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/waitlist-suggestions": {
+            "get": {
+                "operationId": "waitlist_suggestions_list",
+                "description": "Gap G5c (FR-17-6): tutors who now have room for waiting students, raised when\ncapacity appears. Offer the place from a suggestion, or dismiss it.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "entry",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "One waitlist entry"
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "open (default), offered, ... or all"
+                    }
+                ],
+                "tags": [
+                    "waitlist-suggestions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedWaitlistSuggestionList"
+                                },
+                                "examples": {
+                                    "OpenSuggestion": {
+                                        "value": {
+                                            "next": "http://api.example.org/accounts/?cursor=cD00ODY%3D\"",
+                                            "previous": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3",
+                                            "results": [
+                                                {
+                                                    "id": "01929a3e-7b1c-7f00-8000-000000000001",
+                                                    "entry": "01929a3e-7b1c-7f00-8000-000000000002",
+                                                    "student": "01929a3e-7b1c-7f00-8000-000000000003",
+                                                    "student_name": "Arjun Patel",
+                                                    "subject": "Maths",
+                                                    "level": "GCSE",
+                                                    "position": 1,
+                                                    "tutor": "01929a3e-7b1c-7f00-8000-000000000004",
+                                                    "tutor_name": "Nia Okafor",
+                                                    "reason": "availability",
+                                                    "score": "78.5",
+                                                    "status": "open",
+                                                    "decided_at": null,
+                                                    "created_at": "2026-10-21T09:00:00Z",
+                                                    "updated_at": "2026-10-21T09:00:00Z"
+                                                }
+                                            ]
+                                        },
+                                        "summary": "Open suggestion"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/waitlist-suggestions/{id}": {
+            "get": {
+                "operationId": "waitlist_suggestions_retrieve",
+                "description": "Gap G5c (FR-17-6): tutors who now have room for waiting students, raised when\ncapacity appears. Offer the place from a suggestion, or dismiss it.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this waitlist suggestion.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "waitlist-suggestions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WaitlistSuggestion"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/waitlist-suggestions/{id}/dismiss": {
+            "post": {
+                "operationId": "waitlist_suggestions_dismiss_create",
+                "description": "Not this tutor: the suggestion isn't raised again.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this waitlist suggestion.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "waitlist-suggestions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WaitlistSuggestion"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/waitlist-suggestions/{id}/offer": {
+            "post": {
+                "operationId": "waitlist_suggestions_offer_create",
+                "description": "Send the waiting family the time-limited offer link (E17) for this tutor.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this waitlist suggestion.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "waitlist-suggestions"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SuggestionOfferRequest"
+                            },
+                            "examples": {
+                                "Offer": {
+                                    "value": {
+                                        "details": "Tuesdays 4pm with Nia",
+                                        "hours": 48
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SuggestionOfferRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SuggestionOfferRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WaitlistSuggestion"
+                                },
+                                "examples": {
+                                    "OpenSuggestion": {
+                                        "value": {
+                                            "id": "01929a3e-7b1c-7f00-8000-000000000001",
+                                            "entry": "01929a3e-7b1c-7f00-8000-000000000002",
+                                            "student": "01929a3e-7b1c-7f00-8000-000000000003",
+                                            "student_name": "Arjun Patel",
+                                            "subject": "Maths",
+                                            "level": "GCSE",
+                                            "position": 1,
+                                            "tutor": "01929a3e-7b1c-7f00-8000-000000000004",
+                                            "tutor_name": "Nia Okafor",
+                                            "reason": "availability",
+                                            "score": "78.5",
+                                            "status": "open",
+                                            "decided_at": null,
+                                            "created_at": "2026-10-21T09:00:00Z",
+                                            "updated_at": "2026-10-21T09:00:00Z"
+                                        },
+                                        "summary": "Open suggestion"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/waitlist/{id}": {
             "patch": {
                 "operationId": "waitlist_partial_update",
@@ -93840,11 +94204,56 @@
                     },
                     "title": {
                         "type": "string"
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/ClassroomResourceKindEnum"
+                    },
+                    "media_type": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "shared_at": {
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "required": [
                     "id",
+                    "kind",
+                    "media_type",
+                    "message",
+                    "shared_at",
                     "title"
+                ]
+            },
+            "ClassroomResourceKindEnum": {
+                "enum": [
+                    "file",
+                    "link"
+                ],
+                "type": "string",
+                "description": "* `file` - file\n* `link` - link"
+            },
+            "ClassroomResourceOpen": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    },
+                    "expires_in": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "kind": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "expires_in",
+                    "kind",
+                    "url"
                 ]
             },
             "ClassroomRoleEnum": {
@@ -111780,6 +112189,36 @@
                 "type": "string",
                 "description": "* `online` - online\n* `in_person` - in_person\n* `either` - either"
             },
+            "MatchNeeds": {
+                "type": "object",
+                "description": "The students' needs the search used (gap G5c). SEN tags and the gender preference\nare empty for viewers without ``people.student.view_sensitive``.",
+                "properties": {
+                    "exam_boards": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "sen_tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "gender": {
+                        "type": "string"
+                    },
+                    "gender_preference_enabled": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "exam_boards",
+                    "gender",
+                    "gender_preference_enabled",
+                    "sen_tags"
+                ]
+            },
             "MatchRow": {
                 "type": "object",
                 "properties": {
@@ -111927,6 +112366,39 @@
                             "maxLength": 40
                         }
                     },
+                    "exam_boards": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 60
+                        },
+                        "nullable": true
+                    },
+                    "sen_tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 60
+                        },
+                        "nullable": true
+                    },
+                    "gender": {
+                        "nullable": true,
+                        "description": "Tutor gender preference; ignored unless matching.gender_preference is on.\n\n* `female` - Female\n* `male` - Male\n* `non_binary` - Non-binary",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/TutorGenderEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
                     "include_restricted": {
                         "type": "boolean",
                         "default": false
@@ -111950,6 +112422,9 @@
                         "type": "object",
                         "additionalProperties": {}
                     },
+                    "needs": {
+                        "$ref": "#/components/schemas/MatchNeeds"
+                    },
                     "origin": {
                         "allOf": [
                             {
@@ -111967,6 +112442,7 @@
                 },
                 "required": [
                     "criteria",
+                    "needs",
                     "origin",
                     "query",
                     "results"
@@ -112067,9 +112543,15 @@
                             "maximum": 100,
                             "minimum": 0
                         }
+                    },
+                    "gender_preference": {
+                        "type": "boolean",
+                        "readOnly": true,
+                        "description": "Whether matching.gender_preference is on (gap G5c)."
                     }
                 },
                 "required": [
+                    "gender_preference",
                     "weights"
                 ]
             },
@@ -120304,6 +120786,32 @@
                     }
                 }
             },
+            "PaginatedWaitlistSuggestionList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WaitlistSuggestion"
+                        }
+                    }
+                }
+            },
             "PaginatedWarehouseDestinationList": {
                 "type": "object",
                 "required": [
@@ -124723,7 +125231,25 @@
                         ],
                         "writeOnly": true
                     },
-                    "custom_fields": {}
+                    "custom_fields": {},
+                    "sen_tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 60
+                        },
+                        "description": "Special educational needs tags used by matching (sensitive)."
+                    },
+                    "tutor_gender_preference": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/TutorGenderEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    }
                 }
             },
             "PatchedSubjectRequest": {
@@ -125056,6 +125582,32 @@
                         "type": "boolean",
                         "writeOnly": true,
                         "default": true
+                    },
+                    "gender": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/TutorGenderEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    },
+                    "sen_tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 60
+                        },
+                        "description": "Special educational needs the tutor has experience with (matching)."
+                    },
+                    "exam_boards": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 60
+                        },
+                        "description": "Exam boards the tutor teaches (matching)."
                     }
                 }
             },
@@ -144095,6 +144647,24 @@
                         "format": "uuid",
                         "readOnly": true,
                         "nullable": true
+                    },
+                    "sen_tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 60
+                        },
+                        "description": "Special educational needs tags used by matching (sensitive)."
+                    },
+                    "tutor_gender_preference": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/TutorGenderEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
                     }
                 },
                 "required": [
@@ -144433,7 +145003,25 @@
                         ],
                         "writeOnly": true
                     },
-                    "custom_fields": {}
+                    "custom_fields": {},
+                    "sen_tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 60
+                        },
+                        "description": "Special educational needs tags used by matching (sensitive)."
+                    },
+                    "tutor_gender_preference": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/TutorGenderEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    }
                 },
                 "required": [
                     "client",
@@ -145119,6 +145707,21 @@
                 ],
                 "type": "string",
                 "description": "* `trialing` - Trial\n* `active` - Active\n* `past_due` - Payment overdue\n* `suspended` - Suspended (read-only)\n* `cancelled` - Cancelled (read-only)"
+            },
+            "SuggestionOfferRequest": {
+                "type": "object",
+                "properties": {
+                    "details": {
+                        "type": "string",
+                        "description": "What the family sees; defaults to \"A place with <tutor>\".",
+                        "maxLength": 500
+                    },
+                    "hours": {
+                        "type": "integer",
+                        "maximum": 336,
+                        "minimum": 1
+                    }
+                }
             },
             "SummaryTotals": {
                 "type": "object",
@@ -148669,6 +149272,32 @@
                         "readOnly": true,
                         "nullable": true,
                         "description": "Booked time this month as a % of weekly availability."
+                    },
+                    "gender": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/TutorGenderEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    },
+                    "sen_tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 60
+                        },
+                        "description": "Special educational needs the tutor has experience with (matching)."
+                    },
+                    "exam_boards": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 60
+                        },
+                        "description": "Exam boards the tutor teaches (matching)."
                     }
                 },
                 "required": [
@@ -148816,6 +149445,15 @@
                 ],
                 "type": "string",
                 "description": "* `self_employed` - Self-employed\n* `employee` - Employee\n* `other` - Other"
+            },
+            "TutorGenderEnum": {
+                "enum": [
+                    "female",
+                    "male",
+                    "non_binary"
+                ],
+                "type": "string",
+                "description": "* `female` - Female\n* `male` - Male\n* `non_binary` - Non-binary"
             },
             "TutorInput": {
                 "type": "object",
@@ -149811,6 +150449,32 @@
                         "type": "boolean",
                         "writeOnly": true,
                         "default": true
+                    },
+                    "gender": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/TutorGenderEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            }
+                        ]
+                    },
+                    "sen_tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 60
+                        },
+                        "description": "Special educational needs the tutor has experience with (matching)."
+                    },
+                    "exam_boards": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 60
+                        },
+                        "description": "Exam boards the tutor teaches (matching)."
                     }
                 },
                 "required": [
@@ -150787,6 +151451,128 @@
                 ],
                 "type": "string",
                 "description": "* `waiting` - Waiting\n* `offered` - Offered a place\n* `accepted` - Accepted\n* `declined` - Declined\n* `expired` - Offer expired\n* `removed` - Removed"
+            },
+            "WaitlistSuggestion": {
+                "type": "object",
+                "description": "Gap G5c (FR-17-6): a tutor with room for a waiting student.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "entry": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "student": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "student_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "subject": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "level": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "position": {
+                        "type": "integer",
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "tutor_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "reason": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/WaitlistSuggestionReasonEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "score": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,4}(?:\\.\\d{0,1})?$",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/WaitlistSuggestionStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "decided_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "decided_at",
+                    "entry",
+                    "id",
+                    "level",
+                    "position",
+                    "reason",
+                    "score",
+                    "status",
+                    "student",
+                    "student_name",
+                    "subject",
+                    "tutor",
+                    "tutor_name",
+                    "updated_at"
+                ]
+            },
+            "WaitlistSuggestionReasonEnum": {
+                "enum": [
+                    "availability",
+                    "job_ended",
+                    "tutor_available"
+                ],
+                "type": "string",
+                "description": "* `availability` - Availability changed\n* `job_ended` - A job ended or lost its tutor\n* `tutor_available` - Tutor available again"
+            },
+            "WaitlistSuggestionStatusEnum": {
+                "enum": [
+                    "open",
+                    "offered",
+                    "dismissed",
+                    "closed"
+                ],
+                "type": "string",
+                "description": "* `open` - Open\n* `offered` - Place offered\n* `dismissed` - Dismissed\n* `closed` - No longer waiting"
             },
             "WaiveRequest": {
                 "type": "object",

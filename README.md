@@ -5,8 +5,8 @@ delivery, billing, payments, payroll, communications, automations, portals for c
 and tutors, websites, reporting, a public API and an AI assistant. Python (Django) and
 PostgreSQL backend, React and TypeScript frontends.
 
-**Status:** all 32 epics (E01–E32) are built, plus gap batches G1–G4 and G6. Gap batch G5 and
-the items that need real provider credentials are listed in
+**Status:** all 32 epics (E01–E32) are built, plus every gap batch (G1–G6). The items that
+need real provider credentials or infrastructure are listed at the end of
 [docs/05-gap-backlog.md](docs/05-gap-backlog.md). Build order and progress:
 [docs/04-roadmap.md](docs/04-roadmap.md).
 
@@ -100,11 +100,11 @@ Each app in `backend/tutortrack/` owns its models, `services.py` (writes), `sele
 | `comms` | Email, SMS and push, templates, inbox, broadcasts, notification preferences | E13 |
 | `automations` | Trigger/condition/action automations on Temporal | E14 |
 | `portal` | Client, student and tutor portal APIs | E15, E16 |
-| `leads` | Enquiries, pipeline, forms (with file uploads), waitlist, proposals | E17 |
+| `leads` | Enquiries, pipeline, forms (with file uploads), waitlist with tutor-capacity suggestions, proposals | E17 |
 | `recruitment` | Job openings, tutor applications (CV and video uploads), interview booking, onboarding, compliance checks, probation reviews, offboarding, subject tests | E18 |
-| `matching` | Tutor matching and the job marketplace | E19 |
+| `matching` | Tutor matching (incl. exam boards, SEN experience, optional gender preference) and the job marketplace | E19 |
 | `courses` | Group classes, courses, terms and enrolment | E20 |
-| `learning` | Homework, resources, progress and assessments | E21 |
+| `learning` | Homework, resources (also in the online classroom), progress reports (manual or on a schedule) and assessments | E21 |
 | `integrations` | Integration framework and provider connections | E22 |
 | `calendar_sync` | Calendar sync and online lesson (video) integrations | E22 |
 | `accounting` | Xero, QuickBooks, Sage and FreeAgent sync (per-branch ledgers, payment read-back) | E23 |

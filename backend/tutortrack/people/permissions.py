@@ -9,6 +9,8 @@ PERMISSIONS = {
     "people.student.view_sensitive": "See students' date of birth and learning needs/medical notes",
     **{f"people.tutor.{a}": f"Tutors: {a}" for a in _ACTIONS},
     "people.tutor.view_financial": "See tutors' pay rate and tax reference",
+    # Gap G5c (FR-19-1): gender is only used for families' gender preferences in matching.
+    "people.tutor.view_sensitive": "See and edit tutors' gender (matching preferences)",
     "people.tutor.approve_subjects": "Approve the subjects a tutor may teach",
     "people.contact.view_phone": "See contacts' phone numbers (tutor toggle)",
     "people.contact.view_details": "See contacts' full details (tutor toggle)",

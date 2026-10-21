@@ -57,6 +57,22 @@ register(
     label=_("Share progress reports with families as soon as they are approved"),
 )
 register(
+    "learning.progress_schedule",
+    type="choice",
+    default="none",
+    choices=(
+        ("none", _("Don't draft automatically")),
+        ("monthly", _("Every month")),
+        ("termly", _("At the end of each term")),
+    ),
+    label=_("Draft progress reports automatically"),
+    help_text=_(
+        "Monthly drafts last month's reports on the 1st. Termly drafts them the day after a "
+        "term (set up under Classes) ends. Students with lessons in the period get a draft "
+        "for their main tutor to finish."
+    ),
+)
+register(
     "learning.loan_days",
     type="int",
     default=28,

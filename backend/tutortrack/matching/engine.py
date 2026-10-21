@@ -10,6 +10,11 @@ only needs to have claimed the subject, and is flagged ``restricted`` with the r
 Each factor scores 0..1 and the weights (``matching.weights``) combine them into 0..100.
 Unknown inputs (no availability set, no address, no ratings) score 0.5, so missing data
 neither helps nor sinks a tutor; the breakdown says which were unknown.
+
+Gap G5c (FR-19-1) adds the students' needs: exam boards and SEN tags are two optional
+factors (``exam_board``, ``sen``) that only count when the search asks for them, so other
+searches score exactly as before. A family's tutor gender preference is a hard filter, and
+only when the organisation turns on ``matching.gender_preference`` (off by default).
 """
 
 from __future__ import annotations
@@ -32,7 +37,10 @@ FACTORS = (
     "availability", "distance", "rating", "experience", "workload", "history", "margin",
     "response", "fairness",
 )  # fmt: skip
+# Gap G5c: factors that only count when the search asks for them (exam boards, SEN tags).
+OPTIONAL_FACTORS = ("exam_board", "sen")
 MODES = ("online", "in_person", "either")
+GENDERS = ("female", "male", "non_binary")
 
 
 @dataclass
@@ -56,8 +64,14 @@ class Criteria:
     requirements: list[str] = field(default_factory=list)
     exclude: set[str] = field(default_factory=set)
     job_id: str | None = None
+    # Gap G5c (FR-19-1): the students' needs.
+    exam_boards: list[str] = field(default_factory=list)
+    sen_tags: list[str] = field(default_factory=list)
+    gender: str = ""
 
     def to_json(self) -> dict[str, Any]:
+        """What is stored with the search (``MatchQuery``). SEN tags and the gender
+        preference are sensitive, so only their presence is kept."""
         return {
             "job": self.job_id,
             "subject": self.subject_id,
@@ -76,7 +90,13 @@ class Criteria:
             "languages": self.languages,
             "max_pay_rate": str(self.max_pay_rate) if self.max_pay_rate is not None else None,
             "requirements": self.requirements,
+            "exam_boards": self.exam_boards,
+            "sen_tag_count": len(self.sen_tags),
+            "gender_preference": bool(self.gender),
         }
+
+    def needs(self) -> dict[str, Any]:
+        return {"exam_boards": self.exam_boards, "sen_tags": self.sen_tags, "gender": self.gender}
 
 
 @dataclass
@@ -139,10 +159,45 @@ def job_place(job: Any) -> Any:
     return fallback
 
 
+def _labels(values: Any) -> list[str]:
+    """Strings from a JSON list; ``{"board": ...}`` items (older free-form data) too."""
+    out: list[str] = []
+    for item in values if isinstance(values, list) else []:
+        label = item.get("board", "") if isinstance(item, dict) else item
+        label = str(label or "").strip()
+        if label and label.casefold() not in {x.casefold() for x in out}:
+            out.append(label)
+    return out
+
+
+def student_needs(students: list[Any], subject: Any = None) -> dict[str, Any]:
+    """Exam boards, SEN tags and the tutor gender preference of the students (FR-19-1).
+    Exam boards are narrowed to the ones the catalogue subject offers, when it lists any.
+    The gender preference applies only when every student who states one agrees."""
+    boards = _labels([b for s in students for b in _labels(s.exam_boards)])
+    tags = _labels([t for s in students for t in _labels(s.sen_tags)])
+    genders = {s.tutor_gender_preference for s in students if s.tutor_gender_preference}
+    offered = {b.casefold() for b in _labels(getattr(subject, "exam_boards", None))}
+    if offered:
+        boards = [b for b in boards if b.casefold() in offered]
+    return {
+        "exam_boards": boards,
+        "sen_tags": tags,
+        "gender": genders.pop() if len(genders) == 1 else "",
+    }
+
+
 def criteria_for_job(job: Any) -> Criteria:
     from tutortrack.jobs.models import JobTutor
 
     place = job_place(job)
+    needs = student_needs(
+        [
+            link.student
+            for link in job.students.filter(active_to__isnull=True).select_related("student")
+        ],
+        job.subject if job.subject_id else None,
+    )
     exclude = {
         str(t)
         for link in job.students.filter(active_to__isnull=True).select_related("student")
@@ -172,6 +227,7 @@ def criteria_for_job(job: Any) -> Criteria:
         branch_id=str(job.branch_id),
         charge_rate=charge.amount if charge is not None else None,
         exclude=exclude,
+        **needs,
     )
 
 
@@ -201,6 +257,11 @@ def criteria_from_input(data: dict[str, Any], job: Any = None) -> Criteria:
     for key in ("slots", "languages", "requirements"):
         if data.get(key) is not None:
             setattr(c, key, list(data[key]))
+    for key in ("exam_boards", "sen_tags"):  # gap G5c: override the students' needs
+        if data.get(key) is not None:
+            setattr(c, key, _labels(list(data[key])))
+    if data.get("gender") is not None:
+        c.gender = data["gender"] if data["gender"] in GENDERS else ""
     for key in ("start_date", "duration_minutes", "max_pay_rate"):
         if data.get(key) is not None:
             setattr(c, key, data[key])
@@ -225,7 +286,7 @@ def _weights() -> dict[str, float]:
 
     configured = get_setting("matching.weights") or {}
     out = {}
-    for key in FACTORS:
+    for key in (*FACTORS, *OPTIONAL_FACTORS):
         try:
             out[key] = max(float(configured.get(key, DEFAULT_WEIGHTS[key])), 0.0)
         except (TypeError, ValueError):
@@ -265,7 +326,21 @@ def _candidates(c: Criteria, include_restricted: bool, only: list[str] | None) -
         qs = qs.filter(languages__contains=[language])
     if c.max_pay_rate is not None:
         qs = qs.filter(Q(pay_rate_amount__isnull=True) | Q(pay_rate_amount__lte=c.max_pay_rate))
+    if c.gender and gender_preferences_on():
+        qs = qs.filter(gender=c.gender)  # gap G5c: a stated preference, when allowed
     return list(qs.distinct())
+
+
+def gender_preferences_on() -> bool:
+    from tutortrack.tenancy.settings_service import get_setting
+
+    return bool(get_setting("matching.gender_preference"))
+
+
+def _overlap(wanted: list[str], held: Any) -> tuple[int, int, list[str]]:
+    have = {h.casefold() for h in _labels(held)}
+    hits = [w for w in wanted if w.casefold() in have]
+    return len(hits), len(have), hits
 
 
 def _distance(c: Criteria, tutor: Any, default_radius: int) -> tuple[Decimal | None, bool]:
@@ -390,7 +465,6 @@ def search(
     last = last_assignment(ids)
     target_margin = int(get_setting("matching.target_margin_percent")) / 100
     weights = _weights()
-    total_weight = sum(weights.values()) or 1.0
 
     results = []
     for tutor, km, reasons in kept:
@@ -451,6 +525,21 @@ def search(
         factors["fairness"] = _factor(
             weights["fairness"], min(days, 90) / 90 if days is not None else 1.0, days
         )
+        if c.exam_boards:  # gap G5c: teaches one of the students' boards
+            hits, held, names = _overlap(c.exam_boards, tutor.exam_boards)
+            factors["exam_board"] = _factor(
+                weights["exam_board"],
+                (1.0 if hits else 0.0) if held else None,
+                ", ".join(names) or None,
+            )
+        if c.sen_tags:  # gap G5c: share of the students' needs the tutor has experience of
+            hits, held, _names = _overlap(c.sen_tags, tutor.sen_tags)
+            factors["sen"] = _factor(
+                weights["sen"],
+                hits / len(c.sen_tags) if held else None,
+                f"{hits}/{len(c.sen_tags)}" if held else None,
+            )
+        total_weight = sum(f["weight"] for f in factors.values()) or 1.0
         raw = sum(f["weight"] * f["score"] for f in factors.values()) / total_weight * 100
         results.append(
             Match(

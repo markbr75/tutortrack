@@ -93,6 +93,11 @@ class StudentSerializer(BaseModelSerializer):
     last_lesson_at = _moment()
     hours_this_term = _figure()
     merged_into = serializers.UUIDField(source="merged_into_id", read_only=True, allow_null=True)
+    sen_tags = serializers.ListField(
+        child=serializers.CharField(max_length=60, allow_blank=True),
+        required=False,
+        help_text="Special educational needs tags used by matching (sensitive).",
+    )
 
     class Meta:
         model = Student
@@ -102,7 +107,7 @@ class StudentSerializer(BaseModelSerializer):
             "goals", "learning_needs", "exam_boards", "target_grades", "availability",
             "lesson_address", "lesson_address_input", "contact", "user", "custom_fields",
             "archived_at", "created_at", "next_lesson_at", "last_lesson_at", "hours_this_term",
-            "merged_into",
+            "merged_into", "sen_tags", "tutor_gender_preference",
         ]  # fmt: skip
         read_only_fields = [
             "id", "status_changed_at", "contact", "user", "archived_at", "created_at",
@@ -110,6 +115,8 @@ class StudentSerializer(BaseModelSerializer):
         field_permissions = {
             "date_of_birth": "people.student.view_sensitive",
             "learning_needs": "people.student.view_sensitive",
+            "sen_tags": "people.student.view_sensitive",
+            "tutor_gender_preference": "people.student.view_sensitive",
         }
         extra_kwargs = {"branch": {"required": False}}  # defaults to the client's branch
 
@@ -221,6 +228,16 @@ class TutorSerializer(BaseModelSerializer):
         allow_null=True,
         help_text="Booked time this month as a % of weekly availability.",
     )
+    sen_tags = serializers.ListField(
+        child=serializers.CharField(max_length=60, allow_blank=True),
+        required=False,
+        help_text="Special educational needs the tutor has experience with (matching).",
+    )
+    exam_boards = serializers.ListField(
+        child=serializers.CharField(max_length=60, allow_blank=True),
+        required=False,
+        help_text="Exam boards the tutor teaches (matching).",
+    )
 
     class Meta:
         model = TutorProfile
@@ -233,12 +250,14 @@ class TutorSerializer(BaseModelSerializer):
             "public_profile", "tax_reference", "date_of_birth", "emergency_contact",
             "subjects", "qualifications", "custom_fields", "has_joined", "invite",
             "archived_at", "created_at", "hours_this_month", "report_sla", "utilisation",
+            "gender", "sen_tags", "exam_boards",
         ]  # fmt: skip
         read_only_fields = ["id", "status", "status_changed_at", "archived_at", "created_at"]
         field_permissions = {
             "pay_rate_amount": "billing.rates.view_pay",
             "tax_reference": "people.tutor.view_financial",
             "date_of_birth": "people.tutor.view_financial",
+            "gender": "people.tutor.view_sensitive",
         }
 
     def get_has_joined(self, obj: TutorProfile) -> bool:

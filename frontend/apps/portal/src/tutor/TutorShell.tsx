@@ -44,7 +44,10 @@ export function TutorShell() {
   const location = useLocation();
   const navigate = useNavigate();
   useEffect(() => {
-    if (!location.pathname.startsWith("/tutor")) void navigate({ to: "/tutor" });
+    // The in-app classroom (E22-T10) is shared with families, so it lives outside /tutor;
+    // gap G5c: the tutor's "Open the classroom" link must not bounce back to Today.
+    const shared = location.pathname.startsWith("/classroom/");
+    if (!location.pathname.startsWith("/tutor") && !shared) void navigate({ to: "/tutor" });
   }, [location.pathname, navigate]);
   // Offline (E16-T08): replay queued changes, keep the next week on the phone, and never
   // leave one person's data for the next one who signs in here.

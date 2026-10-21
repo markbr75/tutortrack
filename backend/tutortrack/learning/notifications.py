@@ -8,6 +8,7 @@ from typing import Any
 
 from django.utils.translation import gettext_lazy as _
 
+from tutortrack.comms import catalogue
 from tutortrack.comms.catalogue import (
     SAMPLE_BASE,
     client_contacts,
@@ -19,6 +20,7 @@ from tutortrack.comms.catalogue import (
 )
 from tutortrack.comms.defaults import DEFAULTS, SIGN
 from tutortrack.comms.registry import Delivery, NotificationType, Recipient, register
+from tutortrack.core.time import now
 
 
 def _people(student: Any) -> list[Recipient]:
@@ -93,7 +95,11 @@ def _to_tutor(assignment: Any) -> list[Delivery]:
 def load_share(pk: Any) -> Any:
     from .models import ResourceShare
 
-    return ResourceShare.objects.select_related("resource", "shared_by").filter(pk=pk).first()
+    return (
+        ResourceShare.objects.select_related("resource", "shared_by", "lesson")
+        .filter(pk=pk)
+        .first()
+    )
 
 
 def _resource_shared(payload: Any) -> list[Delivery]:
@@ -105,13 +111,17 @@ def _resource_shared(payload: Any) -> list[Delivery]:
     recipients: list[Recipient] = []
     for student in Student.objects.filter(pk__in=student_ids).select_related("client", "user"):
         recipients += _people(student)
+    link = "/portal/learning?tab=resources"
+    lesson = share.lesson
+    if lesson is not None and lesson.online and lesson.end > now():
+        link = f"/portal/classroom/{lesson.pk}"  # gap G5c (FR-21-8): it's in the room
     return _deliveries(
         recipients,
         {
             "resource": {
                 "title": share.resource.title,
                 "message": share.message,
-                "link": tenant_link("/portal/learning?tab=resources"),
+                "link": tenant_link(link),
             }
         },
     )
@@ -308,6 +318,69 @@ for _key, _label in (
             "loan": {"item": "Violin (3/4)", "student": "Maya", "due_date": "2026-11-03"},
         },
     )
+
+
+# Gap G5c (FR-21-6): scheduled drafts wait for the author's comments; staff get a summary.
+def _drafts_to_tutor(payload: Any) -> list[Delivery]:
+    tutor, count, period = payload
+    return _deliveries(
+        [tutor_recipient(tutor)],
+        {"drafts": {"count": count, "period": period, "link": tenant_link("/learning")}},
+    )
+
+
+register(
+    NotificationType(
+        key="progress_reports_drafted",
+        label=str(_("Progress reports drafted for you (to the tutor)")),
+        category="reports",
+        audience="tutor",
+        channels=("email", "in_app"),
+        default_channels=("email", "in_app"),
+        resolve=_drafts_to_tutor,
+        load=lambda pk: None,
+        related_type="",
+        variables=("drafts.count", "drafts.period", "drafts.link"),
+        sample={**SAMPLE_BASE, "drafts": {"count": 4, "period": "2026-10", "link": "/"}},
+        link=lambda payload: "/learning",
+    )
+)
+register(
+    NotificationType(
+        key="staff_progress_reports_drafted",
+        label=str(_("Progress reports drafted on schedule")),
+        category="staff",
+        audience="staff",
+        channels=("in_app", "email"),
+        default_channels=("in_app",),
+        resolve=catalogue._alert("learning.progress.approve"),
+        load=lambda pk: None,
+        related_type="",
+        variables=("alert.title", "alert.body", "alert.link"),
+        sample=catalogue.SAMPLE_ALERT,
+        link=lambda payload: payload[2],
+    )
+)
+
+DEFAULTS.update(
+    {
+        ("progress_reports_drafted", "email"): (
+            "Progress reports to finish for {{ drafts.period }}",
+            "Hello {{ recipient.first_name }},\n\n{{ drafts.count }} progress report(s) for "
+            "{{ drafts.period }} have been drafted for your students. Add your comments and "
+            "submit them: {{ drafts.link }}" + SIGN,
+        ),
+        ("progress_reports_drafted", "in_app"): (
+            "Progress reports to finish",
+            "{{ drafts.count }} for {{ drafts.period }}",
+        ),
+        ("staff_progress_reports_drafted", "in_app"): ("{{ alert.title }}", "{{ alert.body }}"),
+        ("staff_progress_reports_drafted", "email"): (
+            "{{ alert.title }}",
+            "{{ alert.body }}\n\n{{ alert.link }}" + SIGN,
+        ),
+    }
+)
 
 DEFAULTS.update(
     {

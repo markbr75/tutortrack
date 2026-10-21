@@ -666,27 +666,42 @@ def classroom(lesson: Lesson, *, user: Any) -> dict[str, Any]:
     }
 
 
-def _resources(lesson: Lesson, student_ids: list[str] | None) -> list[dict[str, str]]:
-    """Resources shared with the lesson (E21), or with the viewer's students."""
-    from django.db.models import Q
+def _resources(lesson: Lesson, student_ids: list[str] | None) -> list[dict[str, Any]]:
+    """Resources shared with the lesson (E21), its job or the viewer's students, newest
+    first. Gap G5c (FR-21-8): with what the room needs to open them; the classroom page
+    polls while the room is open, so a resource shared during the lesson appears in it."""
+    from tutortrack.learning.services import lesson_shares
 
-    from tutortrack.learning.models import ResourceShare
-
-    query = Q(lesson=lesson)
-    if lesson.job_id:
-        query |= Q(job_id=lesson.job_id)
-    if student_ids:
-        query |= Q(student_id__in=student_ids)
-    shares = ResourceShare.objects.filter(query).select_related("resource")[:20]
     seen: set[str] = set()
     out = []
-    for share in shares:
+    for share in lesson_shares(lesson, student_ids)[:40]:
         resource = share.resource
         if str(resource.pk) in seen:
             continue
         seen.add(str(resource.pk))
-        out.append({"id": str(resource.pk), "title": resource.title})
-    return out
+        out.append(
+            {
+                "id": str(resource.pk),
+                "title": resource.title,
+                "kind": resource.kind,
+                "media_type": resource.media_type,
+                "message": share.message,
+                "shared_at": share.created_at,
+            }
+        )
+    return out[:20]
+
+
+def open_classroom_resource(lesson: Lesson, resource_id: Any, *, user: Any) -> dict[str, Any]:
+    """Gap G5c (FR-21-8): anyone in the classroom opens a resource shared into it."""
+    from tutortrack.learning.services import open_lesson_resource
+
+    role, student_ids = _viewer(lesson, user)
+    if not role:
+        raise NotFound(_("Lesson not found."))
+    return open_lesson_resource(
+        lesson, resource_id, user, student_ids=student_ids if role == "family" else None
+    )
 
 
 @transaction.atomic

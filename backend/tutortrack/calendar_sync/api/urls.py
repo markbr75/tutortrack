@@ -35,6 +35,11 @@ urlpatterns = [
         vv.ClassroomConsentView.as_view(),
         name="lesson-classroom-consent",
     ),
+    path(  # gap G5c (FR-21-8): open a resource shared into the classroom
+        "lessons/<uuid:pk>/classroom/resources/<uuid:resource_id>/open",
+        vv.ClassroomResourceOpenView.as_view(),
+        name="lesson-classroom-resource-open",
+    ),
     path("recordings/<uuid:pk>/play", vv.RecordingPlayView.as_view(), name="recording-play"),
     path("me/recordings", vv.MyRecordingsView.as_view(), name="my-recordings"),
     *router.urls,

@@ -7,6 +7,9 @@ import { useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
 import { AiMatchExplain } from "../ai/AiWidgets";
+import { KeyedSettings } from "../g3/KeyedSettings";
+import { MatchNeedsForm } from "./MatchNeeds";
+import { type NeedsOverride } from "./needs";
 import { ShareShortlistSection } from "./SharePages";
 
 type Row = components["schemas"]["MatchRow"];
@@ -144,19 +147,21 @@ export function JobMatchPage({ jobId }: { jobId: string }) {
   const [chosen, setChosen] = useState<string[]>([]);
   const [mode, setMode] = useState<"sequential" | "simultaneous">("sequential");
   const [expiry, setExpiry] = useState("24");
+  const [needs, setNeeds] = useState<NeedsOverride | null>(null);
   const job = useQuery({
     queryKey: ["job", jobId],
     queryFn: async () =>
       unwrap(await api.GET("/api/v1/jobs/{id}", { params: { path: { id: jobId } } })),
   });
   const results = useQuery({
-    queryKey: ["matching", jobId, includeRestricted],
+    queryKey: ["matching", jobId, includeRestricted, needs],
     queryFn: async () =>
       unwrap(
         await api.POST("/api/v1/matching/search", {
-          body: { job: jobId, include_restricted: includeRestricted, limit: 50 },
+          body: { job: jobId, include_restricted: includeRestricted, limit: 50, ...needs },
         }),
       ),
+    placeholderData: (previous) => previous, // keep the list while a changed search runs
   });
   const batches = useQuery({
     queryKey: ["offer-batches", jobId],
@@ -221,6 +226,16 @@ export function JobMatchPage({ jobId }: { jobId: string }) {
           />
           {t("matching.includeRestricted")}
         </label>
+      ) : null}
+      {results.data?.needs ? (
+        <Card title={t("g5c.needs.title")}>
+          <p className="text-sm text-muted-foreground">{t("g5c.needs.intro")}</p>
+          <MatchNeedsForm
+            key={JSON.stringify(results.data.needs)}
+            needs={results.data.needs}
+            onApply={setNeeds}
+          />
+        </Card>
       ) : null}
       {results.error ? <Alert tone="danger">{results.error.message}</Alert> : null}
       {results.isPending ? <Spinner label={t("grid.loading")} /> : null}
@@ -497,7 +512,22 @@ export function MatchingPage() {
         <Tabs label={t("matching.title")} tabs={tabs} value={tab} onChange={setTab}>
           {tab === "cover" ? <CoverPanel /> : null}
           {tab === "analytics" ? <AnalyticsPanel /> : null}
-          {tab === "weights" ? <WeightsPanel /> : null}
+          {tab === "weights" ? (
+            <div className="space-y-8">
+              <WeightsPanel />
+              <section aria-labelledby="matching-gender" className="max-w-2xl space-y-2">
+                <h2 id="matching-gender" className="text-base font-semibold">
+                  {t("g5c.needs.genderSetting")}
+                </h2>
+                <p className="text-sm text-muted-foreground">{t("g5c.needs.genderSettingHelp")}</p>
+                <KeyedSettings
+                  area="matching"
+                  keys={["matching.gender_preference"]}
+                  label={t("g5c.needs.genderSetting")}
+                />
+              </section>
+            </div>
+          ) : null}
         </Tabs>
       ) : null}
     </div>

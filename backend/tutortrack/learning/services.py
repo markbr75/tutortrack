@@ -15,11 +15,12 @@ from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 from django.db import transaction
+from django.db.models import Q
 from django.utils.translation import gettext as _
 
 from tutortrack.core import audit
 from tutortrack.core.events import publish
-from tutortrack.core.exceptions import BusinessRuleViolation, Conflict, PermissionDenied
+from tutortrack.core.exceptions import BusinessRuleViolation, Conflict, NotFound, PermissionDenied
 from tutortrack.core.models import StoredFile
 from tutortrack.core.money import Money
 from tutortrack.core.permissions import permission_scope
@@ -362,6 +363,45 @@ def open_resource(resource: Resource, user: Any, *, student: Any = None) -> dict
 
     if resource.kind == Resource.Kind.FILE and resource.file is not None:
         url, expires = storage.download_url(user, resource.file)
+        record_open(resource, user, student=student, download=True)
+        return {"url": url, "expires_in": expires, "kind": resource.kind}
+    record_open(resource, user, student=student, download=False)
+    return {"url": resource.url, "expires_in": None, "kind": resource.kind}
+
+
+def lesson_shares(lesson: Any, student_ids: list[str] | None = None) -> Any:
+    """Shares that put resources in a lesson's classroom (FR-21-8): the lesson's own, its
+    job's, and (for a family) their students'."""
+    query = Q(lesson=lesson)
+    if lesson.job_id:
+        query |= Q(job_id=lesson.job_id)
+    if student_ids:
+        query |= Q(student_id__in=student_ids)
+    return (
+        ResourceShare.objects.filter(query, resource__archived_at__isnull=True)
+        .select_related("resource")
+        .order_by("-created_at")
+    )
+
+
+@transaction.atomic
+def open_lesson_resource(
+    lesson: Any, resource_id: Any, user: Any, *, student_ids: list[str] | None = None
+) -> dict[str, Any]:
+    """Open a resource from the lesson's classroom (gap G5c, FR-21-8). The caller has
+    checked the viewer belongs in the classroom; the resource must be shared into it, so
+    a tutor can open what staff shared with the lesson even from the staff library."""
+    from tutortrack.core.storage import services as storage
+
+    share = lesson_shares(lesson, student_ids).filter(resource_id=resource_id).first()
+    if share is None:
+        raise NotFound()
+    resource = share.resource
+    student = None
+    if student_ids:
+        student = Student.objects.filter(pk=student_ids[0]).first()
+    if resource.kind == Resource.Kind.FILE and resource.file is not None:
+        url, expires = storage.presign_download(resource.file, inline=True)
         record_open(resource, user, student=student, download=True)
         return {"url": url, "expires_in": expires, "kind": resource.kind}
     record_open(resource, user, student=student, download=False)

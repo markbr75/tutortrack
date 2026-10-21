@@ -50,6 +50,7 @@
               <li><a href="#settings-profile">Organisation profile</a></li>
               <li><a href="#settings-general">General and terminology</a></li>
               <li><a href="#settings-branches">Branches</a></li>
+              <li><a href="#settings-matching-learning">Matching needs and scheduled progress reports</a></li>
               <li><a href="#settings-registry">Settings that have no screen yet</a></li>
               <li><a href="#support-access">TutorTrack support access</a></li>
               <li><a href="#settings-close">Close the account</a></li>
@@ -397,6 +398,38 @@
           <li><span class="badge">Plan</span> Multiple branches need the Agency plan or above, and the plan's branch limit applies (10 on Agency). Extra branches above those included are charged per branch.</li>
         </ul>
 
+        <h3 id="settings-matching-learning">Matching needs and scheduled progress reports</h3>
+        <ul>
+          <li><strong>Gender preferences</strong> (<span class="path">Matching › Weights</span>,
+            <code>matching.gender_preference</code>, off by default; needs
+            <code>matching.settings.manage</code> to see the tab and <code>org.settings.manage</code>
+            to change it). Turn it on only where it is lawful for you to act on a family's
+            preference for a tutor's gender. When it is on, staff can record a student's
+            <span class="ui">Tutor gender preference</span> and matching only shows tutors of that
+            gender (tutors with no gender recorded don't match). When it is off, a stored
+            preference is ignored everywhere. Tutors' gender needs
+            <code>people.tutor.view_sensitive</code>; see <a href="#roles-fields">sensitive
+            fields</a>.</li>
+          <li><strong>Exam board and SEN experience weights</strong> (<span class="path">Matching ›
+            Weights</span>, 10 each). They only count when a search asks for them (the job's
+            students have exam boards or SEN tags recorded, or staff add them), so other searches
+            score as before.</li>
+          <li><strong>Draft progress reports automatically</strong> (<span class="path">Learning ›
+            Progress reports</span>, <code>learning.progress_schedule</code>: <span class="ui">Don't
+            draft automatically</span> (default), <span class="ui">Every month</span> or
+            <span class="ui">At the end of each term</span>). Monthly drafts last month's reports at
+            06:00 on the 1st; termly drafts them at 06:00 the day after a term (set up under Classes)
+            ends, for students in that term's branch. Only missing reports are drafted, each for the
+            student's main tutor, who is notified (<span class="ui">Progress reports drafted for you
+            (to the tutor)</span>); staff who approve reports get a summary (<span class="ui">Progress
+            reports drafted on schedule</span>). The schedule runs as a Temporal Schedule and pauses
+            with the organisation.</li>
+          <li><strong>Waitlist suggestions</strong> need no setting: staff with
+            <code>leads.waitlist.manage</code> get the in-app notice <span class="ui">A tutor has room
+            for waiting students</span>, which they can switch to email under their notification
+            preferences.</li>
+        </ul>
+
         <h3 id="settings-registry">Settings that have no screen yet</h3>
         <p>Every configurable option is registered in a settings registry, grouped by area, with
           a default. Most areas have a screen (described in the chapters below), but some
@@ -551,7 +584,8 @@
             <tbody>
               <tr><td>Contact phone numbers</td><td><code>people.contact.view_phone</code></td></tr>
               <tr><td>Contact email and address</td><td><code>people.contact.view_details</code></td></tr>
-              <tr><td>Student date of birth and learning needs (reads are audited)</td><td><code>people.student.view_sensitive</code></td></tr>
+              <tr><td>Student date of birth and learning needs (reads are audited); special educational needs tags and the tutor gender preference used in matching</td><td><code>people.student.view_sensitive</code></td></tr>
+              <tr><td>Tutor gender (used only for families' gender preferences in matching)</td><td><code>people.tutor.view_sensitive</code> (owners, admins, branch managers and coordinators by default; not tutors)</td></tr>
               <tr><td>Client tax ID</td><td><code>billing.client.view_tax</code></td></tr>
               <tr><td>Charge rates and amounts on jobs, lessons, services and prices</td><td><code>billing.rates.view_charge</code></td></tr>
               <tr><td>Tutor pay rates and amounts</td><td><code>billing.rates.view_pay</code></td></tr>

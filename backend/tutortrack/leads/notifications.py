@@ -102,6 +102,29 @@ register(
     )
 )
 
+# Gap G5c (FR-17-6): a tutor has room for waiting students.
+register(
+    NotificationType(
+        key="staff_waitlist_suggestion",
+        label=str(_("A tutor has room for waiting students")),
+        category="staff",
+        audience="staff",
+        channels=("in_app", "email"),
+        default_channels=("in_app",),
+        resolve=catalogue._alert("leads.waitlist.manage"),
+        load=lambda pk: None,
+        related_type="",
+        variables=("alert.title", "alert.body", "alert.link"),
+        sample=catalogue.SAMPLE_ALERT,
+        link=lambda payload: payload[2],
+    )
+)
+DEFAULTS[("staff_waitlist_suggestion", "in_app")] = ("{{ alert.title }}", "{{ alert.body }}")
+DEFAULTS[("staff_waitlist_suggestion", "email")] = (
+    "{{ alert.title }}",
+    "{{ alert.body }}\n\n{{ alert.link }}" + SIGN,
+)
+
 DEFAULTS[("proposal_sent", "email")] = (
     "{% if proposal.reminder %}Reminder: {% endif %}{{ proposal.title }}",
     "Hello {{ recipient.first_name }},\n\n"

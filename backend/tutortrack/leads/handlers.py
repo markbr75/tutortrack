@@ -70,6 +70,21 @@ def place_may_be_free(event: EventEnvelope) -> None:
         )
 
 
+@subscribe(
+    "availability.updated",
+    "job.status_changed",
+    "job.tutor_removed",
+    "tutor.status_changed",
+    "tutor.unrestricted",
+)
+def suggest_on_capacity(event: EventEnvelope) -> None:
+    """Gap G5c (FR-17-6): a tutor may have room, so suggest them for waiting students.
+    Idempotent: one suggestion per entry and tutor; the staff notice is keyed on the event."""
+    from .suggestions import capacity_appeared
+
+    capacity_appeared(event)
+
+
 bridge.on(
     "enquiry.received",
     start=EnquiryFollowUpWorkflow,

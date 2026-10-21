@@ -144,6 +144,7 @@ See ADR 0032.
 - **Deviations:** Teams and Google Meet attendance and recordings are not ingested (no webhooks we can subscribe per meeting without extra admin consent); Lessonspace's webhook payload shape is read defensively (user id, name, timestamp) and its recordings API is not called (Daily and Zoom are).
 
 ## Gap backlog (as built 2026-10-21)
+Gap batch G5c: the classroom's resources (E21 FR-21-8) now open from the room (`POST /lessons/{id}/classroom/resources/{resource_id}/open`), carry kind, message and share time, refresh every 15 seconds while the room is open, and the tutor can share into the room. The tutor app no longer redirects the classroom link back to Today. See the E21 gap-backlog notes.
 
 For per-branch ledgers (batch G5, E23; [ADR 0043](../adr/0043-gap-batch-g5b-accounting.md)) the framework gains a third connection level, `branch`:
 

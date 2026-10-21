@@ -105,9 +105,13 @@ class MatchSearchView(APIView):
             if criteria.lat is not None and criteria.lng is not None
             else None
         )
+        needs = criteria.needs()
+        if not has_perm(request.user, "people.student.view_sensitive"):
+            needs |= {"sen_tags": [], "gender": ""}
         body = {
             "query": query.pk,
             "criteria": query.criteria,
+            "needs": {**needs, "gender_preference_enabled": engine.gender_preferences_on()},
             "origin": origin,
             "results": [_row(i, m, shortlisted) for i, m in enumerate(matches, start=1)],
         }
@@ -119,13 +123,20 @@ class MatchingSettingsView(APIView):
 
     @extend_schema(responses=s.MatchingWeightsSerializer)
     def get(self, request: Request) -> Response:
-        return Response({"weights": engine._weights()})
+        return Response(
+            {"weights": engine._weights(), "gender_preference": engine.gender_preferences_on()}
+        )
 
     @extend_schema(request=s.MatchingWeightsSerializer, responses=s.MatchingWeightsSerializer)
     def put(self, request: Request) -> Response:
         payload = s.MatchingWeightsSerializer(data=request.data)
         payload.is_valid(raise_exception=True)
-        return Response({"weights": services.set_weights(payload.validated_data["weights"])})
+        return Response(
+            {
+                "weights": services.set_weights(payload.validated_data["weights"]),
+                "gender_preference": engine.gender_preferences_on(),
+            }
+        )
 
 
 class MatchingAnalyticsView(APIView):
