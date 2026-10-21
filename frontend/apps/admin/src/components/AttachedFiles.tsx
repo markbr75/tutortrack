@@ -29,7 +29,7 @@ export function AttachedFiles({ files, label }: { files?: AttachedFile[]; label?
             {f.is_downloadable ? (
               <button
                 type="button"
-                className="text-link underline underline-offset-2"
+                className="font-medium text-link underline-offset-2 hover:underline"
                 onClick={() => void open(f.id)}
               >
                 {f.filename}
@@ -37,7 +37,9 @@ export function AttachedFiles({ files, label }: { files?: AttachedFile[]; label?
             ) : (
               <span>
                 {f.filename}{" "}
-                <span className="text-muted-foreground">({t("hiring.files.scanning")})</span>
+                <span className="text-xs text-muted-foreground">
+                  ({t("hiring.files.scanning")})
+                </span>
               </span>
             )}
           </li>

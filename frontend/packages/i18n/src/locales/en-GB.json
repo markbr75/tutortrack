@@ -7371,6 +7371,25 @@
       "compliance": "Compliance",
       "performance": "Performance and leaving",
       "noSubjects": "No subjects yet."
+    },
+    "delivery": {
+      "chosen_one": "{{count}} lesson selected",
+      "chosen_other": "{{count}} lessons selected",
+      "waiting_one": "{{count}} lesson waiting",
+      "waiting_other": "{{count}} lessons waiting",
+      "lessonsTable": "Unconfirmed lessons table"
+    },
+    "report": {
+      "noComments": "No comments yet."
+    },
+    "feedback": {
+      "anyStatus": "Any status",
+      "anyRating": "Any rating",
+      "answeredOf": "{{answered}} of {{asked}} answered"
+    },
+    "policy": {
+      "situation": "When",
+      "noTemplates": "No report templates yet."
     }
   }
 }

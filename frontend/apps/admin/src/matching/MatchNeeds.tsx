@@ -23,7 +23,7 @@ export function MatchNeedsForm({
   return (
     <form
       aria-label={t("g5c.needs.title")}
-      className="flex flex-wrap items-end gap-2"
+      className="flex flex-wrap items-start gap-3"
       onSubmit={(e) => {
         e.preventDefault();
         onApply({ exam_boards: splitTags(boards), sen_tags: splitTags(tags), gender });
@@ -52,7 +52,7 @@ export function MatchNeedsForm({
           ]}
         />
       ) : null}
-      <Button type="submit" variant="secondary">
+      <Button type="submit" variant="secondary" className="sm:mt-6">
         {t("g5c.needs.apply")}
       </Button>
     </form>

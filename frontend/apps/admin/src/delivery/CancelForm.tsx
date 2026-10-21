@@ -65,7 +65,7 @@ export function CancelForm({
 
   return (
     <form
-      className="mt-4 space-y-2"
+      className="mt-4 space-y-3"
       onSubmit={(e) => {
         e.preventDefault();
         confirm.mutate();
@@ -111,11 +111,12 @@ export function CancelForm({
         </label>
       ) : null}
       {override ? (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           <TextField
             type="number"
             min={0}
             max={100}
+            className="tabular-nums"
             label={t("delivery.cancel.chargePercent")}
             value={override.charge}
             onChange={(e) => setOverride({ ...override, charge: e.target.value })}
@@ -124,6 +125,7 @@ export function CancelForm({
             type="number"
             min={0}
             max={100}
+            className="tabular-nums"
             label={t("delivery.cancel.payPercent")}
             value={override.pay}
             onChange={(e) => setOverride({ ...override, pay: e.target.value })}

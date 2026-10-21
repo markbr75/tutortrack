@@ -1,7 +1,17 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  FigureStrip,
+  PageHeader,
+  Panel,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
@@ -10,12 +20,29 @@ import { PublicLayout } from "../layout/PublicLayout";
 type Feedback = components["schemas"]["LessonFeedback"];
 type FeedbackStatus = Feedback["status"];
 
+/** Five drawn stars, the given number filled in ink; the rest pale. */
+function StarRow({ rating, className }: { rating: number; className?: string }) {
+  return (
+    <span aria-hidden="true" className={`inline-flex gap-0.5 ${className ?? ""}`}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Star
+          key={n}
+          strokeWidth={1.75}
+          className={
+            n <= rating ? "size-full fill-current text-foreground" : "size-full text-field"
+          }
+        />
+      ))}
+    </span>
+  );
+}
+
 function Stars({ rating }: { rating: number | null }) {
   const { t } = useTranslation();
   if (rating === null) return <span className="text-muted-foreground">–</span>;
   return (
-    <span aria-label={t("lessonFeedback.starsLabel", { count: rating })}>
-      <span aria-hidden="true">{"★".repeat(rating) + "☆".repeat(5 - rating)}</span>
+    <span role="img" aria-label={t("lessonFeedback.starsLabel", { count: rating })}>
+      <StarRow rating={rating} className="h-3.5 [&>svg]:w-3.5" />
     </span>
   );
 }
@@ -48,45 +75,58 @@ function FeedbackSettings() {
   const errors = fieldErrors(save.error);
   if (!area.data) return <Spinner label={t("grid.loading")} />;
   return (
-    <form
-      className="max-w-xl space-y-3"
-      aria-label={t("lessonFeedback.settings")}
-      onSubmit={(e) => {
-        e.preventDefault();
-        save.mutate();
-      }}
-    >
-      <h2 className="font-semibold">{t("lessonFeedback.settings")}</h2>
-      {schema.map((d) =>
-        d.type === "bool" ? (
-          <label key={d.key} className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              disabled={!canManage}
-              checked={Boolean(values[d.key])}
-              onChange={(e) => setValues({ ...values, [d.key]: e.target.checked })}
-            />
-            {d.label}
-          </label>
-        ) : (
-          <TextField
-            key={d.key}
-            label={d.label}
-            type="number"
-            disabled={!canManage}
-            min={d.min_value}
-            max={d.max_value}
-            value={String(values[d.key] ?? "")}
-            error={errors[d.key]}
-            onChange={(e) => setValues({ ...values, [d.key]: Number(e.target.value) })}
-          />
-        ),
-      )}
-      <p className="text-sm text-muted-foreground">{t("lessonFeedback.consentNote")}</p>
-      {canManage ? <Button type="submit">{t("common.save")}</Button> : null}
-      {save.isSuccess ? <p role="status">{t("common.saved")}</p> : null}
-      {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
-    </form>
+    <Panel title={t("lessonFeedback.settings")} flush>
+      <form
+        aria-label={t("lessonFeedback.settings")}
+        onSubmit={(e) => {
+          e.preventDefault();
+          save.mutate();
+        }}
+      >
+        <div className="space-y-3 px-5 py-4">
+          {schema.map((d) =>
+            d.type === "bool" ? (
+              <label key={d.key} className="flex items-start gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 size-4"
+                  disabled={!canManage}
+                  checked={Boolean(values[d.key])}
+                  onChange={(e) => setValues({ ...values, [d.key]: e.target.checked })}
+                />
+                {d.label}
+              </label>
+            ) : (
+              <TextField
+                key={d.key}
+                label={d.label}
+                type="number"
+                disabled={!canManage}
+                min={d.min_value}
+                max={d.max_value}
+                value={String(values[d.key] ?? "")}
+                error={errors[d.key]}
+                onChange={(e) => setValues({ ...values, [d.key]: Number(e.target.value) })}
+              />
+            ),
+          )}
+          <p className="text-xs text-muted-foreground">{t("lessonFeedback.consentNote")}</p>
+          {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
+        </div>
+        {canManage ? (
+          <div className="flex items-center justify-end gap-3 border-t border-border px-5 py-3">
+            {save.isSuccess ? (
+              <p role="status" className="text-sm text-muted-foreground">
+                {t("common.saved")}
+              </p>
+            ) : null}
+            <Button type="submit" size="sm" loading={save.isPending}>
+              {t("common.save")}
+            </Button>
+          </div>
+        ) : null}
+      </form>
+    </Panel>
   );
 }
 
@@ -115,141 +155,187 @@ export function LessonFeedbackPage() {
   });
   const rows: Feedback[] = list.data?.results ?? [];
   const s = summary.data;
+  const low = s ? (s.stars["1"] ?? 0) + (s.stars["2"] ?? 0) : 0;
   return (
-    <div className="space-y-6 p-6">
-      <h1 className="text-2xl font-semibold">{t("lessonFeedback.title")}</h1>
+    <div>
+      <PageHeader title={t("lessonFeedback.title")} />
       {s ? (
-        <section aria-label={t("lessonFeedback.summary")} className="grid gap-3 sm:grid-cols-4">
-          <div className="rounded-md border border-border p-3">
-            <p className="text-sm text-muted-foreground">{t("lessonFeedback.average")}</p>
-            <p className="text-2xl font-semibold">{s.average ?? "–"}</p>
-          </div>
-          <div className="rounded-md border border-border p-3">
-            <p className="text-sm text-muted-foreground">{t("lessonFeedback.answered")}</p>
-            <p className="text-2xl font-semibold">
-              {t("lessonFeedback.ofAsked", { answered: s.answered, asked: s.asked })}
-            </p>
-          </div>
-          <div className="rounded-md border border-border p-3">
-            <p className="text-sm text-muted-foreground">{t("lessonFeedback.answerRate")}</p>
-            <p className="text-2xl font-semibold">{s.answer_rate}%</p>
-          </div>
-          <div className="rounded-md border border-border p-3">
-            <p className="text-sm text-muted-foreground">{t("lessonFeedback.low")}</p>
-            <p className="text-2xl font-semibold">{(s.stars["1"] ?? 0) + (s.stars["2"] ?? 0)}</p>
-          </div>
-        </section>
-      ) : null}
-      {s && s.tutors.length ? (
-        <table className="w-full max-w-2xl text-sm">
-          <caption className="text-left font-semibold">{t("lessonFeedback.byTutor")}</caption>
-          <thead>
-            <tr className="text-left">
-              <th scope="col">{t("lessonFeedback.tutor")}</th>
-              <th scope="col">{t("lessonFeedback.average")}</th>
-              <th scope="col">{t("lessonFeedback.answered")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {s.tutors.map((row) => (
-              <tr key={row.tutor_id ?? "none"} className="border-t border-border">
-                <td>{row.tutor}</td>
-                <td>{row.average}</td>
-                <td>{t("lessonFeedback.ofAsked", { answered: row.answered, asked: row.asked })}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : null}
-      <form
-        className="flex flex-wrap gap-3"
-        aria-label={t("lessonFeedback.filters")}
-        onSubmit={(e) => e.preventDefault()}
-      >
-        <SelectField
-          label={t("lessonFeedback.status")}
-          value={status}
-          onChange={(e) => setStatus(e.target.value as FeedbackStatus | "")}
-          options={[
-            { value: "", label: t("lessonFeedback.any") },
-            ...(["sent", "answered", "expired", "skipped"] as const).map((v) => ({
-              value: v,
-              label: t(`lessonFeedback.statuses.${v}`),
-            })),
+        <FigureStrip
+          label={t("lessonFeedback.summary")}
+          className="mb-6"
+          figures={[
+            { label: t("lessonFeedback.average"), value: s.average ?? "–" },
+            {
+              label: t("lessonFeedback.answered"),
+              value: t("lessonFeedback.ofAsked", { answered: s.answered, asked: s.asked }),
+            },
+            { label: t("lessonFeedback.answerRate"), value: `${s.answer_rate}%` },
+            { label: t("lessonFeedback.low"), value: low },
           ]}
         />
-        <SelectField
-          label={t("lessonFeedback.rating")}
-          value={rating}
-          onChange={(e) => setRating(e.target.value)}
-          options={[
-            { value: "", label: t("lessonFeedback.any") },
-            { value: "low", label: t("lessonFeedback.lowOnly") },
-            ...["5", "4", "3", "2", "1"].map((v) => ({
-              value: v,
-              label: t("lessonFeedback.starsLabel", { count: Number(v) }),
-            })),
-          ]}
-        />
-      </form>
-      {list.isLoading ? <Spinner label={t("grid.loading")} /> : null}
-      {list.data && rows.length === 0 ? <p>{t("lessonFeedback.empty")}</p> : null}
-      {rows.length ? (
-        <table className="w-full text-sm">
-          <caption className="sr-only">{t("lessonFeedback.title")}</caption>
-          <thead>
-            <tr className="text-left">
-              <th scope="col">{t("lessonFeedback.lesson")}</th>
-              <th scope="col">{t("lessonFeedback.student")}</th>
-              <th scope="col">{t("lessonFeedback.tutor")}</th>
-              <th scope="col">{t("lessonFeedback.rating")}</th>
-              <th scope="col">{t("lessonFeedback.comment")}</th>
-              <th scope="col">{t("lessonFeedback.status")}</th>
-              {canManage ? <th scope="col">{t("common.actions")}</th> : null}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.id} className="border-t border-border align-top">
-                <td>
-                  {row.lesson_title}
-                  <div className="text-muted-foreground">{formatDate(row.lesson_date)}</div>
-                </td>
-                <td>{row.student.name}</td>
-                <td>{row.tutor?.name ?? ""}</td>
-                <td>
-                  <Stars rating={row.rating} />
-                </td>
-                <td className="max-w-xs whitespace-pre-wrap">{row.comment}</td>
-                <td>
-                  {t(`lessonFeedback.statuses.${row.status}`)}
-                  {row.skip_reason ? (
-                    <div className="text-muted-foreground">
-                      {t(`lessonFeedback.skipReasons.${row.skip_reason}`)}
-                    </div>
+      ) : null}
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="min-w-0">
+          <form
+            role="search"
+            className="mb-4 flex flex-wrap items-center gap-2"
+            aria-label={t("lessonFeedback.filters")}
+            onSubmit={(e) => e.preventDefault()}
+          >
+            <SelectField
+              label={t("lessonFeedback.status")}
+              hideLabel
+              size="sm"
+              value={status}
+              onChange={(e) => setStatus(e.target.value as FeedbackStatus | "")}
+              options={[
+                { value: "", label: t("designS5.feedback.anyStatus") },
+                ...(["sent", "answered", "expired", "skipped"] as const).map((v) => ({
+                  value: v,
+                  label: t(`lessonFeedback.statuses.${v}`),
+                })),
+              ]}
+            />
+            <SelectField
+              label={t("lessonFeedback.rating")}
+              hideLabel
+              size="sm"
+              value={rating}
+              onChange={(e) => setRating(e.target.value)}
+              options={[
+                { value: "", label: t("designS5.feedback.anyRating") },
+                { value: "low", label: t("lessonFeedback.lowOnly") },
+                ...["5", "4", "3", "2", "1"].map((v) => ({
+                  value: v,
+                  label: t("lessonFeedback.starsLabel", { count: Number(v) }),
+                })),
+              ]}
+            />
+          </form>
+          {withdraw.error ? (
+            <Alert tone="danger" className="mb-4">
+              {withdraw.error.message}
+            </Alert>
+          ) : null}
+          <div
+            role="region"
+            aria-label={t("lessonFeedback.title")}
+            tabIndex={0}
+            className="overflow-x-auto rounded-xl border border-border bg-surface"
+          >
+            <table className="w-full text-left text-sm [&_td]:px-4 [&_td]:py-2.5 [&_th]:px-4 [&_th]:py-2.5">
+              <caption className="sr-only">{t("lessonFeedback.title")}</caption>
+              <thead className="border-b border-border">
+                <tr>
+                  <th scope="col">{t("lessonFeedback.lesson")}</th>
+                  <th scope="col" className="max-md:hidden">
+                    {t("lessonFeedback.tutor")}
+                  </th>
+                  <th scope="col">{t("lessonFeedback.rating")}</th>
+                  <th scope="col">{t("lessonFeedback.status")}</th>
+                  {canManage ? (
+                    <th scope="col">
+                      <span className="sr-only">{t("common.actions")}</span>
+                    </th>
                   ) : null}
-                </td>
-                {canManage ? (
-                  <td>
-                    {row.status === "sent" ? (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => withdraw.mutate(row.id)}
-                        aria-label={t("lessonFeedback.withdrawFor", { name: row.student.name })}
-                      >
-                        {t("lessonFeedback.withdraw")}
-                      </Button>
-                    ) : null}
-                  </td>
+                </tr>
+              </thead>
+              <tbody>
+                {list.isLoading ? (
+                  <tr>
+                    <td colSpan={5}>
+                      <Spinner label={t("grid.loading")} />
+                    </td>
+                  </tr>
                 ) : null}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : null}
-      {withdraw.error ? <Alert tone="danger">{withdraw.error.message}</Alert> : null}
-      {canSeeSettings ? <FeedbackSettings /> : null}
+                {list.data && rows.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-10! text-center text-muted-foreground">
+                      {t("lessonFeedback.empty")}
+                    </td>
+                  </tr>
+                ) : null}
+                {rows.map((row) => (
+                  <tr key={row.id} className="align-top">
+                    <td className="min-w-48">
+                      <span className="font-medium">{row.lesson_title}</span>
+                      <span className="block text-xs text-muted-foreground tabular-nums">
+                        {[formatDate(row.lesson_date), row.student.name].join(" · ")}
+                        <span className="md:hidden">
+                          {row.tutor?.name ? ` · ${row.tutor.name}` : ""}
+                        </span>
+                      </span>
+                      {row.comment ? (
+                        <p className="mt-1 max-w-prose whitespace-pre-wrap">{row.comment}</p>
+                      ) : null}
+                    </td>
+                    <td className="max-md:hidden">{row.tutor?.name ?? ""}</td>
+                    <td>
+                      <Stars rating={row.rating} />
+                    </td>
+                    <td className="min-w-32">
+                      {t(`lessonFeedback.statuses.${row.status}`)}
+                      {row.skip_reason ? (
+                        <span className="block text-xs text-muted-foreground">
+                          {t(`lessonFeedback.skipReasons.${row.skip_reason}`)}
+                        </span>
+                      ) : null}
+                    </td>
+                    {canManage ? (
+                      <td className="text-right">
+                        {row.status === "sent" ? (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => withdraw.mutate(row.id)}
+                            aria-label={t("lessonFeedback.withdrawFor", { name: row.student.name })}
+                          >
+                            {t("lessonFeedback.withdraw")}
+                          </Button>
+                        ) : null}
+                      </td>
+                    ) : null}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <aside className="min-w-0 space-y-6">
+          {s && s.tutors.length ? (
+            <Panel title={t("lessonFeedback.byTutor")} flush>
+              <table className="w-full text-left text-sm [&_td]:px-5 [&_td]:py-2.5 [&_th]:px-5 [&_th]:py-2.5">
+                <caption className="sr-only">{t("lessonFeedback.byTutor")}</caption>
+                <thead className="border-b border-rule">
+                  <tr>
+                    <th scope="col">{t("lessonFeedback.tutor")}</th>
+                    <th scope="col" className="text-right">
+                      {t("lessonFeedback.average")}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {s.tutors.map((row) => (
+                    <tr key={row.tutor_id ?? "none"}>
+                      <td>
+                        <span className="font-medium">{row.tutor}</span>
+                        <span className="block text-xs text-muted-foreground tabular-nums">
+                          {t("designS5.feedback.answeredOf", {
+                            answered: row.answered,
+                            asked: row.asked,
+                          })}
+                        </span>
+                      </td>
+                      <td className="text-right font-semibold tabular-nums">{row.average}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Panel>
+          ) : null}
+          {canSeeSettings ? <FeedbackSettings /> : null}
+        </aside>
+      </div>
     </div>
   );
 }
@@ -296,7 +382,7 @@ export function PublicFeedbackPage({ token }: { token: string }) {
   }
   return (
     <PublicLayout title={title} subtitle={f.organisation}>
-      <p className="mb-4 text-sm">
+      <p className="mb-6 text-muted-foreground">
         {f.tutor
           ? t("lessonFeedback.lessonWith", {
               lesson: f.lesson,
@@ -306,7 +392,7 @@ export function PublicFeedbackPage({ token }: { token: string }) {
           : t("lessonFeedback.lessonOn", { lesson: f.lesson, date: formatDate(f.lesson_date) })}
       </p>
       <form
-        className="space-y-4"
+        className="space-y-5 rounded-xl border border-border bg-surface px-5 py-5"
         onSubmit={(e) => {
           e.preventDefault();
           if (rating) answer.mutate();
@@ -314,11 +400,11 @@ export function PublicFeedbackPage({ token }: { token: string }) {
       >
         <fieldset>
           <legend className="text-sm font-medium">{t("lessonFeedback.rateIt")}</legend>
-          <div className="mt-2 flex gap-2">
+          <div className="mt-2 grid grid-cols-5 gap-2">
             {[1, 2, 3, 4, 5].map((n) => (
               <label
                 key={n}
-                className="flex cursor-pointer flex-col items-center rounded-md border border-border px-3 py-2 has-[:checked]:border-brand has-[:checked]:bg-muted has-[:focus-visible]:ring-2"
+                className="flex cursor-pointer flex-col items-center gap-1 rounded-md border border-field bg-surface px-1 py-2 hover:bg-muted has-[:checked]:border-foreground has-[:checked]:bg-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-link"
               >
                 <input
                   type="radio"
@@ -329,10 +415,16 @@ export function PublicFeedbackPage({ token }: { token: string }) {
                   checked={rating === n}
                   onChange={() => setRating(n)}
                 />
-                <span aria-hidden="true" className="text-xl">
-                  {n <= rating ? "★" : "☆"}
+                <Star
+                  aria-hidden="true"
+                  strokeWidth={1.75}
+                  className={
+                    n <= rating ? "size-5 fill-current text-foreground" : "size-5 text-field"
+                  }
+                />
+                <span className="text-xs tabular-nums">
+                  {t("lessonFeedback.starsLabel", { count: n })}
                 </span>
-                <span className="text-xs">{t("lessonFeedback.starsLabel", { count: n })}</span>
               </label>
             ))}
           </div>
@@ -343,7 +435,7 @@ export function PublicFeedbackPage({ token }: { token: string }) {
           </label>
           <textarea
             id="feedback-comment"
-            className="min-h-24 rounded-md border border-border p-2"
+            className="min-h-24 rounded-md border border-field bg-surface px-3 py-2 text-sm"
             maxLength={2000}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
@@ -359,9 +451,9 @@ export function PublicFeedbackPage({ token }: { token: string }) {
           <span>{t("gapG6.stopAskingFeedback")}</span>
         </label>
         {!rating && answer.isIdle ? (
-          <p className="text-sm text-muted-foreground">{t("lessonFeedback.chooseStars")}</p>
+          <p className="text-xs text-muted-foreground">{t("lessonFeedback.chooseStars")}</p>
         ) : null}
-        <Button type="submit" disabled={!rating || answer.isPending}>
+        <Button type="submit" className="w-full sm:w-auto" disabled={!rating || answer.isPending}>
           {t("lessonFeedback.send")}
         </Button>
         {answer.error ? <Alert tone="danger">{answer.error.message}</Alert> : null}
