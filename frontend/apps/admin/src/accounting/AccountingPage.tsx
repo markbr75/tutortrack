@@ -1,6 +1,17 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  FigureStrip,
+  PageHeader,
+  PanelFooter,
+  RuledPanel,
+  SelectField,
+  Spinner,
+  TextField,
+  buttonClass,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -73,16 +84,17 @@ function ConnectButtons() {
     onSuccess: (result) => window.location.assign(result.authorize_url),
   });
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-2">
-        {PROVIDERS.map((p) => (
-          <Button key={p} variant="secondary" onClick={() => start.mutate(p)}>
-            {t("accounting.connect", { provider: providerName(t, p) })}
-          </Button>
-        ))}
-      </div>
+    <RuledPanel
+      title={t("designS7.accounting.connectTitle")}
+      footer={PROVIDERS.map((p) => (
+        <Button key={p} variant="secondary" onClick={() => start.mutate(p)}>
+          {t("accounting.connect", { provider: providerName(t, p) })}
+        </Button>
+      ))}
+    >
+      <p className="text-sm text-muted-foreground">{t("accounting.notConnected")}</p>
       <ErrorList error={start.error} />
-    </div>
+    </RuledPanel>
   );
 }
 
@@ -97,40 +109,45 @@ function ConnectionCard({ conn, canManage }: { conn: Connection; canManage: bool
         : unwrap(await api.POST("/api/v1/accounting/connections/{id}/disconnect", path)),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["accounting"] }),
   });
+  const facts = [
+    conn.company_name,
+    conn.base_currency,
+    conn.last_sync_at
+      ? t("integrations.lastSync", { when: formatDateTime(conn.last_sync_at, i18n.language) })
+      : "",
+  ].filter(Boolean);
   return (
-    <section
-      className="space-y-2 rounded-md border border-border p-4"
-      aria-label={ledgerLabel(t, conn)}
-    >
-      <h2 className="text-lg font-semibold">{ledgerLabel(t, conn)}</h2>
-      <p className="text-sm">
-        <span className={conn.status === "active" ? "text-success" : "text-danger"}>
+    <RuledPanel
+      title={ledgerLabel(t, conn)}
+      aside={
+        <span className={conn.status === "active" ? "" : "font-medium text-danger"}>
           {t(`integrations.status.${conn.status}`)}
         </span>
-        {conn.company_name ? ` · ${conn.company_name}` : ""}
-        {conn.base_currency ? ` · ${conn.base_currency}` : ""}
-        {conn.last_sync_at
-          ? ` · ${t("integrations.lastSync", { when: formatDateTime(conn.last_sync_at, i18n.language) })}`
-          : ""}
-      </p>
-      {conn.lock_date ? (
-        <p className="text-sm text-muted-foreground">
-          {t("accounting.lockDate", { date: formatDate(conn.lock_date, i18n.language) })}
-        </p>
-      ) : null}
-      {conn.connection_error ? <Alert tone="warning">{conn.connection_error}</Alert> : null}
-      {canManage ? (
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant="secondary" onClick={() => act.mutate("refresh")}>
-            {t("accounting.refresh")}
-          </Button>
-          <Button size="sm" variant="ghost" onClick={() => act.mutate("disconnect")}>
-            {t("integrations.disconnect")}
-          </Button>
-        </div>
-      ) : null}
-      <ErrorList error={act.error} />
-    </section>
+      }
+      footer={
+        canManage ? (
+          <>
+            <Button size="sm" variant="secondary" onClick={() => act.mutate("refresh")}>
+              {t("accounting.refresh")}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => act.mutate("disconnect")}>
+              {t("integrations.disconnect")}
+            </Button>
+          </>
+        ) : undefined
+      }
+    >
+      <div className="space-y-2 text-sm">
+        {facts.length ? <p className="tabular-nums">{facts.join(" · ")}</p> : null}
+        {conn.lock_date ? (
+          <p className="text-muted-foreground tabular-nums">
+            {t("accounting.lockDate", { date: formatDate(conn.lock_date, i18n.language) })}
+          </p>
+        ) : null}
+        {conn.connection_error ? <Alert tone="warning">{conn.connection_error}</Alert> : null}
+        <ErrorList error={act.error} />
+      </div>
+    </RuledPanel>
   );
 }
 
@@ -155,17 +172,15 @@ function OptionsForm({ conn, canManage }: { conn: Connection; canManage: boolean
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["accounting"] }),
   });
   return (
+    <RuledPanel flush titleId="options-heading" title={t("accounting.options")}>
     <form
-      className="max-w-md space-y-3"
       aria-labelledby="options-heading"
       onSubmit={(e) => {
         e.preventDefault();
         save.mutate();
       }}
     >
-      <h2 id="options-heading" className="text-lg font-semibold">
-        {t("accounting.options")}
-      </h2>
+      <div className="max-w-md space-y-4 px-5 py-4">
       <SelectField
         label={t("accounting.mode")}
         value={values.mode}
@@ -187,6 +202,7 @@ function OptionsForm({ conn, canManage }: { conn: Connection; canManage: boolean
       <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
+          className="size-4"
           checked={values.sync_bills}
           disabled={!canManage}
           onChange={(e) => setValues({ ...values, sync_bills: e.target.checked })}
@@ -196,6 +212,7 @@ function OptionsForm({ conn, canManage }: { conn: Connection; canManage: boolean
       <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
+          className="size-4"
           checked={values.attach_pdf}
           disabled={!canManage}
           onChange={(e) => setValues({ ...values, attach_pdf: e.target.checked })}
@@ -214,14 +231,22 @@ function OptionsForm({ conn, canManage }: { conn: Connection; canManage: boolean
           { value: "hold", label: t("accounting.lock.hold") },
         ]}
       />
-      {canManage ? (
-        <Button size="sm" type="submit" disabled={save.isPending}>
-          {t("common.save")}
-        </Button>
-      ) : null}
-      {save.isSuccess ? <p role="status">{t("accounting.saved")}</p> : null}
       <ErrorList error={save.error} />
+      </div>
+      {canManage ? (
+        <PanelFooter>
+          <Button type="submit" disabled={save.isPending}>
+            {t("common.save")}
+          </Button>
+          {save.isSuccess ? (
+            <p role="status" className="text-success">
+              {t("accounting.saved")}
+            </p>
+          ) : null}
+        </PanelFooter>
+      ) : null}
     </form>
+    </RuledPanel>
   );
 }
 
@@ -348,7 +373,7 @@ export function MappingsForm({
     );
   return (
     <form
-      className="space-y-4"
+      className="space-y-5"
       aria-label={t("accounting.mappingsFor", {
         provider: providerName(t, provider.split("@")[0] ?? provider),
       })}
@@ -367,12 +392,12 @@ export function MappingsForm({
           </ul>
         </Alert>
       ) : (
-        <p role="status" className="text-sm text-success">
+        <p role="status" className="text-sm">
           {t("accounting.mappingsComplete")}
         </p>
       )}
       <fieldset className="grid gap-3 sm:grid-cols-2">
-        <legend className="mb-2 font-medium">{t("accounting.accounts")}</legend>
+        <legend className="mb-1 text-sm font-semibold">{t("accounting.accounts")}</legend>
         {data.kinds
           .filter((k) => provider !== "export" || k.kind !== "expense")
           .map((k) => account(k.kind, "default", k.is_required ? `${k.name} *` : k.name))}
@@ -384,8 +409,10 @@ export function MappingsForm({
           taxOptions,
         )}
       </fieldset>
-      <details className="rounded-md border border-border p-3">
-        <summary className="cursor-pointer text-sm font-medium">{t("accounting.specific")}</summary>
+      <details className="border-y border-rule py-3">
+        <summary className="cursor-pointer text-sm font-medium text-link">
+          {t("accounting.specific")}
+        </summary>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           {data.revenue_keys.map((k) =>
             account("revenue", k.key, t("accounting.revenueFor", { name: k.name })),
@@ -399,7 +426,7 @@ export function MappingsForm({
         </div>
       </details>
       <fieldset className="grid gap-3 sm:grid-cols-2">
-        <legend className="mb-2 font-medium">{t("accounting.taxes")}</legend>
+        <legend className="mb-1 text-sm font-semibold">{t("accounting.taxes")}</legend>
         {[{ key: "", name: t("accounting.noTax") }, ...data.tax_rates].map((r) =>
           field(
             `tax-${r.key}`,
@@ -412,7 +439,7 @@ export function MappingsForm({
       </fieldset>
       {chart && chart.tracking.length && data.branches.length > 1 ? (
         <fieldset className="grid gap-3 sm:grid-cols-2">
-          <legend className="mb-2 font-medium">{t("accounting.tracking")}</legend>
+          <legend className="mb-1 text-sm font-semibold">{t("accounting.tracking")}</legend>
           {data.branches.map((b) =>
             field(
               `branch-${b.key}`,
@@ -424,13 +451,19 @@ export function MappingsForm({
           )}
         </fieldset>
       ) : null}
-      {canManage ? (
-        <Button size="sm" type="submit" disabled={save.isPending}>
-          {t("accounting.saveMappings")}
-        </Button>
-      ) : null}
-      {save.isSuccess ? <p role="status">{t("accounting.saved")}</p> : null}
       <ErrorList error={save.error} />
+      {canManage ? (
+        <div className="flex flex-wrap items-center gap-3 border-t border-rule pt-4 text-sm">
+          <Button type="submit" disabled={save.isPending}>
+            {t("accounting.saveMappings")}
+          </Button>
+          {save.isSuccess ? (
+            <p role="status" className="text-success">
+              {t("accounting.saved")}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
     </form>
   );
 }
@@ -457,11 +490,8 @@ function SyncSwitch({ conn, canManage }: { conn: Connection; canManage: boolean 
   });
   const progress = conn.backfill_progress;
   return (
-    <section className="space-y-3" aria-labelledby="sync-heading">
-      <h2 id="sync-heading" className="text-lg font-semibold">
-        {t("accounting.sync")}
-      </h2>
-      <p className="text-sm" role="status">
+    <RuledPanel titleId="sync-heading" title={t("accounting.sync")} bodyClassName="space-y-3">
+      <p className="text-sm tabular-nums" role="status">
         {conn.enabled
           ? t("accounting.syncOn", {
               date: conn.start_date ? formatDate(conn.start_date, i18n.language) : "—",
@@ -469,7 +499,7 @@ function SyncSwitch({ conn, canManage }: { conn: Connection; canManage: boolean 
           : t("accounting.syncOff")}
       </p>
       {canManage && !conn.enabled ? (
-        <div className="flex flex-wrap items-end gap-2">
+        <div className="flex flex-wrap items-start gap-2">
           <TextField
             type="date"
             label={t("accounting.backfillFrom")}
@@ -477,7 +507,11 @@ function SyncSwitch({ conn, canManage }: { conn: Connection; canManage: boolean 
             value={backfillFrom}
             onChange={(e) => setBackfillFrom(e.target.value)}
           />
-          <Button onClick={() => act.mutate("enable")} disabled={conn.problems.length > 0}>
+          <Button
+            className="sm:mt-6"
+            onClick={() => act.mutate("enable")}
+            disabled={conn.problems.length > 0}
+          >
             {t("accounting.enable")}
           </Button>
         </div>
@@ -488,7 +522,7 @@ function SyncSwitch({ conn, canManage }: { conn: Connection; canManage: boolean 
         </Button>
       ) : null}
       {progress?.status ? (
-        <p className="text-sm">
+        <p className="text-sm tabular-nums">
           {t(`accounting.backfill.${progress.status}`, {
             synced: progress.synced ?? 0,
             failed: progress.failed ?? 0,
@@ -501,7 +535,7 @@ function SyncSwitch({ conn, canManage }: { conn: Connection; canManage: boolean 
         </p>
       ) : null}
       <ErrorList error={act.error} />
-    </section>
+    </RuledPanel>
   );
 }
 
@@ -542,76 +576,107 @@ function SyncDashboard({ conn, canManage }: { conn: Connection; canManage: boole
     },
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["accounting"] }),
   });
+  const errorCount = Number(conn.stats.error ?? 0);
   return (
-    <section className="space-y-3" aria-labelledby="dashboard-heading">
-      <h2 id="dashboard-heading" className="text-lg font-semibold">
-        {t("accounting.dashboard")}
-      </h2>
-      <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
-        {(["synced", "pending", "error", "skipped"] as const).map((s) => (
-          <div key={s} className="rounded-md border border-border p-2">
-            <dt className="text-muted-foreground">{t(`accounting.status.${s}`)}</dt>
-            <dd className="text-lg font-semibold">{conn.stats[s]}</dd>
-          </div>
-        ))}
-      </dl>
-      <h3 className="font-medium">{t("accounting.errors")}</h3>
-      {errors.data?.length ? (
-        <>
-          <ul className="divide-y divide-border rounded-md border border-border text-sm">
-            {errors.data.map((r) => (
-              <li key={r.id} className="space-y-1 p-3">
-                <p className="font-medium">{r.label}</p>
-                <p className="text-danger">{r.error}</p>
-                {canManage ? (
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => act.mutate({ id: r.id, kind: "retry" })}
-                    >
-                      {t("accounting.retry")}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => act.mutate({ id: r.id, kind: "skip" })}
-                    >
-                      {t("accounting.skip")}
-                    </Button>
+    <RuledPanel flush titleId="dashboard-heading" title={t("accounting.dashboard")}>
+      <div className="px-5">
+        <FigureStrip
+          label={t("accounting.dashboard")}
+          className="border-0"
+          figures={(["synced", "pending", "error", "skipped"] as const).map((s) => ({
+            key: s,
+            label: t(`accounting.status.${s}`),
+            value: conn.stats[s],
+            tone: s === "error" && errorCount > 0 ? "danger" : "default",
+          }))}
+        />
+      </div>
+      <div className="border-t border-border">
+        <h3 className="px-5 pt-3.5 pb-1 text-sm font-semibold">{t("accounting.errors")}</h3>
+        {errors.data?.length ? (
+          <>
+            <ul className="text-sm">
+              {errors.data.map((r) => (
+                <li
+                  key={r.id}
+                  className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-t border-rule px-5 py-2.5 first:border-0"
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium">{r.label}</p>
+                    <p className="text-xs text-danger">{r.error}</p>
                   </div>
-                ) : null}
+                  {canManage ? (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => act.mutate({ id: r.id, kind: "retry" })}
+                      >
+                        {t("accounting.retry")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => act.mutate({ id: r.id, kind: "skip" })}
+                      >
+                        {t("accounting.skip")}
+                      </Button>
+                    </div>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+            {canManage ? (
+              <PanelFooter>
+                <Button size="sm" variant="secondary" onClick={() => act.mutate({ kind: "all" })}>
+                  {t("accounting.retryAll")}
+                </Button>
+              </PanelFooter>
+            ) : null}
+          </>
+        ) : (
+          <p className="px-5 pb-3.5 text-sm text-muted-foreground">{t("accounting.noErrors")}</p>
+        )}
+        {act.error ? (
+          <div className="px-5 pb-3">
+            <ErrorList error={act.error} />
+          </div>
+        ) : null}
+      </div>
+      <div className="border-t border-border">
+        <h3 className="px-5 pt-3.5 pb-1 text-sm font-semibold">{t("accounting.recent")}</h3>
+        {recent.data?.length ? (
+          <ul className="text-sm">
+            {recent.data.map((r) => (
+              <li
+                key={r.id}
+                className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-rule px-5 py-2.5 first:border-0"
+              >
+                <span className="min-w-0">
+                  {r.label}
+                  {r.external_number ? (
+                    <span className="text-muted-foreground tabular-nums">
+                      {" "}
+                      · {r.external_number}
+                    </span>
+                  ) : null}
+                </span>
+                <span className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {formatDateTime(r.updated_at, i18n.language)}
+                  </span>
+                  <SyncBadge record={r} />
+                </span>
               </li>
             ))}
           </ul>
-          {canManage ? (
-            <Button size="sm" variant="secondary" onClick={() => act.mutate({ kind: "all" })}>
-              {t("accounting.retryAll")}
-            </Button>
-          ) : null}
-        </>
-      ) : (
-        <p className="text-sm text-muted-foreground">{t("accounting.noErrors")}</p>
-      )}
-      <ErrorList error={act.error} />
-      <h3 className="font-medium">{t("accounting.recent")}</h3>
-      <ul className="divide-y divide-border rounded-md border border-border text-sm">
-        {(recent.data ?? []).map((r) => (
-          <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 p-2">
-            <span>
-              {r.label}
-              {r.external_number ? ` · ${r.external_number}` : ""}
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="text-muted-foreground">
-                {formatDateTime(r.updated_at, i18n.language)}
-              </span>
-              <SyncBadge record={r} />
-            </span>
-          </li>
-        ))}
-      </ul>
-    </section>
+        ) : (
+          <p className="px-5 pb-3.5 text-sm text-muted-foreground">
+            {recent.isPending ? t("grid.loading") : t("designS7.accounting.noRecent")}
+          </p>
+        )}
+      </div>
+    </RuledPanel>
   );
 }
 
@@ -633,12 +698,13 @@ function ExportSection({ connections }: { connections: Connection[] }) {
     ...(branch ? { branch } : {}),
   }).toString()}`;
   return (
-    <section className="space-y-3" aria-labelledby="export-heading">
-      <h2 id="export-heading" className="text-lg font-semibold">
-        {t("accounting.export")}
-      </h2>
-      <p className="text-sm text-muted-foreground">{t("accounting.exportHelp")}</p>
-      <div className="grid max-w-xl gap-3 sm:grid-cols-2">
+    <RuledPanel
+      flush
+      titleId="export-heading"
+      title={t("accounting.export")}
+      description={t("accounting.exportHelp")}
+    >
+      <div className="grid max-w-xl gap-4 px-5 py-4 sm:grid-cols-2">
         <TextField
           type="date"
           label={t("accounting.from")}
@@ -678,22 +744,26 @@ function ExportSection({ connections }: { connections: Connection[] }) {
           />
         ) : null}
       </div>
-      {start && end ? (
-        <a className="inline-block font-medium underline" href={href} download>
-          {t("accounting.download")}
-        </a>
-      ) : null}
+      <PanelFooter>
+        {start && end ? (
+          <a className={buttonClass()} href={href} download>
+            {t("accounting.download")}
+          </a>
+        ) : (
+          <p className="text-muted-foreground">{t("designS7.accounting.pickDates")}</p>
+        )}
+      </PanelFooter>
       {mappingSet === "export" ? (
-        <details className="rounded-md border border-border p-3">
-          <summary className="cursor-pointer text-sm font-medium">
+        <details className="border-t border-border px-5 py-3.5">
+          <summary className="cursor-pointer text-sm font-medium text-link">
             {t("accounting.exportCodes")}
           </summary>
-          <div className="mt-3">
+          <div className="mt-4">
             <MappingsForm provider="export" canManage={canManage} />
           </div>
         </details>
       ) : null}
-    </section>
+    </RuledPanel>
   );
 }
 
@@ -726,16 +796,20 @@ export function AccountingPage() {
       ),
   });
   return (
-    <div className="max-w-4xl space-y-8">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold">{t("accounting.title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("accounting.help")}</p>
-        <p className="text-sm">
-          <Link to="/settings/accounting/payroll" className="underline">
+    <div className="max-w-4xl space-y-6">
+      <PageHeader
+        className="mb-0"
+        title={t("accounting.title")}
+        description={t("accounting.help")}
+        actions={
+          <Link
+            to="/settings/accounting/payroll"
+            className={buttonClass({ variant: "secondary", size: "sm" })}
+          >
             {t("accountingPhase3.payrollLink")}
           </Link>
-        </p>
-      </header>
+        }
+      />
       {conn?.simulated ? <Alert>{t("accounting.simulated")}</Alert> : null}
       {complete.isPending ? <Spinner label={t("integrations.finishing")} /> : null}
       {complete.isSuccess ? <Alert tone="success">{t("accounting.connected")}</Alert> : null}
@@ -754,10 +828,7 @@ export function AccountingPage() {
           <LedgerPicker connections={all} value={conn.id} onChange={setSelected} />
           <ConnectionCard conn={conn} canManage={canManage} />
           <OptionsForm key={`${conn.id}-${conn.mode}`} conn={conn} canManage={canManage} />
-          <section className="space-y-3" aria-labelledby="mappings-heading">
-            <h2 id="mappings-heading" className="text-lg font-semibold">
-              {t("accounting.mappings")}
-            </h2>
+          <RuledPanel titleId="mappings-heading" title={t("accounting.mappings")}>
             {chart.data ? (
               <MappingsForm
                 key={conn.mapping_set}
@@ -768,35 +839,35 @@ export function AccountingPage() {
             ) : (
               <Spinner label={t("grid.loading")} />
             )}
-          </section>
+          </RuledPanel>
           <SyncSwitch key={`switch-${conn.id}`} conn={conn} canManage={canManage} />
           <SyncDashboard conn={conn} canManage={canManage} />
           <ReadBackSection conn={conn} canManage={canManage} />
           {canManage ? <BranchLedgers connections={all} /> : null}
         </>
       ) : null}
-      <section className="space-y-2" aria-labelledby="g3-deferred">
-        <h2 id="g3-deferred" className="text-lg font-semibold">
-          {t("g3.accounting.packages")}
-        </h2>
-        <p className="text-sm text-muted-foreground">{t("g3.accounting.packagesHelp")}</p>
+      <RuledPanel
+        titleId="g3-deferred"
+        title={t("g3.accounting.packages")}
+        description={t("g3.accounting.packagesHelp")}
+      >
         <KeyedSettings
           area="accounting"
           keys={["accounting.package_deferred_revenue"]}
           label={t("g3.accounting.packages")}
         />
-      </section>
-      <section className="space-y-2" aria-labelledby="g5-bad-debt">
-        <h2 id="g5-bad-debt" className="text-lg font-semibold">
-          {t("accountingG5.badDebt")}
-        </h2>
-        <p className="text-sm text-muted-foreground">{t("accountingG5.badDebtHelp")}</p>
+      </RuledPanel>
+      <RuledPanel
+        titleId="g5-bad-debt"
+        title={t("accountingG5.badDebt")}
+        description={t("accountingG5.badDebtHelp")}
+      >
         <KeyedSettings
           area="accounting"
           keys={["accounting.bad_debt_vat_relief"]}
           label={t("accountingG5.badDebt")}
         />
-      </section>
+      </RuledPanel>
       {canExport ? <ExportSection connections={all} /> : null}
     </div>
   );

@@ -1,6 +1,6 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Button, SelectField } from "@tutortrack/ui";
+import { Button, RuledPanel, SelectField } from "@tutortrack/ui";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -28,7 +28,7 @@ export function LedgerPicker({
   const { t } = useTranslation();
   if (connections.length < 2) return null;
   return (
-    <div className="max-w-md space-y-1">
+    <div className="max-w-md">
       <SelectField
         label={t("accountingG5.ledger")}
         hint={t("accountingG5.ledgerHelp")}
@@ -58,26 +58,39 @@ export function BranchLedgers({ connections }: { connections: Connection[] }) {
   const rows = branches.data ?? [];
   if (rows.length < 2) return null;
   const taken = new Set(connections.filter((c) => c.branch && c.enabled).map((c) => c.branch));
+  const own = connections.filter((c) => c.branch);
   return (
-    <section className="space-y-3" aria-labelledby="branch-ledgers-heading">
-      <h2 id="branch-ledgers-heading" className="text-lg font-semibold">
-        {t("accountingG5.branchLedgers")}
-      </h2>
-      <p className="text-sm text-muted-foreground">{t("accountingG5.branchLedgersHelp")}</p>
-      {connections.some((c) => c.branch) ? (
-        <ul className="list-disc pl-5 text-sm">
-          {connections
-            .filter((c) => c.branch)
-            .map((c) => (
-              <li key={c.id}>
-                {ledgerLabel(t, c)}
-                {" · "}
+    <RuledPanel
+      flush
+      titleId="branch-ledgers-heading"
+      title={t("accountingG5.branchLedgers")}
+      description={t("accountingG5.branchLedgersHelp")}
+      footer={
+        branch
+          ? PROVIDERS.map((p) => (
+              <Button key={p} variant="secondary" onClick={() => start.mutate(p)}>
+                {t("accountingG5.connectFor", { provider: providerName(t, p) })}
+              </Button>
+            ))
+          : undefined
+      }
+    >
+      {own.length ? (
+        <ul className="text-sm">
+          {own.map((c) => (
+            <li
+              key={c.id}
+              className="flex flex-wrap justify-between gap-x-4 border-b border-rule px-5 py-2.5"
+            >
+              <span className="font-medium">{ledgerLabel(t, c)}</span>
+              <span className="text-muted-foreground">
                 {c.enabled ? t("accountingG5.syncing") : t("accountingG5.notSyncing")}
-              </li>
-            ))}
+              </span>
+            </li>
+          ))}
         </ul>
       ) : null}
-      <div className="max-w-md">
+      <div className="max-w-md space-y-3 px-5 py-4">
         <SelectField
           label={t("accountingG5.branch")}
           value={branch}
@@ -90,17 +103,8 @@ export function BranchLedgers({ connections }: { connections: Connection[] }) {
             })),
           ]}
         />
+        <ErrorList error={start.error} />
       </div>
-      {branch ? (
-        <div className="flex flex-wrap gap-2">
-          {PROVIDERS.map((p) => (
-            <Button key={p} variant="secondary" onClick={() => start.mutate(p)}>
-              {t("accountingG5.connectFor", { provider: providerName(t, p) })}
-            </Button>
-          ))}
-        </div>
-      ) : null}
-      <ErrorList error={start.error} />
-    </section>
+    </RuledPanel>
   );
 }

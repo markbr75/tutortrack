@@ -7357,5 +7357,48 @@
     "badDebtHelp": "When you write off an invoice, reclaim the VAT in the amount written off (bad debt relief). Write-offs then post the VAT back to the VAT account at the invoice's rates.",
     "exportBranch": "Branch",
     "allBranches": "All branches"
+  },
+  "designS7": {
+    "billing": {
+      "description": "Invoices, payments and charges, from the lesson register to money in the bank.",
+      "empty": {
+        "draft": "No draft invoices. Drafts appear here after an invoice run or Invoice now.",
+        "open": "No open invoices: nothing is waiting to be paid.",
+        "overdue": "No overdue invoices.",
+        "paid": "No paid invoices yet.",
+        "all": "No invoices yet."
+      },
+      "noCharges": "Nothing waiting to be invoiced.",
+      "noRequests": "No payment requests yet.",
+      "noRuns": "No invoice runs yet.",
+      "noAgeing": "Nobody owes anything, so there is nothing to age.",
+      "noPackages": "No packages yet.",
+      "noPlans": "No payment plans yet."
+    },
+    "bank": {
+      "empty": "No bank lines in this view."
+    },
+    "payments": {
+      "none": "No payments yet.",
+      "notConnected": "Not connected"
+    },
+    "payroll": {
+      "noRuns": "No pay runs yet.",
+      "noItems": "No pay items yet.",
+      "payouts": "Payouts",
+      "payoutCount_one": "{{count}} payout",
+      "payoutCount_other": "{{count}} payouts",
+      "noPayouts": "No payouts in this run.",
+      "bankFiles": "Bank files",
+      "defaultFormat": "Default format",
+      "noBankFiles": "No bank files yet.",
+      "taxYearOption": "Tax year {{year}}"
+    },
+    "accounting": {
+      "connectTitle": "Connect your accounting package",
+      "noRecent": "Nothing has synced yet.",
+      "pickDates": "Choose the dates to download the export.",
+      "noEmployees": "No employed tutors to link yet."
+    }
   }
 }

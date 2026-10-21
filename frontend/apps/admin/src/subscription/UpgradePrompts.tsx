@@ -1,5 +1,5 @@
 import { useTranslation } from "@tutortrack/i18n";
-import { Button } from "@tutortrack/ui";
+import { Button, buttonClass } from "@tutortrack/ui";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, type ReactNode } from "react";
 
@@ -18,12 +18,15 @@ export function Locked({ feature, children }: { feature: string; children: React
   const { enabled, requiredPlan } = useEntitlement(feature);
   if (enabled) return <>{children}</>;
   return (
-    <div className="rounded-md border border-dashed border-border p-4 text-sm">
-      <p className="font-medium">{t(`plan.features.${feature}`)}</p>
-      <p className="mt-1 text-muted-foreground">
+    <div className="rounded-xl border border-border bg-surface px-5 py-4 text-sm">
+      <p className="font-semibold">{t(`plan.features.${feature}`)}</p>
+      <p className="mt-0.5 text-muted-foreground">
         {t("plan.lockedBody", { plan: planName(t, requiredPlan) })}
       </p>
-      <Link to={PLAN_PAGE} className="mt-2 inline-block font-medium underline">
+      <Link
+        to={PLAN_PAGE}
+        className="mt-2 inline-block font-medium text-link underline-offset-2 hover:underline"
+      >
         {t("plan.seePlans")}
       </Link>
     </div>
@@ -47,10 +50,10 @@ export function UpgradeDialog() {
       ref={ref}
       onClose={dismissUpgrade}
       aria-labelledby="upgrade-title"
-      className="w-full max-w-md rounded-lg border border-border bg-background p-5 shadow-lg backdrop:bg-black/40"
+      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-xl border border-border bg-surface text-foreground backdrop:bg-black/40"
     >
-      <div className="space-y-3">
-        <h2 id="upgrade-title" className="text-lg font-semibold">
+      <div className="space-y-3 px-5 py-4">
+        <h2 id="upgrade-title" className="text-base font-semibold">
           {t("plan.upgradeTitle", { plan: planName(t, problem.required_plan) })}
         </h2>
         <p className="text-sm">
@@ -63,18 +66,14 @@ export function UpgradeDialog() {
                 feature: t(`plan.features.${problem.feature ?? ""}`),
               })}
         </p>
-        <div className="flex flex-wrap justify-end gap-2">
-          <Button variant="ghost" onClick={dismissUpgrade}>
-            {t("common.close")}
-          </Button>
-          <Link
-            to={PLAN_PAGE}
-            onClick={dismissUpgrade}
-            className="inline-flex items-center rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-foreground"
-          >
-            {t("plan.seePlans")}
-          </Link>
-        </div>
+      </div>
+      <div className="flex flex-wrap justify-end gap-2 border-t border-rule px-5 py-3">
+        <Button variant="ghost" onClick={dismissUpgrade}>
+          {t("common.close")}
+        </Button>
+        <Link to={PLAN_PAGE} onClick={dismissUpgrade} className={buttonClass()}>
+          {t("plan.seePlans")}
+        </Link>
       </div>
     </dialog>
   );

@@ -1,6 +1,14 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  PanelFooter,
+  RuledPanel,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -22,11 +30,14 @@ export function RunTutorReviews({ runId }: { runId: string }) {
   });
   if (reviews.isPending) return <Spinner label={t("grid.loading")} />;
   return (
-    <ul className="mt-2 space-y-1 text-sm">
+    <ul className="mt-2 text-sm">
       {(reviews.data ?? []).map((r) => (
-        <li key={r.id}>
-          <strong>{r.tutor_name}</strong> · {t(`g3.tutorReview.status.${r.status}`)}
-          {r.comment ? <span className="block text-muted-foreground">“{r.comment}”</span> : null}
+        <li key={r.id} className="border-t border-rule py-2 first:border-0">
+          <span className="font-medium">{r.tutor_name}</span> ·{" "}
+          {t(`g3.tutorReview.status.${r.status}`)}
+          {r.comment ? (
+            <span className="block text-xs text-muted-foreground">“{r.comment}”</span>
+          ) : null}
         </li>
       ))}
     </ul>
@@ -36,38 +47,34 @@ export function RunTutorReviews({ runId }: { runId: string }) {
 /** Gap G3 billing options: tutor pre-review, monthly statements and how discounts show. */
 export function BillingOptions() {
   const { t } = useTranslation();
+  const sections = [
+    {
+      id: "review",
+      area: "billing",
+      keys: ["billing.tutor_review", "billing.tutor_review_days"],
+    },
+    {
+      id: "statements",
+      area: "billing",
+      keys: ["billing.statement_schedule", "billing.statement_day"],
+    },
+    { id: "discounts", area: "pricing", keys: ["pricing.discount_display"] },
+  ] as const;
   return (
-    <div className="space-y-8">
-      <section aria-labelledby="g3-billing-review" className="space-y-2">
-        <h2 id="g3-billing-review" className="text-lg font-medium">
-          {t("g3.billingOptions.review")}
-        </h2>
-        <KeyedSettings
-          area="billing"
-          keys={["billing.tutor_review", "billing.tutor_review_days"]}
-          label={t("g3.billingOptions.review")}
-        />
-      </section>
-      <section aria-labelledby="g3-billing-statements" className="space-y-2">
-        <h2 id="g3-billing-statements" className="text-lg font-medium">
-          {t("g3.billingOptions.statements")}
-        </h2>
-        <KeyedSettings
-          area="billing"
-          keys={["billing.statement_schedule", "billing.statement_day"]}
-          label={t("g3.billingOptions.statements")}
-        />
-      </section>
-      <section aria-labelledby="g3-billing-discounts" className="space-y-2">
-        <h2 id="g3-billing-discounts" className="text-lg font-medium">
-          {t("g3.billingOptions.discounts")}
-        </h2>
-        <KeyedSettings
-          area="pricing"
-          keys={["pricing.discount_display"]}
-          label={t("g3.billingOptions.discounts")}
-        />
-      </section>
+    <div className="max-w-3xl space-y-6">
+      {sections.map((section) => (
+        <RuledPanel
+          key={section.id}
+          titleId={`g3-billing-${section.id}`}
+          title={t(`g3.billingOptions.${section.id}`)}
+        >
+          <KeyedSettings
+            area={section.area}
+            keys={[...section.keys]}
+            label={t(`g3.billingOptions.${section.id}`)}
+          />
+        </RuledPanel>
+      ))}
     </div>
   );
 }
@@ -115,106 +122,128 @@ export function BulkPayments() {
   const update = (i: number, change: Partial<Row>) =>
     setRows((all) => all.map((r, n) => (n === i ? { ...r, ...change } : r)));
   return (
-    <form
-      className="space-y-3"
-      aria-label={t("g3.bulkPayments.title")}
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (filled.length) save.mutate();
-      }}
-    >
-      <p className="text-sm text-muted-foreground">{t("g3.bulkPayments.help")}</p>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <caption className="sr-only">{t("g3.bulkPayments.title")}</caption>
-          <thead>
-            <tr className="text-left">
-              {["client", "amount", "method", "date", "reference"].map((h) => (
-                <th key={h} scope="col" className="px-1 py-1">
-                  {t(`g3.bulkPayments.${h}`)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, i) => (
-              <tr key={i} className="align-top">
-                <td className="px-1 py-1">
-                  <SelectField
-                    label={t("g3.bulkPayments.rowClient", { n: i + 1 })}
-                    className="min-w-48"
-                    value={row.client}
-                    onChange={(e) => update(i, { client: e.target.value })}
-                    options={[
-                      { value: "", label: t("g3.bulkPayments.chooseClient") },
-                      ...(clients.data ?? []),
-                    ]}
-                  />
-                </td>
-                <td className="px-1 py-1">
-                  <TextField
-                    label={t("g3.bulkPayments.rowAmount", { n: i + 1 })}
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    className="w-28"
-                    value={row.amount}
-                    onChange={(e) => update(i, { amount: e.target.value })}
-                  />
-                </td>
-                <td className="px-1 py-1">
-                  <SelectField
-                    label={t("g3.bulkPayments.rowMethod", { n: i + 1 })}
-                    value={row.method}
-                    onChange={(e) => update(i, { method: e.target.value })}
-                    options={MANUAL.map((m) => ({
-                      value: m,
-                      label: t(`g3.bulkPayments.methods.${m}`),
-                    }))}
-                  />
-                </td>
-                <td className="px-1 py-1">
-                  <TextField
-                    label={t("g3.bulkPayments.rowDate", { n: i + 1 })}
-                    type="date"
-                    value={row.date}
-                    onChange={(e) => update(i, { date: e.target.value })}
-                  />
-                </td>
-                <td className="px-1 py-1">
-                  <TextField
-                    label={t("g3.bulkPayments.rowReference", { n: i + 1 })}
-                    value={row.reference}
-                    maxLength={120}
-                    onChange={(e) => update(i, { reference: e.target.value })}
-                  />
-                  {rowErrors[String(filled.indexOf(row))] ? (
-                    <p role="alert" className="text-xs text-danger">
-                      {t("g3.bulkPayments.rowFailed")}
-                    </p>
-                  ) : null}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => setRows((r) => [...r, { ...EMPTY }])}
+    <RuledPanel flush title={t("g3.bulkPayments.title")} description={t("g3.bulkPayments.help")}>
+      <form
+        aria-label={t("g3.bulkPayments.title")}
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (filled.length) save.mutate();
+        }}
+      >
+        <div
+          role="region"
+          aria-label={t("g3.bulkPayments.title")}
+          tabIndex={0}
+          className="overflow-x-auto"
         >
-          {t("g3.bulkPayments.addRow")}
-        </Button>
-        <Button type="submit" disabled={save.isPending || !filled.length}>
-          {t("g3.bulkPayments.record", { count: filled.length })}
-        </Button>
-      </div>
-      {save.isError ? <Alert tone="danger">{save.error.message}</Alert> : null}
-      {save.isSuccess ? (
-        <p role="status">{t("g3.bulkPayments.done", { count: save.data.length })}</p>
-      ) : null}
-    </form>
+          <table className="w-full min-w-[48rem] text-sm">
+            <caption className="sr-only">{t("g3.bulkPayments.title")}</caption>
+            <thead className="border-b border-border">
+              <tr>
+                {["client", "amount", "method", "date", "reference"].map((h, n) => (
+                  <th
+                    key={h}
+                    scope="col"
+                    className={`py-2.5 pr-2 ${n === 0 ? "pl-5" : "pl-2"} ${h === "amount" ? "text-right" : ""}`}
+                  >
+                    {t(`g3.bulkPayments.${h}`)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, i) => (
+                <tr key={i} className="align-top">
+                  <td className="py-2 pr-2 pl-5">
+                    <SelectField
+                      label={t("g3.bulkPayments.rowClient", { n: i + 1 })}
+                      hideLabel
+                      className="min-w-48"
+                      value={row.client}
+                      onChange={(e) => update(i, { client: e.target.value })}
+                      options={[
+                        { value: "", label: t("g3.bulkPayments.chooseClient") },
+                        ...(clients.data ?? []),
+                      ]}
+                    />
+                  </td>
+                  <td className="px-2 py-2">
+                    <TextField
+                      label={t("g3.bulkPayments.rowAmount", { n: i + 1 })}
+                      hideLabel
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      inputMode="decimal"
+                      className="w-28 text-right tabular-nums"
+                      value={row.amount}
+                      onChange={(e) => update(i, { amount: e.target.value })}
+                    />
+                  </td>
+                  <td className="px-2 py-2">
+                    <SelectField
+                      label={t("g3.bulkPayments.rowMethod", { n: i + 1 })}
+                      hideLabel
+                      value={row.method}
+                      onChange={(e) => update(i, { method: e.target.value })}
+                      options={MANUAL.map((m) => ({
+                        value: m,
+                        label: t(`g3.bulkPayments.methods.${m}`),
+                      }))}
+                    />
+                  </td>
+                  <td className="px-2 py-2">
+                    <TextField
+                      label={t("g3.bulkPayments.rowDate", { n: i + 1 })}
+                      hideLabel
+                      type="date"
+                      className="tabular-nums"
+                      value={row.date}
+                      onChange={(e) => update(i, { date: e.target.value })}
+                    />
+                  </td>
+                  <td className="py-2 pr-5 pl-2">
+                    <TextField
+                      label={t("g3.bulkPayments.rowReference", { n: i + 1 })}
+                      hideLabel
+                      value={row.reference}
+                      maxLength={120}
+                      onChange={(e) => update(i, { reference: e.target.value })}
+                    />
+                    {rowErrors[String(filled.indexOf(row))] ? (
+                      <p role="alert" className="mt-1 text-xs text-danger">
+                        {t("g3.bulkPayments.rowFailed")}
+                      </p>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {save.isError ? (
+          <div className="px-5 pb-3">
+            <Alert tone="danger">{save.error.message}</Alert>
+          </div>
+        ) : null}
+        <PanelFooter>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setRows((r) => [...r, { ...EMPTY }])}
+          >
+            {t("g3.bulkPayments.addRow")}
+          </Button>
+          <Button type="submit" disabled={save.isPending || !filled.length}>
+            {t("g3.bulkPayments.record", { count: filled.length })}
+          </Button>
+          {save.isSuccess ? (
+            <p role="status" className="text-success">
+              {t("g3.bulkPayments.done", { count: save.data.length })}
+            </p>
+          ) : null}
+        </PanelFooter>
+      </form>
+    </RuledPanel>
   );
 }

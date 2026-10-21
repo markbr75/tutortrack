@@ -1,6 +1,14 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  PageHeader,
+  PanelFooter,
+  RuledPanel,
+  SelectField,
+  Spinner,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 
@@ -76,8 +84,8 @@ export function PlanPage() {
   if (!subscription.data) return <Alert tone="info">{t("plan.noSubscription")}</Alert>;
   const sub = subscription.data;
   return (
-    <div className="max-w-4xl space-y-8">
-      <h1 className="text-2xl font-semibold">{t("plan.title")}</h1>
+    <div className="max-w-4xl space-y-6">
+      <PageHeader className="mb-0" title={t("plan.title")} />
       {returned.isSuccess ? <Alert tone="success">{t("plan.thanks")}</Alert> : null}
       <StatusSection sub={sub} />
       {usage.data ? <UsageSection usage={usage.data} /> : null}
@@ -114,19 +122,44 @@ function StatusSection({ sub }: { sub: Subscription }) {
   });
   const trialDays = daysUntil(sub.trial_ends_at);
   const locked = sub.status === "suspended" || sub.status === "cancelled";
+  const actions = sub.can_manage
+    ? [
+        !sub.has_payment_method && !locked ? (
+          <Button key="card" onClick={() => checkout.mutate()} loading={checkout.isPending}>
+            {t("plan.addCard")}
+          </Button>
+        ) : null,
+        locked ? (
+          <Button key="reactivate" onClick={() => reactivate.mutate()} loading={reactivate.isPending}>
+            {t("plan.reactivate")}
+          </Button>
+        ) : null,
+        sub.has_payment_method ? (
+          <Button
+            key="portal"
+            variant="secondary"
+            onClick={() => portal.mutate()}
+            loading={portal.isPending}
+          >
+            {t("plan.managePayment")}
+          </Button>
+        ) : null,
+      ].filter(Boolean)
+    : [];
   return (
-    <section
-      aria-labelledby="plan-status"
-      className="space-y-3 rounded-md border border-border p-4"
-    >
-      <h2 id="plan-status" className="text-lg font-semibold">
-        {t("plan.current", { plan: sub.plan_name })}{" "}
-        <span className="ml-1 rounded bg-muted px-2 py-0.5 text-xs font-medium">
+    <RuledPanel
+      titleId="plan-status"
+      title={t("plan.current", { plan: sub.plan_name })}
+      aside={
+        <span className={sub.status === "past_due" ? "font-semibold text-margin" : "font-medium"}>
           {t(`plan.status.${sub.status}`)}
         </span>
-      </h2>
+      }
+      footer={actions.length ? actions : undefined}
+      bodyClassName="space-y-3 text-sm"
+    >
       {sub.status === "trialing" ? (
-        <p className="text-sm">
+        <p className="tabular-nums">
           {t("plan.trialLeft", { count: trialDays })}{" "}
           {sub.has_payment_method
             ? t("plan.trialThen", { plan: sub.plan_name })
@@ -136,40 +169,19 @@ function StatusSection({ sub }: { sub: Subscription }) {
       {sub.status === "past_due" ? <Alert tone="warning">{t("plan.pastDue")}</Alert> : null}
       {locked ? <Alert tone="warning">{t("plan.locked")}</Alert> : null}
       {sub.current_period_end && sub.status === "active" ? (
-        <p className="text-sm">
+        <p className="tabular-nums">
           {sub.cancel_at_period_end
             ? t("plan.endsOn", { date: formatDate(sub.current_period_end) })
             : t("plan.renewsOn", { date: formatDate(sub.current_period_end) })}
         </p>
       ) : null}
       {sub.pending_plan ? (
-        <p className="text-sm">
-          {t("plan.pendingChange", { plan: t(`plan.names.${sub.pending_plan}`) })}
-        </p>
+        <p>{t("plan.pendingChange", { plan: t(`plan.names.${sub.pending_plan}`) })}</p>
       ) : null}
       {sub.card ? (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground tabular-nums">
           {t("plan.card", { brand: sub.card.brand, last4: sub.card.last4 })}
         </p>
-      ) : null}
-      {sub.can_manage ? (
-        <div className="flex flex-wrap gap-2">
-          {!sub.has_payment_method && !locked ? (
-            <Button onClick={() => checkout.mutate()} loading={checkout.isPending}>
-              {t("plan.addCard")}
-            </Button>
-          ) : null}
-          {locked ? (
-            <Button onClick={() => reactivate.mutate()} loading={reactivate.isPending}>
-              {t("plan.reactivate")}
-            </Button>
-          ) : null}
-          {sub.has_payment_method ? (
-            <Button variant="secondary" onClick={() => portal.mutate()} loading={portal.isPending}>
-              {t("plan.managePayment")}
-            </Button>
-          ) : null}
-        </div>
       ) : null}
       {[checkout.error, portal.error, reactivate.error].map((e, i) =>
         e ? (
@@ -178,46 +190,48 @@ function StatusSection({ sub }: { sub: Subscription }) {
           </Alert>
         ) : null,
       )}
-    </section>
+    </RuledPanel>
   );
 }
 
 function UsageSection({ usage }: { usage: Usage }) {
   const { t } = useTranslation();
   return (
-    <section aria-labelledby="plan-usage" className="space-y-3">
-      <h2 id="plan-usage" className="text-lg font-semibold">
-        {t("plan.usage")}
-      </h2>
-      <ul className="grid gap-3 sm:grid-cols-2">
+    <RuledPanel
+      flush
+      titleId="plan-usage"
+      title={t("plan.usage")}
+      footer={
+        <p className="tabular-nums">
+          {t("plan.seats", { billable: usage.billable_tutors, included: usage.included_tutors })}
+          {usage.next_invoice
+            ? ` ${t("plan.nextInvoice", { amount: formatMoney(usage.next_invoice) })}`
+            : ""}
+        </p>
+      }
+    >
+      <ul className="text-sm">
         {usage.limits.map((limit) => (
-          <li key={limit.key} className="rounded-md border border-border p-3 text-sm">
-            <div className="flex justify-between">
-              <span>{limit.title}</span>
-              <span>
-                {limit.allowed === null
-                  ? t("plan.usedUnlimited", { used: limit.used })
-                  : t("plan.usedOf", { used: limit.used, allowed: limit.allowed })}
-              </span>
-            </div>
-            {limit.allowed !== null ? (
-              <progress
-                className="mt-2 h-2 w-full"
-                max={Math.max(limit.allowed, 1)}
-                value={Math.min(limit.used, limit.allowed)}
-                aria-label={limit.title}
-              />
-            ) : null}
+          <li
+            key={limit.key}
+            className="flex justify-between gap-4 border-t border-rule px-5 py-2.5 first:border-0"
+          >
+            <span>{limit.title}</span>
+            <span
+              className={
+                limit.allowed !== null && limit.used >= limit.allowed
+                  ? "font-semibold tabular-nums"
+                  : "tabular-nums"
+              }
+            >
+              {limit.allowed === null
+                ? t("plan.usedUnlimited", { used: limit.used })
+                : t("plan.usedOf", { used: limit.used, allowed: limit.allowed })}
+            </span>
           </li>
         ))}
       </ul>
-      <p className="text-sm">
-        {t("plan.seats", { billable: usage.billable_tutors, included: usage.included_tutors })}
-        {usage.next_invoice
-          ? ` ${t("plan.nextInvoice", { amount: formatMoney(usage.next_invoice) })}`
-          : ""}
-      </p>
-    </section>
+    </RuledPanel>
   );
 }
 
@@ -275,92 +289,109 @@ function PlansSection({ sub }: { sub: Subscription }) {
     p.effective === "checkout" ? checkout.mutate(plan) : change.mutate(plan);
 
   return (
-    <section aria-labelledby="plan-choose" className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="plan-choose" className="text-lg font-semibold">
-          {t("plan.plans")}
-        </h2>
-        <fieldset className="flex gap-3 text-sm">
-          <legend className="sr-only">{t("plan.billing")}</legend>
-          {(["month", "year"] as const).map((value) => (
-            <label key={value} className="flex items-center gap-1">
-              <input
-                type="radio"
-                name="interval"
-                value={value}
-                checked={interval === value}
-                onChange={() => setInterval(value)}
-              />
-              {t(`plan.interval.${value}`)}
-            </label>
-          ))}
-        </fieldset>
-      </div>
-      {plans.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      <ul className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-        {plans.data?.map((plan) => {
-          const lines = priceLines(t, plan, interval);
-          const isCurrent = plan.key === sub.plan && interval === sub.interval;
-          return (
-            <li key={plan.key} className="flex flex-col rounded-md border border-border p-4">
-              <h3 className="font-semibold">{plan.name}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
-              <ul className="mt-2 text-sm">
-                {lines.length ? (
-                  lines.map((line) => <li key={line}>{line}</li>)
-                ) : (
-                  <li>{t("plan.contactSales")}</li>
-                )}
-                {plan.limits.max_tutors !== null && plan.limits.max_tutors !== undefined ? (
-                  <li>{t("plan.upToTutors", { count: plan.limits.max_tutors })}</li>
-                ) : (
-                  <li>{t("plan.unlimitedTutors")}</li>
-                )}
-              </ul>
-              <div className="mt-auto pt-3">
-                {isCurrent ? (
-                  <span className="text-sm font-medium">{t("plan.yourPlan")}</span>
-                ) : sub.can_manage && plan.visibility === "public" && lines.length ? (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => preview.mutate(plan.key)}
-                    loading={preview.isPending && preview.variables === plan.key}
-                  >
-                    {t("plan.choose", { plan: plan.name })}
-                  </Button>
-                ) : null}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+    <div className="space-y-4">
+      <RuledPanel
+        flush
+        titleId="plan-choose"
+        title={t("plan.plans")}
+        aside={
+          <fieldset className="flex gap-4">
+            <legend className="sr-only">{t("plan.billing")}</legend>
+            {(["month", "year"] as const).map((value) => (
+              <label key={value} className="flex items-center gap-1.5">
+                <input
+                  type="radio"
+                  className="size-4"
+                  name="interval"
+                  value={value}
+                  checked={interval === value}
+                  onChange={() => setInterval(value)}
+                />
+                {t(`plan.interval.${value}`)}
+              </label>
+            ))}
+          </fieldset>
+        }
+      >
+        {plans.isPending ? (
+          <div className="px-5 py-4">
+            <Spinner label={t("grid.loading")} />
+          </div>
+        ) : null}
+        <ul className="text-sm">
+          {plans.data?.map((plan) => {
+            const lines = priceLines(t, plan, interval);
+            const isCurrent = plan.key === sub.plan && interval === sub.interval;
+            return (
+              <li
+                key={plan.key}
+                className="grid gap-x-6 gap-y-2 border-t border-rule px-5 py-3.5 first:border-0 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_10rem] sm:items-start"
+              >
+                <div className="min-w-0">
+                  <h3 className="font-semibold">{plan.name}</h3>
+                  <p className="text-xs text-muted-foreground">{plan.description}</p>
+                </div>
+                <ul className="tabular-nums">
+                  {lines.length ? (
+                    lines.map((line) => <li key={line}>{line}</li>)
+                  ) : (
+                    <li>{t("plan.contactSales")}</li>
+                  )}
+                  {plan.limits.max_tutors !== null && plan.limits.max_tutors !== undefined ? (
+                    <li className="text-muted-foreground">
+                      {t("plan.upToTutors", { count: plan.limits.max_tutors })}
+                    </li>
+                  ) : (
+                    <li className="text-muted-foreground">{t("plan.unlimitedTutors")}</li>
+                  )}
+                </ul>
+                <div className="sm:text-right">
+                  {isCurrent ? (
+                    <span className="font-semibold">{t("plan.yourPlan")}</span>
+                  ) : sub.can_manage && plan.visibility === "public" && lines.length ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => preview.mutate(plan.key)}
+                      loading={preview.isPending && preview.variables === plan.key}
+                    >
+                      {t("plan.choose", { plan: plan.name })}
+                    </Button>
+                  ) : null}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </RuledPanel>
       {choice ? (
         <div
           role="region"
           aria-label={t("plan.confirmTitle")}
-          className="space-y-2 rounded-md border border-border p-4"
+          className="rounded-xl border border-border bg-surface"
         >
-          <h3 className="font-semibold">
-            {t("plan.confirmTitle")}: {t(`plan.names.${choice.plan}`)}
-          </h3>
-          {choice.preview.blockers.length ? (
-            <Alert tone="warning" title={t("plan.blockersTitle")}>
-              <ul className="list-disc pl-5">
-                {choice.preview.blockers.map((b) => (
-                  <li key={b}>{b}</li>
-                ))}
-              </ul>
-            </Alert>
-          ) : (
-            <p className="text-sm">
-              {t(`plan.effective.${choice.preview.effective}`)}
-              {choice.preview.amount_due_now
-                ? ` ${t("plan.dueNow", { amount: formatMoney(choice.preview.amount_due_now) })}`
-                : ""}
-            </p>
-          )}
-          <div className="flex gap-2">
+          <div className="space-y-2 px-5 py-4">
+            <h3 className="text-base font-semibold">
+              {t("plan.confirmTitle")}: {t(`plan.names.${choice.plan}`)}
+            </h3>
+            {choice.preview.blockers.length ? (
+              <Alert tone="warning" title={t("plan.blockersTitle")}>
+                <ul className="list-disc pl-5">
+                  {choice.preview.blockers.map((b) => (
+                    <li key={b}>{b}</li>
+                  ))}
+                </ul>
+              </Alert>
+            ) : (
+              <p className="text-sm tabular-nums">
+                {t(`plan.effective.${choice.preview.effective}`)}
+                {choice.preview.amount_due_now
+                  ? ` ${t("plan.dueNow", { amount: formatMoney(choice.preview.amount_due_now) })}`
+                  : ""}
+              </p>
+            )}
+          </div>
+          <PanelFooter>
             {!choice.preview.blockers.length ? (
               <Button
                 onClick={() => confirm(choice.plan, choice.preview)}
@@ -372,7 +403,7 @@ function PlansSection({ sub }: { sub: Subscription }) {
             <Button variant="ghost" onClick={() => setChoice(null)}>
               {t("common.cancel")}
             </Button>
-          </div>
+          </PanelFooter>
         </div>
       ) : null}
       {[preview.error, change.error, checkout.error].map((e, i) =>
@@ -382,7 +413,7 @@ function PlansSection({ sub }: { sub: Subscription }) {
           </Alert>
         ) : null,
       )}
-    </section>
+    </div>
   );
 }
 
@@ -410,25 +441,24 @@ function CreditsSection({ credits, canManage }: { credits: CreditAccount[]; canM
     onSuccess: refresh,
   });
   return (
-    <section aria-labelledby="plan-credits" className="space-y-3">
-      <h2 id="plan-credits" className="text-lg font-semibold">
-        {t("plan.credits")}
-      </h2>
-      <ul className="grid gap-3 sm:grid-cols-2">
+    <RuledPanel flush titleId="plan-credits" title={t("plan.credits")}>
+      <ul className="text-sm">
         {credits.map((acct) => {
           const kind = acct.credit_type;
           return (
-            <li key={kind} className="space-y-2 rounded-md border border-border p-3 text-sm">
-              <h3 className="font-medium">{t(`plan.creditTypes.${kind}`)}</h3>
-              <p>
-                {t("plan.creditBalance", {
-                  balance: acct.balance,
-                  used: acct.used_this_period,
-                  allowance: acct.allowance,
-                })}
-              </p>
+            <li key={kind} className="space-y-2 border-t border-rule px-5 py-3.5 first:border-0">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <h3 className="font-semibold">{t(`plan.creditTypes.${kind}`)}</h3>
+                <p className="tabular-nums">
+                  {t("plan.creditBalance", {
+                    balance: acct.balance,
+                    used: acct.used_this_period,
+                    allowance: acct.allowance,
+                  })}
+                </p>
+              </div>
               {canManage ? (
-                <>
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
                   <div className="flex flex-wrap gap-2">
                     {acct.packs.map((count) => (
                       <Button
@@ -446,6 +476,7 @@ function CreditsSection({ credits, canManage }: { credits: CreditAccount[]; canM
                     <label key={field} className="flex items-center gap-2">
                       <input
                         type="checkbox"
+                        className="size-4"
                         checked={acct[field]}
                         onChange={(e) =>
                           settings.mutate({ kind, body: { [field]: e.target.checked } })
@@ -454,14 +485,18 @@ function CreditsSection({ credits, canManage }: { credits: CreditAccount[]; canM
                       {t(`plan.${field}`)}
                     </label>
                   ))}
-                </>
+                </div>
               ) : null}
             </li>
           );
         })}
       </ul>
-      {topUp.error ? <Alert tone="danger">{topUp.error.message}</Alert> : null}
-    </section>
+      {topUp.error ? (
+        <div className="px-5 pb-4">
+          <Alert tone="danger">{topUp.error.message}</Alert>
+        </div>
+      ) : null}
+    </RuledPanel>
   );
 }
 
@@ -473,33 +508,48 @@ function InvoicesSection() {
   });
   if (!invoices.data?.length) return null;
   return (
-    <section aria-labelledby="plan-invoices" className="space-y-2">
-      <h2 id="plan-invoices" className="text-lg font-semibold">
-        {t("plan.invoices")}
-      </h2>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left">
-              <th scope="col">{t("plan.invoiceNumber")}</th>
-              <th scope="col">{t("plan.invoiceDate")}</th>
-              <th scope="col">{t("plan.invoiceTotal")}</th>
-              <th scope="col">{t("plan.invoiceStatus")}</th>
-              <th scope="col">
+    <RuledPanel flush titleId="plan-invoices" title={t("plan.invoices")}>
+      <div
+        role="region"
+        aria-labelledby="plan-invoices"
+        tabIndex={0}
+        className="overflow-x-auto"
+      >
+        <table className="w-full min-w-[32rem] text-sm">
+          <thead className="border-b border-border">
+            <tr>
+              <th scope="col" className="py-2.5 pr-4 pl-5">
+                {t("plan.invoiceNumber")}
+              </th>
+              <th scope="col" className="px-4 py-2.5">
+                {t("plan.invoiceDate")}
+              </th>
+              <th scope="col" className="w-32 px-4 py-2.5 text-right">
+                {t("plan.invoiceTotal")}
+              </th>
+              <th scope="col" className="px-4 py-2.5">
+                {t("plan.invoiceStatus")}
+              </th>
+              <th scope="col" className="py-2.5 pr-5 pl-4">
                 <span className="sr-only">PDF</span>
               </th>
             </tr>
           </thead>
           <tbody>
             {invoices.data.map((inv) => (
-              <tr key={inv.id} className="border-t border-border">
-                <td>{inv.number}</td>
-                <td>{formatDate(inv.created)}</td>
-                <td>{formatMoney(inv.total)}</td>
-                <td>{inv.status}</td>
-                <td>
+              <tr key={inv.id}>
+                <td className="py-2.5 pr-4 pl-5 font-medium">{inv.number}</td>
+                <td className="px-4 py-2.5 whitespace-nowrap">{formatDate(inv.created)}</td>
+                <td className="px-4 py-2.5 text-right whitespace-nowrap">
+                  {formatMoney(inv.total)}
+                </td>
+                <td className="px-4 py-2.5">{inv.status}</td>
+                <td className="py-2.5 pr-5 pl-4 text-right">
                   {inv.pdf_url ? (
-                    <a className="underline" href={inv.pdf_url}>
+                    <a
+                      className="font-medium text-link underline-offset-2 hover:underline"
+                      href={inv.pdf_url}
+                    >
                       {t("plan.download", { number: inv.number })}
                     </a>
                   ) : null}
@@ -509,7 +559,7 @@ function InvoicesSection() {
           </tbody>
         </table>
       </div>
-    </section>
+    </RuledPanel>
   );
 }
 
@@ -536,26 +586,26 @@ function CancelSection({ sub }: { sub: Subscription }) {
   if (sub.status === "cancelled" || sub.status === "suspended") return null;
   if (sub.cancel_at_period_end) {
     return (
-      <section className="space-y-2">
+      <RuledPanel
+        footer={
+          <Button variant="secondary" onClick={() => undo.mutate()} loading={undo.isPending}>
+            {t("plan.keepSubscription")}
+          </Button>
+        }
+      >
         <p className="text-sm">{t("plan.cancelScheduled")}</p>
-        <Button variant="secondary" onClick={() => undo.mutate()} loading={undo.isPending}>
-          {t("plan.keepSubscription")}
-        </Button>
-      </section>
+      </RuledPanel>
     );
   }
   return (
-    <section aria-labelledby="plan-cancel" className="space-y-2">
-      <h2 id="plan-cancel" className="text-lg font-semibold">
-        {t("plan.cancelTitle")}
-      </h2>
+    <RuledPanel titleId="plan-cancel" title={t("plan.cancelTitle")}>
       {!open ? (
-        <Button variant="ghost" onClick={() => setOpen(true)}>
+        <Button variant="ghost" className="-ml-4 text-muted-foreground" onClick={() => setOpen(true)}>
           {t("plan.cancel")}
         </Button>
       ) : (
         <form
-          className="max-w-md space-y-3"
+          className="max-w-md space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
             cancel.mutate();
@@ -568,16 +618,16 @@ function CancelSection({ sub }: { sub: Subscription }) {
             options={REASONS.map((r) => ({ value: r, label: t(`plan.reasons.${r}`) }))}
             onChange={(e) => setReason(e.target.value as (typeof REASONS)[number])}
           />
-          <label className="block text-sm">
+          <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">{t("plan.cancelFeedback")}</span>
             <textarea
-              className="mt-1 w-full rounded-md border border-border p-2"
+              className="w-full rounded-md border bg-surface px-3 py-2 text-sm"
               rows={3}
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
             />
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button type="submit" variant="danger" loading={cancel.isPending}>
               {t("plan.confirmCancel")}
             </Button>
@@ -588,6 +638,6 @@ function CancelSection({ sub }: { sub: Subscription }) {
           {cancel.error ? <Alert tone="danger">{cancel.error.message}</Alert> : null}
         </form>
       )}
-    </section>
+    </RuledPanel>
   );
 }

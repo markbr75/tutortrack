@@ -1,6 +1,6 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner } from "@tutortrack/ui";
+import { Alert, Button, RuledPanel, Spinner } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -40,60 +40,76 @@ export function AddonsSection({ canManage }: { canManage: boolean }) {
   });
   const error = buy.error ?? stop.error;
   return (
-    <section aria-labelledby="addons-h" className="space-y-3">
-      <h2 id="addons-h" className="text-lg font-semibold">
-        {t("addons.title")}
-      </h2>
-      {addons.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      <ul className="grid gap-3 sm:grid-cols-3">
+    <RuledPanel flush titleId="addons-h" title={t("addons.title")}>
+      {addons.isPending ? (
+        <div className="px-5 py-4">
+          <Spinner label={t("grid.loading")} />
+        </div>
+      ) : null}
+      <ul className="text-sm">
         {addons.data?.map((addon) => (
-          <li key={addon.key} className="flex flex-col gap-2 rounded-md border border-border p-4">
-            <p className="font-medium">{addon.name}</p>
-            <p className="text-sm text-muted-foreground">{addon.description}</p>
-            {addon.price ? (
-              <p className="text-sm">
-                {t(`addons.per.${addon.interval}`, { price: formatMoney(addon.price) })}
-              </p>
-            ) : null}
-            {addon.included_in_plan ? (
-              <p className="text-sm">{t("addons.included")}</p>
-            ) : addon.active ? (
-              <>
-                <p className="text-sm font-medium text-success">{t("addons.active")}</p>
-                {canManage ? (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    loading={stop.isPending && stop.variables === addon.key}
-                    onClick={() => stop.mutate(addon.key)}
-                  >
-                    {t("addons.stop")}
+          <li
+            key={addon.key}
+            className="grid gap-x-6 gap-y-2 border-t border-rule px-5 py-3.5 first:border-0 sm:grid-cols-[minmax(0,1fr)_10rem_10rem] sm:items-start"
+          >
+            <div className="min-w-0">
+              <p className="font-semibold">{addon.name}</p>
+              <p className="text-xs text-muted-foreground">{addon.description}</p>
+            </div>
+            <p className="tabular-nums sm:text-right">
+              {addon.price
+                ? t(`addons.per.${addon.interval}`, { price: formatMoney(addon.price) })
+                : null}
+            </p>
+            <div className="space-y-2 sm:text-right">
+              {addon.included_in_plan ? (
+                <p>{t("addons.included")}</p>
+              ) : addon.active ? (
+                <>
+                  <p className="font-semibold">{t("addons.active")}</p>
+                  {canManage ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      loading={stop.isPending && stop.variables === addon.key}
+                      onClick={() => stop.mutate(addon.key)}
+                    >
+                      {t("addons.stop")}
+                    </Button>
+                  ) : null}
+                </>
+              ) : canManage && addon.price ? (
+                confirming === addon.key ? (
+                  <>
+                    <p className="sm:text-left">{t("addons.confirmText")}</p>
+                    <div className="flex flex-wrap gap-2 sm:justify-end">
+                      <Button
+                        size="sm"
+                        loading={buy.isPending}
+                        onClick={() => buy.mutate(addon.key)}
+                      >
+                        {t("addons.confirm")}
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setConfirming(null)}>
+                        {t("addons.cancel")}
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <Button size="sm" variant="secondary" onClick={() => setConfirming(addon.key)}>
+                    {t("addons.buy")}
                   </Button>
-                ) : null}
-              </>
-            ) : canManage && addon.price ? (
-              confirming === addon.key ? (
-                <div className="space-y-2">
-                  <p className="text-sm">{t("addons.confirmText")}</p>
-                  <div className="flex gap-2">
-                    <Button size="sm" loading={buy.isPending} onClick={() => buy.mutate(addon.key)}>
-                      {t("addons.confirm")}
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setConfirming(null)}>
-                      {t("addons.cancel")}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <Button size="sm" onClick={() => setConfirming(addon.key)}>
-                  {t("addons.buy")}
-                </Button>
-              )
-            ) : null}
+                )
+              ) : null}
+            </div>
           </li>
         ))}
       </ul>
-      {error ? <Alert tone="danger">{error.message}</Alert> : null}
-    </section>
+      {error ? (
+        <div className="px-5 pb-4">
+          <Alert tone="danger">{error.message}</Alert>
+        </div>
+      ) : null}
+    </RuledPanel>
   );
 }
