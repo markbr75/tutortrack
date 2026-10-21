@@ -20,6 +20,14 @@ from .processes import (
     onboarding_workflow_id,
     reference_workflow_id,
 )
+from .review_processes import (
+    InterviewInput,
+    InterviewWorkflow,
+    ProbationInput,
+    ProbationReviewWorkflow,
+    interview_workflow_id,
+    probation_workflow_id,
+)
 
 
 def _running(workflow_id: str) -> bool:
@@ -130,4 +138,42 @@ bridge.on(
     signal="item_done",
     id=lambda e: onboarding_workflow_id(e.organisation_id, e.subject["id"]),
     when=lambda e: _running(onboarding_workflow_id(e.organisation_id, e.subject["id"])),
+)
+
+
+# --- gap batch G5a: interviews and probation reviews (FR-18-2, FR-18-9) ----------------------
+
+
+@subscribe("onboarding.completed")
+def schedule_probation(event: EventEnvelope) -> None:
+    """A tutor who finishes onboarding gets their first probation review (idempotent)."""
+    from django.db import transaction
+
+    from .performance import schedule_after_activation
+
+    with transaction.atomic():
+        schedule_after_activation(event.subject["id"])
+
+
+bridge.on(
+    "application.interview_booked",
+    start=InterviewWorkflow,
+    id=lambda e: interview_workflow_id(e.organisation_id, e.data["interview_id"]),
+    input=lambda e: InterviewInput(
+        organisation_id=str(e.organisation_id), interview_id=e.data["interview_id"]
+    ),
+)
+bridge.on(
+    "probation.scheduled",
+    start=ProbationReviewWorkflow,
+    id=lambda e: probation_workflow_id(e.organisation_id, e.subject["id"]),
+    input=lambda e: ProbationInput(
+        organisation_id=str(e.organisation_id), review_id=e.subject["id"]
+    ),
+)
+bridge.on(
+    "probation.completed",
+    signal="closed",
+    id=lambda e: probation_workflow_id(e.organisation_id, e.subject["id"]),
+    when=lambda e: _running(probation_workflow_id(e.organisation_id, e.subject["id"])),
 )

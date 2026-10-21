@@ -322,14 +322,107 @@ def sweep(on: date | None = None) -> int:
     return expired
 
 
-def dashboard() -> dict[str, Any]:
-    """Tutors x requirements with each cell's status (FR-18-8)."""
+GAPS = ("missing", "rejected", "expired")
+DASHBOARD_STATUSES = ("onboarding", "active", "restricted")
+
+
+def dashboard(
+    *,
+    tutor_status: str = "",
+    requirement: str = "",
+    cell_status: str = "",
+    gaps_only: bool = False,
+    tutor_ids: list[Any] | None = None,
+) -> dict[str, Any]:
+    """Tutors x requirements with each cell's status (FR-18-8). Filters (G5a): the tutor's
+    status, one requirement (key), a cell status, only tutors with gaps (missing, rejected
+    or expired)."""
     requirements = [r for r in ensure_requirement_types() if r.active]
-    tutors = list(
-        TutorProfile.objects.filter(status__in=["onboarding", "active", "restricted"]).order_by(
-            "last_name", "first_name"
+    statuses = [tutor_status] if tutor_status in DASHBOARD_STATUSES else DASHBOARD_STATUSES
+    qs = TutorProfile.objects.filter(status__in=statuses)
+    if tutor_ids is not None:
+        qs = qs.filter(pk__in=tutor_ids)
+    tutors = list(qs.order_by("last_name", "first_name"))
+    board = _matrix(requirements, tutors)
+    wanted = [r.key for r in requirements if not requirement or r.key == requirement]
+    if requirement:
+        board["requirements"] = [r for r in requirements if r.key == requirement]
+
+    def keep(row: dict[str, Any]) -> bool:
+        cells = [row["cells"][k]["status"] for k in wanted]
+        if cell_status and cell_status not in cells:
+            return False
+        return not gaps_only or any(c in GAPS for c in cells)
+
+    board["rows"] = [r for r in board["rows"] if keep(r)]
+    return board
+
+
+def export_rows(board: dict[str, Any]) -> list[list[str]]:
+    """The dashboard as CSV rows (FR-18-8 export): one row per tutor, a status and expiry
+    column per requirement."""
+    labels = {
+        "missing": _("Missing"),
+        "submitted": _("Waiting for verification"),
+        "verified": _("Verified"),
+        "rejected": _("Rejected"),
+        "expired": _("Expired"),
+        "n/a": _("Not needed"),
+    }
+    header = [_("Tutor"), _("Email"), _("Tutor status")]
+    for req in board["requirements"]:
+        header += [str(req.name), _("%(name)s expiry") % {"name": req.name}]
+    rows = [header]
+    for row in board["rows"]:
+        tutor = row["tutor"]
+        line = [tutor.full_name, tutor.email, row["status"]]
+        for req in board["requirements"]:
+            cell = row["cells"][req.key]
+            line += [
+                str(labels.get(cell["status"], cell["status"])),
+                cell["expiry_date"].isoformat() if cell["expiry_date"] else "",
+            ]
+        rows.append(line)
+    return rows
+
+
+def request_missing(
+    *, tutor_ids: list[Any] | None = None, requirements: list[str] | None = None, user: Any = None
+) -> list[dict[str, Any]]:
+    """Bulk "request missing documents" (FR-18-8): tell each tutor (all with gaps, or the
+    chosen ones) which documents are missing, rejected or expired. At most one request per
+    tutor per day for the same documents."""
+    from tutortrack.comms import services as comms
+
+    board = dashboard(tutor_ids=tutor_ids, gaps_only=True)
+    wanted = set(requirements or [])
+    names = {r.key: r.name for r in board["requirements"]}
+    sent: list[dict[str, Any]] = []
+    for row in board["rows"]:
+        tutor = row["tutor"]
+        gaps = [
+            key
+            for key, cell in row["cells"].items()
+            if cell["status"] in GAPS and (not wanted or key in wanted)
+        ]
+        if not gaps:
+            continue
+        with transaction.atomic():
+            publish(
+                events.ComplianceDocumentsRequested(subject_id=tutor.pk, requirements=gaps),
+                dedupe_key=f"docs-requested:{tutor.pk}:{today():%Y%m%d}:{','.join(sorted(gaps))}",
+            )
+            audit.record(tutor, "compliance_documents_requested", {"requirements": [None, gaps]})
+        comms.notify(
+            "compliance_documents_requested",
+            (tutor.pk, [str(names[k]) for k in gaps]),
+            key=f"docs:{tutor.pk}:{today():%Y%m%d}:{','.join(sorted(gaps))}",
         )
-    )
+        sent.append({"tutor": tutor.pk, "requirements": gaps})
+    return sent
+
+
+def _matrix(requirements: list[RequirementType], tutors: list[TutorProfile]) -> dict[str, Any]:
     records = {
         (r.tutor_id, r.requirement_id): r for r in ComplianceRecord.objects.filter(tutor__in=tutors)
     }

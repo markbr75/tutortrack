@@ -111,6 +111,7 @@
           <li><a href="#accounting-h">Accounting</a>
             <ol>
               <li><a href="#accounting-connect">Connect and map</a></li>
+              <li><a href="#accounting-branches">Separate ledgers for branches</a></li>
               <li><a href="#accounting-xero-payroll">Xero Payroll for employed tutors</a></li>
             </ol>
           </li>
@@ -420,6 +421,7 @@
                 <tr><td>Courses</td><td>Proration basis (sessions); prorate mid-term joins (on); fee timing (at enrolment); withdrawal refunds (unused sessions); waitlist auto-offer (on, 48 hours); make-up credit (60 days)</td></tr>
                 <tr><td>Data migration</td><td>Import rollback window (7 days); export link lifetime (7 days)</td></tr>
                 <tr><td>Developer</td><td>API key rotation overlap (24 hours)</td></tr>
+                <tr><td>Recruitment and compliance</td><td>Probation review after activation (<code>recruitment.probation_days</code>, 90 days; 0 = no automatic review); remind staff before a probation review is due (7 days); interview hours for interviewers without their own availability (<code>recruitment.interview_hours</code>, weekdays 09:00–17:00 in the organisation's time zone); create a video link automatically when an interview is booked (on); days before a tutor can retake a failed subject test (7); days a referee has to reply (14); activate tutors automatically when onboarding is complete (on); compliance reminders (60, 30 and 7 days); hold pay while restricted (on)</td></tr>
               </tbody>
             </table>
           </div>
@@ -512,6 +514,17 @@
             such as inviting team members, editing roles, single sign-on and
             <span class="ui">View as</span>, are not limited by it today, so give the Branch
             manager role only to people you would trust with those.</p>
+        </div>
+
+        <div class="callout tip">
+          <strong>Recruitment and HR permissions</strong>
+          <p>Recruitment, compliance, probation reviews, performance notes and offboarding are
+            given only to owners and admins by default. To let someone else run them, make a
+            custom role with <code>recruitment.application.view</code>/<code>edit</code>/<code>decide</code>,
+            <code>recruitment.pipeline.manage</code> (openings and forms),
+            <code>compliance.view</code>/<code>verify</code> (verifying and requesting documents),
+            <code>recruitment.performance.view</code>/<code>manage</code> (probation reviews and
+            notes) and <code>recruitment.offboarding.manage</code>.</p>
         </div>
 
         <h3 id="roles-custom">Custom roles</h3>
@@ -880,18 +893,33 @@
           <li>Watch <span class="ui">Sync status</span>. Items in <span class="ui">Needs attention</span> are explained in plain finance terms and wait up to 30 days for <span class="ui">Retry</span> or <span class="ui">Skip</span>. An error digest is emailed daily.</li>
         </ol>
         <ul>
-          <li><strong>Payments recorded in the ledger:</strong> optionally import payments entered directly in Xero or QuickBooks (checked nightly). Not available for Sage or FreeAgent, or in summary mode.</li>
+          <li><strong>Payments recorded in the ledger:</strong> optionally import payments entered directly in Xero, QuickBooks, Sage or FreeAgent (checked nightly, or <span class="ui">Check now</span>). Not available in summary mode.</li>
+          <li><strong>Changes after a payment has synced:</strong> moving a payment to other invoices (reallocating it) moves it in the ledger too, and a lost dispute (chargeback) takes the money back off the invoices it paid, like a refund. A refund recorded after a reallocation waits until the reallocation is in the ledger.</li>
+          <li><strong>VAT on bad debts:</strong> with <span class="ui">Reclaim the VAT on written-off invoices (bad debt relief)</span> on, a write-off reclaims the VAT in the amount written off at the invoice's rates, in the ledger and in summary journals and GL exports. Off by default; check that your tax authority's conditions are met.</li>
+          <li><strong>Other currencies in summary mode:</strong> each day's records in a currency other than the ledger's base currency get a summary journal of their own, converted at that day's exchange rate (line by line, rounded half-up). Map <span class="ui">Currency conversion differences</span> for the rounding difference, or it goes to rounding. With no rate for the day, the journal waits as an error until one arrives; then <span class="ui">Retry</span>.</li>
           <li><strong>Package sales:</strong> optionally post prepaid packages to deferred revenue (needs a deferred revenue mapping).</li>
-          <li><strong>General ledger export:</strong> download a journal for a date range as generic CSV, Sage 50, MYOB or QuickBooks Desktop (IIF), with or without a connection.</li>
-          <li>One ledger per organisation; branches become tracking categories. Drafts are never sent, and synced records are final in the ledger.</li>
+          <li><strong>General ledger export:</strong> download a journal for a date range as generic CSV, Sage 50, MYOB or QuickBooks Desktop (IIF), with or without a connection. Choose a ledger's own account codes to export just that ledger's records, or pick a <span class="ui">Branch</span>. VAT on tutors' self-billing invoices is included (debit <span class="ui">VAT on purchases (input tax)</span>, or the sales tax account if that isn't mapped, with the self-billing VAT tax code), and lost disputes appear as chargebacks.</li>
+          <li>Drafts are never sent, and synced records are final in the ledger: later changes go as their own records (credit notes, refunds, reallocations, chargebacks).</li>
         </ul>
         <div class="callout">
-          <strong>Not built yet</strong>
-          <p>Per-branch ledgers, syncing payment reallocations or lost disputes after a payment has
-            synced, bad-debt VAT adjustments, summary journals in other currencies and self-billing
-            VAT in GL exports. Live testing against Xero and QuickBooks needs real credentials; if
+          <strong>Testing without credentials</strong>
+          <p>Live testing against Xero, QuickBooks, Sage and FreeAgent needs real credentials; if
             the server has no keys, a simulated ledger is used and the page says so.</p>
         </div>
+
+        <h3 id="accounting-branches">Separate ledgers for branches</h3>
+        <p>A branch can keep its own books (its own Xero organisation, QuickBooks company, Sage
+          business or FreeAgent company). Under <span class="ui">Separate ledgers for
+          branches</span>, choose the <span class="ui">Branch</span> and select
+          <span class="ui">Connect {provider} for this branch</span>. Then pick it in
+          <span class="ui">Ledger</span> at the top of the page, map its accounts (each ledger has
+          its own mappings) and switch its sync on.</p>
+        <ul>
+          <li>Once a branch's ledger is syncing, that branch's invoices, credit notes, payments, refunds, payouts and tutor bills go there; everything else goes to the organisation's ledger. Summary journals, backfills and GL exports follow the same split.</li>
+          <li>A client billed by two ledgers is a contact in both, and changes to their details reach both.</li>
+          <li>One switched-on ledger for the organisation and one per branch. Records already synced stay where they are.</li>
+          <li>Without separate ledgers, branches become tracking categories or classes in the organisation's ledger, as before.</li>
+        </ul>
 
         <h3 id="accounting-xero-payroll">Xero Payroll for employed tutors</h3>
         <p>From the <span class="ui">Xero Payroll for employed tutors</span> link: select
@@ -1408,6 +1436,7 @@
               <tr><td>Archived students; archived clients and their contacts</td><td>6 years</td></tr>
               <tr><td>Lesson report notes and comments</td><td>6 years</td></tr>
               <tr><td>Rejected or withdrawn tutor applications; background check results</td><td>183 days</td></tr>
+              <tr><td>Files uploaded on public forms that were never sent</td><td>2 days (minimum 1)</td></tr>
               <tr><td>Online lesson recordings</td><td>1 year</td></tr>
               <tr><td>Online lesson join and leave logs</td><td>180 days</td></tr>
               <tr><td>Message log and in-app notifications</td><td>2 years</td></tr>
@@ -1864,9 +1893,10 @@
                 <tr><td><code>PLATFORM_REQUIRE_MFA</code></td><td><code>true</code>: console staff must have two-factor authentication.</td></tr>
                 <tr><td><code>PLATFORM_IP_ALLOWLIST</code></td><td>Empty: any network. Set it to the office or VPN ranges.</td></tr>
                 <tr><td><code>TT_REGION</code>, <code>REGION_UK_APP_URL</code>, <code>REGION_EU_APP_URL</code>, <code>REGION_US_APP_URL</code>, <code>REGION_AU_APP_URL</code></td><td>Data residency: the region this stack serves (empty: all, single stack) and each region's sign-up app.</td></tr>
-                <tr><td><code>THROTTLE_SIGNUP</code>, <code>THROTTLE_LOGIN</code>, <code>THROTTLE_PUBLIC_FORM</code>, <code>THROTTLE_PUBLIC_WIDGET</code></td><td>10/hour, 30/minute, 20/hour, 600/hour.</td></tr>
+                <tr><td><code>THROTTLE_SIGNUP</code>, <code>THROTTLE_LOGIN</code>, <code>THROTTLE_PUBLIC_FORM</code>, <code>THROTTLE_PUBLIC_WIDGET</code>, <code>THROTTLE_PUBLIC_UPLOAD</code></td><td>10/hour, 30/minute, 20/hour, 600/hour, 60/hour (anonymous uploads on public forms, per IP).</td></tr>
                 <tr><td><code>API_RATE_LIMIT_PER_MINUTE</code>, <code>API_BURST_PER_SECOND</code></td><td>Public API limits per token: 600 per minute, 100 per second.</td></tr>
                 <tr><td><code>FILE_UPLOAD_MAX_BYTES</code></td><td>25 MB.</td></tr>
+                <tr><td><code>PUBLIC_UPLOAD_DOCUMENT_MAX_BYTES</code>, <code>PUBLIC_UPLOAD_VIDEO_MAX_BYTES</code></td><td>10 MB and 100 MB: limits for files families and applicants upload on public forms (documents and CVs; video introductions). The files' first bytes must match their type, and they are scanned like other uploads.</td></tr>
                 <tr><td><code>CLAMAV_ENABLED</code>, <code>CLAMAV_HOST</code>, <code>CLAMAV_PORT</code></td><td>When false, uploads are marked clean without a scan. Turn it on in production.</td></tr>
                 <tr><td><code>PWNED_PASSWORDS_CHECK</code></td><td><code>true</code>: reject breached passwords.</td></tr>
                 <tr><td><code>GEOIP_COUNTRY_HEADER</code>, <code>GEOIP_LOOKUP</code>, <code>IMPOSSIBLE_TRAVEL_HOURS</code></td><td>Impossible-travel sign-in alerts (CDN header <code>CF-IPCountry</code>, 2 hours).</td></tr>

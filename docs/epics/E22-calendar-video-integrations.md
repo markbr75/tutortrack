@@ -142,3 +142,11 @@ See ADR 0032.
 - **Embedded classroom (FR-22-5):** `GET /lessons/{id}/classroom` for the lesson's tutor, its families or staff: the role's room link, whether it can be embedded (built-in Daily/Whereby rooms and Lessonspace; Zoom, Teams and Meet open in their own app), when it opens, the safeguarding banner (`integrations.classroom_banner`), whether the lesson is recorded (`integrations.classroom_recording` or Zoom's recording setting), which of the viewer's students still need recording consent, and the lesson's shared E21 resources. The portal page `/portal/classroom/<lesson>` embeds the room (camera and microphone allowed), shows the banner and offers "I agree to recording" (an E29 consent record, method `portal`). Families also get a Recordings page for recordings shared with them.
 - **Settings (new module `calendar_sync/org_settings.py`):** `integrations.video_attendance`, `integrations.recording_requires_consent`, `integrations.classroom_recording`, `integrations.classroom_banner`.
 - **Deviations:** Teams and Google Meet attendance and recordings are not ingested (no webhooks we can subscribe per meeting without extra admin consent); Lessonspace's webhook payload shape is read defensively (user id, name, timestamp) and its recordings API is not called (Daily and Zoom are).
+
+## Gap backlog (as built 2026-10-21)
+
+For per-branch ledgers (batch G5, E23; [ADR 0043](../adr/0043-gap-batch-g5b-accounting.md)) the framework gains a third connection level, `branch`:
+
+- `IntegrationConnection.branch` (null for personal and organisation connections) with its own unique constraint (one live connection per organisation, provider and branch); the organisation constraint now applies only where `branch` is empty.
+- `POST /integrations/oauth/start` takes `level=branch` with `branch` (required, must exist); the OAuth state carries it and `/oauth/complete` saves it. Connections serialise `branch`; `integration.*` events carry `branch_id`.
+- Only providers that list `branch` in `ProviderSpec.levels` accept it (the four accounting ledgers). `selectors.org_connection()` ignores branch connections; the integrations directory counts them as connected for the organisation.

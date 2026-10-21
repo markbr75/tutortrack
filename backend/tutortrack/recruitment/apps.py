@@ -32,3 +32,10 @@ class RecruitmentConfig(AppConfig):
             "recruitment.tutorapplication",
             lambda user, stored: has_perm(user, "recruitment.application.view"),
         )
+
+        # G5a: CV, video and other uploads on the public application form.
+        from tutortrack.core.storage import public
+
+        from .services import upload_kinds_for_opening
+
+        public.register_context("opening", upload_kinds_for_opening)

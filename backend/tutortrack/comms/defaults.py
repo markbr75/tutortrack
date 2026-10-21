@@ -224,6 +224,8 @@ for _key in (
     "staff_compliance_submitted",
     "staff_compliance_expiring",
     "staff_application_waiting",
+    "staff_interview_booked",
+    "staff_probation_review",
     "staff_offer_accepted",
     "staff_offers_exhausted",
     "staff_job_application",
@@ -303,6 +305,30 @@ DEFAULTS[("onboarding_reminder", "email")] = (
 DEFAULTS[("onboarding_reminder", "in_app")] = (
     "Finish your onboarding",
     "A few steps are left before you can start.",
+)
+DEFAULTS[("compliance_documents_requested", "email")] = (
+    "Documents needed by {{ organisation.name }}",
+    "Hello {{ recipient.first_name }},\n\nWe still need these from you before you can take on "
+    "work: {{ request.documents }}.\n\nPlease upload them in the tutor portal: {{ request.link }}"
+    + SIGN,
+)
+DEFAULTS[("compliance_documents_requested", "in_app")] = (
+    "Documents needed",
+    "Please upload: {{ request.documents }}.",
+)
+DEFAULTS[("interview_confirmed", "email")] = (
+    "Your interview with {{ organisation.name }}",
+    "Hello {{ recipient.first_name }},\n\nYour {{ interview.minutes }}-minute interview is "
+    'booked for {{ interview.when|datetime("full") }}.'
+    "{% if interview.meeting_url %}\n\nJoin the video call here: {{ interview.meeting_url }}"
+    "{% endif %}" + SIGN,
+)
+DEFAULTS[("interview_reminder", "email")] = (
+    "Reminder: your interview with {{ organisation.name }}",
+    "Hello {{ recipient.first_name }},\n\nA reminder that your interview is at "
+    '{{ interview.when|datetime("full") }}.'
+    "{% if interview.meeting_url %}\n\nJoin the video call here: {{ interview.meeting_url }}"
+    "{% endif %}" + SIGN,
 )
 
 

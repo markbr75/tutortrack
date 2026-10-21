@@ -13,7 +13,8 @@ Translation of our documents:
 * provider payout → one ``Deposit`` of the gross from the clearing account with a
   negative fee line, so the deposit equals the bank feed line;
 * tutor bill → ``Bill`` (account-based lines); payout → ``BillPayment`` (cheque);
-* summary journal → ``JournalEntry``.
+* summary journal → ``JournalEntry``;
+* reallocation (gap G5) → the ``ReceivePayment``'s lines replaced (sparse update).
 
 Creates pass ``requestid`` (QuickBooks' idempotency key). The company id (``realmId``) is
 the connection's ``external_account_id``.
@@ -39,6 +40,7 @@ from ..documents import (
     PaymentDoc,
     PayoutDoc,
     Pushed,
+    ReallocationDoc,
     RefundDoc,
 )
 from .base import (
@@ -494,6 +496,32 @@ class QuickBooksClient:
             },
         )
         return Pushed(f"{doc.payment}:refund:{doc.ref}")
+
+    def _push_reallocation(
+        self, creds: Credentials, doc: ReallocationDoc, external_id: str, key: str
+    ) -> Pushed:
+        """Re-apply the ``ReceivePayment``: its lines become the new allocations (the total
+        is unchanged; QuickBooks keeps the rest unapplied, as client credit)."""
+        payment = self._read(creds, "Payment", doc.payment)
+        self._call(
+            creds,
+            "POST",
+            "/payment",
+            {
+                "Id": doc.payment,
+                "SyncToken": payment["SyncToken"],
+                "sparse": True,
+                "Line": [
+                    {
+                        "Amount": _money(amount),
+                        "LinkedTxn": [{"TxnId": txn, "TxnType": "Invoice"}],
+                    }
+                    for txn, amount in doc.allocations
+                ],
+                "PrivateNote": f"{payment.get('PrivateNote', '')} Reallocated {doc.date}"[:4000],
+            },
+        )
+        return Pushed(f"{doc.payment}:reallocated:{key[-16:]}", created=not external_id)
 
     def _push_provider_payout(
         self, creds: Credentials, doc: PayoutDoc, external_id: str, key: str

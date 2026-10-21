@@ -107,16 +107,25 @@ def export(person: Person) -> list[Section]:
     ]
 
 
+def _uploads(person: Person) -> list[Any]:
+    out: dict[str, Any] = {}
+    for app in _applications(person).select_related("cv", "video").prefetch_related("attachments"):
+        for stored in (app.cv, app.video, *app.attachments.all()):
+            if stored is not None:
+                out[str(stored.pk)] = stored
+    return list(out.values())
+
+
 def files(person: Person) -> list[Any]:
-    return [a.cv for a in _applications(person).select_related("cv") if a.cv_id]
+    return _uploads(person)
 
 
 def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
     out = ErasureOutcome()
     applications = _applications(person)
+    out.file_ids += [str(f.pk) for f in _uploads(person)]
     for app in applications:
-        if app.cv_id:
-            out.file_ids.append(str(app.cv_id))
+        app.attachments.clear()
         TutorApplication.objects.filter(pk=app.pk).update(
             first_name=ctx.label("recruitment.application", app.pk, _("Erased applicant")),
             last_name="",
@@ -129,6 +138,7 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
             answers={},
             decision_reason="",
             cv=None,
+            video=None,
         )
         out.anonymised += 1
     out.deleted += ReferenceRequest.objects.filter(application__in=applications).delete()[0]

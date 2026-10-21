@@ -1,4 +1,5 @@
-"""E23-T09: read-back of payments recorded directly in Xero or QuickBooks (FR-23-4): only
+"""E23-T09: read-back of payments recorded directly in the ledger (FR-23-4; Sage and
+FreeAgent since gap G5): only
 payments TutorTrack didn't send are imported, as E11 manual payments allocated to the
 invoice, once; the sync engine never pushes them back; misfits are skipped with a reason;
 the real clients' requests; API and isolation."""
@@ -47,7 +48,7 @@ def read_back(org, conn) -> dict[str, int]:
         return readback.read_back(conn)
 
 
-@pytest.mark.parametrize("provider", ["xero", "quickbooks"])
+@pytest.mark.parametrize("provider", ["xero", "quickbooks", "sage", "freeagent"])
 def test_payment_recorded_in_the_ledger_is_imported_once(
     org, world, provider, django_capture_on_commit_callbacks
 ):
@@ -292,15 +293,151 @@ def test_quickbooks_reads_linked_payments_and_the_amount_applied(monkeypatch):
     )
 
 
-def test_read_back_is_only_offered_for_ledgers_that_support_it(org, world):
-    """Sage and FreeAgent (Phase 3) can't list an invoice's payments yet."""
-    assert readback.supported("xero")
-    assert readback.supported("quickbooks")
-    assert not readback.supported("sage")
-    assert not readback.supported("freeagent")
+def test_read_back_is_offered_for_every_ledger(org, world):
+    """Gap G5: Sage and FreeAgent list an invoice's payments too; anything else is refused."""
+    for provider in ("xero", "quickbooks", "sage", "freeagent"):
+        assert readback.supported(provider)
+    assert not readback.supported("myob")
     conn = enabled(org, world)
     with tenant_context(org):
-        type(conn).objects.filter(pk=conn.pk).update(provider="sage")
+        type(conn).objects.filter(pk=conn.pk).update(provider="myob")
         conn.refresh_from_db()
         with pytest.raises(services.BusinessRuleViolation):
             services.update_options(conn, import_payments=True)
+
+
+def test_sage_reads_customer_receipts_allocated_to_the_invoice(monkeypatch):
+    """Gap G5: Sage's contact payments for the invoice's contact; receipts only, with the
+    amount allocated to this invoice."""
+    from tutortrack.accounting.providers import sage
+
+    recorder = Recorder(
+        [
+            (
+                "/sales_invoices/s-inv",
+                {"id": "s-inv", "contact": {"id": "c-9"}, "payments_allocations": [{"id": "a"}]},
+            ),
+            (
+                "/contact_payments",
+                {
+                    "$items": [
+                        {
+                            "id": "cp-1",
+                            "transaction_type": {"id": "CUSTOMER_RECEIPT"},
+                            "date": "2026-10-12",
+                            "reference": "BACS 77",
+                            "bank_account": {"id": "bank-1"},
+                            "allocated_artefacts": [
+                                {"artefact": {"id": "s-inv"}, "amount": "40.00"},
+                                {"artefact": {"id": "other"}, "amount": "10.00"},
+                            ],
+                        },
+                        {
+                            "id": "cp-2",
+                            "transaction_type": {"id": "CUSTOMER_REFUND"},
+                            "allocated_artefacts": [{"artefact": {"id": "s-inv"}, "amount": "5"}],
+                        },
+                        {
+                            "id": "cp-3",
+                            "transaction_type": {"id": "CUSTOMER_RECEIPT"},
+                            "allocated_artefacts": [{"artefact": {"id": "other"}, "amount": "9"}],
+                        },
+                    ],
+                    "$next": None,
+                },
+            ),
+        ]
+    )
+    monkeypatch.setattr(http, "request", recorder)
+    [payment] = sage.SageClient().invoice_payments(CREDS, "s-inv")
+    assert (payment.id, payment.amount, payment.date, payment.reference, payment.account) == (
+        "cp-1",
+        "40.00",
+        "2026-10-12",
+        "BACS 77",
+        "bank-1",
+    )
+    assert any("/contact_payments" in url for url in recorder.calls)
+
+
+def test_sage_skips_the_payment_lookup_when_nothing_is_applied(monkeypatch):
+    from tutortrack.accounting.providers import sage
+
+    recorder = Recorder(
+        [("/sales_invoices/s-inv", {"contact": {"id": "c-9"}, "payments_allocations": []})]
+    )
+    monkeypatch.setattr(http, "request", recorder)
+    assert sage.SageClient().invoice_payments(CREDS, "s-inv") == []
+    assert not any("/contact_payments" in url for url in recorder.calls)
+
+
+def test_freeagent_reads_explanations_paying_the_invoice(monkeypatch):
+    """Gap G5: FreeAgent's bank transaction explanations whose ``paid_invoice`` is the
+    invoice, on every bank account; negative ones (refunds) are left out. Bank accounts
+    and explanations are fetched once per client (one read-back run)."""
+    from tutortrack.accounting.providers import freeagent
+
+    invoice = "https://api.freeagent.com/v2/invoices/1"
+    recorder = Recorder(
+        [
+            ("/invoices/", {"invoice": {"paid_value": "60.0", "dated_on": "2026-10-01"}}),
+            (
+                "/bank_accounts",
+                {"bank_accounts": [{"url": "https://api.freeagent.com/v2/bank_accounts/7"}]},
+            ),
+            (
+                "/bank_transaction_explanations",
+                {
+                    "bank_transaction_explanations": [
+                        {
+                            "url": "https://api.freeagent.com/v2/bank_transaction_explanations/5",
+                            "paid_invoice": invoice,
+                            "gross_value": "60.0",
+                            "dated_on": "2026-10-12",
+                            "description": "BACS",
+                            "bank_account": "https://api.freeagent.com/v2/bank_accounts/7",
+                        },
+                        {
+                            "url": "https://api.freeagent.com/v2/bank_transaction_explanations/6",
+                            "paid_invoice": invoice,
+                            "gross_value": "-10.0",
+                        },
+                        {
+                            "url": "https://api.freeagent.com/v2/bank_transaction_explanations/8",
+                            "paid_invoice": "https://api.freeagent.com/v2/invoices/2",
+                            "gross_value": "15.0",
+                        },
+                    ]
+                },
+            ),
+        ]
+    )
+    monkeypatch.setattr(http, "request", recorder)
+    client = freeagent.FreeAgentClient()
+    [payment] = client.invoice_payments(CREDS, invoice)
+    assert (payment.id, payment.amount, payment.date, payment.account) == (
+        "https://api.freeagent.com/v2/bank_transaction_explanations/5",
+        "60.0",
+        "2026-10-12",
+        "https://api.freeagent.com/v2/bank_accounts/7",
+    )
+    client.invoice_payments(CREDS, invoice)
+    assert sum("/bank_accounts" in url for url in recorder.calls) == 1
+    assert sum("/bank_transaction_explanations" in url for url in recorder.calls) == 1
+
+
+def test_freeagent_parts_of_a_split_payment_are_ours(org, world):
+    """A FreeAgent payment is one explanation per invoice (parts kept as bare URLs): every
+    part counts as TutorTrack's own, so read-back never imports them."""
+    conn = enabled(org, world, "freeagent", import_payments=True)
+    with tenant_context(org):
+        ExternalRecordLink.objects.create(
+            connection=conn,
+            provider="freeagent",
+            object_type="payment",
+            object_id="p-split",
+            external_id="https://fa/x/1",
+            status="synced",
+            meta={"parts": ["https://fa/x/1", "https://fa/x/2"]},
+        )
+        assert {"https://fa/x/1", "https://fa/x/2"} <= readback.our_payment_ids(conn)

@@ -122,3 +122,9 @@
 |---|---|---|---|---|---|---|---|---|
 | TP-E21-053 | Storage quota reached | Coordinator | Plan storage near the limit (platform override) | 1. Upload a large file. | Refused with a quota message. | P3 | No | |
 | TP-E21-054 | Learning portal switched off | Admin, Parent | `learning.portal` off | 1. Parent opens the portal. | **Learning** not in the menu; `/portal/learning` shows no data. | P3 | No | |
+
+## Gap batch G5a (2026-10-21): tutor subject tests (FR-18-3 seam)
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E21-055 | Build a tutor subject test | Admin | A catalogue subject | 1. Learning → Quizzes → new quiz: **Used for** Tutor subject test, subject, pass mark, questions. | The quiz lists as a tutor subject test and appears in the tutor portal for tutors teaching the subject (E18 TP-E18-066). | P2 | backend `tutortrack/recruitment/tests/test_g5a.py` (quiz with purpose tutor_test); builder by hand | |

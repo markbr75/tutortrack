@@ -59,20 +59,20 @@ Tick an item when it is built, and record the as-built details in the owning epi
 *G4 built 2026-10-14 (ADR 0038); as-built notes in E02, E03, E13, E14 and E16. Realtime SSE needs ASGI in the deploy to scale (runbook `docs/runbooks/realtime-notifications.md`).*
 
 ## Batch G5 — Leads, recruitment, matching, learning, accounting and reporting (E17–E26)
-- [ ] File uploads on public forms: enquiry attachments, CV/video (FR-17-1, FR-18-1; E17:88, E18:111). *M*
+- [x] File uploads on public forms: enquiry attachments, CV/video (FR-17-1, FR-18-1; E17:88, E18:111). *M*
 - [ ] Waitlist suggestions when tutor capacity appears (FR-17-6; E17:104). *S–M*
-- [ ] Compliance dashboard export and bulk "request missing documents" (FR-18-8; E18:107). *S*
-- [ ] Probation reviews, performance notes, offboarding checklist (FR-18-9; E18:111). *M*
-- [ ] Interview booking through the slot engine with an automatic video link (FR-18-2; E18:95). *M*
-- [ ] Admin job-opening editor (FR-18-1; E31:117). *S–M*
-- [ ] UI for online tutor subject tests (FR-18-3; E21:102). *S*
+- [x] Compliance dashboard export and bulk "request missing documents" (FR-18-8; E18:107). *S*
+- [x] Probation reviews, performance notes, offboarding checklist (FR-18-9; E18:111). *M*
+- [x] Interview booking through the slot engine with an automatic video link (FR-18-2; E18:95). *M*
+- [x] Admin job-opening editor (FR-18-1; E31:117). *S–M*
+- [x] UI for online tutor subject tests (FR-18-3; E21:102). *S*
 - [ ] Matching criteria: gender preference, SEN tags, exam board (FR-19-1; E19:77). *S–M*
 - [ ] Automatic termly/monthly progress-report generation on a schedule (FR-21-6; E21:95). *S*
 - [ ] Send shared resources into video rooms (FR-21-8; E21:113) — check against the E22-T10 build. *M*
-- [ ] Payment read-back (E23-T09) for Sage and FreeAgent; today it is Xero and QuickBooks only, and the option is refused for other ledgers. *S–M*
-- [ ] Per-branch ledgers (FR-23-1; E23:216). *M–L*
-- [ ] Payment reallocations and lost disputes after sync (FR-23-2/3; E23:217-219). *M*
-- [ ] Summary journals in non-base currencies; bad-debt VAT adjustment; self-billing VAT in GL exports (FR-23-2/5; E23:220-225). *M*
+- [x] Payment read-back (E23-T09) for Sage and FreeAgent; today it is Xero and QuickBooks only, and the option is refused for other ledgers. *S–M*
+- [x] Per-branch ledgers (FR-23-1; E23:216). *M–L*
+- [x] Payment reallocations and lost disputes after sync (FR-23-2/3; E23:217-219). *M*
+- [x] Summary journals in non-base currencies; bad-debt VAT adjustment; self-billing VAT in GL exports (FR-23-2/5; E23:220-225). *M*
 - [x] Referral, affiliate and review reports (FR-26-2; E25:121, E26:88). *S–M*
 - [x] Room utilisation per room; custom-field filters for students and tutors; tutor utilisation net of time off; scheduling custom reports (FR-26-2/4; E26:89-90, E26:114). *S each*
 

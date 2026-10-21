@@ -96,8 +96,9 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * @description Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping
-     *     problems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
+     * @description Ledger connections (Xero, QuickBooks Online, Sage, FreeAgent): the organisation's,
+     *     and any branch's own (``branch``, gap G5), with sync options, health, mapping problems
+     *     and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
      *     (individual records or a daily summary journal), ``start_date`` (nothing earlier
      *     syncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.
      */
@@ -122,8 +123,9 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * @description Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping
-     *     problems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
+     * @description Ledger connections (Xero, QuickBooks Online, Sage, FreeAgent): the organisation's,
+     *     and any branch's own (``branch``, gap G5), with sync options, health, mapping problems
+     *     and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
      *     (individual records or a daily summary journal), ``start_date`` (nothing earlier
      *     syncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.
      */
@@ -134,8 +136,9 @@ export interface paths {
     options?: never;
     head?: never;
     /**
-     * @description Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping
-     *     problems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
+     * @description Ledger connections (Xero, QuickBooks Online, Sage, FreeAgent): the organisation's,
+     *     and any branch's own (``branch``, gap G5), with sync options, health, mapping problems
+     *     and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
      *     (individual records or a daily summary journal), ``start_date`` (nothing earlier
      *     syncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.
      */
@@ -169,8 +172,9 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * @description Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping
-     *     problems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
+     * @description Ledger connections (Xero, QuickBooks Online, Sage, FreeAgent): the organisation's,
+     *     and any branch's own (``branch``, gap G5), with sync options, health, mapping problems
+     *     and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
      *     (individual records or a daily summary journal), ``start_date`` (nothing earlier
      *     syncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.
      */
@@ -316,7 +320,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** @description A mapping set (a provider's, or ``export`` for GL files) and what is missing. */
+    /**
+     * @description A mapping set (a provider's, a branch ledger's ``<provider>@<branch id>``, or
+     *     ``export`` for GL files) and what is missing.
+     */
     get: operations["accounting_mappings_retrieve"];
     /**
      * @description Replace the mapping set (accounts per kind and key, tax codes per tax rate,
@@ -5362,6 +5369,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/compliance/dashboard/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The compliance matrix as CSV, with the dashboard's filters (audited). */
+    get: operations["compliance_dashboard_export_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/compliance/records/{id}/reject": {
     parameters: {
       query?: never;
@@ -5388,6 +5412,26 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations["compliance_records_verify_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/compliance/request-missing": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Bulk "request missing documents": each tutor (all with gaps, or the chosen ones) is
+     *     told which documents are missing, rejected or expired.
+     */
+    post: operations["compliance_request_missing_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -8915,20 +8959,14 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * @description Base for views over tenant data.
-     *
-     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
-     *     generation there is no request tenant, so an empty unscoped queryset is returned
-     *     instead (it is never evaluated).
+     * @description Job openings (FR-18-1) and their editor (G5a): title, web address, description,
+     *     subjects, location, branch, application form, published and closing date.
      */
     get: operations["job_openings_list"];
     put?: never;
     /**
-     * @description Base for views over tenant data.
-     *
-     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
-     *     generation there is no request tenant, so an empty unscoped queryset is returned
-     *     instead (it is never evaluated).
+     * @description Job openings (FR-18-1) and their editor (G5a): title, web address, description,
+     *     subjects, location, branch, application form, published and closing date.
      */
     post: operations["job_openings_create"];
     delete?: never;
@@ -8945,40 +8983,45 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * @description Base for views over tenant data.
-     *
-     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
-     *     generation there is no request tenant, so an empty unscoped queryset is returned
-     *     instead (it is never evaluated).
+     * @description Job openings (FR-18-1) and their editor (G5a): title, web address, description,
+     *     subjects, location, branch, application form, published and closing date.
      */
     get: operations["job_openings_retrieve"];
     /**
-     * @description Base for views over tenant data.
-     *
-     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
-     *     generation there is no request tenant, so an empty unscoped queryset is returned
-     *     instead (it is never evaluated).
+     * @description Job openings (FR-18-1) and their editor (G5a): title, web address, description,
+     *     subjects, location, branch, application form, published and closing date.
      */
     put: operations["job_openings_update"];
     post?: never;
     /**
-     * @description Base for views over tenant data.
-     *
-     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
-     *     generation there is no request tenant, so an empty unscoped queryset is returned
-     *     instead (it is never evaluated).
+     * @description Job openings (FR-18-1) and their editor (G5a): title, web address, description,
+     *     subjects, location, branch, application form, published and closing date.
      */
     delete: operations["job_openings_destroy"];
     options?: never;
     head?: never;
     /**
-     * @description Base for views over tenant data.
-     *
-     *     Subclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI
-     *     generation there is no request tenant, so an empty unscoped queryset is returned
-     *     instead (it is never evaluated).
+     * @description Job openings (FR-18-1) and their editor (G5a): title, web address, description,
+     *     subjects, location, branch, application form, published and closing date.
      */
     patch: operations["job_openings_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/job-openings/default-form": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description The standard tutor application form, created on first use. */
+    post: operations["job_openings_default_form_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/job-postings": {
@@ -12689,6 +12732,39 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/me/subject-tests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The tutor's subject tests (tutor portal). */
+    get: operations["me_subject_tests_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/subject-tests/{quiz_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["me_subject_tests_retrieve"];
+    put?: never;
+    post: operations["me_subject_tests_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/me/tax-identity": {
     parameters: {
       query?: never;
@@ -14641,6 +14717,42 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/performance-notes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Staff notes on a tutor's performance: praise, concerns and notes. */
+    get: operations["performance_notes_list"];
+    put?: never;
+    /** @description Staff notes on a tutor's performance: praise, concerns and notes. */
+    post: operations["performance_notes_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/performance-notes/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Staff notes on a tutor's performance: praise, concerns and notes. */
+    get: operations["performance_notes_retrieve"];
+    put?: never;
+    post?: never;
+    /** @description Staff notes on a tutor's performance: praise, concerns and notes. */
+    delete: operations["performance_notes_destroy"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/permissions": {
     parameters: {
       query?: never;
@@ -16556,6 +16668,58 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/probation-reviews": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Probation reviews; ``ProbationReviewWorkflow`` reminds staff before each is due. */
+    get: operations["probation_reviews_list"];
+    put?: never;
+    /** @description Probation reviews; ``ProbationReviewWorkflow`` reminds staff before each is due. */
+    post: operations["probation_reviews_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/probation-reviews/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Probation reviews; ``ProbationReviewWorkflow`` reminds staff before each is due. */
+    get: operations["probation_reviews_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/probation-reviews/{id}/complete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Probation reviews; ``ProbationReviewWorkflow`` reminds staff before each is due. */
+    post: operations["probation_reviews_complete_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/processes": {
     parameters: {
       query?: never;
@@ -17410,6 +17574,46 @@ export interface paths {
     get: operations["public_tutors_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/uploads": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Start an upload for a public form's file field: returns a presigned PUT and the token
+     *     the form submission carries. Throttled per IP (``public_upload``).
+     */
+    post: operations["public_uploads_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/public/uploads/complete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Finish an upload: the file's size, type and signature are checked and it is queued for
+     *     the malware scan.
+     */
+    post: operations["public_uploads_complete_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -21145,6 +21349,78 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/tutors/{id}/offboarding": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description ``/tutors/{id}/offboarding``: the latest checklist; POST starts offboarding (the
+     *     tutor becomes inactive).
+     */
+    get: operations["tutors_offboarding_retrieve"];
+    put?: never;
+    /**
+     * @description ``/tutors/{id}/offboarding``: the latest checklist; POST starts offboarding (the
+     *     tutor becomes inactive).
+     */
+    post: operations["tutors_offboarding_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutors/{id}/offboarding/{key}/done": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["tutors_offboarding_done_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutors/{id}/offboarding/complete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["tutors_offboarding_complete_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutors/{id}/offboarding/revoke-access": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["tutors_offboarding_revoke_access_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/tutors/{id}/onboarding": {
     parameters: {
       query?: never;
@@ -21213,6 +21489,23 @@ export interface paths {
     put?: never;
     /** @description Tutors. Creating one invites them to join (role Tutor) unless ``invite`` is false. */
     post: operations["tutors_status_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/tutors/{id}/subject-tests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Staff: the tutor's subject-test results (tutor record). */
+    get: operations["tutors_subject_tests_list"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -22341,6 +22634,11 @@ export interface components {
       readonly connection: string;
       readonly provider: string;
       readonly provider_name: string;
+      /** Format: uuid */
+      readonly branch: string | null;
+      readonly branch_name: string | null;
+      /** @description The mapping set it posts with: the provider, or <provider>@<branch> for a branch's own ledger. */
+      readonly mapping_set: string;
       readonly status: string;
       readonly account_name: string;
       readonly connection_error: string;
@@ -22460,6 +22758,12 @@ export interface components {
       tax_rate?: string | null;
       /** Format: uuid */
       product?: string | null;
+    };
+    AddPerformanceNoteRequest: {
+      /** Format: uuid */
+      tutor: string;
+      kind: components["schemas"]["PerformanceNoteKindEnum"];
+      body: string;
     };
     /** @description An add-on in the in-app shop (G6, FR-04-1). */
     Addon: {
@@ -23041,6 +23345,9 @@ export interface components {
       readonly scorecards: components["schemas"]["Scorecard"][];
       readonly references: components["schemas"]["Reference"][];
       readonly interviews: components["schemas"]["Interview"][];
+      readonly cv_file: components["schemas"]["AttachedFile"] | null;
+      readonly video_file: components["schemas"]["AttachedFile"] | null;
+      readonly attachments: components["schemas"]["AttachedFile"][];
     };
     /**
      * @description * `invoice` - Reduce what is owed on the invoice
@@ -23048,6 +23355,12 @@ export interface components {
      * @enum {string}
      */
     ApplicationEnum: "invoice" | "credit";
+    ApplicationForm: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      slug: string;
+    };
     ApplicationStage: {
       /** Format: uuid */
       readonly id: string;
@@ -23248,6 +23561,15 @@ export interface components {
       owners: string[];
       order?: number;
       active?: boolean;
+    };
+    /** @description A file attached to a record (open it with ``GET /files/{id}/download``). */
+    AttachedFile: {
+      /** Format: uuid */
+      id: string;
+      filename: string;
+      content_type: string;
+      size_bytes: number;
+      is_downloadable: boolean;
     };
     Attachment: {
       /** Format: uuid */
@@ -25436,6 +25758,21 @@ export interface components {
     CompleteCheckoutRequest: {
       session_id: string;
     };
+    /**
+     * @description * `passed` - passed
+     *     * `extended` - extended
+     *     * `failed` - failed
+     *     * `cancelled` - cancelled
+     * @enum {string}
+     */
+    CompleteProbationOutcomeEnum: "passed" | "extended" | "failed" | "cancelled";
+    CompleteProbationRequest: {
+      outcome: components["schemas"]["CompleteProbationOutcomeEnum"];
+      /** @default  */
+      notes: string;
+      /** Format: date */
+      extend_to?: string | null;
+    };
     CompleteRequest: {
       attendance?: components["schemas"]["AttendanceRowRequest"][];
       /** Format: date-time */
@@ -27245,6 +27582,7 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
       readonly age_hours: number;
+      readonly attachments: components["schemas"]["AttachedFile"][];
     };
     EnquiryCreateRequest: {
       first_name: string;
@@ -28810,6 +29148,8 @@ export interface components {
       readonly provider: string;
       readonly provider_name: string;
       readonly level: components["schemas"]["IntegrationLevelEnum"];
+      /** Format: uuid */
+      readonly branch: string | null;
       readonly status: components["schemas"]["IntegrationConnectionStatusEnum"];
       readonly user: components["schemas"]["ConnectionUser"] | null;
       readonly account_name: string;
@@ -28843,9 +29183,10 @@ export interface components {
     /**
      * @description * `user` - Personal
      *     * `organisation` - Organisation
+     *     * `branch` - Branch
      * @enum {string}
      */
-    IntegrationLevelEnum: "user" | "organisation";
+    IntegrationLevelEnum: "user" | "organisation" | "branch";
     /**
      * @description * `reschedule` - reschedule
      *     * `cancellation` - cancellation
@@ -28872,10 +29213,23 @@ export interface components {
       options?: unknown;
       minutes?: number;
       meeting_url?: string;
+      host_url?: string;
+      video_provider?: string;
       /** Format: date-time */
       start?: string | null;
       status?: components["schemas"]["InterviewStatusEnum"];
+      mode?: components["schemas"]["InterviewModeEnum"];
+      /** Format: date */
+      window_start?: string | null;
+      /** Format: date */
+      window_end?: string | null;
     };
+    /**
+     * @description * `times` - Times offered by staff
+     *     * `availability` - Booking link from the interviewer's free time
+     * @enum {string}
+     */
+    InterviewModeEnum: "times" | "availability";
     /**
      * @description * `proposed` - Waiting for the applicant
      *     * `booked` - Booked
@@ -29520,28 +29874,31 @@ export interface components {
       /** Format: uuid */
       readonly id: string;
       title: string;
-      slug: string;
+      slug?: string;
       description?: string;
       subjects?: unknown;
       location?: string;
       /** Format: uuid */
       branch?: string | null;
       /** Format: uuid */
-      form: string;
+      form?: string | null;
+      /** @default  */
+      readonly form_name: string;
       published?: boolean;
       /** Format: date */
       closes_on?: string | null;
+      readonly applications_open: number;
     };
     JobOpeningRequest: {
       title: string;
-      slug: string;
+      slug?: string;
       description?: string;
       subjects?: unknown;
       location?: string;
       /** Format: uuid */
       branch?: string | null;
       /** Format: uuid */
-      form: string;
+      form?: string | null;
       published?: boolean;
       /** Format: date */
       closes_on?: string | null;
@@ -31597,10 +31954,35 @@ export interface components {
       level: components["schemas"]["IntegrationLevelEnum"];
       /** @default /settings/integrations */
       next: string;
+      /**
+       * Format: uuid
+       * @description With level=branch: the branch whose own account this is (e.g. its ledger).
+       */
+      branch?: string | null;
     };
     OAuthStartResult: {
       /** Format: uri */
       authorize_url: string;
+    };
+    Offboarding: {
+      /** Format: uuid */
+      id: string | null;
+      reason: string;
+      /** Format: date */
+      leaving_on: string | null;
+      /** Format: date-time */
+      started_at: string | null;
+      /** Format: date-time */
+      completed_at: string | null;
+      items: components["schemas"]["OffboardingItem"][];
+      tutor_status: string;
+    };
+    OffboardingItem: {
+      key: string;
+      label: string;
+      auto: boolean;
+      done: boolean;
+      done_at: string | null;
     };
     OfferBatch: {
       /** Format: uuid */
@@ -33471,6 +33853,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["PayrollTimesheetSync"][];
     };
+    PaginatedPerformanceNoteList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PerformanceNote"][];
+    };
     PaginatedPhoneNumberList: {
       /**
        * Format: uri
@@ -33535,6 +33930,19 @@ export interface components {
        */
       previous?: string | null;
       results: components["schemas"]["PriceList"][];
+    };
+    PaginatedProbationReviewList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["ProbationReview"][];
     };
     PaginatedProcessList: {
       /**
@@ -34879,7 +35287,7 @@ export interface components {
       /** Format: uuid */
       branch?: string | null;
       /** Format: uuid */
-      form?: string;
+      form?: string | null;
       published?: boolean;
       /** Format: date */
       closes_on?: string | null;
@@ -36320,6 +36728,26 @@ export interface components {
       /** Format: decimal */
       pay_percent: string;
     };
+    PerformanceNote: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      tutor: string;
+      kind?: components["schemas"]["PerformanceNoteKindEnum"];
+      body: string;
+      /** Format: uuid */
+      readonly author: string | null;
+      readonly author_name: string;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `praise` - Praise
+     *     * `concern` - Concern
+     *     * `note` - Note
+     * @enum {string}
+     */
+    PerformanceNoteKindEnum: "praise" | "concern" | "note";
     Permission: {
       codename: string;
       category: string;
@@ -37465,6 +37893,36 @@ export interface components {
     PrivacyReasonRequest: {
       reason: string;
     };
+    ProbationReview: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      /** Format: date */
+      readonly due_on: string;
+      /** @default scheduled */
+      readonly status: components["schemas"]["ProbationReviewStatusEnum"];
+      readonly outcome_notes: string;
+      /** Format: uuid */
+      readonly reviewer: string | null;
+      readonly reviewer_name: string;
+      /** Format: date-time */
+      readonly reviewed_at: string | null;
+      /** Format: uuid */
+      readonly previous: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+    };
+    /**
+     * @description * `scheduled` - Scheduled
+     *     * `passed` - Passed
+     *     * `extended` - Extended
+     *     * `failed` - Not passed
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    ProbationReviewStatusEnum: "scheduled" | "passed" | "extended" | "failed" | "cancelled";
     Process: {
       /** Format: uuid */
       readonly id: string;
@@ -37822,7 +38280,13 @@ export interface components {
       valid_days?: number | null;
     };
     ProposeInterviewRequest: {
-      options: string[];
+      /** @default times */
+      mode: components["schemas"]["InterviewModeEnum"];
+      options?: string[];
+      /** Format: date */
+      window_start?: string | null;
+      /** Format: date */
+      window_end?: string | null;
       /** @default 30 */
       minutes: number;
       meeting_url?: string;
@@ -38079,6 +38543,8 @@ export interface components {
       start: string | null;
       meeting_url: string;
       organisation: string;
+      mode: string;
+      timezone: string;
     };
     /** @description ``PublicKeyCredential{Creation,Request}Options`` as JSON (base64url binary). */
     PublicKeyOptions: {
@@ -38386,6 +38852,58 @@ export interface components {
     PublicTutorSubject: {
       subject: string;
       level: string;
+    };
+    PublicUploadCompleteRequest: {
+      token: string;
+    };
+    PublicUploadCreated: {
+      /** @description Send this as the file field's answer. */
+      token: string;
+      upload: components["schemas"]["PublicUploadTarget"];
+      max_bytes: number;
+    };
+    /**
+     * @description * `cv` - cv
+     *     * `document` - document
+     *     * `video` - video
+     * @enum {string}
+     */
+    PublicUploadKindEnum: "cv" | "document" | "video";
+    PublicUploadRequestRequest: {
+      /**
+       * @description `form` for an enquiry or registration form, `opening` for a job opening.
+       *
+       *     * `form` - form
+       *     * `opening` - opening
+       */
+      target: components["schemas"]["PublicUploadRequestTargetEnum"];
+      /** @description The form or opening slug. */
+      slug: string;
+      kind: components["schemas"]["PublicUploadKindEnum"];
+      filename: string;
+      content_type: string;
+      size_bytes: number;
+    };
+    /**
+     * @description * `form` - form
+     *     * `opening` - opening
+     * @enum {string}
+     */
+    PublicUploadRequestTargetEnum: "form" | "opening";
+    PublicUploadTarget: {
+      /** Format: uri */
+      url: string;
+      method: string;
+      headers: {
+        [key: string]: string;
+      };
+      expires_in: number;
+    };
+    PublicUploadedFile: {
+      token: string;
+      filename: string;
+      content_type: string;
+      size_bytes: number;
     };
     PublicWidget: {
       key: string;
@@ -39449,11 +39967,26 @@ export interface components {
       /** @default  */
       reason: string;
     };
+    RequestMissingRequest: {
+      /** @description Leave out to ask every tutor with gaps. */
+      tutors?: string[] | null;
+      /** @description Requirement keys to ask for; leave empty for all gaps. */
+      requirements?: string[];
+    };
+    RequestMissingResult: {
+      count: number;
+      requests: components["schemas"]["RequestedTutor"][];
+    };
     RequestReferenceRequest: {
       name: string;
       /** Format: email */
       email: string;
       relationship?: string;
+    };
+    RequestedTutor: {
+      /** Format: uuid */
+      tutor: string;
+      requirements: string[];
     };
     /**
      * @description * `client` - Client
@@ -39621,7 +40154,7 @@ export interface components {
       /** Format: uuid */
       readonly resource: string;
       readonly resource_title: string;
-      readonly target: components["schemas"]["TargetEnum"];
+      readonly target: components["schemas"]["ResourceShareTargetEnum"];
       /** Format: uuid */
       readonly target_id: string;
       readonly target_name: string;
@@ -39629,6 +40162,14 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    /**
+     * @description * `student` - student
+     *     * `job` - job
+     *     * `lesson` - lesson
+     *     * `group_class` - group_class
+     * @enum {string}
+     */
+    ResourceShareTargetEnum: "student" | "job" | "lesson" | "group_class";
     /**
      * @description * `staff` - Staff only
      *     * `tutors` - Staff and all tutors
@@ -40300,6 +40841,12 @@ export interface components {
     ScheduleDeletionRequest: {
       reason: string;
       confirm_slug: string;
+    };
+    ScheduleProbationRequest: {
+      /** Format: uuid */
+      tutor: string;
+      /** Format: date */
+      due_on: string;
     };
     ScheduleRequest: {
       /** Format: date-time */
@@ -41341,6 +41888,12 @@ export interface components {
         [key: string]: unknown;
       };
     };
+    StartOffboardingRequest: {
+      /** @default  */
+      reason: string;
+      /** Format: date */
+      leaving_on?: string | null;
+    };
     StartOffersRequest: {
       /** Format: uuid */
       job: string;
@@ -41633,6 +42186,89 @@ export interface components {
       exam_boards?: string[];
       order?: number;
     };
+    SubjectTest: {
+      /** Format: uuid */
+      id: string;
+      title: string;
+      description: string;
+      /** @default  */
+      subject: string;
+      /** @default  */
+      level: string;
+      pass_percent: number;
+      time_limit_minutes: number | null;
+      readonly question_count: number;
+      subjects: string[];
+      status: components["schemas"]["SubjectTestStatusEnum"];
+      /** Format: decimal */
+      percent: string | null;
+      /** Format: date-time */
+      taken_at: string | null;
+      /** Format: date-time */
+      retake_at: string | null;
+      can_take: boolean;
+    };
+    SubjectTestAttempt: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      quiz: string;
+      title: string;
+      /** @default  */
+      subject: string;
+      /** Format: decimal */
+      percent: string;
+      passed: boolean;
+      /** Format: date-time */
+      submitted_at: string;
+    };
+    SubjectTestDetail: {
+      /** Format: uuid */
+      id: string;
+      title: string;
+      description: string;
+      /** @default  */
+      subject: string;
+      /** @default  */
+      level: string;
+      pass_percent: number;
+      time_limit_minutes: number | null;
+      readonly question_count: number;
+      subjects: string[];
+      status: components["schemas"]["SubjectTestStatusEnum"];
+      /** Format: decimal */
+      percent: string | null;
+      /** Format: date-time */
+      taken_at: string | null;
+      /** Format: date-time */
+      retake_at: string | null;
+      can_take: boolean;
+      readonly questions: components["schemas"]["SubjectTestQuestion"][];
+    };
+    SubjectTestQuestion: {
+      /** Format: uuid */
+      id: string;
+      kind: string;
+      prompt: string;
+      choices: {
+        [key: string]: unknown;
+      }[];
+      points: number;
+    };
+    SubjectTestResult: {
+      /** Format: decimal */
+      percent: string;
+      passed: boolean;
+      pass_percent: number;
+      assessed: string[];
+    };
+    /**
+     * @description * `not_taken` - not_taken
+     *     * `passed` - passed
+     *     * `failed` - failed
+     * @enum {string}
+     */
+    SubjectTestStatusEnum: "not_taken" | "passed" | "failed";
     Submission: {
       /** Format: uuid */
       readonly id: string;
@@ -41894,14 +42530,12 @@ export interface components {
       colour?: string;
       entity_types?: unknown;
     };
-    /**
-     * @description * `student` - student
-     *     * `job` - job
-     *     * `lesson` - lesson
-     *     * `group_class` - group_class
-     * @enum {string}
-     */
-    TargetEnum: "student" | "job" | "lesson" | "group_class";
+    TakeSubjectTestRequest: {
+      /** @description Question id → choice id(s) or a short answer. */
+      answers: {
+        [key: string]: unknown;
+      };
+    };
     Task: {
       /** Format: uuid */
       readonly id: string;
@@ -44403,6 +45037,8 @@ export interface operations {
   accounting_export_retrieve: {
     parameters: {
       query: {
+        /** @description Only this branch's records. */
+        branch?: string | null;
         end: string;
         /**
          * @description * `generic` - Generic GL journal (CSV)
@@ -44411,14 +45047,8 @@ export interface operations {
          *     * `iif` - QuickBooks Desktop (IIF)
          */
         file_format?: "generic" | "sage50" | "myob" | "iif";
-        /**
-         * @description * `export` - export
-         *     * `xero` - xero
-         *     * `quickbooks` - quickbooks
-         *     * `sage` - sage
-         *     * `freeagent` - freeagent
-         */
-        mapping_set?: "export" | "xero" | "quickbooks" | "sage" | "freeagent";
+        /** @description export, xero, quickbooks, sage, freeagent, or <provider>@<branch id> for a branch's own ledger (its records only). */
+        mapping_set?: string;
         start: string;
       };
       header?: never;
@@ -44442,7 +45072,8 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        provider: "export" | "freeagent" | "quickbooks" | "sage" | "xero";
+        /** @description xero, quickbooks, sage, freeagent, export (GL files), or <provider>@<branch id> for a branch's own ledger. */
+        provider: string;
       };
       cookie?: never;
     };
@@ -44463,7 +45094,8 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        provider: "export" | "freeagent" | "quickbooks" | "sage" | "xero";
+        /** @description xero, quickbooks, sage, freeagent, export (GL files), or <provider>@<branch id> for a branch's own ledger. */
+        provider: string;
       };
       cookie?: never;
     };
@@ -44547,6 +45179,7 @@ export interface operations {
         object_type?:
           | "bill"
           | "bill_payment"
+          | "chargeback"
           | "contact"
           | "credit_note"
           | "invoice"
@@ -44556,6 +45189,7 @@ export interface operations {
           | "pay_statement"
           | "payment"
           | "provider_payout"
+          | "reallocation"
           | "refund"
           | "supplier"
           | "write_off";
@@ -46466,7 +47100,7 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody: {
+    requestBody?: {
       content: {
         "application/json": components["schemas"]["ProposeInterviewRequest"];
         "application/x-www-form-urlencoded": components["schemas"]["ProposeInterviewRequest"];
@@ -54078,7 +54712,14 @@ export interface operations {
   };
   compliance_dashboard_retrieve: {
     parameters: {
-      query?: never;
+      query?: {
+        cell_status?: "expired" | "missing" | "rejected" | "submitted" | "verified";
+        /** @description Only tutors with missing, rejected or expired. */
+        gaps?: boolean;
+        /** @description A requirement key, e.g. dbs_enhanced. */
+        requirement?: string;
+        tutor_status?: "active" | "onboarding" | "restricted";
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -54091,6 +54732,32 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ComplianceDashboard"];
+        };
+      };
+    };
+  };
+  compliance_dashboard_export_retrieve: {
+    parameters: {
+      query?: {
+        cell_status?: "expired" | "missing" | "rejected" | "submitted" | "verified";
+        /** @description Only tutors with missing, rejected or expired. */
+        gaps?: boolean;
+        /** @description A requirement key, e.g. dbs_enhanced. */
+        requirement?: string;
+        tutor_status?: "active" | "onboarding" | "restricted";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv": string;
         };
       };
     };
@@ -54145,6 +54812,34 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ComplianceRecord"];
+        };
+      };
+    };
+  };
+  compliance_request_missing_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["RequestMissingRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["RequestMissingRequest"];
+        "multipart/form-data": components["schemas"]["RequestMissingRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RequestMissingResult"];
         };
       };
     };
@@ -60443,6 +61138,28 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["JobOpening"];
+        };
+      };
+    };
+  };
+  job_openings_default_form_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApplicationForm"];
         };
       };
     };
@@ -66948,6 +67665,76 @@ export interface operations {
       };
     };
   };
+  me_subject_tests_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SubjectTest"][];
+        };
+      };
+    };
+  };
+  me_subject_tests_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        quiz_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SubjectTestDetail"];
+        };
+      };
+    };
+  };
+  me_subject_tests_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        quiz_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TakeSubjectTestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["TakeSubjectTestRequest"];
+        "multipart/form-data": components["schemas"]["TakeSubjectTestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SubjectTestResult"];
+        };
+      };
+    };
+  };
   me_tax_identity_retrieve: {
     parameters: {
       query?: never;
@@ -70213,6 +71000,105 @@ export interface operations {
       };
     };
   };
+  performance_notes_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        kind?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPerformanceNoteList"];
+        };
+      };
+    };
+  };
+  performance_notes_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddPerformanceNoteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AddPerformanceNoteRequest"];
+        "multipart/form-data": components["schemas"]["AddPerformanceNoteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PerformanceNote"];
+        };
+      };
+    };
+  };
+  performance_notes_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this performance note. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PerformanceNote"];
+        };
+      };
+    };
+  };
+  performance_notes_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this performance note. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   permissions_list: {
     parameters: {
       query?: never;
@@ -73190,6 +74076,115 @@ export interface operations {
       };
     };
   };
+  probation_reviews_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: string;
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedProbationReviewList"];
+        };
+      };
+    };
+  };
+  probation_reviews_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScheduleProbationRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ScheduleProbationRequest"];
+        "multipart/form-data": components["schemas"]["ScheduleProbationRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProbationReview"];
+        };
+      };
+    };
+  };
+  probation_reviews_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this probation review. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProbationReview"];
+        };
+      };
+    };
+  };
+  probation_reviews_complete_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this probation review. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CompleteProbationRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["CompleteProbationRequest"];
+        "multipart/form-data": components["schemas"]["CompleteProbationRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProbationReview"];
+        };
+      };
+    };
+  };
   processes_list: {
     parameters: {
       query?: {
@@ -74762,6 +75757,62 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PublicTutorDetail"];
+        };
+      };
+    };
+  };
+  public_uploads_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublicUploadRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PublicUploadRequestRequest"];
+        "multipart/form-data": components["schemas"]["PublicUploadRequestRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicUploadCreated"];
+        };
+      };
+    };
+  };
+  public_uploads_complete_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PublicUploadCompleteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PublicUploadCompleteRequest"];
+        "multipart/form-data": components["schemas"]["PublicUploadCompleteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PublicUploadedFile"];
         };
       };
     };
@@ -81821,6 +82872,130 @@ export interface operations {
       };
     };
   };
+  tutors_offboarding_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Offboarding"];
+        };
+      };
+    };
+  };
+  tutors_offboarding_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["StartOffboardingRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["StartOffboardingRequest"];
+        "multipart/form-data": components["schemas"]["StartOffboardingRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Offboarding"];
+        };
+      };
+    };
+  };
+  tutors_offboarding_done_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Offboarding"];
+        };
+      };
+    };
+  };
+  tutors_offboarding_complete_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Offboarding"];
+        };
+      };
+    };
+  };
+  tutors_offboarding_revoke_access_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Offboarding"];
+        };
+      };
+    };
+  };
   tutors_onboarding_retrieve: {
     parameters: {
       query?: never;
@@ -81971,6 +83146,27 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Tutor"];
+        };
+      };
+    };
+  };
+  tutors_subject_tests_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SubjectTestAttempt"][];
         };
       };
     };

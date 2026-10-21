@@ -100,14 +100,14 @@ Each app in `backend/tutortrack/` owns its models, `services.py` (writes), `sele
 | `comms` | Email, SMS and push, templates, inbox, broadcasts, notification preferences | E13 |
 | `automations` | Trigger/condition/action automations on Temporal | E14 |
 | `portal` | Client, student and tutor portal APIs | E15, E16 |
-| `leads` | Enquiries, pipeline, forms, waitlist | E17 |
-| `recruitment` | Tutor applications, onboarding, compliance checks | E18 |
+| `leads` | Enquiries, pipeline, forms (with file uploads), waitlist, proposals | E17 |
+| `recruitment` | Job openings, tutor applications (CV and video uploads), interview booking, onboarding, compliance checks, probation reviews, offboarding, subject tests | E18 |
 | `matching` | Tutor matching and the job marketplace | E19 |
 | `courses` | Group classes, courses, terms and enrolment | E20 |
 | `learning` | Homework, resources, progress and assessments | E21 |
 | `integrations` | Integration framework and provider connections | E22 |
 | `calendar_sync` | Calendar sync and online lesson (video) integrations | E22 |
-| `accounting` | Xero, QuickBooks, Sage and FreeAgent sync | E23 |
+| `accounting` | Xero, QuickBooks, Sage and FreeAgent sync (per-branch ledgers, payment read-back) | E23 |
 | `sites` | Public website builder, widgets, custom domains, white-labelling | E24 |
 | `growth` | Reviews, referrals and affiliates | E25 |
 | `reporting` | Reports (incl. referral, affiliate, review and room utilisation), dashboards, custom and scheduled reports, warehouse export | E26 |

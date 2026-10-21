@@ -275,6 +275,59 @@ def mark_failed(lesson_id: Any, error: str) -> bool:
     return True
 
 
+# --- meetings that aren't lessons (E18 interviews, gap batch G5a) -------------------------------
+
+
+def create_standalone_meeting(
+    *,
+    key: str,
+    topic: str,
+    start: Any,
+    end: Any,
+    timezone: str,
+    host_user_id: Any,
+    host_name: str = "",
+) -> tuple[str, Any]:
+    """A one-off online meeting (e.g. a recruitment interview) on the organisation's default
+    video provider: the host's own connection, else the organisation's, else the built-in
+    room. Returns ``(provider, MeetingInfo)``, or ``("none", None)`` when the organisation
+    turned online meetings off. Provider errors propagate so the caller can retry."""
+    provider = str(_setting("integrations.video_provider"))
+    if provider == "none":
+        return "none", None
+    account = providers.VIDEO_PROVIDERS.get(provider)
+    connection: IntegrationConnection | None = None
+    if account is None:
+        provider = "builtin"
+    else:
+        connection = selectors.user_connection(host_user_id, account) or selectors.org_connection(
+            account
+        )
+        if connection is None:
+            provider = "builtin"
+    spec = MeetingSpec(
+        lesson_id=key,
+        topic=topic,
+        start=start,
+        end=end,
+        timezone=timezone,
+        host_name=host_name,
+        space_key=key,
+        options={
+            "waiting_room": bool(_setting("integrations.zoom_waiting_room")),
+            "passcode": bool(_setting("integrations.zoom_passcode")),
+            "recording": "none",
+        },
+    )
+    try:
+        info = providers.meeting_client(provider).create_meeting(_creds(connection), spec)
+    except ProviderError as exc:
+        if connection is not None and isinstance(exc, AuthError):
+            integrations.record_failure(connection, exc)
+        raise
+    return provider, info
+
+
 # --- join links (FR-22-4, T09) -------------------------------------------------------------------
 
 

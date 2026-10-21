@@ -521,7 +521,7 @@
 <tr><td><span class="ui">Assessments</span></td><td>Create diagnostics, mock exams and other assessments and <span class="ui">Record a result</span>.</td></tr>
 <tr><td><span class="ui">Progress reports</span></td><td><span class="ui">Generate progress reports</span> for a term, month or custom period as drafts. Add <span class="ui">Summary comments</span> (or <span class="ui">Draft with AI</span>), <span class="ui">Submit for approval</span>, <span class="ui">Approve</span> and <span class="ui">Share with the family</span>.</td></tr>
 <tr><td><span class="ui">Library</span></td><td>Lend books, instruments and devices; mark them <span class="ui">Returned</span>, <span class="ui">Lost</span> or <span class="ui">Lost: charge replacement</span>.</td></tr>
-<tr><td><span class="ui">Quizzes</span></td><td>Build auto-marked quizzes to set as homework. Questions are locked once someone has taken the quiz.</td></tr>
+<tr><td><span class="ui">Quizzes</span></td><td>Build auto-marked quizzes to set as homework. Questions are locked once someone has taken the quiz. Set <span class="ui">Used for</span> to <span class="ui">Tutor subject test</span>, with a <span class="ui">Subject</span> and <span class="ui">Pass mark (%)</span>, to test tutors who teach that subject (see <a href="#tutor-tests">subject tests</a>).</td></tr>
 </tbody>
 </table>
 </div>
@@ -633,16 +633,18 @@
 </ul>
 <p><strong>Proposals.</strong> <span class="ui">New proposal</span> builds a priced offer with an introduction, schedule, price lines, suggested tutors and an optional deposit. <span class="ui">Send</span> emails it with a PDF; the family reads it on a web page, chooses a tutor and accepts (paying any deposit) or declines. Accepting converts the enquiry and offers the job to the chosen tutor. Sent proposals can't be edited; <span class="ui">Withdraw</span> it and send a new one.</p>
 <p><strong>Waitlist.</strong> Students waiting for a place, in order. Describe the slot under <span class="ui">Offer (day, time, tutor)</span> and select <span class="ui">Offer place</span>. The family gets a time-limited link to accept or decline.</p>
-<p><strong>Forms.</strong> <span class="ui">New form</span> creates an enquiry form for your website. Edit its fields (each can save to a record field or record consent), tick <span class="ui">Published</span> and use <span class="ui">Open form</span> to get its address. Forms can't take file uploads.</p>
+<p><strong>Forms.</strong> <span class="ui">New form</span> creates an enquiry form for your website. Edit its fields (each can save to a record field or record consent), tick <span class="ui">Published</span> and use <span class="ui">Open form</span> to get its address.</p>
+<p><strong>File uploads.</strong> Add a field of type <span class="ui">file</span> and choose <span class="ui">Files allowed</span>: <span class="ui">Documents and photos</span> (PDF, Word or a photo, up to 10 MB), <span class="ui">CV (PDF or Word)</span> or <span class="ui">Video</span> (MP4, MOV or WebM, up to 100 MB). Tick <span class="ui">More than one file</span> to allow up to five. Families upload on your form's page; the files appear under <span class="ui">Files sent with the enquiry</span> on the enquiry and open once they have been checked for viruses. Files on a form embedded on your website open your full form instead.</p>
 <p><strong>Reports.</strong> Enquiries, win rate and first-response time, by stage and by source.</p>
 </section>
 
-<section id="recruitment" data-route="admin:/recruitment" aria-labelledby="recruitment-h">
+<section id="recruitment" data-route="admin:/recruitment admin:/recruitment/openings" aria-labelledby="recruitment-h">
 <h4 id="recruitment-h">Recruitment</h4>
 <p><span class="ui">Recruitment</span> (<code>recruitment.application.view</code>) shows tutor applications by stage: Applied, Screening, Interview, References &amp; checks and Decision. Applications come from your public vacancies page.</p>
+<p><strong>Openings.</strong> The <span class="ui">Openings</span> tab lists your roles with their open applications. <span class="ui">New opening</span> (<code>recruitment.pipeline.manage</code>): enter the <span class="ui">Title</span>, <span class="ui">Subjects</span> (separated by commas), <span class="ui">Location</span>, <span class="ui">Branch</span>, <span class="ui">Closing date</span> and <span class="ui">Description</span> (or use <span class="ui">Draft with AI</span>), tick <span class="ui">Publish on the vacancies page</span> and save. The <span class="ui">Web address</span> is made from the title. Leave <span class="ui">Application form</span> on <span class="ui">Standard application form</span> to use the ready-made form: details, subjects, qualifications, experience, right to work, a CV and a video introduction, two referees and the privacy notice. You can change that form in <span class="path">Leads › Forms</span> like any other.</p>
 <ol class="steps">
-<li>Open an application to see the applicant's subjects, experience and answers. Change the <span class="ui">Stage</span> as you go.</li>
-<li>To interview, enter an <span class="ui">Interview time</span> and select <span class="ui">Invite to interview</span>. The applicant confirms by email link. Arrange the video link yourself.</li>
+<li>Open an application to see the applicant's subjects, experience and answers, and their CV, video and other files (they open once checked for viruses). Change the <span class="ui">Stage</span> as you go.</li>
+<li>To interview, choose <span class="ui">Booking link (interviewer's free time)</span>, the length and the dates to offer, and select <span class="ui">Send invitation</span>. The applicant picks any free time: yours from your availability if you also tutor, otherwise within the organisation's interview hours, never clashing with your other interviews. Or choose <span class="ui">One time I choose</span> and enter the time. When they book, a video link is created and emailed to them, you are told, and they get a reminder the day before. <span class="ui">Video link</span> opens the call.</li>
 <li>Enter a referee's name and email and select <span class="ui">Ask for a reference</span>. Referees get reminders; their rating and any concern appear under <span class="ui">References</span>.</li>
 <li>Select <span class="ui">Approve and onboard</span> (<code>recruitment.application.decide</code>). This creates the tutor with an invitation and an onboarding checklist, and they become active when the required items are done. Or give a <span class="ui">Reason</span> and <span class="ui">Reject</span>; the applicant is emailed.</li>
 </ol>
@@ -655,6 +657,17 @@
 <li>To check a document, open the tutor and use the compliance card: <span class="ui">Verify</span> or <span class="ui">Reject</span> (<code>compliance.verify</code>). You can't verify your own records.</li>
 <li>To run an online check, use <span class="ui">Start an online check</span> on the tutor's page, choose the provider and type, confirm the tutor agreed and select <span class="ui">Start check</span>. Results are only shown to people allowed to see them, and each look is recorded.</li>
 <li>Tutors get reminders 60, 30 and 7 days before expiry. When a required item expires, the tutor is <strong>restricted</strong>: they can't be given new lessons and their pay is held until it is fixed.</li>
+<li>Filter the grid by <span class="ui">Tutor status</span>, <span class="ui">Requirement</span> or <span class="ui">Only tutors with gaps</span>. <span class="ui">Export CSV</span> downloads what you see, with a status and expiry date for each requirement.</li>
+<li>To chase documents, tick tutors and select <span class="ui">Request documents from … tutors</span>, or select <span class="ui">Request missing documents</span> to ask everyone shown (<code>compliance.verify</code>). Each tutor gets an email and a message listing what is missing, rejected or expired, at most once a day.</li>
+</ul>
+</section>
+
+<section id="tutor-performance" aria-labelledby="tutor-performance-h">
+<h4 id="tutor-performance-h">Probation, performance notes and offboarding</h4>
+<p>On a tutor's page:</p>
+<ul>
+<li><span class="ui">Performance</span> (<code>recruitment.performance.view</code>; recording needs <code>recruitment.performance.manage</code>): a tutor who finishes onboarding gets a <span class="ui">Probation review</span> about three months later, or use <span class="ui">Schedule review</span>. You are reminded a week before, on the day, and weekly until you choose an <span class="ui">Outcome</span> (<span class="ui">Passed</span>, <span class="ui">Extended</span> with the <span class="ui">Next review</span> date, <span class="ui">Not passed</span> or <span class="ui">Cancelled</span>) and select <span class="ui">Record outcome</span>. Add <span class="ui">Performance notes</span> (note, praise or concern); tutors don't see them. Subject-test results are listed here too.</li>
+<li><span class="ui">Offboarding</span> (<code>recruitment.offboarding.manage</code>): enter the <span class="ui">Reason for leaving</span> and <span class="ui">Leaving date</span> and select <span class="ui">Start offboarding</span>. The tutor stops getting new work at once. Reassigning jobs and future lessons and the final pay tick themselves when they are done; <span class="ui">Revoke access</span> ends their login; tick the other steps with <span class="ui">Mark done</span>. <span class="ui">Finish offboarding</span> archives the tutor; their records are kept for the retention period.</li>
 </ul>
 </section>
 
@@ -904,6 +917,16 @@ A moved lesson tells the family. A request waits for the office or the family to
 <li>If not, select <span class="ui">Something's wrong</span>, say what is wrong and select <span class="ui">Send</span>. The office holds those invoices until it is sorted out.</li>
 </ul>
 <p>Answer by the date shown; after that the invoices go out as they are.</p>
+</section>
+
+<section id="tutor-tests" data-route="portal:/tutor/tests" aria-labelledby="tutor-tests-h">
+<h3 id="tutor-tests-h">Subject tests</h3>
+<p><span class="ui">Subject tests</span> lists short online tests for the subjects you teach, with the number of questions and the pass mark.</p>
+<ol class="steps">
+<li>Select <span class="ui">Start …</span>, answer each question and select <span class="ui">Send answers</span>.</li>
+<li>Your score shows straight away. If you pass, the subject is marked as assessed and the office approves it.</li>
+<li>If you don't pass, you can try again from the date shown (a week later by default).</li>
+</ol>
 </section>
 
 <section id="tutor-onboarding" data-route="portal:/tutor/onboarding portal:/tutor/compliance" aria-labelledby="tutor-onboarding-h">

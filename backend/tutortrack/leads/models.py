@@ -163,6 +163,8 @@ class Enquiry(BranchScopedModel):
     )
     trial_feedback = models.TextField(blank=True, default="")
     converted_job_ids = models.JSONField(default=list, blank=True)
+    # G5a: files the family uploaded on the public form (``core.storage.public``).
+    attachments = models.ManyToManyField("core.StoredFile", blank=True, related_name="+")
 
     class Meta(BranchScopedModel.Meta):
         ordering = ["-created_at"]

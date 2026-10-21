@@ -2,7 +2,7 @@ import { css, html, nothing } from "lit";
 
 import { TtWidget } from "./base";
 import { referralCode } from "./referral";
-import { api, ApiError, emit } from "./runtime";
+import { api, ApiError, apiBase, emit } from "./runtime";
 import { t } from "./strings";
 
 interface Field {
@@ -237,6 +237,17 @@ export class TtEnquiryForm extends TtWidget {
           />
           <span>${field.label}</span>
         </label>
+        ${error ? html`<p class="error" id="${id}-error">${error}</p>` : nothing}
+      </div>`;
+    } else if (field.type === "file") {
+      // G5a: uploads need the hosted form (storage only accepts uploads from it).
+      return html`<div class="field">
+        <p class="label">${field.label}</p>
+        <p class="muted">
+          <a href="${apiBase()}/f/${this.form}" target="_blank" rel="noopener"
+            >${t("attachOnFullForm")}</a
+          >
+        </p>
         ${error ? html`<p class="error" id="${id}-error">${error}</p>` : nothing}
       </div>`;
     } else if (field.type === "students") {

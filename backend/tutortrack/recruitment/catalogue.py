@@ -137,3 +137,75 @@ CHECKLIST = [
     {"key": "payout", "label": "Add your bank details", "kind": "payout", "mandatory": True},
     {"key": "profile", "label": "Write your profile", "kind": "profile", "mandatory": False},
 ]
+
+
+def _field(key: str, label: str, kind: str, maps_to: str = "", **extra: Any) -> dict[str, Any]:
+    out: dict[str, Any] = {"key": key, "label": label, "type": kind, **extra}
+    if maps_to:
+        out["maps_to"] = maps_to
+    return out
+
+
+# G5a (FR-18-1): the standard tutor application form a new job opening can start from. Staff
+# can change it in the form builder like any other form.
+APPLICATION_FORM: dict[str, Any] = {
+    "steps": [
+        {
+            "title": "About you",
+            "fields": [
+                _field("first_name", "First name", "text", "applicant.first_name", required=True),
+                _field("last_name", "Last name", "text", "applicant.last_name", required=True),
+                _field("email", "Email", "email", "applicant.email", required=True),
+                _field("phone", "Phone", "phone", "applicant.phone"),
+                _field("postcode", "Postcode", "postcode", "applicant.postcode"),
+                _field("right_to_work", "Right to work", "text", "applicant.right_to_work"),
+            ],
+        },
+        {
+            "title": "Your teaching",
+            "fields": [
+                _field(
+                    "subjects",
+                    "Subjects and levels you teach",
+                    "text",
+                    "applicant.subjects",
+                    required=True,
+                ),
+                _field(
+                    "qualifications",
+                    "Qualifications and grades",
+                    "textarea",
+                    "applicant.qualifications",
+                ),
+                _field("experience", "Tutoring experience", "textarea", "applicant.experience"),
+                _field("cv", "CV (PDF or Word)", "file", "applicant.cv", file_kind="cv"),
+                _field(
+                    "video",
+                    "Video introduction (optional)",
+                    "file",
+                    "applicant.video",
+                    file_kind="video",
+                ),
+                _field("video_url", "Or a link to your video", "text", "applicant.video_url"),
+            ],
+        },
+        {
+            "title": "References",
+            "fields": [
+                _field("referees", "Two referees", "referees", "referees", required=True),
+                _field("privacy", "I have read the privacy notice", "consent", required=True),
+            ],
+        },
+    ]
+}
+
+# G5a (FR-18-9): the offboarding checklist. ``auto`` items complete themselves from the
+# tutor's data; the others are ticked by staff.
+OFFBOARDING: list[dict[str, Any]] = [
+    {"key": "jobs", "label": "Reassign or end the tutor's jobs", "auto": True},
+    {"key": "lessons", "label": "Reassign or cancel future lessons", "auto": True},
+    {"key": "access", "label": "Revoke access to TutorTrack", "auto": True},
+    {"key": "final_pay", "label": "Pay everything owed in a final pay run", "auto": True},
+    {"key": "equipment", "label": "Collect resources, keys and equipment", "auto": False},
+    {"key": "records", "label": "Keep records for the retention period", "auto": False},
+]

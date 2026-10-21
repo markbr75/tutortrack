@@ -33,6 +33,7 @@ const enGB = {
   student: "Student {n} first name",
   studentSubjects: "Student {n} subjects",
   addStudent: "Add another student",
+  attachOnFullForm: "To attach files, use our full form (opens in a new tab)",
   website: "Website",
   price: "Price",
   askPrice: "Ask us",
