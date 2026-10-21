@@ -45,5 +45,7 @@ invoice), but the product treated one tutor like an agency:
 - The user guide gains "Working on your own"; the admin guide documents the wizard option
   and the type of business setting.
 - Plan limits are unchanged (Solo: one tutor), so a sole trader's own tutor record fits.
-- Local development needs Celery beat (or a manual `dispatch_outbox`) for completed lessons to
-  become charges; production runs beat. Not changed here.
+- Completed lessons did not become charges locally. The cause (found 2026-10-21) was not beat:
+  the local worker command consumed only the `default` queue, so outbox, notification, billing
+  and other routed tasks never ran. `config/celery.py` now declares every queue, and the README
+  adds beat for timed jobs.

@@ -88,7 +88,7 @@ describe("people map (E05-T12)", () => {
     expect(calls.find((c) => c.path === "/api/v1/people/map/geocode")?.body).toEqual({
       kinds: ["student", "tutor"],
     });
-  });
+  }, 15_000); // renders the full map; can pass 5 s on a loaded machine
 });
 
 describe("lesson feedback (E09-T09)", () => {
