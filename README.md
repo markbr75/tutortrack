@@ -5,8 +5,8 @@ delivery, billing, payments, payroll, communications, automations, portals for c
 and tutors, websites, reporting, a public API and an AI assistant. Python (Django) and
 PostgreSQL backend, React and TypeScript frontends.
 
-**Status:** all 32 epics (E01–E32) are built, plus gap batches G1–G4 and G6. Gap batch G5 and
-the items that need real provider credentials are listed in
+**Status:** all 32 epics (E01–E32) are built, plus every gap batch (G1–G6). The items that
+need real provider credentials or infrastructure are listed at the end of
 [docs/05-gap-backlog.md](docs/05-gap-backlog.md). Build order and progress:
 [docs/04-roadmap.md](docs/04-roadmap.md).
 
