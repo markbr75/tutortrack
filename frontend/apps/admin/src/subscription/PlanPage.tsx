@@ -85,7 +85,7 @@ export function PlanPage() {
   const sub = subscription.data;
   return (
     <div className="max-w-4xl space-y-6">
-      <PageHeader className="mb-0" title={t("plan.title")} />
+      <PageHeader title={t("plan.title")} />
       {returned.isSuccess ? <Alert tone="success">{t("plan.thanks")}</Alert> : null}
       <StatusSection sub={sub} />
       {usage.data ? <UsageSection usage={usage.data} /> : null}

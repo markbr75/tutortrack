@@ -176,12 +176,18 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
       <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold">
-            <span className="tabular-nums">{inv.number || t("billing.draftInvoice")}</span>{" "}
-            <InvoiceStatus
-              status={inv.status}
-              overdue={inv.is_overdue}
-              className="ml-2 align-middle text-base font-medium"
-            />
+            <span className="tabular-nums">{inv.number || t("billing.draftInvoice")}</span>
+            {/* "Draft invoice" already says it; the status word follows a number only. */}
+            {inv.number ? (
+              <>
+                {" "}
+                <InvoiceStatus
+                  status={inv.status}
+                  overdue={inv.is_overdue}
+                  className="ml-2 align-middle text-base font-medium"
+                />
+              </>
+            ) : null}
           </h1>
           <p className="mt-1 text-muted-foreground">
             <Link

@@ -1291,6 +1291,7 @@
       "bank_transfer": "Bank transfer",
       "cash": "Cash",
       "cheque": "Cheque",
+      "paypal": "PayPal",
       "other": "Other"
     },
     "status": {
@@ -7373,7 +7374,7 @@
       "noRuns": "No invoice runs yet.",
       "noAgeing": "Nobody owes anything, so there is nothing to age.",
       "noPackages": "No packages yet.",
-      "noPlans": "No payment plans yet."
+      "noPlans": "No recurring fees yet."
     },
     "bank": {
       "empty": "No bank lines in this view."

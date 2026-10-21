@@ -76,6 +76,7 @@ export function InvoiceTable({
   isFetchingMore,
   onLoadMore,
   empty,
+  hideClient,
 }: {
   rows: Invoice[];
   isLoading?: boolean;
@@ -83,6 +84,8 @@ export function InvoiceTable({
   isFetchingMore?: boolean;
   onLoadMore?: () => void;
   empty?: string;
+  /** On a client's own record the client column would repeat the page title. */
+  hideClient?: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const money = useMoney();
@@ -144,6 +147,7 @@ export function InvoiceTable({
       isFetchingMore={isFetchingMore}
       onLoadMore={onLoadMore}
       labels={labels}
+      initialColumnVisibility={hideClient ? { client: false } : undefined}
     />
   );
 }
@@ -582,7 +586,13 @@ function Ageing() {
               {BUCKETS.map((b) => (
                 <td
                   key={b}
-                  className={`px-4 py-2.5 text-right whitespace-nowrap ${zero(row[b]) ? "text-muted-foreground" : ""}`}
+                  className={`px-4 py-2.5 text-right whitespace-nowrap ${
+                    zero(row[b])
+                      ? "text-muted-foreground"
+                      : b === "current"
+                        ? ""
+                        : "font-medium text-margin"
+                  }`}
                 >
                   {money(row[b])}
                 </td>

@@ -179,6 +179,7 @@ export function ClientBilling({ clientId, currency }: { clientId: string; curren
             rows={invoices.data?.results ?? []}
             isLoading={invoices.isPending}
             empty={t("designS7.billing.empty.all")}
+            hideClient
           />
         ) : null}
         {tab === "payments" ? (

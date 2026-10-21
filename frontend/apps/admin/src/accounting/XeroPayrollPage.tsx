@@ -7,7 +7,6 @@ import {
   RuledPanel,
   SelectField,
   Spinner,
-  buttonClass,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -111,19 +110,17 @@ export function XeroPayrollPage() {
   const data = status.data;
   return (
     <div className="max-w-4xl space-y-6">
-      <PageHeader
-        className="mb-0"
-        title={t("accountingPhase3.payrollTitle")}
-        description={t("accountingPhase3.payrollHelp")}
-        actions={
-          <Link
-            to="/settings/accounting"
-            className={buttonClass({ variant: "secondary", size: "sm" })}
-          >
+      <div>
+        <p className="mb-2 text-sm">
+          <Link to="/settings/accounting" className="font-medium text-link hover:underline">
             {t("accounting.title")}
           </Link>
-        }
-      />
+        </p>
+        <PageHeader
+          title={t("accountingPhase3.payrollTitle")}
+          description={t("accountingPhase3.payrollHelp")}
+        />
+      </div>
       {complete.isSuccess ? (
         <Alert tone="success">{t("accountingPhase3.payrollConnected")}</Alert>
       ) : null}

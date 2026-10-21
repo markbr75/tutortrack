@@ -798,7 +798,6 @@ export function AccountingPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <PageHeader
-        className="mb-0"
         title={t("accounting.title")}
         description={t("accounting.help")}
         actions={
