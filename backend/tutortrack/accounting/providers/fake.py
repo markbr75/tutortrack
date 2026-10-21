@@ -31,6 +31,7 @@ from ..documents import (
     PaymentDoc,
     PayoutDoc,
     Pushed,
+    ReallocationDoc,
     RefundDoc,
 )
 from .base import (
@@ -474,6 +475,14 @@ class FakeAccountingClient:
             self._recompute(invoice)
         if doc.from_credit:
             self._use_credit(state, doc.contact, doc.from_credit)
+        paid = state["records"].get("payments", {}).get(doc.payment)
+        if paid is not None:  # what the payment still pays, as a real ledger shows it
+            taken = dict(doc.from_invoices)
+            paid["allocations"] = [
+                [t, str(_dec(a) - taken.get(t, Decimal(0)))]
+                for t, a in paid["allocations"]
+                if _dec(a) - taken.get(t, Decimal(0)) > 0
+            ]
         record = {
             "id": self._new_id("refund"),
             "payment": doc.payment,
@@ -484,6 +493,43 @@ class FakeAccountingClient:
         }
         self._store(state, "refunds", record)
         return Pushed(record["id"])
+
+    def _push_reallocation(
+        self, state: dict[str, Any], doc: ReallocationDoc, external_id: str
+    ) -> Pushed:
+        """Move a payment between invoices (gap G5); what comes off invoices goes to the
+        contact's credit and what goes onto them comes out of it."""
+        payment = self._find(state, "payments", doc.payment)
+        before = {t: _dec(a) for t, a in payment["allocations"]}
+        after = dict(doc.allocations)
+        for target in sorted(set(before) | set(after)):
+            invoice = self._find(state, "invoices", target)
+            change = after.get(target, Decimal(0)) - before.get(target, Decimal(0))
+            if change > _dec(invoice["amount_due"]):
+                raise LedgerRejected(
+                    "Payment amount exceeds the amount outstanding on this document."
+                )
+        for target in sorted(set(before) | set(after)):
+            invoice = self._find(state, "invoices", target)
+            change = after.get(target, Decimal(0)) - before.get(target, Decimal(0))
+            invoice["paid"] = str(_dec(invoice["paid"]) + change)
+            self._recompute(invoice)
+        freed = sum(before.values(), Decimal(0)) - sum(after.values(), Decimal(0))
+        if freed > 0:
+            contact = self._find(state, "contacts", doc.contact)
+            contact["credit"] = str(_dec(contact["credit"]) + freed)
+        elif freed < 0:
+            self._use_credit(state, doc.contact, -freed)
+        payment["allocations"] = [[t, str(a)] for t, a in doc.allocations]
+        payment["unallocated"] = str(_dec(payment.get("unallocated", "0")) + freed)
+        record: dict[str, Any] = {
+            "id": self._new_id("realloc"),
+            "payment": doc.payment,
+            "allocations": [[t, str(a)] for t, a in doc.allocations],
+            "date": doc.date,
+        }
+        self._store(state, "reallocations", record)
+        return Pushed(record["id"], created=not external_id)
 
     def _push_provider_payout(
         self, state: dict[str, Any], doc: PayoutDoc, external_id: str

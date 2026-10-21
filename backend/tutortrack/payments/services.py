@@ -728,6 +728,7 @@ def reallocate(
     if payment.status not in {Payment.Status.SUCCEEDED, Payment.Status.PARTIALLY_REFUNDED}:
         raise BusinessRuleViolation(_("Only received payments can be allocated."))
     before = {str(k): str(v) for k, v in _by_invoice(payment).items()}
+    held = {str(k): str(v.amount) for k, v in _by_invoice(payment).items() if v.is_positive()}
     for invoice_id, amount in _by_invoice(payment).items():
         if amount.is_positive():
             invoice = Invoice.objects.get(pk=invoice_id)
@@ -740,6 +741,18 @@ def reallocate(
         payment,
         "reallocate",
         {"allocations": [before, {str(i.pk): str(a.amount) for i, a in allocations}]},
+    )
+    publish(
+        events.PaymentReallocated(
+            subject_id=payment.pk,
+            client_id=str(payment.client_id),
+            amount=payment.amount.to_dict(),
+            before=held,
+            after={
+                str(k): str(v.amount) for k, v in _by_invoice(payment).items() if v.is_positive()
+            },
+        ),
+        branch_id=payment.branch_id,
     )
     return payment
 
@@ -1191,7 +1204,6 @@ def close_dispute(dispute: Dispute, *, won: bool) -> Dispute:
     payment = dispute.payment
     dispute.status = Dispute.Status.WON if won else Dispute.Status.LOST
     dispute.closed_at = now()
-    dispute.save()
     if won:
         payment.status = Payment.Status.SUCCEEDED
         payment.save(update_fields=["status", "updated_at"])
@@ -1218,6 +1230,9 @@ def close_dispute(dispute: Dispute, *, won: bool) -> Dispute:
         payment.refunded = min(payment.amount, payment.refunded + dispute.amount)
         payment.status = Payment.Status.REFUNDED
         payment.save(update_fields=["refunded_amount", "status", "updated_at"])
+    # Saved last: ``closed_at``..``updated_at`` brackets the allocations a loss took back,
+    # which E23 reads to post the chargeback to the ledger (gap G5).
+    dispute.save()
     publish(
         events.PaymentDisputeClosed(
             subject_id=payment.pk,

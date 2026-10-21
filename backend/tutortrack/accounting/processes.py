@@ -62,6 +62,9 @@ class SyncInput(WorkflowInput):
     object_id: str
     wait_for_retry: bool = True
     retry_wait_days: int = RETRY_WAIT_DAYS
+    # The ledger (gap G5: per-branch ledgers): empty = the record's own; prerequisites and
+    # retries name their parent's.
+    connection_id: str = ""
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -69,6 +72,7 @@ class FailureInput(WorkflowInput):
     object_type: str
     object_id: str
     error: str = ""
+    connection_id: str = ""
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -104,7 +108,10 @@ def plan_sync(input: SyncInput) -> dict[str, Any]:
     from . import services
 
     return services.plan(
-        input.object_type, input.object_id, workflow_id=activity.info().workflow_id or ""
+        input.object_type,
+        input.object_id,
+        workflow_id=activity.info().workflow_id or "",
+        connection_id=input.connection_id,
     )
 
 
@@ -115,7 +122,7 @@ def push_record(input: SyncInput) -> str:
     from . import services
 
     try:
-        return services.sync(input.object_type, input.object_id)
+        return services.sync(input.object_type, input.object_id, connection_id=input.connection_id)
     except RateLimited as exc:
         raise _rate_limited(exc) from exc
 
@@ -124,7 +131,7 @@ def push_record(input: SyncInput) -> str:
 def record_blocked(input: SyncInput) -> bool:
     from . import services
 
-    services.record_blocked(input.object_type, input.object_id)
+    services.record_blocked(input.object_type, input.object_id, input.connection_id)
     return True
 
 
@@ -132,7 +139,7 @@ def record_blocked(input: SyncInput) -> bool:
 def record_failure(input: FailureInput) -> bool:
     from . import services
 
-    services.final_failure(input.object_type, input.object_id, input.error)
+    services.final_failure(input.object_type, input.object_id, input.error, input.connection_id)
     return True
 
 
@@ -209,6 +216,9 @@ class AccountingSyncWorkflow:
         )
         if plan["status"] != "ready":
             return str(plan["status"])
+        # Everything below goes to the ledger the plan chose (histories recorded before
+        # gap G5 have no ``connection_id``: the record's own ledger).
+        input = replace(input, connection_id=str(plan.get("connection_id") or ""))
         blocked = False
         for object_type, object_id in plan["prerequisites"]:
             result = await workflow.execute_child_workflow(
@@ -218,6 +228,7 @@ class AccountingSyncWorkflow:
                     object_type=object_type,
                     object_id=object_id,
                     wait_for_retry=False,
+                    connection_id=input.connection_id,
                 ),
                 id=f"{workflow.info().workflow_id}/{attempt}/{object_type}:{object_id}",
             )
@@ -247,6 +258,7 @@ class AccountingSyncWorkflow:
                     object_type=input.object_type,
                     object_id=input.object_id,
                     error=str(cause)[:300],
+                    connection_id=input.connection_id,
                 ),
                 start_to_close_timeout=timedelta(minutes=1),
             )

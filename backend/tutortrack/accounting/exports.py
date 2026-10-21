@@ -20,18 +20,23 @@ from django.utils.translation import gettext as _
 
 from tutortrack.core.exceptions import BusinessRuleViolation
 
-from . import journals
-from .mappings import Mappings
-from .models import AccountingConnection
+from . import journals, routing
+from .mappings import Mappings, connection_for_set
+from .routing import Scope
 
 FORMATS = ("generic", "sage50", "myob", "iif")
 
 
-def _rows(provider: str, start: date, end: date, tz: str) -> list[journals.Posting]:
-    conn = AccountingConnection.objects.filter(provider=provider).order_by("-created_at").first()
+def _rows(
+    provider: str, start: date, end: date, tz: str, branch: str | None = None
+) -> list[journals.Posting]:
+    conn = connection_for_set(provider)
     maps = Mappings(provider, conn.chart if conn is not None else None)
-    postings = journals.sales_postings(maps, start, end, tz) + journals.other_postings(
-        maps, start, end, tz
+    # A ledger's own set exports what that ledger takes (gap G5: per-branch ledgers);
+    # ``branch`` narrows any export to one branch.
+    scope = Scope(include=str(branch)) if branch else routing.scope(conn)
+    postings = journals.sales_postings(maps, start, end, tz, scope=scope) + journals.other_postings(
+        maps, start, end, tz, scope=scope
     )
     return sorted(postings, key=lambda p: (p.date, p.source, p.credit > 0))
 
@@ -44,7 +49,9 @@ def _code(p: journals.Posting) -> str:
     return p.account.code or p.account.id
 
 
-def export(fmt: str, *, provider: str, start: date, end: date, tz: str) -> tuple[str, str, bytes]:
+def export(
+    fmt: str, *, provider: str, start: date, end: date, tz: str, branch: str | None = None
+) -> tuple[str, str, bytes]:
     """``(filename, content type, content)``."""
     from .errors import MappingMissing
 
@@ -53,7 +60,7 @@ def export(fmt: str, *, provider: str, start: date, end: date, tz: str) -> tuple
     if end < start:
         raise BusinessRuleViolation(_("The period ends before it starts."))
     try:
-        postings = _rows(provider, start, end, tz)
+        postings = _rows(provider, start, end, tz, branch)
     except MappingMissing as exc:
         raise BusinessRuleViolation(str(exc)) from exc
     stem = f"gl-{start.isoformat()}-{end.isoformat()}"

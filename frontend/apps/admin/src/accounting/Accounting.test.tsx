@@ -22,6 +22,9 @@ const CONNECTION = {
   connection: "c1",
   provider: "xero",
   provider_name: "Xero",
+  branch: null as string | null,
+  branch_name: null as string | null,
+  mapping_set: "xero",
   status: "active",
   account_name: "Bright Minds Ltd",
   connection_error: "",
@@ -180,5 +183,76 @@ describe("accounting settings", () => {
       expect(calls.some((c) => c.path === "/api/v1/accounting/records/r1/retry")).toBe(true),
     );
     expect(screen.getByRole("button", { name: "Skip" })).toBeInTheDocument();
+  });
+
+  it("switches between the organisation's ledger and a branch's own (gap G5)", async () => {
+    window.history.pushState(null, "", "/settings/accounting");
+    const north = {
+      ...CONNECTION,
+      id: "a2",
+      branch: "b2",
+      branch_name: "North",
+      mapping_set: "xero@b2",
+    };
+    const calls = mockApi(
+      routes({
+        "GET /api/v1/accounting/connections": { body: { results: [CONNECTION, north] } },
+        "GET /api/v1/accounting/connections/a2/chart": { body: CHART },
+        "GET /api/v1/accounting/mappings/xero%40b2": { body: { ...MAPPINGS, provider: "xero@b2" } },
+      }),
+    );
+    render(<App />);
+    const picker = await screen.findByLabelText("Ledger");
+    expect(screen.getByRole("heading", { name: "Xero · whole organisation" })).toBeInTheDocument();
+    fireEvent.change(picker, { target: { value: "a2" } });
+    expect(await screen.findByRole("heading", { name: "Xero · North" })).toBeInTheDocument();
+    await waitFor(() =>
+      expect(calls.some((c) => c.path === "/api/v1/accounting/mappings/xero%40b2")).toBe(true),
+    );
+    await waitFor(() =>
+      expect(
+        calls.some((c) => c.path === "/api/v1/accounting/records" && c.search.includes("a2")),
+      ).toBe(true),
+    );
+  });
+
+  it("connects a separate ledger for a branch (gap G5)", async () => {
+    window.history.pushState(null, "", "/settings/accounting");
+    const assign = vi.fn();
+    vi.stubGlobal("location", {
+      ...window.location,
+      assign,
+      search: "",
+      pathname: "/settings/accounting",
+    });
+    const calls = mockApi(
+      routes({
+        "GET /api/v1/branches": {
+          body: {
+            results: [
+              { id: "b1", name: "Leeds", code: "LDS" },
+              { id: "b2", name: "North", code: "NTH" },
+            ],
+          },
+        },
+        "POST /api/v1/integrations/oauth/start": {
+          body: { authorize_url: "https://login.xero.example/authorize" },
+        },
+      }),
+    );
+    render(<App />);
+    const section = await screen.findByRole("region", { name: "Separate ledgers for branches" });
+    fireEvent.change(within(section).getByLabelText("Branch"), { target: { value: "b2" } });
+    fireEvent.click(within(section).getByRole("button", { name: "Connect Xero for this branch" }));
+    await waitFor(() =>
+      expect(assign).toHaveBeenCalledWith("https://login.xero.example/authorize"),
+    );
+    expect(calls.find((c) => c.path.endsWith("/oauth/start"))?.body).toEqual({
+      provider: "xero",
+      level: "branch",
+      branch: "b2",
+      next: "/settings/accounting",
+    });
+    expect(screen.getByRole("heading", { name: "VAT on bad debts" })).toBeInTheDocument();
   });
 });

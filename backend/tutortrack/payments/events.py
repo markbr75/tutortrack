@@ -46,6 +46,16 @@ class PaymentRefunded(_PaymentEvent):
 
 
 @dataclass(frozen=True, kw_only=True)
+class PaymentReallocated(_PaymentEvent):
+    """A received payment's allocations were replaced (FR-11-6); E23 sends the change to a
+    ledger the payment is already in (gap G5)."""
+
+    event_type: ClassVar[str] = "payment.reallocated"
+    before: dict[str, str] = field(default_factory=dict)  # invoice id -> amount
+    after: dict[str, str] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, kw_only=True)
 class PaymentDisputed(_PaymentEvent):
     event_type: ClassVar[str] = "payment.disputed"
     dispute_id: str

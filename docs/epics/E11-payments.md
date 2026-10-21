@@ -148,3 +148,10 @@ Batch G3 of `docs/05-gap-backlog.md`; design in [ADR 0037](../adr/0037-gap-batch
 - **Expiring-card notices (FR-11-2):** a fan-out Celery beat task on the 1st of each month emails clients whose saved card expires that month (comms type `card_expiring`, with a fresh setup link when a provider is connected) and publishes `payment_method.expiring`; dedupe keys per card and expiry, so re-runs send nothing (no marker columns). `payments.card_expiry_notices` turns it off.
 - **Auto-pay N days before due (FR-11-3):** `payments.autopay_timing` (`on_issue`/`before_due`) and `payments.autopay_days_before_due`. The bridge passes `CollectInput.collect_on`; `PaymentCollectionWorkflow` (behind `workflow.patched("autopay-before-due")`) waits until 09:00 local that day (now if it has passed), ending early when the invoice is paid; "Collect now" while it waits signals `collect_now` instead of answering `collection_in_progress` (a `waiting` flag in the workflow's query). Replay history `PaymentCollectionWorkflow-before-due.json`.
 - **Bulk payment-entry grid (FR-11-5):** `POST /payments/bulk` (up to 200 rows: client, amount, method, date, reference; `Idempotency-Key`) records each as a manual payment paying that client's oldest invoices first; all or nothing, with errors by row. Billing → **Record payments** is the grid.
+
+## Gap backlog (as built 2026-10-21)
+
+Small changes for the accounting items of batch G5 (E23; [ADR 0043](../adr/0043-gap-batch-g5b-accounting.md)):
+
+- `services.reallocate` publishes `payment.reallocated` (`before` and `after`: invoice id → amount) so a ledger the payment is already in can be updated. It is in the webhook catalogue with the other `payment.*` events.
+- `services.close_dispute` saves the dispute after writing the allocations a loss takes back, so `closed_at`..`updated_at` brackets them (E23 posts the chargeback from them). No behaviour change otherwise.

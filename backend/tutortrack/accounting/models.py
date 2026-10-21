@@ -39,6 +39,11 @@ class AccountingConnection(TenantModel):
         "integrations.IntegrationConnection", on_delete=models.CASCADE, related_name="+"
     )
     provider = models.CharField(max_length=30)
+    # Gap G5 (FR-23-1): a branch with its own ledger; null = the organisation's ledger, which
+    # also takes every branch without a switched-on ledger of its own.
+    branch = models.ForeignKey(
+        "tenancy.Branch", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
+    )
     enabled = models.BooleanField(default=False)
     mode = models.CharField(max_length=10, choices=Mode.choices, default=Mode.INDIVIDUAL)
     start_date = models.DateField(null=True, blank=True)  # nothing earlier syncs
@@ -66,6 +71,16 @@ class AccountingConnection(TenantModel):
     def __str__(self) -> str:
         return f"{self.provider} ({self.company_name})"
 
+    @property
+    def mapping_set(self) -> str:
+        """The mapping set this ledger posts with: the provider key, or
+        ``<provider>@<branch id>`` for a branch's own ledger (its chart differs)."""
+        return mapping_set_for(self.provider, self.branch_id)
+
+
+def mapping_set_for(provider: str, branch_id: object = None) -> str:
+    return f"{provider}@{branch_id}" if branch_id else provider
+
 
 class AccountMapping(TenantModel):
     """``kind`` is what the account is for (revenue, clearing, bank, fees, tutor_cost,
@@ -73,7 +88,8 @@ class AccountMapping(TenantModel):
     (``default``, ``service_category:<id>``, ``product_category:<category>``,
     ``method:<method>``, ``provider:stripe``, ``expense_category:<id>``)."""
 
-    provider = models.CharField(max_length=30)  # mapping set: xero | quickbooks | export
+    # mapping set: xero | quickbooks | sage | freeagent | export, or <provider>@<branch id>
+    provider = models.CharField(max_length=64)
     kind = models.CharField(max_length=20)
     key = models.CharField(max_length=80, default="default")
     external_id = models.CharField(max_length=100)
@@ -92,7 +108,7 @@ class AccountMapping(TenantModel):
 class TaxMapping(TenantModel):
     """Our tax rate (empty = no tax) ↔ the provider's tax code."""
 
-    provider = models.CharField(max_length=30)
+    provider = models.CharField(max_length=64)
     tax_rate = models.ForeignKey(
         "catalogue.TaxRate", null=True, blank=True, on_delete=models.CASCADE, related_name="+"
     )
@@ -116,7 +132,7 @@ class TaxMapping(TenantModel):
 class TrackingMapping(TenantModel):
     """A branch ↔ a Xero tracking option (or a QuickBooks class/location)."""
 
-    provider = models.CharField(max_length=30)
+    provider = models.CharField(max_length=64)
     branch = models.ForeignKey("tenancy.Branch", on_delete=models.CASCADE, related_name="+")
     category_id = models.CharField(max_length=100)
     option_id = models.CharField(max_length=100)

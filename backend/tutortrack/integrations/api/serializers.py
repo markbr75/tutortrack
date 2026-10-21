@@ -39,6 +39,7 @@ class IntegrationConnectionSerializer(BaseModelSerializer):
             "provider",
             "provider_name",
             "level",
+            "branch",
             "status",
             "user",
             "account_name",
@@ -82,6 +83,11 @@ class OAuthStartSerializer(serializers.Serializer):
     provider = serializers.CharField()
     level = serializers.ChoiceField(choices=LEVELS, default="user")
     next = serializers.CharField(default="/settings/integrations", max_length=300)
+    branch = serializers.UUIDField(
+        required=False,
+        allow_null=True,
+        help_text="With level=branch: the branch whose own account this is (e.g. its ledger).",
+    )
 
 
 class OAuthStartResultSerializer(serializers.Serializer):
