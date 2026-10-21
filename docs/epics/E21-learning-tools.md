@@ -111,3 +111,8 @@ Lightweight learning-management features that make tutoring outcomes visible: a 
   - Family portal `/portal/learning` has tabs for homework, resources, goals, results, progress reports and loans, plus a homework page for handing in (text, link, files, quiz, done). The `learning` feature is in `/portal/me`.
   - Tutor app: `/portal/tutor/homework` (review queue, set homework), `/portal/tutor/homework/{id}` (review) and `/portal/tutor/resources` (my library, share with my students).
 - **Not built:** FR-21-8 (sending resources to E22 video rooms such as Lessonspace). Lesson shares publish `resource.shared` with `target=lesson` for E22 to pick up when providers support it.
+
+## Gap backlog (as built 2026-10-21)
+Gap batch G5a.
+
+- **Tutor subject tests (E18 FR-18-3).** The quiz builder sets the purpose (homework and practice, or tutor subject test), a catalogue subject and the pass mark, and the quiz list shows the purpose. Tutor subject tests are taken in the tutor app (`/portal/tutor/tests`) through `take_quiz(student=None, user=…)`; see the E18 notes. New selectors `tutor_tests()` and `tutor_test_attempts()`.

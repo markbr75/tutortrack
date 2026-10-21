@@ -51,7 +51,9 @@ def update_policy(
     category = registry.retention_category(policy.category)
     if category is None:
         raise BusinessRuleViolation(_("Unknown retention category."))
-    minimum = {"audit_logs": 365 * 7, "erased_financial": 1}.get(policy.category, 30)
+    minimum = {"audit_logs": 365 * 7, "erased_financial": 1, "unclaimed_public_uploads": 1}.get(
+        policy.category, 30
+    )
     if period_days is not None and period_days < minimum:
         message = _("Keep this for at least %(days)s days.") % {"days": minimum}
         raise BusinessRuleViolation(message, extra={"errors": {"period_days": [message]}})

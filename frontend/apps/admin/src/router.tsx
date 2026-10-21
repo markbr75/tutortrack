@@ -91,6 +91,7 @@ import {
   VacanciesPage,
   VacancyPage,
 } from "./recruitment/RecruitmentPages";
+import { OpeningsPage } from "./recruitment/HiringPages";
 import { PlanPage } from "./subscription/PlanPage";
 import { TeamPage } from "./routes/TeamPage";
 import { ReportsLibraryPage, ReportViewPage, SavedReportsPage } from "./reporting/ReportingPages";
@@ -513,6 +514,8 @@ const enquiryRoute = createRoute({
 });
 const recruitmentRoute = appPage("/recruitment", ApplicationsPage);
 const complianceRoute = appPage("/compliance", ComplianceDashboardPage);
+// G5a: the job-opening editor.
+const openingsRoute = appPage("/recruitment/openings", OpeningsPage);
 const matchingRoute = appPage("/matching", MatchingPage);
 const automationsRoute = appPage("/automations", AutomationsPage);
 const automationRoute = createRoute({
@@ -673,6 +676,7 @@ const routeTree = rootRoute.addChildren([
     payRunRoute,
     recruitmentRoute,
     complianceRoute,
+    openingsRoute,
     applicationRoute,
     leadsRoute,
     leadsFormsRoute,

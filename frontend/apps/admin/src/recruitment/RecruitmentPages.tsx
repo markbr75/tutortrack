@@ -1,26 +1,47 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import { Alert, Button, PageHeader, SelectField, Spinner, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
 import { AiJobAdvert } from "../ai/AiWidgets";
+import { AttachedFiles } from "../components/AttachedFiles";
 import { Turnstile } from "../components/Turnstile";
 import { PublicLayout } from "../layout/PublicLayout";
 import { PublicField, type Schema } from "../leads/MorePages";
 
-function Page({ title, children }: { title: string; children: ReactNode }) {
+/** The recruitment area's frame: page header and the Applications / Openings / Compliance
+ * links (G5a adds Openings). */
+export function RecruitmentPage({
+  title,
+  description,
+  actions,
+  children,
+}: {
+  title: string;
+  description?: ReactNode;
+  actions?: ReactNode;
+  children: ReactNode;
+}) {
   const { t } = useTranslation();
+  const link =
+    "pb-1 text-muted-foreground [&.active]:border-b-2 [&.active]:border-foreground [&.active]:text-foreground";
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{title}</h1>
-      <nav aria-label={t("recruitment.title")} className="flex gap-3 text-sm">
-        <Link to="/recruitment" activeOptions={{ exact: true }} className="[&.active]:font-medium">
+      <PageHeader title={title} description={description} actions={actions} className="mb-2" />
+      <nav
+        aria-label={t("recruitment.title")}
+        className="flex gap-4 border-b border-border text-sm"
+      >
+        <Link to="/recruitment" activeOptions={{ exact: true }} className={link}>
           {t("recruitment.applications")}
         </Link>
-        <Link to="/compliance" className="[&.active]:font-medium">
+        <Link to="/recruitment/openings" className={link}>
+          {t("hiring.openings.title")}
+        </Link>
+        <Link to="/compliance" className={link}>
           {t("recruitment.compliance")}
         </Link>
       </nav>
@@ -28,6 +49,8 @@ function Page({ title, children }: { title: string; children: ReactNode }) {
     </div>
   );
 }
+
+const Page = RecruitmentPage;
 
 /** Applications by stage (FR-18-2). */
 export function ApplicationsPage() {
@@ -101,6 +124,10 @@ export function ApplicationPage({ id }: { id: string }) {
   const [reason, setReason] = useState("");
   const [referee, setReferee] = useState({ name: "", email: "" });
   const [slot, setSlot] = useState("");
+  const [inviteMode, setInviteMode] = useState<"availability" | "times">("availability");
+  const [windowStart, setWindowStart] = useState("");
+  const [windowEnd, setWindowEnd] = useState("");
+  const [minutes, setMinutes] = useState("30");
   const application = useQuery({
     queryKey: ["application", id],
     queryFn: async () =>
@@ -152,7 +179,22 @@ export function ApplicationPage({ id }: { id: string }) {
       unwrap(
         await api.POST("/api/v1/applications/{id}/interviews", {
           ...path,
-          body: { options: [new Date(slot).toISOString()], minutes: 30, meeting_url: "" },
+          body:
+            inviteMode === "availability"
+              ? {
+                  mode: "availability",
+                  window_start: windowStart,
+                  window_end: windowEnd || windowStart,
+                  minutes: Number(minutes),
+                  options: [],
+                  meeting_url: "",
+                }
+              : {
+                  mode: "times",
+                  options: [new Date(slot).toISOString()],
+                  minutes: Number(minutes),
+                  meeting_url: "",
+                },
         }),
       ),
     onSuccess: set,
@@ -177,6 +219,31 @@ export function ApplicationPage({ id }: { id: string }) {
             <strong>{q}</strong>: {String(v)}
           </p>
         ))}
+        {a.video_url ? (
+          <p>
+            {t("hiring.files.videoLink")}:{" "}
+            <a className="text-link underline" href={a.video_url} rel="noreferrer" target="_blank">
+              {a.video_url}
+            </a>
+          </p>
+        ) : null}
+        <AttachedFiles
+          label={t("hiring.files.uploads")}
+          files={[
+            ...(a.cv_file
+              ? [{ ...a.cv_file, filename: `${t("hiring.files.cv")}: ${a.cv_file.filename}` }]
+              : []),
+            ...(a.video_file
+              ? [
+                  {
+                    ...a.video_file,
+                    filename: `${t("hiring.files.video")}: ${a.video_file.filename}`,
+                  },
+                ]
+              : []),
+            ...(a.attachments ?? []),
+          ]}
+        />
       </section>
       {a.status === "open" ? (
         <section className="space-y-3 rounded-md border border-border p-4">
@@ -196,17 +263,61 @@ export function ApplicationPage({ id }: { id: string }) {
                 ))}
             </select>
           </label>
-          <div className="flex flex-wrap items-end gap-2">
-            <TextField
-              label={t("recruitment.interviewTime")}
-              type="datetime-local"
-              value={slot}
-              onChange={(e) => setSlot(e.target.value)}
-            />
-            <Button variant="secondary" disabled={!slot} onClick={() => interview.mutate()}>
-              {t("recruitment.inviteToInterview")}
-            </Button>
-          </div>
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-medium">{t("recruitment.inviteToInterview")}</legend>
+            <div className="flex flex-wrap items-end gap-2">
+              <SelectField
+                label={t("hiring.interviews.how")}
+                value={inviteMode}
+                onChange={(e) => setInviteMode(e.target.value as "availability" | "times")}
+                options={[
+                  { value: "availability", label: t("hiring.interviews.bookingLink") },
+                  { value: "times", label: t("hiring.interviews.oneTime") },
+                ]}
+              />
+              <SelectField
+                label={t("hiring.interviews.length")}
+                value={minutes}
+                onChange={(e) => setMinutes(e.target.value)}
+                options={["20", "30", "45", "60"].map((m) => ({
+                  value: m,
+                  label: t("hiring.interviews.minutes", { count: Number(m) }),
+                }))}
+              />
+              {inviteMode === "availability" ? (
+                <>
+                  <TextField
+                    label={t("hiring.interviews.from")}
+                    type="date"
+                    value={windowStart}
+                    onChange={(e) => setWindowStart(e.target.value)}
+                  />
+                  <TextField
+                    label={t("hiring.interviews.to")}
+                    type="date"
+                    value={windowEnd}
+                    onChange={(e) => setWindowEnd(e.target.value)}
+                  />
+                </>
+              ) : (
+                <TextField
+                  label={t("recruitment.interviewTime")}
+                  type="datetime-local"
+                  value={slot}
+                  onChange={(e) => setSlot(e.target.value)}
+                />
+              )}
+              <Button
+                variant="secondary"
+                disabled={inviteMode === "availability" ? !windowStart : !slot}
+                loading={interview.isPending}
+                onClick={() => interview.mutate()}
+              >
+                {t("hiring.interviews.send")}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">{t("hiring.interviews.hint")}</p>
+          </fieldset>
           <div className="flex flex-wrap items-end gap-2">
             <TextField
               label={t("recruitment.refereeName", { n: "" })}
@@ -256,7 +367,33 @@ export function ApplicationPage({ id }: { id: string }) {
         ))}
         <h2 className="font-semibold">{t("recruitment.interviews")}</h2>
         {a.interviews.map((i) => (
-          <p key={i.id}>{i.start ? formatDateTime(i.start) : t("recruitment.awaitingChoice")}</p>
+          <p key={i.id}>
+            {i.start ? formatDateTime(i.start) : t("recruitment.awaitingChoice")}
+            {i.mode === "availability" && !i.start && i.window_start ? (
+              <span className="text-muted-foreground">
+                {" "}
+                ·{" "}
+                {t("hiring.interviews.window", {
+                  from: formatDate(i.window_start),
+                  to: formatDate(i.window_end ?? i.window_start),
+                })}
+              </span>
+            ) : null}
+            {i.host_url || i.meeting_url ? (
+              <>
+                {" "}
+                ·{" "}
+                <a
+                  className="text-link underline"
+                  href={i.host_url || i.meeting_url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {t("hiring.interviews.join")}
+                </a>
+              </>
+            ) : null}
+          </p>
         ))}
         <h2 className="font-semibold">{t("recruitment.scorecards")}</h2>
         {a.scorecards.map((sc) => (
@@ -278,57 +415,191 @@ const CELL_TONE: Record<string, string> = {
   expired: "bg-red-100 text-red-900",
 };
 
-/** Tutors × requirements (FR-18-8). */
+/** Tutors × requirements (FR-18-8), with filters, CSV export and bulk "request missing
+ * documents" (gap batch G5a). */
 export function ComplianceDashboardPage() {
   const { t } = useTranslation();
+  const canRequest = usePermission("compliance.verify");
+  const [tutorStatus, setTutorStatus] = useState("");
+  const [requirement, setRequirement] = useState("");
+  const [gaps, setGaps] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
+  const query = {
+    ...(tutorStatus ? { tutor_status: tutorStatus as "onboarding" | "active" | "restricted" } : {}),
+    ...(requirement ? { requirement } : {}),
+    ...(gaps ? { gaps: true } : {}),
+  };
   const board = useQuery({
-    queryKey: ["compliance-dashboard"],
-    queryFn: async () => unwrap(await api.GET("/api/v1/compliance/dashboard")),
+    queryKey: ["compliance-dashboard", query],
+    queryFn: async () =>
+      unwrap(await api.GET("/api/v1/compliance/dashboard", { params: { query } })),
   });
-  if (!board.data) return <Spinner label={t("grid.loading")} />;
+  const types = useQuery({
+    queryKey: ["requirement-types"],
+    queryFn: async () => unwrap(await api.GET("/api/v1/compliance/requirement-types")),
+  });
+  const exportCsv = useMutation({
+    mutationFn: async () => {
+      const result = await api.GET("/api/v1/compliance/dashboard/export", {
+        params: { query },
+        parseAs: "blob",
+      });
+      const response = result.response as Response;
+      if (!response.ok || !result.data) throw new Error(t("hiring.compliance.exportFailed"));
+      const url = URL.createObjectURL(result.data as unknown as Blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "compliance.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+    },
+  });
+  const request = useMutation({
+    mutationFn: async () =>
+      unwrap(
+        await api.POST("/api/v1/compliance/request-missing", {
+          body: {
+            tutors: selected.length ? selected : (board.data?.rows.map((r) => r.tutor) ?? []),
+            requirements: requirement ? [requirement] : [],
+          },
+        }),
+      ),
+    onSuccess: () => setSelected([]),
+  });
+  const toggle = (id: string) =>
+    setSelected(selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id]);
   return (
-    <Page title={t("recruitment.compliance")}>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left">
-              <th scope="col">{t("recruitment.tutor")}</th>
-              {board.data.requirements.map((r) => (
-                <th key={r.key} scope="col">
-                  {r.name}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {board.data.rows.map((row) => (
-              <tr key={row.tutor} className="border-t border-border">
-                <th scope="row" className="text-left font-normal">
-                  <Link to="/tutors/$tutorId" params={{ tutorId: row.tutor }} className="underline">
-                    {row.name}
-                  </Link>
-                  {row.status === "restricted" ? ` · ${t("recruitment.restricted")}` : ""}
-                </th>
-                {board.data.requirements.map((r) => {
-                  const cell = row.cells[r.key];
-                  return (
-                    <td key={r.key}>
-                      <span className={`rounded px-1 ${CELL_TONE[cell?.status ?? ""] ?? ""}`}>
-                        {t(`recruitment.cell.${cell?.status ?? "missing"}`)}
-                      </span>
-                      {cell?.expiry_date ? (
-                        <span className="block text-xs text-muted-foreground">
-                          {formatDate(cell.expiry_date)}
-                        </span>
-                      ) : null}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <Page
+      title={t("recruitment.compliance")}
+      actions={
+        <>
+          <Button
+            variant="secondary"
+            loading={exportCsv.isPending}
+            onClick={() => exportCsv.mutate()}
+          >
+            {t("hiring.compliance.export")}
+          </Button>
+          {canRequest ? (
+            <Button loading={request.isPending} onClick={() => request.mutate()}>
+              {selected.length
+                ? t("hiring.compliance.requestSelected", { count: selected.length })
+                : t("hiring.compliance.requestAll")}
+            </Button>
+          ) : null}
+        </>
+      }
+    >
+      <div
+        className="flex flex-wrap items-end gap-2"
+        role="group"
+        aria-label={t("hiring.compliance.filters")}
+      >
+        <SelectField
+          label={t("hiring.compliance.tutorStatus")}
+          size="sm"
+          value={tutorStatus}
+          onChange={(e) => setTutorStatus(e.target.value)}
+          options={[
+            { value: "", label: t("hiring.compliance.anyStatus") },
+            ...["onboarding", "active", "restricted"].map((v) => ({
+              value: v,
+              label: t(`people.tutorStatus.${v}`),
+            })),
+          ]}
+        />
+        <SelectField
+          label={t("hiring.compliance.requirement")}
+          size="sm"
+          value={requirement}
+          onChange={(e) => setRequirement(e.target.value)}
+          options={[
+            { value: "", label: t("hiring.compliance.allRequirements") },
+            ...(types.data ?? [])
+              .filter((r) => r.active)
+              .map((r) => ({ value: r.key, label: r.name })),
+          ]}
+        />
+        <label className="flex h-9 items-center gap-2 text-sm">
+          <input type="checkbox" checked={gaps} onChange={(e) => setGaps(e.target.checked)} />
+          {t("hiring.compliance.gapsOnly")}
+        </label>
       </div>
+      {request.isSuccess ? (
+        <Alert tone="success">
+          {t("hiring.compliance.requested", { count: request.data.count })}
+        </Alert>
+      ) : null}
+      {(request.error ?? exportCsv.error) ? (
+        <Alert tone="danger">{(request.error ?? exportCsv.error)?.message}</Alert>
+      ) : null}
+      {!board.data ? (
+        <Spinner label={t("grid.loading")} />
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left">
+                {canRequest ? (
+                  <th scope="col">
+                    <span className="sr-only">{t("hiring.compliance.select")}</span>
+                  </th>
+                ) : null}
+                <th scope="col">{t("recruitment.tutor")}</th>
+                {board.data.requirements.map((r) => (
+                  <th key={r.key} scope="col">
+                    {r.name}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {board.data.rows.map((row) => (
+                <tr key={row.tutor} className="border-t border-border">
+                  {canRequest ? (
+                    <td>
+                      <input
+                        type="checkbox"
+                        aria-label={t("hiring.compliance.selectTutor", { name: row.name })}
+                        checked={selected.includes(row.tutor)}
+                        onChange={() => toggle(row.tutor)}
+                      />
+                    </td>
+                  ) : null}
+                  <th scope="row" className="text-left font-normal">
+                    <Link
+                      to="/tutors/$tutorId"
+                      params={{ tutorId: row.tutor }}
+                      className="underline"
+                    >
+                      {row.name}
+                    </Link>
+                    {row.status === "restricted" ? ` · ${t("recruitment.restricted")}` : ""}
+                  </th>
+                  {board.data.requirements.map((r) => {
+                    const cell = row.cells[r.key];
+                    return (
+                      <td key={r.key}>
+                        <span className={`rounded px-1 ${CELL_TONE[cell?.status ?? ""] ?? ""}`}>
+                          {t(`recruitment.cell.${cell?.status ?? "missing"}`)}
+                        </span>
+                        {cell?.expiry_date ? (
+                          <span className="block text-xs text-muted-foreground">
+                            {formatDate(cell.expiry_date)}
+                          </span>
+                        ) : null}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {!board.data.rows.length ? (
+            <p className="mt-3 text-muted-foreground">{t("hiring.compliance.noRows")}</p>
+          ) : null}
+        </div>
+      )}
     </Page>
   );
 }
@@ -485,6 +756,7 @@ export function VacancyPage({ slug }: { slug: string }) {
                 value={answers[f.key]}
                 error={errors?.[f.key]?.[0]}
                 onChange={(v) => setAnswers({ ...answers, [f.key]: v })}
+                uploadTarget={{ target: "opening", slug }}
               />
             )),
           )}
@@ -528,17 +800,52 @@ export function InterviewChoicePage({ token }: { token: string }) {
   return (
     <PublicLayout title={t("recruitment.chooseTime", { organisation: i.organisation })}>
       {i.status === "booked" && i.start ? (
-        <p role="status">{t("recruitment.interviewBooked", { when: formatDateTime(i.start) })}</p>
+        <div role="status" className="space-y-2">
+          <p>{t("recruitment.interviewBooked", { when: formatDateTime(i.start) })}</p>
+          {i.meeting_url ? (
+            <p>
+              <a
+                className="text-link underline"
+                href={i.meeting_url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t("hiring.interviews.joinCall")}
+              </a>
+            </p>
+          ) : (
+            <p className="text-muted-foreground">{t("hiring.interviews.linkToFollow")}</p>
+          )}
+        </div>
+      ) : !i.options.length ? (
+        <p>{t("hiring.interviews.noTimes")}</p>
       ) : (
-        <ul className="space-y-2">
-          {i.options.map((option) => (
-            <li key={option}>
-              <Button variant="secondary" onClick={() => book.mutate(option)}>
-                {formatDateTime(option)}
-              </Button>
-            </li>
+        <div className="space-y-4">
+          {Object.entries(
+            i.options.reduce<Record<string, string[]>>((days, option) => {
+              const day = formatDate(option);
+              (days[day] ??= []).push(option);
+              return days;
+            }, {}),
+          ).map(([day, options]) => (
+            <section key={day} aria-label={day}>
+              <h2 className="mb-2 font-semibold">{day}</h2>
+              <ul className="flex flex-wrap gap-2">
+                {options.map((option) => (
+                  <li key={option}>
+                    <Button
+                      variant="secondary"
+                      loading={book.isPending && book.variables === option}
+                      onClick={() => book.mutate(option)}
+                    >
+                      {formatDateTime(option)}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </div>
       )}
       {book.error ? <Alert tone="danger">{book.error.message}</Alert> : null}
     </PublicLayout>

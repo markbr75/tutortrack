@@ -51,6 +51,9 @@ def _all(codename: str) -> dict[str, str]:
 
 
 class JobOpeningViewSet(TenantScopedViewMixin, viewsets.ModelViewSet):
+    """Job openings (FR-18-1) and their editor (G5a): title, web address, description,
+    subjects, location, branch, application form, published and closing date."""
+
     model = JobOpening
     serializer_class = s.JobOpeningSerializer
     pagination_class = None
@@ -59,13 +62,40 @@ class JobOpeningViewSet(TenantScopedViewMixin, viewsets.ModelViewSet):
     )
 
     def get_tenant_queryset(self) -> Any:
-        return JobOpening.objects.all()
+        return JobOpening.objects.select_related("form")
+
+    def get_serializer_context(self) -> dict[str, Any]:
+        from django.db.models import Count
+
+        context = dict(super().get_serializer_context())
+        if self.action == "list" and not getattr(self, "swagger_fake_view", False):
+            rows = (
+                TutorApplication.objects.filter(status=TutorApplication.Status.OPEN)
+                .values("opening")
+                .annotate(n=Count("id"))
+            )
+            context["open_counts"] = {r["opening"]: r["n"] for r in rows}
+        return context
 
     def perform_create(self, serializer: Any) -> None:
-        form = serializer.validated_data["form"]
-        if form.type != "application":
-            raise ValidationError({"form": ["Choose a tutor application form."]})
-        serializer.save()
+        serializer.instance = services.save_opening(
+            None, user=self.request.user, **serializer.validated_data
+        )
+
+    def perform_update(self, serializer: Any) -> None:
+        serializer.instance = services.save_opening(
+            serializer.instance, user=self.request.user, **serializer.validated_data
+        )
+
+    @extend_schema(
+        request=None,
+        responses=s.ApplicationFormSerializer,
+        description="The standard tutor application form, created on first use.",
+    )
+    @action(detail=False, methods=["post"], url_path="default-form")
+    def default_form(self, request: Request) -> Response:
+        form = services.default_application_form()
+        return Response({"id": form.pk, "name": form.name, "slug": form.slug})
 
 
 class ApplicationStageViewSet(
@@ -187,7 +217,27 @@ class ApplicationViewSet(
         services.approve(application, user=request.user, **payload.validated_data)
         return self._detail(application)
 
-    @extend_schema(request=s.ProposeInterviewSerializer, responses=s.ApplicationDetailSerializer)
+    @extend_schema(
+        request=s.ProposeInterviewSerializer,
+        responses=s.ApplicationDetailSerializer,
+        examples=[
+            OpenApiExample(
+                "Booking link over the interviewer's free time (G5a)",
+                value={
+                    "mode": "availability",
+                    "window_start": "2026-11-02",
+                    "window_end": "2026-11-13",
+                    "minutes": 30,
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Times offered by hand",
+                value={"mode": "times", "options": ["2026-11-03T10:00:00Z"], "minutes": 30},
+                request_only=True,
+            ),
+        ],
+    )
     @action(detail=True, methods=["post"])
     def interviews(self, request: Request, pk: Any = None) -> Response:
         payload = s.ProposeInterviewSerializer(data=request.data)
@@ -415,12 +465,35 @@ class RecordRejectView(APIView):
         return Response(s.ComplianceRecordSerializer(record, context={"show_numbers": True}).data)
 
 
+DASHBOARD_FILTERS = [
+    OpenApiParameter("tutor_status", str, enum=["onboarding", "active", "restricted"]),
+    OpenApiParameter("requirement", str, description="A requirement key, e.g. dbs_enhanced."),
+    OpenApiParameter(
+        "cell_status",
+        str,
+        enum=["missing", "submitted", "verified", "rejected", "expired"],
+    ),
+    OpenApiParameter("gaps", bool, description="Only tutors with missing, rejected or expired."),
+]
+
+
+def dashboard_filters(request: Request) -> dict[str, Any]:
+    q = request.query_params
+    return {
+        "tutor_status": q.get("tutor_status", ""),
+        "requirement": q.get("requirement", ""),
+        "cell_status": q.get("cell_status", ""),
+        "gaps_only": q.get("gaps") in ("1", "true"),
+    }
+
+
 class DashboardView(APIView):
     permission_classes = perms({"GET": "compliance.view"})
 
-    @extend_schema(responses=s.ComplianceDashboardSerializer)
+    @extend_schema(parameters=DASHBOARD_FILTERS, responses=s.ComplianceDashboardSerializer)
     def get(self, request: Request) -> Response:
-        return Response(s.ComplianceDashboardSerializer(compliance.dashboard()).data)
+        board = compliance.dashboard(**dashboard_filters(request))
+        return Response(s.ComplianceDashboardSerializer(board).data)
 
 
 class AssessSubjectView(APIView):
@@ -511,16 +584,21 @@ class PublicInterviewView(APIView):
 
     @extend_schema(responses=s.PublicInterviewSerializer)
     def get(self, request: Request, token: str) -> Response:
+        from .. import interviews
+
         interview = services.interview_for_token(token)
+        org = getattr(request, "organisation", None)
         return Response(
             {
                 "applicant": interview.application.first_name,
-                "options": interview.options,
+                "options": interviews.options_for(interview),
                 "minutes": interview.minutes,
                 "status": interview.status,
                 "start": interview.start,
                 "meeting_url": interview.meeting_url if interview.start else "",
                 "organisation": _org_name(request),
+                "mode": interview.mode,
+                "timezone": str(org.timezone) if org is not None else "",
             }
         )
 

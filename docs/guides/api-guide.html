@@ -44,6 +44,7 @@
             <li><a href="#concurrency">Concurrent updates</a></li>
             <li><a href="#rate-limits">Rate limits</a></li>
             <li><a href="#versioning">Versioning and deprecation</a></li>
+            <li><a href="#public-uploads">Files on public forms</a></li>
           </ol>
         </li>
         <li><a href="#webhooks">Webhooks</a>
@@ -65,7 +66,7 @@
     <header>
       <h1>TutorTrack API guide</h1>
       <p class="lead">Connect your own systems to TutorTrack with the REST API and webhooks.</p>
-      <p class="meta">Last updated: 2026-10-14 · API version v1</p>
+      <p class="meta">Last updated: 2026-10-21 · API version v1</p>
     </header>
 
     <section id="overview">
@@ -295,6 +296,33 @@ const { results, next } = await res.json();</code></pre>
         An endpoint that is going away sends <code>Deprecation</code> (RFC 9745),
         <code>Sunset</code> (RFC 8594) and a <code>Link</code> to its changelog entry on every
         response, months before removal.</p>
+
+      <h3 id="public-uploads">Files on public forms</h3>
+      <p>Enquiry forms and job openings can have file fields. If you post a form from your own
+        site, upload each file first. These endpoints need no token; call them on the
+        organisation's address. They are limited to 60 requests an hour per IP address.</p>
+      <ol class="steps">
+        <li><code>POST /api/v1/public/uploads</code> with <code>target</code> (<code>form</code> or
+          <code>opening</code>), the form's or opening's <code>slug</code>, the field's
+          <code>kind</code> (<code>document</code>, <code>cv</code> or <code>video</code>),
+          <code>filename</code>, <code>content_type</code> and <code>size_bytes</code>. The form must
+          be published and have a file field of that kind. The reply has a <code>token</code> and
+          an <code>upload</code> (a presigned URL, method and headers, valid for 15 minutes).</li>
+        <li>Send the bytes to <code>upload.url</code> with <code>upload.method</code> and
+          <code>upload.headers</code>.</li>
+        <li><code>POST /api/v1/public/uploads/complete</code> with the <code>token</code>. Size, type
+          and the file's first bytes are checked (a mismatch is refused with
+          <code>upload_mismatch</code>), and the malware scan is queued.</li>
+        <li>Send the token (or a list of tokens for a field that takes several files) as that
+          field's answer in <code>POST /api/v1/public/forms/{slug}</code> or
+          <code>POST /api/v1/public/job-openings/{slug}</code>. A token works once, for that form,
+          for 24 hours.</li>
+      </ol>
+      <p>Limits: documents and CVs up to 10 MB (PDF, Word; documents also JPEG, PNG, WebP, HEIC),
+        videos up to 100 MB (MP4, MOV, WebM). Errors use the usual problem format with a
+        <code>code</code>: <code>uploads_not_accepted</code>, <code>file_type_not_allowed</code>,
+        <code>file_too_large</code>, <code>upload_mismatch</code>, <code>upload_token_invalid</code>,
+        <code>upload_claimed</code>, <code>upload_incomplete</code>.</p>
     </section>
 
     <section id="webhooks">
@@ -400,7 +428,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
       <h3 id="webhook-events">Event catalogue</h3>
       <p>Subscribe to individual types or to <code>&lt;aggregate&gt;.*</code>.</p>
       <!-- BEGIN GENERATED: webhook-events -->
-<p class="meta">249 event types on 70 aggregates, generated from the webhook event catalogue.</p>
+<p class="meta">255 event types on 72 aggregates, generated from the webhook event catalogue.</p>
 <details class="ref" id="events-affiliate_statement">
   <summary><code>affiliate_statement.*</code> <span class="badge">1</span></summary>
   <div class="table-wrap"><table>
@@ -411,12 +439,13 @@ export function verify(secret, header, rawBody, tolerance = 300) {
   </table></div>
 </details>
 <details class="ref" id="events-application">
-  <summary><code>application.*</code> <span class="badge">5</span></summary>
+  <summary><code>application.*</code> <span class="badge">6</span></summary>
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
     <tbody>
       <tr><td><code>application.approved</code></td><td>Application approved.</td><td><code>tutor_id</code></td></tr>
       <tr><td><code>application.interview_booked</code></td><td>Application interview booked.</td><td><code>interview_id</code></td></tr>
+      <tr><td><code>application.interview_meeting_created</code></td><td>The video link for a booked interview was created.</td><td><code>interview_id</code>, <code>provider</code></td></tr>
       <tr><td><code>application.rejected</code></td><td>Application rejected.</td><td><code>reason</code></td></tr>
       <tr><td><code>application.stage_changed</code></td><td>Application stage changed.</td><td><code>to_stage</code></td></tr>
       <tr><td><code>application.submitted</code></td><td>Starts <code>TutorApplicationWorkflow</code>.</td><td><code>opening_id</code></td></tr>
@@ -557,10 +586,11 @@ export function verify(secret, header, rawBody, tolerance = 300) {
   </table></div>
 </details>
 <details class="ref" id="events-compliance">
-  <summary><code>compliance.*</code> <span class="badge">5</span></summary>
+  <summary><code>compliance.*</code> <span class="badge">6</span></summary>
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
     <tbody>
+      <tr><td><code>compliance.documents_requested</code></td><td>Staff asked a tutor for missing, rejected or expired documents.</td><td><code>requirements</code></td></tr>
       <tr><td><code>compliance.expired</code></td><td>Compliance expired.</td><td><code>tutor_id</code>, <code>requirement</code></td></tr>
       <tr><td><code>compliance.expiring</code></td><td>Compliance expiring.</td><td><code>tutor_id</code>, <code>requirement</code>, <code>days</code></td></tr>
       <tr><td><code>compliance.record_rejected</code></td><td>Compliance record rejected.</td><td><code>tutor_id</code>, <code>requirement</code>, <code>reason</code></td></tr>
@@ -860,6 +890,16 @@ export function verify(secret, header, rawBody, tolerance = 300) {
     </tbody>
   </table></div>
 </details>
+<details class="ref" id="events-offboarding">
+  <summary><code>offboarding.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>offboarding.completed</code></td><td>Offboarding completed.</td><td>—</td></tr>
+      <tr><td><code>offboarding.started</code></td><td>Offboarding started.</td><td><code>leaving_on</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
 <details class="ref" id="events-onboarding">
   <summary><code>onboarding.*</code> <span class="badge">4</span></summary>
   <div class="table-wrap"><table>
@@ -971,6 +1011,16 @@ export function verify(secret, header, rawBody, tolerance = 300) {
       <tr><td><code>payout.failed</code></td><td>Payout failed.</td><td><code>tutor_id</code>, <code>pay_run_id</code>, <code>amount</code>, <code>reason</code></td></tr>
       <tr><td><code>payout.paid</code></td><td>Payout paid.</td><td><code>tutor_id</code>, <code>pay_run_id</code>, <code>amount</code></td></tr>
       <tr><td><code>payout.received</code></td><td>Payout received.</td><td><code>amount</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-probation">
+  <summary><code>probation.*</code> <span class="badge">2</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>probation.completed</code></td><td>Probation completed.</td><td><code>tutor_id</code>, <code>outcome</code></td></tr>
+      <tr><td><code>probation.scheduled</code></td><td>Starts <code>ProbationReviewWorkflow</code>.</td><td><code>tutor_id</code>, <code>due_on</code></td></tr>
     </tbody>
   </table></div>
 </details>

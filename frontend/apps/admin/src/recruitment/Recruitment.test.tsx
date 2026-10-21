@@ -71,7 +71,7 @@ describe("recruitment", () => {
     });
     render(<App />);
     expect(await screen.findByText("Expired")).toBeInTheDocument();
-    expect(screen.getByText(/Restricted/)).toBeInTheDocument();
+    expect(screen.getByRole("rowheader", { name: /Restricted/ })).toBeInTheDocument();
   });
 
   it("lets a referee give a reference", async () => {

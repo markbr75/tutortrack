@@ -41,6 +41,8 @@ PUBLIC_AGGREGATES = frozenset(
         "proposal", "public_profile", "quiz", "recording", "referral", "reschedule", "resource",
         "review", "self_billing_statement", "shortlist", "term", "thread", "time_off",
         "topic_mastery",
+        # G5a: tutor probation reviews and offboarding (E18 FR-18-9).
+        "offboarding", "probation",
     }
 )  # fmt: skip
 
@@ -53,6 +55,8 @@ NEVER_AGGREGATES = frozenset(
         "push_subscription", "api_key", "oauth_app", "webhook_endpoint", "webhook_delivery",
         "sandbox", "user", "impersonation", "membership", "role", "organisation",
         "subscription", "credits", "automation", "ai_feature", "ai_proposal",
+        # G5a: staff notes on a tutor's performance stay inside TutorTrack.
+        "performance",
     }
 )  # fmt: skip
 NEVER_EVENT_TYPES = frozenset({"thread.intent_classified"})

@@ -5,6 +5,7 @@ from typing import Any
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from tutortrack.core.api.public_uploads import AttachedFileSerializer
 from tutortrack.core.api.serializers import BaseModelSerializer, MoneySerializerField
 from tutortrack.matching.api.serializers import PublicTutorCardSerializer
 
@@ -54,6 +55,7 @@ class EnquirySerializer(BaseModelSerializer):
     student_names = serializers.SerializerMethodField()
     age_hours = serializers.SerializerMethodField()
     sla_breached = serializers.SerializerMethodField()
+    attachments = AttachedFileSerializer(many=True, read_only=True)
 
     class Meta:
         model = Enquiry
@@ -95,6 +97,7 @@ class EnquirySerializer(BaseModelSerializer):
             "converted_job_ids",
             "created_at",
             "age_hours",
+            "attachments",
         ]
         read_only_fields = fields
 
@@ -221,7 +224,8 @@ class FormSerializer(serializers.ModelSerializer):
         fields = ["id", "type", "name", "slug", "schema", "settings", "published", "branch"]
 
     def validate_schema(self, value: Any) -> Any:
-        return forms.clean_schema(value)
+        form_type = self.initial_data.get("type") or getattr(self.instance, "type", "enquiry")
+        return forms.clean_schema(value, form_type=str(form_type))
 
 
 class FormSubmissionSerializer(serializers.ModelSerializer):

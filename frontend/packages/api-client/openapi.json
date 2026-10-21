@@ -5405,6 +5405,27 @@
                         "application/json": {
                             "schema": {
                                 "$ref": "#/components/schemas/ProposeInterviewRequest"
+                            },
+                            "examples": {
+                                "BookingLinkOverTheInterviewer'sFreeTime(G5a)": {
+                                    "value": {
+                                        "mode": "availability",
+                                        "window_start": "2026-11-02",
+                                        "window_end": "2026-11-13",
+                                        "minutes": 30
+                                    },
+                                    "summary": "Booking link over the interviewer's free time (G5a)"
+                                },
+                                "TimesOfferedByHand": {
+                                    "value": {
+                                        "mode": "times",
+                                        "options": [
+                                            "2026-11-03T10:00:00Z"
+                                        ],
+                                        "minutes": 30
+                                    },
+                                    "summary": "Times offered by hand"
+                                }
                             }
                         },
                         "application/x-www-form-urlencoded": {
@@ -5417,8 +5438,7 @@
                                 "$ref": "#/components/schemas/ProposeInterviewRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -21541,6 +21561,50 @@
         "/api/v1/compliance/dashboard": {
             "get": {
                 "operationId": "compliance_dashboard_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "cell_status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "expired",
+                                "missing",
+                                "rejected",
+                                "submitted",
+                                "verified"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "gaps",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Only tutors with missing, rejected or expired."
+                    },
+                    {
+                        "in": "query",
+                        "name": "requirement",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "A requirement key, e.g. dbs_enhanced."
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor_status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "onboarding",
+                                "restricted"
+                            ]
+                        }
+                    }
+                ],
                 "tags": [
                     "compliance"
                 ],
@@ -21555,6 +21619,78 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ComplianceDashboard"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/compliance/dashboard/export": {
+            "get": {
+                "operationId": "compliance_dashboard_export_retrieve",
+                "description": "The compliance matrix as CSV, with the dashboard's filters (audited).",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "cell_status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "expired",
+                                "missing",
+                                "rejected",
+                                "submitted",
+                                "verified"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "gaps",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Only tutors with missing, rejected or expired."
+                    },
+                    {
+                        "in": "query",
+                        "name": "requirement",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "A requirement key, e.g. dbs_enhanced."
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor_status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "onboarding",
+                                "restricted"
+                            ]
+                        }
+                    }
+                ],
+                "tags": [
+                    "compliance"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "text/csv": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
                                 }
                             }
                         },
@@ -21665,6 +21801,80 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ComplianceRecord"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/compliance/request-missing": {
+            "post": {
+                "operationId": "compliance_request_missing_create",
+                "description": "Bulk \"request missing documents\": each tutor (all with gaps, or the chosen ones) is\ntold which documents are missing, rejected or expired.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "compliance"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RequestMissingRequest"
+                            },
+                            "examples": {
+                                "EveryoneWithGaps": {
+                                    "value": {},
+                                    "summary": "Everyone with gaps"
+                                },
+                                "TwoTutors,DBSOnly": {
+                                    "value": {
+                                        "tutors": [
+                                            "0192b0f4-8f3a-7c1e-9a1b-1c2d3e4f5a6b",
+                                            "0192b0f4-8f3a-7c1e-9a1b-1c2d3e4f5a6c"
+                                        ],
+                                        "requirements": [
+                                            "dbs_enhanced"
+                                        ]
+                                    },
+                                    "summary": "Two tutors, DBS only"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RequestMissingRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RequestMissingRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RequestMissingResult"
                                 }
                             }
                         },
@@ -34393,7 +34603,7 @@
         "/api/v1/job-openings": {
             "get": {
                 "operationId": "job_openings_list",
-                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "description": "Job openings (FR-18-1) and their editor (G5a): title, web address, description,\nsubjects, location, branch, application form, published and closing date.",
                 "parameters": [
                     {
                         "name": "ordering",
@@ -34432,7 +34642,7 @@
             },
             "post": {
                 "operationId": "job_openings_create",
-                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "description": "Job openings (FR-18-1) and their editor (G5a): title, web address, description,\nsubjects, location, branch, application form, published and closing date.",
                 "parameters": [
                     {
                         "in": "header",
@@ -34489,7 +34699,7 @@
         "/api/v1/job-openings/{id}": {
             "get": {
                 "operationId": "job_openings_retrieve",
-                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "description": "Job openings (FR-18-1) and their editor (G5a): title, web address, description,\nsubjects, location, branch, application form, published and closing date.",
                 "parameters": [
                     {
                         "in": "path",
@@ -34526,7 +34736,7 @@
             },
             "put": {
                 "operationId": "job_openings_update",
-                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "description": "Job openings (FR-18-1) and their editor (G5a): title, web address, description,\nsubjects, location, branch, application form, published and closing date.",
                 "parameters": [
                     {
                         "in": "path",
@@ -34583,7 +34793,7 @@
             },
             "patch": {
                 "operationId": "job_openings_partial_update",
-                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "description": "Job openings (FR-18-1) and their editor (G5a): title, web address, description,\nsubjects, location, branch, application form, published and closing date.",
                 "parameters": [
                     {
                         "in": "path",
@@ -34639,7 +34849,7 @@
             },
             "delete": {
                 "operationId": "job_openings_destroy",
-                "description": "Base for views over tenant data.\n\nSubclasses set ``model`` and implement ``get_tenant_queryset()``. During OpenAPI\ngeneration there is no request tenant, so an empty unscoped queryset is returned\ninstead (it is never evaluated).",
+                "description": "Job openings (FR-18-1) and their editor (G5a): title, web address, description,\nsubjects, location, branch, application form, published and closing date.",
                 "parameters": [
                     {
                         "in": "path",
@@ -34663,6 +34873,43 @@
                 "responses": {
                     "204": {
                         "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/job-openings/default-form": {
+            "post": {
+                "operationId": "job_openings_default_form_create",
+                "description": "The standard tutor application form, created on first use.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "job-openings"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApplicationForm"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 },
                 "x-visibility": "internal"
@@ -48837,6 +49084,147 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/me/subject-tests": {
+            "get": {
+                "operationId": "me_subject_tests_list",
+                "description": "The tutor's subject tests (tutor portal).",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SubjectTest"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/me/subject-tests/{quiz_id}": {
+            "get": {
+                "operationId": "me_subject_tests_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "quiz_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubjectTestDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "me_subject_tests_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "quiz_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TakeSubjectTestRequest"
+                            },
+                            "examples": {
+                                "Answers": {
+                                    "value": {
+                                        "answers": {
+                                            "0192b0f4-8f3a-7c1e-9a1b-1c2d3e4f5a6b": [
+                                                "b"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TakeSubjectTestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TakeSubjectTestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubjectTestResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/me/tax-identity": {
             "get": {
                 "operationId": "me_tax_identity_retrieve",
@@ -55871,6 +56259,209 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/performance-notes": {
+            "get": {
+                "operationId": "performance_notes_list",
+                "description": "Staff notes on a tutor's performance: praise, concerns and notes.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "kind",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "performance-notes"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedPerformanceNoteList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "performance_notes_create",
+                "description": "Staff notes on a tutor's performance: praise, concerns and notes.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "performance-notes"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddPerformanceNoteRequest"
+                            },
+                            "examples": {
+                                "Praise": {
+                                    "value": {
+                                        "tutor": "0192b0f4-8f3a-7c1e-9a1b-1c2d3e4f5a6b",
+                                        "kind": "praise",
+                                        "body": "Lovely feedback from the Patels."
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddPerformanceNoteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddPerformanceNoteRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PerformanceNote"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/performance-notes/{id}": {
+            "get": {
+                "operationId": "performance_notes_retrieve",
+                "description": "Staff notes on a tutor's performance: praise, concerns and notes.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this performance note.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "performance-notes"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PerformanceNote"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "delete": {
+                "operationId": "performance_notes_destroy",
+                "description": "Staff notes on a tutor's performance: praise, concerns and notes.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this performance note.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "performance-notes"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/permissions": {
             "get": {
                 "operationId": "permissions_list",
@@ -61752,6 +62343,254 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/probation-reviews": {
+            "get": {
+                "operationId": "probation_reviews_list",
+                "description": "Probation reviews; ``ProbationReviewWorkflow`` reminds staff before each is due.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "probation-reviews"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedProbationReviewList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "probation_reviews_create",
+                "description": "Probation reviews; ``ProbationReviewWorkflow`` reminds staff before each is due.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "probation-reviews"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScheduleProbationRequest"
+                            },
+                            "examples": {
+                                "Schedule": {
+                                    "value": {
+                                        "tutor": "0192b0f4-8f3a-7c1e-9a1b-1c2d3e4f5a6b",
+                                        "due_on": "2027-01-15"
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScheduleProbationRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScheduleProbationRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProbationReview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/probation-reviews/{id}": {
+            "get": {
+                "operationId": "probation_reviews_retrieve",
+                "description": "Probation reviews; ``ProbationReviewWorkflow`` reminds staff before each is due.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this probation review.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "probation-reviews"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProbationReview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/probation-reviews/{id}/complete": {
+            "post": {
+                "operationId": "probation_reviews_complete_create",
+                "description": "Probation reviews; ``ProbationReviewWorkflow`` reminds staff before each is due.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this probation review.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "probation-reviews"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteProbationRequest"
+                            },
+                            "examples": {
+                                "Extend": {
+                                    "value": {
+                                        "outcome": "extended",
+                                        "notes": "Punctuality",
+                                        "extend_to": "2027-03-01"
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteProbationRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteProbationRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProbationReview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/processes": {
             "get": {
                 "operationId": "processes_list",
@@ -64830,6 +65669,129 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/PublicTutorDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/public/uploads": {
+            "post": {
+                "operationId": "public_uploads_create",
+                "description": "Start an upload for a public form's file field: returns a presigned PUT and the token\nthe form submission carries. Throttled per IP (``public_upload``).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PublicUploadRequestRequest"
+                            },
+                            "examples": {
+                                "ACVForAJobOpening": {
+                                    "value": {
+                                        "target": "opening",
+                                        "slug": "maths-tutors-leeds",
+                                        "kind": "cv",
+                                        "filename": "Nia Okafor CV.pdf",
+                                        "content_type": "application/pdf",
+                                        "size_bytes": 182044
+                                    },
+                                    "summary": "A CV for a job opening"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PublicUploadRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PublicUploadRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicUploadCreated"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/public/uploads/complete": {
+            "post": {
+                "operationId": "public_uploads_complete_create",
+                "description": "Finish an upload: the file's size, type and signature are checked and it is queued for\nthe malware scan.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "public"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PublicUploadCompleteRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PublicUploadCompleteRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PublicUploadCompleteRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicUploadedFile"
                                 }
                             }
                         },
@@ -79445,6 +80407,258 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/tutors/{id}/offboarding": {
+            "get": {
+                "operationId": "tutors_offboarding_retrieve",
+                "description": "``/tutors/{id}/offboarding``: the latest checklist; POST starts offboarding (the\ntutor becomes inactive).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Offboarding"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "tutors_offboarding_create",
+                "description": "``/tutors/{id}/offboarding``: the latest checklist; POST starts offboarding (the\ntutor becomes inactive).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StartOffboardingRequest"
+                            },
+                            "examples": {
+                                "Start": {
+                                    "value": {
+                                        "reason": "Moving abroad",
+                                        "leaving_on": "2026-12-20"
+                                    }
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StartOffboardingRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StartOffboardingRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Offboarding"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/tutors/{id}/offboarding/{key}/done": {
+            "post": {
+                "operationId": "tutors_offboarding_done_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Offboarding"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/tutors/{id}/offboarding/complete": {
+            "post": {
+                "operationId": "tutors_offboarding_complete_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Offboarding"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/tutors/{id}/offboarding/revoke-access": {
+            "post": {
+                "operationId": "tutors_offboarding_revoke_access_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Offboarding"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/tutors/{id}/onboarding": {
             "get": {
                 "operationId": "tutors_onboarding_retrieve",
@@ -79764,6 +80978,47 @@
                 "x-scopes": [
                     "tutors:write"
                 ]
+            }
+        },
+        "/api/v1/tutors/{id}/subject-tests": {
+            "get": {
+                "operationId": "tutors_subject_tests_list",
+                "description": "Staff: the tutor's subject-test results (tutor record).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "tutors"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SubjectTestAttempt"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
             }
         },
         "/api/v1/tutors/{id}/subjects": {
@@ -84152,6 +85407,28 @@
                     "unit_price"
                 ]
             },
+            "AddPerformanceNoteRequest": {
+                "type": "object",
+                "properties": {
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/PerformanceNoteKindEnum"
+                    },
+                    "body": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 5000
+                    }
+                },
+                "required": [
+                    "body",
+                    "kind",
+                    "tutor"
+                ]
+            },
             "Addon": {
                 "type": "object",
                 "description": "An add-on in the in-app shop (G6, FR-04-1).",
@@ -85929,12 +87206,39 @@
                             "$ref": "#/components/schemas/Interview"
                         },
                         "readOnly": true
+                    },
+                    "cv_file": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AttachedFile"
+                            }
+                        ],
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "video_file": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AttachedFile"
+                            }
+                        ],
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "attachments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AttachedFile"
+                        },
+                        "readOnly": true
                     }
                 },
                 "required": [
                     "answers",
+                    "attachments",
                     "created_at",
                     "cv",
+                    "cv_file",
                     "decided_at",
                     "decision_reason",
                     "email",
@@ -85959,6 +87263,7 @@
                     "status",
                     "subjects",
                     "tutor",
+                    "video_file",
                     "video_url"
                 ]
             },
@@ -85969,6 +87274,26 @@
                 ],
                 "type": "string",
                 "description": "* `invoice` - Reduce what is owed on the invoice\n* `credit` - Keep as client credit"
+            },
+            "ApplicationForm": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "slug"
+                ]
             },
             "ApplicationStage": {
                 "type": "object",
@@ -86579,6 +87904,35 @@
                 },
                 "required": [
                     "owners"
+                ]
+            },
+            "AttachedFile": {
+                "type": "object",
+                "description": "A file attached to a record (open it with ``GET /files/{id}/download``).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "filename": {
+                        "type": "string"
+                    },
+                    "content_type": {
+                        "type": "string"
+                    },
+                    "size_bytes": {
+                        "type": "integer"
+                    },
+                    "is_downloadable": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "content_type",
+                    "filename",
+                    "id",
+                    "is_downloadable",
+                    "size_bytes"
                 ]
             },
             "Attachment": {
@@ -93395,6 +94749,37 @@
                     "session_id"
                 ]
             },
+            "CompleteProbationOutcomeEnum": {
+                "enum": [
+                    "passed",
+                    "extended",
+                    "failed",
+                    "cancelled"
+                ],
+                "type": "string",
+                "description": "* `passed` - passed\n* `extended` - extended\n* `failed` - failed\n* `cancelled` - cancelled"
+            },
+            "CompleteProbationRequest": {
+                "type": "object",
+                "properties": {
+                    "outcome": {
+                        "$ref": "#/components/schemas/CompleteProbationOutcomeEnum"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 5000
+                    },
+                    "extend_to": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "outcome"
+                ]
+            },
             "CompleteRequest": {
                 "type": "object",
                 "properties": {
@@ -99012,10 +100397,18 @@
                     "age_hours": {
                         "type": "integer",
                         "readOnly": true
+                    },
+                    "attachments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AttachedFile"
+                        },
+                        "readOnly": true
                     }
                 },
                 "required": [
                     "age_hours",
+                    "attachments",
                     "client",
                     "client_name",
                     "contact",
@@ -104104,13 +105497,30 @@
                             {
                                 "type": "string",
                                 "format": "uri",
-                                "maxLength": 200
+                                "maxLength": 1000
                             },
                             {
                                 "type": "string",
                                 "maxLength": 0
                             }
                         ]
+                    },
+                    "host_url": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "uri",
+                                "maxLength": 1000
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    },
+                    "video_provider": {
+                        "type": "string",
+                        "maxLength": 20
                     },
                     "start": {
                         "type": "string",
@@ -104119,12 +105529,33 @@
                     },
                     "status": {
                         "$ref": "#/components/schemas/InterviewStatusEnum"
+                    },
+                    "mode": {
+                        "$ref": "#/components/schemas/InterviewModeEnum"
+                    },
+                    "window_start": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "window_end": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
                     }
                 },
                 "required": [
                     "id",
                     "interviewer"
                 ]
+            },
+            "InterviewModeEnum": {
+                "enum": [
+                    "times",
+                    "availability"
+                ],
+                "type": "string",
+                "description": "* `times` - Times offered by staff\n* `availability` - Booking link from the interviewer's free time"
             },
             "InterviewStatusEnum": {
                 "enum": [
@@ -106011,9 +107442,17 @@
                         "maxLength": 150
                     },
                     "slug": {
-                        "type": "string",
-                        "maxLength": 80,
-                        "pattern": "^[-a-zA-Z0-9_]+$"
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 80,
+                                "pattern": "^[-a-zA-Z0-9_]+$"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
                     },
                     "description": {
                         "type": "string"
@@ -106030,7 +107469,13 @@
                     },
                     "form": {
                         "type": "string",
-                        "format": "uuid"
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "form_name": {
+                        "type": "string",
+                        "readOnly": true,
+                        "default": ""
                     },
                     "published": {
                         "type": "boolean"
@@ -106039,12 +107484,16 @@
                         "type": "string",
                         "format": "date",
                         "nullable": true
+                    },
+                    "applications_open": {
+                        "type": "integer",
+                        "readOnly": true
                     }
                 },
                 "required": [
-                    "form",
+                    "applications_open",
+                    "form_name",
                     "id",
-                    "slug",
                     "title"
                 ]
             },
@@ -106057,10 +107506,17 @@
                         "maxLength": 150
                     },
                     "slug": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 80,
-                        "pattern": "^[-a-zA-Z0-9_]+$"
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 80,
+                                "pattern": "^[-a-zA-Z0-9_]+$"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
                     },
                     "description": {
                         "type": "string"
@@ -106077,7 +107533,8 @@
                     },
                     "form": {
                         "type": "string",
-                        "format": "uuid"
+                        "format": "uuid",
+                        "nullable": true
                     },
                     "published": {
                         "type": "boolean"
@@ -106089,8 +107546,6 @@
                     }
                 },
                 "required": [
-                    "form",
-                    "slug",
                     "title"
                 ]
             },
@@ -112765,6 +114220,80 @@
                     "authorize_url"
                 ]
             },
+            "Offboarding": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "reason": {
+                        "type": "string"
+                    },
+                    "leaving_on": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OffboardingItem"
+                        }
+                    },
+                    "tutor_status": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "completed_at",
+                    "id",
+                    "items",
+                    "leaving_on",
+                    "reason",
+                    "started_at",
+                    "tutor_status"
+                ]
+            },
+            "OffboardingItem": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "auto": {
+                        "type": "boolean"
+                    },
+                    "done": {
+                        "type": "boolean"
+                    },
+                    "done_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "auto",
+                    "done",
+                    "done_at",
+                    "key",
+                    "label"
+                ]
+            },
             "OfferBatch": {
                 "type": "object",
                 "properties": {
@@ -117229,6 +118758,32 @@
                     }
                 }
             },
+            "PaginatedPerformanceNoteList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PerformanceNote"
+                        }
+                    }
+                }
+            },
             "PaginatedPhoneNumberList": {
                 "type": "object",
                 "required": [
@@ -117355,6 +118910,32 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/PriceList"
+                        }
+                    }
+                }
+            },
+            "PaginatedProbationReviewList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProbationReview"
                         }
                     }
                 }
@@ -120817,10 +122398,17 @@
                         "maxLength": 150
                     },
                     "slug": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 80,
-                        "pattern": "^[-a-zA-Z0-9_]+$"
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 80,
+                                "pattern": "^[-a-zA-Z0-9_]+$"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
                     },
                     "description": {
                         "type": "string"
@@ -120837,7 +122425,8 @@
                     },
                     "form": {
                         "type": "string",
-                        "format": "uuid"
+                        "format": "uuid",
+                        "nullable": true
                     },
                     "published": {
                         "type": "boolean"
@@ -125392,6 +126981,58 @@
                     "pay_percent"
                 ]
             },
+            "PerformanceNote": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/PerformanceNoteKindEnum"
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "author": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "author_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "author",
+                    "author_name",
+                    "body",
+                    "created_at",
+                    "id",
+                    "tutor"
+                ]
+            },
+            "PerformanceNoteKindEnum": {
+                "enum": [
+                    "praise",
+                    "concern",
+                    "note"
+                ],
+                "type": "string",
+                "description": "* `praise` - Praise\n* `concern` - Concern\n* `note` - Note"
+            },
             "Permission": {
                 "type": "object",
                 "properties": {
@@ -129300,6 +130941,94 @@
                     "reason"
                 ]
             },
+            "ProbationReview": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "tutor_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "due_on": {
+                        "type": "string",
+                        "format": "date",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ProbationReviewStatusEnum"
+                            }
+                        ],
+                        "readOnly": true,
+                        "default": "scheduled"
+                    },
+                    "outcome_notes": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "reviewer": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "reviewer_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "reviewed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "previous": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "due_on",
+                    "id",
+                    "outcome_notes",
+                    "previous",
+                    "reviewed_at",
+                    "reviewer",
+                    "reviewer_name",
+                    "status",
+                    "tutor",
+                    "tutor_name"
+                ]
+            },
+            "ProbationReviewStatusEnum": {
+                "enum": [
+                    "scheduled",
+                    "passed",
+                    "extended",
+                    "failed",
+                    "cancelled"
+                ],
+                "type": "string",
+                "description": "* `scheduled` - Scheduled\n* `passed` - Passed\n* `extended` - Extended\n* `failed` - Not passed\n* `cancelled` - Cancelled"
+            },
             "Process": {
                 "type": "object",
                 "properties": {
@@ -130411,14 +132140,31 @@
             "ProposeInterviewRequest": {
                 "type": "object",
                 "properties": {
+                    "mode": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/InterviewModeEnum"
+                            }
+                        ],
+                        "default": "times"
+                    },
                     "options": {
                         "type": "array",
                         "items": {
                             "type": "string",
                             "format": "date-time"
                         },
-                        "maxItems": 10,
-                        "minItems": 1
+                        "maxItems": 10
+                    },
+                    "window_start": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "window_end": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
                     },
                     "minutes": {
                         "type": "integer",
@@ -130431,7 +132177,8 @@
                             {
                                 "type": "string",
                                 "format": "uri",
-                                "default": ""
+                                "default": "",
+                                "maxLength": 1000
                             },
                             {
                                 "type": "string",
@@ -130439,10 +132186,7 @@
                             }
                         ]
                     }
-                },
-                "required": [
-                    "options"
-                ]
+                }
             },
             "ProrationPreview": {
                 "type": "object",
@@ -131294,16 +133038,24 @@
                     },
                     "organisation": {
                         "type": "string"
+                    },
+                    "mode": {
+                        "type": "string"
+                    },
+                    "timezone": {
+                        "type": "string"
                     }
                 },
                 "required": [
                     "applicant",
                     "meeting_url",
                     "minutes",
+                    "mode",
                     "options",
                     "organisation",
                     "start",
-                    "status"
+                    "status",
+                    "timezone"
                 ]
             },
             "PublicKeyOptions": {
@@ -132408,6 +134160,150 @@
                 "required": [
                     "level",
                     "subject"
+                ]
+            },
+            "PublicUploadCompleteRequest": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "PublicUploadCreated": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "description": "Send this as the file field's answer."
+                    },
+                    "upload": {
+                        "$ref": "#/components/schemas/PublicUploadTarget"
+                    },
+                    "max_bytes": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "max_bytes",
+                    "token",
+                    "upload"
+                ]
+            },
+            "PublicUploadKindEnum": {
+                "enum": [
+                    "cv",
+                    "document",
+                    "video"
+                ],
+                "type": "string",
+                "description": "* `cv` - cv\n* `document` - document\n* `video` - video"
+            },
+            "PublicUploadRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "target": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PublicUploadRequestTargetEnum"
+                            }
+                        ],
+                        "description": "`form` for an enquiry or registration form, `opening` for a job opening.\n\n* `form` - form\n* `opening` - opening"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The form or opening slug.",
+                        "maxLength": 80,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/PublicUploadKindEnum"
+                    },
+                    "filename": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                    },
+                    "content_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 127
+                    },
+                    "size_bytes": {
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "content_type",
+                    "filename",
+                    "kind",
+                    "size_bytes",
+                    "slug",
+                    "target"
+                ]
+            },
+            "PublicUploadRequestTargetEnum": {
+                "enum": [
+                    "form",
+                    "opening"
+                ],
+                "type": "string",
+                "description": "* `form` - form\n* `opening` - opening"
+            },
+            "PublicUploadTarget": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "method": {
+                        "type": "string"
+                    },
+                    "headers": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "expires_in": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "expires_in",
+                    "headers",
+                    "method",
+                    "url"
+                ]
+            },
+            "PublicUploadedFile": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    },
+                    "filename": {
+                        "type": "string"
+                    },
+                    "content_type": {
+                        "type": "string"
+                    },
+                    "size_bytes": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "content_type",
+                    "filename",
+                    "size_bytes",
+                    "token"
                 ]
             },
             "PublicWidget": {
@@ -135562,6 +137458,47 @@
                     }
                 }
             },
+            "RequestMissingRequest": {
+                "type": "object",
+                "properties": {
+                    "tutors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "nullable": true,
+                        "description": "Leave out to ask every tutor with gaps."
+                    },
+                    "requirements": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "pattern": "^[-a-zA-Z0-9_]+$"
+                        },
+                        "description": "Requirement keys to ask for; leave empty for all gaps."
+                    }
+                }
+            },
+            "RequestMissingResult": {
+                "type": "object",
+                "properties": {
+                    "count": {
+                        "type": "integer"
+                    },
+                    "requests": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RequestedTutor"
+                        }
+                    }
+                },
+                "required": [
+                    "count",
+                    "requests"
+                ]
+            },
             "RequestReferenceRequest": {
                 "type": "object",
                 "properties": {
@@ -135583,6 +137520,25 @@
                 "required": [
                     "email",
                     "name"
+                ]
+            },
+            "RequestedTutor": {
+                "type": "object",
+                "properties": {
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "requirements": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "requirements",
+                    "tutor"
                 ]
             },
             "RequesterEnum": {
@@ -136078,7 +138034,7 @@
                     "target": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/TargetEnum"
+                                "$ref": "#/components/schemas/ResourceShareTargetEnum"
                             }
                         ],
                         "readOnly": true
@@ -136112,6 +138068,16 @@
                     "target_id",
                     "target_name"
                 ]
+            },
+            "ResourceShareTargetEnum": {
+                "enum": [
+                    "student",
+                    "job",
+                    "lesson",
+                    "group_class"
+                ],
+                "type": "string",
+                "description": "* `student` - student\n* `job` - job\n* `lesson` - lesson\n* `group_class` - group_class"
             },
             "ResourceVisibilityEnum": {
                 "enum": [
@@ -138160,6 +140126,23 @@
                 "required": [
                     "confirm_slug",
                     "reason"
+                ]
+            },
+            "ScheduleProbationRequest": {
+                "type": "object",
+                "properties": {
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "due_on": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                },
+                "required": [
+                    "due_on",
+                    "tutor"
                 ]
             },
             "ScheduleRequest": {
@@ -141551,6 +143534,21 @@
                     "target_ids"
                 ]
             },
+            "StartOffboardingRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 500
+                    },
+                    "leaving_on": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    }
+                }
+            },
             "StartOffersRequest": {
                 "type": "object",
                 "properties": {
@@ -142523,6 +144521,275 @@
                     "name"
                 ]
             },
+            "SubjectTest": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "subject": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "level": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "pass_percent": {
+                        "type": "integer"
+                    },
+                    "time_limit_minutes": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "question_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/SubjectTestStatusEnum"
+                    },
+                    "percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "taken_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "retake_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "can_take": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "can_take",
+                    "description",
+                    "id",
+                    "pass_percent",
+                    "percent",
+                    "question_count",
+                    "retake_at",
+                    "status",
+                    "subjects",
+                    "taken_at",
+                    "time_limit_minutes",
+                    "title"
+                ]
+            },
+            "SubjectTestAttempt": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "quiz": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "subject": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    },
+                    "passed": {
+                        "type": "boolean"
+                    },
+                    "submitted_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "id",
+                    "passed",
+                    "percent",
+                    "quiz",
+                    "submitted_at",
+                    "title"
+                ]
+            },
+            "SubjectTestDetail": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "subject": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "level": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "pass_percent": {
+                        "type": "integer"
+                    },
+                    "time_limit_minutes": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "question_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/SubjectTestStatusEnum"
+                    },
+                    "percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "taken_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "retake_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "can_take": {
+                        "type": "boolean"
+                    },
+                    "questions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SubjectTestQuestion"
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "can_take",
+                    "description",
+                    "id",
+                    "pass_percent",
+                    "percent",
+                    "question_count",
+                    "questions",
+                    "retake_at",
+                    "status",
+                    "subjects",
+                    "taken_at",
+                    "time_limit_minutes",
+                    "title"
+                ]
+            },
+            "SubjectTestQuestion": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "kind": {
+                        "type": "string"
+                    },
+                    "prompt": {
+                        "type": "string"
+                    },
+                    "choices": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "points": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "choices",
+                    "id",
+                    "kind",
+                    "points",
+                    "prompt"
+                ]
+            },
+            "SubjectTestResult": {
+                "type": "object",
+                "properties": {
+                    "percent": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    },
+                    "passed": {
+                        "type": "boolean"
+                    },
+                    "pass_percent": {
+                        "type": "integer"
+                    },
+                    "assessed": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "assessed",
+                    "pass_percent",
+                    "passed",
+                    "percent"
+                ]
+            },
+            "SubjectTestStatusEnum": {
+                "enum": [
+                    "not_taken",
+                    "passed",
+                    "failed"
+                ],
+                "type": "string",
+                "description": "* `not_taken` - not_taken\n* `passed` - passed\n* `failed` - failed"
+            },
             "Submission": {
                 "type": "object",
                 "properties": {
@@ -143397,15 +145664,18 @@
                     "name"
                 ]
             },
-            "TargetEnum": {
-                "enum": [
-                    "student",
-                    "job",
-                    "lesson",
-                    "group_class"
-                ],
-                "type": "string",
-                "description": "* `student` - student\n* `job` - job\n* `lesson` - lesson\n* `group_class` - group_class"
+            "TakeSubjectTestRequest": {
+                "type": "object",
+                "properties": {
+                    "answers": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "description": "Question id → choice id(s) or a short answer."
+                    }
+                },
+                "required": [
+                    "answers"
+                ]
             },
             "Task": {
                 "type": "object",

@@ -139,3 +139,11 @@
 | TP-E17-065 | Converting twice | Coordinator | A won enquiry | 1. Open it and try **Convert to client** again (or repeat the API call). | Refused; no duplicate jobs or clients. | P2 | No | |
 | TP-E17-066 | Archived service or inactive tutor at conversion | Coordinator | Archive the Piano service | 1. Convert choosing Piano lesson. | Piano is not offered, or the API refuses it with a clear message. | P3 | No | |
 | TP-E17-067 | Proposals in DSAR export and erasure | Admin | Accepted proposal for Kofi Mensah | 1. In **Privacy**, export Kofi's data, then erase him (E29). | The export contains the proposal signature and reasons; after erasure the signature, reasons and free text are removed. | P2 | backend: `tutortrack/leads/tests/test_proposals.py::test_proposals_are_in_dsar_exports_and_erased` | |
+
+## Gap batch G5a (2026-10-21): file uploads on the enquiry form (FR-17-1)
+
+| ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
+|---|---|---|---|---|---|---|---|---|
+| TP-E17-068 | Family attaches school reports | Anonymous, Coordinator | An enquiry form with a file field (documents, more than one) | 1. Open `/f/<slug>`, add a PDF and a photo, send.<br>2. As a coordinator, open the enquiry. | The enquiry lists both files, which open once scanned; the submission keeps file references, not upload tokens; a tutor can't open them. | P1 | backend: `tutortrack/leads/tests/test_uploads.py`; admin vitest `src/recruitment/Hiring.test.tsx` (public upload) |  |
+| TP-E17-069 | Upload rules on public forms | Anonymous | The same form | 1. Upload to a form without file fields, an unknown type, more than 5 files, an upload token twice. | Each is refused with a clear message; unsent uploads are deleted by the `unclaimed_public_uploads` retention category after 2 days. | P2 | backend: `tutortrack/core/tests/test_public_uploads.py`, `tutortrack/leads/tests/test_uploads.py` |  |
+| TP-E17-070 | Uploads in DSAR export and erasure | Admin | An enquiry with attachments | 1. Export, then erase the contact (E29). | The files are in the export and deleted on erasure. | P2 | backend: `tutortrack/leads/tests/test_uploads.py::test_dsar_and_erasure_cover_enquiry_uploads` |  |

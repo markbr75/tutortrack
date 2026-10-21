@@ -220,7 +220,7 @@
         <h1>TutorTrack admin guide</h1>
         <p class="lead">How to set up and configure a tutoring business on TutorTrack, and how
           the TutorTrack service itself is operated.</p>
-        <p class="meta">Last updated: 2026-10-20</p>
+        <p class="meta">Last updated: 2026-10-21</p>
       </header>
 
       <section id="overview" aria-labelledby="overview-h">
@@ -420,6 +420,7 @@
                 <tr><td>Courses</td><td>Proration basis (sessions); prorate mid-term joins (on); fee timing (at enrolment); withdrawal refunds (unused sessions); waitlist auto-offer (on, 48 hours); make-up credit (60 days)</td></tr>
                 <tr><td>Data migration</td><td>Import rollback window (7 days); export link lifetime (7 days)</td></tr>
                 <tr><td>Developer</td><td>API key rotation overlap (24 hours)</td></tr>
+                <tr><td>Recruitment and compliance</td><td>Probation review after activation (<code>recruitment.probation_days</code>, 90 days; 0 = no automatic review); remind staff before a probation review is due (7 days); interview hours for interviewers without their own availability (<code>recruitment.interview_hours</code>, weekdays 09:00–17:00 in the organisation's time zone); create a video link automatically when an interview is booked (on); days before a tutor can retake a failed subject test (7); days a referee has to reply (14); activate tutors automatically when onboarding is complete (on); compliance reminders (60, 30 and 7 days); hold pay while restricted (on)</td></tr>
               </tbody>
             </table>
           </div>
@@ -512,6 +513,17 @@
             such as inviting team members, editing roles, single sign-on and
             <span class="ui">View as</span>, are not limited by it today, so give the Branch
             manager role only to people you would trust with those.</p>
+        </div>
+
+        <div class="callout tip">
+          <strong>Recruitment and HR permissions</strong>
+          <p>Recruitment, compliance, probation reviews, performance notes and offboarding are
+            given only to owners and admins by default. To let someone else run them, make a
+            custom role with <code>recruitment.application.view</code>/<code>edit</code>/<code>decide</code>,
+            <code>recruitment.pipeline.manage</code> (openings and forms),
+            <code>compliance.view</code>/<code>verify</code> (verifying and requesting documents),
+            <code>recruitment.performance.view</code>/<code>manage</code> (probation reviews and
+            notes) and <code>recruitment.offboarding.manage</code>.</p>
         </div>
 
         <h3 id="roles-custom">Custom roles</h3>
@@ -1407,6 +1419,7 @@
               <tr><td>Archived students; archived clients and their contacts</td><td>6 years</td></tr>
               <tr><td>Lesson report notes and comments</td><td>6 years</td></tr>
               <tr><td>Rejected or withdrawn tutor applications; background check results</td><td>183 days</td></tr>
+              <tr><td>Files uploaded on public forms that were never sent</td><td>2 days (minimum 1)</td></tr>
               <tr><td>Online lesson recordings</td><td>1 year</td></tr>
               <tr><td>Online lesson join and leave logs</td><td>180 days</td></tr>
               <tr><td>Message log and in-app notifications</td><td>2 years</td></tr>
@@ -1863,9 +1876,10 @@
                 <tr><td><code>PLATFORM_REQUIRE_MFA</code></td><td><code>true</code>: console staff must have two-factor authentication.</td></tr>
                 <tr><td><code>PLATFORM_IP_ALLOWLIST</code></td><td>Empty: any network. Set it to the office or VPN ranges.</td></tr>
                 <tr><td><code>TT_REGION</code>, <code>REGION_UK_APP_URL</code>, <code>REGION_EU_APP_URL</code>, <code>REGION_US_APP_URL</code>, <code>REGION_AU_APP_URL</code></td><td>Data residency: the region this stack serves (empty: all, single stack) and each region's sign-up app.</td></tr>
-                <tr><td><code>THROTTLE_SIGNUP</code>, <code>THROTTLE_LOGIN</code>, <code>THROTTLE_PUBLIC_FORM</code>, <code>THROTTLE_PUBLIC_WIDGET</code></td><td>10/hour, 30/minute, 20/hour, 600/hour.</td></tr>
+                <tr><td><code>THROTTLE_SIGNUP</code>, <code>THROTTLE_LOGIN</code>, <code>THROTTLE_PUBLIC_FORM</code>, <code>THROTTLE_PUBLIC_WIDGET</code>, <code>THROTTLE_PUBLIC_UPLOAD</code></td><td>10/hour, 30/minute, 20/hour, 600/hour, 60/hour (anonymous uploads on public forms, per IP).</td></tr>
                 <tr><td><code>API_RATE_LIMIT_PER_MINUTE</code>, <code>API_BURST_PER_SECOND</code></td><td>Public API limits per token: 600 per minute, 100 per second.</td></tr>
                 <tr><td><code>FILE_UPLOAD_MAX_BYTES</code></td><td>25 MB.</td></tr>
+                <tr><td><code>PUBLIC_UPLOAD_DOCUMENT_MAX_BYTES</code>, <code>PUBLIC_UPLOAD_VIDEO_MAX_BYTES</code></td><td>10 MB and 100 MB: limits for files families and applicants upload on public forms (documents and CVs; video introductions). The files' first bytes must match their type, and they are scanned like other uploads.</td></tr>
                 <tr><td><code>CLAMAV_ENABLED</code>, <code>CLAMAV_HOST</code>, <code>CLAMAV_PORT</code></td><td>When false, uploads are marked clean without a scan. Turn it on in production.</td></tr>
                 <tr><td><code>PWNED_PASSWORDS_CHECK</code></td><td><code>true</code>: reject breached passwords.</td></tr>
                 <tr><td><code>GEOIP_COUNTRY_HEADER</code>, <code>GEOIP_LOOKUP</code>, <code>IMPOSSIBLE_TRAVEL_HOURS</code></td><td>Impossible-travel sign-in alerts (CDN header <code>CF-IPCountry</code>, 2 hours).</td></tr>
@@ -2011,7 +2025,7 @@
   </div>
 
   <footer class="site-footer">
-    <p>TutorTrack admin guide · Last updated: 2026-10-20 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
+    <p>TutorTrack admin guide · Last updated: 2026-10-21 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
   </footer>
 </body>
 </html>
