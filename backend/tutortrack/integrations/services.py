@@ -51,13 +51,27 @@ def _payload(connection: IntegrationConnection) -> dict[str, Any]:
         "level": connection.level,
         "user_id": str(connection.user_id) if connection.user_id else None,
         "capabilities": sorted(spec.capabilities),
+        "branch_id": str(connection.branch_id) if connection.branch_id else None,
     }
 
 
 # --- connect ------------------------------------------------------------------------------------
 
 
-def start_oauth(user: Any, *, provider: str, level: str, next_path: str = "/") -> str:
+def _branch(level: str, branch: Any) -> str:
+    """A branch-level connection names its branch (gap G5); other levels don't."""
+    from tutortrack.tenancy.models import Branch
+
+    if level != IntegrationConnection.Level.BRANCH:
+        return ""
+    if not branch or not Branch.objects.filter(pk=branch).exists():
+        raise _invalid("branch", _("Choose the branch this account is for."))
+    return str(branch)
+
+
+def start_oauth(
+    user: Any, *, provider: str, level: str, next_path: str = "/", branch: Any = None
+) -> str:
     """The provider's authorization URL for ``user`` (see ``oauth`` for the flow)."""
     spec = _spec(provider)
     if spec.auth != "oauth2":
@@ -72,6 +86,7 @@ def start_oauth(user: Any, *, provider: str, level: str, next_path: str = "/") -
         provider=provider,
         level=level,
         next_path=next_path,
+        branch_id=_branch(level, branch),
     )
     return providers.oauth_client(provider).authorize_url(
         state=token,
@@ -109,6 +124,7 @@ def complete_oauth(
         parsed.provider,
         parsed.level,
         tokens=tokens,
+        branch=parsed.branch_id or None,
     )
 
 
@@ -169,17 +185,20 @@ def _save(
     tokens: TokenSet,
     secret: str = "",
     extra: dict[str, Any] | None = None,
+    branch: Any = None,
 ) -> IntegrationConnection:
     existing = (
         IntegrationConnection.objects.select_for_update()
-        .filter(provider=provider, user=owner, level=level)
+        .filter(provider=provider, user=owner, level=level, branch_id=branch)
         .exclude(status=Status.DISCONNECTED)
         .first()
     )
     if existing is not None and existing.external_account_id != tokens.account_id:
         _disconnect(existing, revoke=False)  # a different account replaces the old one
         existing = None
-    connection = existing or IntegrationConnection(provider=provider, user=owner, level=level)
+    connection = existing or IntegrationConnection(
+        provider=provider, user=owner, level=level, branch_id=branch
+    )
     reconnected = existing is not None
     with audit.track(connection, action="reconnect" if reconnected else "connect"):
         connection.status = Status.ACTIVE

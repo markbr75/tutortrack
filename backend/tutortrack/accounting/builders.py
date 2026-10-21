@@ -36,11 +36,13 @@ from .documents import (
     Line,
     PaymentDoc,
     PayoutDoc,
+    ReallocationDoc,
     RefundDoc,
 )
 from .errors import MappingMissing, PrerequisiteMissing
 from .mappings import Mappings
 from .models import AccountingConnection, ExternalRecordLink
+from .routing import Scope, routes_to, scope
 
 Ref = tuple[str, str]
 CONTAINERS = {"pay_run", "pay_statement"}
@@ -50,10 +52,20 @@ ISSUED_ONCE = {
     "write_off",
     "payment",
     "refund",
+    "chargeback",
     "provider_payout",
     "bill_payment",
 }
-SALES_SIDE = {"contact", "invoice", "credit_note", "write_off", "payment", "refund"}
+SALES_SIDE = {
+    "contact",
+    "invoice",
+    "credit_note",
+    "write_off",
+    "payment",
+    "refund",
+    "reallocation",
+    "chargeback",
+}
 OBJECT_TYPES = (
     "contact",
     "supplier",
@@ -67,6 +79,8 @@ OBJECT_TYPES = (
     "bill_payment",
     "journal",
     "package_revenue",
+    "reallocation",
+    "chargeback",
     *sorted(CONTAINERS),
 )
 
@@ -89,11 +103,19 @@ class Context:
         from tutortrack.tenancy.models import Organisation
 
         self.conn = conn
-        self.maps = maps or Mappings(conn.provider, conn.chart)
+        self.maps = maps or Mappings(conn.mapping_set, conn.chart)
         org = Organisation.objects.get(pk=require_organisation_id())
         self.tz = ZoneInfo(org.timezone)
         self.org = org
         self._links: dict[Ref, ExternalRecordLink | None] = {}
+        self._scope: Scope | None = None
+
+    @property
+    def scope(self) -> Scope:
+        """The branches this ledger takes (gap G5: per-branch ledgers)."""
+        if self._scope is None:
+            self._scope = scope(self.conn)
+        return self._scope
 
     def link(self, object_type: str, object_id: Any) -> ExternalRecordLink | None:
         key = (object_type, str(object_id))
@@ -173,21 +195,37 @@ def prerequisites(conn: AccountingConnection, object_type: str, object_id: str) 
         if refund is not None:  # the refund reopens the invoice; the note then credits it
             deps.append(("refund", str(refund.pk)))
         return deps
-    if object_type == "payment":
+    if object_type in ("payment", "reallocation"):
         payment = Payment.objects.filter(pk=object_id).first()
         if payment is None:
             return []
-        invoices = (
-            PaymentAllocation.objects.filter(payment=payment, amount_amount__gt=0)
-            .values_list("invoice_id", flat=True)
-            .distinct()
+        rows = PaymentAllocation.objects.filter(payment=payment, amount_amount__gt=0)
+        # Only invoices that belong in this ledger (gap G5: per-branch ledgers).
+        invoices = sorted(
+            {
+                str(invoice_id)
+                for invoice_id, branch_id in rows.values_list("invoice_id", "invoice__branch_id")
+                if routes_to(conn, branch_id)
+            }
         )
-        return [("contact", str(payment.client_id))] + [("invoice", str(i)) for i in invoices]
+        deps = [("contact", str(payment.client_id))]
+        if object_type == "reallocation":
+            deps.append(("payment", str(payment.pk)))
+        return deps + [("invoice", i) for i in invoices]
     if object_type == "refund":
         refund = Refund.objects.select_related("payment").filter(pk=object_id).first()
         if refund is None:
             return []
-        return [("contact", str(refund.payment.client_id)), ("payment", str(refund.payment_id))]
+        deps = [("contact", str(refund.payment.client_id)), ("payment", str(refund.payment_id))]
+        return deps + _pending_reallocation(conn, refund.payment_id)
+    if object_type == "chargeback":
+        from tutortrack.payments.models import Dispute
+
+        dispute = Dispute.objects.select_related("payment").filter(pk=object_id).first()
+        if dispute is None:
+            return []
+        deps = [("contact", str(dispute.payment.client_id)), ("payment", str(dispute.payment_id))]
+        return deps + _pending_reallocation(conn, dispute.payment_id)
     if object_type == "bill":
         payout = Payout.objects.filter(pk=object_id).first()
         return [("supplier", str(payout.tutor_id))] if payout is not None else []
@@ -209,6 +247,20 @@ def prerequisites(conn: AccountingConnection, object_type: str, object_id: str) 
             return []
         return [("bill", str(statement.payout_id))]
     return []
+
+
+def _pending_reallocation(conn: AccountingConnection, payment_id: Any) -> list[Ref]:
+    """A refund or chargeback waits for a reallocation of its payment that isn't in the
+    ledger yet: it takes money back off the invoices the payment was moved to (gap G5)."""
+    link = ExternalRecordLink.objects.filter(
+        connection=conn, object_type="reallocation", object_id=str(payment_id)
+    ).first()
+    if link is None or link.status in (
+        ExternalRecordLink.Status.SYNCED,
+        ExternalRecordLink.Status.SKIPPED,
+    ):
+        return []
+    return [("reallocation", str(payment_id))]
 
 
 # --- builders ------------------------------------------------------------------------------------
@@ -467,13 +519,19 @@ def _write_off(ctx: Context, object_id: str) -> Built:
     if amount <= 0:
         raise Skip(_("Nothing was owed when it was written off."))
     account = ctx.maps.account("bad_debt")
-    line = Line(
-        description=_("Bad debt: %(number)s") % {"number": invoice.number},
-        account=account.id,
-        account_code=account.code,
-        net=amount,
-        tax_code=ctx.maps.tax_code(None),
-        tracking=ctx.maps.tracking_for(invoice.branch_id),
+    # With bad debt VAT relief (gap G5) the VAT in the amount written off is reclaimed: a
+    # line per tax rate carries it, so the ledger's credit note reduces output VAT.
+    lines = tuple(
+        Line(
+            description=_("Bad debt: %(number)s") % {"number": invoice.number},
+            account=account.id,
+            account_code=account.code,
+            net=net,
+            tax=tax,
+            tax_code=tax_code,
+            tracking=ctx.maps.tracking_for(invoice.branch_id),
+        )
+        for net, tax, tax_code in journals.write_off_parts(ctx.maps, invoice, amount)
     )
     doc = CreditNoteDoc(
         kind="write_off",
@@ -484,7 +542,7 @@ def _write_off(ctx: Context, object_id: str) -> Built:
         contact=ctx.ext("contact", invoice.client_id),
         invoice=invoice_ext,
         allocate=amount,
-        lines=(line,),
+        lines=lines,
         total=amount,
         reason=invoice.write_off_reason,
     )
@@ -507,16 +565,20 @@ def _payment(ctx: Context, object_id: str) -> Built:
     ctx.check_individual()
     day = ctx.local(payment.received_at)
     ctx.check_start(day)
+    # What it pays now, before refunds and chargebacks (they post after it, reopening what
+    # they took back): a reallocation made before it synced nets out (gap G5).
     paid: dict[str, Decimal] = defaultdict(Decimal)
     numbers: dict[str, str] = {}
-    for row in PaymentAllocation.objects.filter(
-        payment=payment, amount_amount__gt=0
-    ).select_related("invoice"):
+    for row in PaymentAllocation.objects.filter(payment=payment).select_related("invoice"):
         external = ctx.synced_ext("invoice", row.invoice_id)
         if external:
             paid[external] += row.amount.amount
             numbers[external] = row.invoice.number
-    allocations = tuple(sorted(paid.items()))
+    for _type, _id, start, end, _amount in _takebacks(payment):
+        for external, value in _taken(payment, start, end, ctx).items():
+            paid[external] += value
+    numbers = {k: v for k, v in numbers.items() if paid[k] > 0}
+    allocations = tuple(sorted((k, v) for k, v in paid.items() if v > 0))
     allocated = sum((a for _i, a in allocations), Decimal(0))
     label_ref = payment.reference or payment.get_method_display()
     refs = ", ".join(sorted(numbers.values()))
@@ -537,56 +599,251 @@ def _payment(ctx: Context, object_id: str) -> Built:
         "amount": f"{payment.amount.amount} {payment.currency}",
         "client": payment.client.display_name,
     }
-    return Built(doc, label)
+    # What the ledger holds of it, kept up to date by later refunds, chargebacks and
+    # reallocations (gap G5).
+    return Built(doc, label, meta={"ledger": _amounts(allocations), "total": str(doc.amount)})
+
+
+def _amounts(pairs: Any) -> dict[str, str]:
+    return {str(target): str(amount) for target, amount in pairs if amount}
+
+
+def _decimals(raw: dict[str, Any]) -> dict[str, Decimal]:
+    return {str(k): Decimal(str(v)) for k, v in (raw or {}).items() if Decimal(str(v))}
+
+
+def _parts(meta: dict[str, Any]) -> tuple[tuple[str, ...], ...]:
+    """The provider's parts of a payment as tuples of strings (Xero: invoice, payment id,
+    amount; FreeAgent keeps bare explanation URLs)."""
+    out = []
+    for part in meta.get("parts") or []:
+        out.append((str(part),) if isinstance(part, str) else tuple(str(x) for x in part))
+    return tuple(out)
+
+
+def _taken(payment: Any, start: Any, end: Any, ctx: Context) -> dict[str, Decimal]:
+    """Allocations a refund or chargeback took back off this ledger's invoices: the
+    negative rows written while it was being recorded (``start``..``end``)."""
+    from tutortrack.payments.models import PaymentAllocation
+
+    taken: dict[str, Decimal] = defaultdict(Decimal)
+    if start is None or end is None:
+        return taken
+    for row in PaymentAllocation.objects.filter(
+        payment=payment, amount_amount__lt=0, created_at__gte=start, created_at__lte=end
+    ):
+        external = ctx.synced_ext("invoice", row.invoice_id)
+        if external:
+            taken[external] += -row.amount.amount
+    return taken
+
+
+def _takebacks(payment: Any) -> list[tuple[str, str, Any, Any, Decimal]]:
+    """Refunds and lost disputes of a payment: (object type, id, start, end, amount)."""
+    from tutortrack.payments.models import Dispute, Refund
+
+    out: list[tuple[str, str, Any, Any, Decimal]] = [
+        ("refund", str(r.pk), r.created_at, r.updated_at, r.amount.amount)
+        for r in Refund.objects.filter(payment=payment, status=Refund.Status.SUCCEEDED)
+    ]
+    out += [
+        ("chargeback", str(d.pk), d.closed_at, d.updated_at, d.amount.amount)
+        for d in Dispute.objects.filter(payment=payment, status=Dispute.Status.LOST)
+    ]
+    return out
+
+
+def ledger_state(ctx: Context, payment: Any) -> tuple[dict[str, Decimal], Decimal]:
+    """What the ledger holds of a synced payment: its amount per invoice and its total
+    (less refunds and chargebacks posted). Payment links synced before gap G5 have no
+    record of it, so it is worked out from the allocations at the time."""
+    from tutortrack.payments.models import PaymentAllocation
+
+    link = ctx.link("payment", payment.pk)
+    meta = link.meta if link is not None else {}
+    if "ledger" in meta:
+        return _decimals(meta["ledger"]), Decimal(str(meta.get("total", payment.amount.amount)))
+    held: dict[str, Decimal] = defaultdict(Decimal)
+    synced_at = link.synced_at if link is not None else None
+    for row in PaymentAllocation.objects.filter(payment=payment, amount_amount__gt=0):
+        if synced_at is not None and row.created_at > synced_at:
+            continue
+        external = ctx.synced_ext("invoice", row.invoice_id)
+        if external:
+            held[external] += row.amount.amount
+    total = payment.amount.amount
+    for object_type, object_id, start, end, amount in _takebacks(payment):
+        done = ctx.link(object_type, object_id)
+        if done is None or done.status != ExternalRecordLink.Status.SYNCED:
+            continue
+        total -= amount
+        for external, value in _taken(payment, start, end, ctx).items():
+            held[external] -= value
+    return {k: v for k, v in held.items() if v > 0}, total
+
+
+def _after(ledger: dict[str, Decimal], taken: dict[str, Decimal]) -> dict[str, str]:
+    left = {k: v - taken.get(k, Decimal(0)) for k, v in ledger.items()}
+    return {k: str(v) for k, v in left.items() if v > 0}
+
+
+def _synced_payment(ctx: Context, payment: Any) -> ExternalRecordLink:
+    payment_link = ctx.link("payment", payment.pk)
+    if payment_link is None or payment_link.status != ExternalRecordLink.Status.SYNCED:
+        if payment_link is not None and payment_link.status == ExternalRecordLink.Status.SKIPPED:
+            raise Skip(_("Its payment isn't in the ledger."))
+        ctx.ext("payment", payment.pk)  # raises "waiting"
+    return payment_link  # type: ignore[return-value]
+
+
+def _takeback(
+    ctx: Context,
+    payment: Any,
+    *,
+    ref: str,
+    amount: Decimal,
+    start: Any,
+    end: Any,
+    reference: str,
+) -> tuple[RefundDoc, dict[str, Any]]:
+    """Money going back out of a synced payment (a refund or a lost dispute): reopens what
+    it took off invoices, the rest comes out of the client's credit."""
+    payment_link = _synced_payment(ctx, payment)
+    taken = _taken(payment, start, end, ctx)
+    from_invoices = tuple(sorted(taken.items()))
+    from_credit = amount - sum((a for _i, a in from_invoices), Decimal(0))
+    ledger, total = ledger_state(ctx, payment)
+    doc = RefundDoc(
+        kind="refund",
+        ref=ref,
+        date=ctx.local(start).isoformat(),
+        currency=payment.currency,
+        contact=ctx.ext("contact", payment.client_id),
+        account=clearing_account(ctx, payment).id,
+        payment=payment_link.external_id,
+        amount=amount,
+        reference=reference.strip()[:255],
+        from_invoices=from_invoices,
+        from_credit=from_credit,
+        parts=_parts(payment_link.meta),
+    )
+    # The payment's ledger state once this is posted (``services`` writes it back).
+    meta = {
+        "payment": str(payment.pk),
+        "ledger_after": _after(ledger, taken),
+        "total_after": str(total - amount),
+    }
+    return doc, meta
 
 
 def _refund(ctx: Context, object_id: str) -> Built:
-    from tutortrack.payments.models import PaymentAllocation, Refund
+    from tutortrack.payments.models import Refund
 
     refund = Refund.objects.select_related("payment__client").get(pk=object_id)
     if refund.status != Refund.Status.SUCCEEDED:
         raise Skip(_("Only completed refunds are synced."))
     ctx.check_individual()
     payment = refund.payment
-    payment_link = ctx.link("payment", payment.pk)
-    if payment_link is None or payment_link.status != ExternalRecordLink.Status.SYNCED:
-        if payment_link is not None and payment_link.status == ExternalRecordLink.Status.SKIPPED:
-            raise Skip(_("Its payment isn't in the ledger."))
-        ctx.ext("payment", payment.pk)  # raises "waiting"
-    day = ctx.local(refund.created_at)
-    # The allocations the refund took back were written while it was being recorded.
-    taken: dict[str, Decimal] = defaultdict(Decimal)
-    for row in PaymentAllocation.objects.filter(
-        payment=payment,
-        amount_amount__lt=0,
-        created_at__gte=refund.created_at,
-        created_at__lte=refund.updated_at,
-    ):
-        external = ctx.synced_ext("invoice", row.invoice_id)
-        if external:
-            taken[external] += -row.amount.amount
-    from_invoices = tuple(sorted(taken.items()))
-    from_credit = refund.amount.amount - sum((a for _i, a in from_invoices), Decimal(0))
-    parts = tuple(tuple(str(x) for x in p) for p in payment_link.meta.get("parts", []))  # type: ignore[union-attr]
-    doc = RefundDoc(
-        kind="refund",
+    doc, meta = _takeback(
+        ctx,
+        payment,
         ref=str(refund.pk),
-        date=day.isoformat(),
-        currency=refund.currency,
-        contact=ctx.ext("contact", payment.client_id),
-        account=clearing_account(ctx, payment).id,
-        payment=payment_link.external_id,  # type: ignore[union-attr]
         amount=refund.amount.amount,
-        reference=f"Refund {payment.reference or ''} {refund.reason}".strip()[:255],
-        from_invoices=from_invoices,
-        from_credit=from_credit,
-        parts=parts,  # type: ignore[arg-type]
+        start=refund.created_at,
+        end=refund.updated_at,
+        reference=f"Refund {payment.reference or ''} {refund.reason}",
     )
     label = _("Refund %(amount)s · %(client)s") % {
         "amount": f"{refund.amount.amount} {refund.currency}",
         "client": payment.client.display_name,
     }
-    return Built(doc, label)
+    return Built(doc, label, meta=meta)
+
+
+def _chargeback(ctx: Context, object_id: str) -> Built:
+    """A lost dispute (gap G5, FR-11-8): the provider took the money back, so the ledger
+    gets it like a refund from the payment, reopening the invoices it had paid."""
+    from tutortrack.payments.models import Dispute
+
+    dispute = Dispute.objects.select_related("payment__client").get(pk=object_id)
+    if dispute.status != Dispute.Status.LOST:
+        raise Skip(_("Only lost disputes take money back."))
+    ctx.check_individual()
+    payment = dispute.payment
+    doc, meta = _takeback(
+        ctx,
+        payment,
+        ref=f"chargeback-{dispute.pk}",
+        amount=dispute.amount.amount,
+        start=dispute.closed_at,
+        end=dispute.updated_at,
+        reference=f"Chargeback {payment.reference or ''} {dispute.reason}",
+    )
+    label = _("Chargeback %(amount)s · %(client)s") % {
+        "amount": f"{dispute.amount.amount} {dispute.currency}",
+        "client": payment.client.display_name,
+    }
+    return Built(doc, label, meta=meta)
+
+
+def _reallocation(ctx: Context, object_id: str) -> Built:
+    """A synced payment moved between invoices in TutorTrack (gap G5, FR-11-6): the ledger
+    payment is moved to match. What it should hold is the payment's allocations now, plus
+    whatever refunds or chargebacks not yet in the ledger took off (they post next)."""
+    from tutortrack.payments.models import Payment, PaymentAllocation
+
+    payment = Payment.objects.select_related("client").get(pk=object_id)
+    ctx.check_individual()
+    link = ctx.link("payment", payment.pk)
+    if link is None or link.status != ExternalRecordLink.Status.SYNCED:
+        raise Skip(_("Its payment isn't in the ledger yet; it goes with its allocations then."))
+    want: dict[str, Decimal] = defaultdict(Decimal)
+    rows = PaymentAllocation.objects.filter(payment=payment)
+    for row in rows:
+        external = ctx.synced_ext("invoice", row.invoice_id)
+        if external:
+            want[external] += row.amount.amount
+    for object_type, object_id_, start, end, _amount in _takebacks(payment):
+        done = ctx.link(object_type, object_id_)
+        if done is not None and done.status in (
+            ExternalRecordLink.Status.SYNCED,
+            ExternalRecordLink.Status.SKIPPED,
+        ):
+            continue
+        for external, value in _taken(payment, start, end, ctx).items():
+            want[external] += value
+    held, total = ledger_state(ctx, payment)
+    allocations = tuple(sorted((k, v) for k, v in want.items() if v > 0))
+    previous = tuple(sorted(held.items()))
+    if allocations == previous:
+        raise Skip(_("The ledger already shows these allocations."))
+    if sum((a for _k, a in allocations), Decimal(0)) > total:
+        raise Skip(_("The allocations are more than the ledger holds of the payment."))
+    latest = rows.order_by("-created_at").values_list("created_at", flat=True).first()
+    doc = ReallocationDoc(
+        kind="reallocation",
+        ref=str(payment.pk),
+        date=ctx.local(latest).isoformat(),
+        currency=payment.currency,
+        contact=ctx.ext("contact", payment.client_id),
+        account=clearing_account(ctx, payment).id,
+        payment=link.external_id,
+        paid_on=ctx.local(payment.received_at).isoformat(),
+        reference=(payment.reference or payment.get_method_display())[:255],
+        total=total,
+        allocations=allocations,
+        previous=previous,
+        parts=_parts(link.meta),
+    )
+    label = _("Reallocation of %(amount)s · %(client)s") % {
+        "amount": f"{payment.amount.amount} {payment.currency}",
+        "client": payment.client.display_name,
+    }
+    return Built(
+        doc,
+        label,
+        meta={"payment": str(payment.pk), "ledger_after": _amounts(allocations)},
+    )
 
 
 def _provider_payout(ctx: Context, object_id: str) -> Built:
@@ -741,27 +998,59 @@ def _bill_payment(ctx: Context, object_id: str) -> Built:
     return Built(doc, _("Payout to %(name)s") % {"name": payout.tutor.full_name})
 
 
+def journal_id(day: date, currency: str = "") -> str:
+    """A summary journal's id: the day (base currency), or ``<day>:<currency>`` for the
+    same day's records in another currency (gap G5)."""
+    return f"{day.isoformat()}:{currency}" if currency else day.isoformat()
+
+
 def _journal(ctx: Context, object_id: str) -> Built:
     if ctx.conn.mode != AccountingConnection.Mode.SUMMARY:
         raise Skip(_("Summary journals are off."))
-    day = date.fromisoformat(object_id)
+    raw_day, _sep, other = object_id.partition(":")
+    day = date.fromisoformat(raw_day)
     ctx.check_start(day)
-    currency = ctx.conn.base_currency or ctx.org.default_currency
-    postings = journals.sales_postings(ctx.maps, day, day, str(ctx.tz), currency=currency)
+    base = ctx.conn.base_currency or ctx.org.default_currency
+    currency = other or base
+    postings = journals.sales_postings(
+        ctx.maps, day, day, str(ctx.tz), currency=currency, scope=ctx.scope
+    )
+    rates: dict[str, str] = {}
+    if currency != base:
+        # Ledgers take manual journals in their base currency only: convert at the day's
+        # rate, line by line (half-up), and post any difference to currency conversion.
+        postings, rates = journals.convert(postings, base, journals.RateSource())
     lines = journals.summarise(postings)
     if not lines:
         raise Skip(_("Nothing happened that day."))
-    lines = journals.balance(ctx.maps, lines)
+    lines = journals.balance(ctx.maps, lines, kind="fx" if rates else "rounding")
+    if rates:
+        rate = next(iter(rates.values()))
+        narration = _("TutorTrack daily summary %(day)s (%(currency)s at %(rate)s %(base)s)") % {
+            "day": raw_day,
+            "currency": currency,
+            "rate": rate,
+            "base": base,
+        }
+    else:
+        narration = _("TutorTrack daily summary %(day)s (%(currency)s)") % {
+            "day": raw_day,
+            "currency": currency,
+        }
     doc = JournalDoc(
         kind="journal",
         ref=object_id,
-        date=object_id,
-        currency=currency,
-        narration=_("TutorTrack daily summary %(day)s (%(currency)s)")
-        % {"day": object_id, "currency": currency},
+        date=raw_day,
+        currency=base,
+        narration=narration,
         lines=tuple(lines),
     )
-    return Built(doc, _("Summary journal %(day)s") % {"day": object_id})
+    label = (
+        _("Summary journal %(day)s (%(currency)s)") % {"day": raw_day, "currency": currency}
+        if other
+        else _("Summary journal %(day)s") % {"day": raw_day}
+    )
+    return Built(doc, label, meta={"currency": currency, "rates": rates} if rates else {})
 
 
 def _package_revenue(ctx: Context, object_id: str) -> Built:
@@ -774,7 +1063,9 @@ def _package_revenue(ctx: Context, object_id: str) -> Built:
     day = date.fromisoformat(object_id)
     ctx.check_start(day)
     currency = ctx.conn.base_currency or ctx.org.default_currency
-    postings = journals.package_postings(ctx.maps, day, day, str(ctx.tz), currency=currency)
+    postings = journals.package_postings(
+        ctx.maps, day, day, str(ctx.tz), currency=currency, scope=ctx.scope
+    )
     lines = journals.summarise(postings)
     if not lines:
         raise Skip(_("No package units were used that day."))
@@ -792,6 +1083,8 @@ def _package_revenue(ctx: Context, object_id: str) -> Built:
 
 BUILDERS = {
     "package_revenue": _package_revenue,
+    "reallocation": _reallocation,
+    "chargeback": _chargeback,
     "contact": _contact,
     "supplier": _supplier,
     "invoice": _invoice,

@@ -103,7 +103,9 @@ def _people_connected(*providers: str) -> Callable[[], str]:
         rows = _connections(providers).filter(status=IntegrationConnection.Status.ACTIVE)
         people = rows.filter(level=IntegrationConnection.Level.USER).values("user").distinct()
         count = people.count()
-        if rows.filter(level=IntegrationConnection.Level.ORGANISATION).exists():
+        if rows.filter(
+            level__in=[IntegrationConnection.Level.ORGANISATION, IntegrationConnection.Level.BRANCH]
+        ).exists():
             return str(_("Connected for the organisation"))
         if not count:
             return ""

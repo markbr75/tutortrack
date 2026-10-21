@@ -20,7 +20,7 @@ VIEW = "integrations.accounting.view"
 
 
 def connections(user: Any) -> QuerySet[AccountingConnection]:
-    qs = AccountingConnection.objects.select_related("connection").exclude(
+    qs = AccountingConnection.objects.select_related("connection", "branch").exclude(
         connection__status="disconnected"
     )
     return scope_queryset(user, qs, VIEW)
@@ -53,11 +53,12 @@ def stats(conn: AccountingConnection) -> dict[str, int]:
 
 
 def statuses(user: Any, object_type: str, object_ids: list[str]) -> list[ExternalRecordLink]:
-    """The latest connection's link per record (sync badges)."""
-    from .services import active_connection
+    """Each record's links on the switched-on ledgers (sync badges; a record has one per
+    ledger it went to, gap G5: per-branch ledgers)."""
+    from .routing import enabled_connections
 
-    conn = active_connection()
+    conns = [c.pk for c in enabled_connections()]
     qs = records(user).filter(object_type=object_type, object_id__in=object_ids[:200])
-    if conn is not None:
-        qs = qs.filter(connection=conn)
+    if conns:
+        qs = qs.filter(connection__in=conns)
     return list(qs)

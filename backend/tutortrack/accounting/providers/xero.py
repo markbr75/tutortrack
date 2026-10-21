@@ -14,7 +14,10 @@ Translation of our documents:
 * provider payout → one bank transfer of the net amount (matches the bank feed line) and
   a ``SPEND`` transaction for the fees, both from the clearing account;
 * tutor bill → ``ACCPAY`` invoice; payout → ``Payment`` against it;
-* summary journal → ``ManualJournals``.
+* summary journal → ``ManualJournals``;
+* reallocation (gap G5) → the invoice payments that change are deleted and made again
+  with the new amounts on the payment's date; money moved off invoices becomes an
+  overpayment, money moved onto them from client credit is an overpayment allocation.
 
 Every create sends ``Idempotency-Key``. The tenant (organisation) id is the connection's
 ``external_account_id`` (picked from ``/connections`` when connecting).
@@ -41,6 +44,7 @@ from ..documents import (
     PaymentDoc,
     PayoutDoc,
     Pushed,
+    ReallocationDoc,
     RefundDoc,
 )
 from .base import (
@@ -467,6 +471,7 @@ class XeroClient:
         if external_id:
             return Pushed(external_id, created=False)
         ids: list[str] = []
+        parts = [list(p) for p in doc.parts if len(p) >= 3]
         if doc.from_credit:
             over = next((p for p in doc.parts if p[0] == "overpayment"), None)
             if over is not None:
@@ -479,6 +484,9 @@ class XeroClient:
                 }
                 result = self._call(creds, "PUT", "/Payments", {"Payments": [body]}, key=key)
                 ids.append(str(result["Payments"][0]["PaymentID"]))
+                for kept in parts:
+                    if kept[0] == "overpayment" and kept[1] == over[1]:
+                        kept[2] = str(Decimal(kept[2]) - doc.from_credit)
         for n, (invoice, amount) in enumerate(doc.from_invoices):
             part = next((p for p in doc.parts if p[0] == invoice), None)
             if part is None:
@@ -489,20 +497,120 @@ class XeroClient:
                 f"/Payments/{part[1]}",
                 {"Payments": [{"PaymentID": part[1], "Status": "DELETED"}]},
             )
+            parts = [p for p in parts if p[1] != part[1]]
             remaining = Decimal(part[2]) - amount
             if remaining > 0:
-                ids.append(
-                    self._payment(
-                        creds,
-                        target=invoice,
-                        account=doc.account,
-                        amount=remaining,
-                        day=doc.date,
-                        reference=doc.reference,
-                        key=f"{key}:{n}",
-                    )
+                replacement = self._payment(
+                    creds,
+                    target=invoice,
+                    account=doc.account,
+                    amount=remaining,
+                    day=doc.date,
+                    reference=doc.reference,
+                    key=f"{key}:{n}",
                 )
-        return Pushed(ids[0] if ids else f"refund:{doc.ref}", meta={"payments": ids})
+                ids.append(replacement)
+                parts.append([invoice, replacement, str(remaining)])
+        return Pushed(
+            ids[0] if ids else f"refund:{doc.ref}", meta={"payments": ids, "parts": parts}
+        )
+
+    def _push_reallocation(
+        self, creds: Credentials, doc: ReallocationDoc, external_id: str, key: str
+    ) -> Pushed:
+        """Xero can't edit a payment's amount: payments on invoices whose amount changes
+        are deleted and made again (on the payment's date, so bank reconciliation keeps
+        matching). Money moved off invoices is received again as an overpayment; money
+        moved onto them beyond what was freed comes from the client's overpayment."""
+        parts = [list(p) for p in doc.parts if len(p) >= 3]
+        on_invoice = {p[0]: p for p in parts if p[0] != "overpayment"}
+        over = next((p for p in parts if p[0] == "overpayment"), None)
+        want = dict(doc.allocations)
+        had = {k: Decimal(p[2]) for k, p in on_invoice.items()}
+        for target, amount in doc.previous:  # e.g. an overpayment allocation made earlier
+            had.setdefault(target, amount)
+        increase = sum(want.values(), Decimal(0)) - sum(had.values(), Decimal(0))
+        from_credit: dict[str, Decimal] = {}
+        if increase > 0:  # credit moved onto invoices: allocate the overpayment
+            left = increase
+            for target in sorted(want):
+                extra = want[target] - had.get(target, Decimal(0))
+                if extra > 0 and left > 0:
+                    from_credit[target] = min(extra, left)
+                    left -= from_credit[target]
+        day = doc.paid_on or doc.date
+        ids: list[str] = []
+        kept: list[list[str]] = [p for p in parts if p[0] == "overpayment"]
+        for n, target in enumerate(sorted(set(want) | set(had))):
+            part = on_invoice.get(target)
+            old_cash = Decimal(part[2]) if part is not None else Decimal(0)
+            # Earlier overpayment allocations stay; only the cash payment changes.
+            allocated = had.get(target, Decimal(0)) - old_cash
+            new_cash = max(
+                want.get(target, Decimal(0)) - allocated - from_credit.get(target, Decimal(0)),
+                Decimal(0),
+            )
+            if new_cash == old_cash:
+                if part is not None:
+                    kept.append(part)
+                continue
+            if part is not None:
+                self._call(
+                    creds,
+                    "POST",
+                    f"/Payments/{part[1]}",
+                    {"Payments": [{"PaymentID": part[1], "Status": "DELETED"}]},
+                )
+            if new_cash > 0:
+                pid = self._payment(
+                    creds,
+                    target=target,
+                    account=doc.account,
+                    amount=new_cash,
+                    day=day,
+                    reference=doc.reference,
+                    key=f"{key}:{n}",
+                )
+                ids.append(pid)
+                kept.append([target, pid, str(new_cash)])
+        if from_credit and over is not None:
+            self._call(
+                creds,
+                "PUT",
+                f"/Overpayments/{over[1]}/Allocations",
+                {
+                    "Allocations": [
+                        {
+                            "Invoice": {"InvoiceID": target},
+                            "Amount": _money(amount),
+                            "Date": doc.date,
+                        }
+                        for target, amount in sorted(from_credit.items())
+                    ]
+                },
+            )
+            for part in kept:
+                if part[1] == over[1]:
+                    part[2] = str(Decimal(part[2]) - sum(from_credit.values(), Decimal(0)))
+        if increase < 0:  # money moved off invoices: received again as an overpayment
+            body = {
+                "Type": "RECEIVE-OVERPAYMENT",
+                "Contact": {"ContactID": doc.contact},
+                "BankAccount": {"AccountID": doc.account},
+                "Date": day,
+                "Reference": doc.reference[:255],
+                "LineAmountTypes": "NoTax",
+                "LineItems": [
+                    {"Description": doc.reference[:4000], "LineAmount": _money(-increase)}
+                ],
+            }
+            result = self._call(
+                creds, "PUT", "/BankTransactions", {"BankTransactions": [body]}, key=f"{key}:over"
+            )
+            overpayment = str(result["BankTransactions"][0].get("OverpaymentID", ""))
+            kept.append(["overpayment", overpayment, str(-increase)])
+        first = ids[0] if ids else f"reallocation:{doc.ref}"
+        return Pushed(first, meta={"parts": kept, "payments": ids}, created=not external_id)
 
     def _fees_contact(self, creds: Credentials, name: str) -> str:
         found = self._call(creds, "GET", "/Contacts", params={"where": f'Name=="{name}"'}).get(

@@ -21,6 +21,7 @@ class IntegrationConnection(TenantModel):
     class Level(models.TextChoices):
         USER = "user", _("Personal")
         ORGANISATION = "organisation", _("Organisation")
+        BRANCH = "branch", _("Branch")  # a branch's own account (gap G5: per-branch ledgers)
 
     class Status(models.TextChoices):
         ACTIVE = "active", _("Connected")
@@ -32,6 +33,11 @@ class IntegrationConnection(TenantModel):
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE, related_name="+"
     )
     level = models.CharField(max_length=12, choices=Level.choices, default=Level.USER)
+    # Branch-level connections (e.g. a branch's own Xero organisation, gap G5); null for
+    # personal and organisation-wide connections.
+    branch = models.ForeignKey(
+        "tenancy.Branch", null=True, blank=True, on_delete=models.CASCADE, related_name="+"
+    )
     provider = models.CharField(max_length=30)
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.ACTIVE)
     scopes = models.JSONField(default=list, blank=True)
@@ -62,8 +68,13 @@ class IntegrationConnection(TenantModel):
             ),
             models.UniqueConstraint(
                 fields=["organisation", "provider"],
-                condition=Q(user__isnull=True) & ~Q(status="disconnected"),
+                condition=Q(user__isnull=True, branch__isnull=True) & ~Q(status="disconnected"),
                 name="integration_org_provider_unique",
+            ),
+            models.UniqueConstraint(
+                fields=["organisation", "provider", "branch"],
+                condition=Q(user__isnull=True, branch__isnull=False) & ~Q(status="disconnected"),
+                name="integration_branch_provider_unique",
             ),
         ]
         indexes = [models.Index(fields=["user", "provider", "status"])]

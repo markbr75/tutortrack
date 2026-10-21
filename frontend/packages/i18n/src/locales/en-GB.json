@@ -7092,5 +7092,23 @@
     "now": "Now · {{time}}",
     "waiting": "Waiting for you",
     "nothingWaiting": "Nothing waiting for you."
+  },
+  "accountingG5": {
+    "ledger": "Ledger",
+    "ledgerHelp": "Each branch can keep its own books. Records go to their branch's ledger when it has one switched on, otherwise to the organisation's.",
+    "wholeOrganisation": "{{provider}} · whole organisation",
+    "forBranch": "{{provider}} · {{branch}}",
+    "branchLedgers": "Separate ledgers for branches",
+    "branchLedgersHelp": "Connect a branch to its own Xero organisation, QuickBooks company, Sage business or FreeAgent company. Once its sync is switched on, that branch's invoices, payments and tutor bills go there instead of to the organisation's ledger.",
+    "branch": "Branch",
+    "chooseBranch": "Choose a branch",
+    "hasLedger": "{{branch}} (has its own ledger)",
+    "connectFor": "Connect {{provider}} for this branch",
+    "syncing": "syncing",
+    "notSyncing": "not syncing yet",
+    "badDebt": "VAT on bad debts",
+    "badDebtHelp": "When you write off an invoice, reclaim the VAT in the amount written off (bad debt relief). Write-offs then post the VAT back to the VAT account at the invoice's rates.",
+    "exportBranch": "Branch",
+    "allBranches": "All branches"
   }
 }

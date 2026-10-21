@@ -96,8 +96,9 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * @description Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping
-     *     problems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
+     * @description Ledger connections (Xero, QuickBooks Online, Sage, FreeAgent): the organisation's,
+     *     and any branch's own (``branch``, gap G5), with sync options, health, mapping problems
+     *     and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
      *     (individual records or a daily summary journal), ``start_date`` (nothing earlier
      *     syncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.
      */
@@ -122,8 +123,9 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * @description Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping
-     *     problems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
+     * @description Ledger connections (Xero, QuickBooks Online, Sage, FreeAgent): the organisation's,
+     *     and any branch's own (``branch``, gap G5), with sync options, health, mapping problems
+     *     and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
      *     (individual records or a daily summary journal), ``start_date`` (nothing earlier
      *     syncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.
      */
@@ -134,8 +136,9 @@ export interface paths {
     options?: never;
     head?: never;
     /**
-     * @description Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping
-     *     problems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
+     * @description Ledger connections (Xero, QuickBooks Online, Sage, FreeAgent): the organisation's,
+     *     and any branch's own (``branch``, gap G5), with sync options, health, mapping problems
+     *     and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
      *     (individual records or a daily summary journal), ``start_date`` (nothing earlier
      *     syncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.
      */
@@ -169,8 +172,9 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * @description Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping
-     *     problems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
+     * @description Ledger connections (Xero, QuickBooks Online, Sage, FreeAgent): the organisation's,
+     *     and any branch's own (``branch``, gap G5), with sync options, health, mapping problems
+     *     and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
      *     (individual records or a daily summary journal), ``start_date`` (nothing earlier
      *     syncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.
      */
@@ -316,7 +320,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** @description A mapping set (a provider's, or ``export`` for GL files) and what is missing. */
+    /**
+     * @description A mapping set (a provider's, a branch ledger's ``<provider>@<branch id>``, or
+     *     ``export`` for GL files) and what is missing.
+     */
     get: operations["accounting_mappings_retrieve"];
     /**
      * @description Replace the mapping set (accounts per kind and key, tax codes per tax rate,
@@ -22341,6 +22348,11 @@ export interface components {
       readonly connection: string;
       readonly provider: string;
       readonly provider_name: string;
+      /** Format: uuid */
+      readonly branch: string | null;
+      readonly branch_name: string | null;
+      /** @description The mapping set it posts with: the provider, or <provider>@<branch> for a branch's own ledger. */
+      readonly mapping_set: string;
       readonly status: string;
       readonly account_name: string;
       readonly connection_error: string;
@@ -28803,6 +28815,8 @@ export interface components {
       readonly provider: string;
       readonly provider_name: string;
       readonly level: components["schemas"]["IntegrationLevelEnum"];
+      /** Format: uuid */
+      readonly branch: string | null;
       readonly status: components["schemas"]["IntegrationConnectionStatusEnum"];
       readonly user: components["schemas"]["ConnectionUser"] | null;
       readonly account_name: string;
@@ -28836,9 +28850,10 @@ export interface components {
     /**
      * @description * `user` - Personal
      *     * `organisation` - Organisation
+     *     * `branch` - Branch
      * @enum {string}
      */
-    IntegrationLevelEnum: "user" | "organisation";
+    IntegrationLevelEnum: "user" | "organisation" | "branch";
     /**
      * @description * `reschedule` - reschedule
      *     * `cancellation` - cancellation
@@ -31590,6 +31605,11 @@ export interface components {
       level: components["schemas"]["IntegrationLevelEnum"];
       /** @default /settings/integrations */
       next: string;
+      /**
+       * Format: uuid
+       * @description With level=branch: the branch whose own account this is (e.g. its ledger).
+       */
+      branch?: string | null;
     };
     OAuthStartResult: {
       /** Format: uri */
@@ -44381,6 +44401,8 @@ export interface operations {
   accounting_export_retrieve: {
     parameters: {
       query: {
+        /** @description Only this branch's records. */
+        branch?: string | null;
         end: string;
         /**
          * @description * `generic` - Generic GL journal (CSV)
@@ -44389,14 +44411,8 @@ export interface operations {
          *     * `iif` - QuickBooks Desktop (IIF)
          */
         file_format?: "generic" | "sage50" | "myob" | "iif";
-        /**
-         * @description * `export` - export
-         *     * `xero` - xero
-         *     * `quickbooks` - quickbooks
-         *     * `sage` - sage
-         *     * `freeagent` - freeagent
-         */
-        mapping_set?: "export" | "xero" | "quickbooks" | "sage" | "freeagent";
+        /** @description export, xero, quickbooks, sage, freeagent, or <provider>@<branch id> for a branch's own ledger (its records only). */
+        mapping_set?: string;
         start: string;
       };
       header?: never;
@@ -44420,7 +44436,8 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        provider: "export" | "freeagent" | "quickbooks" | "sage" | "xero";
+        /** @description xero, quickbooks, sage, freeagent, export (GL files), or <provider>@<branch id> for a branch's own ledger. */
+        provider: string;
       };
       cookie?: never;
     };
@@ -44441,7 +44458,8 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        provider: "export" | "freeagent" | "quickbooks" | "sage" | "xero";
+        /** @description xero, quickbooks, sage, freeagent, export (GL files), or <provider>@<branch id> for a branch's own ledger. */
+        provider: string;
       };
       cookie?: never;
     };
@@ -44525,6 +44543,7 @@ export interface operations {
         object_type?:
           | "bill"
           | "bill_payment"
+          | "chargeback"
           | "contact"
           | "credit_note"
           | "invoice"
@@ -44534,6 +44553,7 @@ export interface operations {
           | "pay_statement"
           | "payment"
           | "provider_payout"
+          | "reallocation"
           | "refund"
           | "supplier"
           | "write_off";

@@ -65,7 +65,7 @@
     <header>
       <h1>TutorTrack API guide</h1>
       <p class="lead">Connect your own systems to TutorTrack with the REST API and webhooks.</p>
-      <p class="meta">Last updated: 2026-10-14 · API version v1</p>
+      <p class="meta">Last updated: 2026-10-21 · API version v1</p>
     </header>
 
     <section id="overview">
@@ -400,7 +400,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
       <h3 id="webhook-events">Event catalogue</h3>
       <p>Subscribe to individual types or to <code>&lt;aggregate&gt;.*</code>.</p>
       <!-- BEGIN GENERATED: webhook-events -->
-<p class="meta">249 event types on 70 aggregates, generated from the webhook event catalogue.</p>
+<p class="meta">250 event types on 70 aggregates, generated from the webhook event catalogue.</p>
 <details class="ref" id="events-affiliate_statement">
   <summary><code>affiliate_statement.*</code> <span class="badge">1</span></summary>
   <div class="table-wrap"><table>
@@ -926,7 +926,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
   </table></div>
 </details>
 <details class="ref" id="events-payment">
-  <summary><code>payment.*</code> <span class="badge">7</span></summary>
+  <summary><code>payment.*</code> <span class="badge">8</span></summary>
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
     <tbody>
@@ -935,6 +935,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
       <tr><td><code>payment.disputed</code></td><td>Payment disputed.</td><td><code>client_id</code>, <code>amount</code>, <code>dispute_id</code>, <code>evidence_due_by</code></td></tr>
       <tr><td><code>payment.failed</code></td><td>Payment failed.</td><td><code>client_id</code>, <code>attempt</code>, <code>failure_code</code>, <code>final</code></td></tr>
       <tr><td><code>payment.pending</code></td><td>Payment pending.</td><td><code>client_id</code>, <code>amount</code></td></tr>
+      <tr><td><code>payment.reallocated</code></td><td>Payment reallocated.</td><td><code>client_id</code>, <code>amount</code>, <code>before</code>, <code>after</code></td></tr>
       <tr><td><code>payment.refunded</code></td><td>Payment refunded.</td><td><code>client_id</code>, <code>amount</code>, <code>refund_id</code></td></tr>
       <tr><td><code>payment.succeeded</code></td><td>Payment succeeded.</td><td><code>client_id</code>, <code>amount</code>, <code>method</code>, <code>invoice_ids</code></td></tr>
     </tbody>
