@@ -72,6 +72,25 @@ def test_scheduled_report_is_generated_and_emailed(org, temporal_env, s3):
     record(temporal_env, wid, "ScheduledReportWorkflow-delivered")
 
 
+def test_scheduled_custom_report_is_generated_and_emailed(org, temporal_env, s3):
+    """Gap G5 (FR-26-4): custom reports are scheduled through the same workflow."""
+    owner = MembershipFactory(organisation=org, role="coordinator").user
+    recipient = MembershipFactory(organisation=org, role="admin").user
+    definition = {"dataset": "lessons", "group_by": ["status"], "measures": ["lessons"]}
+    with tenant_context(org), transaction.atomic():
+        report = services.save_custom_report(owner, name="Lessons", definition=definition)
+        scheduled = services.create_scheduled_report(
+            owner, report, recipients=[recipient.pk], frequency="daily", time=time(6)
+        )
+    wid = start(org, scheduled, "custom")
+    assert temporal_env.result(wid) == "delivered:1"
+    with tenant_context(org):
+        run = ReportRun.objects.get(run_key=wid)
+        assert (run.status, run.report_key) == ("delivered", f"custom:{report.pk}")
+    assert [m.to for m in mail.outbox if m.attachments] == [[recipient.email]]
+    record(temporal_env, wid, "ScheduledReportWorkflow-custom-delivered")
+
+
 def test_generation_is_retried(org, temporal_env, s3, monkeypatch):
     scheduled, _recipient = schedule(org)
     real = services.generate_scheduled_run

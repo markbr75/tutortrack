@@ -45,6 +45,7 @@ class State:
     provider: str
     level: str
     next_path: str
+    branch_id: str = ""  # level "branch" (gap G5)
 
 
 def callback_url() -> str:
@@ -69,7 +70,13 @@ def safe_next(path: str) -> str:
 
 
 def make_state(
-    *, organisation_id: Any, user_id: Any, provider: str, level: str, next_path: str
+    *,
+    organisation_id: Any,
+    user_id: Any,
+    provider: str,
+    level: str,
+    next_path: str,
+    branch_id: Any = "",
 ) -> tuple[str, State]:
     state = State(
         nonce=secrets.token_urlsafe(18),
@@ -78,6 +85,7 @@ def make_state(
         provider=provider,
         level=level,
         next_path=safe_next(next_path),
+        branch_id=str(branch_id or ""),
     )
     token = signing.dumps(
         {
@@ -87,6 +95,7 @@ def make_state(
             "p": provider,
             "l": level,
             "x": state.next_path,
+            "b": state.branch_id,
         },
         salt=STATE_SALT,
         compress=True,
@@ -106,4 +115,5 @@ def read_state(token: str) -> State:
         provider=str(data["p"]),
         level=str(data["l"]),
         next_path=safe_next(str(data.get("x", "/"))),
+        branch_id=str(data.get("b", "") or ""),
     )

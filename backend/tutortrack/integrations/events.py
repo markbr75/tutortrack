@@ -15,6 +15,7 @@ class _ConnectionEvent(DomainEvent):
     level: str
     user_id: str | None = None
     capabilities: list[str] = field(default_factory=list)
+    branch_id: str | None = None  # branch-level connections (gap G5)
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -39,7 +39,14 @@ REPORT_PARAMS = [
     OpenApiParameter("service", str, description="Service ids, comma separated"),
     OpenApiParameter("subject", str, description="Subject ids, comma separated"),
     OpenApiParameter("tag", str, description="Tag id (clients, students or tutors)"),
-    OpenApiParameter("custom_field", str, description="Client custom field, key=value"),
+    OpenApiParameter(
+        "custom_field",
+        str,
+        description=(
+            "Custom field filter, [entity.]key=value: entity is client (the default), student "
+            "or tutor, as the report's custom_field_entities allow (e.g. student.year_group=Y10)"
+        ),
+    ),
     OpenApiParameter("group_by", str),
     OpenApiParameter("ordering", str, description="Column key, '-' for descending"),
     OpenApiParameter("currency", str, description="Reporting currency (converted at FX rates)"),
@@ -288,14 +295,43 @@ class ScheduledReportViewSet(
     def get_tenant_queryset(self) -> Any:
         return selectors.scheduled_reports(self.request.user)
 
+    @extend_schema(
+        examples=[
+            OpenApiExample(
+                "A saved report view, weekly",
+                value={
+                    "saved_report": "6f1c2a8e-1d2b-4c3d-9e8f-0a1b2c3d4e5f",
+                    "frequency": "weekly",
+                    "weekday": 0,
+                    "time": "07:00",
+                    "format": "csv",
+                    "recipients": ["2b7e4f1a-3c5d-4e6f-8a9b-0c1d2e3f4a5b"],
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "A custom report, monthly",
+                value={
+                    "custom_report": "9a8b7c6d-5e4f-4a3b-2c1d-0e9f8a7b6c5d",
+                    "frequency": "monthly",
+                    "day_of_month": 1,
+                    "time": "08:30",
+                    "format": "xlsx",
+                    "recipients": ["2b7e4f1a-3c5d-4e6f-8a9b-0c1d2e3f4a5b"],
+                },
+                request_only=True,
+            ),
+        ]
+    )
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payload = s.ScheduledReportSerializer(data=request.data, context={"request": request})
         payload.is_valid(raise_exception=True)
         data = dict(payload.validated_data)
-        saved = data.pop("saved_report")
+        source = data.pop("saved_report", None) or data.pop("custom_report", None)
+        data.pop("custom_report", None)
         recipients = data.pop("recipients")
         scheduled = services.create_scheduled_report(
-            request.user, saved, recipients=recipients, **data
+            request.user, source, recipients=recipients, **data
         )
         return Response(s.ScheduledReportSerializer(scheduled).data, status=status.HTTP_201_CREATED)
 

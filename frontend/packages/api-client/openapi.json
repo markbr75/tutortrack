@@ -334,7 +334,7 @@
         "/api/v1/accounting/connections": {
             "get": {
                 "operationId": "accounting_connections_list",
-                "description": "Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping\nproblems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``\n(individual records or a daily summary journal), ``start_date`` (nothing earlier\nsyncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.",
+                "description": "Ledger connections (Xero, QuickBooks Online, Sage, FreeAgent): the organisation's,\nand any branch's own (``branch``, gap G5), with sync options, health, mapping problems\nand the sync dashboard's counts. ``PATCH`` changes the options: ``mode``\n(individual records or a daily summary journal), ``start_date`` (nothing earlier\nsyncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.",
                 "parameters": [
                     {
                         "name": "cursor",
@@ -453,7 +453,7 @@
         "/api/v1/accounting/connections/{id}": {
             "get": {
                 "operationId": "accounting_connections_retrieve",
-                "description": "Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping\nproblems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``\n(individual records or a daily summary journal), ``start_date`` (nothing earlier\nsyncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.",
+                "description": "Ledger connections (Xero, QuickBooks Online, Sage, FreeAgent): the organisation's,\nand any branch's own (``branch``, gap G5), with sync options, health, mapping problems\nand the sync dashboard's counts. ``PATCH`` changes the options: ``mode``\n(individual records or a daily summary journal), ``start_date`` (nothing earlier\nsyncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.",
                 "parameters": [
                     {
                         "in": "query",
@@ -498,7 +498,7 @@
             },
             "patch": {
                 "operationId": "accounting_connections_partial_update",
-                "description": "Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping\nproblems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``\n(individual records or a daily summary journal), ``start_date`` (nothing earlier\nsyncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.",
+                "description": "Ledger connections (Xero, QuickBooks Online, Sage, FreeAgent): the organisation's,\nand any branch's own (``branch``, gap G5), with sync options, health, mapping problems\nand the sync dashboard's counts. ``PATCH`` changes the options: ``mode``\n(individual records or a daily summary journal), ``start_date`` (nothing earlier\nsyncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.",
                 "parameters": [
                     {
                         "in": "path",
@@ -623,7 +623,7 @@
         "/api/v1/accounting/connections/{id}/cancel-backfill": {
             "post": {
                 "operationId": "accounting_connections_cancel_backfill_create",
-                "description": "Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping\nproblems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``\n(individual records or a daily summary journal), ``start_date`` (nothing earlier\nsyncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.",
+                "description": "Ledger connections (Xero, QuickBooks Online, Sage, FreeAgent): the organisation's,\nand any branch's own (``branch``, gap G5), with sync options, health, mapping problems\nand the sync dashboard's counts. ``PATCH`` changes the options: ``mode``\n(individual records or a daily summary journal), ``start_date`` (nothing earlier\nsyncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``.",
                 "parameters": [
                     {
                         "in": "header",
@@ -992,6 +992,16 @@
                 "parameters": [
                     {
                         "in": "query",
+                        "name": "branch",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                        },
+                        "description": "Only this branch's records."
+                    },
+                    {
+                        "in": "query",
                         "name": "end",
                         "schema": {
                             "type": "string",
@@ -1019,18 +1029,12 @@
                         "in": "query",
                         "name": "mapping_set",
                         "schema": {
-                            "enum": [
-                                "export",
-                                "xero",
-                                "quickbooks",
-                                "sage",
-                                "freeagent"
-                            ],
                             "type": "string",
+                            "minLength": 1,
                             "default": "export",
-                            "minLength": 1
+                            "maxLength": 64
                         },
-                        "description": "* `export` - export\n* `xero` - xero\n* `quickbooks` - quickbooks\n* `sage` - sage\n* `freeagent` - freeagent"
+                        "description": "export, xero, quickbooks, sage, freeagent, or <provider>@<branch id> for a branch's own ledger (its records only)."
                     },
                     {
                         "in": "query",
@@ -1069,21 +1073,15 @@
         "/api/v1/accounting/mappings/{provider}": {
             "get": {
                 "operationId": "accounting_mappings_retrieve",
-                "description": "A mapping set (a provider's, or ``export`` for GL files) and what is missing.",
+                "description": "A mapping set (a provider's, a branch ledger's ``<provider>@<branch id>``, or\n``export`` for GL files) and what is missing.",
                 "parameters": [
                     {
                         "in": "path",
                         "name": "provider",
                         "schema": {
-                            "type": "string",
-                            "enum": [
-                                "export",
-                                "freeagent",
-                                "quickbooks",
-                                "sage",
-                                "xero"
-                            ]
+                            "type": "string"
                         },
+                        "description": "xero, quickbooks, sage, freeagent, export (GL files), or <provider>@<branch id> for a branch's own ledger.",
                         "required": true
                     }
                 ],
@@ -1117,15 +1115,9 @@
                         "in": "path",
                         "name": "provider",
                         "schema": {
-                            "type": "string",
-                            "enum": [
-                                "export",
-                                "freeagent",
-                                "quickbooks",
-                                "sage",
-                                "xero"
-                            ]
+                            "type": "string"
                         },
+                        "description": "xero, quickbooks, sage, freeagent, export (GL files), or <provider>@<branch id> for a branch's own ledger.",
                         "required": true
                     }
                 ],
@@ -1348,6 +1340,7 @@
                             "enum": [
                                 "bill",
                                 "bill_payment",
+                                "chargeback",
                                 "contact",
                                 "credit_note",
                                 "invoice",
@@ -1357,6 +1350,7 @@
                                 "pay_statement",
                                 "payment",
                                 "provider_payout",
+                                "reallocation",
                                 "refund",
                                 "supplier",
                                 "write_off"
@@ -67933,7 +67927,7 @@
                         "schema": {
                             "type": "string"
                         },
-                        "description": "Client custom field, key=value"
+                        "description": "Custom field filter, [entity.]key=value: entity is client (the default), student or tutor, as the report's custom_field_entities allow (e.g. student.year_group=Y10)"
                     },
                     {
                         "in": "query",
@@ -68130,7 +68124,7 @@
                         "schema": {
                             "type": "string"
                         },
-                        "description": "Client custom field, key=value"
+                        "description": "Custom field filter, [entity.]key=value: entity is client (the default), student or tutor, as the report's custom_field_entities allow (e.g. student.year_group=Y10)"
                     },
                     {
                         "in": "query",
@@ -71565,6 +71559,34 @@
                         "application/json": {
                             "schema": {
                                 "$ref": "#/components/schemas/ScheduledReportRequest"
+                            },
+                            "examples": {
+                                "ASavedReportView,Weekly": {
+                                    "value": {
+                                        "saved_report": "6f1c2a8e-1d2b-4c3d-9e8f-0a1b2c3d4e5f",
+                                        "frequency": "weekly",
+                                        "weekday": 0,
+                                        "time": "07:00",
+                                        "format": "csv",
+                                        "recipients": [
+                                            "2b7e4f1a-3c5d-4e6f-8a9b-0c1d2e3f4a5b"
+                                        ]
+                                    },
+                                    "summary": "A saved report view, weekly"
+                                },
+                                "ACustomReport,Monthly": {
+                                    "value": {
+                                        "custom_report": "9a8b7c6d-5e4f-4a3b-2c1d-0e9f8a7b6c5d",
+                                        "frequency": "monthly",
+                                        "day_of_month": 1,
+                                        "time": "08:30",
+                                        "format": "xlsx",
+                                        "recipients": [
+                                            "2b7e4f1a-3c5d-4e6f-8a9b-0c1d2e3f4a5b"
+                                        ]
+                                    },
+                                    "summary": "A custom report, monthly"
+                                }
                             }
                         },
                         "application/x-www-form-urlencoded": {
@@ -85425,6 +85447,22 @@
                         "type": "string",
                         "readOnly": true
                     },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "branch_name": {
+                        "type": "string",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "mapping_set": {
+                        "type": "string",
+                        "readOnly": true,
+                        "description": "The mapping set it posts with: the provider, or <provider>@<branch> for a branch's own ledger."
+                    },
                     "status": {
                         "type": "string",
                         "readOnly": true
@@ -85536,6 +85574,8 @@
                     "account_name",
                     "backfill_progress",
                     "base_currency",
+                    "branch",
+                    "branch_name",
                     "chart_fetched_at",
                     "company_name",
                     "connection",
@@ -85546,6 +85586,7 @@
                     "id",
                     "last_sync_at",
                     "lock_date",
+                    "mapping_set",
                     "payments_checked_at",
                     "problems",
                     "provider",
@@ -98017,6 +98058,15 @@
                     "type"
                 ]
             },
+            "CustomFieldEntitiesEnum": {
+                "enum": [
+                    "client",
+                    "student",
+                    "tutor"
+                ],
+                "type": "string",
+                "description": "* `client` - client\n* `student` - student\n* `tutor` - tutor"
+            },
             "CustomFieldRequest": {
                 "type": "object",
                 "properties": {
@@ -105750,6 +105800,12 @@
                         ],
                         "readOnly": true
                     },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
                     "status": {
                         "allOf": [
                             {
@@ -105833,6 +105889,7 @@
                 },
                 "required": [
                     "account_name",
+                    "branch",
                     "capabilities",
                     "connected_at",
                     "created_at",
@@ -105865,10 +105922,11 @@
             "IntegrationLevelEnum": {
                 "enum": [
                     "user",
-                    "organisation"
+                    "organisation",
+                    "branch"
                 ],
                 "type": "string",
-                "description": "* `user` - Personal\n* `organisation` - Organisation"
+                "description": "* `user` - Personal\n* `organisation` - Organisation\n* `branch` - Branch"
             },
             "IntentEnum": {
                 "enum": [
@@ -114684,6 +114742,12 @@
                         "minLength": 1,
                         "default": "/settings/integrations",
                         "maxLength": 300
+                    },
+                    "branch": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "With level=branch: the branch whose own account this is (e.g. its ledger)."
                     }
                 },
                 "required": [
@@ -137512,6 +137576,13 @@
                             "type": "string"
                         }
                     },
+                    "custom_field_entities": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CustomFieldEntitiesEnum"
+                        },
+                        "description": "Records whose custom fields the custom_field filter may name."
+                    },
                     "group_by": {
                         "type": "array",
                         "items": {
@@ -137528,6 +137599,7 @@
                 "required": [
                     "category",
                     "category_label",
+                    "custom_field_entities",
                     "default_period",
                     "description",
                     "filters",
@@ -140758,6 +140830,7 @@
             },
             "ScheduledReport": {
                 "type": "object",
+                "description": "Give either a saved standard report view (``saved_report``) or a custom report\n(``custom_report``, gap G5).",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -140766,9 +140839,20 @@
                     },
                     "saved_report": {
                         "type": "string",
-                        "format": "uuid"
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "custom_report": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
                     },
                     "saved_report_name": {
+                        "type": "string",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "report_name": {
                         "type": "string",
                         "readOnly": true
                     },
@@ -140825,17 +140909,24 @@
                     "last_run_at",
                     "recipient_details",
                     "report_key",
-                    "saved_report",
+                    "report_name",
                     "saved_report_name",
                     "time"
                 ]
             },
             "ScheduledReportRequest": {
                 "type": "object",
+                "description": "Give either a saved standard report view (``saved_report``) or a custom report\n(``custom_report``, gap G5).",
                 "properties": {
                     "saved_report": {
                         "type": "string",
-                        "format": "uuid"
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "custom_report": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
                     },
                     "frequency": {
                         "$ref": "#/components/schemas/ReportFrequencyEnum"
@@ -140872,7 +140963,6 @@
                 "required": [
                     "frequency",
                     "recipients",
-                    "saved_report",
                     "time"
                 ]
             },

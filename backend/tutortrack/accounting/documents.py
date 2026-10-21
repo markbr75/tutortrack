@@ -115,7 +115,34 @@ class RefundDoc(Document):
     credit_note: str = ""  # external credit note the refund is paid against, if any
     # How the provider recorded the payment: (invoice id | "overpayment", part id, amount),
     # from the payment's push result. Xero needs it to replace or refund the parts.
-    parts: tuple[tuple[str, str, str], ...] = ()
+    parts: tuple[tuple[str, ...], ...] = ()
+
+
+@dataclass(frozen=True)
+class ReallocationDoc(Document):
+    """A payment already in the ledger whose allocations changed in TutorTrack (gap G5):
+    move it from ``previous`` to ``allocations``. ``total`` is what the ledger holds of
+    the payment (less refunds); the rest of it is unallocated credit before and after."""
+
+    contact: str = ""
+    account: str = ""  # clearing/bank account the payment went to
+    payment: str = ""  # external payment id
+    paid_on: str = ""  # the payment's own date: recreated parts keep it (bank feed lines)
+    reference: str = ""
+    total: Decimal = Decimal(0)
+    allocations: tuple[tuple[str, Decimal], ...] = ()  # (external invoice id, amount) now
+    previous: tuple[tuple[str, Decimal], ...] = ()  # what the ledger had
+    # How the provider recorded the payment (Xero: (invoice | "overpayment", id, amount);
+    # FreeAgent: (explanation url,)), from the payment's (or last change's) push result.
+    parts: tuple[tuple[str, ...], ...] = ()
+
+    @property
+    def unallocated(self) -> Decimal:
+        return self.total - sum((a for _i, a in self.allocations), Decimal(0))
+
+    @property
+    def previous_unallocated(self) -> Decimal:
+        return self.total - sum((a for _i, a in self.previous), Decimal(0))
 
 
 @dataclass(frozen=True)

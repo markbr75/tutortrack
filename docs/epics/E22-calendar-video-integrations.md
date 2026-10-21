@@ -145,3 +145,9 @@ See ADR 0032.
 
 ## Gap backlog (as built 2026-10-21)
 Gap batch G5c: the classroom's resources (E21 FR-21-8) now open from the room (`POST /lessons/{id}/classroom/resources/{resource_id}/open`), carry kind, message and share time, refresh every 15 seconds while the room is open, and the tutor can share into the room. The tutor app no longer redirects the classroom link back to Today. See the E21 gap-backlog notes.
+
+For per-branch ledgers (batch G5, E23; [ADR 0043](../adr/0043-gap-batch-g5b-accounting.md)) the framework gains a third connection level, `branch`:
+
+- `IntegrationConnection.branch` (null for personal and organisation connections) with its own unique constraint (one live connection per organisation, provider and branch); the organisation constraint now applies only where `branch` is empty.
+- `POST /integrations/oauth/start` takes `level=branch` with `branch` (required, must exist); the OAuth state carries it and `/oauth/complete` saves it. Connections serialise `branch`; `integration.*` events carry `branch_id`.
+- Only providers that list `branch` in `ProviderSpec.levels` accept it (the four accounting ledgers). `selectors.org_connection()` ignores branch connections; the integrations directory counts them as connected for the organisation.

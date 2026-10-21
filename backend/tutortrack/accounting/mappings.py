@@ -1,8 +1,9 @@
 """Account, tax and tracking mappings (FR-23-1): what each kind of money posts to, and
 whether a mapping set is complete enough to switch sync on.
 
-A *mapping set* is a provider key (``xero``, ``quickbooks``) or ``export`` (GL files,
-where an account is just its code). Lookups go from the most specific key to
+A *mapping set* is a provider key (``xero``, ``quickbooks``), ``<provider>@<branch id>``
+for a branch's own ledger (gap G5, its chart differs) or ``export`` (GL files, where an
+account is just its code). Lookups go from the most specific key to
 ``default``; revenue also falls back to the account code saved on the service or product
 (``Service.revenue_account_code``, ``Product.account_code``) when the ledger has it.
 """
@@ -35,6 +36,11 @@ KINDS: dict[str, Any] = {
     "payable": _lazy("Accounts payable (tutors)"),
     "sales_tax": _lazy("Sales tax (VAT) liability"),
     "deferred_revenue": _lazy("Deferred revenue (unused packages)"),
+    # Gap G5 (optional): currency conversion differences on summary journals in other
+    # currencies (else rounding), and input VAT on tutors' self-billing invoices in GL
+    # exports (else the sales tax account).
+    "fx": _lazy("Currency conversion differences"),
+    "input_tax": _lazy("VAT on purchases (input tax)"),
 }
 ALWAYS = ("revenue", "clearing", "bank", "fees", "bad_debt")
 JOURNAL = ("receivable", "sales_tax", "rounding")
@@ -46,6 +52,50 @@ class AccountRef:
     id: str
     code: str = ""
     name: str = ""
+
+
+def parse_set(name: str) -> tuple[str, str | None]:
+    """``"xero@<branch>"`` → ``("xero", "<branch>")``; ``"xero"`` → ``("xero", None)``."""
+    provider, _sep, branch = name.partition("@")
+    return provider, branch or None
+
+
+def valid_set(name: str) -> bool:
+    """A provider key, ``export``, or a provider key for one of the branches."""
+    from tutortrack.tenancy.models import Branch
+
+    from .providers import PROVIDERS
+
+    provider, branch = parse_set(name)
+    if name == EXPORT:
+        return True
+    if provider not in PROVIDERS:
+        return False
+    if branch is None:
+        return True
+    import uuid
+
+    try:
+        uuid.UUID(branch)
+    except ValueError:
+        return False
+    return Branch.objects.filter(pk=branch).exists()
+
+
+def connection_for_set(name: str) -> AccountingConnection | None:
+    """The (latest) connection whose mappings these are."""
+    if name == EXPORT:
+        return None
+    provider, branch = parse_set(name)
+    return (
+        AccountingConnection.objects.filter(provider=provider, branch_id=branch)
+        .exclude(connection__status="disconnected")
+        .order_by("-created_at")
+        .first()
+        or AccountingConnection.objects.filter(provider=provider, branch_id=branch)
+        .order_by("-created_at")
+        .first()
+    )
 
 
 def required_kinds(conn: AccountingConnection | None) -> tuple[str, ...]:

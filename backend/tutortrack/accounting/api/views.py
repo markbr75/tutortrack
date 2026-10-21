@@ -46,6 +46,10 @@ VIEW = "integrations.accounting.view"
 MANAGE = "integrations.accounting.manage"
 EXPORT = "integrations.accounting.export"
 READ_MANAGE = HasMethodPermission.for_({"GET": VIEW, "*": MANAGE})
+MAPPING_SET_HELP = (
+    "xero, quickbooks, sage, freeagent, export (GL files), or <provider>@<branch id> for a "
+    "branch's own ledger."
+)
 
 
 def _provider_error(exc: ProviderError) -> BusinessRuleViolation:
@@ -61,8 +65,9 @@ class AccountingConnectionViewSet(
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
-    """Ledger connections (Xero, QuickBooks Online) with sync options, health, mapping
-    problems and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
+    """Ledger connections (Xero, QuickBooks Online, Sage, FreeAgent): the organisation's,
+    and any branch's own (``branch``, gap G5), with sync options, health, mapping problems
+    and the sync dashboard's counts. ``PATCH`` changes the options: ``mode``
     (individual records or a daily summary journal), ``start_date`` (nothing earlier
     syncs), ``sync_bills``, ``attach_pdf`` and ``lock_behaviour``."""
 
@@ -229,11 +234,7 @@ def _keys() -> dict[str, list[dict[str, str]]]:
 
 
 def _mapping_set(provider: str) -> dict[str, Any]:
-    conn = (
-        AccountingConnection.objects.filter(provider=provider).order_by("-created_at").first()
-        if provider != mappings.EXPORT
-        else None
-    )
+    conn = mappings.connection_for_set(provider)
     required = set(mappings.required_kinds(conn))
     return {
         "provider": provider,
@@ -269,23 +270,20 @@ class MappingSetView(APIView):
 
     @extend_schema(
         parameters=[
-            OpenApiParameter(
-                "provider", str, OpenApiParameter.PATH, enum=[*PROVIDERS, mappings.EXPORT]
-            )
+            OpenApiParameter("provider", str, OpenApiParameter.PATH, description=MAPPING_SET_HELP)
         ],
         responses=s.MappingSetSerializer,
     )
     def get(self, request: Request, provider: str) -> Response:
-        """A mapping set (a provider's, or ``export`` for GL files) and what is missing."""
-        if provider not in (*PROVIDERS, mappings.EXPORT):
+        """A mapping set (a provider's, a branch ledger's ``<provider>@<branch id>``, or
+        ``export`` for GL files) and what is missing."""
+        if not mappings.valid_set(provider):
             raise BusinessRuleViolation("Unknown mapping set.")
         return Response(s.MappingSetSerializer(_mapping_set(provider)).data)
 
     @extend_schema(
         parameters=[
-            OpenApiParameter(
-                "provider", str, OpenApiParameter.PATH, enum=[*PROVIDERS, mappings.EXPORT]
-            )
+            OpenApiParameter("provider", str, OpenApiParameter.PATH, description=MAPPING_SET_HELP)
         ],
         request=s.MappingSetSerializer,
         responses=s.MappingSetSerializer,
@@ -310,9 +308,7 @@ class MappingSetView(APIView):
         payload = s.MappingSetSerializer(data=request.data)
         payload.is_valid(raise_exception=True)
         data = payload.validated_data
-        conn = (
-            AccountingConnection.objects.filter(provider=provider).order_by("-created_at").first()
-        )
+        conn = mappings.connection_for_set(provider)
         services.save_mappings(
             provider,
             accounts=[dict(r) for r in data["accounts"]],
@@ -412,11 +408,18 @@ class ExportView(APIView):
             start=start,
             end=end,
             tz=org.timezone,
+            branch=str(data["branch"]) if data.get("branch") else None,
         )
         audit.record(
             org,
             "gl_export",
-            {"format": data["file_format"], "start": str(start), "end": str(end)},
+            {
+                "format": data["file_format"],
+                "start": str(start),
+                "end": str(end),
+                "mapping_set": data["mapping_set"],
+                "branch": str(data.get("branch") or ""),
+            },
         )
         response = HttpResponse(content, content_type=content_type)
         response["Content-Disposition"] = f'attachment; filename="{name}"'

@@ -264,7 +264,7 @@ def test_dashboard_filters_and_csv_export(org, admin, tutor):
     with tenant_context(org):
         from tutortrack.core.models import AuditEntry
 
-        assert AuditEntry.objects.filter(action="export", object_repr="compliance dashboard")
+        assert AuditEntry.objects.filter(action="export", object_repr="compliance dashboard export")
 
 
 def test_request_missing_documents_tells_each_tutor_once_a_day(org, admin, tutor):

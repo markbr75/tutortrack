@@ -49,6 +49,12 @@ class AccountingConnectionSerializer(BaseModelSerializer):
     stats = serializers.SerializerMethodField()
     problems = serializers.SerializerMethodField()
     backfill_progress = serializers.SerializerMethodField()
+    branch_name = serializers.CharField(source="branch.name", read_only=True, allow_null=True)
+    mapping_set = serializers.CharField(
+        read_only=True,
+        help_text="The mapping set it posts with: the provider, or <provider>@<branch> for a "
+        "branch's own ledger.",
+    )
 
     class Meta:
         model = AccountingConnection
@@ -57,6 +63,9 @@ class AccountingConnectionSerializer(BaseModelSerializer):
             "connection",
             "provider",
             "provider_name",
+            "branch",
+            "branch_name",
+            "mapping_set",
             "status",
             "account_name",
             "connection_error",
@@ -112,7 +121,7 @@ class AccountingConnectionSerializer(BaseModelSerializer):
 
     @extend_schema_field(MappingProblemSerializer(many=True))
     def get_problems(self, obj: AccountingConnection) -> list[dict[str, str]]:
-        return mappings.problems(obj.provider, obj)
+        return mappings.problems(obj.mapping_set, obj)
 
     @extend_schema_field(BackfillProgressSerializer)
     def get_backfill_progress(self, obj: AccountingConnection) -> dict[str, Any]:
@@ -268,16 +277,20 @@ class ExportQuerySerializer(serializers.Serializer):
     file_format = serializers.ChoiceField(choices=EXPORT_FORMATS, default="generic")
     start = serializers.DateField()
     end = serializers.DateField()
-    mapping_set = serializers.ChoiceField(
-        choices=[
-            ("export", "export"),
-            ("xero", "xero"),
-            ("quickbooks", "quickbooks"),
-            ("sage", "sage"),
-            ("freeagent", "freeagent"),
-        ],
+    mapping_set = serializers.CharField(
         default="export",
+        max_length=64,
+        help_text="export, xero, quickbooks, sage, freeagent, or <provider>@<branch id> for "
+        "a branch's own ledger (its records only).",
     )
+    branch = serializers.UUIDField(
+        required=False, allow_null=True, help_text="Only this branch's records."
+    )
+
+    def validate_mapping_set(self, value: str) -> str:
+        if not mappings.valid_set(value):
+            raise serializers.ValidationError("Unknown mapping set.")
+        return value
 
 
 # --- payment read-back (E23-T09) ------------------------------------------------------------

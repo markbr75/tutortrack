@@ -12,7 +12,13 @@ Translation of our documents:
   (``paid_invoice`` / ``paid_bill``), one per allocation;
 * provider payout → a ``transfer_bank_account`` explanation of the net amount plus a
   fees explanation;
-* summary journal → ``/journal_sets``.
+* summary journal → ``/journal_sets``;
+* reallocation (gap G5) → the payment's explanations deleted and explained again against
+  the new invoices, on the payment's own date.
+
+Read-back (E23-T09, gap G5): explanations on the company's bank accounts whose
+``paid_invoice`` is the invoice (from its date on; bank accounts and explanations are
+fetched once per read-back run).
 
 Every call goes through ``core.net.safe_urlopen`` (``user_url=True``). FreeAgent has
 no tracking categories we map. Tested against request shapes only.
@@ -38,9 +44,13 @@ from ..documents import (
     PaymentDoc,
     PayoutDoc,
     Pushed,
+    ReallocationDoc,
     RefundDoc,
 )
-from .base import Chart, LedgerAccount, LedgerInfo, LedgerTaxCode
+from .base import Chart, LedgerAccount, LedgerInfo, LedgerPayment, LedgerTaxCode
+
+PER_PAGE = 100
+MAX_PAGES = 20
 
 SCOPES: tuple[str, ...] = ()  # FreeAgent grants full access to the company
 TYPES = {
@@ -96,6 +106,11 @@ def _id(url: str) -> str:
 class FreeAgentClient:
     provider = "freeagent"
     rate_limit = 100  # FreeAgent allows 120 requests a minute per user
+
+    def __init__(self) -> None:
+        # Read-back caches (one client per run): bank accounts, explanations per account.
+        self._banks: list[str] | None = None
+        self._explained: dict[tuple[str, str], list[dict[str, Any]]] = {}
 
     def _call(
         self,
@@ -159,6 +174,55 @@ class FreeAgentClient:
         found = self._call(creds, "GET", external_id)
         record = found.get("bill" if kind == "bill" else "invoice") or {}
         return str(record.get("due_value")) if record else None
+
+    def _bank_accounts(self, creds: Credentials) -> list[str]:
+        if self._banks is None:
+            body = self._call(creds, "GET", "/bank_accounts")
+            self._banks = [_id(b["url"]) for b in body.get("bank_accounts", []) if b.get("url")]
+        return self._banks
+
+    def _explanations(self, creds: Credentials, bank: str, since: str) -> list[dict[str, Any]]:
+        key = (bank, since)
+        if key not in self._explained:
+            found: list[dict[str, Any]] = []
+            for page in range(1, MAX_PAGES + 1):
+                params: dict[str, Any] = {"bank_account": bank, "page": page, "per_page": PER_PAGE}
+                if since:
+                    params["from_date"] = since
+                rows = self._call(
+                    creds, "GET", "/bank_transaction_explanations", params=params
+                ).get("bank_transaction_explanations", [])
+                found.extend(rows)
+                if len(rows) < PER_PAGE:
+                    break
+            self._explained[key] = found
+        return self._explained[key]
+
+    def invoice_payments(self, creds: Credentials, external_id: str) -> list[LedgerPayment]:
+        """Money explained against the invoice on any bank account (refunds, which are
+        negative, are left out)."""
+        invoice = self._call(creds, "GET", external_id).get("invoice") or {}
+        if Decimal(str(invoice.get("paid_value") or "0")) <= 0:
+            return []
+        since = str(invoice.get("dated_on") or "")[:10]
+        out: list[LedgerPayment] = []
+        for bank in self._bank_accounts(creds):
+            for row in self._explanations(creds, bank, since):
+                if row.get("paid_invoice") != external_id:
+                    continue
+                value = Decimal(str(row.get("gross_value") or "0"))
+                if value <= 0:
+                    continue
+                out.append(
+                    LedgerPayment(
+                        id=_id(row.get("url", "")),
+                        amount=str(value),
+                        date=str(row.get("dated_on") or "")[:10],
+                        reference=str(row.get("description") or ""),
+                        account=_id(row.get("bank_account") or bank),
+                    )
+                )
+        return out
 
     def push(
         self, creds: Credentials, doc: Document, external_id: str = "", *, idempotency_key: str
@@ -333,6 +397,45 @@ class FreeAgentClient:
         return Pushed(parts[0] if parts else "", meta={"parts": parts})
 
     _push_bill_payment = _push_payment
+
+    def _push_reallocation(
+        self, creds: Credentials, doc: ReallocationDoc, external_id: str, key: str
+    ) -> Pushed:
+        """Explain the payment again: its explanations go and new ones are made against the
+        new invoices (and money on account), dated as the payment was."""
+        for part in doc.parts:
+            if part and part[0].startswith("http"):
+                self._call(creds, "DELETE", part[0])
+        day = doc.paid_on or doc.date
+        parts = [
+            self._explain(
+                creds,
+                {
+                    "bank_account": doc.account,
+                    "dated_on": day,
+                    "description": doc.reference[:200],
+                    "gross_value": _money(amount),
+                    "paid_invoice": target,
+                },
+            )
+            for target, amount in doc.allocations
+        ]
+        if doc.unallocated > 0:
+            parts.append(
+                self._explain(
+                    creds,
+                    {
+                        "bank_account": doc.account,
+                        "dated_on": day,
+                        "description": f"{doc.reference} (on account)"[:200],
+                        "gross_value": _money(doc.unallocated),
+                        "category": "",
+                    },
+                )
+            )
+        return Pushed(
+            parts[0] if parts else doc.payment, meta={"parts": parts}, created=not external_id
+        )
 
     def _push_refund(
         self, creds: Credentials, doc: RefundDoc, external_id: str, key: str

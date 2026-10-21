@@ -3,8 +3,6 @@ reviews, performance notes and offboarding (FR-18-9), and tutor subject tests (F
 
 from __future__ import annotations
 
-import csv
-import io
 from typing import Any
 
 from django.http import HttpResponse
@@ -16,7 +14,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from tutortrack.core import audit
 from tutortrack.core.api.viewsets import TenantScopedViewMixin
 from tutortrack.people.models import TutorProfile
 
@@ -24,12 +21,6 @@ from .. import compliance, performance, subject_tests
 from ..models import OffboardingChecklist, PerformanceNote, ProbationReview
 from . import serializers as s
 from .views import AUTH, DASHBOARD_FILTERS, _my_tutor, _tutor, dashboard_filters, perms
-
-
-def _csv_safe(value: str) -> str:
-    """Neutralise spreadsheet formula injection (cells starting with = + - @)."""
-    return "'" + value if value[:1] in {"=", "+", "-", "@", "\t"} else value
-
 
 # --- compliance (FR-18-8) -------------------------------------------------------------------
 
@@ -44,25 +35,20 @@ class DashboardExportView(APIView):
         responses={(200, "text/csv"): OpenApiResponse(response=OpenApiTypes.BINARY)},
     )
     def get(self, request: Request) -> HttpResponse:
-        from tutortrack.core.context import require_organisation_id
-        from tutortrack.tenancy.models import Organisation
+        from operator import itemgetter
 
-        filters = dashboard_filters(request)
-        board = compliance.dashboard(**filters)
-        buffer = io.StringIO()
-        writer = csv.writer(buffer)
-        for row in compliance.export_rows(board):
-            writer.writerow([_csv_safe(str(cell)) for cell in row])
-        organisation = Organisation.objects.get(pk=require_organisation_id())
-        audit.record(
-            organisation,
-            "export",
-            {"rows": [None, len(board["rows"])], "filters": [None, filters]},
-            object_repr="compliance dashboard",
+        from tutortrack.crm.listing import table_export
+
+        board = compliance.dashboard(**dashboard_filters(request))
+        header, *rows = compliance.export_rows(board)
+        # Shared export: formula-injection safe, audited, counts towards mass-export alerts.
+        return table_export(
+            request,
+            rows,
+            [(name, itemgetter(i)) for i, name in enumerate(header)],
+            filename="compliance.csv",
+            entity_type="compliance dashboard",
         )
-        response = HttpResponse(buffer.getvalue(), content_type="text/csv; charset=utf-8")
-        response["Content-Disposition"] = 'attachment; filename="compliance.csv"'
-        return response
 
 
 class RequestMissingView(APIView):
