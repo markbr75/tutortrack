@@ -29,33 +29,38 @@ export function MatchNeedsForm({
     <form
       role="search"
       aria-label={t("g5c.needs.title")}
-      className="flex flex-wrap items-center gap-2"
+      className="flex flex-wrap items-start gap-2"
       onSubmit={(e) => {
         e.preventDefault();
         onApply({ exam_boards: splitTags(boards), sen_tags: splitTags(tags), gender });
       }}
     >
-      <div className="min-w-48 flex-1">
-        <TextField
-          label={t("g5c.needs.examBoards")}
-          hideLabel
-          size="sm"
-          placeholder={t("g5c.needs.examBoards")}
-          aria-describedby={hintId}
-          value={boards}
-          onChange={(e) => setBoards(e.target.value)}
-        />
-      </div>
-      <div className="min-w-48 flex-1">
-        <TextField
-          label={t("g5c.needs.senTags")}
-          hideLabel
-          size="sm"
-          placeholder={t("g5c.needs.senTags")}
-          aria-describedby={hintId}
-          value={tags}
-          onChange={(e) => setTags(e.target.value)}
-        />
+      <div className="flex min-w-0 grow-[2] basis-96 flex-wrap gap-2">
+        <div className="min-w-48 flex-1">
+          <TextField
+            label={t("g5c.needs.examBoards")}
+            hideLabel
+            size="sm"
+            placeholder={t("g5c.needs.examBoards")}
+            aria-describedby={hintId}
+            value={boards}
+            onChange={(e) => setBoards(e.target.value)}
+          />
+        </div>
+        <div className="min-w-48 flex-1">
+          <TextField
+            label={t("g5c.needs.senTags")}
+            hideLabel
+            size="sm"
+            placeholder={t("g5c.needs.senTags")}
+            aria-describedby={hintId}
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+          />
+        </div>
+        <p id={hintId} className="basis-full text-xs text-muted-foreground">
+          {t("designS5.matching.listHint")}
+        </p>
       </div>
       {needs.gender_preference_enabled ? (
         <SelectField
@@ -71,12 +76,9 @@ export function MatchNeedsForm({
         />
       ) : null}
       {children}
-      <Button type="submit" size="sm" variant="secondary" className="h-9">
+      <Button type="submit" size="sm" variant="secondary" className="h-9 shrink-0">
         {t("g5c.needs.apply")}
       </Button>
-      <p id={hintId} className="basis-full text-xs text-muted-foreground">
-        {t("designS5.matching.listHint")}
-      </p>
     </form>
   );
 }
