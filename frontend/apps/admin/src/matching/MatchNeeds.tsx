@@ -1,6 +1,6 @@
 import { useTranslation } from "@tutortrack/i18n";
 import { Button, SelectField, TextField } from "@tutortrack/ui";
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 
 import { GENDERS, splitTags, type MatchNeeds, type NeedsOverride } from "./needs";
 
@@ -19,6 +19,7 @@ export function MatchNeedsForm({
   children?: ReactNode;
 }) {
   const { t } = useTranslation();
+  const hintId = useId();
   const [boards, setBoards] = useState(needs.exam_boards.join(", "));
   const [tags, setTags] = useState(needs.sen_tags.join(", "));
   const [gender, setGender] = useState<NeedsOverride["gender"]>(
@@ -39,8 +40,8 @@ export function MatchNeedsForm({
           label={t("g5c.needs.examBoards")}
           hideLabel
           size="sm"
-          placeholder={`${t("g5c.needs.examBoards")} (${t("designS5.matching.commas")})`}
-          title={t("g5c.needs.listHint")}
+          placeholder={t("g5c.needs.examBoards")}
+          aria-describedby={hintId}
           value={boards}
           onChange={(e) => setBoards(e.target.value)}
         />
@@ -50,8 +51,8 @@ export function MatchNeedsForm({
           label={t("g5c.needs.senTags")}
           hideLabel
           size="sm"
-          placeholder={`${t("g5c.needs.senTags")} (${t("designS5.matching.commas")})`}
-          title={t("g5c.needs.listHint")}
+          placeholder={t("g5c.needs.senTags")}
+          aria-describedby={hintId}
           value={tags}
           onChange={(e) => setTags(e.target.value)}
         />
@@ -73,6 +74,9 @@ export function MatchNeedsForm({
       <Button type="submit" size="sm" variant="secondary" className="h-9">
         {t("g5c.needs.apply")}
       </Button>
+      <p id={hintId} className="basis-full text-xs text-muted-foreground">
+        {t("designS5.matching.listHint")}
+      </p>
     </form>
   );
 }

@@ -18,12 +18,8 @@ import { Link } from "@tanstack/react-router";
 import { useState, type DragEvent, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
-import {
-  AiEnquiryExtract,
-  AiEnquiryTriageButton,
-  AiEnquiryTriageResult,
-  useEnquiryTriage,
-} from "../ai/AiWidgets";
+import { AiEnquiryExtract, AiEnquiryTriageButton, AiEnquiryTriageResult } from "../ai/AiWidgets";
+import { useEnquiryTriage } from "../ai/enquiryTriage";
 import { AttachedFiles } from "../components/AttachedFiles";
 import { RecordHeader, RecordLayout } from "../components/RecordHeader";
 import { RecordActivity } from "../crm/Activity";

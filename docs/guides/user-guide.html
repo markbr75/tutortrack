@@ -278,7 +278,7 @@
 </ul>
 <p>The bar shows progress and lists any records that failed, with the reason (for example "no marketing consent").</p>
 <h5 id="record-pages">The record pages</h5>
-<p>Each record page opens with the way back (for example <span class="ui">Clients</span>), the name and one line of context, and its actions on the right, such as <span class="ui">Merge with another record</span>. The record's work (billing, jobs, subjects, activity) is in the wide column; details, contacts and <span class="ui">Change status</span> are in the narrow column on the right, or below on a phone.</p>
+<p>Each record page opens with the way back (for example <span class="ui">Clients</span>), the name and one line of context, and its actions on the right, such as <span class="ui">Merge with another record</span> and <span class="ui">Change status</span> (it opens the status list and its confirming button in place; <span class="ui">Cancel</span> closes it). The record's work (billing, jobs, subjects, activity) is in the wide column; details and contacts are in the narrow column on the right, or below on a phone.</p>
 <ul>
 <li><strong>Client:</strong> <span class="ui">Contacts</span> (with <span class="ui">Invite to portal</span> for each contact with an email), <span class="ui">Students</span>, billing facts and, with billing access, the client's balances, invoices, payments, packages and payment methods (see <a href="#client-billing">billing on the client record</a>).</li>
 <li><strong>Student:</strong> details (year group, school, date of birth, subjects, goals, learning needs), <span class="ui">Needs for matching</span> (exam boards and, for staff who may see sensitive details, special educational needs and the family's tutor gender preference when your organisation allows it; <span class="ui">Edit</span> to change them), <span class="ui">Change status</span>, the student's jobs with <span class="ui">Set up lessons</span>, and privacy and safeguarding information.</li>
@@ -419,7 +419,7 @@
 <ul>
 <li><span class="ui">Add a tutor</span>: choose a tutor and select <span class="ui">Assign</span>. Tick <span class="ui">Offer first (tutor accepts)</span> to send an offer instead.</li>
 <li><span class="ui">Replace</span>: choose the new tutor and the date, select <span class="ui">Preview</span> to see how many lessons move and clash, then <span class="ui">Replace tutor</span>.</li>
-<li><span class="ui">Change status</span>: choose the status and a reason. Completing or cancelling a job can cancel its future lessons.</li>
+<li><span class="ui">Change status</span> (at the top of the job): choose the status and a reason, then <span class="ui">Apply</span>. Completing or cancelling a job can cancel its future lessons.</li>
 <li><span class="ui">Find a tutor</span>: opens matching for this job (see <a href="#matching">Matching</a>).</li>
 </ul>
 <p>If a job has an hours cap, you get a warning at 80% and scheduling past 100% is blocked.</p>
@@ -428,7 +428,7 @@
 <section id="matching" data-route="admin:/matching" aria-labelledby="matching-h">
 <h4 id="matching-h">Matching, offers and cover</h4>
 <p>To find a tutor for a job, open the job and select <span class="ui">Find a tutor</span>. TutorTrack ranks tutors by availability, distance, rating, experience, spare capacity, similar lessons taught, margin, offer acceptance and time since their last job. Open <span class="ui">Score breakdown</span> to see why a tutor ranks where they do. Restricted and unapproved tutors are hidden unless you tick <span class="ui">Include restricted and unapproved tutors</span>, and they can't be offered the job.</p>
-<p><strong>Students' needs.</strong> The <span class="ui">Students' needs</span> panel shows the <span class="ui">Exam boards</span> and <span class="ui">Special educational needs</span> recorded on the job's students. Tutors who teach one of the boards and have experience of those needs score higher (<span class="ui">Exam board</span> and <span class="ui">SEN experience</span> in the breakdown). If your organisation allows gender preferences, a student's <span class="ui">Tutor gender preference</span> limits the matches. Change any of them and select <span class="ui">Search again</span> to try a different search; the students' records don't change. SEN tags and gender preferences are only shown to staff who may see students' sensitive details.</p>
+<p><strong>Students' needs.</strong> The filter row at the top of <span class="ui">Find a tutor</span> shows the <span class="ui">Exam boards</span> and <span class="ui">Special educational needs</span> recorded on the job's students. Tutors who teach one of the boards and have experience of those needs score higher (<span class="ui">Exam board</span> and <span class="ui">SEN experience</span> in the breakdown). If your organisation allows gender preferences, a student's <span class="ui">Tutor gender preference</span> limits the matches. Change any of them and select <span class="ui">Search again</span> to try a different search; the students' records don't change. SEN tags and gender preferences are only shown to staff who may see students' sensitive details.</p>
 <ol class="steps">
 <li>Select <span class="ui">Shortlist</span> on suitable tutors.</li>
 <li>Choose how to reach them:
@@ -631,7 +631,7 @@
 <li>Choose the <span class="ui">Service</span>, then <span class="ui">Book free trial</span> with a start time. After the trial, record the <span class="ui">Trial outcome</span>.</li>
 <li><span class="ui">Convert to client</span> (<code>leads.enquiry.convert</code>) makes the family a client, makes the students active and creates a job that is seeking a tutor. Tick <span class="ui">Invite the family to the portal</span> to send an invitation.</li>
 <li><span class="ui">Mark lost</span> with a <span class="ui">Lost reason</span>.</li>
-<li><span class="ui">Triage with AI</span> (if on) suggests next steps, a priority and a draft reply.</li>
+<li><span class="ui">Triage with AI</span> (if on), at the top of <span class="ui">Next steps</span>, suggests next steps, a priority and a draft reply, shown in that panel.</li>
 </ul>
 <p><strong>Proposals.</strong> <span class="ui">New proposal</span> builds a priced offer with an introduction, schedule, price lines, suggested tutors and an optional deposit. <span class="ui">Send</span> emails it with a PDF; the family reads it on a web page, chooses a tutor and accepts (paying any deposit) or declines. Accepting converts the enquiry and offers the job to the chosen tutor. Sent proposals can't be edited; <span class="ui">Withdraw</span> it and send a new one.</p>
 <p><strong>Waitlist.</strong> Students waiting for a place, in order. Describe the slot under <span class="ui">Offer (day, time, tutor)</span> and select <span class="ui">Offer place</span>. The family gets a time-limited link to accept or decline.</p>

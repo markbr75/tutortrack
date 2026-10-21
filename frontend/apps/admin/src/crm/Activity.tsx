@@ -282,7 +282,7 @@ export function RecordActivity({ target }: { target: TargetRef }) {
     <Panel
       title={t("crm.activity")}
       flush
-      bodyClassName="pb-5 [&_[role=tablist]]:px-5 [&_[role=tabpanel]]:px-5"
+      bodyClassName="pb-5 [&_[role=tablist]]:px-5 [&_[role=tablist]]:[mask-image:none] [&_[role=tabpanel]]:px-5"
     >
       <Tabs
         label={t("crm.activity")}

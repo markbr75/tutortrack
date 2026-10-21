@@ -7406,8 +7406,8 @@
     },
     "matching": {
       "noData": "Nothing to show yet.",
-      "commas": "separate with commas",
-      "anyGender": "Tutor gender: no preference"
+      "anyGender": "Tutor gender: no preference",
+      "listHint": "Separate several exam boards or needs with commas."
     }
   }
 }

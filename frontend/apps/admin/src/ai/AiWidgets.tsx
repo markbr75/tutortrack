@@ -6,6 +6,7 @@ import { useId, useState } from "react";
 
 import { api } from "../api";
 import { useAiFeature } from "./ai";
+import { useEnquiryTriage, type EnquiryTriage } from "./enquiryTriage";
 import {
   AiContentHelper,
   AiError,
@@ -194,21 +195,6 @@ export function AiEnquiryExtract({ onExtract }: { onExtract: (data: Extracted) =
 }
 
 /** Triage: next steps, a draft reply, and field changes as a proposal to confirm. */
-/** The triage request for one enquiry, shared by its button and its result. */
-export function useEnquiryTriage(enquiryId: string) {
-  const enabled = useAiFeature("enquiry");
-  const triage = useMutation({
-    mutationFn: async () =>
-      unwrap(
-        await api.POST("/api/v1/ai/enquiries/{enquiry_id}/triage", {
-          params: { path: { enquiry_id: enquiryId } },
-        }),
-      ),
-  });
-  return { enabled, triage };
-}
-
-type EnquiryTriage = ReturnType<typeof useEnquiryTriage>;
 
 /** "Triage with AI": a small secondary action (for a panel header or the page actions). */
 export function AiEnquiryTriageButton({ triage }: { triage: EnquiryTriage }) {
