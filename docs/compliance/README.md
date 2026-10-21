@@ -44,4 +44,4 @@ design is ADR 0028.
 The five technical controls and where they live: boundary firewalls (AWS security groups,
 Terraform), secure configuration (hardened container images, CIS benchmarks), user access
 control (access-control.md), malware protection (ClamAV on uploads, managed laptops), and
-patch management (Dependabot, monthly base image rebuilds, 14-day critical patch SLA).
+patch management (Dependabot security updates, monthly base image rebuilds, 14-day critical patch SLA).

@@ -29,7 +29,8 @@ to all staff, contractors and systems that build, run or support TutorTrack in e
   short-lived, audited roles.
 - Endpoints: managed, encrypted laptops with automatic updates and screen lock.
 - Development: code review on every change, CI security checks (Semgrep, Bandit rules,
-  gitleaks, pip-audit, pnpm audit), dependency updates (Dependabot).
+  gitleaks, pip-audit, pnpm audit), security updates for vulnerable dependencies
+  (Dependabot security updates); version upgrades are made on purpose, not by a bot.
 - Data: encryption at rest (RDS, S3, KMS) and in transit (TLS 1.2+); `EncryptedField` for
   tokens, bank details, tax ids, safeguarding notes and medical/SEN notes; regional stacks
   (no cross-region replication).
