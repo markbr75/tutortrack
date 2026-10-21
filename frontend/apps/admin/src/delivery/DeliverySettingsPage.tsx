@@ -408,6 +408,7 @@ function TemplateEditor({ template, onSaved }: { template: Template | null; onSa
                 type="button"
                 size="sm"
                 variant="ghost"
+                className="-ml-3"
                 onClick={() => setFields((current) => current.filter((_f, n) => n !== i))}
               >
                 {t("delivery.settings.removeField", { label: field.label || field.key })}

@@ -274,7 +274,7 @@ export function JobMatchPage({ jobId }: { jobId: string }) {
       {results.error ? <Alert tone="danger">{results.error.message}</Alert> : null}
       {results.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {results.data ? (
-        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
           <Card title={t("matching.results", { count: results.data.results.length })} flush>
             {results.data.results.length === 0 ? (
               <p className="px-5 py-4 text-sm text-muted-foreground">{t("matching.none")}</p>
@@ -725,7 +725,7 @@ function AnalyticsPanel() {
           ]}
         />
       </section>
-      <div className="grid items-start gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-2">
       <Card title={t("matching.acceptance")} flush>
         <table className={TABLE}>
           <thead className="border-b border-border">

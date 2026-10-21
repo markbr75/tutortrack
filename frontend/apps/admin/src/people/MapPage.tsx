@@ -245,7 +245,7 @@ export function PeopleMapPage() {
         </p>
       ) : null}
       {view === "map" && proj ? (
-        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <figure className="min-w-0 rounded-xl border border-border bg-surface">
           <svg
             role="group"

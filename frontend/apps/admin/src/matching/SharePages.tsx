@@ -25,42 +25,43 @@ export function TutorCard({
   onSelect?: () => void;
 }) {
   const { t } = useTranslation();
+  const facts = [
+    card.rating !== null
+      ? t("shortlistShare.rating", { rating: card.rating, count: card.rating_count })
+      : "",
+    card.years_experience !== null
+      ? t("shortlistShare.experience", { count: card.years_experience })
+      : "",
+    card.online ? t("shortlistShare.online") : "",
+    card.in_person ? t("shortlistShare.inPerson") : "",
+  ].filter(Boolean);
+  const subjects = card.subjects
+    .map((s) => (s.level ? `${s.subject} (${s.level})` : s.subject))
+    .join(", ");
+  const background = [
+    card.qualifications.map((q) => q.title).join("; "),
+    card.languages.length
+      ? t("shortlistShare.languages", { list: card.languages.join(", ") })
+      : "",
+  ].filter(Boolean);
   const body = (
     <div className="flex gap-3">
       {card.photo_url ? (
-        <img src={card.photo_url} alt="" className="size-16 shrink-0 rounded-full object-cover" />
+        <img src={card.photo_url} alt="" className="size-14 shrink-0 rounded-full object-cover" />
       ) : null}
-      <div className="min-w-0 space-y-1 text-sm">
+      <div className="min-w-0 flex-1 text-sm">
         <p className="text-base font-semibold">{card.name}</p>
-        {card.headline ? <p>{card.headline}</p> : null}
-        {card.rating !== null ? (
-          <p>{t("shortlistShare.rating", { rating: card.rating, count: card.rating_count })}</p>
-        ) : null}
-        {card.subjects.length ? (
-          <p>
-            {card.subjects
-              .map((s) => (s.level ? `${s.subject} (${s.level})` : s.subject))
-              .join(", ")}
-          </p>
-        ) : null}
-        {card.years_experience !== null ? (
-          <p>{t("shortlistShare.experience", { count: card.years_experience })}</p>
-        ) : null}
-        {card.qualifications.length ? (
-          <p>{card.qualifications.map((q) => q.title).join("; ")}</p>
-        ) : null}
-        {card.languages.length ? (
-          <p>{t("shortlistShare.languages", { list: card.languages.join(", ") })}</p>
-        ) : null}
-        <p className="text-muted-foreground">
-          {[
-            card.online ? t("shortlistShare.online") : "",
-            card.in_person ? t("shortlistShare.inPerson") : "",
-          ]
-            .filter(Boolean)
-            .join(" · ")}
-        </p>
-        {card.bio ? <p className="whitespace-pre-line">{card.bio}</p> : null}
+        {card.headline ? <p className="text-muted-foreground">{card.headline}</p> : null}
+        <div className="mt-3 space-y-1 border-t border-rule pt-3">
+          {subjects ? <p className="font-medium">{subjects}</p> : null}
+          {facts.length ? (
+            <p className="text-muted-foreground tabular-nums">{facts.join(" · ")}</p>
+          ) : null}
+          {background.length ? (
+            <p className="text-muted-foreground">{background.join(" · ")}</p>
+          ) : null}
+          {card.bio ? <p className="pt-1 whitespace-pre-line">{card.bio}</p> : null}
+        </div>
       </div>
     </div>
   );
@@ -81,7 +82,7 @@ export function TutorCard({
       <input
         type="radio"
         name={name}
-        className="sr-only"
+        className="float-right mt-1 ml-3 size-4"
         checked={selected}
         onChange={onSelect}
         aria-label={t("shortlistShare.choose", { name: card.name })}

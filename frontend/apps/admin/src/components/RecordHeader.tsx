@@ -39,7 +39,7 @@ export function RecordHeader({
 export function RecordLayout({ main, side }: { main: ReactNode; side?: ReactNode }) {
   if (!side) return <div className="space-y-6">{main}</div>;
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+    <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="min-w-0 space-y-6">{main}</div>
       <aside className="min-w-0 space-y-6">{side}</aside>
     </div>

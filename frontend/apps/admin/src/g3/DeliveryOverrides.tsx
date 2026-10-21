@@ -156,10 +156,10 @@ export function TemplateAssignments({
       <legend className="text-sm font-medium">{label}</legend>
       <div className="max-h-40 space-y-1.5 overflow-y-auto rounded-md border border-field bg-surface p-2.5">
         {(rows ?? []).map((r) => (
-          <label key={r.id} className="flex items-center gap-2 text-sm">
+          <label key={r.id} className="flex items-start gap-2 text-sm">
             <input
               type="checkbox"
-              className="size-4"
+              className="mt-0.5 size-4 shrink-0"
               checked={value[name].includes(r.id)}
               onChange={(e) =>
                 onChange({

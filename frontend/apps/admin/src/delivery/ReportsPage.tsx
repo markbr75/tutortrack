@@ -38,7 +38,6 @@ export function ReportsPage() {
             </Link>
             <span className="block text-xs text-muted-foreground tabular-nums">
               {formatDateTime(row.original.lesson_start, i18n.language)}
-              <span className="sm:hidden"> · {row.original.tutor_name}</span>
             </span>
           </div>
         ),
