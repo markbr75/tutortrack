@@ -513,7 +513,7 @@ function InvoicesSection() {
         role="region"
         aria-labelledby="plan-invoices"
         tabIndex={0}
-        className="overflow-x-auto"
+        className="relative overflow-x-auto"
       >
         <table className="w-full min-w-[32rem] text-sm">
           <thead className="border-b border-border">

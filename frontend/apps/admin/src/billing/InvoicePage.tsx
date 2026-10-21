@@ -314,19 +314,19 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
               role="region"
               aria-labelledby="invoice-lines-h"
               tabIndex={0}
-              className="overflow-x-auto"
+              className="relative overflow-x-auto"
             >
-              <table className="w-full min-w-[36rem] text-left text-sm">
+              <table className="w-full text-left text-sm md:min-w-[36rem]">
                 <caption className="sr-only">{t("billing.lines")}</caption>
                 <thead className="border-b border-border">
                   <tr>
-                    <th scope="col" className="w-28 py-2.5 pr-4 pl-5">
+                    <th scope="col" className="w-28 py-2.5 pr-4 pl-5 max-md:hidden">
                       {t("billing.date")}
                     </th>
-                    <th scope="col" className="px-4 py-2.5">
+                    <th scope="col" className="py-2.5 pr-4 pl-5 md:pl-4">
                       {t("billing.description")}
                     </th>
-                    <th scope="col" className="px-4 py-2.5">
+                    <th scope="col" className="px-4 py-2.5 max-md:hidden">
                       {t("billing.student")}
                     </th>
                     <th scope="col" className={`w-32 py-2.5 pl-4 text-right ${amountPad}`}>
@@ -347,18 +347,24 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
                 <tbody>
                   {inv.lines.map((row) => (
                     <tr key={row.id}>
-                      <td className="py-2.5 pr-4 pl-5 align-top whitespace-nowrap">
+                      <td className="py-2.5 pr-4 pl-5 align-top whitespace-nowrap max-md:hidden">
                         {formatDate(row.date, i18n.language)}
                       </td>
-                      <td className="px-4 py-2.5 align-top">
+                      <td className="py-2.5 pr-4 pl-5 align-top md:pl-4">
                         {row.description}
                         {row.tutor_name ? (
                           <span className="block text-xs text-muted-foreground">
                             {row.tutor_name}
                           </span>
                         ) : null}
+                        {/* On phones the date and student fold into the line's context. */}
+                        <span className="block text-xs text-muted-foreground tabular-nums md:hidden">
+                          {[formatDate(row.date, i18n.language), row.student_name]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </span>
                       </td>
-                      <td className="px-4 py-2.5 align-top">{row.student_name}</td>
+                      <td className="px-4 py-2.5 align-top max-md:hidden">{row.student_name}</td>
                       <td className={`py-2.5 pl-4 text-right align-top ${amountPad}`}>
                         {money(row.gross)}
                         {Number(row.credited.amount) ? (
@@ -415,11 +421,21 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
                       <th
                         scope="row"
                         colSpan={3}
-                        className={
+                        className={`max-md:hidden ${
                           row.due
                             ? "py-3 pr-4 pl-5 text-right text-base font-semibold"
                             : "py-2 pr-4 pl-5 text-right text-sm font-normal text-muted-foreground"
-                        }
+                        }`}
+                      >
+                        {row.label}
+                      </th>
+                      <th
+                        scope="row"
+                        className={`md:hidden ${
+                          row.due
+                            ? "py-3 pr-4 pl-5 text-right text-base font-semibold"
+                            : "py-2 pr-4 pl-5 text-right text-sm font-normal text-muted-foreground"
+                        }`}
                       >
                         {row.label}
                       </th>

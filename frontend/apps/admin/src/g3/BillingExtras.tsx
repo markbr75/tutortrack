@@ -134,7 +134,7 @@ export function BulkPayments() {
           role="region"
           aria-label={t("g3.bulkPayments.title")}
           tabIndex={0}
-          className="overflow-x-auto"
+          className="relative overflow-x-auto"
         >
           <table className="w-full min-w-[48rem] text-sm">
             <caption className="sr-only">{t("g3.bulkPayments.title")}</caption>

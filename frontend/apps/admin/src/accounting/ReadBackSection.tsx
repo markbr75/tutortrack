@@ -129,7 +129,7 @@ export function ReadBackSection({ conn, canManage }: { conn: Connection; canMana
           role="region"
           aria-label={t("ledgerReadBack.title", { provider })}
           tabIndex={0}
-          className="overflow-x-auto border-t border-rule"
+          className="relative overflow-x-auto border-t border-rule"
         >
           <table className="w-full min-w-[40rem] text-sm">
             <caption className="sr-only">{t("ledgerReadBack.title", { provider })}</caption>

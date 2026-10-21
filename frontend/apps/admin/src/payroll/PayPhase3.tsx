@@ -285,7 +285,7 @@ export function TaxFormsPage() {
               role="region"
               aria-label={t("payrollPhase3.taxFormsTitle")}
               tabIndex={0}
-              className="overflow-x-auto rounded-xl border border-border bg-surface"
+              className="relative overflow-x-auto rounded-xl border border-border bg-surface"
             >
               <table className="w-full text-left text-sm">
                 <caption className="sr-only">{t("payrollPhase3.taxFormsTitle")}</caption>

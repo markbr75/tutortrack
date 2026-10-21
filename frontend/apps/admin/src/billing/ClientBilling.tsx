@@ -197,7 +197,7 @@ export function ClientBilling({ clientId, currency }: { clientId: string; curren
             role="region"
             aria-label={t("billing.ledger")}
             tabIndex={0}
-            className="overflow-x-auto rounded-xl border border-border bg-surface"
+            className="relative overflow-x-auto rounded-xl border border-border bg-surface"
           >
             <table className="w-full text-left text-sm">
               <caption className="sr-only">{t("billing.ledger")}</caption>

@@ -24,7 +24,15 @@ import { BillingOptions, BulkPayments, RunTutorReviews } from "../g3/BillingExtr
 import { BankReconciliation } from "../payments/BankReconciliation";
 import { PaymentsList } from "../payments/PaymentsPages";
 import { LateFeesTab, PackagesTab, PlansTab, SplitsTab } from "./Phase2Tabs";
-import { EndHead, Figure, InvoiceStatus, PanelEmpty, PanelLoading, rowClass } from "./moneyUi";
+import {
+  EndHead,
+  Figure,
+  InvoiceStatus,
+  PanelEmpty,
+  PanelLoading,
+  rowClass,
+  useIsPhone,
+} from "./moneyUi";
 
 type Tab =
   | "invoices"
@@ -90,19 +98,34 @@ export function InvoiceTable({
   const { t, i18n } = useTranslation();
   const money = useMoney();
   const labels = useGridLabels(empty);
+  const phone = useIsPhone();
   const columns = useMemo<ColumnDef<Invoice, unknown>[]>(
     () => [
       {
         id: "number",
         header: t("billing.number"),
         cell: ({ row }) => (
-          <Link
-            to="/invoices/$invoiceId"
-            params={{ invoiceId: row.original.id }}
-            className="font-medium whitespace-nowrap tabular-nums underline-offset-2 hover:underline"
-          >
-            {row.original.number || t("billing.draftInvoice")}
-          </Link>
+          <>
+            <Link
+              to="/invoices/$invoiceId"
+              params={{ invoiceId: row.original.id }}
+              className="font-medium whitespace-nowrap tabular-nums underline-offset-2 hover:underline"
+            >
+              {row.original.number || t("billing.draftInvoice")}
+            </Link>
+            {phone ? (
+              <span className="block text-xs text-muted-foreground tabular-nums">
+                {[
+                  hideClient ? "" : row.original.client_name,
+                  row.original.due_date
+                    ? `${t("billing.due")} ${formatDate(row.original.due_date, i18n.language)}`
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
+            ) : null}
+          </>
         ),
       },
       { id: "client", header: t("billing.client"), cell: ({ row }) => row.original.client_name },
@@ -134,10 +157,12 @@ export function InvoiceTable({
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps -- labels follow the language
-    [t, i18n.language],
+    [t, i18n.language, phone, hideClient],
   );
   return (
     <DataGrid
+      // On phones the client, due date and total fold into the number's context line.
+      key={phone ? "phone" : "wide"}
       caption={t("billing.tabs.invoices")}
       rows={rows}
       columns={columns}
@@ -147,7 +172,13 @@ export function InvoiceTable({
       isFetchingMore={isFetchingMore}
       onLoadMore={onLoadMore}
       labels={labels}
-      initialColumnVisibility={hideClient ? { client: false } : undefined}
+      initialColumnVisibility={
+        phone
+          ? { client: false, due: false, total: false }
+          : hideClient
+            ? { client: false }
+            : undefined
+      }
     />
   );
 }
@@ -191,6 +222,7 @@ function Charges() {
   const { t, i18n } = useTranslation();
   const money = useMoney();
   const labels = useGridLabels(t("designS7.billing.noCharges"));
+  const phone = useIsPhone();
   const list = useCursorList(["charges", "uninvoiced"], async (cursor) =>
     unwrap(
       await api.GET("/api/v1/charges", { params: { query: { status: ["uninvoiced"], cursor } } }),
@@ -212,7 +244,17 @@ function Charges() {
         cell: ({ row }) => (
           <>
             {row.original.description}
-            {row.original.student_name ? (
+            {phone ? (
+              <span className="block text-xs text-muted-foreground tabular-nums">
+                {[
+                  formatDate(row.original.date, i18n.language),
+                  row.original.client_name,
+                  row.original.student_name,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
+            ) : row.original.student_name ? (
               <span className="block text-xs text-muted-foreground">
                 {row.original.student_name}
               </span>
@@ -227,10 +269,12 @@ function Charges() {
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps -- labels follow the language
-    [t, i18n.language],
+    [t, i18n.language, phone],
   );
   return (
     <DataGrid
+      key={phone ? "phone" : "wide"}
+      initialColumnVisibility={phone ? { date: false, client: false } : undefined}
       caption={t("billing.tabs.charges")}
       rows={list.rows}
       columns={columns}
@@ -552,7 +596,7 @@ function Ageing() {
       role="region"
       aria-label={t("billing.tabs.ageing")}
       tabIndex={0}
-      className="overflow-x-auto rounded-xl border border-border bg-surface"
+      className="relative overflow-x-auto rounded-xl border border-border bg-surface"
     >
       <table className="w-full text-left text-sm">
         <caption className="sr-only">{t("billing.tabs.ageing")}</caption>

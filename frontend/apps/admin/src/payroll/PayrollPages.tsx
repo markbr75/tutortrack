@@ -16,7 +16,14 @@ import { Link } from "@tanstack/react-router";
 import { useMemo, useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
-import { EndHead, Figure, PanelEmpty, PanelLoading, rowClass } from "../billing/moneyUi";
+import {
+  EndHead,
+  Figure,
+  PanelEmpty,
+  PanelLoading,
+  rowClass,
+  useIsPhone,
+} from "../billing/moneyUi";
 import { RunItems } from "../g3/PayrollExtras";
 import { WiseConnectionCard } from "./PayPhase3";
 
@@ -43,7 +50,7 @@ export function PayrollNav() {
   return (
     <nav
       aria-label={t("payroll.title")}
-      className="mb-5 flex gap-1 overflow-x-auto border-b border-border pr-6 [mask-image:linear-gradient(to_right,black_calc(100%-1.5rem),transparent)] [scrollbar-width:none]"
+      className="relative mb-5 flex gap-1 overflow-x-auto border-b border-border pr-6 [mask-image:linear-gradient(to_right,black_calc(100%-1.5rem),transparent)] [scrollbar-width:none]"
     >
       {links.map((l) => (
         <Link
@@ -298,21 +305,21 @@ export function PayRunPage({ id }: { id: string }) {
             {t("designS7.payroll.payoutCount", { count: r.payouts.length })}
           </span>
         </div>
-        <div role="region" aria-labelledby="payouts-h" tabIndex={0} className="overflow-x-auto">
-          <table className="w-full min-w-[36rem] text-left text-sm">
+        <div role="region" aria-labelledby="payouts-h" tabIndex={0} className="relative overflow-x-auto">
+          <table className="w-full text-left text-sm md:min-w-[36rem]">
             <caption className="sr-only">{t("designS7.payroll.payouts")}</caption>
             <thead className="border-b border-border">
               <tr>
                 <th scope="col" className="py-2.5 pr-4 pl-5">
                   {t("payroll.tutor")}
                 </th>
-                <th scope="col" className="px-4 py-2.5">
+                <th scope="col" className="px-4 py-2.5 max-md:hidden">
                   {t("payroll.method")}
                 </th>
                 <th scope="col" className="px-4 py-2.5">
                   {t("payroll.status")}
                 </th>
-                <th scope="col" className="px-4 py-2.5">
+                <th scope="col" className="px-4 py-2.5 max-md:hidden">
                   {t("payroll.statement")}
                 </th>
                 <th scope="col" className="w-32 py-2.5 pr-5 pl-4 text-right">
@@ -323,8 +330,25 @@ export function PayRunPage({ id }: { id: string }) {
             <tbody>
               {r.payouts.map((p) => (
                 <tr key={p.id}>
-                  <td className="py-2.5 pr-4 pl-5 font-medium">{p.tutor_name}</td>
-                  <td className="px-4 py-2.5">{t(`payroll.methods.${p.method}`)}</td>
+                  <td className="py-2.5 pr-4 pl-5">
+                    <span className="font-medium">{p.tutor_name}</span>
+                    {/* On phones the method and statement fold into the tutor's context line. */}
+                    <span className="block text-xs text-muted-foreground md:hidden">
+                      {t(`payroll.methods.${p.method}`)}
+                      {p.statement ? (
+                        <>
+                          {" · "}
+                          <a
+                            className="text-link tabular-nums underline-offset-2 hover:underline"
+                            href={`/api/v1/pay-statements/${p.statement.id}/pdf`}
+                          >
+                            {p.statement.number}
+                          </a>
+                        </>
+                      ) : null}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5 max-md:hidden">{t(`payroll.methods.${p.method}`)}</td>
                   <td className="px-4 py-2.5">
                     <span className={p.status === "failed" ? "font-medium text-danger" : ""}>
                       {t(`payroll.payoutStatus.${p.status}`)}
@@ -335,7 +359,7 @@ export function PayRunPage({ id }: { id: string }) {
                       </span>
                     ) : null}
                   </td>
-                  <td className="px-4 py-2.5">
+                  <td className="px-4 py-2.5 max-md:hidden">
                     {p.statement ? (
                       <a
                         className="text-link tabular-nums underline-offset-2 hover:underline"
@@ -361,7 +385,10 @@ export function PayRunPage({ id }: { id: string }) {
             <tfoot>
               {(runTotals.length ? runTotals : [["", ""]]).map(([currency, amount], i) => (
                 <tr key={currency || "none"} className={i === 0 ? "border-t border-border" : ""}>
-                  <th scope="row" colSpan={4} className="py-3 pr-4 pl-5 text-right text-base font-semibold">
+                  <th scope="row" colSpan={4} className="py-3 pr-4 pl-5 text-right text-base font-semibold max-md:hidden">
+                    {i === 0 ? t("payroll.total") : ""}
+                  </th>
+                  <th scope="row" colSpan={2} className="py-3 pr-4 pl-5 text-right text-base font-semibold md:hidden">
                     {i === 0 ? t("payroll.total") : ""}
                   </th>
                   <td className="py-3 pr-5 pl-4 text-right text-base font-semibold">
@@ -559,6 +586,7 @@ export function PayItemsPage() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["pay-items"] }),
   });
   const labels = useGridLabels(t("designS7.payroll.noItems"));
+  const phone = useIsPhone();
   const columns = useMemo<ColumnDef<PayItem, unknown>[]>(
     () => [
       {
@@ -574,7 +602,13 @@ export function PayItemsPage() {
         header: t("payroll.description"),
         cell: ({ row }) => (
           <>
+            {phone ? <span className="block font-medium">{row.original.tutor_name}</span> : null}
             {row.original.description}
+            {phone ? (
+              <span className="block text-xs text-muted-foreground tabular-nums">
+                {formatDate(row.original.date, i18n.language)}
+              </span>
+            ) : null}
             {(row.original.hold_reasons as string[]).map((r) => (
               <span key={r} className="block text-xs text-muted-foreground">
                 {t(`pay.holdReasons.${r}`)}
@@ -590,7 +624,12 @@ export function PayItemsPage() {
       },
       {
         id: "actions",
-        header: () => <span className="sr-only">{t("payroll.actions")}</span>,
+        // `relative` keeps the visually hidden heading inside the table's scroll box.
+        header: () => (
+          <span className="relative">
+            <span className="sr-only">{t("payroll.actions")}</span>
+          </span>
+        ),
         cell: ({ row }) =>
           canManage && row.original.status === "held" ? (
             <Button
@@ -604,7 +643,7 @@ export function PayItemsPage() {
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps -- labels follow the language
-    [t, i18n.language, canManage],
+    [t, i18n.language, canManage, phone],
   );
   return (
     <Page title={t("payroll.items")}>
@@ -623,6 +662,9 @@ export function PayItemsPage() {
           />
         </div>
         <DataGrid
+          // On phones the date and tutor fold into the description.
+          key={phone ? "phone" : "wide"}
+          initialColumnVisibility={phone ? { date: false, tutor: false } : undefined}
           caption={t("payroll.items")}
           rows={items.data?.results ?? []}
           columns={columns}
