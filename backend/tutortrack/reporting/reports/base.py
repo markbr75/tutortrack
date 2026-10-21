@@ -10,6 +10,7 @@ kept in ``original_currency`` (FR-26-6).
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from datetime import date
@@ -42,6 +43,13 @@ CATEGORIES = {
     "people": _("People and compliance"),
 }
 FILTERS = ("branch", "tutor", "client", "service", "subject", "tag", "custom_field")
+# Records whose custom fields a report can filter on (``custom_field=[entity.]key=value``).
+CUSTOM_FIELD_MODELS = {
+    "client": ("people", "Client"),
+    "student": ("people", "Student"),
+    "tutor": ("people", "TutorProfile"),
+}
+_CUSTOM_FIELD_KEY = re.compile(r"^(?!.*__)[A-Za-z0-9_-]{1,60}$")  # no "__": not a lookup path
 NUMERIC = ("money", "number", "count", "hours")
 TIME_GROUPS: dict[str, Any] = {
     "day": TruncDay,
@@ -77,6 +85,10 @@ GROUP_LABELS = {
     "owner": _("Owner"),
     "level": _("Level"),
     "stage": _("Stage"),
+    "program": _("Programme"),
+    "referrer": _("Referred by"),
+    "affiliate": _("Affiliate"),
+    "room": _("Room"),
 }
 
 
@@ -119,6 +131,22 @@ class ReportDef:
     ordering: str = ""
     period: bool = True  # whether the date range applies
     default_period: str = "this_month"
+    # Whose custom fields the "custom_field" filter may name (default: clients only).
+    custom_fields: tuple[str, ...] = ()
+    # Extra permissions needed besides ``codename`` (e.g. the growth app's view rights).
+    requires: tuple[str, ...] = ()
+
+    @property
+    def custom_field_entities(self) -> tuple[str, ...]:
+        if "custom_field" not in self.filters:
+            return ()
+        return self.custom_fields or ("client",)
+
+    def allowed(self, user: Any) -> bool:
+        """Whether ``user`` may run the report (its family permission and ``requires``)."""
+        from tutortrack.core.permissions import has_perm
+
+        return all(has_perm(user, c) for c in (self.codename, *self.requires))
 
     def describe(self) -> dict[str, Any]:
         return {
@@ -128,6 +156,7 @@ class ReportDef:
             "category_label": str(CATEGORIES[self.category]),
             "description": str(self.description),
             "filters": list(self.filters),
+            "custom_field_entities": list(self.custom_field_entities),
             "group_by": [{"value": g, "label": str(GROUP_LABELS.get(g, g))} for g in self.group_by],
             "period": self.period,
             "default_period": self.default_period,
@@ -263,9 +292,53 @@ def parse_params(report: ReportDef, data: Mapping[str, Any]) -> Params:
         setattr(params, name, id_list(data, name))
     if params.tag:
         id_list({"tag": params.tag}, "tag")
-    if params.custom_field and "=" not in params.custom_field:
-        raise invalid("custom_field", _("Use field=value."))
+    if params.custom_field:
+        check_custom_field(report, params.custom_field)
     return params
+
+
+def split_custom_field(raw: str) -> tuple[str, str, str]:
+    """``[entity.]key=value`` → (entity, key, value). Without an entity it means clients
+    (the original E26 form, kept for saved views); the entity is then ""."""
+    left, _sep, value = raw.partition("=")
+    entity, dot, key = left.strip().partition(".")
+    if not dot:
+        entity, key = "", left.strip()
+    return entity.strip(), key.strip(), value.strip()
+
+
+def check_custom_field(report: ReportDef, raw: str) -> None:
+    if "=" not in raw:
+        raise invalid("custom_field", _("Use field=value."))
+    entity, key, _value = split_custom_field(raw)
+    if not _CUSTOM_FIELD_KEY.match(key):
+        raise invalid("custom_field", _("Unknown custom field."))
+    entities = report.custom_field_entities
+    # A bare key means clients; reports without the filter keep ignoring it (E26 views).
+    if (entity and entity not in entities) or (
+        not entity and entities and "client" not in entities
+    ):
+        raise invalid(
+            "custom_field", _("This report can't be filtered on that record's custom fields.")
+        )
+
+
+def custom_field_matches(entity: str, key: str, value: str) -> QuerySet[Any]:
+    """Ids of the clients, students or tutors whose custom field ``key`` equals ``value``
+    (text, yes/no, whole numbers, or one of a multiple choice's options)."""
+    from django.apps import apps
+
+    model = apps.get_model(*CUSTOM_FIELD_MODELS[entity])
+    path = f"custom_fields__{key}"
+    q = Q(**{path: value}) | Q(**{f"{path}__contains": [value]})
+    lowered = value.lower()
+    if lowered in ("true", "yes"):
+        q |= Q(**{path: True})
+    elif lowered in ("false", "no"):
+        q |= Q(**{path: False})
+    elif re.fullmatch(r"-?\d{1,15}", value):
+        q |= Q(**{path: int(value)})
+    return model.objects.filter(q).values("pk")
 
 
 # --- scoping ------------------------------------------------------------------------------------
@@ -314,7 +387,6 @@ def filter_facts(
         values = getattr(params, name)
         if lookup and values:
             qs = qs.filter(**{f"{lookup}__in": values})
-    client_lookup = fields.get("client")
     if params.tag:
         from tutortrack.crm.models import TaggedItem
 
@@ -331,12 +403,30 @@ def filter_facts(
                 )
                 q |= Q(**{f"{lookup}__in": [str(i["target_id"]) for i in ids]})
         qs = qs.filter(q)
-    if params.custom_field and client_lookup:
-        from tutortrack.people.models import Client
+    if params.custom_field:
+        qs = filter_custom_field(qs, params, fields)
+    return qs
 
-        key, _sep, value = params.custom_field.partition("=")
-        ids = Client.objects.filter(**{f"custom_fields__{key.strip()}": value.strip()}).values("pk")
-        qs = qs.filter(**{f"{client_lookup}__in": ids})
+
+def filter_custom_field(
+    qs: QuerySet[Any], params: Params, fields: Mapping[str, str | None]
+) -> QuerySet[Any]:
+    """The ``custom_field`` filter on the client, student or tutor lookup in ``fields``.
+    Students without a lookup are reached through the lesson's attendees (``lesson``)."""
+    entity, key, value = split_custom_field(params.custom_field)
+    entity = entity or "client"
+    if entity not in CUSTOM_FIELD_MODELS or not _CUSTOM_FIELD_KEY.match(key):
+        return qs.none()
+    ids = custom_field_matches(entity, key, value)
+    lookup = fields.get(entity)
+    if lookup:
+        return qs.filter(**{f"{lookup}__in": ids})
+    lesson = fields.get("lesson")
+    if entity == "student" and lesson:
+        from tutortrack.scheduling.models import LessonAttendee
+
+        lessons = LessonAttendee.objects.filter(student_id__in=ids).values("lesson_id")
+        return qs.filter(**{f"{lesson}__in": lessons})
     return qs
 
 

@@ -47,7 +47,7 @@ def read(stored: StoredFile) -> bytes:
 def _may_open(user: Any, stored: StoredFile) -> bool:
     run = (
         ReportRun.objects.filter(pk=stored.owner_object_id)
-        .select_related("scheduled_report__saved_report")
+        .select_related("scheduled_report__saved_report", "scheduled_report__custom_report")
         .first()
     )
     if run is None:
@@ -56,8 +56,7 @@ def _may_open(user: Any, stored: StoredFile) -> bool:
         return True
     scheduled = run.scheduled_report
     return scheduled is not None and (
-        scheduled.saved_report.owner_id == user.pk
-        or scheduled.recipients.filter(pk=user.pk).exists()
+        scheduled.source.owner_id == user.pk or scheduled.recipients.filter(pk=user.pk).exists()
     )
 
 

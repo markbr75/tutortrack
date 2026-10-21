@@ -129,7 +129,7 @@
 <header>
 <h1>TutorTrack user guide</h1>
 <p class="lead">How to use TutorTrack day to day: for the office team in the admin app, tutors in the tutor app, families and students in the client portal, and affiliates in the partner portal.</p>
-<p class="meta">Last updated: 2026-10-20</p>
+<p class="meta">Last updated: 2026-10-21</p>
 </header>
 <p>Setting up the organisation (settings, roles, payments, integrations, the website and data import) is covered in the <a href="admin-guide.html">admin guide</a>. Developers should read the <a href="api-guide.html">API guide</a>.</p>
 
@@ -718,8 +718,12 @@
 <ul>
 <li><strong>All reports:</strong> standard reports grouped into Finance, Payroll, Operations, Sales and People. You see the groups your role allows.</li>
 <li><strong>Running a report:</strong> set the <span class="ui">Period</span>, filter by tutor, service or client, choose <span class="ui">Group by</span> and, if you work in several currencies, <span class="ui">Show in currency</span>. <span class="ui">Download</span> as CSV, Excel or PDF (<code>reporting.export</code>; downloads are recorded).</li>
+<li><strong>Custom field filters:</strong> reports that support them show a <span class="ui">Custom field filter</span>. Choose whose field it is in <span class="ui">Custom field of</span> (client, student or tutor, as the report allows), pick the field and type the value in <span class="ui">Equals</span>, then press Enter. For example, lessons, attendance and active students for students whose year group is Y10, or utilisation and compliance for tutors on one contract type. Yes/no fields match "yes" or "no".</li>
+<li><strong>Tutor utilisation:</strong> <span class="ui">Tutor hours and utilisation</span> shows each tutor's weekly availability, approved <span class="ui">Time off hours</span> taken from it, approved <span class="ui">Extra availability hours</span>, the net <span class="ui">Available hours</span>, and booked hours as a share of the net hours. Time off that is only requested is not taken off.</li>
+<li><strong>Room utilisation:</strong> <span class="ui">Room utilisation</span> (Operations) shows, per room, lessons and hours booked (not cancelled) against the hours its location is open (the location's opening hours, or your business hours), and <span class="ui">Seats filled %</span> against the room's capacity. <span class="ui">Location use</span> gives the same booked hours per location.</li>
+<li><strong>Referrals, affiliates and reviews</strong> (Sales; you also need the matching <span class="ui">Reviews &amp; referrals</span> permission): <span class="ui">Referral performance</span> (referrals made in the period, how many reached the milestone, were rewarded, were held by fraud checks or lapsed, and the credit given), <span class="ui">Affiliate performance</span> (clients each affiliate referred and converted, commission earned, clawed back, adjusted and paid; link clicks are all-time totals) and <span class="ui">Review scores</span> (reviews by tutor, month or source with average stars, five-star share, low scores, moderation, replies and review requests answered).</li>
 <li><strong>Saving:</strong> <span class="ui">Save this view</span> keeps your filters. Tick <span class="ui">Share with colleagues who can run this report</span> to share it.</li>
-<li><strong>Scheduling:</strong> on <span class="ui">Saved and scheduled</span>, select <span class="ui">Email on a schedule</span> for a saved view, choose how often, the time and file type and who to <span class="ui">Send to</span>. Recent files are listed with <span class="ui">Download file</span>.</li>
+<li><strong>Scheduling:</strong> on <span class="ui">Saved and scheduled</span>, select <span class="ui">Email on a schedule</span> for a saved view, choose how often, the time and file type and who to <span class="ui">Send to</span>. Custom reports you built can be scheduled the same way from the list beside <span class="ui">Build a report</span>; they show as <span class="ui">Custom report</span> in the schedule list and run as you, with your data access. Recent files are listed with <span class="ui">Download file</span>.</li>
 <li><strong>Custom reports:</strong> <span class="ui">Build a report</span> (<code>reporting.builder.use</code>). Choose what to <span class="ui">Report on</span>, up to three <span class="ui">Group by</span> fields, up to six <span class="ui">Figures</span>, filters, period and chart, then <span class="ui">Run report</span> and <span class="ui">Save report</span>.</li>
 </ul>
 </section>
@@ -1279,7 +1283,7 @@ A moved lesson tells the family. A request waits for the office or the family to
 </main>
 </div>
 <footer class="site-footer">
-<p>TutorTrack user guide. Last updated 2026-10-20. Found something out of date? Update this guide in the same pull request as the change.</p>
+<p>TutorTrack user guide. Last updated 2026-10-21. Found something out of date? Update this guide in the same pull request as the change.</p>
 </footer>
 </body>
 </html>

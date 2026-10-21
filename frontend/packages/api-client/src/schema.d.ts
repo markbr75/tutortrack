@@ -26309,6 +26309,13 @@ export interface components {
       validation_regex?: string;
       active?: boolean;
     };
+    /**
+     * @description * `client` - client
+     *     * `student` - student
+     *     * `tutor` - tutor
+     * @enum {string}
+     */
+    CustomFieldEntitiesEnum: "client" | "student" | "tutor";
     CustomFieldRequest: {
       entity_type: string;
       key: string;
@@ -39289,6 +39296,8 @@ export interface components {
       category_label: string;
       description: string;
       filters: string[];
+      /** @description Records whose custom fields the custom_field filter may name. */
+      custom_field_entities: components["schemas"]["CustomFieldEntitiesEnum"][];
       group_by: components["schemas"]["Option"][];
       period: boolean;
       default_period: string;
@@ -40308,12 +40317,19 @@ export interface components {
       time: string;
       duration_minutes?: number;
     };
+    /**
+     * @description Give either a saved standard report view (``saved_report``) or a custom report
+     *     (``custom_report``, gap G5).
+     */
     ScheduledReport: {
       /** Format: uuid */
       readonly id: string;
       /** Format: uuid */
-      saved_report: string;
-      readonly saved_report_name: string;
+      saved_report?: string | null;
+      /** Format: uuid */
+      custom_report?: string | null;
+      readonly saved_report_name: string | null;
+      readonly report_name: string;
       readonly report_key: string;
       frequency: components["schemas"]["ReportFrequencyEnum"];
       weekday?: number;
@@ -40328,9 +40344,15 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    /**
+     * @description Give either a saved standard report view (``saved_report``) or a custom report
+     *     (``custom_report``, gap G5).
+     */
     ScheduledReportRequest: {
       /** Format: uuid */
-      saved_report: string;
+      saved_report?: string | null;
+      /** Format: uuid */
+      custom_report?: string | null;
       frequency: components["schemas"]["ReportFrequencyEnum"];
       weekday?: number;
       day_of_month?: number;
@@ -75778,7 +75800,7 @@ export interface operations {
         client?: string;
         /** @description Reporting currency (converted at FX rates) */
         currency?: string;
-        /** @description Client custom field, key=value */
+        /** @description Custom field filter, [entity.]key=value: entity is client (the default), student or tutor, as the report's custom_field_entities allow (e.g. student.year_group=Y10) */
         custom_field?: string;
         /** @description Start (custom period) */
         from?: string;
@@ -75825,7 +75847,7 @@ export interface operations {
         client?: string;
         /** @description Reporting currency (converted at FX rates) */
         currency?: string;
-        /** @description Client custom field, key=value */
+        /** @description Custom field filter, [entity.]key=value: entity is client (the default), student or tutor, as the report's custom_field_entities allow (e.g. student.year_group=Y10) */
         custom_field?: string;
         file_format: "csv" | "pdf" | "xlsx";
         /** @description Start (custom period) */

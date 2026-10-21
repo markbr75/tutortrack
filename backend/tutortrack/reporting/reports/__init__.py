@@ -8,7 +8,6 @@ from typing import Any
 from django.utils.translation import gettext_lazy as _
 
 from tutortrack.core.exceptions import NotFound, PermissionDenied
-from tutortrack.core.permissions import has_perm
 
 from .base import (
     Params,
@@ -32,18 +31,18 @@ __all__ = [
 
 
 def load_all() -> None:
-    from . import finance, operations, payroll, people, sales  # noqa: F401
+    from . import finance, growth, operations, payroll, people, sales  # noqa: F401
 
 
 def available(user: Any) -> list[ReportDef]:
-    return [r for r in all_reports() if has_perm(user, r.codename)]
+    return [r for r in all_reports() if r.allowed(user)]
 
 
 def find(key: str, user: Any) -> ReportDef:
     report = get(key)
     if report is None:
         raise NotFound(str(_("Unknown report.")))
-    if not has_perm(user, report.codename):
+    if not report.allowed(user):
         raise PermissionDenied(str(_("You can't run this report.")))
     return report
 

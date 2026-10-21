@@ -135,12 +135,26 @@ def delete_saved_report(user: Any, saved: SavedReport) -> None:
 # --- scheduled reports (T07) --------------------------------------------------------------------
 
 
-def _recipients(saved: SavedReport, user_ids: Iterable[Any]) -> list[Any]:
+Source = SavedReport | CustomReport
+
+
+def may_receive(user: Any, source: Source) -> bool:
+    """Whether ``user`` may see what a schedule sends: the standard report (its family
+    permission and any extra ones), or the custom report's dataset family."""
+    if isinstance(source, SavedReport):
+        report = reports.base.get(source.report_key)
+        return report is not None and report.allowed(user)
+    from . import builder
+
+    dataset = builder.datasets().get(source.dataset)
+    return dataset is not None and has_perm(user, dataset.codename)
+
+
+def _recipients(source: Source, user_ids: Iterable[Any]) -> list[Any]:
     from django.contrib.auth import get_user_model
 
     from tutortrack.identity.models import Membership
 
-    report = reports.base.get(saved.report_key)
     staff = ("owner", "admin", "branch_manager", "coordinator", "finance")
     ids = {str(u) for u in user_ids}
     if not ids:
@@ -152,7 +166,7 @@ def _recipients(saved: SavedReport, user_ids: Iterable[Any]) -> list[Any]:
         ).values_list("user_id", flat=True)
     }
     users = list(get_user_model().objects.filter(pk__in=members, is_active=True))
-    allowed = [u for u in users if report is not None and has_perm(u, report.codename)]
+    allowed = [u for u in users if may_receive(u, source)]
     if len(allowed) != len(ids):
         raise invalid(
             "recipients", _("Reports can only go to staff who are allowed to see this report.")
@@ -187,25 +201,29 @@ def _schedule_fields(fields: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
-def _check_schedule_access(user: Any, saved: SavedReport) -> None:
+def _check_schedule_access(user: Any, source: Source) -> None:
     scope = permission_scope(user, "reporting.schedule.manage")
     if scope is None or not has_perm(user, "reporting.export"):
         raise PermissionDenied(_("You can't schedule reports."))
-    if scope != "all" and saved.owner_id != user.pk:
+    if scope != "all" and source.owner_id != user.pk:
         raise PermissionDenied(_("You can only schedule your own saved reports."))
 
 
 @transaction.atomic
 def create_scheduled_report(
-    user: Any, saved: SavedReport, *, recipients: Iterable[Any], **fields: Any
+    user: Any, source: Source, *, recipients: Iterable[Any], **fields: Any
 ) -> ScheduledReport:
-    _check_schedule_access(user, saved)
+    """Schedule a saved report view or a custom report (gap G5) to be emailed."""
+    _check_schedule_access(user, source)
     values = _schedule_fields(fields)
     for name in ("frequency", "time"):
         if name not in values:
             raise invalid(name, _("This field is required."))
-    scheduled = ScheduledReport.objects.create(saved_report=saved, **values)
-    scheduled.recipients.set(_recipients(saved, recipients))
+    if isinstance(source, CustomReport):
+        scheduled = ScheduledReport.objects.create(custom_report=source, **values)
+    else:
+        scheduled = ScheduledReport.objects.create(saved_report=source, **values)
+    scheduled.recipients.set(_recipients(source, recipients))
     audit.record_create(scheduled)
     publish(
         ScheduledReportSaved(
@@ -223,14 +241,14 @@ def update_scheduled_report(
     recipients: Iterable[Any] | None = None,
     **fields: Any,
 ) -> ScheduledReport:
-    _check_schedule_access(user, scheduled.saved_report)
+    _check_schedule_access(user, scheduled.source)
     with audit.track(scheduled):
         for name, value in _schedule_fields(fields).items():
             setattr(scheduled, name, value)
         scheduled.save()
     if recipients is not None:
         before = sorted(str(u) for u in scheduled.recipients.values_list("pk", flat=True))
-        chosen = _recipients(scheduled.saved_report, recipients)
+        chosen = _recipients(scheduled.source, recipients)
         scheduled.recipients.set(chosen)
         after = sorted(str(u.pk) for u in chosen)
         if before != after:
@@ -245,7 +263,11 @@ def update_scheduled_report(
 
 @transaction.atomic
 def delete_scheduled_report(user: Any, scheduled: ScheduledReport) -> None:
-    _check_schedule_access(user, scheduled.saved_report)
+    _check_schedule_access(user, scheduled.source)
+    _remove_schedule(scheduled)
+
+
+def _remove_schedule(scheduled: ScheduledReport) -> None:
     audit.record(scheduled, "delete")
     publish(ScheduledReportDeleted(subject_id=scheduled.pk))
     scheduled.delete()
@@ -321,48 +343,67 @@ def export(user: Any, report_key: str, data: Any, fmt: str) -> tuple[str, str, b
 # --- scheduled runs (TW1) -----------------------------------------------------------------------
 
 
-def generate_scheduled_run(scheduled_id: Any, run_key: str) -> str:
-    """Run the saved report as its owner and store the file. Idempotent per ``run_key``
-    (the workflow id). Returns the run id, or "" when the schedule is gone or paused."""
-    from . import files
+def _render_scheduled(scheduled: ScheduledReport) -> tuple[str, dict[str, Any], str, bytes, int]:
+    """Run what the schedule sends as its owner: (report key, params, file name, file,
+    rows). A custom report runs its stored definition (relative periods stay relative)."""
     from .selectors import acting_as
+
+    fmt = scheduled.format
+    source = scheduled.source
+    if isinstance(source, CustomReport):
+        key = f"custom:{source.pk}"
+        with acting_as(source.owner):
+            name, content, rows, stored = _render_custom(
+                source.owner, source.definition, fmt, name=source.name, key=key
+            )
+        return key, stored, name, content, rows
+    saved: SavedReport = source
+    owner = saved.owner
+    with acting_as(owner):
+        report, params, result = reports.run(saved.report_key, owner, saved.params)
+        content = exports.render(fmt, report, params, result)
+    return (
+        report.key,
+        {**params.as_query(), "_period": params.period.as_dict()},
+        exports.filename(report, params, fmt),
+        content,
+        len(result.rows),
+    )
+
+
+def generate_scheduled_run(scheduled_id: Any, run_key: str) -> str:
+    """Run the saved report view or custom report as its owner and store the file.
+    Idempotent per ``run_key`` (the workflow id). Returns the run id, or "" when the
+    schedule is gone or paused."""
+    from . import files
 
     existing = ReportRun.objects.filter(run_key=run_key).first()
     if existing is not None and existing.status != ReportRun.Status.FAILED:
         return str(existing.pk)
     scheduled = (
-        ScheduledReport.objects.select_related("saved_report__owner")
+        ScheduledReport.objects.select_related("saved_report__owner", "custom_report__owner")
         .filter(pk=scheduled_id)
         .first()
     )
     if scheduled is None or not scheduled.enabled:
         return ""
-    saved = scheduled.saved_report
-    owner = saved.owner
-    with acting_as(owner):
-        report, params, result = reports.run(saved.report_key, owner, saved.params)
-        content = exports.render(scheduled.format, report, params, result)
+    report_key, params, filename, content, rows = _render_scheduled(scheduled)
     with transaction.atomic():
         run, _created = ReportRun.objects.update_or_create(
             run_key=run_key,
             defaults={
-                "report_key": report.key,
-                "params": {**params.as_query(), "_period": params.period.as_dict()},
+                "report_key": report_key[:60],
+                "params": params,
                 "format": scheduled.format,
                 "status": ReportRun.Status.COMPLETED,
                 "scheduled_report": scheduled,
-                "requested_by": owner,
-                "row_count": len(result.rows),
+                "requested_by": scheduled.source.owner,
+                "row_count": rows,
                 "error": "",
                 "completed_at": now(),
             },
         )
-        stored = files.save(
-            run,
-            exports.filename(report, params, scheduled.format),
-            exports.CONTENT_TYPES[scheduled.format],
-            content,
-        )
+        stored = files.save(run, filename, exports.CONTENT_TYPES[scheduled.format], content)
         run.file = stored
         run.save(update_fields=["file", "updated_at"])
         ScheduledReport.objects.filter(pk=scheduled.pk).update(last_run_at=now())
@@ -399,17 +440,24 @@ def deliver_run(run_id: Any, *, dedupe_key: str = "") -> int:
 @transaction.atomic
 def fail_run(scheduled_id: Any, run_key: str, error: str, *, dedupe_key: str = "") -> str:
     scheduled = (
-        ScheduledReport.objects.filter(pk=scheduled_id).select_related("saved_report").first()
+        ScheduledReport.objects.filter(pk=scheduled_id)
+        .select_related("saved_report__owner", "custom_report__owner")
+        .first()
     )
+    source = scheduled.source if scheduled is not None else None
+    if isinstance(source, CustomReport):
+        report_key = f"custom:{source.pk}"
+    else:
+        report_key = source.report_key if source is not None else ""
     try:
         with transaction.atomic():
             run, _created = ReportRun.objects.get_or_create(
                 run_key=run_key,
                 defaults={
-                    "report_key": scheduled.saved_report.report_key if scheduled else "",
+                    "report_key": report_key[:60],
                     "format": scheduled.format if scheduled else "csv",
                     "scheduled_report": scheduled,
-                    "requested_by": scheduled.saved_report.owner if scheduled else None,
+                    "requested_by": source.owner if source is not None else None,
                 },
             )
     except IntegrityError:  # pragma: no cover - concurrent retry
@@ -499,26 +547,22 @@ def save_custom_report(
 def delete_custom_report(user: Any, report: CustomReport) -> None:
     if report.owner_id != user.pk:
         raise PermissionDenied(_("Only the person who built this report can delete it."))
+    for scheduled in report.schedules.all():
+        _remove_schedule(scheduled)  # also stops its Temporal Schedule
     audit.record(report, "delete")
     publish(CustomReportDeleted(subject_id=report.pk, dataset=report.dataset))
     report.delete()
 
 
-@transaction.atomic
-def export_custom(
-    user: Any, definition: dict[str, Any], fmt: str, *, name: str = "", key: str = "custom"
-) -> tuple[str, str, bytes]:
-    """Run a custom report (as this user) and render CSV, Excel or PDF; recorded like
-    standard exports (a run, an ``export`` audit entry, the mass-export alert, an event)."""
+def _render_custom(
+    user: Any, definition: dict[str, Any], fmt: str, *, name: str, key: str
+) -> tuple[str, bytes, int, dict[str, Any]]:
+    """Run a custom report as ``user`` and render it: (file name, file, rows, params)."""
     import re
 
     from . import builder
     from .reports.base import Params, ReportDef
 
-    if fmt not in FORMATS:
-        raise invalid("format", _("Choose CSV, Excel or PDF."))
-    if not has_perm(user, "reporting.export"):
-        raise PermissionDenied(_("You can't export reports."))
     output = builder.run(user, definition)
     spec = output.spec
     title = name or str(spec.dataset.label)
@@ -533,18 +577,32 @@ def export_custom(
     )
     params = Params(period=spec.period or builder.periods.resolve("today"), preset=spec.preset)
     content = exports.render(fmt, report, params, output.result)
+    slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-") or "custom-report"
+    stored = {**spec.clean, "_period": spec.period.as_dict() if spec.period else {}}
+    return f"{slug}.{fmt}", content, len(output.result.rows), stored
+
+
+@transaction.atomic
+def export_custom(
+    user: Any, definition: dict[str, Any], fmt: str, *, name: str = "", key: str = "custom"
+) -> tuple[str, str, bytes]:
+    """Run a custom report (as this user) and render CSV, Excel or PDF; recorded like
+    standard exports (a run, an ``export`` audit entry, the mass-export alert, an event)."""
+    if fmt not in FORMATS:
+        raise invalid("format", _("Choose CSV, Excel or PDF."))
+    if not has_perm(user, "reporting.export"):
+        raise PermissionDenied(_("You can't export reports."))
+    filename, content, rows, params = _render_custom(user, definition, fmt, name=name, key=key)
     run = ReportRun.objects.create(
         report_key=key[:60],
-        params={**spec.clean, "_period": spec.period.as_dict() if spec.period else {}},
+        params=params,
         format=fmt,
         status=ReportRun.Status.COMPLETED,
         requested_by=user,
-        row_count=len(output.result.rows),
+        row_count=rows,
         completed_at=now(),
     )
-    rows = len(output.result.rows)
     audit.record(run, "export", {"report": key, "format": fmt, "rows": rows})
     check_mass_export(user, run.organisation_id)
     publish(ReportExported(subject_id=run.pk, report_key=key[:60], format=fmt, rows=rows))
-    slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-") or "custom-report"
-    return f"{slug}.{fmt}", exports.CONTENT_TYPES[fmt], content
+    return filename, exports.CONTENT_TYPES[fmt], content

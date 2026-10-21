@@ -18,35 +18,41 @@ def _load(pk: str) -> Any:
     from .models import ReportRun
 
     return (
-        ReportRun.objects.select_related("scheduled_report__saved_report", "file")
+        ReportRun.objects.select_related(
+            "scheduled_report__saved_report", "scheduled_report__custom_report", "file"
+        )
         .filter(pk=pk)
         .first()
     )
 
 
+def _path(run: Any) -> str:
+    """Saved views are listed on Saved reports; custom reports beside the builder."""
+    scheduled = run.scheduled_report
+    return "/analytics/builder" if scheduled and scheduled.custom_report_id else "/analytics/saved"
+
+
 def _context(run: Any) -> dict[str, Any]:
-    saved = run.scheduled_report.saved_report
+    source = run.scheduled_report.source
     period = run.params.get("_period") or {}
     return {
-        "name": saved.name,
+        "name": source.name if source is not None else "",
         "period": f"{period.get('from', '')} \N{EN DASH} {period.get('to', '')}" if period else "",
         "rows": run.row_count,
         "format": run.format.upper(),
-        "link": tenant_link("/analytics/saved"),
+        "link": tenant_link(_path(run)),
     }
 
 
 def _resolve(run: Any) -> list[Delivery]:
-    from tutortrack.core.permissions import has_perm
+    from .services import may_receive
 
-    from .reports.base import get
-
-    report = get(run.report_key)
+    source = run.scheduled_report.source
     base = {"organisation": organisation(), "report": _context(run)}
     out = []
     for user in run.scheduled_report.recipients.filter(is_active=True):
         # Recipients must still be allowed to see this kind of report.
-        if report is None or not has_perm(user, report.codename):
+        if source is None or not may_receive(user, source):
             continue
         r = user_recipient(user)
         out.append(Delivery(r, {**base, "recipient": {"name": r.name, "first_name": r.first_name}}))
@@ -91,7 +97,7 @@ register(
             },
         },
         attachments=_attachments,
-        link=lambda run: "/analytics/saved",
+        link=_path,
     )
 )
 

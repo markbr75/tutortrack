@@ -7092,5 +7092,20 @@
     "now": "Now · {{time}}",
     "waiting": "Waiting for you",
     "nothingWaiting": "Nothing waiting for you."
+  },
+  "reportingG5": {
+    "customFieldFilter": "Custom field filter",
+    "customFieldOf": "Custom field of",
+    "customField": "{{entity}} custom field",
+    "customFieldValue": "Equals",
+    "customFieldHint": "Press Enter or leave the box to apply.",
+    "entities": {
+      "client": "Client",
+      "student": "Student",
+      "tutor": "Tutor"
+    },
+    "customReport": "Custom report",
+    "scheduleNamed": "Email on a schedule: {{name}}",
+    "scheduled": "{{name}} will be emailed on its schedule. Manage it under Saved reports."
   }
 }

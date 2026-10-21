@@ -314,7 +314,14 @@ class CommandToolBox(BaseToolBox):
 # --- copilot ----------------------------------------------------------------------------------
 
 NAME_COLUMNS = {"client": "CLIENT", "tutor": "TUTOR", "student": "STUDENT", "owner": "STAFF"}
-NAME_GROUPS = {"client": "CLIENT", "tutor": "TUTOR", "student": "STUDENT", "owner": "STAFF"}
+NAME_GROUPS = {
+    "client": "CLIENT",
+    "tutor": "TUTOR",
+    "student": "STUDENT",
+    "owner": "STAFF",
+    "referrer": "CLIENT",  # G5 referral report
+    "affiliate": "PERSON",  # G5 affiliate report
+}
 
 
 def report_link(key: str, query: dict[str, Any]) -> str:

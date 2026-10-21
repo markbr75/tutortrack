@@ -544,6 +544,94 @@ function FilterSelect({
   );
 }
 
+// Gap G5: custom-field filters on clients, students or tutors (``[entity.]key=value``).
+const ENTITY_TYPES: Record<string, string> = {
+  client: "people.client",
+  student: "people.student",
+  tutor: "people.tutor",
+};
+
+function parseCustomField(raw: string, fallback: string) {
+  const [left = "", ...rest] = raw.split("=");
+  const dot = left.indexOf(".");
+  return dot < 0
+    ? { entity: raw ? "client" : fallback, key: left, value: rest.join("=") }
+    : { entity: left.slice(0, dot), key: left.slice(dot + 1), value: rest.join("=") };
+}
+
+function CustomFieldFilter({
+  entities,
+  value,
+  onChange,
+}: {
+  entities: string[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const { t } = useTranslation();
+  const initial = parseCustomField(value, entities[0] ?? "client");
+  const [entity, setEntity] = useState(
+    entities.includes(initial.entity) ? initial.entity : (entities[0] ?? "client"),
+  );
+  const [key, setKey] = useState(initial.key);
+  const [text, setText] = useState(initial.value);
+  const fields = useQuery({
+    queryKey: ["custom-fields", entity],
+    queryFn: async () =>
+      unwrap(
+        await api.GET("/api/v1/custom-fields", {
+          params: { query: { entity_type: ENTITY_TYPES[entity] ?? entity } },
+        }),
+      ),
+  });
+  const apply = (e: string, k: string, v: string) =>
+    onChange(k && v.trim() ? `${e}.${k}=${v.trim()}` : "");
+  return (
+    <fieldset className="flex flex-wrap items-end gap-3">
+      <legend className="sr-only">{t("reportingG5.customFieldFilter")}</legend>
+      {entities.length > 1 ? (
+        <SelectField
+          label={t("reportingG5.customFieldOf")}
+          value={entity}
+          onChange={(e) => {
+            setEntity(e.target.value);
+            setKey("");
+            apply(e.target.value, "", text);
+          }}
+          options={entities.map((v) => ({ value: v, label: t(`reportingG5.entities.${v}`) }))}
+        />
+      ) : null}
+      <SelectField
+        label={t("reportingG5.customField", {
+          entity: t(`reportingG5.entities.${entity}`),
+        })}
+        value={key}
+        onChange={(e) => {
+          setKey(e.target.value);
+          apply(entity, e.target.value, text);
+        }}
+        options={[
+          { value: "", label: t("reporting.all") },
+          ...(fields.data ?? [])
+            .filter((f) => f.active !== false)
+            .map((f) => ({ value: f.key, label: f.label })),
+        ]}
+      />
+      <TextField
+        label={t("reportingG5.customFieldValue")}
+        hint={t("reportingG5.customFieldHint")}
+        value={text}
+        disabled={!key}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={() => apply(entity, key, text)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") apply(entity, key, text);
+        }}
+      />
+    </fieldset>
+  );
+}
+
 export function ResultTable({
   result,
   caption,
@@ -740,6 +828,13 @@ export function ReportViewPage({ reportKey }: { reportKey: string }) {
               onChange={(v) => set({ [f]: v })}
             />
           ))}
+          {def.custom_field_entities?.length ? (
+            <CustomFieldFilter
+              entities={def.custom_field_entities}
+              value={params.custom_field ?? ""}
+              onChange={(v) => set({ custom_field: v })}
+            />
+          ) : null}
           <TextField
             label={t("reporting.currency")}
             hint={t("reporting.currencyHint")}
@@ -806,7 +901,14 @@ export function ReportViewPage({ reportKey }: { reportKey: string }) {
 
 const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
-function ScheduleForm({ saved, onDone }: { saved: Saved; onDone: () => void }) {
+/** Schedule a saved report view or (gap G5) a custom report (``kind: "custom"``). */
+export function ScheduleForm({
+  saved,
+  onDone,
+}: {
+  saved: { id: string; name: string; kind?: "saved" | "custom" };
+  onDone: () => void;
+}) {
   const { t } = useTranslation();
   const [frequency, setFrequency] = useState("weekly");
   const [weekday, setWeekday] = useState("0");
@@ -823,7 +925,7 @@ function ScheduleForm({ saved, onDone }: { saved: Saved; onDone: () => void }) {
       unwrap(
         await api.POST("/api/v1/scheduled-reports", {
           body: {
-            saved_report: saved.id,
+            ...(saved.kind === "custom" ? { custom_report: saved.id } : { saved_report: saved.id }),
             frequency: frequency as "weekly",
             weekday: Number(weekday),
             day_of_month: Number(day),
@@ -1032,7 +1134,10 @@ export function SavedReportsPage() {
           <ul className="space-y-2">
             {(scheduled.data?.results ?? []).map((s) => (
               <li key={s.id} className="flex flex-wrap items-center gap-3 text-sm">
-                <span className="font-medium">{s.saved_report_name}</span>
+                <span className="font-medium">{s.report_name}</span>
+                {s.custom_report ? (
+                  <span className="text-muted-foreground">{t("reportingG5.customReport")}</span>
+                ) : null}
                 <span>
                   {t(`reporting.frequencies.${s.frequency}`)} · {s.time} ·{" "}
                   {t(`reporting.formats.${s.format ?? "csv"}`)}
@@ -1047,7 +1152,7 @@ export function SavedReportsPage() {
                   size="sm"
                   variant="secondary"
                   onClick={() => removeScheduled.mutate(s.id)}
-                  aria-label={t("reporting.deleteSchedule", { name: s.saved_report_name })}
+                  aria-label={t("reporting.deleteSchedule", { name: s.report_name })}
                 >
                   {t("reporting.delete")}
                 </Button>

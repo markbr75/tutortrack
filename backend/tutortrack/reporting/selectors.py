@@ -102,15 +102,23 @@ def _manages_all(user: Any) -> bool:
 def scheduled_reports(user: Any) -> QuerySet[ScheduledReport]:
     if permission_scope(user, "reporting.schedule.manage") is None:
         return ScheduledReport.objects.none()
-    qs = ScheduledReport.objects.select_related("saved_report").prefetch_related("recipients")
-    return qs if _manages_all(user) else qs.filter(saved_report__owner=user)
+    qs = ScheduledReport.objects.select_related("saved_report", "custom_report").prefetch_related(
+        "recipients"
+    )
+    return qs if _manages_all(user) else qs.filter(ScheduledReport.own_scope_q(user))
 
 
 def report_runs(user: Any) -> QuerySet[ReportRun]:
-    qs = ReportRun.objects.select_related("scheduled_report__saved_report", "file")
+    qs = ReportRun.objects.select_related(
+        "scheduled_report__saved_report", "scheduled_report__custom_report", "file"
+    )
     if _manages_all(user):
         return qs
-    return qs.filter(Q(requested_by=user) | Q(scheduled_report__saved_report__owner=user))
+    return qs.filter(
+        Q(requested_by=user)
+        | Q(scheduled_report__saved_report__owner=user)
+        | Q(scheduled_report__custom_report__owner=user)
+    )
 
 
 # --- custom reports (T08) -----------------------------------------------------------------------

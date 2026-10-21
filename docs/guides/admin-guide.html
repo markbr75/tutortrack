@@ -220,7 +220,7 @@
         <h1>TutorTrack admin guide</h1>
         <p class="lead">How to set up and configure a tutoring business on TutorTrack, and how
           the TutorTrack service itself is operated.</p>
-        <p class="meta">Last updated: 2026-10-20</p>
+        <p class="meta">Last updated: 2026-10-21</p>
       </header>
 
       <section id="overview" aria-labelledby="overview-h">
@@ -526,6 +526,7 @@
           <li><span class="ui">Archive</span> removes a role from everyone who has it.</li>
           <li>A custom role is a copy: it does <strong>not</strong> get permissions added in later releases. Review your custom roles after new features ship.</li>
           <li>The only way to make someone other than the owner a Designated Safeguarding Lead is a custom role that allows <code>safeguarding.dsl</code>.</li>
+          <li>The referral, affiliate and review reports need two permissions: <code>reporting.sales.view</code> and the matching reviews and referrals one (<code>growth.referral.view</code>, <code>growth.affiliate.view</code> or <code>growth.review.view</code>), whose scope also limits the figures. Coordinators get all three reports; Finance gets the referral and affiliate reports but not <span class="ui">Review scores</span>. Scheduled reports only go to people who hold both.</li>
         </ul>
 
         <h3 id="roles-fields">Sensitive fields</h3>
@@ -2011,7 +2012,7 @@
   </div>
 
   <footer class="site-footer">
-    <p>TutorTrack admin guide · Last updated: 2026-10-20 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
+    <p>TutorTrack admin guide · Last updated: 2026-10-21 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
   </footer>
 </body>
 </html>

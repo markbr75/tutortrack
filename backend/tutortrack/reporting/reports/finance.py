@@ -89,6 +89,7 @@ register(
         ),
         run=revenue,
         filters=ALL_FILTERS,
+        custom_fields=("client", "student", "tutor"),
         group_by=("month", "week", "day", "service", "subject", "tutor", "branch", "client"),
     )
 )
@@ -125,6 +126,7 @@ register(
         description=_("Charges waiting for the next invoice run."),
         run=uninvoiced,
         filters=ALL_FILTERS,
+        custom_fields=("client", "student", "tutor"),
         group_by=("client", "month", "service", "tutor", "branch"),
         default_period="last_12_months",
         ordering="-gross",
@@ -620,6 +622,7 @@ register(
         description=_("Revenue less tutor pay by tutor, service, job or month."),
         run=margin,
         filters=ALL_FILTERS,
+        custom_fields=("client", "student", "tutor"),
         group_by=("tutor", "service", "job", "month", "branch"),
         ordering="-margin",
     )
