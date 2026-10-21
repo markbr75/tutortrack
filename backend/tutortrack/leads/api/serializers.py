@@ -20,6 +20,7 @@ from ..models import (
     PipelineStage,
     Proposal,
     WaitlistEntry,
+    WaitlistSuggestion,
 )
 
 
@@ -325,6 +326,55 @@ class WaitlistEntrySerializer(BaseModelSerializer):
 
 class OfferSerializer(serializers.Serializer):
     details = serializers.CharField(max_length=500)
+    hours = serializers.IntegerField(required=False, min_value=1, max_value=336)
+
+
+class WaitlistSuggestionSerializer(BaseModelSerializer):
+    """Gap G5c (FR-17-6): a tutor with room for a waiting student."""
+
+    student = serializers.UUIDField(source="entry.student_id", read_only=True)
+    student_name = serializers.CharField(source="entry.student.full_name", read_only=True)
+    subject = serializers.CharField(source="entry.subject", read_only=True)
+    level = serializers.CharField(source="entry.level", read_only=True)
+    tutor_name = serializers.CharField(source="tutor.full_name", read_only=True)
+    position = serializers.SerializerMethodField()
+
+    class Meta:
+        model = WaitlistSuggestion
+        fields = [
+            "id",
+            "entry",
+            "student",
+            "student_name",
+            "subject",
+            "level",
+            "position",
+            "tutor",
+            "tutor_name",
+            "reason",
+            "score",
+            "status",
+            "decided_at",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = fields
+
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
+    def get_position(self, obj: WaitlistSuggestion) -> int | None:
+        from .. import services
+
+        entry = obj.entry
+        return services.position(entry) if entry.status == WaitlistEntry.Status.WAITING else None
+
+
+class SuggestionOfferSerializer(serializers.Serializer):
+    details = serializers.CharField(
+        max_length=500,
+        required=False,
+        allow_blank=True,
+        help_text='What the family sees; defaults to "A place with <tutor>".',
+    )
     hours = serializers.IntegerField(required=False, min_value=1, max_value=336)
 
 

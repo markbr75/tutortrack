@@ -9,6 +9,7 @@ import { api, useOrganisation, usePermission } from "../api";
 import { markAssisted } from "../ai/ai";
 import { AiAssistedBadge, AiFeedback } from "../ai/AiParts";
 import { AiExplainToParent } from "../ai/AiWidgets";
+import { KeyedSettings } from "../g3/KeyedSettings";
 import { PAGE, localToIso, uploadFile, useStudentOptions } from "./hooks";
 import { Cell, Empty, FormCard, Table, TextArea } from "./shared";
 
@@ -882,6 +883,10 @@ function ProgressSection() {
   const { t, i18n } = useTranslation();
   const invalidate = useInvalidate();
   const canWrite = usePermission("learning.progress.write");
+  // Gap G5c (FR-21-6): staff who approve reports set the automatic schedule.
+  const canApprove = usePermission("learning.progress.approve");
+  const canViewSettings = usePermission("org.settings.view");
+  const canSchedule = canApprove && canViewSettings;
   const [selected, setSelected] = useState<string>("");
   const reports = useQuery({
     queryKey: ["learning", "progress"],
@@ -978,6 +983,21 @@ function ProgressSection() {
             </p>
           ) : null}
         </FormCard>
+      ) : null}
+      {canSchedule ? (
+        <section aria-labelledby="progress-schedule" className="space-y-2">
+          <h2 id="progress-schedule" className="text-base font-semibold">
+            {t("g5c.progressSchedule.title")}
+          </h2>
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            {t("g5c.progressSchedule.intro")}
+          </p>
+          <KeyedSettings
+            area="learning"
+            keys={["learning.progress_schedule"]}
+            label={t("g5c.progressSchedule.title")}
+          />
+        </section>
       ) : null}
     </div>
   );

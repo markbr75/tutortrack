@@ -9,6 +9,7 @@ import { Turnstile } from "../components/Turnstile";
 import { PublicFileField, type UploadTarget } from "../components/PublicFileField";
 import { PublicLayout } from "../layout/PublicLayout";
 import { LeadsPage } from "./LeadsPages";
+import { WaitlistSuggestions } from "./WaitlistSuggestions";
 
 type FormDef = components["schemas"]["Form"];
 
@@ -338,6 +339,7 @@ export function WaitlistPage() {
   });
   return (
     <LeadsPage title={t("leads.waitlist")}>
+      <WaitlistSuggestions />
       {entries.data && !entries.data.results.length ? (
         <p className="text-sm">{t("leads.nobodyWaiting")}</p>
       ) : null}

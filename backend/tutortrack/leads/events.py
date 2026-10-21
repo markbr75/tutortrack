@@ -99,6 +99,20 @@ class WaitlistOfferExpired(_WaitlistEvent):
 
 
 @dataclass(frozen=True, kw_only=True)
+class WaitlistSuggestionCreated(DomainEvent):
+    """A tutor now has room for a waiting student; the payload carries ids only.
+
+    Gap G5c (FR-17-6)."""
+
+    event_type: ClassVar[str] = "waitlist.suggestion_created"
+    subject_type: ClassVar[str] = "waitlist_suggestion"
+    entry_id: str
+    student_id: str
+    tutor_id: str
+    reason: str
+
+
+@dataclass(frozen=True, kw_only=True)
 class FormSubmitted(DomainEvent):
     event_type: ClassVar[str] = "form.submitted"
     subject_type: ClassVar[str] = "form_submission"

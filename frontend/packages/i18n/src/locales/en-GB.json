@@ -2271,7 +2271,9 @@
       "history": "Similar lessons taught",
       "margin": "Margin",
       "response": "Offer acceptance",
-      "fairness": "Time since last job"
+      "fairness": "Time since last job",
+      "exam_board": "Exam board",
+      "sen": "SEN experience"
     },
     "days": {
       "mon": "Mon",
@@ -7261,6 +7263,66 @@
       "subject": "Subject",
       "anySubject": "No subject",
       "passMark": "Pass mark (%)"
+    }
+  },
+  "g5c": {
+    "suggestions": {
+      "title_one": "{{count}} tutor with room",
+      "title_other": "{{count}} tutors with room",
+      "intro": "Tutors who now have room for a waiting student: their availability changed, a job ended or they can take work again. Offer the place, or dismiss the suggestion.",
+      "room": "{{tutor}} has room for {{student}}",
+      "score": "match {{score}}",
+      "details": "Offer details for {{student}}",
+      "detailsHint": "Optional: day, time and tutor. The family sees this.",
+      "offer": "Offer place",
+      "offerTo": "Offer {{student}} a place with {{tutor}}",
+      "dismiss": "Dismiss",
+      "dismissFor": "Dismiss {{tutor}} for {{student}}",
+      "reasons": {
+        "availability": "Availability changed",
+        "job_ended": "A job ended or lost its tutor",
+        "tutor_available": "Tutor available again"
+      }
+    },
+    "needs": {
+      "title": "Students' needs",
+      "intro": "Taken from the job's students. Exam boards and SEN experience add to the score; a gender preference limits the matches when your organisation allows it.",
+      "examBoards": "Exam boards",
+      "senTags": "Special educational needs",
+      "listHint": "Separate with commas.",
+      "gender": "Tutor gender preference",
+      "noPreference": "No preference",
+      "apply": "Search again",
+      "genderSetting": "Gender preferences",
+      "genderSettingHelp": "Off by default. Turn this on only where it is lawful for you to act on a family's preference for a tutor's gender. When it's on, a student's preference limits their matches."
+    },
+    "genders": {
+      "female": "Female",
+      "male": "Male",
+      "non_binary": "Non-binary"
+    },
+    "profile": {
+      "title": "Matching profile",
+      "studentTitle": "Needs for matching",
+      "senExperience": "SEN experience",
+      "gender": "Gender",
+      "genderHint": "Only used when families may state a gender preference.",
+      "notRecorded": "Not recorded",
+      "none": "None recorded",
+      "edit": "Edit"
+    },
+    "progressSchedule": {
+      "title": "Draft reports automatically",
+      "intro": "Draft progress reports on a schedule: monthly on the 1st for last month, or termly the day after each term ends. Each student's main tutor is asked to add comments; approval and sharing work as usual."
+    },
+    "classroom": {
+      "open": "Open",
+      "openResource": "Open {{title}}",
+      "none": "Nothing has been shared with this lesson yet.",
+      "share": "Share into the room",
+      "choose": "Resource",
+      "pick": "Choose a resource",
+      "message": "Message (optional)"
     }
   }
 }

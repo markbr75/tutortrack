@@ -280,8 +280,8 @@
 <h5 id="record-pages">The record pages</h5>
 <ul>
 <li><strong>Client:</strong> <span class="ui">Contacts</span> (with <span class="ui">Invite to portal</span> for each contact with an email), <span class="ui">Students</span>, billing facts and, with billing access, the client's balances, invoices, payments, packages and payment methods (see <a href="#client-billing">billing on the client record</a>).</li>
-<li><strong>Student:</strong> details (year group, school, date of birth, subjects, goals, learning needs), <span class="ui">Change status</span>, the student's jobs with <span class="ui">Set up lessons</span>, and privacy and safeguarding information.</li>
-<li><strong>Tutor:</strong> details, pay rate, how they teach, <span class="ui">Subjects</span> (approve new subjects with <span class="ui">Approve</span>), pay profile, compliance and background checks, and <span class="ui">Change status</span>.</li>
+<li><strong>Student:</strong> details (year group, school, date of birth, subjects, goals, learning needs), <span class="ui">Needs for matching</span> (exam boards and, for staff who may see sensitive details, special educational needs and the family's tutor gender preference when your organisation allows it; <span class="ui">Edit</span> to change them), <span class="ui">Change status</span>, the student's jobs with <span class="ui">Set up lessons</span>, and privacy and safeguarding information.</li>
+<li><strong>Tutor:</strong> details, pay rate, how they teach, <span class="ui">Subjects</span> (approve new subjects with <span class="ui">Approve</span>), <span class="ui">Matching profile</span> (<span class="ui">SEN experience</span>, <span class="ui">Exam boards</span> and, with <code>people.tutor.view_sensitive</code>, <span class="ui">Gender</span>, which is only used for families' gender preferences), pay profile, compliance and background checks, and <span class="ui">Change status</span>.</li>
 </ul>
 <p>Every record (and every job) has an <span class="ui">Activity</span> panel:</p>
 <ul>
@@ -427,6 +427,7 @@
 <section id="matching" data-route="admin:/matching" aria-labelledby="matching-h">
 <h4 id="matching-h">Matching, offers and cover</h4>
 <p>To find a tutor for a job, open the job and select <span class="ui">Find a tutor</span>. TutorTrack ranks tutors by availability, distance, rating, experience, spare capacity, similar lessons taught, margin, offer acceptance and time since their last job. Open <span class="ui">Score breakdown</span> to see why a tutor ranks where they do. Restricted and unapproved tutors are hidden unless you tick <span class="ui">Include restricted and unapproved tutors</span>, and they can't be offered the job.</p>
+<p><strong>Students' needs.</strong> The <span class="ui">Students' needs</span> panel shows the <span class="ui">Exam boards</span> and <span class="ui">Special educational needs</span> recorded on the job's students. Tutors who teach one of the boards and have experience of those needs score higher (<span class="ui">Exam board</span> and <span class="ui">SEN experience</span> in the breakdown). If your organisation allows gender preferences, a student's <span class="ui">Tutor gender preference</span> limits the matches. Change any of them and select <span class="ui">Search again</span> to try a different search; the students' records don't change. SEN tags and gender preferences are only shown to staff who may see students' sensitive details.</p>
 <ol class="steps">
 <li>Select <span class="ui">Shortlist</span> on suitable tutors.</li>
 <li>Choose how to reach them:
@@ -441,7 +442,7 @@
 <ul>
 <li><span class="ui">Cover requests</span>: lessons that need a stand-in, created when time off is approved or by tutors. <span class="ui">Who's free</span> lists suitable tutors; select <span class="ui">Give them the cover</span>. Tutors can also take cover themselves in the tutor app.</li>
 <li><span class="ui">Analytics</span>: time to match, offer acceptance and unmatched demand by subject and area over 90 days.</li>
-<li><span class="ui">Weights</span>: how much each ranking factor counts (admins).</li>
+<li><span class="ui">Weights</span>: how much each ranking factor counts, including <span class="ui">Exam board</span> and <span class="ui">SEN experience</span> (which only count when a search asks for them), and whether families may state a <span class="ui">Gender preferences</span> (admins; see the <a href="admin-guide.html">admin guide</a>).</li>
 </ul>
 <p>You can also ask the <a href="#ai">AI command bar</a> to find tutors.</p>
 </section>
@@ -525,7 +526,7 @@
 </tbody>
 </table>
 </div>
-<p>Progress reports are generated when you select <span class="ui">Generate drafts</span>; they are not created on a schedule.</p>
+<p>Progress reports are generated when you select <span class="ui">Generate drafts</span>, or on a schedule: under <span class="path">Learning › Progress reports › Draft reports automatically</span>, choose <span class="ui">Every month</span> (last month's reports are drafted on the 1st) or <span class="ui">At the end of each term</span> (drafted the day after a term set up under Classes ends). Each student with lessons in the period gets a draft for their main tutor (the one who taught most of their lessons), who is told to add comments; staff who approve reports get a summary. Reports that already exist are never touched. You need <code>learning.progress.approve</code> and access to settings to change the schedule.</p>
 </section>
 
 <h3 id="money-group">Money</h3>
@@ -633,6 +634,7 @@
 </ul>
 <p><strong>Proposals.</strong> <span class="ui">New proposal</span> builds a priced offer with an introduction, schedule, price lines, suggested tutors and an optional deposit. <span class="ui">Send</span> emails it with a PDF; the family reads it on a web page, chooses a tutor and accepts (paying any deposit) or declines. Accepting converts the enquiry and offers the job to the chosen tutor. Sent proposals can't be edited; <span class="ui">Withdraw</span> it and send a new one.</p>
 <p><strong>Waitlist.</strong> Students waiting for a place, in order. Describe the slot under <span class="ui">Offer (day, time, tutor)</span> and select <span class="ui">Offer place</span>. The family gets a time-limited link to accept or decline.</p>
+<p><strong>Tutors with room.</strong> When a tutor's capacity appears (they add availability, a job of theirs ends or loses them, or they can take work again), TutorTrack checks the waiting students they could teach: an approved subject, the right branch, not excluded by the family, below their weekly hours and with a free hour in the next two weeks. Matches are listed above the queue as "<em>tutor</em> has room for <em>student</em>", with the reason and the match score, and you get one notice per tutor (<code>leads.waitlist.manage</code>). Select <span class="ui">Offer place</span> to send the family the offer link (the details default to "A place with <em>tutor</em>"); the student's other suggestions close. <span class="ui">Dismiss</span> means that tutor won't be suggested for that student again.</p>
 <p><strong>Forms.</strong> <span class="ui">New form</span> creates an enquiry form for your website. Edit its fields (each can save to a record field or record consent), tick <span class="ui">Published</span> and use <span class="ui">Open form</span> to get its address.</p>
 <p><strong>File uploads.</strong> Add a field of type <span class="ui">file</span> and choose <span class="ui">Files allowed</span>: <span class="ui">Documents and photos</span> (PDF, Word or a photo, up to 10 MB), <span class="ui">CV (PDF or Word)</span> or <span class="ui">Video</span> (MP4, MOV or WebM, up to 100 MB). Tick <span class="ui">More than one file</span> to allow up to five. Families upload on your form's page; the files appear under <span class="ui">Files sent with the enquiry</span> on the enquiry and open once they have been checked for viruses. Files on a form embedded on your website open your full form instead.</p>
 <p><strong>Reports.</strong> Enquiries, win rate and first-response time, by stage and by source.</p>
@@ -1113,6 +1115,8 @@ A moved lesson tells the family. A request waits for the office or the family to
 <li>The built-in room (and Lessonspace) opens inside the page; allow the camera and microphone. Zoom, Microsoft Teams and Google Meet lessons open in their own app with <span class="ui">Join the lesson</span>.</li>
 <li>If the lesson is recorded, you are told. If your consent is needed, select <span class="ui">I agree to recording</span>.</li>
 <li>Before the start you see when the room opens; the page refreshes by itself.</li>
+<li><span class="ui">Resources for this lesson</span> lists what was shared with the lesson, the job or your child. Select <span class="ui">Open</span> next to one to open it in a new tab. While the room is open the list refreshes every few seconds, so something shared during the lesson appears straight away.</li>
+<li>Tutors can put one of their resources into the room: choose it under <span class="ui">Resource</span>, add a <span class="ui">Message (optional)</span> and select <span class="ui">Share into the room</span>. Families also get a notice that links to the classroom.</li>
 </ul>
 <p><span class="ui">Recordings</span> lists lesson recordings shared with you. Select <span class="ui">Watch</span> to play one.</p>
 </section>

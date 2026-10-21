@@ -14,6 +14,9 @@ DEFAULT_WEIGHTS = {
     "margin": 5,
     "response": 5,
     "fairness": 5,
+    # Gap G5c: only count when a search asks for exam boards or SEN experience.
+    "exam_board": 10,
+    "sen": 10,
 }
 
 register(
@@ -67,6 +70,17 @@ register(
     min_value=1,
     max_value=100,
     label=_("Tutors told about each cover request"),
+)
+
+register(
+    "matching.gender_preference",
+    type="bool",
+    default=False,
+    label=_("Let families state a tutor gender preference for matching"),
+    help_text=_(
+        "Off by default. Turn it on only where it is lawful for you to act on it. When on, "
+        "a student's preference limits matches to tutors of that gender."
+    ),
 )
 
 register(

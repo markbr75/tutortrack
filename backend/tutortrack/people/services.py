@@ -245,8 +245,35 @@ def update_contact(contact: Contact, **changes: Any) -> Contact:
 STUDENT_FIELDS = {
     "first_name", "last_name", "preferred_name", "date_of_birth", "year_group", "school",
     "subjects", "goals", "learning_needs", "exam_boards", "target_grades", "availability",
-    "branch", "branch_id",
+    "branch", "branch_id", "sen_tags", "tutor_gender_preference",
 }  # fmt: skip
+TAG_LISTS = ("sen_tags", "exam_boards")  # gap G5c: matching tags on students and tutors
+MAX_TAGS = 20
+
+
+def clean_tags(value: Any) -> list[str]:
+    """A list of short labels (SEN tags, exam boards): trimmed, without blanks or
+    duplicates (ignoring case), first spelling kept."""
+    if value in (None, ""):
+        return []
+    if not isinstance(value, list | tuple):
+        raise BusinessRuleViolation(_("Tags must be a list."))
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in value:
+        label = str(item).strip()[:60]
+        if label and label.casefold() not in seen:
+            seen.add(label.casefold())
+            out.append(label)
+    if len(out) > MAX_TAGS:
+        raise BusinessRuleViolation(_("Use at most %(n)s tags.") % {"n": MAX_TAGS})
+    return out
+
+
+def _clean_tag_fields(fields: dict[str, Any]) -> None:
+    for key in TAG_LISTS:
+        if key in fields:
+            fields[key] = clean_tags(fields[key])
 
 
 def _validate_subjects(value: Any) -> list[dict[str, str]]:
@@ -283,6 +310,7 @@ def create_student(
         raise BusinessRuleViolation(_("The client is archived."))
     if "subjects" in fields:
         fields["subjects"] = _validate_subjects(fields["subjects"])
+    _clean_tag_fields(fields)
     fields.setdefault("branch_id", client.branch_id)
     if status in ACTIVE_STUDENT_STATUSES:
         _check_student_capacity()
@@ -309,6 +337,7 @@ def update_student(student: Student, **changes: Any) -> Student:
         change_student_status(student, changes.pop("status"))
     if "subjects" in changes:
         changes["subjects"] = _validate_subjects(changes["subjects"])
+    _clean_tag_fields(changes)
     _apply(
         student, changes, STUDENT_FIELDS, entity_type="people.student", event=events.StudentUpdated
     )
@@ -379,7 +408,7 @@ TUTOR_FIELDS = {
     "bio_private", "languages", "years_experience", "employment_type", "pay_rate_amount",
     "travel_radius_km", "delivers_online", "delivers_in_person", "max_weekly_hours",
     "min_lesson_minutes", "public_profile", "tax_reference", "date_of_birth",
-    "emergency_contact",
+    "emergency_contact", "gender", "sen_tags", "exam_boards",
 }  # fmt: skip
 
 
@@ -393,6 +422,7 @@ def create_tutor(
     unknown = set(fields) - TUTOR_FIELDS
     if unknown:
         raise BusinessRuleViolation(f"Unknown tutor fields: {', '.join(sorted(unknown))}")
+    _clean_tag_fields(fields)
     email = email.strip().lower()
     if TutorProfile.objects.filter(email=email).exists():
         raise BusinessRuleViolation(
@@ -455,6 +485,7 @@ def update_tutor(tutor: TutorProfile, **changes: Any) -> TutorProfile:
         tutor.branches.set(list(changes.pop("branches")))
     if "status" in changes:
         change_tutor_status(tutor, changes.pop("status"))
+    _clean_tag_fields(changes)
     _apply(tutor, changes, TUTOR_FIELDS, entity_type="people.tutor", event=events.TutorUpdated)
     return tutor
 

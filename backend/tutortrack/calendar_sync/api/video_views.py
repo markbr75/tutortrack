@@ -81,6 +81,17 @@ class RecordingLinkSerializer(serializers.Serializer):
 class ClassroomResourceSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     title = serializers.CharField()
+    # Gap G5c (FR-21-8): enough to open it in the room.
+    kind = serializers.ChoiceField(choices=["file", "link"])
+    media_type = serializers.CharField()
+    message = serializers.CharField(allow_blank=True)
+    shared_at = serializers.DateTimeField()
+
+
+class ClassroomResourceOpenSerializer(serializers.Serializer):
+    url = serializers.CharField()
+    expires_in = serializers.IntegerField(allow_null=True)
+    kind = serializers.CharField()
 
 
 class ClassroomSerializer(serializers.Serializer):
@@ -255,6 +266,34 @@ class ClassroomView(APIView):
     def get(self, request: Request, pk: str) -> Response:
         lesson = get_object_or_404(Lesson.objects.all(), pk=pk)
         return Response(ClassroomSerializer(video.classroom(lesson, user=request.user)).data)
+
+
+class ClassroomResourceOpenView(APIView):
+    """``POST /lessons/{id}/classroom/resources/{resource_id}/open`` (gap G5c, FR-21-8):
+    open a resource shared into the lesson's classroom, for anyone in the classroom (the
+    lesson's tutor, its families, staff). Returns a short-lived link for files, the link
+    itself otherwise, and records the view."""
+
+    permission_classes = AUTH
+
+    @extend_schema(
+        request=None,
+        responses=ClassroomResourceOpenSerializer,
+        examples=[
+            OpenApiExample(
+                "A shared link",
+                value={"url": "https://example.com/fractions", "expires_in": None, "kind": "link"},
+                response_only=True,
+            )
+        ],
+    )
+    def post(self, request: Request, pk: str, resource_id: str) -> Response:
+        lesson = get_object_or_404(Lesson.objects.all(), pk=pk)
+        return Response(
+            ClassroomResourceOpenSerializer(
+                video.open_classroom_resource(lesson, resource_id, user=request.user)
+            ).data
+        )
 
 
 class ClassroomConsentView(APIView):

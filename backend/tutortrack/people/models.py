@@ -222,6 +222,13 @@ class Contact(NoOwnScopeMixin, TenantModel, CustomisableModel):
         return f"{self.first_name} {self.last_name}".strip()
 
 
+TUTOR_GENDERS = (
+    ("female", _("Female")),
+    ("male", _("Male")),
+    ("non_binary", _("Non-binary")),
+)
+
+
 class Student(NoOwnScopeMixin, BranchScopedModel, CustomisableModel):
     own_scope_path = "job_links__job"
 
@@ -247,7 +254,14 @@ class Student(NoOwnScopeMixin, BranchScopedModel, CustomisableModel):
     subjects = models.JSONField(default=list, blank=True)
     goals = models.TextField(blank=True, default="")
     learning_needs = EncryptedField(blank=True, default="")  # SEN / medical: encrypted
-    exam_boards = models.JSONField(default=list, blank=True)
+    exam_boards = models.JSONField(default=list, blank=True)  # ["AQA"] (E19 matching)
+    # Gap G5c (FR-19-1): special educational needs tags for matching (["dyslexia"]) and
+    # the family's tutor gender preference (used only with ``matching.gender_preference``).
+    # Both are sensitive: ``people.student.view_sensitive`` and audit-redacted.
+    sen_tags = models.JSONField(default=list, blank=True)
+    tutor_gender_preference = models.CharField(
+        max_length=20, choices=TUTOR_GENDERS, blank=True, default=""
+    )
     target_grades = models.JSONField(default=dict, blank=True)
     availability = models.JSONField(default=dict, blank=True)
     lesson_address = models.ForeignKey(
@@ -273,7 +287,7 @@ class Student(NoOwnScopeMixin, BranchScopedModel, CustomisableModel):
     merged_at = models.DateTimeField(null=True, blank=True)
 
     audit_sensitive_fields: ClassVar[frozenset[str]] = frozenset(
-        {"learning_needs", "date_of_birth"}
+        {"learning_needs", "date_of_birth", "sen_tags", "tutor_gender_preference"}
     )
 
     class Meta(BranchScopedModel.Meta):
@@ -343,10 +357,16 @@ class TutorProfile(TenantModel, CustomisableModel):
     tax_reference = EncryptedField(blank=True, default="")  # UTR / SSN last 4 / ABN
     date_of_birth = models.DateField(null=True, blank=True)
     emergency_contact = models.JSONField(default=dict, blank=True)
+    # Gap G5c (FR-19-1) matching profile: gender (sensitive, ``people.tutor.view_sensitive``;
+    # only used when the organisation turns on gender preferences), SEN experience tags and
+    # the exam boards the tutor teaches.
+    gender = models.CharField(max_length=20, choices=TUTOR_GENDERS, blank=True, default="")
+    sen_tags = models.JSONField(default=list, blank=True)
+    exam_boards = models.JSONField(default=list, blank=True)
     archived_at = models.DateTimeField(null=True, blank=True, db_index=True)
 
     audit_sensitive_fields: ClassVar[frozenset[str]] = frozenset(
-        {"tax_reference", "date_of_birth", "pay_rate_amount"}
+        {"tax_reference", "date_of_birth", "pay_rate_amount", "gender"}
     )
 
     class Meta(TenantModel.Meta):

@@ -11473,6 +11473,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/lessons/{id}/classroom/resources/{resource_id}/open": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description ``POST /lessons/{id}/classroom/resources/{resource_id}/open`` (gap G5c, FR-21-8):
+     *     open a resource shared into the lesson's classroom, for anyone in the classroom (the
+     *     lesson's tutor, its families, staff). Returns a short-lived link for files, the link
+     *     itself otherwise, and records the view.
+     */
+    post: operations["lessons_classroom_resources_open_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/lessons/{id}/complete": {
     parameters: {
       query?: never;
@@ -21686,6 +21708,80 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/waitlist-suggestions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Gap G5c (FR-17-6): tutors who now have room for waiting students, raised when
+     *     capacity appears. Offer the place from a suggestion, or dismiss it.
+     */
+    get: operations["waitlist_suggestions_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/waitlist-suggestions/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Gap G5c (FR-17-6): tutors who now have room for waiting students, raised when
+     *     capacity appears. Offer the place from a suggestion, or dismiss it.
+     */
+    get: operations["waitlist_suggestions_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/waitlist-suggestions/{id}/dismiss": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Not this tutor: the suggestion isn't raised again. */
+    post: operations["waitlist_suggestions_dismiss_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/waitlist-suggestions/{id}/offer": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Send the waiting family the time-limited offer link (E17) for this tutor. */
+    post: operations["waitlist_suggestions_offer_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/waitlist/{id}": {
     parameters: {
       query?: never;
@@ -25438,6 +25534,22 @@ export interface components {
       /** Format: uuid */
       id: string;
       title: string;
+      kind: components["schemas"]["ClassroomResourceKindEnum"];
+      media_type: string;
+      message: string;
+      /** Format: date-time */
+      shared_at: string;
+    };
+    /**
+     * @description * `file` - file
+     *     * `link` - link
+     * @enum {string}
+     */
+    ClassroomResourceKindEnum: "file" | "link";
+    ClassroomResourceOpen: {
+      url: string;
+      expires_in: number | null;
+      kind: string;
     };
     /**
      * @description * `tutor` - tutor
@@ -31228,6 +31340,16 @@ export interface components {
      * @enum {string}
      */
     MatchModeEnum: "online" | "in_person" | "either";
+    /**
+     * @description The students' needs the search used (gap G5c). SEN tags and the gender preference
+     *     are empty for viewers without ``people.student.view_sensitive``.
+     */
+    MatchNeeds: {
+      exam_boards: string[];
+      sen_tags: string[];
+      gender: string;
+      gender_preference_enabled: boolean;
+    };
     MatchRow: {
       rank: number;
       tutor: components["schemas"]["MatchTutor"];
@@ -31267,6 +31389,22 @@ export interface components {
       /** Format: decimal */
       max_pay_rate?: string | null;
       requirements?: string[];
+      exam_boards?: string[] | null;
+      sen_tags?: string[] | null;
+      /**
+       * @description Tutor gender preference; ignored unless matching.gender_preference is on.
+       *
+       *     * `female` - Female
+       *     * `male` - Male
+       *     * `non_binary` - Non-binary
+       */
+      gender?:
+        | (
+            | components["schemas"]["TutorGenderEnum"]
+            | components["schemas"]["BlankEnum"]
+            | components["schemas"]["NullEnum"]
+          )
+        | null;
       /** @default false */
       include_restricted: boolean;
       /** @default 50 */
@@ -31278,6 +31416,7 @@ export interface components {
       criteria: {
         [key: string]: unknown;
       };
+      needs: components["schemas"]["MatchNeeds"];
       origin: components["schemas"]["Point"] | null;
       results: components["schemas"]["MatchRow"][];
     };
@@ -31304,6 +31443,8 @@ export interface components {
       weights: {
         [key: string]: number;
       };
+      /** @description Whether matching.gender_preference is on (gap G5c). */
+      readonly gender_preference: boolean;
     };
     MatchingWeightsRequest: {
       weights: {
@@ -34567,6 +34708,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["WaitlistEntry"][];
     };
+    PaginatedWaitlistSuggestionList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["WaitlistSuggestion"][];
+    };
     PaginatedWarehouseDestinationList: {
       /**
        * Format: uri
@@ -35942,6 +36096,10 @@ export interface components {
       availability?: unknown;
       lesson_address_input?: components["schemas"]["AddressInputRequest"];
       custom_fields?: unknown;
+      /** @description Special educational needs tags used by matching (sensitive). */
+      sen_tags?: string[];
+      tutor_gender_preference?:
+        components["schemas"]["TutorGenderEnum"] | components["schemas"]["BlankEnum"];
     };
     PatchedSubjectRequest: {
       name?: string;
@@ -36044,6 +36202,11 @@ export interface components {
       custom_fields?: unknown;
       /** @default true */
       invite: boolean;
+      gender?: components["schemas"]["TutorGenderEnum"] | components["schemas"]["BlankEnum"];
+      /** @description Special educational needs the tutor has experience with (matching). */
+      sen_tags?: string[];
+      /** @description Exam boards the tutor teaches (matching). */
+      exam_boards?: string[];
     };
     PatchedUpdateConcernRequest: {
       status?: components["schemas"]["SafeguardingStatusEnum"];
@@ -41991,6 +42154,10 @@ export interface components {
       readonly hours_this_term: string | null;
       /** Format: uuid */
       readonly merged_into: string | null;
+      /** @description Special educational needs tags used by matching (sensitive). */
+      sen_tags?: string[];
+      tutor_gender_preference?:
+        components["schemas"]["TutorGenderEnum"] | components["schemas"]["BlankEnum"];
     };
     StudentHistory: {
       student: {
@@ -42089,6 +42256,10 @@ export interface components {
       availability?: unknown;
       lesson_address_input?: components["schemas"]["AddressInputRequest"];
       custom_fields?: unknown;
+      /** @description Special educational needs tags used by matching (sensitive). */
+      sen_tags?: string[];
+      tutor_gender_preference?:
+        components["schemas"]["TutorGenderEnum"] | components["schemas"]["BlankEnum"];
     };
     StudentSignInRequest: {
       username: string;
@@ -42296,6 +42467,11 @@ export interface components {
      * @enum {string}
      */
     SubscriptionStatusEnum: "trialing" | "active" | "past_due" | "suspended" | "cancelled";
+    SuggestionOfferRequest: {
+      /** @description What the family sees; defaults to "A place with <tutor>". */
+      details?: string;
+      hours?: number;
+    };
     SummaryTotals: {
       currency: string;
       earned: components["schemas"]["MoneyOut"];
@@ -43414,6 +43590,11 @@ export interface components {
        * @description Booked time this month as a % of weekly availability.
        */
       readonly utilisation: string | null;
+      gender?: components["schemas"]["TutorGenderEnum"] | components["schemas"]["BlankEnum"];
+      /** @description Special educational needs the tutor has experience with (matching). */
+      sen_tags?: string[];
+      /** @description Exam boards the tutor teaches (matching). */
+      exam_boards?: string[];
     };
     TutorCompliance: {
       restricted: boolean;
@@ -43453,6 +43634,13 @@ export interface components {
      * @enum {string}
      */
     TutorEmploymentTypeEnum: "self_employed" | "employee" | "other";
+    /**
+     * @description * `female` - Female
+     *     * `male` - Male
+     *     * `non_binary` - Non-binary
+     * @enum {string}
+     */
+    TutorGenderEnum: "female" | "male" | "non_binary";
     TutorInput: {
       /** Format: uuid */
       tutor: string;
@@ -43781,6 +43969,11 @@ export interface components {
       custom_fields?: unknown;
       /** @default true */
       invite: boolean;
+      gender?: components["schemas"]["TutorGenderEnum"] | components["schemas"]["BlankEnum"];
+      /** @description Special educational needs the tutor has experience with (matching). */
+      sen_tags?: string[];
+      /** @description Exam boards the tutor teaches (matching). */
+      exam_boards?: string[];
     };
     TutorReviewFlagRequest: {
       comment: string;
@@ -44077,6 +44270,47 @@ export interface components {
      * @enum {string}
      */
     WaitlistStatusEnum: "waiting" | "offered" | "accepted" | "declined" | "expired" | "removed";
+    /** @description Gap G5c (FR-17-6): a tutor with room for a waiting student. */
+    WaitlistSuggestion: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly entry: string;
+      /** Format: uuid */
+      readonly student: string;
+      readonly student_name: string;
+      readonly subject: string;
+      readonly level: string;
+      readonly position: number | null;
+      /** Format: uuid */
+      readonly tutor: string;
+      readonly tutor_name: string;
+      readonly reason: components["schemas"]["WaitlistSuggestionReasonEnum"];
+      /** Format: decimal */
+      readonly score: string | null;
+      readonly status: components["schemas"]["WaitlistSuggestionStatusEnum"];
+      /** Format: date-time */
+      readonly decided_at: string | null;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    /**
+     * @description * `availability` - Availability changed
+     *     * `job_ended` - A job ended or lost its tutor
+     *     * `tutor_available` - Tutor available again
+     * @enum {string}
+     */
+    WaitlistSuggestionReasonEnum: "availability" | "job_ended" | "tutor_available";
+    /**
+     * @description * `open` - Open
+     *     * `offered` - Place offered
+     *     * `dismissed` - Dismissed
+     *     * `closed` - No longer waiting
+     * @enum {string}
+     */
+    WaitlistSuggestionStatusEnum: "open" | "offered" | "dismissed" | "closed";
     WaiveRequest: {
       reason: string;
     };
@@ -65666,6 +65900,31 @@ export interface operations {
       };
     };
   };
+  lessons_classroom_resources_open_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+        resource_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ClassroomResourceOpen"];
+        };
+      };
+    };
+  };
   lessons_complete_create: {
     parameters: {
       query?: never;
@@ -83486,6 +83745,119 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["WaitlistEntry"];
+        };
+      };
+    };
+  };
+  waitlist_suggestions_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description One waitlist entry */
+        entry?: string;
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        /** @description open (default), offered, ... or all */
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedWaitlistSuggestionList"];
+        };
+      };
+    };
+  };
+  waitlist_suggestions_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this waitlist suggestion. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WaitlistSuggestion"];
+        };
+      };
+    };
+  };
+  waitlist_suggestions_dismiss_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this waitlist suggestion. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WaitlistSuggestion"];
+        };
+      };
+    };
+  };
+  waitlist_suggestions_offer_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this waitlist suggestion. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["SuggestionOfferRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["SuggestionOfferRequest"];
+        "multipart/form-data": components["schemas"]["SuggestionOfferRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WaitlistSuggestion"];
         };
       };
     };

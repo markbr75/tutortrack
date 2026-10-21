@@ -924,6 +924,9 @@ def offer_place(entry: WaitlistEntry, *, details: str, hours: int | None = None)
         entry.offered_at = now()
         entry.offer_expires_at = now() + timedelta(hours=hours)
         entry.save()
+    from .suggestions import close_for_entry
+
+    close_for_entry(entry)  # gap G5c: open suggestions for this student are done
     publish(
         events.WaitlistPlaceOffered(
             subject_id=entry.pk,
@@ -1011,6 +1014,9 @@ def remove_from_waitlist(entry: WaitlistEntry) -> WaitlistEntry:
     with audit.track(entry, action="remove"):
         entry.status = WaitlistEntry.Status.REMOVED
         entry.save(update_fields=["status", "updated_at"])
+    from .suggestions import close_for_entry
+
+    close_for_entry(entry)
     return entry
 
 

@@ -15,6 +15,7 @@ import { InviteButton } from "../portal/InviteButton";
 import { RecordActivity } from "../crm/Activity";
 import { StudentJobs } from "../jobs/StudentJobs";
 import { StudentPrivacyPanel } from "../safeguarding/SafeguardingPages";
+import { StudentMatchingCard, TutorMatchingCard } from "./MatchingProfileCard";
 import { STUDENT_STATUSES, TUTOR_STATUSES } from "./statuses";
 
 const linkClass = "font-medium underline-offset-2 hover:underline";
@@ -301,6 +302,7 @@ export function StudentPage({ studentId }: { studentId: string }) {
             ]}
           />
         </Card>
+        <StudentMatchingCard student={s} />
         {canEdit ? (
           <Card title={t("people.changeStatus")}>
             <StatusChanger
@@ -419,6 +421,7 @@ export function TutorPage({ tutorId }: { tutorId: string }) {
             ))}
           </ul>
         </Card>
+        <TutorMatchingCard tutor={p} />
         {canEdit ? (
           <Card title={t("people.changeStatus")}>
             <StatusChanger

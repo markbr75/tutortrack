@@ -10,6 +10,9 @@ router.register("assignment-rules", views.AssignmentRuleViewSet, basename="assig
 router.register("forms", views.FormViewSet, basename="forms")
 router.register("form-submissions", views.FormSubmissionViewSet, basename="form-submissions")
 router.register("waitlist", views.WaitlistViewSet, basename="waitlist")
+router.register(
+    "waitlist-suggestions", views.WaitlistSuggestionViewSet, basename="waitlist-suggestions"
+)
 router.register("proposals", views.ProposalViewSet, basename="proposals")
 
 urlpatterns = [

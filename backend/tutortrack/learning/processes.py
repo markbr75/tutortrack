@@ -15,6 +15,11 @@
 
 Both workflows only orchestrate: every decision that depends on data is made by an
 activity calling the services (idempotent: reminders and overdue marks happen once).
+
+* ``ProgressReportRunWorkflow`` (gap G5c, FR-21-6): started by the organisation's
+  progress-report **Temporal Schedule** (``learning.progress_schedule``, monthly or
+  termly; see ``learning.progress_schedule``). Plans the periods due, drafts the missing
+  reports in batches, then tells the authors and staff (once per period).
 """
 
 from __future__ import annotations
@@ -36,6 +41,8 @@ from tutortrack.core.workflows.links import report_step
 TIMEOUT = timedelta(minutes=5)
 HOMEWORK_PROCESS = "homework"
 LOAN_PROCESS = "loan"
+PROGRESS_RUN_PROCESS = "progress-reports"
+PROGRESS_BATCH = 25
 MAX_ROUNDS = 200
 
 
@@ -55,6 +62,26 @@ class AssignmentInput(WorkflowInput):
 @dataclass(frozen=True, kw_only=True)
 class LoanInput(WorkflowInput):
     loan_id: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class ProgressRunInput(WorkflowInput):
+    on: str = ""  # ISO date to plan for (tests, manual runs); empty = today, org time
+
+
+@dataclass(frozen=True, kw_only=True)
+class ProgressBatchInput(WorkflowInput):
+    period: str
+    start: str  # ISO date
+    end: str
+    student_ids: list[str]
+
+
+@dataclass(frozen=True, kw_only=True)
+class ProgressPeriodInput(WorkflowInput):
+    period: str
+    start: str
+    end: str
 
 
 # --- activities ---------------------------------------------------------------------------------
@@ -111,6 +138,40 @@ def loan_notice(input: LoanInput) -> bool:
     from . import services
 
     return services.send_overdue_notice(input.loan_id)
+
+
+@tenant_activity
+def plan_progress_reports(input: ProgressRunInput) -> list[dict[str, Any]]:
+    from datetime import date
+
+    from . import progress_schedule
+
+    return progress_schedule.plan(date.fromisoformat(input.on) if input.on else None)
+
+
+@tenant_activity
+def draft_progress_batch(input: ProgressBatchInput) -> int:
+    from datetime import date
+
+    from . import progress_schedule
+
+    return progress_schedule.draft(
+        input.period,
+        date.fromisoformat(input.start),
+        date.fromisoformat(input.end),
+        input.student_ids,
+    )
+
+
+@tenant_activity
+def announce_progress_drafts(input: ProgressPeriodInput) -> int:
+    from datetime import date
+
+    from . import progress_schedule
+
+    return progress_schedule.announce(
+        input.period, date.fromisoformat(input.start), date.fromisoformat(input.end)
+    )
 
 
 # --- workflows ----------------------------------------------------------------------------------
@@ -238,3 +299,56 @@ class LoanReminderWorkflow(_Waits):
                 continue
             await workflow.execute_activity(loan_notice, input, start_to_close_timeout=TIMEOUT)
         return "gave_up"
+
+
+@register_workflow(process=PROGRESS_RUN_PROCESS, task_queue="default", cancel_permission=None)
+@workflow.defn
+class ProgressReportRunWorkflow:
+    """Started by the organisation's progress-report **Temporal Schedule** (gap G5c,
+    FR-21-6): drafts the missing reports for each period due, in batches, then tells the
+    authors and staff about the periods that got new drafts."""
+
+    def __init__(self) -> None:
+        self.step = "planning"
+
+    @workflow.query
+    def state(self) -> dict[str, Any]:
+        return {"step": self.step}
+
+    @workflow.run
+    async def run(self, input: ProgressRunInput) -> str:
+        plan = await workflow.execute_activity(
+            plan_progress_reports, input, start_to_close_timeout=TIMEOUT
+        )
+        drafted = 0
+        for period in plan:
+            students = list(period["students"])
+            created = 0
+            self.step = f"drafting:{period['start']}:{period['end']}"
+            for index in range(0, len(students), PROGRESS_BATCH):
+                created += await workflow.execute_activity(
+                    draft_progress_batch,
+                    ProgressBatchInput(
+                        organisation_id=input.organisation_id,
+                        period=str(period["period"]),
+                        start=str(period["start"]),
+                        end=str(period["end"]),
+                        student_ids=students[index : index + PROGRESS_BATCH],
+                    ),
+                    start_to_close_timeout=timedelta(minutes=30),
+                )
+            if created:
+                await workflow.execute_activity(
+                    announce_progress_drafts,
+                    ProgressPeriodInput(
+                        organisation_id=input.organisation_id,
+                        period=str(period["period"]),
+                        start=str(period["start"]),
+                        end=str(period["end"]),
+                    ),
+                    start_to_close_timeout=TIMEOUT,
+                )
+            drafted += created
+        self.step = "done"
+        await report_step(input, "drafted", status="completed")
+        return f"drafted:{drafted}"

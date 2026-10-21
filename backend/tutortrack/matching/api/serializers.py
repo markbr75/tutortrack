@@ -7,6 +7,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from tutortrack.core.api.serializers import MoneySerializerField
+from tutortrack.people.models import TUTOR_GENDERS
 
 from ..models import (
     CoverRequest,
@@ -42,8 +43,32 @@ class MatchSearchSerializer(serializers.Serializer):
         max_digits=10, decimal_places=2, required=False, allow_null=True
     )
     requirements = serializers.ListField(child=serializers.CharField(max_length=40), required=False)
+    # Gap G5c (FR-19-1): override the job's students' needs (omit to use theirs).
+    exam_boards = serializers.ListField(
+        child=serializers.CharField(max_length=60), required=False, allow_null=True
+    )
+    sen_tags = serializers.ListField(
+        child=serializers.CharField(max_length=60), required=False, allow_null=True
+    )
+    gender = serializers.ChoiceField(
+        choices=TUTOR_GENDERS,
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        help_text="Tutor gender preference; ignored unless matching.gender_preference is on.",
+    )
     include_restricted = serializers.BooleanField(default=False)
     limit = serializers.IntegerField(min_value=1, max_value=200, default=50)
+
+
+class MatchNeedsSerializer(serializers.Serializer):
+    """The students' needs the search used (gap G5c). SEN tags and the gender preference
+    are empty for viewers without ``people.student.view_sensitive``."""
+
+    exam_boards = serializers.ListField(child=serializers.CharField())
+    sen_tags = serializers.ListField(child=serializers.CharField())
+    gender = serializers.CharField(allow_blank=True)
+    gender_preference_enabled = serializers.BooleanField()
 
 
 class MatchTutorSerializer(serializers.Serializer):
@@ -81,12 +106,16 @@ class MatchRowSerializer(serializers.Serializer):
 class MatchSearchResultSerializer(serializers.Serializer):
     query = serializers.UUIDField()
     criteria = serializers.DictField()
+    needs = MatchNeedsSerializer()
     origin = PointSerializer(allow_null=True)
     results = MatchRowSerializer(many=True)
 
 
 class MatchingWeightsSerializer(serializers.Serializer):
     weights = serializers.DictField(child=serializers.FloatField(min_value=0, max_value=100))
+    gender_preference = serializers.BooleanField(
+        read_only=True, help_text="Whether matching.gender_preference is on (gap G5c)."
+    )
 
 
 class ShortlistSerializer(serializers.ModelSerializer):

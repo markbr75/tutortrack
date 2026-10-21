@@ -45,6 +45,7 @@
             <li><a href="#rate-limits">Rate limits</a></li>
             <li><a href="#versioning">Versioning and deprecation</a></li>
             <li><a href="#public-uploads">Files on public forms</a></li>
+            <li><a href="#matching-needs">Matching needs, waitlist suggestions and classroom resources</a></li>
           </ol>
         </li>
         <li><a href="#webhooks">Webhooks</a>
@@ -323,6 +324,37 @@ const { results, next } = await res.json();</code></pre>
         <code>code</code>: <code>uploads_not_accepted</code>, <code>file_type_not_allowed</code>,
         <code>file_too_large</code>, <code>upload_mismatch</code>, <code>upload_token_invalid</code>,
         <code>upload_claimed</code>, <code>upload_incomplete</code>.</p>
+
+      <h3 id="matching-needs">Matching needs, waitlist suggestions and classroom resources</h3>
+      <ul>
+        <li><strong>Students' needs in matching.</strong> Students have <code>exam_boards</code>,
+          <code>sen_tags</code> and <code>tutor_gender_preference</code>; tutors have
+          <code>exam_boards</code>, <code>sen_tags</code> and <code>gender</code>. SEN tags and the
+          gender preference are only returned to callers with
+          <code>people.student.view_sensitive</code>, a tutor's gender only with
+          <code>people.tutor.view_sensitive</code>; without them the fields are left out and
+          can't be written. <code>POST /api/v1/matching/search</code> takes the job's students'
+          needs, or <code>exam_boards</code>, <code>sen_tags</code> and <code>gender</code> to
+          override them; the reply's <code>needs</code> says what was used and whether gender
+          preferences are on (<code>matching.gender_preference</code>; when off, the gender is
+          ignored). The breakdown gains <code>exam_board</code> and <code>sen</code> only when a
+          search asks for them.</li>
+        <li><strong>Waitlist suggestions.</strong> <code>GET /api/v1/waitlist-suggestions</code>
+          (<code>status</code>: <code>open</code> by default, <code>offered</code>,
+          <code>dismissed</code>, <code>closed</code> or <code>all</code>; <code>entry</code>) lists
+          tutors who have room for waiting students. <code>POST …/{id}/offer</code> (optional
+          <code>details</code> and <code>hours</code>) sends the family the offer link;
+          <code>POST …/{id}/dismiss</code> stops that tutor being suggested for that student. The
+          webhook event <code>waitlist.suggestion_created</code> carries ids and the reason only.</li>
+        <li><strong>Classroom resources.</strong> <code>GET /api/v1/lessons/{id}/classroom</code>
+          returns each resource's <code>kind</code>, <code>media_type</code>, <code>message</code>
+          and <code>shared_at</code>; <code>POST /api/v1/lessons/{id}/classroom/resources/{resource_id}/open</code>
+          gives anyone in the classroom a link to a resource shared with the lesson (a short-lived
+          link for files).</li>
+        <li><strong>Scheduled progress reports.</strong> The webhook event
+          <code>progress_report.batch_drafted</code> (counts only) fires once per period when the
+          organisation's schedule drafts reports.</li>
+      </ul>
     </section>
 
     <section id="webhooks">
@@ -428,7 +460,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
       <h3 id="webhook-events">Event catalogue</h3>
       <p>Subscribe to individual types or to <code>&lt;aggregate&gt;.*</code>.</p>
       <!-- BEGIN GENERATED: webhook-events -->
-<p class="meta">255 event types on 72 aggregates, generated from the webhook event catalogue.</p>
+<p class="meta">257 event types on 72 aggregates, generated from the webhook event catalogue.</p>
 <details class="ref" id="events-affiliate_statement">
   <summary><code>affiliate_statement.*</code> <span class="badge">1</span></summary>
   <div class="table-wrap"><table>
@@ -1025,11 +1057,12 @@ export function verify(secret, header, rawBody, tolerance = 300) {
   </table></div>
 </details>
 <details class="ref" id="events-progress_report">
-  <summary><code>progress_report.*</code> <span class="badge">3</span></summary>
+  <summary><code>progress_report.*</code> <span class="badge">4</span></summary>
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
     <tbody>
       <tr><td><code>progress_report.approved</code></td><td>Progress report approved.</td><td><code>student_id</code>, <code>period_start</code>, <code>period_end</code></td></tr>
+      <tr><td><code>progress_report.batch_drafted</code></td><td>The organisation&#x27;s schedule drafted progress reports for a period, with counts only.</td><td><code>period</code>, <code>period_start</code>, <code>period_end</code>, <code>created</code></td></tr>
       <tr><td><code>progress_report.shared</code></td><td>Progress report shared.</td><td><code>student_id</code>, <code>period_start</code>, <code>period_end</code>, <code>client_id</code></td></tr>
       <tr><td><code>progress_report.submitted</code></td><td>Progress report submitted.</td><td><code>student_id</code>, <code>period_start</code>, <code>period_end</code></td></tr>
     </tbody>
@@ -1249,7 +1282,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
   </table></div>
 </details>
 <details class="ref" id="events-waitlist">
-  <summary><code>waitlist.*</code> <span class="badge">4</span></summary>
+  <summary><code>waitlist.*</code> <span class="badge">5</span></summary>
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
     <tbody>
@@ -1257,6 +1290,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
       <tr><td><code>waitlist.place_accepted</code></td><td>Waitlist place accepted.</td><td><code>student_id</code>, <code>group_class_id</code></td></tr>
       <tr><td><code>waitlist.place_declined</code></td><td>Waitlist place declined.</td><td><code>student_id</code>, <code>group_class_id</code></td></tr>
       <tr><td><code>waitlist.place_offered</code></td><td>Starts <code>WaitlistOfferWorkflow</code>.</td><td><code>student_id</code>, <code>group_class_id</code>, <code>expires_at</code></td></tr>
+      <tr><td><code>waitlist.suggestion_created</code></td><td>A tutor now has room for a waiting student; the payload carries ids only.</td><td><code>entry_id</code>, <code>student_id</code>, <code>tutor_id</code>, <code>reason</code></td></tr>
     </tbody>
   </table></div>
 </details>

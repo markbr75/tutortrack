@@ -25,6 +25,17 @@ def report_topics_and_homework(event: EventEnvelope) -> None:
     services.homework_from_report(event.subject["id"])
 
 
+@subscribe("organisation.settings_updated")
+def follow_progress_schedule(event: EventEnvelope) -> None:
+    """Gap G5c (FR-21-6): keep the progress-report Temporal Schedule in step with
+    ``learning.progress_schedule`` (create, update or delete; idempotent)."""
+    keys = set(event.data.get("keys") or [])
+    if event.data.get("area") == "learning" and "learning.progress_schedule" in keys:
+        from .progress_schedule import sync_schedule
+
+        sync_schedule()
+
+
 def _notify(type_key: str, loader: str, event: EventEnvelope, key: str) -> None:
     from tutortrack.comms import services as comms
 

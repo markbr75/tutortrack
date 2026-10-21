@@ -344,6 +344,7 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         # Phase 2b (E05-T12, E09-T09, E17-T09, E19-T08, E23-T09)
         "PersonKindEnum": "tutortrack.people.selectors.MAP_KINDS",
+        "TutorGenderEnum": "tutortrack.people.models.TUTOR_GENDERS",  # G5c matching needs
         "LessonFeedbackStatusEnum": "tutortrack.delivery.models.LessonFeedback.Status",
         "ShortlistShareStatusEnum": "tutortrack.matching.models.ShortlistShare.Status",
         "ShortlistShareStateEnum": "tutortrack.matching.api.serializers.SHARE_STATES",

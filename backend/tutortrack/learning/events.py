@@ -152,6 +152,20 @@ class ProgressReportShared(_ProgressEvent):
     client_id: str
 
 
+@dataclass(frozen=True, kw_only=True)
+class ProgressReportsDrafted(DomainEvent):
+    """The organisation's schedule drafted progress reports for a period, with counts only.
+
+    Gap G5c (FR-21-6); the subject is the organisation."""
+
+    event_type: ClassVar[str] = "progress_report.batch_drafted"
+    subject_type: ClassVar[str] = "organisation"
+    period: str
+    period_start: str
+    period_end: str
+    created: int
+
+
 # --- lending library ----------------------------------------------------------------------------
 
 
