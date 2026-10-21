@@ -11,7 +11,7 @@ Python 3.12 · Django 5 · DRF + drf-spectacular · PostgreSQL 16 · Celery + Re
 - Database roles (E02, ADR 0003): `DATABASE_URL` is the RLS-restricted app role, `DATABASE_OWNER_URL` the table owner (`migrate` uses it automatically), `DATABASE_PLATFORM_URL` the BYPASSRLS role (platform_admin only). Tests run as the app role. In data migrations use `schema_editor.connection.alias`.
 - `make seed` creates the admin `admin@tutortrack.localhost` (password from `SEED_ADMIN_PASSWORD`, default `tutortrack`) and the org `brightminds`.
 - Admin app: `pnpm --dir frontend install && pnpm --dir frontend dev`, then open http://brightminds.localhost:5173 (tenant = subdomain).
-- Background jobs: `cd backend && uv run celery -A config worker -l INFO` (add `-P solo` on Windows); Temporal workers: `uv run python manage.py temporal_worker --task-queue all` (Temporal UI: http://localhost:8233).
+- Background jobs: `cd backend && uv run celery -A config worker -l INFO` (consumes every queue; add `-P solo` on Windows) and `uv run celery -A config beat -l INFO` (timed jobs and outbox retries); Temporal workers: `uv run python manage.py temporal_worker --task-queue all` (Temporal UI: http://localhost:8233).
 
 ## Commands
 - `make dev`: start the full stack (docker-compose)

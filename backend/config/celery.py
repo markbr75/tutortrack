@@ -3,6 +3,7 @@
 import os
 
 from celery import Celery
+from kombu import Exchange, Queue
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.dev")
 
@@ -21,6 +22,13 @@ app.conf.task_routes = {
     "tutortrack.migration.*": {"queue": "imports"},
     "tutortrack.reporting.*": {"queue": "reports"},
 }
+
+# Every queue is declared, so a worker started without -Q (local development) consumes them all;
+# deployed workers still pick theirs with -Q.
+QUEUES = ("default", "outbox", "notifications", "billing", "integrations", "imports", "reports")
+# Own exchange and routing key per queue, as Celery creates them on demand (a shared key would
+# copy each task into every queue).
+app.conf.task_queues = [Queue(name, Exchange(name), routing_key=name) for name in QUEUES]
 
 
 def _load_beat_schedule() -> None:

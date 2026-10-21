@@ -39,7 +39,8 @@ Then run each of these in its own terminal:
 
 ```bash
 cd backend && uv run python manage.py runserver 127.0.0.1:8010         # API
-cd backend && uv run celery -A config worker -l INFO                    # background jobs (-P solo on Windows)
+cd backend && uv run celery -A config worker -l INFO                    # background jobs, all queues (-P solo on Windows)
+cd backend && uv run celery -A config beat -l INFO                      # timed jobs: reminders, checks, retries
 cd backend && uv run python manage.py temporal_worker --task-queue all  # workflows
 pnpm --dir frontend dev                                                 # admin app
 pnpm --dir frontend/apps/portal dev                                     # client and tutor portal
