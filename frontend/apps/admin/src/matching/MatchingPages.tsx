@@ -316,15 +316,14 @@ export function JobMatchPage({ jobId }: { jobId: string }) {
                             {row.tutor.name}
                           </Link>
                           {row.restricted ? (
-                            <>
-                              {" · "}
-                              <span className="text-xs font-semibold text-danger">
-                                {t("matching.restricted")}
-                              </span>
-                            </>
+                            <span className="block text-xs font-semibold text-warning">
+                              {t("matching.restricted")}
+                            </span>
                           ) : null}
-                          <Breakdown row={row} />
-                          <AiMatchExplain jobId={jobId} tutorId={row.tutor.id} />
+                          <div className="mt-1 space-y-1 [&_button]:whitespace-nowrap">
+                            <Breakdown row={row} />
+                            <AiMatchExplain jobId={jobId} tutorId={row.tutor.id} />
+                          </div>
                         </td>
                         <td className="font-semibold tabular-nums">{row.score}</td>
                         <td className="whitespace-nowrap tabular-nums">
